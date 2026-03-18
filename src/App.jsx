@@ -399,7 +399,7 @@ function BossSection({enemy,currentHp,isWiggling,innerRef}){
   const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35
   return(
     <div ref={innerRef} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:12,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%'}}>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:14,letterSpacing:5,color:'#cc3300',textTransform:'uppercase',fontWeight:900,textShadow:'0 0 10px rgba(200,50,0,0.4)'}}>{enemy.circle} · {enemy.subtitle}</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:21,letterSpacing:4,color:'#cc3300',textTransform:'uppercase',fontWeight:900,textShadow:'0 0 10px rgba(200,50,0,0.4)'}}>{enemy.circle} · {enemy.subtitle}</div>
       <div style={{display:'flex',alignItems:'center',gap:16,width:'100%'}}>
         <div style={{width:130,height:130,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:6,display:'flex',alignItems:'center',justifyContent:'center',fontSize:70,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:'hidden',transition:'all 0.5s'}}>
           {enemy.emoji}
@@ -407,7 +407,7 @@ function BossSection({enemy,currentHp,isWiggling,innerRef}){
         </div>
         <div style={{flex:1}}>
           <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:58,color:'#120804',lineHeight:1,marginBottom:8,textShadow:'1px 1px 0 rgba(0,0,0,0.5)'}}>{enemy.name}</div>
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:18,color:'#6a5020',fontStyle:'italic',opacity:1,lineHeight:1.5,fontWeight:600}}>{enemy.passive}</div>
+          <div style={{fontFamily:"'IM Fell English',serif",fontSize:18,color:'#1a1008',fontStyle:'italic',opacity:1,lineHeight:1.5,fontWeight:700}}>{enemy.passive}</div>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:12,color:'#7a4a18',marginTop:5,letterSpacing:1,fontWeight:700}}>Base damage: {enemy.baseDmg} ± 2 per Strike</div>
         </div>
       </div>
@@ -476,9 +476,9 @@ export default function App(){
   const [enemy,setEnemy]=useState(ENEMIES[0])
   const [enemyHp,setEnemyHp]=useState(ENEMIES[0].maxHp)
   const [stage,setStage]=useState([null,null,null,null,null])
-  const [deck,setDeck]=useState([])
-  const [hand,setHand]=useState([])
-  const [discardPile,setDiscardPile]=useState([])
+  const [deck,setDeck]=useState([]);const deckRef=useRef([]);
+  const [hand,setHand]=useState([]);const handRef=useRef([]);
+  const [discardPile,setDiscardPile]=useState([]);const discRef=useRef([]);
   const [embers,setEmbers]=useState(MAX_EMBERS)
   const [stash,setStash]=useState(0)
   const [strikesLeft,setStrikesLeft]=useState(MAX_STRIKES)
@@ -507,6 +507,11 @@ export default function App(){
   const [shopBoughtIds,setShopBoughtIds]=useState([])
   const [stats,setStats]=useState({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
 
+  
+  // Keep refs in sync for use in timeouts
+  handRef.current=hand;
+  deckRef.current=deck;
+  discRef.current=discardPile;
   const bossRef=useRef(null)
   const stageRefs=useRef(Array(5).fill(null).map(()=>({current:null})))
   const fid=useRef(0),prid=useRef(0)
@@ -708,35 +713,17 @@ export default function App(){
           addLog('👁 '+enemy.name+' hits '+target.name+' for '+actualDmg+varLabel)
           setDiceTarget(null)
           setTimeout(function(){
-            setHand(function(curHand){
-              return curHand; // placeholder - actual draw happens below
-            });
-            setDeck(function(curDeck){
-              setDiscardPile(function(curDisc){
-                setHand(function(curHand2){
-                  const res2={h:[...curHand2],d:[...curDeck],disc:[...curDisc]};
-                  const target=HAND_SIZE;
-                  let nh=res2.h,nd=res2.d,ndisc=res2.disc;
-                  while(nh.length<target){
-                    if(nd.length===0){
-                      if(ndisc.length===0)break;
-                      nd=[...ndisc].sort(()=>Math.random()-.5);
-                      ndisc=[];
-                    }
-                    nh=[...nh,nd[0]];nd=nd.slice(1);
-                  }
-                  setTimeout(function(){
-                    setDeck(nd);
-                    setDiscardPile(ndisc);
-                  },0);
-                  return nh;
-                });
-                return curDisc;
-              });
-              return curDeck;
-            });
-            setAnimPhase('idle');setSelected([])
-            addLog('— Hand refilled.')
+            let nh=[...handRef.current],nd=[...deckRef.current],ndisc=[...discRef.current];
+            while(nh.length<HAND_SIZE){
+              if(nd.length===0){
+                if(ndisc.length===0)break;
+                nd=[...ndisc].sort(()=>Math.random()-.5);
+                ndisc=[];
+              }
+              nh=[...nh,nd[0]];nd=nd.slice(1);
+            }
+            setHand(nh);setDeck(nd);setDiscardPile(ndisc);
+            setAnimPhase('idle');setSelected([]);
           },900)
         },1200)
       },delay+400)
@@ -795,10 +782,6 @@ export default function App(){
       {floats.map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
       {projectiles.map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
       {showDice&&diceTarget&&<DiceRoll target={diceTarget} onDone={()=>setShowDice(false)}/>}
-
-      {/* HUD */}
-      <div style={{flexShrink:0,display:'flex',justifyContent:'space-between',alignItems:'center',padding:'7px 20px',background:'rgba(0,0,0,0.92)',borderBottom:'1px solid rgba(100,55,10,0.55)'}}>
-        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:26,color:'#d0b060'}}>Vestibule</div>
         <div style={{display:'flex',gap:22,alignItems:'center'}}>
           {[['Fight',(fightIndex+1)+'/3','#dd2222'],['Corruption',corruption+'%',corruption>60?'#ff3300':'#aa5500']].map(function(item){return(
             <div key={item[0]} style={{textAlign:'center'}}>
@@ -817,7 +800,7 @@ export default function App(){
       </div>
 
       {/* PARCHMENT */}
-      <div style={{flex:'0 0 58%',margin:'5px 10px 0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'hidden',background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:'2px solid #7a5820',boxShadow:'inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)',display:'flex',flexDirection:'column'}}>
+      <div style={{flex:'0 0 58%',margin:'0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'hidden',background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:'2px solid #7a5820',boxShadow:'inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)',display:'flex',flexDirection:'column'}}>
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
         <div style={{padding:'10px 16px 8px',position:'relative',zIndex:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0}}>
           <div style={{width:'100%',maxWidth:760,background:'rgba(8,0,0,0.55)',border:'2px solid rgba(160,20,0,0.8)',borderRadius:8,padding:'12px 20px 14px',animation:'bossGlow 2s ease-in-out infinite',boxShadow:'0 0 30px rgba(150,0,0,0.4),inset 0 0 40px rgba(80,0,0,0.3)'}}>
@@ -830,8 +813,8 @@ export default function App(){
             <div style={{fontFamily:"'IM Fell English',serif",fontSize:10,color:'#8a6838',opacity:.4,fontStyle:'italic',letterSpacing:4}}>— stage —</div>
             <div style={{flex:1,height:1,background:'rgba(60,35,5,0.2)'}}/>
           </div>
-          <div style={{display:'flex',alignItems:'center',gap:8,padding:'12px 10px',justifyContent:'center',flex:1}}>
-            <div style={{display:'flex',flexDirection:'column',gap:8,alignSelf:'center',marginRight:10,background:'rgba(0,0,0,0.25)',borderRadius:'6px 0 0 6px',padding:'8px 12px 8px 8px',borderRight:'1px solid rgba(140,90,20,0.4)'}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,padding:'12px 10px 12px 220px',justifyContent:'center',flex:1,position:'relative'}}>
+            <div style={{display:'flex',flexDirection:'column',gap:8,alignSelf:'center',flexShrink:0,background:'rgba(0,0,0,0.22)',borderRadius:'0 6px 6px 0',padding:'8px 10px 8px 10px',borderRight:'1px solid rgba(140,90,20,0.35)',position:'absolute',left:0,top:'50%',transform:'translateY(-50%)'}}>
               {[1,2,3].map(i=><div key={i} style={{width:80,height:105,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:24,opacity:.28}}>⚗</div><div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>)}
             </div>
             {stage.map((m,i)=>(
@@ -867,9 +850,9 @@ export default function App(){
       </div>
 
       {/* HAND AREA */}
-      <div style={{flex:'0 0 42%',background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0 12px',display:'flex',flexDirection:'column',zIndex:30,minHeight:0}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',padding:'8px 0 4px',gap:10,flexShrink:0}}>
-          <div style={{display:'flex',flexDirection:'column',gap:8,alignItems:'center',background:'rgba(20,12,4,0.7)',borderRadius:6,padding:'8px 6px',border:'1px solid rgba(100,65,15,0.3)'}}>
+      <div style={{flex:1,background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0 12px',display:'flex',flexDirection:'column',zIndex:30,minHeight:0}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',padding:'4px 0 3px',gap:6,flexShrink:0}}>
+          <div style={{display:'flex',flexDirection:'column',gap:14,alignItems:'center',justifyContent:'center',background:'rgba(20,12,4,0.7)',borderRadius:6,padding:'12px 10px',border:'1px solid rgba(100,65,15,0.3)',alignSelf:'stretch'}}>
             <DeckPile count={deck.length} label="Deck"/>
             <DeckPile count={discardPile.length} label="Discard"/>
           </div>
@@ -879,23 +862,31 @@ export default function App(){
           </div>
           <div style={{display:'flex',flexDirection:'column',gap:5,alignItems:'flex-end',flexShrink:0}}>
             <button onClick={handleStrike} disabled={!canStrike}
-              style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 28px',background:canStrike?'rgba(130,0,0,0.4)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:185}}>⚔ Strike</button>
+              style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'8px 20px',background:canStrike?'rgba(130,0,0,0.4)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:185}}>⚔ Strike</button>
             <div style={{display:'flex',alignItems:'center',gap:8,justifyContent:'flex-end'}}>
               <PhaseDots left={strikesLeft} total={MAX_STRIKES} color='#dd2222' wide={true}/>
               <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555'}}>{strikesLeft}/{MAX_STRIKES}</span>
             </div>
             <button onClick={handleDiscard} disabled={!canDiscard}
-              style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 28px',background:canDiscard?'rgba(100,70,0,0.35)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:185}}>↓ Discard</button>
+              style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'8px 20px',background:canDiscard?'rgba(100,70,0,0.35)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:185}}>↓ Discard</button>
             <div style={{display:'flex',alignItems:'center',gap:8,justifyContent:'flex-end'}}>
               <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
               <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555'}}>{discardsLeft}/{MAX_DISCARDS}</span>
             </div>
-            <div style={{marginTop:10,paddingTop:8,borderTop:'1px solid rgba(100,60,10,0.3)'}}>
+            <div style={{marginTop:8,paddingTop:8,borderTop:'1px solid rgba(100,60,10,0.3)'}}>
+              <div style={{display:'flex',gap:12,justifyContent:'flex-end',marginBottom:8}}>
+                {[['Fight',(fightIndex+1)+'/3','#dd2222'],['Corrupt',corruption+'%',corruption>60?'#ff3300':'#aa5500'],['Stash',stash,'#44cc44']].map(function(item){return(
+                  <div key={item[0]} style={{textAlign:'center'}}>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#7a5a30',letterSpacing:2,textTransform:'uppercase'}}>{item[0]}</div>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
+                  </div>
+                )})}
+              </div>
               <EmberDisplayLarge current={embers} max={MAX_EMBERS}/>
             </div>
           </div>
         </div>
-        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:28,paddingTop:0,overflow:'visible',position:'relative'}}>
+        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:20,paddingTop:0,overflow:'visible'}}>
           {hand.map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length}
               isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
