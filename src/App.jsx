@@ -340,12 +340,12 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
       <div style={{fontFamily:"'Cinzel',serif",fontSize:12,letterSpacing:1.5,color:st?'#444':'#8a7a50',textAlign:'center',padding:'4px 4px 8px',textTransform:'uppercase'}}>{member.role}</div>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 20px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
         <div style={{textAlign:'center'}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:7,color:'#6a3a3a',textTransform:'uppercase',opacity:.8}}>ATK</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:st?'#555':'#ee2222',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>ATK</div>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.atk}</div>
         </div>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:7,color:'#6a4a20',opacity:.65}}>{member.keyword}</div>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:st?'#555':'#e8a820',fontWeight:700,letterSpacing:1,textAlign:'center'}}>{member.keyword}</div>
         <div style={{textAlign:'center'}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:7,color:'#2a5a2a',textTransform:'uppercase',opacity:.8}}>HP</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:st?'#555':member.hp<=2?'#ff4400':'#33dd33',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>HP</div>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,lineHeight:1,color:st?'#555':member.hp<=2?'#ff4400':'#33dd33',textShadow:st?'none':'0 0 12px rgba(0,190,0,0.5)'}}>{member.hp}</div>
         </div>
       </div>
@@ -354,7 +354,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   )
 }
 
-function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought}){
+function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop}){
   const spread=Math.min(4,20/total),mid=(total-1)/2
   const rot=(index-mid)*spread,yOff=Math.abs(index-mid)*2
   const bc=card.type==='CORRUPT'?'#aa1111':card.type==='UTILITY'?'#22aa44':card.type==='EMBER'?'#c87820':'#9933cc'
@@ -362,16 +362,20 @@ function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLea
   const unaffordable=!canAfford&&card.embers>0
   const shimmerAnim=card.rarity==='Rare'?'holoShimmer 3s ease-in-out infinite':card.rarity==='Uncommon'?'uncommonGlow 2s ease-in-out infinite':''
   return(
-    <div draggable onDragStart={e=>{e.dataTransfer.effectAllowed='move';onDragStart(index)}} onDragEnd={onDragEnd}
+    <div draggable
+      onDragStart={e=>{e.dataTransfer.effectAllowed='move';onDragStart(index)}}
+      onDragEnd={onDragEnd}
+      onDragOver={e=>{e.preventDefault();onHandDragOver&&onHandDragOver()}}
+      onDrop={e=>{e.stopPropagation();onHandDrop&&onHandDrop()}}
       onMouseEnter={onHover} onMouseLeave={onLeave} onClick={onClick}
       style={{width:190,flexShrink:0,position:'relative',
         background:isSelected?'linear-gradient(180deg,#2a1a0a,#160e05)':'linear-gradient(180deg,#201408,#100804)',
-        border:isSelected?`2px solid #cc0000`:isHovered&&canAfford?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
+        border:isDragOver?'2px dashed #e8a820':isSelected?`2px solid #cc0000`:isHovered&&canAfford?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
         borderRadius:7,cursor:unaffordable?'not-allowed':'grab',position:'relative',
         transformOrigin:'bottom center',
-        transform:isDragging?'scale(0.85) rotate(5deg)':isHovered&&canAfford?'translateY(-70px) scale(1.25) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
+        transform:isDragging?'scale(0.85) rotate(5deg)':isHovered&&canAfford?'translateY(-52px) scale(1.18) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
-        zIndex:isDragging?1:isHovered?999:isSelected?200:10-Math.abs(index-mid),
+        zIndex:isDragging?1:isHovered?9999:isSelected?200:10-Math.abs(index-mid),
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered&&canAfford?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
         opacity:unaffordable?0.35:isDragging?0.4:1,
         animation:shimmerAnim,
@@ -407,8 +411,8 @@ function BossSection({enemy,currentHp,isWiggling,innerRef}){
         </div>
         <div style={{flex:1}}>
           <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:58,color:'#120804',lineHeight:1,marginBottom:8,textShadow:'1px 1px 0 rgba(0,0,0,0.5)'}}>{enemy.name}</div>
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:18,color:'#1a1008',fontStyle:'italic',opacity:1,lineHeight:1.5,fontWeight:700}}>{enemy.passive}</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:'#1a1008',marginTop:5,letterSpacing:1,fontWeight:700}}>Base damage: {enemy.baseDmg} ± 2 per Strike</div>
+          <div style={{fontFamily:"'IM Fell English',serif",fontSize:25,color:'#1a1008',fontStyle:'italic',opacity:1,lineHeight:1.5,fontWeight:700}}>{enemy.passive}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:18,color:'#1a1008',marginTop:6,letterSpacing:1,fontWeight:700}}>Base damage: {enemy.baseDmg} ± 2 per Strike</div>
         </div>
       </div>
       <div style={{width:'70%',margin:'0 auto'}}>
@@ -491,6 +495,7 @@ export default function App(){
   const [dragCardUid,setDragCardUid]=useState(null)
   const [dragStageIdx,setDragStageIdx]=useState(null)
   const [dragHandIdx,setDragHandIdx]=useState(null)
+  const [dragOverHandIdx,setDragOverHandIdx]=useState(null)
   const [log,setLog]=useState(['⛧ The gig begins.'])
   const [damageFlash,setDamageFlash]=useState(false)
   const [animPhase,setAnimPhase]=useState('idle')
@@ -603,6 +608,18 @@ export default function App(){
     const ns=[...stage];var tmp=ns[dragStageIdx];ns[dragStageIdx]=ns[toIdx];ns[toIdx]=tmp
     setStage(ns);setDragStageIdx(null)
   },[dragCardUid,dragStageIdx,stage,handleDropOnStage])
+
+  const handleHandReorder=useCallback((fromIdx,toIdx)=>{
+    if(fromIdx===toIdx||fromIdx===null||toIdx===null)return
+    setHand(prev=>{
+      const next=[...prev]
+      const [card]=next.splice(fromIdx,1)
+      next.splice(toIdx,0,card)
+      return next
+    })
+    setDragHandIdx(null)
+    setDragOverHandIdx(null)
+  },[])
 
   const handleDiscard=useCallback(()=>{
     if(selected.length===0||discardsLeft<=0||animPhase!=='idle')return
@@ -822,11 +839,11 @@ export default function App(){
             const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1
             const fin=Math.round(dmg*bon)
             return <>
-              <span style={{fontFamily:"'IM Fell English',serif",fontSize:12,color:'#5a4010',opacity:.7,fontStyle:'italic'}}>combined attack</span>
+              <span style={{fontFamily:"'IM Fell English',serif",fontSize:17,color:'#6a4a18',opacity:.9,fontStyle:'italic'}}>combined attack</span>
               <span style={{fontFamily:"'Cinzel',serif",fontSize:28,fontWeight:900,color:'#8a0000',textShadow:'0 0 16px rgba(120,0,0,0.6)'}}>{fin}</span>
               {bon>1&&<span style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#e8a820',letterSpacing:1}}>+{Math.round((bon-1)*100)}% SYNERGY</span>}
               <span style={{color:'#6a3010',opacity:.5,fontSize:14}}>⟶</span>
-              <span style={{fontFamily:"'IM Fell English',serif",fontSize:12,color:'#5a4010',opacity:.7,fontStyle:'italic'}}>{enemy.name}</span>
+              <span style={{fontFamily:"'IM Fell English',serif",fontSize:17,color:'#6a4a18',opacity:.9,fontStyle:'italic'}}>{enemy.name}</span>
             </>
           })()}
         </div>
@@ -863,18 +880,18 @@ export default function App(){
           <div style={{height:8}}/>
           <EmberDisplayLarge current={embers} max={MAX_EMBERS}/>
           <div style={{height:6}}/>
-          <div style={{display:'flex',gap:10,justifyContent:'flex-end'}}>
+          <div style={{display:'flex',gap:14,justifyContent:'flex-end',padding:'4px 0'}}>
             {[['Fight',(fightIndex+1)+'/3','#dd2222'],['Corrupt',corruption+'%',corruption>60?'#ff3300':'#aa5500'],['Stash',stash,'#44cc44']].map(function(item){return(
-              <div key={item[0]} style={{textAlign:'center'}}>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#7a5a30',letterSpacing:2,textTransform:'uppercase'}}>{item[0]}</div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
+              <div key={item[0]} style={{textAlign:'center',padding:'0 4px'}}>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#9a7a40',letterSpacing:2,textTransform:'uppercase',marginBottom:2}}>{item[0]}</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:22,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
               </div>
             )})}
           </div>
         </div>
 
         {/* CARD FAN — takes full height, padded to avoid overlapping columns */}
-        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:24,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0}}>
+        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:24,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative'}}>
           {hand.map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length}
               isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
@@ -883,13 +900,14 @@ export default function App(){
               onHover={()=>setHovered(card.uid)} onLeave={()=>setHovered(null)}
               onClick={()=>setSelected(p=>p.includes(card.uid)?p.filter(x=>x!==card.uid):[...p,card.uid])}
               onDragStart={()=>{setDragHandIdx(i);setDragCardUid(card.uid)}}
-              onDragEnd={()=>setDragHandIdx(null)}
+              onDragEnd={()=>{setDragHandIdx(null);setDragOverHandIdx(null)}}
+              isDragOver={dragOverHandIdx===i&&dragHandIdx!==null&&dragHandIdx!==i}
+              onHandDragOver={()=>{if(dragHandIdx!==null&&dragHandIdx!==i)setDragOverHandIdx(i)}}
+              onHandDrop={()=>handleHandReorder(dragHandIdx,i)}
             />
           ))}
         </div>
-        <div style={{borderTop:'1px solid rgba(90,50,10,0.3)',padding:'5px 0 8px',flexShrink:0}}>
-          {log.slice(0,2).map((l,i)=><div key={i} style={{fontFamily:"'IM Fell English',serif",fontSize:12,color:i===0?'#c0a858':'#5a4020',fontStyle:'italic',opacity:1-i*.5,paddingLeft:4}}>{l}</div>)}
-        </div>
+
       </div>
     </div>
   )

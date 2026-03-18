@@ -55,6 +55,9 @@
 - [ ] Verify hand always refills to 6 after every Strike and Discard action
 - [ ] Confirm z-index hover fix is consistent for all cards including newly drawn ones
 - [ ] Hellquake has no implemented effect (placeholder only)
+- [ ] Setlist card: needs modal UI to view/rearrange top 4 deck cards
+- [ ] The Remaster card: needs modal UI to view/delete/copy deck cards
+- [ ] Demo Tape card: needs "last riff played" tracking state
 
 ---
 
