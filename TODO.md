@@ -346,3 +346,10 @@ Even 3 locked members visible from the start gives players an immediate long-ter
 - **Corruption 50%+:** Chromatic aberration starts on boss name and attack number
 - **Corruption 100% / Hellquake:** Full interlace flicker, strong chroma split, heavy bloom
 - **Stoned to the Bone screen:** Maximum effect — this should look like the TV is dying
+
+### ✅ Completed this push
+- [x] All 7 musicians shown on Opening Night screen
+- [x] FRENZIED keyword — +1 ATK permanently when member lands killing blow on boss
+- [x] DEBUFF keyword — Nott/Vocalist reduces boss damage by 1 per Strike (resets each fight)
+- [x] Hellquake d6 system — 6 wildly different outcomes: OBLITERATION / RESONANCE / BACKLASH / POSSESSION / RITUAL / THE VOID
+- [x] Setlist card — drag-to-reorder modal showing top 4 deck cards, lock in new order
