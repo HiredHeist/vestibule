@@ -1,142 +1,271 @@
-# Vestibule — To-Do List
-*Priority ranked. Updated end of Session 4.*
+# Vestibule — Master TODO & Design Reference
+*Priority ranked. Auto-maintained. Updated end of Session 4.*
 
 ---
 
-## 🔴 P1 — DO NEXT SESSION (Blocks proper playtesting)
+## 🔴 P1 — NEXT SESSION (Core gameplay gaps)
 
-### Implement all unfinished cards
-Every dead card in the deck breaks trust and feels like a bug. Fix these first.
+### 1. Implement all dead cards (most urgent)
+Dead cards = broken trust. Every one of these appears 3x in the deck.
 
-- [ ] **Demo Tape** — track `lastRiffPlayed` in state, on play: re-cast that card free
-- [ ] **Setlist** — modal overlay showing top 4 deck cards as draggable tiles, player reorders then confirms
-- [ ] **The Remaster** — modal showing 10 deck cards, player clicks 2 to delete + 1 to duplicate
-- [ ] **Hellquake** — triggered by Black Sabbath Sigil: screen shake + damage = total band ATK × (corruption/10), vignette flash
+**Demo Tape** — Track `lastRiffPlayed` in state. On play: cast that card again for free. If no riff played yet this fight, show "No riff recorded yet."
 
-### Band member keyword passives (currently decorative)
-Keywords show on cards but do nothing. Making them real transforms the game.
-- [ ] **FRENZIED** (Bjorn/Ragnar) — +1 ATK each time they deal a killing blow (boss HP to 0)
-- [ ] **DOUBLE TIME** (Thor) — already works (doubles ATK) ✅
-- [ ] **ANCHOR** (Ingrid/Dag) — at end of each Strike, heal adjacent members for 1 HP
-- [ ] **CORRUPT** (Loki) — ATK = base + floor(corruption/20) dynamically
-- [ ] **DEBUFF** (Nott) — each Strike reduces boss baseDmg by 1 (min 1), resets each fight
+**Setlist** — Modal overlay: show top 4 deck cards as large draggable tiles. Player drag-reorders then hits Confirm. Shuffles back in new order.
 
----
+**The Remaster** — Modal: show 10 random deck cards. Player clicks 2 red X buttons to delete, 1 green + to duplicate. Confirms. Powerful late-game card.
 
-## 🟠 P2 — HIGH IMPACT (Next 2 sessions)
+**Hellquake** — See detailed spec below.
 
-### Shop redesign
-Currently functional but feels like a spreadsheet. Needs to feel like a cursed black market.
-- [ ] Dark atmospheric layout — candlelit, dangerous feeling
-- [ ] Cards for sale displayed as proper game cards (same style as hand cards)
-- [ ] Booster pack opening animation — cards flip over one by one
-- [ ] Artifact display more prominent and tempting
-- [ ] Shop music/ambience hint (even just a CSS pulse effect)
+### 2. Keyword passives — make them real
+These are the engine of build diversity. Without them all runs feel the same.
 
-### Circle II — Gluttony
-The game has no end state beyond Circle I. Players need somewhere to go.
-- [ ] 3 new enemies with unique passives (not just stat bumps)
-- [ ] New circle-specific artifact set
-- [ ] Slightly harder difficulty curve
-
-### Psychedelic Too Stoned visual system
-*(Full spec in notes below)*
-This is the signature mechanic — needs the visual treatment to match
-- [ ] 4-stage HP degradation visuals on member cards
-- [ ] Corruption UI escalation (50/75/100% thresholds)
-- [ ] Too Stoned moment: screen flash + bloom + sound
+- **FRENZIED** (Bjorn/Ragnar) — Each Strike, if this member's ATK alone would deal >10 damage, gain +1 ATK permanently (stacks, max +5 per fight)
+- **ANCHOR** (Ingrid/Dag) — End of each Strike phase: heal adjacent members 1HP. If both neighbors are alive, heal self 1HP too
+- **CORRUPT** (Loki) — ATK = baseatk + floor(corruption/15). At 100% corruption, ATK doubles. Displayed dynamically on card
+- **DEBUFF** (Nott) — Each Strike reduces boss base damage by 1 (min 1). Visual indicator on boss. Resets between fights
+- **DOUBLE TIME** (Thor) — Already works ✅
 
 ---
 
-## 🟡 P3 — POLISH & JUICE (Ongoing)
+## 🟠 P2 — HIGH IMPACT (Sessions 5-6)
 
-### Sound design
-Already have basic Web Audio synth sounds. Need:
-- [ ] Card draw sound (upward whoosh)
-- [ ] Too Stoned moment (psychedelic swell)
-- [ ] Victory fanfare (full chord progression)
-- [ ] Hellquake (earth-shaking sub bass hit)
-- [ ] Shop music (dark ambient loop)
+### Hellquake — Full Design Spec
+*Triggered by Black Sabbath Sigil card. Must feel catastrophic, mysterious, and unforgettable.*
 
-### Card draw animation
-- [ ] Cards slide up from deck pile into hand when drawn
-- [ ] Would add massive juice to the refill moment
+**The effect — chaotic and powerful:**
+Roll a d6 (1-6) at the moment of Hellquake. Result determines which of 6 equally likely outcomes fires:
+1. **OBLITERATION** — Deal damage = total band ATK × 4 to boss. Pure power. Rare and clean.
+2. **RESONANCE** — All band members gain +3 ATK permanently. The riff echoes forever.
+3. **BACKLASH** — Boss takes 30 damage BUT one random member goes Too Stoned instantly. High risk/reward.
+4. **POSSESSION** — All cards in hand become free to play this Strike. Infinite combos for one turn.
+5. **RITUAL** — Reduce boss HP to exactly half, regardless of current HP. Works even if boss has 1HP left (floors to 1).
+6. **THE VOID** — All Corruption is transferred to the boss as direct damage. Set your Corruption to 0. At 100% = 100 damage.
 
-### End screen improvements
-- [ ] Victory screen feels more celebratory
-- [ ] Defeat screen leans into the Too Stoned aesthetic
-- [ ] Show run summary stats more prominently
+**Visual spec:**
+- Screen goes black for 0.5s
+- Massive ⛧ sigil expands from center
+- Colour bloom (deep red → purple → white)
+- Shake the entire viewport
+- Reveal the outcome with gothic text announcement
+- The outcome number is hidden until the moment of reveal — pure tension
 
-### Opening Night screen
-- [ ] Show more musicians (currently shows 5 of 7)
-- [ ] Better visual layout for selection
+### Foil & Mythic Card Editions
+*Inspired by Balatro's editions but with our aesthetic*
+
+**Foil cards** (uncommon rarity upgrade):
+- Visual: animated shimmer/holographic effect on the card border
+- Mechanical effect: +1 to all numeric values on the card (e.g. Amp It Up: ×2 → ×3 ATK, Warm Up: +1 → +2 ATK)
+- Drop rate: ~15% chance when buying a card in shop or opening mid/high tier pack
+
+**Mythic cards** (rare rarity upgrade):
+- Visual: deep pulsing dark aura, animated runes on card back, unique colour treatment
+- Mechanical effect: Card's effect triggers TWICE (e.g. Sound Check: all members +3HP fires twice = +6HP)
+- Drop rate: ~4% from packs, never in base shop
+
+**Foil/Mythic on stage** — the mentor ability:
+- A foil member card on stage pulses with an amber shimmer
+- The member DIRECTLY TO ITS RIGHT receives +1 ATK passively (the "mentor" relationship)
+- Visual connection: both cards have a subtle golden chain/link animation between them
+- A mythic member on stage: ALL adjacent members get +1 ATK
+- If two foil members are adjacent to each other, both get the bonus (mutual synergy)
+
+### Pack System Redesign — Music Format Theme
+*Inspired by Balatro's 5-type pack system. Each pack type serves a distinct purpose.*
+
+**CASSETTE TAPE** 🎵 (2-3 Stash) — Cards for your deck
+- Normal: see 3 cards, pick 1
+- Dubbed: see 4 cards, pick 1 (costs 1 more)
+- Limited Edition: see 5 cards, pick 2 (costs 3 more, rare)
+- Contains: regular deck cards, common/uncommon weighted
+
+**CD-R** 💿 (4-6 Stash) — Passive run buffs (our "planet cards")
+- Normal: see 2 buffs, pick 1
+- Burnt Copy: see 3 buffs, pick 1 (costs 2 more)
+- Contains: passive upgrades that last the entire run (see Passive Buff list below)
+- Opens immediately on purchase (like Balatro's celestial packs — no inventory slot needed)
+
+**RARE VINYL** 🎸 (8-12 Stash) — Artifacts & premium finds
+- Standard Press: see 1 artifact + 1 card, pick 1
+- First Pressing: see 2 artifacts + 1 card, pick 1 (costs 4 more)
+- Contains: circle artifacts, rare/mythic chance cards
+- Higher chance of foil/mythic editions
+
+**DEMO REEL** 📼 (6-8 Stash) — Mixed, best value variance
+- Contains: mix of cards + buffs + small chance of artifact
+- Normal: see 4 items (mixed), pick 2
+- Masters Edition: see 6 items, pick 2 (costs 3 more)
+- The gambling pack — could be amazing or mediocre
+
+### CD-R Passive Buffs (our "planet cards")
+These are permanent run upgrades. Once applied they never leave. Should feel meaningful but not broken.
+
+**ATK-focused:**
+- **Power Chord** — All RIFF cards deal +2 bonus damage when played (stacks up to 3x per run)
+- **Stage Presence** — Each fight you win, one random member gains +1 ATK permanently
+- **Feedback** — Every 3 RIFF cards played in one Strike, reduce all RIFF costs by 1 ember this fight
+
+**Survival-focused:**
+- **Sound Check** — Start each fight with all members at full HP + 2 bonus HP
+- **Roadie Crew** — First time any member would go Too Stoned each fight, they survive at 1 HP instead
+- **Encore Ready** — After each boss is defeated, fully restore one random member's HP
+
+**Economy-focused:**
+- **Merch Table** — Earn +2 Stash per fight victory (stacks with base reward)
+- **Packed House** — If you enter a fight with a full 5-member band, earn +3 bonus Stash on victory
+- **Back Catalogue** — Rerolling the shop costs 1 less Stash (min 1)
+
+**Corruption/Chaos:**
+- **Devil's Tuning** — Corruption never decreases below 20% (floor). In exchange, +15% base damage
+- **Static** — At the start of each fight, gain a random card from outside your current deck (temporary, discarded after fight)
+- **Distortion Pedal** — Every 20% Corruption = +1 ember per fight start
+
+**Deck-focused:**
+- **B-Side** — Your deck has one extra copy of every RIFF card (added at start of next fight)
+- **Greatest Hits** — The first card drawn each Strike is always one you haven't played this fight
+- **Soundboard** — Each fight, your first Discard is free (doesn't use a discard counter)
 
 ---
 
-## 🟢 P4 — FUTURE FEATURES
+## 🟡 P3 — POLISH & DEPTH
 
-### Artifact system (active)
-- [ ] Artifacts should trigger visually when their effect fires
-- [ ] Add 4+ new artifacts per circle
+### Ember Economy Review
+*Current balance analysis:*
 
-### More card types
-- [ ] **GEAR** type — persistent equipment cards that stay in play
-- [ ] **CURSE** type — negative cards that can be removed via shop
+Starting embers: 6. Cards cost 1-5. Average card cost ~2. With 6 cards in hand, you can typically play 2-3 cards per Strike. That feels about right for early fights but too easy for Circle I.
 
-### Progression
-- [ ] Circle III, IV, V... (deeper = harder + more psychedelic)
-- [ ] Meta-progression: unlockable starting bands, card discoveries
-- [ ] Daily seed challenge mode
+**Proposed tweaks:**
+- Reduce starting embers to **5** (creates harder choices immediately)
+- The Hellfire Amulet artifact (+2 bonus embers/fight) becomes genuinely valuable
+- Tapped Out (FREE, +5 next Strike) becomes a more interesting card vs alternatives
+- Groupie (net +1 ember) becomes relevant as an opener for combos
+
+### Stash Economy Review
+*Current: win fight → earn 6 + rand(3) + strikes remaining. Shop costs: 3-8 per card.*
+
+**Issues:**
+- Too easy to go broke by fight 2 if you buy everything
+- No way to earn Stash mid-fight
+- Reroll starts at 4 and escalates — fine
+
+**Proposed additions:**
+- **Perfect Strike** bonus: if you defeat the boss in fewer than 3 strikes, earn +3 bonus Stash
+- **Merch Drop**: small chance (15%) each fight to find 2 bonus Stash on the floor (logged as "Found some merch money")
+- **Corruption Dividend**: if you finish a fight with >75% Corruption, earn +2 Stash (risk/reward for Loki builds)
+- Cards like The Hermit from Balatro — a card that doubles your current Stash (capped at 10) could be interesting
+
+### End Screen
+- Victory: more celebratory — show run stats, band composition, signature plays
+- Defeat: lean psychedelic — the Too Stoned aesthetic
+
+### Card Draw Animation
+- Cards slide up from deck into hand (upward whoosh)
+- Massive juice moment, especially on full refills
+
+### Opening Night Screen
+- Show all 7 musicians (currently only 5)
+- Let player see full band composition before committing
+
+---
+
+## 🟢 P4 — FUTURE
+
+### Circles II-IX
+Following Dante's circles — each has thematic enemies:
+- II (Lust): enemies that buff themselves each round, seduction mechanic
+- III (Gluttony): enemies that gain HP when you play cards
+- IV (Greed): stash is at risk, enemies steal stash on hit
+- V (Anger): enemies hit harder the more you buff your band
+- Each circle introduces 2-3 new cards, 1 new mechanic
+
+### Meta-progression
+- Unlock new band members by completing circles
+- Unlock new card types by playing specific builds
+- Daily seed challenge mode
+- Achievement system tied to the Too Stoned mechanic
+
+### Sound
+- Card draw sound
+- Hellquake dramatic swell + impact
+- Too Stoned psychedelic bloom
+- Victory fanfare
+- Shop ambient (dark, smoky, jazz-doom hybrid)
 
 ### Platform
-- [ ] Steam page planning
-- [ ] Card artwork (real illustrations to replace emojis)
-- [ ] Mobile responsiveness check
+- Steam page
+- Card artwork (real illustrations to replace emojis)
+- Mobile check
 
 ---
 
-## 📝 DESIGN NOTES
+## 📊 FULL CARD REVIEW — What each card should do
 
-### Psychedelic Too Stoned Visual System — Full Spec
-*Questions still to confirm before building:*
-1. HP degradation: subtle start (barely noticeable at 75%, dramatic at 25%) — YES
-2. Corruption parchment shift: parchment bleeds red/dark at high corruption — YES
-3. Too Stoned card: whole card face changes — YES
-4. Text effects: smooth CSS for deterioration, sharp glitch for the Too Stoned moment
-5. Too Stoned screen flash: YES — most memorable moment in game
+### Currently working ✅
+| Card | Status | Notes |
+|------|--------|-------|
+| Amp It Up | ✅ | Doubles target ATK. Core card. |
+| Warm Up | ✅ | +1 ATK temp. Good cheap opener. |
+| New Strings | ✅ | +2 ATK permanent. Expensive but strong. |
+| Encore | ✅ | Attack again. Stack with buffs for big turns. |
+| Infernal Encore | ✅ | ALL attack again. Game-winning combo. |
+| Stage Dive | ✅ | HP-to-damage. Once per round. |
+| Overdrive | ✅ | Double ALL ATK if >80% corrupt. Powerful. |
+| Possessed Performance | ✅ | Triple ATK. Most expensive. Should feel legendary. |
+| Burn the Set | ✅ | Full hand refresh. Good for digging. |
+| Sound Wall | ✅ | 5 direct damage + skip boss passive. Niche but useful. |
+| Dial to Eleven | ✅ | +20% corrupt. Feeds Loki and Feedback Loop. |
+| Signal Decay | ✅ | -30% corrupt + 5 HP heal. Defensive control. |
+| Feedback Loop | ✅ | Damage = corrupt %. Best at 80-100%. |
+| Controlled Feedback | ✅ | Set to 50%. Stabilizer. |
+| Sound Check | ✅ | +3 HP all. Simple but useful. |
+| Roadie | ✅ | Shield from Too Stoned. Underrated. |
+| Wake Up Call | ✅ | Revive member. Save a run card. |
+| Groupie | ✅ | Net +1 ember. Efficient if you have embers to spend. |
+| Tapped Out | ✅ | +5 embers next Strike. Free cost makes it interesting. |
 
-**Stage 1 (HP 75%):** Amber/yellow tint, faint haze, throb slightly faster
-**Stage 2 (HP 50%):** Purple/magenta saturation, edge blur, emoji drifts, numbers flicker
-**Stage 3 (HP 25%):** Heavy distortion, pulses purple↔red, text wobbles, stars in emoji zone
-**Stage 4 (HP 0):** 15° tilt, grey-green pallor, emoji → 💨, blurs out, locked
+### Needs implementing 🔴
+| Card | Priority | Design Notes |
+|------|----------|-------------|
+| Demo Tape | HIGH | Track lastRiffPlayed. Copy + free cast. |
+| Setlist | HIGH | Drag-to-reorder top 4 deck cards modal. |
+| The Remaster | HIGH | Delete 2, copy 1 from 10 deck cards modal. |
+| Black Sabbath Sigil / Hellquake | HIGH | See full Hellquake spec above. |
 
-**Corruption escalation:**
-- 50%+ background breathes (scale pulse)
-- 75%+ HUD shifts purple
-- 100% strong vignette, parchment bleeds red
-
-### On Game Addictiveness
-The core is strong. What makes roguelites addictive is the "one more run" feeling — you need:
-1. ✅ Meaningful choices (card plays, discard vs keep, shop decisions)
-2. ✅ Distinctive aesthetic (nobody else has doom metal + Dante's Inferno)
-3. ⚠️ Build variety — right now most runs feel similar. Keyword passives + more card synergies will fix this
-4. ⚠️ Stakes — Too Stoned needs to hurt more. Right now it's too easy to avoid/recover
-5. ❌ Meta-progression — nothing carries between runs yet. Even unlocking new band members would help enormously
+### Balance concerns ⚠️
+| Card | Issue | Fix |
+|------|-------|-----|
+| Possessed Performance | 5 embers is almost never castable | Reduce to 4 embers OR reduce effect to ×2.5 ATK at 4 embers |
+| Stage Dive | Once per round limits are unclear to new players | Add clear visual indicator when used |
+| Sound Wall | 5 damage is weak in fights 2-3 | Scale with fight index: 5/8/12 damage |
 
 ---
 
-## ✅ COMPLETED (Session 4)
+## 🎮 ADDICTIVENESS ASSESSMENT
 
+**What's working:**
+- ✅ Core loop is solid and fast — fights feel active, not passive
+- ✅ The aesthetic is genuinely unique — nobody else has this
+- ✅ Too Stoned mechanic is memorable and thematic
+- ✅ Corruption creates real tension and build identity
+
+**What's missing for "one more run" feeling:**
+- ❌ Build diversity — without keyword passives all runs feel similar. Fix is P1.
+- ❌ Memorable moments — Hellquake could be THE moment. Currently it does nothing.
+- ⚠️ Stakes — Too Stoned needs the psychedelic visual treatment to feel catastrophic
+- ⚠️ Discovery — foil/mythic cards create "I've never seen THAT before" moments
+- ❌ Meta-progression — nothing carries between runs. Even 3 unlockable band members would help.
+
+**Honest score:** 6/10 addictiveness right now. With P1+P2 done: 8.5/10. That's a Steam launch candidate.
+
+---
+
+## ✅ COMPLETED SESSION 4
 - [x] Play screen UI fully locked
-- [x] Boss throbbing red glow box, large readable text
-- [x] Member cards 230×345, correct size matching placeholders
-- [x] Hand cards: fixed height 295px, effect text centered
-- [x] Hover z-index via anyHovered+isolation — always on top
-- [x] Hand drag-to-reorder (insert style, like Balatro)
-- [x] drawUpTo while loop fix — hand always refills to 6
-- [x] Attack number red pulse animation on value change
-- [x] Ghost card bug fixed (dragHandIdx cleared on stage drop)
-- [x] Shop leave bug fixed (animPhase reset, hand redealt for fight 2/3)
-- [x] Recruit screen — buy pack → pick musician → add to stage
-- [x] Enemy rebalance: Wanderer 40HP, Lost Soul 69HP ← non-negotiable, Drifter 100HP
-- [x] GitHub + GDD.md auto-maintained living document
+- [x] Boss throbbing red glow box
+- [x] Member cards 230×345, correct size
+- [x] Hand cards: fixed height, hover z-index, drag-to-reorder
+- [x] drawUpTo while loop fix
+- [x] Attack number red pulse animation
+- [x] Ghost card + shop leave bugs fixed
+- [x] Recruit screen working
+- [x] Enemy rebalance: 40/69/100 HP
+- [x] GitHub + living GDD.md
