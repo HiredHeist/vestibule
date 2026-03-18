@@ -599,7 +599,7 @@ export default function App(){
     if(!card)return
     const ok=applyCard(card,slotIdx)
     if(ok){setHand(p=>p.filter(c=>c.uid!==dragCardUid));setDiscardPile(p=>[...p,card])}
-    setDragCardUid(null)
+    setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
   },[dragCardUid,hand,animPhase,applyCard])
 
   const handleStageDrop=useCallback((toIdx)=>{
