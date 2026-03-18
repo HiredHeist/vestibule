@@ -181,14 +181,14 @@ function EmberDisplay({current,max}){
 
 function BoosterScreen({onComplete,seed}){
   const [sel,setSel]=useState([])
-  const pool=ALL_MUSICIANS.slice(0,5)
+  const pool=ALL_MUSICIANS
   const toggle=id=>setSel(p=>p.includes(id)?p.filter(x=>x!==id):p.length<2?[...p,id]:p)
   return(
     <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,padding:'20px 0'}}>
       <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:52,color:'#d0b060',textShadow:'0 0 40px rgba(200,150,20,0.4),2px 2px 0 #000'}}>Opening Night</div>
       <div style={{fontFamily:"'IM Fell English',serif",fontSize:18,color:'#a09060',fontStyle:'italic'}}>Select 2 musicians to start your band</div>
       <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#4a3a20',letterSpacing:2}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
-      <div style={{display:'flex',gap:16,flexWrap:'wrap',justifyContent:'center',maxWidth:960,padding:'0 20px'}}>
+      <div style={{display:'flex',gap:14,flexWrap:'wrap',justifyContent:'center',maxWidth:1200,padding:'0 20px'}}>
         {pool.map(m=>{
           const s=sel.includes(m.id),dis=!s&&sel.length>=2
           return(
@@ -541,6 +541,56 @@ function RecruitScreen({candidates,stage,onPick,onPass}){
   )
 }
 
+function SetlistModal({cards,onConfirm,onClose}){
+  const [order,setOrder]=useState(cards.map((_,i)=>i))
+  const [dragging,setDragging]=useState(null)
+  const move=(from,to)=>{
+    const next=[...order]
+    const [item]=next.splice(from,1)
+    next.splice(to,0,item)
+    setOrder(next)
+  }
+  const ordered=order.map(i=>cards[i])
+  return(
+    <div style={{position:'fixed',inset:0,zIndex:9700,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:24}}>
+      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:48,color:'#d0b060'}}>Setlist</div>
+      <div style={{fontFamily:"'IM Fell English',serif",fontSize:16,color:'#a09060',fontStyle:'italic'}}>Drag to reorder the top of your deck</div>
+      <div style={{display:'flex',gap:16,alignItems:'flex-end'}}>
+        {ordered.map((card,i)=>{
+          const bc=card.type==='CORRUPT'?'#aa1111':card.type==='UTILITY'?'#22aa44':card.type==='EMBER'?'#c87820':'#9933cc'
+          return(
+            <div key={card.uid} draggable
+              onDragStart={()=>setDragging(i)}
+              onDragOver={e=>{e.preventDefault()}}
+              onDrop={()=>{if(dragging!==null&&dragging!==i){move(dragging,i);setDragging(null)}}}
+              onDragEnd={()=>setDragging(null)}
+              style={{width:160,background:'linear-gradient(180deg,#201408,#100804)',border:'2px solid '+bc,borderRadius:7,overflow:'hidden',cursor:'grab',opacity:dragging===i?0.5:1,transition:'transform 0.15s',transform:dragging===i?'scale(0.95)':'scale(1)'}}>
+              <div style={{height:5,background:bc}}/>
+              <div style={{height:90,display:'flex',alignItems:'center',justifyContent:'center',fontSize:44,background:'rgba(0,0,0,0.35)'}}>{card.emoji}</div>
+              <div style={{padding:'8px 10px 12px'}}>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:3}}>{card.name}</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:bc,textAlign:'center',letterSpacing:2,textTransform:'uppercase',marginBottom:6}}>{card.type}</div>
+                <div style={{fontFamily:"'IM Fell English',serif",fontSize:10,color:'#b09870',textAlign:'center',fontStyle:'italic',lineHeight:1.4}}>{card.effect}</div>
+              </div>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'rgba(200,160,60,0.5)',textAlign:'center',padding:'4px',background:'rgba(0,0,0,0.4)'}}>#{i+1}</div>
+            </div>
+          )
+        })}
+      </div>
+      <div style={{display:'flex',gap:16}}>
+        <button onClick={()=>onConfirm(ordered)}
+          style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(30,130,30,0.3)',border:'2px solid #22aa44',borderRadius:3,color:'#44dd44',cursor:'pointer'}}>
+          ✓ Lock In
+        </button>
+        <button onClick={onClose}
+          style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(80,40,10,0.3)',border:'1px solid rgba(100,60,20,0.5)',borderRadius:3,color:'#8a6030',cursor:'pointer'}}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function App(){
   const [gameState,setGameState]=useState('booster')
   const [runSeed]=useState(()=>Math.floor(Math.random()*0xFFFFFF))
@@ -574,6 +624,9 @@ export default function App(){
   const [showDice,setShowDice]=useState(false)
   const [pendingEmbers,setPendingEmbers]=useState(0)
   const [lastRiffPlayed,setLastRiffPlayed]=useState(null)
+  const [bossDebuff,setBossDebuff]=useState(0)
+  const [setlistOpen,setSetlistOpen]=useState(false)
+  const [setlistCards,setSetlistCards]=useState([])
   const [deathCause,setDeathCause]=useState('fallen')
   const [circleArtifact]=useState(()=>CIRCLE_ARTIFACTS[Math.floor(Math.random()*CIRCLE_ARTIFACTS.length)])
   const [shopCards,setShopCards]=useState(()=>genShopCards())
@@ -641,6 +694,15 @@ export default function App(){
     else if(card.id==='soundcheck'){ns=ns.map(s=>s?Object.assign({},s,{hp:Math.min(s.maxHp,s.hp+3)}):null);msg='🔊 All members +3 HP!';addFloat('+3 HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')}
     else if(card.id==='dialtoeleven'){const nc=Math.min(100,corruption+20);setCorruption(nc);updStat('maxCorruption',nc,true);msg='📻 Corruption +20% → '+nc+'%'}
     else if(card.id==='sigdecay'){const nc=Math.max(0,corruption-30);setCorruption(nc);msg='📡 Corruption -30% → '+nc+'%'}
+    else if(card.id==='setlist'){
+      // Show top 4 deck cards in a reorder modal
+      const top4=deck.slice(0,4)
+      if(top4.length===0){addLog('📋 Deck is empty!');return false}
+      setSetlistCards(top4)
+      setSetlistOpen(true)
+      spent=0
+      msg='📋 Setlist opened — rearrange the top of your deck.'
+    }
     else if(card.id==='controlfeedback'){setCorruption(50);msg='🎚 Corruption set to 50%.'}
     else if(card.id==='feedbackloop'){const dmg=Math.floor(corruption);const bc2=getCenter(bossRef);setEnemyHp(function(prev){return Math.max(0,prev-dmg)});addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=20);playHit();updStat('totalDamage',dmg);msg='🎛 Feedback Loop: '+dmg+' damage!'}
     else if(card.id==='soundwall'){const bc3=getCenter(bossRef);setEnemyHp(function(prev){return Math.max(0,prev-5)});addFloat(5,bc3.x,bc3.y-60,'#dd2222');playHit();msg='🔈 Sound Wall! 5 direct damage.';updStat('totalDamage',5)}
@@ -657,7 +719,54 @@ export default function App(){
     }
     else if(card.id==='burnset'){const res=drawUpTo([],deck,discardPile,HAND_SIZE);setHand(res.h);setDeck(res.d);setDiscardPile([...res.disc,...hand]);msg='🔥 Hand burned! Drew 6 new cards.'}
     else if(card.id==='overdrive'){if(corruption>80){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{addLog('⚠ Need >80% Corruption.');return false}}
-    else if(card.id==='sabbathsigil'){setCorruption(100);updStat('maxCorruption',100,true);msg='⛧ BLACK SABBATH SIGIL! Corruption 100%!';addFloat('HELLQUAKE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#aa1111',true)}
+    else if(card.id==='sabbathsigil'){
+      setCorruption(100);updStat('maxCorruption',100,true)
+      const roll=Math.floor(Math.random()*6)+1
+      const bc=getCenter(bossRef)
+      let hqMsg='',hqFloat='',hqColor='#aa1111'
+      if(roll===1){
+        // OBLITERATION — total band ATK × 4
+        const totalAtk=ns.filter(m=>m&&!m.tooStoned).reduce((s,m)=>s+m.atk,0)
+        const hqDmg=totalAtk*4
+        setEnemyHp(function(prev){return Math.max(0,prev-hqDmg)})
+        updStat('totalDamage',hqDmg)
+        hqMsg='⛧ HELLQUAKE: OBLITERATION! '+hqDmg+' damage!';hqFloat='OBLITERATION!';hqColor='#ff2200'
+      } else if(roll===2){
+        // RESONANCE — all members +3 ATK permanently
+        ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3}):m)
+        hqMsg='⛧ HELLQUAKE: RESONANCE! All members +3 ATK!';hqFloat='+3 ATK!';hqColor='#ff6600'
+      } else if(roll===3){
+        // BACKLASH — 30 damage BUT one random member goes Too Stoned
+        setEnemyHp(function(prev){return Math.max(0,prev-30)})
+        updStat('totalDamage',30)
+        const alive=ns.filter(m=>m&&!m.tooStoned)
+        if(alive.length>0){
+          const victim=alive[Math.floor(Math.random()*alive.length)]
+          const vi=ns.indexOf(victim)
+          ns[vi]=Object.assign({},victim,{hp:0,tooStoned:true})
+        }
+        hqMsg='⛧ HELLQUAKE: BACKLASH! 30 damage but a member falls!';hqFloat='BACKLASH!';hqColor='#9933cc'
+      } else if(roll===4){
+        // POSSESSION — all hand cards free this Strike (set embers to max temporarily)
+        setEmbers(maxEmbers)
+        setPendingEmbers(maxEmbers)
+        hqMsg='⛧ HELLQUAKE: POSSESSION! All cards free this Strike!';hqFloat='POSSESSED!';hqColor='#cc44ff'
+      } else if(roll===5){
+        // RITUAL — boss HP set to exactly half (floor), min 1
+        setEnemyHp(function(prev){return Math.max(1,Math.floor(prev/2))})
+        hqMsg='⛧ HELLQUAKE: RITUAL! Boss HP halved!';hqFloat='RITUAL!';hqColor='#aa1111'
+      } else {
+        // THE VOID — corruption becomes damage, reset to 0
+        const voidDmg=Math.floor(corruption)
+        setEnemyHp(function(prev){return Math.max(0,prev-voidDmg)})
+        updStat('totalDamage',voidDmg)
+        setCorruption(0)
+        hqMsg='⛧ HELLQUAKE: THE VOID! '+voidDmg+' damage, Corruption purged!';hqFloat='THE VOID!';hqColor='#4400aa'
+      }
+      msg=hqMsg
+      addFloat(hqFloat,bc.x,bc.y-80,hqColor,true)
+      playHit()
+    }
     else if(card.id==='possessedperf'){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*3,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='🎭 POSSESSED! Triple ATK!';addFloat('×3 ATK!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}
     else if(card.id==='infencore'){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{encoreReady:true}):s});msg='👿 Infernal Encore! All members attack again!'}
 
@@ -720,6 +829,9 @@ export default function App(){
 
     if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
 
+    // DEBUFF keyword: Nott reduces boss damage each Strike
+    const debuffCount=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='DEBUFF').length
+    if(debuffCount>0){setBossDebuff(p=>p+debuffCount);addLog('🎤 Nott debuffs the boss! (-'+debuffCount+' damage)')}
     setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1)
 
     const buffed=actives.filter(m=>(m.buffCount||0)>0)
@@ -766,6 +878,16 @@ export default function App(){
       })})
 
       if(newEHp<=0){
+        // FRENZIED: members with keyword get +1 ATK on kill
+        setStage(function(prev){
+          return prev.map(function(m){
+            if(m&&!m.tooStoned&&m.keyword==='FRENZIED'){
+              addFloat('FRENZIED!',getCenter(stageRefs.current[prev.indexOf(m)]).x,getCenter(stageRefs.current[prev.indexOf(m)]).y-80,'#ff6600',false)
+              return Object.assign({},m,{atk:m.atk+1,maxHp:m.maxHp})
+            }
+            return m
+          })
+        })
         const stashEarned=6+Math.floor(Math.random()*3)+strikesLeft
         setStash(function(p){return p+stashEarned})
         updStat('stashEarned',stashEarned);updStat('fightsSurvived',1)
@@ -790,7 +912,7 @@ export default function App(){
         setTimeout(function(){
           setShowDice(false)
           const variance=Math.floor(Math.random()*5)-2
-          const actualDmg=Math.max(1,enemy.baseDmg+variance)
+          const actualDmg=Math.max(1,enemy.baseDmg+variance-bossDebuff)
           const varLabel=variance>0?' (CRIT!)':variance<0?' (miss)':''
           const ti=stage.indexOf(target)
           setStage(function(prev){
@@ -857,7 +979,7 @@ export default function App(){
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(nextEnemy.maxHp)
     setEmbers(maxEmbers);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([])
+    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0)
     setStage(p=>p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false}):null))
     // Redeal hand from current deck+discard
     setDeck(function(curDeck){
@@ -943,6 +1065,11 @@ export default function App(){
       {floats.map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
       {projectiles.map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
       {showDice&&diceTarget&&<DiceRoll target={diceTarget} onDone={()=>setShowDice(false)}/>}
+      {setlistOpen&&<SetlistModal cards={setlistCards} onConfirm={(ordered)=>{
+        setDeck(prev=>[...ordered,...prev.slice(setlistCards.length)])
+        setSetlistOpen(false)
+        addLog('📋 Setlist locked in.')
+      }} onClose={()=>setSetlistOpen(false)}/>}
       {/* PARCHMENT */}
       <div style={{flex:'0 0 63%',margin:'0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'visible',background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:'2px solid #7a5820',boxShadow:'inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)',display:'flex',flexDirection:'column'}}>
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
