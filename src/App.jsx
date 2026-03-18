@@ -368,7 +368,7 @@ function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLea
       onDragOver={e=>{e.preventDefault();onHandDragOver&&onHandDragOver()}}
       onDrop={e=>{e.stopPropagation();onHandDrop&&onHandDrop()}}
       onMouseEnter={onHover} onMouseLeave={onLeave} onClick={onClick}
-      style={{width:190,flexShrink:0,position:'relative',
+      style={{width:190,height:295,flexShrink:0,position:'relative',display:'flex',flexDirection:'column',
         background:isSelected?'linear-gradient(180deg,#2a1a0a,#160e05)':'linear-gradient(180deg,#201408,#100804)',
         border:isDragOver?'2px dashed #e8a820':isSelected?`2px solid #cc0000`:isHovered&&canAfford?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
         borderRadius:7,cursor:unaffordable?'not-allowed':'grab',position:'relative',
@@ -380,7 +380,7 @@ function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLea
         opacity:unaffordable?0.35:isDragging?0.4:1,
         animation:shimmerAnim,
         margin:'0 -26px',userSelect:'none'}}>
-      <div style={{height:6,borderRadius:'7px 7px 0 0',background:bc,boxShadow:`0 0 14px ${glow}`}}/>
+      <div style={{height:6,flexShrink:0,borderRadius:'7px 7px 0 0',background:bc,boxShadow:`0 0 14px ${glow}`}}/>
       {card.embers>0?(
         <div style={{position:'absolute',top:8,right:8,width:28,height:28,borderRadius:'50%',background:canAfford?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',border:`2px solid ${canAfford?'#ff6600':'#4a2a10'}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:canAfford?'#fff':'#5a3a10',boxShadow:canAfford?'0 0 10px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
       ):(
@@ -388,13 +388,13 @@ function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLea
       )}
       {card.rarity==='Rare'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
       {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
-      <div style={{height:115,display:'flex',alignItems:'center',justifyContent:'center',fontSize:54,background:'rgba(0,0,0,0.35)',position:'relative'}}>
+      <div style={{height:115,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:54,background:'rgba(0,0,0,0.35)',position:'relative'}}>
         <div style={{position:'absolute',inset:0,background:`radial-gradient(circle at center,${bc}18,transparent 70%)`}}/>
         {card.emoji}
       </div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:700,color:unaffordable?'#555':'#eedfc0',textAlign:'center',padding:'9px 6px 3px',letterSpacing:.4,lineHeight:1.2,borderBottom:'1px solid rgba(255,255,255,0.07)'}}>{card.name}</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:unaffordable?'#444':bc,textAlign:'center',padding:'3px 4px',letterSpacing:1.8,textTransform:'uppercase'}}>{card.type}</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:13,color:unaffordable?'#4a3a20':'#b09870',textAlign:'center',padding:'5px 8px 12px',lineHeight:1.4,fontStyle:'italic',minHeight:52}}>{card.effect}</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:700,color:unaffordable?'#555':'#eedfc0',textAlign:'center',padding:'9px 6px 3px',letterSpacing:.4,lineHeight:1.2,borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:unaffordable?'#444':bc,textAlign:'center',padding:'3px 4px',letterSpacing:1.8,textTransform:'uppercase',flexShrink:0}}>{card.type}</div>
+      <div style={{fontFamily:"'IM Fell English',serif",fontSize:13,color:unaffordable?'#4a3a20':'#b09870',textAlign:'center',padding:'4px 8px 8px',lineHeight:1.4,fontStyle:'italic',flex:1,display:'flex',alignItems:'center',justifyContent:'center'}}>{card.effect}</div>
     </div>
   )
 }
@@ -891,8 +891,18 @@ export default function App(){
         </div>
 
         {/* CARD FAN — takes full height, padded to avoid overlapping columns */}
-        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:24,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative'}}>
-          {hand.map((card,i)=>(
+        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:44,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative'}}>
+          {[...hand.map((card,i)=>({card,i}))]
+            .sort((a,b)=>{
+              const aH=hovered===a.card.uid, bH=hovered===b.card.uid
+              const aS=selected.includes(a.card.uid), bS=selected.includes(b.card.uid)
+              if(aH) return 1
+              if(bH) return -1
+              if(aS&&!bS) return 1
+              if(bS&&!aS) return -1
+              return a.i-b.i
+            })
+            .map(({card,i})=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length}
               isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
               canAfford={card.embers===0||embers>=card.embers}
