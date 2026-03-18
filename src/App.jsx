@@ -297,7 +297,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   const [over,setOver]=useState(false)
   if(!member){
     return <div ref={innerRef} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}}
-      style={{width:172,height:260,border:`1px dashed ${over?'rgba(232,168,32,0.6)':'rgba(160,100,30,0.22)'}`,borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,background:over?'rgba(100,70,15,0.18)':'rgba(28,16,4,0.14)',transition:'all 0.2s'}}>
+      style={{width:200,height:300,border:`1px dashed ${over?'rgba(232,168,32,0.6)':'rgba(160,100,30,0.22)'}`,borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,background:over?'rgba(100,70,15,0.18)':'rgba(28,16,4,0.14)',transition:'all 0.2s'}}>
       <div style={{fontSize:28,opacity:.1}}>⛧</div>
       <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:'rgba(160,100,30,0.28)',fontStyle:'italic'}}>empty</div>
     </div>
@@ -306,7 +306,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   const buffCount=member.buffCount||0
   return(
     <div ref={innerRef} draggable onDragStart={onDragStart} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}}
-      style={{width:172,background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
+      style={{width:200,background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
         border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':over?'2px solid #e8a820':st?'1px solid #333':'2px solid rgba(190,120,25,0.85)',
         borderRadius:6,
         boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':'0 6px 24px rgba(0,0,0,0.85)',
@@ -318,22 +318,22 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
       {buffCount>0&&<div style={{position:'absolute',top:6,left:6,background:buffCount>=3?'#aa1111':'#9933cc',borderRadius:10,padding:'1px 6px',fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:900,color:'#fff',zIndex:10,boxShadow:'0 0 8px rgba(0,0,0,0.6)'}}>+{buffCount}</div>}
       {isDiceTarget&&<div style={{position:'absolute',top:-16,left:'50%',transform:'translateX(-50%)',fontSize:20}}>🎯</div>}
       <div style={{height:5,borderRadius:'6px 6px 0 0',background:st?'#333':'linear-gradient(90deg,#dd2222,#ff7700)',boxShadow:st?'none':'0 0 14px rgba(220,50,0,0.5)'}}/>
-      <div style={{height:86,display:'flex',alignItems:'center',justifyContent:'center',fontSize:48,background:'rgba(0,0,0,0.3)',position:'relative'}}>
+      <div style={{height:120,display:'flex',alignItems:'center',justifyContent:'center',fontSize:62,background:'rgba(0,0,0,0.3)',position:'relative'}}>
         {member.emoji}
         {st&&<div style={{position:'absolute',top:4,right:4,fontSize:22}}>💨</div>}
         {isAttacking&&<div style={{position:'absolute',inset:0,background:'rgba(255,50,0,0.12)',animation:'pulse 0.4s ease infinite alternate'}}/>}
       </div>
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:22,color:st?'#555':'#e8d8a0',textAlign:'center',padding:'5px 4px 1px',lineHeight:1}}>{member.name}</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:1.5,color:st?'#444':'#8a7a50',textAlign:'center',padding:'2px 4px 4px',textTransform:'uppercase'}}>{member.role}</div>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 12px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:26,color:st?'#555':'#e8d8a0',textAlign:'center',padding:'8px 4px 2px',lineHeight:1}}>{member.name}</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:1.5,color:st?'#444':'#8a7a50',textAlign:'center',padding:'3px 4px 6px',textTransform:'uppercase'}}>{member.role}</div>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
         <div style={{textAlign:'center'}}>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:7,color:'#6a3a3a',textTransform:'uppercase',opacity:.8}}>ATK</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:28,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.atk}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:36,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.atk}</div>
         </div>
         <div style={{fontFamily:"'Cinzel',serif",fontSize:7,color:'#6a4a20',opacity:.65}}>{member.keyword}</div>
         <div style={{textAlign:'center'}}>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:7,color:'#2a5a2a',textTransform:'uppercase',opacity:.8}}>HP</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:28,fontWeight:900,lineHeight:1,color:st?'#555':member.hp<=2?'#ff4400':'#33dd33',textShadow:st?'none':'0 0 12px rgba(0,190,0,0.5)'}}>{member.hp}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:36,fontWeight:900,lineHeight:1,color:st?'#555':member.hp<=2?'#ff4400':'#33dd33',textShadow:st?'none':'0 0 12px rgba(0,190,0,0.5)'}}>{member.hp}</div>
         </div>
       </div>
       <div style={{height:5,background:'rgba(0,0,0,0.5)',borderRadius:'0 0 6px 6px'}}><div style={{height:'100%',borderRadius:'0 0 6px 6px',background:st?'#333':'linear-gradient(90deg,#003800,#33dd33)',width:`${(member.hp/member.maxHp)*100}%`,transition:'width 0.4s ease'}}/></div>
@@ -351,15 +351,15 @@ function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLea
   return(
     <div draggable onDragStart={e=>{e.dataTransfer.effectAllowed='move';onDragStart(index)}} onDragEnd={onDragEnd}
       onMouseEnter={onHover} onMouseLeave={onLeave} onClick={onClick}
-      style={{width:172,flexShrink:0,
+      style={{width:172,flexShrink:0,position:'relative',
         background:isSelected?'linear-gradient(180deg,#2a1a0a,#160e05)':'linear-gradient(180deg,#201408,#100804)',
-        border:isSelected?`2px solid #e8a820`:isHovered&&canAfford?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
+        border:isSelected?`2px solid #cc0000`:isHovered&&canAfford?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
         borderRadius:7,cursor:unaffordable?'not-allowed':'grab',position:'relative',
         transformOrigin:'bottom center',
-        transform:isDragging?'scale(0.85) rotate(5deg)':isHovered&&canAfford?'translateY(-70px) scale(1.25) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-22px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
+        transform:isDragging?'scale(0.85) rotate(5deg)':isHovered&&canAfford?'translateY(-70px) scale(1.25) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
         zIndex:isDragging?1:isHovered?999:isSelected?200:10-Math.abs(index-mid),
-        boxShadow:isShopBought?`0 0 12px ${bc}44`:isHovered&&canAfford?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
+        boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered&&canAfford?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
         opacity:unaffordable?0.35:isDragging?0.4:1,
         animation:shimmerAnim,
         margin:'0 -22px',userSelect:'none'}}>
@@ -427,8 +427,8 @@ function DeckPile({count,label}){
   )
 }
 
-function PhaseDots({left,total,color}){
-  return <div style={{display:'flex',gap:4}}>{Array.from({length:total}).map((_,i)=><div key={i} style={{width:13,height:13,borderRadius:3,background:i<left?color:'rgba(40,20,8,0.6)',border:`1px solid ${i<left?color:'rgba(80,50,20,0.3)'}`,boxShadow:i<left?`0 0 7px ${color}88`:'none',transition:'all 0.25s'}}/>)}</div>
+function PhaseDots({left,total,color,wide}){
+  const sz=wide?17:13;return <div style={{display:'flex',gap:wide?4:4,flex:wide?1:undefined}}>{Array.from({length:total}).map((_,i)=><div key={i} style={{width:sz,height:sz,borderRadius:4,background:i<left?color:'rgba(40,20,8,0.6)',border:`1px solid ${i<left?color:'rgba(80,50,20,0.3)'}`,boxShadow:i<left?`0 0 9px ${color}99`:'none',transition:'all 0.25s'}}/>)}</div>
 }
 
 function EndScreen({won,stats,seed,onReset}){
@@ -785,15 +785,15 @@ export default function App(){
         <div style={{padding:'10px 20px 8px',position:'relative',zIndex:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0}}>
           <BossSection enemy={enemy} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef}/>
         </div>
-        <div style={{position:'relative',zIndex:5,background:'rgba(20,11,3,0.42)',borderTop:'2px solid rgba(60,35,5,0.45)',flexShrink:0}}>
+        <div style={{position:'relative',zIndex:5,background:'rgba(20,11,3,0.42)',borderTop:'2px solid rgba(60,35,5,0.45)',flex:1,display:'flex',flexDirection:'column',justifyContent:'center'}}>
           <div style={{display:'flex',alignItems:'center',gap:10,padding:'3px 16px 1px'}}>
             <div style={{flex:1,height:1,background:'rgba(60,35,5,0.2)'}}/>
             <div style={{fontFamily:"'IM Fell English',serif",fontSize:10,color:'#8a6838',opacity:.4,fontStyle:'italic',letterSpacing:4}}>— stage —</div>
             <div style={{flex:1,height:1,background:'rgba(60,35,5,0.2)'}}/>
           </div>
-          <div style={{display:'flex',alignItems:'flex-end',gap:8,padding:'6px 10px 8px',justifyContent:'center'}}>
-            <div style={{display:'flex',flexDirection:'column',gap:4,alignSelf:'center',marginRight:8,background:'rgba(0,0,0,0.28)',borderRadius:6,padding:'6px',border:'1px solid rgba(120,80,20,0.2)'}}>
-              {[1,2,3].map(i=><div key={i} style={{width:70,height:72,border:'1px dashed rgba(200,160,50,0.28)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,background:'rgba(40,25,5,0.45)'}}><div style={{fontSize:18,opacity:.22}}>⚗</div><div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.38)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>)}
+          <div style={{display:'flex',alignItems:'center',gap:8,padding:'12px 10px',justifyContent:'center',flex:1}}>
+            <div style={{display:'flex',flexDirection:'column',gap:8,alignSelf:'center',marginRight:10,background:'rgba(0,0,0,0.25)',borderRadius:'6px 0 0 6px',padding:'8px 12px 8px 8px',borderRight:'1px solid rgba(140,90,20,0.4)'}}>
+              {[1,2,3].map(i=><div key={i} style={{width:76,height:92,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:24,opacity:.28}}>⚗</div><div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>)}
             </div>
             {stage.map((m,i)=>(
               <StageSlot key={i} member={m} slotIdx={i}
@@ -841,15 +841,15 @@ export default function App(){
           <div style={{display:'flex',flexDirection:'column',gap:5,alignItems:'flex-end',flexShrink:0}}>
             <button onClick={handleStrike} disabled={!canStrike}
               style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 28px',background:canStrike?'rgba(130,0,0,0.4)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:185}}>⚔ Strike</button>
-            <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'flex-end'}}>
-              <PhaseDots left={strikesLeft} total={MAX_STRIKES} color='#dd2222'/>
-              <span style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:700,color:strikesLeft>0?'#dd2222':'#444'}}>{strikesLeft}/{MAX_STRIKES}</span>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:185}}>
+              <PhaseDots left={strikesLeft} total={MAX_STRIKES} color='#dd2222' wide={true}/>
+              <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555'}}>{strikesLeft}/{MAX_STRIKES}</span>
             </div>
             <button onClick={handleDiscard} disabled={!canDiscard}
               style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 28px',background:canDiscard?'rgba(100,70,0,0.35)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:185}}>↓ Discard</button>
-            <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'flex-end'}}>
-              <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820'/>
-              <span style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:700,color:discardsLeft>0?'#e8a820':'#444'}}>{discardsLeft}/{MAX_DISCARDS}</span>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:185}}>
+              <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
+              <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555'}}>{discardsLeft}/{MAX_DISCARDS}</span>
             </div>
           </div>
         </div>
