@@ -76,3 +76,15 @@
 - [x] Boss section enlarged (A+B+C treatment)
 - [x] Artifact zone flush left with separator
 - [x] 230×345 member cards with scaled internals
+
+---
+
+## ✅ PLAY SCREEN — LOCKED IN (Session 4 complete)
+- [x] Play screen UI finalized — boss box, member cards, hand cards, artifacts, buttons
+- [x] Hand cards: correct size, hover z-index, drag-to-reorder, no cutoff
+- [x] drawUpTo while loop fix — hand always refills to full after strike/discard
+- [x] Attack number pulse animation
+- [x] Ghost card bug fixed (dragHandIdx cleared on stage drop)
+- [x] All cards same height, effect text vertically centered
+
+## 🏪 NEXT: BLACK MARKET SHOP REDESIGN
