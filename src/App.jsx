@@ -782,23 +782,6 @@ export default function App(){
       {floats.map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
       {projectiles.map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
       {showDice&&diceTarget&&<DiceRoll target={diceTarget} onDone={()=>setShowDice(false)}/>}
-        <div style={{display:'flex',gap:22,alignItems:'center'}}>
-          {[['Fight',(fightIndex+1)+'/3','#dd2222'],['Corruption',corruption+'%',corruption>60?'#ff3300':'#aa5500']].map(function(item){return(
-            <div key={item[0]} style={{textAlign:'center'}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#7a5a30',letterSpacing:3,textTransform:'uppercase'}}>{item[0]}</div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:20,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
-            </div>
-          )})}
-          <div style={{display:'flex',alignItems:'center',gap:6}}>
-            <span style={{fontSize:18}}>🌿</span>
-            <div style={{textAlign:'center'}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#4a7a4a',letterSpacing:3,textTransform:'uppercase'}}>Stash</div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:20,fontWeight:900,color:'#44cc44',lineHeight:1}}>{stash}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* PARCHMENT */}
       <div style={{flex:'0 0 58%',margin:'0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'hidden',background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:'2px solid #7a5820',boxShadow:'inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)',display:'flex',flexDirection:'column'}}>
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
