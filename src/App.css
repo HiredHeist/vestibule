@@ -21,8 +21,8 @@ body {
 
 /* ── Keyframes ── */
 @keyframes throb {
-  0%, 100% { box-shadow: 0 6px 24px rgba(0,0,0,0.85), 0 0 0px rgba(190,120,25,0); }
-  50% { box-shadow: 0 6px 28px rgba(0,0,0,0.9), 0 0 18px rgba(190,120,25,0.35); }
+  0%, 100% { box-shadow: 0 6px 24px rgba(0,0,0,0.85), 0 0 0px rgba(190,120,25,0); transform: scale(1); }
+  50% { box-shadow: 0 6px 32px rgba(0,0,0,0.9), 0 0 22px rgba(190,120,25,0.5); transform: scale(1.025); }
 }
 
 @keyframes wiggle {
