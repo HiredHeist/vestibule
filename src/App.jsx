@@ -783,14 +783,14 @@ export default function App(){
       {projectiles.map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
       {showDice&&diceTarget&&<DiceRoll target={diceTarget} onDone={()=>setShowDice(false)}/>}
       {/* PARCHMENT */}
-      <div style={{flex:'0 0 58%',margin:'0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'hidden',background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:'2px solid #7a5820',boxShadow:'inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)',display:'flex',flexDirection:'column'}}>
+      <div style={{flex:'0 0 63%',margin:'0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'visible',background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:'2px solid #7a5820',boxShadow:'inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)',display:'flex',flexDirection:'column'}}>
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
         <div style={{padding:'10px 16px 8px',position:'relative',zIndex:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0}}>
           <div style={{width:'100%',maxWidth:760,background:'rgba(8,0,0,0.55)',border:'2px solid rgba(160,20,0,0.8)',borderRadius:8,padding:'12px 20px 14px',animation:'bossGlow 2s ease-in-out infinite',boxShadow:'0 0 30px rgba(150,0,0,0.4),inset 0 0 40px rgba(80,0,0,0.3)'}}>
             <BossSection enemy={enemy} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef}/>
           </div>
         </div>
-        <div style={{position:'relative',zIndex:5,background:'rgba(20,11,3,0.42)',borderTop:'2px solid rgba(60,35,5,0.45)',flex:1,display:'flex',flexDirection:'column',justifyContent:'center'}}>
+        <div style={{position:'relative',zIndex:5,background:'rgba(20,11,3,0.42)',borderTop:'2px solid rgba(60,35,5,0.45)',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>
           <div style={{display:'flex',alignItems:'center',gap:10,padding:'3px 16px 1px'}}>
             <div style={{flex:1,height:1,background:'rgba(60,35,5,0.2)'}}/>
             <div style={{fontFamily:"'IM Fell English',serif",fontSize:10,color:'#8a6838',opacity:.4,fontStyle:'italic',letterSpacing:4}}>— stage —</div>
