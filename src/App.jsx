@@ -62,6 +62,13 @@ const ALL_CARDS=[
   {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:5,effect:'All members deal triple ATK this Strike only.',color:'#9933cc',typeColor:'#7722aa'},
 ]
 
+const KEYWORD_DESC={
+  'FRENZIED':'High damage dealer. ATK scales with consecutive buffs.',
+  'DOUBLE TIME':'Drummer bonus: all band ATK doubles this Strike.',
+  'ANCHOR':'After each Strike, heals adjacent members +1 HP.',
+  'CORRUPT':'ATK increases with Corruption level. Thrives in chaos.',
+  'DEBUFF':'Reduces boss damage by 1 each Strike. Protects the band.',
+}
 function seededRng(seed){let s=seed;return function(){s=Math.imul(48271,s)|0;return(s&0x7fffffff)/0x7fffffff}}
 
 function buildDeck(seed){
@@ -308,6 +315,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,recruitPack,shopCards,
 
 function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef}){
   const [over,setOver]=useState(false)
+  const [showTip,setShowTip]=useState(false)
   if(!member){
     return <div ref={innerRef} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}}
       style={{width:230,height:345,border:`1px dashed ${over?'rgba(232,168,32,0.6)':'rgba(160,100,30,0.22)'}`,borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,background:over?'rgba(100,70,15,0.18)':'rgba(28,16,4,0.14)',transition:'all 0.2s'}}>
@@ -318,7 +326,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   const st=member.tooStoned
   const buffCount=member.buffCount||0
   return(
-    <div ref={innerRef} draggable onDragStart={onDragStart} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}}
+    <div ref={innerRef} draggable onDragStart={onDragStart} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}} onMouseEnter={()=>setShowTip(true)} onMouseLeave={()=>setShowTip(false)}
       style={{width:230,height:345,display:'flex',flexDirection:'column',background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
         border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':over?'2px solid #e8a820':st?'1px solid #333':'2px solid rgba(190,120,25,0.85)',
         borderRadius:6,
@@ -328,6 +336,8 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
         animation:(!st&&!isAttacking&&!isDiceTarget)?'throb 3s ease-in-out infinite':'none',
         transition:'border 0.2s, box-shadow 0.2s, opacity 0.3s, transform 0.3s',
         cursor:'grab',position:'relative'}}>
+      {/* Keyword tooltip */}
+      {showTip&&member&&KEYWORD_DESC[member.keyword]&&<div style={{position:'absolute',bottom:'105%',left:'50%',transform:'translateX(-50%)',background:'rgba(8,4,2,0.97)',border:'1px solid rgba(160,100,25,0.6)',borderRadius:6,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:200,maxWidth:260,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:900,color:'#e8a820',letterSpacing:2,textTransform:'uppercase',marginBottom:5}}>{member.keyword}</div><div style={{fontFamily:"'IM Fell English',serif",fontSize:13,color:'#c8b080',lineHeight:1.5,fontStyle:'italic'}}>{KEYWORD_DESC[member.keyword]}</div></div>}
       {buffCount>0&&<div style={{position:'absolute',top:6,left:6,background:buffCount>=3?'#aa1111':'#9933cc',borderRadius:10,padding:'1px 6px',fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:900,color:'#fff',zIndex:10,boxShadow:'0 0 8px rgba(0,0,0,0.6)'}}>+{buffCount}</div>}
       {isDiceTarget&&<div style={{position:'absolute',top:-16,left:'50%',transform:'translateX(-50%)',fontSize:20}}>🎯</div>}
       <div style={{height:5,borderRadius:'6px 6px 0 0',background:st?'#333':'linear-gradient(90deg,#dd2222,#ff7700)',boxShadow:st?'none':'0 0 14px rgba(220,50,0,0.5)'}}/>
@@ -452,10 +462,14 @@ function EndScreen({won,cause,stats,seed,onReset}){
   const isStoned=cause==='stoned'
   const isVictory=cause==='victory'
   return(
-    <div style={{position:'fixed',inset:0,zIndex:9800,background:isStoned?'rgba(2,4,2,0.98)':isVictory?'rgba(4,3,1,0.96)':'rgba(3,1,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:18,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'30px 0'}}>
-      {isStoned&&<div style={{fontFamily:"'Cinzel',serif",fontSize:13,letterSpacing:8,color:'rgba(100,180,80,0.6)',textTransform:'uppercase',animation:'fadeIn 1s ease',marginBottom:-8}}>YOU DIED</div>}
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:isStoned?86:76,color:isStoned?'#44aa22':isVictory?'#d8c9a8':'#7a0000',textShadow:isStoned?'0 0 80px rgba(60,200,40,0.6),3px 3px 0 #000,0 0 160px rgba(40,150,20,0.3)':isVictory?'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000':'0 0 60px rgba(100,0,0,0.6),3px 3px 0 #000'}}>{isStoned?'Stoned to the Bone':isVictory?'Victory':'Fallen'}</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:isStoned?22:17,color:isStoned?'rgba(120,200,80,0.8)':'#a09060',fontStyle:'italic'}}>{isStoned?'The band ran out of strikes.':isVictory?'The Drifter has fallen. Circle II opens.':'The Vestibule claims another soul.'}</div>
+    <div style={{position:'fixed',inset:0,zIndex:9800,background:isStoned?'rgba(2,0,0,0.97)':isVictory?'rgba(4,3,1,0.96)':'rgba(3,1,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:18,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'30px 0'}}>
+      {/* Watermark */}
+      <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
+        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:220,color:'rgba(180,180,180,0.07)',userSelect:'none',lineHeight:1,textAlign:'center'}}>Vestibule</div>
+      </div>
+      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:18}}>
+      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:isStoned?92:76,color:isStoned?'#cc1111':isVictory?'#d8c9a8':'#7a0000',textShadow:isStoned?'0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000,0 0 120px rgba(140,0,0,0.5)':isVictory?'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000':'0 0 60px rgba(100,0,0,0.6),3px 3px 0 #000'}}>{isStoned?'Stoned to the Bone':isVictory?'Victory':'Fallen'}</div>
+      <div style={{fontFamily:"'IM Fell English',serif",fontSize:isStoned?20:17,color:isStoned?'rgba(200,80,80,0.9)':'#a09060',fontStyle:'italic'}}>{isStoned?'The band ran out of strikes.':isVictory?'The Drifter has fallen. Circle II opens.':'The Vestibule claims another soul.'}</div>
       <div style={{background:'rgba(20,12,4,0.8)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:6,padding:'18px 28px',minWidth:380}}>
         <div style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:12}}>Run Statistics</div>
         {[['Strikes Thrown',stats.strikesThrown],['Total Damage Dealt',stats.totalDamage],['Highest Strike Damage',stats.highestStrike],['Too Stoned Events',stats.tooStonedCount],['Cards Played',stats.cardsPlayed],['Max Corruption',stats.maxCorruption+'%'],['Stash Earned',stats.stashEarned+' 🌿'],['Fights Survived',stats.fightsSurvived+' / 3']].map(function(row){
@@ -468,9 +482,10 @@ function EndScreen({won,cause,stats,seed,onReset}){
         })}
       </div>
       <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#5a4a20',letterSpacing:2}}>RUN SEED: {seed.toString(16).toUpperCase()} — Share with friends!</div>
-      <button onClick={onReset} style={{fontFamily:"'Cinzel',serif",fontSize:15,letterSpacing:4,color:isStoned?'#66cc44':isVictory?'#ee2222':'#b09858',background:isStoned?'rgba(40,120,20,0.22)':isVictory?'rgba(100,0,0,0.22)':'transparent',border:isStoned?'2px solid #44aa22':isVictory?'2px solid #7a0000':'1px solid rgba(90,60,20,0.5)',borderRadius:3,padding:'13px 46px',cursor:'pointer',textTransform:'uppercase'}}>
-        {isVictory?'⛧ Play Again':isStoned?'↺ Try Again':'↺ Try Again'}
+      <button onClick={onReset} style={{fontFamily:"'Cinzel',serif",fontSize:15,letterSpacing:4,color:isStoned?'#ff3333':isVictory?'#ee2222':'#b09858',background:isStoned?'rgba(80,0,0,0.3)':isVictory?'rgba(100,0,0,0.22)':'transparent',border:isStoned?'2px solid #cc1111':isVictory?'2px solid #7a0000':'1px solid rgba(90,60,20,0.5)',borderRadius:3,padding:'13px 46px',cursor:'pointer',textTransform:'uppercase',boxShadow:isStoned?'0 0 30px rgba(180,0,0,0.4)':'none'}}>
+        {isVictory?'⛧ Play Again':'↺ Try Again'}
       </button>
+      </div>
     </div>
   )
 }
@@ -559,6 +574,7 @@ export default function App(){
   const [showDice,setShowDice]=useState(false)
   const [pendingEmbers,setPendingEmbers]=useState(0)
   const [lastRiffPlayed,setLastRiffPlayed]=useState(null)
+  const [deathCause,setDeathCause]=useState('fallen')
   const [circleArtifact]=useState(()=>CIRCLE_ARTIFACTS[Math.floor(Math.random()*CIRCLE_ARTIFACTS.length)])
   const [shopCards,setShopCards]=useState(()=>genShopCards())
   const [boosterPacks]=useState(()=>genBoosterPacks())
@@ -755,7 +771,7 @@ export default function App(){
         updStat('stashEarned',stashEarned);updStat('fightsSurvived',1)
         addLog('⛧ Victory! +'+stashEarned+' Stash earned.')
         setTimeout(function(){
-          if(fightIndex>=2){playVictory();setMaxEmbers(function(p){return Math.min(MAX_EMBERS_CAP,p+1)});setTimeout(function(){setGameState('end')},800)}
+          if(fightIndex>=2){playVictory();setDeathCause('victory');setMaxEmbers(function(p){return Math.min(MAX_EMBERS_CAP,p+1)});setTimeout(function(){setGameState('end')},800)}
           else{
             setShopCards(genShopCards())
             setRecruitPack(genRecruitPack())
@@ -792,7 +808,7 @@ export default function App(){
               addFloat(actualDmg,getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-50,'#ff3300',false)
             }
             const allStoned=ns2.filter(function(m){return m}).every(function(m){return m.tooStoned})
-            if(allStoned){setTimeout(function(){setGameState('end')},800)}
+            if(allStoned){setDeathCause('fallen');setTimeout(function(){setGameState('end')},800)}
             return ns2
           })
           setDamageFlash(true);setTimeout(function(){setDamageFlash(false)},400)
@@ -821,6 +837,14 @@ export default function App(){
               return ns;
             });
             setAnimPhase('idle');setSelected([]);
+            // Check out-of-strikes death AFTER this strike resolves
+            setStrikesLeft(function(cur){
+              if(cur<=0){
+                setDeathCause('stoned');
+                setTimeout(function(){setGameState('end')},800);
+              }
+              return cur;
+            });
           },900)
         },1200)
       },delay+400)
@@ -899,7 +923,7 @@ export default function App(){
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(maxEmbers);setStash(0);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
-    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0)
+    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0);setDeathCause('fallen')
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([])
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
   }
@@ -911,8 +935,7 @@ export default function App(){
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll}/>
-  const endCause=won?'victory':strikesLeft<=0&&enemyHp>0?'stoned':'fallen'
-  if(gameState==='end')return <EndScreen won={won} cause={endCause} stats={stats} seed={runSeed} onReset={handleReset}/>
+  if(gameState==='end')return <EndScreen won={won} cause={deathCause} stats={stats} seed={runSeed} onReset={handleReset}/>
 
   return(
     <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none'}}>
