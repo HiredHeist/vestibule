@@ -408,7 +408,7 @@ function BossSection({enemy,currentHp,isWiggling,innerRef}){
         <div style={{flex:1}}>
           <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:58,color:'#120804',lineHeight:1,marginBottom:8,textShadow:'1px 1px 0 rgba(0,0,0,0.5)'}}>{enemy.name}</div>
           <div style={{fontFamily:"'IM Fell English',serif",fontSize:18,color:'#1a1008',fontStyle:'italic',opacity:1,lineHeight:1.5,fontWeight:700}}>{enemy.passive}</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:12,color:'#7a4a18',marginTop:5,letterSpacing:1,fontWeight:700}}>Base damage: {enemy.baseDmg} ± 2 per Strike</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:'#1a1008',marginTop:5,letterSpacing:1,fontWeight:700}}>Base damage: {enemy.baseDmg} ± 2 per Strike</div>
         </div>
       </div>
       <div style={{width:'70%',margin:'0 auto'}}>
@@ -429,13 +429,13 @@ function BossSection({enemy,currentHp,isWiggling,innerRef}){
 function DeckPile({count,label}){
   return(
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
-      <div style={{position:'relative',width:68,height:88}}>
-        {[2,1,0].map(i=><div key={i} style={{position:'absolute',width:60,height:80,background:i===0?'linear-gradient(135deg,#1e1408,#0a0804)':`rgba(15,10,4,${.7-i*.2})`,border:'1px solid rgba(160,110,35,0.55)',borderRadius:4,top:i*3,left:i*3}}>
+      <div style={{position:'relative',width:90,height:112}}>
+        {[2,1,0].map(i=><div key={i} style={{position:'absolute',width:80,height:100,background:i===0?'linear-gradient(135deg,#1e1408,#0a0804)':`rgba(15,10,4,${.7-i*.2})`,border:'1px solid rgba(160,110,35,0.55)',borderRadius:4,top:i*3,left:i*3}}>
           {i===0&&<div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,opacity:.2,color:'#c8a060'}}>⛧</div>}
         </div>)}
       </div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:22,fontWeight:900,color:'#c8a060'}}>{count}</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:2,color:'#6a5a30',textTransform:'uppercase'}}>{label}</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:26,fontWeight:900,color:'#c8a060'}}>{count}</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:2,color:'#6a5a30',textTransform:'uppercase'}}>{label}</div>
     </div>
   )
 }
@@ -523,7 +523,7 @@ export default function App(){
 
   const drawUpTo=useCallback((h,d,disc,target)=>{
     let nh=[...h],nd=[...d],ndisc=[...disc]
-    for(let i=0;i<target-nh.length;i++){
+    while(nh.length<target){
       if(nd.length===0){if(ndisc.length===0)break;nd=[...ndisc].sort(()=>Math.random()-.5);ndisc=[];addLog('🔄 Deck reshuffled.')}
       nh=[...nh,nd[0]];nd=nd.slice(1);playCard()
     }
@@ -833,43 +833,48 @@ export default function App(){
       </div>
 
       {/* HAND AREA */}
-      <div style={{flex:1,background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0 12px',display:'flex',flexDirection:'column',zIndex:30,minHeight:0}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',padding:'4px 0 3px',gap:6,flexShrink:0}}>
-          <div style={{display:'flex',flexDirection:'column',gap:14,alignItems:'center',justifyContent:'center',background:'rgba(20,12,4,0.7)',borderRadius:6,padding:'12px 10px',border:'1px solid rgba(100,65,15,0.3)',alignSelf:'stretch'}}>
-            <DeckPile count={deck.length} label="Deck"/>
-            <DeckPile count={discardPile.length} label="Discard"/>
+      <div style={{flex:1,background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0',display:'flex',flexDirection:'column',zIndex:30,minHeight:0,position:'relative'}}>
+        <div style={{textAlign:'center',padding:'6px 0 0',flexShrink:0,position:'relative',zIndex:2}}>
+          <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length} of {HAND_SIZE}</span>
+          {pendingEmbers>0&&<span style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#ff6600',marginLeft:12}}>+{pendingEmbers} 🔥 pending</span>}
+        </div>
+
+        {/* LEFT COLUMN: Deck/Discard — absolutely positioned */}
+        <div style={{position:'absolute',left:0,top:0,bottom:32,zIndex:5,display:'flex',flexDirection:'column',gap:14,alignItems:'center',justifyContent:'center',background:'rgba(20,12,4,0.7)',borderRadius:'0 6px 6px 0',padding:'12px 14px',border:'1px solid rgba(100,65,15,0.3)',borderLeft:'none',minWidth:90}}>
+          <DeckPile count={deck.length} label="Deck"/>
+          <DeckPile count={discardPile.length} label="Discard"/>
+        </div>
+
+        {/* RIGHT COLUMN: Buttons/Embers/Info — absolutely positioned */}
+        <div style={{position:'absolute',right:0,top:0,bottom:32,zIndex:5,display:'flex',flexDirection:'column',gap:6,alignItems:'flex-end',justifyContent:'center',padding:'8px 12px',background:'rgba(10,5,2,0.6)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none'}}>
+          <button onClick={handleStrike} disabled={!canStrike}
+            style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 20px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:190}}>⚔ Strike</button>
+          <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'flex-end',width:190}}>
+            <PhaseDots left={strikesLeft} total={MAX_STRIKES} color='#dd2222' wide={true}/>
+            <span style={{fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555',minWidth:28,textAlign:'right'}}>{strikesLeft}/{MAX_STRIKES}</span>
           </div>
-          <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',paddingTop:4}}>
-            <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length} of {HAND_SIZE}</div>
-            {pendingEmbers>0&&<div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#ff6600',marginTop:4}}>+{pendingEmbers} 🔥 pending next Strike</div>}
+          <div style={{height:8}}/>
+          <button onClick={handleDiscard} disabled={!canDiscard}
+            style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 20px',background:canDiscard?'rgba(100,70,0,0.4)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:190}}>↓ Discard</button>
+          <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'flex-end',width:190}}>
+            <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
+            <span style={{fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555',minWidth:28,textAlign:'right'}}>{discardsLeft}/{MAX_DISCARDS}</span>
           </div>
-          <div style={{display:'flex',flexDirection:'column',gap:5,alignItems:'flex-end',flexShrink:0}}>
-            <button onClick={handleStrike} disabled={!canStrike}
-              style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'8px 20px',background:canStrike?'rgba(130,0,0,0.4)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:185}}>⚔ Strike</button>
-            <div style={{display:'flex',alignItems:'center',gap:8,justifyContent:'flex-end'}}>
-              <PhaseDots left={strikesLeft} total={MAX_STRIKES} color='#dd2222' wide={true}/>
-              <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555'}}>{strikesLeft}/{MAX_STRIKES}</span>
-            </div>
-            <button onClick={handleDiscard} disabled={!canDiscard}
-              style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'8px 20px',background:canDiscard?'rgba(100,70,0,0.35)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:185}}>↓ Discard</button>
-            <div style={{display:'flex',alignItems:'center',gap:8,justifyContent:'flex-end'}}>
-              <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
-              <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555'}}>{discardsLeft}/{MAX_DISCARDS}</span>
-            </div>
-            <div style={{marginTop:8,paddingTop:8,borderTop:'1px solid rgba(100,60,10,0.3)'}}>
-              <div style={{display:'flex',gap:12,justifyContent:'flex-end',marginBottom:8}}>
-                {[['Fight',(fightIndex+1)+'/3','#dd2222'],['Corrupt',corruption+'%',corruption>60?'#ff3300':'#aa5500'],['Stash',stash,'#44cc44']].map(function(item){return(
-                  <div key={item[0]} style={{textAlign:'center'}}>
-                    <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#7a5a30',letterSpacing:2,textTransform:'uppercase'}}>{item[0]}</div>
-                    <div style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
-                  </div>
-                )})}
+          <div style={{height:8}}/>
+          <EmberDisplayLarge current={embers} max={MAX_EMBERS}/>
+          <div style={{height:6}}/>
+          <div style={{display:'flex',gap:10,justifyContent:'flex-end'}}>
+            {[['Fight',(fightIndex+1)+'/3','#dd2222'],['Corrupt',corruption+'%',corruption>60?'#ff3300':'#aa5500'],['Stash',stash,'#44cc44']].map(function(item){return(
+              <div key={item[0]} style={{textAlign:'center'}}>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#7a5a30',letterSpacing:2,textTransform:'uppercase'}}>{item[0]}</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
               </div>
-              <EmberDisplayLarge current={embers} max={MAX_EMBERS}/>
-            </div>
+            )})}
           </div>
         </div>
-        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:20,paddingTop:0,overflow:'visible'}}>
+
+        {/* CARD FAN — takes full height, padded to avoid overlapping columns */}
+        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:24,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0}}>
           {hand.map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length}
               isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
