@@ -840,7 +840,7 @@ export default function App(){
             const fin=Math.round(dmg*bon)
             return <>
               <span style={{fontFamily:"'IM Fell English',serif",fontSize:17,color:'#6a4a18',opacity:.9,fontStyle:'italic'}}>combined attack</span>
-              <span style={{fontFamily:"'Cinzel',serif",fontSize:28,fontWeight:900,color:'#8a0000',textShadow:'0 0 16px rgba(120,0,0,0.6)'}}>{fin}</span>
+              <span key={fin} style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block'}}>{fin}</span>
               {bon>1&&<span style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#e8a820',letterSpacing:1}}>+{Math.round((bon-1)*100)}% SYNERGY</span>}
               <span style={{color:'#6a3010',opacity:.5,fontSize:14}}>⟶</span>
               <span style={{fontFamily:"'IM Fell English',serif",fontSize:17,color:'#6a4a18',opacity:.9,fontStyle:'italic'}}>{enemy.name}</span>
