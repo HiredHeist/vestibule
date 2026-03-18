@@ -473,6 +473,56 @@ function EndScreen({won,stats,seed,onReset}){
 }
 
 // ── Main App ──────────────────────────────────────────────────────────────────
+
+function RecruitScreen({candidates,stage,onPick,onPass}){
+  return(
+    <div style={{position:'fixed',inset:0,zIndex:9600,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:24,padding:'40px 20px'}}>
+      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:44,color:'#d0b060',textShadow:'0 0 30px rgba(200,150,20,0.4)'}}>Recruit a Member</div>
+      <div style={{fontFamily:"'IM Fell English',serif",fontSize:18,color:'#a09060',fontStyle:'italic'}}>Choose one musician to join your band — or pass</div>
+      <div style={{display:'flex',gap:20,flexWrap:'wrap',justifyContent:'center',maxWidth:1000}}>
+        {candidates.map(m=>{
+          const alreadyOn=stage.some(s=>s&&s.id===m.id)
+          const emptySlot=stage.findIndex(s=>!s)
+          const canAdd=!alreadyOn&&emptySlot!==-1
+          return(
+            <div key={m.id} onClick={()=>canAdd&&onPick(m)}
+              style={{width:200,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'1px solid rgba(160,100,25,0.5)',borderRadius:7,overflow:'hidden',cursor:canAdd?'pointer':'not-allowed',opacity:canAdd?1:0.4,transition:'all 0.2s',transform:canAdd?'none':'none'}}
+              onMouseEnter={e=>{if(canAdd)e.currentTarget.style.transform='translateY(-6px) scale(1.03)';e.currentTarget.style.boxShadow='0 0 30px rgba(232,168,32,0.4)'}}
+              onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none'}}>
+              <div style={{height:4,background:'linear-gradient(90deg,#e8a820,#ffcc44)'}}/>
+              <div style={{height:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:52,background:'rgba(0,0,0,0.35)'}}>{m.emoji}</div>
+              <div style={{padding:'8px 12px 12px'}}>
+                <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:24,color:'#e8d090',textAlign:'center',marginBottom:2}}>{m.name}</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:2,color:'#8a7040',textAlign:'center',textTransform:'uppercase',marginBottom:8}}>{m.role}</div>
+                <div style={{display:'flex',justifyContent:'space-between',padding:'6px 8px',background:'rgba(0,0,0,0.5)',borderRadius:4,marginBottom:6}}>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#ee2222',textTransform:'uppercase',fontWeight:900}}>ATK</div>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:28,fontWeight:900,color:'#ee2222',lineHeight:1}}>{m.atk}</div>
+                  </div>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#e8a820',fontWeight:700,alignSelf:'center'}}>{m.keyword}</div>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:28,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
+                  </div>
+                </div>
+                <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:'#8a7040',textAlign:'center',fontStyle:'italic',lineHeight:1.3}}>{m.desc}</div>
+                {alreadyOn&&<div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#aa6600',textAlign:'center',marginTop:6,letterSpacing:1}}>ALREADY ON STAGE</div>}
+                {!alreadyOn&&emptySlot===-1&&<div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#aa2200',textAlign:'center',marginTop:6,letterSpacing:1}}>STAGE FULL</div>}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      <button onClick={onPass}
+        style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'12px 40px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:3,color:'#7a5020',cursor:'pointer',transition:'all 0.2s'}}
+        onMouseEnter={e=>{e.currentTarget.style.borderColor='#8a6030';e.currentTarget.style.color='#c8a040'}}
+        onMouseLeave={e=>{e.currentTarget.style.borderColor='#4a3010';e.currentTarget.style.color='#7a5020'}}>
+        Pass — No Recruitment
+      </button>
+    </div>
+  )
+}
+
 export default function App(){
   const [gameState,setGameState]=useState('booster')
   const [runSeed]=useState(()=>Math.floor(Math.random()*0xFFFFFF))
@@ -508,6 +558,7 @@ export default function App(){
   const [shopCards,setShopCards]=useState(()=>genShopCards())
   const [boosterPacks]=useState(()=>genBoosterPacks())
   const [recruitPack,setRecruitPack]=useState(()=>genRecruitPack())
+  const [recruitCandidates,setRecruitCandidates]=useState([])
   const [rerollCost,setRerollCost]=useState(4)
   const [shopBoughtIds,setShopBoughtIds]=useState([])
   const [stats,setStats]=useState({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -779,8 +830,35 @@ export default function App(){
       setDeck(p=>[...p,nc])
       setShopBoughtIds(p=>[...p,nc.uid])
       addLog('🛒 Bought '+item.name+'!')
+    } else if(type==='recruit'){
+      // Pick random candidates from ALL_MUSICIANS (more options for better packs)
+      const count=item.name.includes('Demonic')?6:item.name.includes('Experienced')?4:2
+      const shuffled=[...ALL_MUSICIANS].sort(()=>Math.random()-.5)
+      setRecruitCandidates(shuffled.slice(0,count))
+      setGameState('recruit')
     } else {addLog('📦 Purchased: '+item.name+'!')}
   },[stash])
+
+  const handleRecruitPick=useCallback((member)=>{
+    // Find first empty slot on stage
+    setStage(prev=>{
+      const ns=[...prev]
+      const idx=ns.findIndex(m=>!m)
+      if(idx!==-1){
+        ns[idx]=Object.assign({},member,{uid:Math.random().toString(36).slice(2)})
+        addLog('🎸 '+member.name+' joins the band!')
+      }
+      return ns
+    })
+    setGameState('shop')
+    setRecruitCandidates([])
+  },[])
+
+  const handleRecruitPass=useCallback(()=>{
+    addLog('👋 No new members recruited.')
+    setGameState('shop')
+    setRecruitCandidates([])
+  },[])
 
   const handleReroll=useCallback(()=>{
     if(stash<rerollCost)return
@@ -802,6 +880,7 @@ export default function App(){
   const won=fightIndex>=2&&enemyHp<=0
 
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
+  if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll}/>
   if(gameState==='end')return <EndScreen won={won} stats={stats} seed={runSeed} onReset={handleReset}/>
 
