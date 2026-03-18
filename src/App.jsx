@@ -297,7 +297,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   const [over,setOver]=useState(false)
   if(!member){
     return <div ref={innerRef} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}}
-      style={{width:148,height:228,border:`1px dashed ${over?'rgba(232,168,32,0.6)':'rgba(160,100,30,0.22)'}`,borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,background:over?'rgba(100,70,15,0.18)':'rgba(28,16,4,0.14)',transition:'all 0.2s'}}>
+      style={{width:172,height:260,border:`1px dashed ${over?'rgba(232,168,32,0.6)':'rgba(160,100,30,0.22)'}`,borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,background:over?'rgba(100,70,15,0.18)':'rgba(28,16,4,0.14)',transition:'all 0.2s'}}>
       <div style={{fontSize:28,opacity:.1}}>⛧</div>
       <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:'rgba(160,100,30,0.28)',fontStyle:'italic'}}>empty</div>
     </div>
@@ -306,7 +306,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   const buffCount=member.buffCount||0
   return(
     <div ref={innerRef} draggable onDragStart={onDragStart} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}}
-      style={{width:148,background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
+      style={{width:172,background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
         border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':over?'2px solid #e8a820':st?'1px solid #333':'2px solid rgba(190,120,25,0.85)',
         borderRadius:6,
         boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':'0 6px 24px rgba(0,0,0,0.85)',
@@ -351,18 +351,18 @@ function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLea
   return(
     <div draggable onDragStart={e=>{e.dataTransfer.effectAllowed='move';onDragStart(index)}} onDragEnd={onDragEnd}
       onMouseEnter={onHover} onMouseLeave={onLeave} onClick={onClick}
-      style={{width:168,flexShrink:0,
+      style={{width:172,flexShrink:0,
         background:isSelected?'linear-gradient(180deg,#2a1a0a,#160e05)':'linear-gradient(180deg,#201408,#100804)',
         border:isSelected?`2px solid #e8a820`:isHovered&&canAfford?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
         borderRadius:7,cursor:unaffordable?'not-allowed':'grab',position:'relative',
         transformOrigin:'bottom center',
         transform:isDragging?'scale(0.85) rotate(5deg)':isHovered&&canAfford?'translateY(-70px) scale(1.25) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-22px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
-        zIndex:isDragging?1:isHovered?100:isSelected?200:10-Math.abs(index-mid),
+        zIndex:isDragging?1:isHovered?999:isSelected?200:10-Math.abs(index-mid),
         boxShadow:isShopBought?`0 0 12px ${bc}44`:isHovered&&canAfford?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
         opacity:unaffordable?0.35:isDragging?0.4:1,
         animation:shimmerAnim,
-        margin:'0 -18px',userSelect:'none'}}>
+        margin:'0 -22px',userSelect:'none'}}>
       <div style={{height:6,borderRadius:'7px 7px 0 0',background:bc,boxShadow:`0 0 14px ${glow}`}}/>
       {card.embers>0?(
         <div style={{position:'absolute',top:8,right:8,width:28,height:28,borderRadius:'50%',background:canAfford?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',border:`2px solid ${canAfford?'#ff6600':'#4a2a10'}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:canAfford?'#fff':'#5a3a10',boxShadow:canAfford?'0 0 10px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
@@ -416,12 +416,12 @@ function BossSection({enemy,currentHp,isWiggling,innerRef}){
 function DeckPile({count,label}){
   return(
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
-      <div style={{position:'relative',width:54,height:70}}>
-        {[2,1,0].map(i=><div key={i} style={{position:'absolute',width:48,height:64,background:i===0?'linear-gradient(135deg,#1e1408,#0a0804)':`rgba(15,10,4,${.7-i*.2})`,border:'1px solid rgba(160,110,35,0.55)',borderRadius:4,top:i*3,left:i*3}}>
+      <div style={{position:'relative',width:68,height:88}}>
+        {[2,1,0].map(i=><div key={i} style={{position:'absolute',width:60,height:80,background:i===0?'linear-gradient(135deg,#1e1408,#0a0804)':`rgba(15,10,4,${.7-i*.2})`,border:'1px solid rgba(160,110,35,0.55)',borderRadius:4,top:i*3,left:i*3}}>
           {i===0&&<div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,opacity:.2,color:'#c8a060'}}>⛧</div>}
         </div>)}
       </div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:18,fontWeight:900,color:'#c8a060'}}>{count}</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:22,fontWeight:900,color:'#c8a060'}}>{count}</div>
       <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:2,color:'#6a5a30',textTransform:'uppercase'}}>{label}</div>
     </div>
   )
@@ -780,7 +780,7 @@ export default function App(){
       </div>
 
       {/* PARCHMENT */}
-      <div style={{flex:'0 0 auto',margin:'5px 10px 0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'hidden',background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:'2px solid #7a5820',boxShadow:'inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)',display:'flex',flexDirection:'column'}}>
+      <div style={{flex:'0 0 58%',margin:'5px 10px 0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'hidden',background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:'2px solid #7a5820',boxShadow:'inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)',display:'flex',flexDirection:'column'}}>
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
         <div style={{padding:'10px 20px 8px',position:'relative',zIndex:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0}}>
           <BossSection enemy={enemy} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef}/>
@@ -792,8 +792,8 @@ export default function App(){
             <div style={{flex:1,height:1,background:'rgba(60,35,5,0.2)'}}/>
           </div>
           <div style={{display:'flex',alignItems:'flex-end',gap:8,padding:'6px 10px 8px',justifyContent:'center'}}>
-            <div style={{display:'flex',flexDirection:'column',gap:5,alignSelf:'center',marginRight:2}}>
-              {[1,2,3].map(i=><div key={i} style={{width:62,height:68,border:'1px dashed rgba(200,160,50,0.22)',borderRadius:4,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2,background:'rgba(80,50,10,0.07)'}}><div style={{fontSize:14,opacity:.18}}>⚗</div><div style={{fontFamily:"'Cinzel',serif",fontSize:6,letterSpacing:1,color:'rgba(200,160,60,0.32)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>)}
+            <div style={{display:'flex',flexDirection:'column',gap:4,alignSelf:'center',marginRight:8,background:'rgba(0,0,0,0.28)',borderRadius:6,padding:'6px',border:'1px solid rgba(120,80,20,0.2)'}}>
+              {[1,2,3].map(i=><div key={i} style={{width:70,height:72,border:'1px dashed rgba(200,160,50,0.28)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,background:'rgba(40,25,5,0.45)'}}><div style={{fontSize:18,opacity:.22}}>⚗</div><div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.38)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>)}
             </div>
             {stage.map((m,i)=>(
               <StageSlot key={i} member={m} slotIdx={i}
@@ -828,9 +828,9 @@ export default function App(){
       </div>
 
       {/* HAND AREA */}
-      <div style={{flex:1,background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0 12px',display:'flex',flexDirection:'column',zIndex:30,minHeight:0}}>
+      <div style={{flex:'0 0 42%',background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0 12px',display:'flex',flexDirection:'column',zIndex:30,minHeight:0}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',padding:'8px 0 4px',gap:10,flexShrink:0}}>
-          <div style={{display:'flex',flexDirection:'column',gap:8,alignItems:'center'}}>
+          <div style={{display:'flex',flexDirection:'column',gap:8,alignItems:'center',background:'rgba(20,12,4,0.7)',borderRadius:6,padding:'8px 6px',border:'1px solid rgba(100,65,15,0.3)'}}>
             <DeckPile count={deck.length} label="Deck"/>
             <DeckPile count={discardPile.length} label="Discard"/>
           </div>
@@ -846,7 +846,7 @@ export default function App(){
               <span style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:700,color:strikesLeft>0?'#dd2222':'#444'}}>{strikesLeft}/{MAX_STRIKES}</span>
             </div>
             <button onClick={handleDiscard} disabled={!canDiscard}
-              style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 28px',background:canDiscard?'rgba(110,75,0,0.4)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#e8a820':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(200,140,0,0.5)':'none',boxShadow:canDiscard?'0 0 22px rgba(120,90,0,0.3)':'none',transition:'all 0.15s',width:185}}>↓ Discard</button>
+              style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 28px',background:canDiscard?'rgba(100,70,0,0.35)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:185}}>↓ Discard</button>
             <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'flex-end'}}>
               <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820'/>
               <span style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:700,color:discardsLeft>0?'#e8a820':'#444'}}>{discardsLeft}/{MAX_DISCARDS}</span>
