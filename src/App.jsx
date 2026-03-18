@@ -354,7 +354,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   )
 }
 
-function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop}){
+function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop}){
   const spread=Math.min(4,20/total),mid=(total-1)/2
   const rot=(index-mid)*spread,yOff=Math.abs(index-mid)*2
   const bc=card.type==='CORRUPT'?'#aa1111':card.type==='UTILITY'?'#22aa44':card.type==='EMBER'?'#c87820':'#9933cc'
@@ -370,14 +370,14 @@ function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLea
       onMouseEnter={onHover} onMouseLeave={onLeave} onClick={onClick}
       style={{width:190,height:295,flexShrink:0,position:'relative',display:'flex',flexDirection:'column',
         background:isSelected?'linear-gradient(180deg,#2a1a0a,#160e05)':'linear-gradient(180deg,#201408,#100804)',
-        border:isDragOver?'2px dashed #e8a820':isSelected?`2px solid #cc0000`:isHovered&&canAfford?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
-        borderRadius:7,cursor:unaffordable?'not-allowed':'grab',position:'relative',
+        border:isSelected?`2px solid #cc0000`:isHovered&&canAfford?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
+        borderRadius:7,cursor:'grab',position:'relative',
         transformOrigin:'bottom center',
         transform:isDragging?'scale(0.85) rotate(5deg)':isHovered&&canAfford?'translateY(-52px) scale(1.18) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
-        zIndex:isDragging?1:isHovered?9999:isSelected?200:10-Math.abs(index-mid),
+        zIndex:isDragging?0:isHovered?9999:anyHovered?1:isSelected?50:10-Math.abs(index-mid),
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered&&canAfford?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
-        opacity:unaffordable?0.35:isDragging?0.4:1,
+        opacity:isDragging?0.4:1,
         animation:shimmerAnim,
         margin:'0 -26px',userSelect:'none'}}>
       <div style={{height:6,flexShrink:0,borderRadius:'7px 7px 0 0',background:bc,boxShadow:`0 0 14px ${glow}`}}/>
@@ -392,9 +392,9 @@ function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLea
         <div style={{position:'absolute',inset:0,background:`radial-gradient(circle at center,${bc}18,transparent 70%)`}}/>
         {card.emoji}
       </div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:700,color:unaffordable?'#555':'#eedfc0',textAlign:'center',padding:'9px 6px 3px',letterSpacing:.4,lineHeight:1.2,borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:unaffordable?'#444':bc,textAlign:'center',padding:'3px 4px',letterSpacing:1.8,textTransform:'uppercase',flexShrink:0}}>{card.type}</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:13,color:unaffordable?'#4a3a20':'#b09870',textAlign:'center',padding:'4px 8px 8px',lineHeight:1.4,fontStyle:'italic',flex:1,display:'flex',alignItems:'center',justifyContent:'center'}}>{card.effect}</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'9px 6px 3px',letterSpacing:.4,lineHeight:1.2,borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:bc,textAlign:'center',padding:'3px 4px',letterSpacing:1.8,textTransform:'uppercase',flexShrink:0}}>{card.type}</div>
+      <div style={{fontFamily:"'IM Fell English',serif",fontSize:13,color:'#b09870',textAlign:'center',padding:'4px 8px 8px',lineHeight:1.4,fontStyle:'italic',flex:1,display:'flex',alignItems:'center',justifyContent:'center'}}>{card.effect}</div>
     </div>
   )
 }
@@ -891,20 +891,11 @@ export default function App(){
         </div>
 
         {/* CARD FAN — takes full height, padded to avoid overlapping columns */}
-        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:44,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative'}}>
-          {[...hand.map((card,i)=>({card,i}))]
-            .sort((a,b)=>{
-              const aH=hovered===a.card.uid, bH=hovered===b.card.uid
-              const aS=selected.includes(a.card.uid), bS=selected.includes(b.card.uid)
-              if(aH) return 1
-              if(bH) return -1
-              if(aS&&!bS) return 1
-              if(bS&&!aS) return -1
-              return a.i-b.i
-            })
-            .map(({card,i})=>(
+        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:30,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',isolation:'isolate'}}>
+          {hand.map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length}
               isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
+              anyHovered={hovered!==null}
               canAfford={card.embers===0||embers>=card.embers}
               isDragging={dragHandIdx===i} isShopBought={shopBoughtIds.includes(card.uid)}
               onHover={()=>setHovered(card.uid)} onLeave={()=>setHovered(null)}
