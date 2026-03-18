@@ -465,11 +465,11 @@ function EndScreen({won,cause,stats,seed,onReset}){
     <div style={{position:'fixed',inset:0,zIndex:9800,background:isStoned?'rgba(2,0,0,0.97)':isVictory?'rgba(4,3,1,0.96)':'rgba(3,1,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:18,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'30px 0'}}>
       {/* Watermark */}
       <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
-        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:220,color:'rgba(180,180,180,0.07)',userSelect:'none',lineHeight:1,textAlign:'center'}}>Vestibule</div>
+        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:340,color:'rgba(180,180,180,0.07)',userSelect:'none',lineHeight:1,textAlign:'center'}}>Vestibule</div>
       </div>
       <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:18}}>
       <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:isStoned?92:76,color:isStoned?'#cc1111':isVictory?'#d8c9a8':'#7a0000',textShadow:isStoned?'0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000,0 0 120px rgba(140,0,0,0.5)':isVictory?'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000':'0 0 60px rgba(100,0,0,0.6),3px 3px 0 #000'}}>{isStoned?'Stoned to the Bone':isVictory?'Victory':'Fallen'}</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:isStoned?20:17,color:isStoned?'rgba(200,80,80,0.9)':'#a09060',fontStyle:'italic'}}>{isStoned?'The band ran out of strikes.':isVictory?'The Drifter has fallen. Circle II opens.':'The Vestibule claims another soul.'}</div>
+      <div style={{fontFamily:"'IM Fell English',serif",fontSize:isStoned?20:17,color:isStoned?'rgba(200,80,80,0.9)':'#a09060',fontStyle:'italic'}}>{isStoned?'The band ran out of herb.':isVictory?'The Drifter has fallen. Circle II opens.':'The Vestibule claims another soul.'}</div>
       <div style={{background:'rgba(20,12,4,0.8)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:6,padding:'18px 28px',minWidth:380}}>
         <div style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:12}}>Run Statistics</div>
         {[['Strikes Thrown',stats.strikesThrown],['Total Damage Dealt',stats.totalDamage],['Highest Strike Damage',stats.highestStrike],['Too Stoned Events',stats.tooStonedCount],['Cards Played',stats.cardsPlayed],['Max Corruption',stats.maxCorruption+'%'],['Stash Earned',stats.stashEarned+' 🌿'],['Fights Survived',stats.fightsSurvived+' / 3']].map(function(row){
