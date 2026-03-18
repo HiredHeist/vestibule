@@ -16,6 +16,7 @@ function playCard(){playTone(600,.1,'triangle',false,.15)}
 function playEmber(){playTone(400,.15,'sine',false,.2);setTimeout(function(){playTone(500,.15,'sine',false,.2)},80)}
 function playVictory(){[130.8,164.8,196,261.6,329.6].forEach(function(f,i){try{var ctx=mkCtx(),osc=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime+i*.13;osc.type='sine';g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.05);g.gain.exponentialRampToValueAtTime(.001,t+.6);osc.frequency.setValueAtTime(f,t);osc.connect(g);g.connect(ctx.destination);osc.start(t);osc.stop(t+.6)}catch(e){}})}
 function playDice(){playTone(300,.08,'square',false,.3);setTimeout(function(){playTone(450,.08,'square',false,.3)},100)}
+function playDraw(){[220,330,440].forEach(function(f,i){setTimeout(function(){playTone(f,.08,'sine',false,.08)},i*60)})}
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const MAX_EMBERS_CAP=8, MAX_STRIKES=4, MAX_DISCARDS=4, HAND_SIZE=6
@@ -53,13 +54,13 @@ const ALL_CARDS=[
   {id:'tappedout',name:'Tapped Out',type:'EMBER',rarity:'Uncommon',emoji:'🪙',embers:0,effect:'Gain 5 Embers at the start of next Strike.',color:'#c87820',typeColor:'#a05a10'},
   {id:'controlfeedback',name:'Controlled Feedback',type:'CORRUPT',rarity:'Uncommon',emoji:'🎚',embers:2,effect:'Set Corruption to exactly 50%.',color:'#aa1111',typeColor:'#880000'},
   {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:2,effect:'Discard entire hand. Draw 6 new cards.',color:'#9933cc',typeColor:'#7722aa'},
-  {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:3,effect:'Deal 5 direct damage. Boss passive skips.',color:'#9933cc',typeColor:'#7722aa'},
+  {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:3,effect:'Deal 5/8/12 damage (scales by fight). Boss passive skips.',color:'#9933cc',typeColor:'#7722aa'},
   {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:4,effect:'Damage = target HP to boss. Once per round.',color:'#9933cc',typeColor:'#7722aa'},
   {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'If Corruption >80%, double ALL ATK this Strike.',color:'#9933cc',typeColor:'#7722aa'},
   {id:'infencore',name:'Infernal Encore',type:'RIFF',rarity:'Rare',emoji:'👿',embers:4,effect:'ALL members attack again simultaneously.',color:'#9933cc',typeColor:'#7722aa'},
   {id:'remaster',name:'The Remaster',type:'UTILITY',rarity:'Rare',emoji:'🎙',embers:0,effect:'View 10 deck cards. Delete 2. Copy 1.',color:'#22aa44',typeColor:'#118833'},
-  {id:'sabbathsigil',name:'Black Sabbath Sigil',type:'CORRUPT',rarity:'Rare',emoji:'⛧',embers:2,effect:'Set Corruption to 100%. Hellquake fires.',color:'#aa1111',typeColor:'#880000'},
-  {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:5,effect:'All members deal triple ATK this Strike only.',color:'#9933cc',typeColor:'#7722aa'},
+  {id:'sabbathsigil',name:'Black Sabbath Sigil',type:'CORRUPT',rarity:'Rare',emoji:'⛧',embers:2,effect:'Corruption → 100%. Roll d10. Hellquake fires — anything can happen.',color:'#aa1111',typeColor:'#880000'},
+  {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:4,effect:'All members deal triple ATK this Strike only.',color:'#9933cc',typeColor:'#7722aa'},
 ]
 
 const KEYWORD_DESC={
@@ -351,7 +352,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 20px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
         <div style={{textAlign:'center'}}>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:st?'#555':'#ee2222',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>ATK</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.keyword==='CORRUPT'&&!st?member.atk+Math.floor((member._corruptBonus||0)):member.atk}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.atk}</div>
         </div>
         <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:st?'#555':'#e8a820',fontWeight:700,letterSpacing:1,textAlign:'center'}}>{member.keyword}</div>
         <div style={{textAlign:'center'}}>
@@ -364,7 +365,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   )
 }
 
-function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop}){
+function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop,isUsed}){
   const spread=Math.min(4,20/total),mid=(total-1)/2
   const rot=(index-mid)*spread,yOff=Math.abs(index-mid)*2
   const bc=card.type==='CORRUPT'?'#aa1111':card.type==='UTILITY'?'#22aa44':card.type==='EMBER'?'#c87820':'#9933cc'
@@ -391,6 +392,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         animation:shimmerAnim,
         margin:'0 -26px',userSelect:'none'}}>
       <div style={{height:6,flexShrink:0,borderRadius:'7px 7px 0 0',background:bc,boxShadow:`0 0 14px ${glow}`}}/>
+      {isUsed&&<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'rgba(0,0,0,0.85)',border:'2px solid #888',borderRadius:6,padding:'6px 14px',fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,color:'#888',letterSpacing:4,zIndex:20,pointerEvents:'none'}}>USED</div>}
       {card.embers>0?(
         <div style={{position:'absolute',top:8,right:8,width:28,height:28,borderRadius:'50%',background:canAfford?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',border:`2px solid ${canAfford?'#ff6600':'#4a2a10'}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:canAfford?'#fff':'#5a3a10',boxShadow:canAfford?'0 0 10px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
       ):(
@@ -409,7 +411,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
   )
 }
 
-function BossSection({enemy,currentHp,isWiggling,innerRef}){
+function BossSection({enemy,currentHp,isWiggling,innerRef,debuff}){
   const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35
   return(
     <div ref={innerRef} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:12,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%'}}>
@@ -418,6 +420,7 @@ function BossSection({enemy,currentHp,isWiggling,innerRef}){
         <div style={{width:130,height:130,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:6,display:'flex',alignItems:'center',justifyContent:'center',fontSize:70,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:'hidden',transition:'all 0.5s'}}>
           {enemy.emoji}
           {isLow&&<div style={{position:'absolute',inset:0,background:'rgba(120,0,0,0.2)',animation:'pulse 1.2s ease infinite alternate'}}/>}
+          {debuff>0&&<div style={{position:'absolute',bottom:4,right:4,background:'rgba(0,80,160,0.9)',border:'1px solid #4488ff',borderRadius:4,padding:'2px 5px',fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:900,color:'#88aaff'}}>-{debuff}dmg</div>}
         </div>
         <div style={{flex:1}}>
           <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:58,color:'#120804',lineHeight:1,marginBottom:8,textShadow:'1px 1px 0 rgba(0,0,0,0.5)'}}>{enemy.name}</div>
@@ -541,6 +544,64 @@ function RecruitScreen({candidates,stage,onPick,onPass}){
   )
 }
 
+
+function RemasterModal({cards,onConfirm,onClose}){
+  const [toDelete,setToDelete]=useState([])
+  const [toCopy,setToCopy]=useState(null)
+  const toggleDelete=(uid)=>{
+    if(toDelete.includes(uid)){setToDelete(p=>p.filter(x=>x!==uid))}
+    else if(toDelete.length<2){setToDelete(p=>[...p,uid])}
+  }
+  const ready=toDelete.length===2&&toCopy!==null
+  return(
+    <div style={{position:'fixed',inset:0,zIndex:9700,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,padding:'20px'}}>
+      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:44,color:'#d0b060'}}>The Remaster</div>
+      <div style={{fontFamily:"'IM Fell English',serif",fontSize:15,color:'#a09060',fontStyle:'italic',textAlign:'center'}}>
+        Click <span style={{color:'#ee2222',fontWeight:900}}>2 cards to delete</span> · Click <span style={{color:'#22aa44',fontWeight:900}}>1 card to copy</span>
+      </div>
+      <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center',maxWidth:1100,overflowY:'auto',maxHeight:'55vh'}}>
+        {cards.map((card)=>{
+          const bc=card.type==='CORRUPT'?'#aa1111':card.type==='UTILITY'?'#22aa44':card.type==='EMBER'?'#c87820':'#9933cc'
+          const isDel=toDelete.includes(card.uid)
+          const isCopy=toCopy===card.uid
+          const canDel=!isCopy&&(isDel||toDelete.length<2)
+          const canCopy=!isDel
+          return(
+            <div key={card.uid} style={{width:140,background:'linear-gradient(180deg,#201408,#100804)',border:isDel?'2px solid #ee2222':isCopy?'2px solid #22aa44':'1px solid '+bc+'55',borderRadius:7,overflow:'hidden',opacity:(isDel||isCopy||(!isDel&&!isCopy))?1:0.5,transition:'all 0.2s',flexShrink:0}}>
+              <div style={{height:4,background:bc}}/>
+              <div style={{height:70,display:'flex',alignItems:'center',justifyContent:'center',fontSize:36,background:'rgba(0,0,0,0.35)'}}>{card.emoji}</div>
+              <div style={{padding:'6px 8px 4px'}}>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:2}}>{card.name}</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:7,color:bc,textAlign:'center',letterSpacing:2,textTransform:'uppercase'}}>{card.type}</div>
+              </div>
+              <div style={{display:'flex',gap:4,padding:'4px 6px 8px'}}>
+                <button onClick={()=>canDel&&toggleDelete(card.uid)}
+                  style={{flex:1,padding:'4px 0',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,background:isDel?'rgba(180,0,0,0.4)':'rgba(60,20,10,0.4)',border:isDel?'1px solid #ee2222':'1px solid rgba(100,40,20,0.4)',borderRadius:2,color:isDel?'#ff4444':'#6a3020',cursor:canDel?'pointer':'not-allowed'}}>
+                  {isDel?'✓ DEL':'✗ DEL'}
+                </button>
+                <button onClick={()=>canCopy&&setToCopy(isCopy?null:card.uid)}
+                  style={{flex:1,padding:'4px 0',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,background:isCopy?'rgba(0,120,40,0.4)':'rgba(10,40,20,0.4)',border:isCopy?'1px solid #22aa44':'1px solid rgba(20,60,30,0.4)',borderRadius:2,color:isCopy?'#44dd44':'#2a5a30',cursor:canCopy?'pointer':'not-allowed'}}>
+                  {isCopy?'✓ CPY':'+CPY'}
+                </button>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      <div style={{display:'flex',gap:16}}>
+        <button onClick={()=>ready&&onConfirm(toDelete,toCopy)} disabled={!ready}
+          style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:ready?'rgba(30,130,30,0.3)':'rgba(20,20,20,0.3)',border:ready?'2px solid #22aa44':'1px solid #333',borderRadius:3,color:ready?'#44dd44':'#555',cursor:ready?'pointer':'not-allowed'}}>
+          ✓ Apply
+        </button>
+        <button onClick={onClose}
+          style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(80,40,10,0.3)',border:'1px solid rgba(100,60,20,0.5)',borderRadius:3,color:'#8a6030',cursor:'pointer'}}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function SetlistModal({cards,onConfirm,onClose}){
   const [order,setOrder]=useState(cards.map((_,i)=>i))
   const [dragging,setDragging]=useState(null)
@@ -627,7 +688,10 @@ export default function App(){
   const [bossDebuff,setBossDebuff]=useState(0)
   const [setlistOpen,setSetlistOpen]=useState(false)
   const [setlistCards,setSetlistCards]=useState([])
+  const [remasterOpen,setRemasterOpen]=useState(false)
+  const [remasterCards,setRemasterCards]=useState([])
   const [deathCause,setDeathCause]=useState('fallen')
+  const [hellquakeAnim,setHellquakeAnim]=useState(null)
   const [circleArtifact]=useState(()=>CIRCLE_ARTIFACTS[Math.floor(Math.random()*CIRCLE_ARTIFACTS.length)])
   const [shopCards,setShopCards]=useState(()=>genShopCards())
   const [boosterPacks]=useState(()=>genBoosterPacks())
@@ -694,6 +758,14 @@ export default function App(){
     else if(card.id==='soundcheck'){ns=ns.map(s=>s?Object.assign({},s,{hp:Math.min(s.maxHp,s.hp+3)}):null);msg='🔊 All members +3 HP!';addFloat('+3 HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')}
     else if(card.id==='dialtoeleven'){const nc=Math.min(100,corruption+20);setCorruption(nc);updStat('maxCorruption',nc,true);msg='📻 Corruption +20% → '+nc+'%'}
     else if(card.id==='sigdecay'){const nc=Math.max(0,corruption-30);setCorruption(nc);msg='📡 Corruption -30% → '+nc+'%'}
+    else if(card.id==='remaster'){
+      const pool=deck.length>=10?[...deck].sort(()=>Math.random()-.5).slice(0,10):[...deck]
+      if(pool.length===0){addLog('🎙 Deck is empty!');return false}
+      setRemasterCards(pool)
+      setRemasterOpen(true)
+      spent=0
+      msg='🎙 The Remaster — choose wisely.'
+    }
     else if(card.id==='setlist'){
       // Show top 4 deck cards in a reorder modal
       const top4=deck.slice(0,4)
@@ -705,7 +777,7 @@ export default function App(){
     }
     else if(card.id==='controlfeedback'){setCorruption(50);msg='🎚 Corruption set to 50%.'}
     else if(card.id==='feedbackloop'){const dmg=Math.floor(corruption);const bc2=getCenter(bossRef);setEnemyHp(function(prev){return Math.max(0,prev-dmg)});addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=20);playHit();updStat('totalDamage',dmg);msg='🎛 Feedback Loop: '+dmg+' damage!'}
-    else if(card.id==='soundwall'){const bc3=getCenter(bossRef);setEnemyHp(function(prev){return Math.max(0,prev-5)});addFloat(5,bc3.x,bc3.y-60,'#dd2222');playHit();msg='🔈 Sound Wall! 5 direct damage.';updStat('totalDamage',5)}
+    else if(card.id==='soundwall'){const swDmg=fightIndex===0?5:fightIndex===1?8:12;const bc3=getCenter(bossRef);setEnemyHp(function(prev){return Math.max(0,prev-swDmg)});addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
     else if(card.id==='groupie'){const gain=3;setEmbers(function(p){return Math.min(maxEmbers,p+gain-card.embers)});spent=0;playEmber();msg='🍯 Groupie! Net +'+(gain-card.embers)+' Embers.';addFloat('+'+gain+' 🔥',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')}
     else if(card.id==='tappedout'){setPendingEmbers(function(p){return p+5});spent=0;playEmber();msg='🪙 Tapped Out! +5 Embers next Strike.'}
     else if(card.id==='demotape'){
@@ -721,48 +793,62 @@ export default function App(){
     else if(card.id==='overdrive'){if(corruption>80){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{addLog('⚠ Need >80% Corruption.');return false}}
     else if(card.id==='sabbathsigil'){
       setCorruption(100);updStat('maxCorruption',100,true)
-      const roll=Math.floor(Math.random()*6)+1
+      const roll=Math.floor(Math.random()*10)+1
       const bc=getCenter(bossRef)
       let hqMsg='',hqFloat='',hqColor='#aa1111'
-      if(roll===1){
-        // OBLITERATION — total band ATK × 4
-        const totalAtk=ns.filter(m=>m&&!m.tooStoned).reduce((s,m)=>s+m.atk,0)
+      // d10 outcomes: 5 positive, 2 mixed, 3 negative
+      if(roll<=2){
+        // 1-2: OBLITERATION — total band ATK × 4 (positive)
+        const totalAtk=ns.filter(m=>m&&!m.tooStoned).reduce((sum,m)=>sum+m.atk,0)
         const hqDmg=totalAtk*4
         setEnemyHp(function(prev){return Math.max(0,prev-hqDmg)})
         updStat('totalDamage',hqDmg)
         hqMsg='⛧ HELLQUAKE: OBLITERATION! '+hqDmg+' damage!';hqFloat='OBLITERATION!';hqColor='#ff2200'
-      } else if(roll===2){
-        // RESONANCE — all members +3 ATK permanently
-        ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3}):m)
-        hqMsg='⛧ HELLQUAKE: RESONANCE! All members +3 ATK!';hqFloat='+3 ATK!';hqColor='#ff6600'
       } else if(roll===3){
-        // BACKLASH — 30 damage BUT one random member goes Too Stoned
-        setEnemyHp(function(prev){return Math.max(0,prev-30)})
-        updStat('totalDamage',30)
-        const alive=ns.filter(m=>m&&!m.tooStoned)
-        if(alive.length>0){
-          const victim=alive[Math.floor(Math.random()*alive.length)]
-          const vi=ns.indexOf(victim)
-          ns[vi]=Object.assign({},victim,{hp:0,tooStoned:true})
-        }
-        hqMsg='⛧ HELLQUAKE: BACKLASH! 30 damage but a member falls!';hqFloat='BACKLASH!';hqColor='#9933cc'
+        // 3: RESONANCE — all members +3 ATK permanently (positive)
+        ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3}):m)
+        hqMsg='⛧ HELLQUAKE: RESONANCE! All members +3 ATK forever!';hqFloat='RESONANCE!';hqColor='#ff6600'
       } else if(roll===4){
-        // POSSESSION — all hand cards free this Strike (set embers to max temporarily)
-        setEmbers(maxEmbers)
-        setPendingEmbers(maxEmbers)
-        hqMsg='⛧ HELLQUAKE: POSSESSION! All cards free this Strike!';hqFloat='POSSESSED!';hqColor='#cc44ff'
-      } else if(roll===5){
-        // RITUAL — boss HP set to exactly half (floor), min 1
+        // 4: RITUAL — boss HP halved (positive)
         setEnemyHp(function(prev){return Math.max(1,Math.floor(prev/2))})
-        hqMsg='⛧ HELLQUAKE: RITUAL! Boss HP halved!';hqFloat='RITUAL!';hqColor='#aa1111'
-      } else {
-        // THE VOID — corruption becomes damage, reset to 0
+        hqMsg='⛧ HELLQUAKE: RITUAL! Boss HP halved!';hqFloat='RITUAL!';hqColor='#cc44ff'
+      } else if(roll===5){
+        // 5: THE VOID — corruption → damage, reset to 0 (positive)
         const voidDmg=Math.floor(corruption)
         setEnemyHp(function(prev){return Math.max(0,prev-voidDmg)})
         updStat('totalDamage',voidDmg)
         setCorruption(0)
-        hqMsg='⛧ HELLQUAKE: THE VOID! '+voidDmg+' damage, Corruption purged!';hqFloat='THE VOID!';hqColor='#4400aa'
+        hqMsg='⛧ HELLQUAKE: THE VOID! '+voidDmg+' damage, soul cleansed!';hqFloat='THE VOID!';hqColor='#4400aa'
+      } else if(roll===6){
+        // 6: POSSESSION — all cards free this Strike (positive)
+        setEmbers(maxEmbers);setPendingEmbers(maxEmbers)
+        hqMsg='⛧ HELLQUAKE: POSSESSION! All cards free this Strike!';hqFloat='POSSESSED!';hqColor='#aa44ff'
+      } else if(roll===7){
+        // 7: BACKLASH — 30 damage BUT one random member falls (mixed)
+        setEnemyHp(function(prev){return Math.max(0,prev-30)})
+        updStat('totalDamage',30)
+        const alive=ns.filter(m=>m&&!m.tooStoned)
+        if(alive.length>0){const victim=alive[Math.floor(Math.random()*alive.length)];const vi=ns.indexOf(victim);ns[vi]=Object.assign({},victim,{hp:0,tooStoned:true})}
+        hqMsg='⛧ HELLQUAKE: BACKLASH! 30 damage, one member lost!';hqFloat='BACKLASH!';hqColor='#9933cc'
+      } else if(roll===8){
+        // 8: FEEDBACK — boss dmg doubles 2 strikes but +3 embers (mixed)
+        setPendingEmbers(p=>p+3)
+        setBossDebuff(p=>p-4) // negative debuff = extra boss damage for 2 strikes effectively
+        hqMsg='⛧ HELLQUAKE: FEEDBACK! Boss energised but you gain 3 Embers!';hqFloat='FEEDBACK!';hqColor='#ff8800'
+      } else if(roll===9){
+        // 9: THE RIFF CURSE — entire hand discarded, no redraw (negative)
+        setHand([]);setDiscardPile(p=>[...p,...hand])
+        hqMsg='⛧ HELLQUAKE: THE RIFF CURSE! Hand obliterated!';hqFloat='CURSED!';hqColor='#880000'
+      } else {
+        // 10: TOTAL WIPEOUT — random member Too Stoned AND boss heals 15 (negative)
+        const alive2=ns.filter(m=>m&&!m.tooStoned)
+        if(alive2.length>0){const v2=alive2[Math.floor(Math.random()*alive2.length)];const vi2=ns.indexOf(v2);ns[vi2]=Object.assign({},v2,{hp:0,tooStoned:true})}
+        setEnemyHp(function(prev){return Math.min(enemy.maxHp,prev+15)})
+        hqMsg='⛧ HELLQUAKE: TOTAL WIPEOUT! A member falls and the boss recovers!';hqFloat='WIPEOUT!';hqColor='#440000'
       }
+      // Dramatic flash then reveal
+      setHellquakeAnim({text:hqFloat,color:hqColor})
+      setTimeout(()=>setHellquakeAnim(null),2000)
       msg=hqMsg
       addFloat(hqFloat,bc.x,bc.y-80,hqColor,true)
       playHit()
@@ -888,10 +974,15 @@ export default function App(){
             return m
           })
         })
-        const stashEarned=6+Math.floor(Math.random()*3)+strikesLeft
+        const perfectBonus=strikesLeft>=2?3:0
+        const stashEarned=6+Math.floor(Math.random()*3)+strikesLeft+perfectBonus
         setStash(function(p){return p+stashEarned})
         updStat('stashEarned',stashEarned);updStat('fightsSurvived',1)
-        addLog('⛧ Victory! +'+stashEarned+' Stash earned.')
+        // Merch drop chance
+        if(Math.random()<0.15){setStash(p=>p+2);addLog('🎽 Found some merch money! +2 Stash.')}
+        if(corruption>=75){setStash(p=>p+2);addLog('🌀 Corruption Dividend! +2 Stash for high corruption.')}
+        if(perfectBonus>0)addFloat('PERFECT! +3',getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
+        addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.')+'')
         setTimeout(function(){
           if(fightIndex>=2){playVictory();setDeathCause('victory');setMaxEmbers(function(p){return Math.min(MAX_EMBERS_CAP,p+1)});setTimeout(function(){setGameState('end')},800)}
           else{
@@ -947,6 +1038,7 @@ export default function App(){
               nh=[...nh,nd[0]];nd=nd.slice(1);
             }
             setHand(nh);setDeck(nd);setDiscardPile(ndisc);
+            playDraw();
             // ANCHOR keyword: heal adjacent members after Strike
             setStage(function(prev){
               const ns=[...prev];
@@ -1061,10 +1153,25 @@ export default function App(){
 
   return(
     <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none'}}>
+      <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:8000,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px)',animation:'vhsDrift 8s ease-in-out infinite',mixBlendMode:'overlay'}}/>
       {damageFlash&&<div style={{position:'fixed',inset:0,zIndex:8500,pointerEvents:'none',background:'radial-gradient(ellipse at center,rgba(200,0,0,0.25),rgba(100,0,0,0.4))',animation:'flashFade 0.4s ease-out forwards'}}/>}
       {floats.map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
       {projectiles.map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
       {showDice&&diceTarget&&<DiceRoll target={diceTarget} onDone={()=>setShowDice(false)}/>}
+      {hellquakeAnim&&<div style={{position:'fixed',inset:0,zIndex:9500,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.75)',animation:'fadeIn 0.1s ease'}}>
+        <div style={{fontSize:120,animation:'throb 0.4s ease-in-out infinite'}}>⛧</div>
+        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:64,color:hellquakeAnim.color,textShadow:'0 0 60px '+hellquakeAnim.color+',0 0 120px '+hellquakeAnim.color,animation:'fadeIn 0.3s ease'}}>{hellquakeAnim.text}</div>
+      </div>}
+      {remasterOpen&&<RemasterModal cards={remasterCards} onConfirm={(delUids,copyUid)=>{
+        setDeck(prev=>{
+          const copyCard=prev.find(c=>c.uid===copyUid)||remasterCards.find(c=>c.uid===copyUid)
+          const filtered=prev.filter(c=>!delUids.includes(c.uid))
+          if(copyCard){const newCopy=Object.assign({},copyCard,{uid:Math.random().toString(36).slice(2)});filtered.push(newCopy)}
+          return filtered
+        })
+        setRemasterOpen(false)
+        addLog('🎙 Remastered: deleted 2, copied 1.')
+      }} onClose={()=>setRemasterOpen(false)}/>}
       {setlistOpen&&<SetlistModal cards={setlistCards} onConfirm={(ordered)=>{
         setDeck(prev=>[...ordered,...prev.slice(setlistCards.length)])
         setSetlistOpen(false)
@@ -1075,7 +1182,7 @@ export default function App(){
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
         <div style={{padding:'10px 16px 8px',position:'relative',zIndex:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0}}>
           <div style={{width:'100%',maxWidth:760,background:'rgba(8,0,0,0.55)',border:'2px solid rgba(160,20,0,0.8)',borderRadius:8,padding:'12px 20px 14px',animation:'bossGlow 2s ease-in-out infinite',boxShadow:'0 0 30px rgba(150,0,0,0.4),inset 0 0 40px rgba(80,0,0,0.3)'}}>
-            <BossSection enemy={enemy} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef}/>
+            <BossSection enemy={enemy} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff}/>
           </div>
         </div>
         <div style={{position:'relative',zIndex:5,background:'rgba(20,11,3,0.42)',borderTop:'2px solid rgba(60,35,5,0.45)',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>
@@ -1167,7 +1274,7 @@ export default function App(){
         {/* CARD FAN — takes full height, padded to avoid overlapping columns */}
         <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:30,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',isolation:'isolate',zIndex:1}}>
           {hand.map((card,i)=>(
-            <HandCard key={card.uid} card={card} index={i} total={hand.length}
+            <HandCard key={card.uid} card={card} index={i} total={hand.length} isUsed={card.id==='stagedive'&&stageDiveUsed}
               isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
               anyHovered={hovered!==null}
               canAfford={card.embers===0||embers>=card.embers}

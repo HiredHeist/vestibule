@@ -95,3 +95,16 @@ body {
   40%  { color: #ff2222; text-shadow: 0 0 30px rgba(255,80,0,0.7); transform: scale(1.15); }
   100% { color: #cc1111; text-shadow: 0 0 20px rgba(180,0,0,0.8); transform: scale(1); }
 }
+
+/* VHS drift overlay */
+@keyframes vhsDrift {
+  0%   { background-position: 0 0; opacity: 0.04; }
+  25%  { background-position: 0 -30px; opacity: 0.06; }
+  50%  { background-position: 0 -10px; opacity: 0.03; }
+  75%  { background-position: 0 -50px; opacity: 0.05; }
+  100% { background-position: 0 0; opacity: 0.04; }
+}
+@keyframes chromaShift {
+  0%,100% { text-shadow: -1px 0 rgba(255,0,0,0.3), 1px 0 rgba(0,100,255,0.3); }
+  50% { text-shadow: -2px 0 rgba(255,0,0,0.5), 2px 0 rgba(0,100,255,0.5); }
+}
