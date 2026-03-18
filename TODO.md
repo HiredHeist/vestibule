@@ -353,3 +353,19 @@ Even 3 locked members visible from the start gives players an immediate long-ter
 - [x] DEBUFF keyword — Nott/Vocalist reduces boss damage by 1 per Strike (resets each fight)
 - [x] Hellquake d6 system — 6 wildly different outcomes: OBLITERATION / RESONANCE / BACKLASH / POSSESSION / RITUAL / THE VOID
 - [x] Setlist card — drag-to-reorder modal showing top 4 deck cards, lock in new order
+
+### ✅ MEGA PUSH — All 15 items completed
+- [x] The Remaster card — full modal: delete 2, copy 1 from up to 10 deck cards. P1 COMPLETE — zero dead cards remain
+- [x] Perfect Strike bonus — ≤2 strikes used on kill = +3 Stash + gold PERFECT! float
+- [x] Merch Drop — 15% chance per fight victory = +2 Stash
+- [x] Corruption Dividend — finish fight ≥75% corruption = +2 Stash (rewards Loki builds)
+- [x] Sound Wall scaling — 5/8/12 damage by fight index, card text updated
+- [x] Possessed Performance — cost reduced 5→4 embers (actually castable now)
+- [x] Stage Dive USED badge — greyed "USED" overlay appears on card when spent
+- [x] Hellquake d10 — 10 outcomes (1-2: OBLITERATION, 3: RESONANCE, 4: RITUAL, 5: THE VOID, 6: POSSESSION, 7: BACKLASH, 8: FEEDBACK, 9: RIFF CURSE, 10: TOTAL WIPEOUT) + dramatic sigil overlay
+- [x] VHS drift overlay — always-on subtle retro scanline effect
+- [x] Card draw sound — upward 3-tone (220/330/440Hz) on hand refill
+- [x] Nott DEBUFF visual — "-Xdmg" badge shown on boss portrait when Nott is active
+- [x] Perfect Strike float — gold "PERFECT! +3" float on clean victories
+- [x] FRENZIED correctly fires on boss kill only ✅
+- [x] Hellquake card text updated — "Roll d10. Anything can happen."
