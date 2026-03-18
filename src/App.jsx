@@ -297,7 +297,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   const [over,setOver]=useState(false)
   if(!member){
     return <div ref={innerRef} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}}
-      style={{width:200,height:300,border:`1px dashed ${over?'rgba(232,168,32,0.6)':'rgba(160,100,30,0.22)'}`,borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,background:over?'rgba(100,70,15,0.18)':'rgba(28,16,4,0.14)',transition:'all 0.2s'}}>
+      style={{width:230,height:345,border:`1px dashed ${over?'rgba(232,168,32,0.6)':'rgba(160,100,30,0.22)'}`,borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,background:over?'rgba(100,70,15,0.18)':'rgba(28,16,4,0.14)',transition:'all 0.2s'}}>
       <div style={{fontSize:28,opacity:.1}}>⛧</div>
       <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:'rgba(160,100,30,0.28)',fontStyle:'italic'}}>empty</div>
     </div>
@@ -306,7 +306,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   const buffCount=member.buffCount||0
   return(
     <div ref={innerRef} draggable onDragStart={onDragStart} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}}
-      style={{width:200,background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
+      style={{width:230,background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
         border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':over?'2px solid #e8a820':st?'1px solid #333':'2px solid rgba(190,120,25,0.85)',
         borderRadius:6,
         boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':'0 6px 24px rgba(0,0,0,0.85)',
@@ -318,22 +318,22 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
       {buffCount>0&&<div style={{position:'absolute',top:6,left:6,background:buffCount>=3?'#aa1111':'#9933cc',borderRadius:10,padding:'1px 6px',fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:900,color:'#fff',zIndex:10,boxShadow:'0 0 8px rgba(0,0,0,0.6)'}}>+{buffCount}</div>}
       {isDiceTarget&&<div style={{position:'absolute',top:-16,left:'50%',transform:'translateX(-50%)',fontSize:20}}>🎯</div>}
       <div style={{height:5,borderRadius:'6px 6px 0 0',background:st?'#333':'linear-gradient(90deg,#dd2222,#ff7700)',boxShadow:st?'none':'0 0 14px rgba(220,50,0,0.5)'}}/>
-      <div style={{height:120,display:'flex',alignItems:'center',justifyContent:'center',fontSize:62,background:'rgba(0,0,0,0.3)',position:'relative'}}>
+      <div style={{height:138,display:'flex',alignItems:'center',justifyContent:'center',fontSize:72,background:'rgba(0,0,0,0.3)',position:'relative'}}>
         {member.emoji}
         {st&&<div style={{position:'absolute',top:4,right:4,fontSize:22}}>💨</div>}
         {isAttacking&&<div style={{position:'absolute',inset:0,background:'rgba(255,50,0,0.12)',animation:'pulse 0.4s ease infinite alternate'}}/>}
       </div>
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:26,color:st?'#555':'#e8d8a0',textAlign:'center',padding:'8px 4px 2px',lineHeight:1}}>{member.name}</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:1.5,color:st?'#444':'#8a7a50',textAlign:'center',padding:'3px 4px 6px',textTransform:'uppercase'}}>{member.role}</div>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:30,color:st?'#555':'#e8d8a0',textAlign:'center',padding:'10px 4px 3px',lineHeight:1}}>{member.name}</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:12,letterSpacing:1.5,color:st?'#444':'#8a7a50',textAlign:'center',padding:'4px 4px 8px',textTransform:'uppercase'}}>{member.role}</div>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 20px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
         <div style={{textAlign:'center'}}>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:7,color:'#6a3a3a',textTransform:'uppercase',opacity:.8}}>ATK</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:36,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.atk}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.atk}</div>
         </div>
         <div style={{fontFamily:"'Cinzel',serif",fontSize:7,color:'#6a4a20',opacity:.65}}>{member.keyword}</div>
         <div style={{textAlign:'center'}}>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:7,color:'#2a5a2a',textTransform:'uppercase',opacity:.8}}>HP</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:36,fontWeight:900,lineHeight:1,color:st?'#555':member.hp<=2?'#ff4400':'#33dd33',textShadow:st?'none':'0 0 12px rgba(0,190,0,0.5)'}}>{member.hp}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,lineHeight:1,color:st?'#555':member.hp<=2?'#ff4400':'#33dd33',textShadow:st?'none':'0 0 12px rgba(0,190,0,0.5)'}}>{member.hp}</div>
         </div>
       </div>
       <div style={{height:5,background:'rgba(0,0,0,0.5)',borderRadius:'0 0 6px 6px'}}><div style={{height:'100%',borderRadius:'0 0 6px 6px',background:st?'#333':'linear-gradient(90deg,#003800,#33dd33)',width:`${(member.hp/member.maxHp)*100}%`,transition:'width 0.4s ease'}}/></div>
@@ -351,7 +351,7 @@ function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLea
   return(
     <div draggable onDragStart={e=>{e.dataTransfer.effectAllowed='move';onDragStart(index)}} onDragEnd={onDragEnd}
       onMouseEnter={onHover} onMouseLeave={onLeave} onClick={onClick}
-      style={{width:172,flexShrink:0,position:'relative',
+      style={{width:190,flexShrink:0,position:'relative',
         background:isSelected?'linear-gradient(180deg,#2a1a0a,#160e05)':'linear-gradient(180deg,#201408,#100804)',
         border:isSelected?`2px solid #cc0000`:isHovered&&canAfford?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
         borderRadius:7,cursor:unaffordable?'not-allowed':'grab',position:'relative',
@@ -362,7 +362,7 @@ function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLea
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered&&canAfford?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
         opacity:unaffordable?0.35:isDragging?0.4:1,
         animation:shimmerAnim,
-        margin:'0 -22px',userSelect:'none'}}>
+        margin:'0 -26px',userSelect:'none'}}>
       <div style={{height:6,borderRadius:'7px 7px 0 0',background:bc,boxShadow:`0 0 14px ${glow}`}}/>
       {card.embers>0?(
         <div style={{position:'absolute',top:8,right:8,width:28,height:28,borderRadius:'50%',background:canAfford?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',border:`2px solid ${canAfford?'#ff6600':'#4a2a10'}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:canAfford?'#fff':'#5a3a10',boxShadow:canAfford?'0 0 10px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
@@ -371,13 +371,13 @@ function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLea
       )}
       {card.rarity==='Rare'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
       {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
-      <div style={{height:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:48,background:'rgba(0,0,0,0.35)',position:'relative'}}>
+      <div style={{height:115,display:'flex',alignItems:'center',justifyContent:'center',fontSize:54,background:'rgba(0,0,0,0.35)',position:'relative'}}>
         <div style={{position:'absolute',inset:0,background:`radial-gradient(circle at center,${bc}18,transparent 70%)`}}/>
         {card.emoji}
       </div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:unaffordable?'#555':'#eedfc0',textAlign:'center',padding:'8px 6px 3px',letterSpacing:.4,lineHeight:1.2,borderBottom:'1px solid rgba(255,255,255,0.07)'}}>{card.name}</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:700,color:unaffordable?'#555':'#eedfc0',textAlign:'center',padding:'9px 6px 3px',letterSpacing:.4,lineHeight:1.2,borderBottom:'1px solid rgba(255,255,255,0.07)'}}>{card.name}</div>
       <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:unaffordable?'#444':bc,textAlign:'center',padding:'3px 4px',letterSpacing:1.8,textTransform:'uppercase'}}>{card.type}</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:12,color:unaffordable?'#4a3a20':'#b09870',textAlign:'center',padding:'4px 8px 10px',lineHeight:1.4,fontStyle:'italic',minHeight:48}}>{card.effect}</div>
+      <div style={{fontFamily:"'IM Fell English',serif",fontSize:13,color:unaffordable?'#4a3a20':'#b09870',textAlign:'center',padding:'5px 8px 12px',lineHeight:1.4,fontStyle:'italic',minHeight:52}}>{card.effect}</div>
     </div>
   )
 }
@@ -385,28 +385,28 @@ function HandCard({card,index,total,isHovered,isSelected,canAfford,onHover,onLea
 function BossSection({enemy,currentHp,isWiggling,innerRef}){
   const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35
   return(
-    <div ref={innerRef} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:7,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',maxWidth:500}}>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:4,color:'#8a0000',textTransform:'uppercase',fontWeight:700}}>{enemy.circle} · {enemy.subtitle}</div>
+    <div ref={innerRef} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:10,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',maxWidth:700}}>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:13,letterSpacing:4,color:'#aa2200',textTransform:'uppercase',fontWeight:700}}>{enemy.circle} · {enemy.subtitle}</div>
       <div style={{display:'flex',alignItems:'center',gap:16,width:'100%'}}>
-        <div style={{width:92,height:92,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#2e0000,#080000)',border:`3px solid ${isLow?'#dd2222':'rgba(100,40,15,0.7)'}`,borderRadius:5,display:'flex',alignItems:'center',justifyContent:'center',fontSize:48,boxShadow:isLow?'0 0 35px rgba(200,0,0,0.55)':'0 0 14px rgba(100,0,0,0.3)',position:'relative',overflow:'hidden',transition:'all 0.5s'}}>
+        <div style={{width:120,height:120,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:6,display:'flex',alignItems:'center',justifyContent:'center',fontSize:64,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:'hidden',transition:'all 0.5s'}}>
           {enemy.emoji}
           {isLow&&<div style={{position:'absolute',inset:0,background:'rgba(120,0,0,0.2)',animation:'pulse 1.2s ease infinite alternate'}}/>}
         </div>
         <div style={{flex:1}}>
-          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:34,color:'#1a0c04',lineHeight:1,marginBottom:4}}>{enemy.name}</div>
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:12,color:'#5a4a20',fontStyle:'italic',opacity:.85,lineHeight:1.4}}>{enemy.passive}</div>
+          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:48,color:'#1a0c04',lineHeight:1,marginBottom:6}}>{enemy.name}</div>
+          <div style={{fontFamily:"'IM Fell English',serif",fontSize:15,color:'#5a4a20',fontStyle:'italic',opacity:.9,lineHeight:1.4}}>{enemy.passive}</div>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#6a3a10',marginTop:3,letterSpacing:1}}>Base damage: {enemy.baseDmg} ± 2 per Strike</div>
         </div>
       </div>
-      <div style={{width:'100%'}}>
+      <div style={{width:'70%',margin:'0 auto'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:4}}>
-          <span style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:3,color:'#5a3a10',textTransform:'uppercase'}}>Vitality</span>
-          <span style={{fontFamily:"'Cinzel',serif",fontSize:22,fontWeight:900,color:isLow?'#ee2222':'#6a3010',transition:'color 0.5s'}}>{Math.max(0,currentHp)} / {enemy.maxHp}</span>
+          <span style={{fontFamily:"'Cinzel',serif",fontSize:13,letterSpacing:3,color:'#6a4a10',textTransform:'uppercase'}}>Vitality</span>
+          <span style={{fontFamily:"'Cinzel',serif",fontSize:28,fontWeight:900,color:isLow?'#ee2222':'#6a3010',transition:'color 0.5s'}}>{Math.max(0,currentHp)} / {enemy.maxHp}</span>
         </div>
-        <div style={{width:'100%',height:22,background:'rgba(50,25,8,0.75)',border:'1px solid rgba(100,55,15,0.6)',borderRadius:2,overflow:'hidden',boxShadow:'inset 0 2px 6px rgba(0,0,0,0.7)',position:'relative'}}>
+        <div style={{width:'100%',height:28,background:'rgba(50,25,8,0.75)',border:'1px solid rgba(100,55,15,0.6)',borderRadius:2,overflow:'hidden',boxShadow:'inset 0 2px 6px rgba(0,0,0,0.7)',position:'relative'}}>
           {[25,50,75].map(pp=><div key={pp} style={{position:'absolute',top:0,bottom:0,left:`${pp}%`,width:1,background:'rgba(0,0,0,0.35)',zIndex:2}}/>)}
           <div style={{height:'100%',background:isLow?'linear-gradient(90deg,#660000,#cc0000,#ff2200)':'linear-gradient(90deg,#7a0000,#aa1100,#cc2200)',width:`${pct}%`,transition:'width 0.7s cubic-bezier(0.4,0,0.2,1)'}}/>
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:700,color:'rgba(240,220,180,0.9)',letterSpacing:2,textShadow:'0 1px 3px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)} HP REMAINING</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:'rgba(240,220,180,0.95)',letterSpacing:2,textShadow:'0 1px 3px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)} HP REMAINING</div>
         </div>
       </div>
     </div>
@@ -590,8 +590,8 @@ export default function App(){
     if(selected.length===0||discardsLeft<=0||animPhase!=='idle')return
     const toDisc=hand.filter(c=>selected.includes(c.uid))
     const rem=hand.filter(c=>!selected.includes(c.uid))
-    const res=drawUpTo(rem,deck,discardPile,HAND_SIZE)
-    setHand(res.h);setDeck(res.d);setDiscardPile([...res.disc,...toDisc])
+    const res=drawUpTo(rem,deck,[...discardPile,...toDisc],HAND_SIZE)
+    setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
     setDiscardsLeft(p=>p-1);setSelected([])
     addLog('🗑 '+toDisc.length+' discarded & replaced.')
   },[selected,discardsLeft,animPhase,hand,deck,discardPile,drawUpTo])
@@ -791,9 +791,9 @@ export default function App(){
             <div style={{fontFamily:"'IM Fell English',serif",fontSize:10,color:'#8a6838',opacity:.4,fontStyle:'italic',letterSpacing:4}}>— stage —</div>
             <div style={{flex:1,height:1,background:'rgba(60,35,5,0.2)'}}/>
           </div>
-          <div style={{display:'flex',alignItems:'center',gap:8,padding:'12px 10px',justifyContent:'center',flex:1}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,padding:'12px 10px',justifyContent:'flex-start',flex:1}}>
             <div style={{display:'flex',flexDirection:'column',gap:8,alignSelf:'center',marginRight:10,background:'rgba(0,0,0,0.25)',borderRadius:'6px 0 0 6px',padding:'8px 12px 8px 8px',borderRight:'1px solid rgba(140,90,20,0.4)'}}>
-              {[1,2,3].map(i=><div key={i} style={{width:76,height:92,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:24,opacity:.28}}>⚗</div><div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>)}
+              {[1,2,3].map(i=><div key={i} style={{width:80,height:105,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:24,opacity:.28}}>⚗</div><div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>)}
             </div>
             {stage.map((m,i)=>(
               <StageSlot key={i} member={m} slotIdx={i}
@@ -841,19 +841,19 @@ export default function App(){
           <div style={{display:'flex',flexDirection:'column',gap:5,alignItems:'flex-end',flexShrink:0}}>
             <button onClick={handleStrike} disabled={!canStrike}
               style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 28px',background:canStrike?'rgba(130,0,0,0.4)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:185}}>⚔ Strike</button>
-            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:185}}>
+            <div style={{display:'flex',alignItems:'center',gap:8,justifyContent:'flex-end'}}>
               <PhaseDots left={strikesLeft} total={MAX_STRIKES} color='#dd2222' wide={true}/>
               <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555'}}>{strikesLeft}/{MAX_STRIKES}</span>
             </div>
             <button onClick={handleDiscard} disabled={!canDiscard}
               style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 28px',background:canDiscard?'rgba(100,70,0,0.35)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:185}}>↓ Discard</button>
-            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:185}}>
+            <div style={{display:'flex',alignItems:'center',gap:8,justifyContent:'flex-end'}}>
               <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
               <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555'}}>{discardsLeft}/{MAX_DISCARDS}</span>
             </div>
           </div>
         </div>
-        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:16,paddingTop:4,minHeight:0,overflow:'visible'}}>
+        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'center',paddingBottom:8,paddingTop:8,minHeight:0,overflow:'visible'}}>
           {hand.map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length}
               isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
