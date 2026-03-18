@@ -276,3 +276,73 @@ Following Dante's circles — each has thematic enemies:
 - [x] Demo Tape card implemented (replays last RIFF for free)
 - [x] CORRUPT keyword live (Loki ATK = base + floor(corruption/15))
 - [x] ANCHOR keyword live (Ingrid/Dag heal adjacent members +1HP after each Strike)
+
+---
+
+## 🎮 SETTINGS / COLLECTION / UNLOCK SYSTEM (P2)
+
+### Settings Menu (⚙ button, top-right corner of play screen)
+- [ ] Volume sliders for music and SFX separately
+- [ ] Deck back design selector (unlock via run milestones)
+- [ ] Accessibility options: reduce motion toggle, colorblind mode
+- [ ] Seed input field for challenge/custom runs
+- [ ] "How to Play" quick reference card (keywords, card types, mechanics explained)
+
+### Collection Screen (🏆 button)
+- [ ] **Band member roster** — all 7 members shown, locked ones as shadowed silhouettes with cryptic unlock hint (e.g. "Defeat Circle II with a full band")
+- [ ] **Card collection** — all cards shown, locked/undiscovered as dark outlines with a ? and a subtle hint
+- [ ] **Artifact collection** — artifacts found/purchased shown, undiscovered hidden
+- [ ] **Run history** — last 5 runs with seed, fight reached, cause of death
+- [ ] **Statistics** — total strikes thrown, total Too Stoned events, highest single strike damage, most played card, total Stash earned lifetime
+
+### Unlock Conditions (examples to build from)
+- Beat Circle I → unlock Nott and Dag
+- Beat Circle II → unlock foil card editions in shop
+- Go Too Stoned 10 times total → unlock a unique "Relapse" card
+- Win a fight with 100% Corruption → unlock Black Sabbath Sigil as a possible starting card
+- Win with only 2 band members → unlock a secret Mythic card (never appears in normal shop)
+- Discover all cards → unlock a special deck back design
+- Beat the game → unlock "New Game+" with a harder difficulty modifier
+
+### Why this matters for retention
+The collection screen should show you what you CAN'T have yet — silhouettes, cryptic hints, mystery.
+That's the obsession loop: "just one more run to unlock that." Balatro does this brilliantly.
+Even 3 locked members visible from the start gives players an immediate long-term goal.
+
+---
+
+## 🎨 PSYCHEDELIC VISUAL SYSTEM — RETRO 1994 TREATMENT
+
+*The goal: make Vestibule look like it was recovered from a damaged VHS tape of a 1994 metal music video game that somehow runs perfectly. Classy, not kitsch. Think early Doom meets a CD-ROM game manual aesthetic.*
+
+### What we mean by "retro 1994" — NOT just scanlines:
+
+**Chromatic Aberration** — Subtle RGB channel split on key UI elements (boss name, "STONED TO THE BONE" text). Red channel shifts slightly left, blue shifts slightly right. Only on dramatic moments, not constant.
+
+**VHS Tape Noise** — Occasional horizontal "glitch lines" that drift slowly up the screen. Not random flicker but slow, organic drift. Like a tape being played on a slightly warped machine. Applied as a CSS animation on a fixed overlay div, very low opacity (~8%).
+
+**CRT Phosphor Glow** — Text elements get a subtle bloom effect where the glow spreads unevenly, slightly stronger on the left side (how old CRT phosphors actually decayed). Already somewhat achieved with textShadow but we can push this further.
+
+**Pixel Font for specific UI elements** — Not the gothic fonts, but counter numbers (HP, ATK, Stash) could use a pixel/bitmap style font for those specific values only. Like they're reading off a health bar from a 1994 RPG.
+
+**Color Banding** — Backgrounds use stepped gradients rather than smooth ones. 4-6 distinct color bands instead of linear gradient. Classic early 3D render aesthetic.
+
+**Interlace Flicker on dramatic moments** — When Hellquake fires or Too Stoned triggers: a brief (0.3s) interlace effect where alternating rows go slightly brighter/darker. Like the TV is about to blow out.
+
+**Dithering pattern on dark areas** — The black hand area and dark backgrounds could have a very subtle dithering texture overlay. Classic early PC game look — not pixelated but hinting at it.
+
+**Loading/transition effect** — Between screens (shop → fight), a brief "loading" horizontal wipe with a pixel bar. Like an old game loading a new room.
+
+### Implementation approach:
+- Most effects are CSS-only (overlay divs, animations, filters)
+- Chromatic aberration: `text-shadow: -1px 0 red, 1px 0 blue` variant
+- VHS drift: CSS keyframe animation on a fixed overlay with `repeating-linear-gradient`
+- Phosphor bloom: enhanced `filter: blur` + `mix-blend-mode: screen` on a duplicate element
+- Color banding: step-function gradients in the background elements
+- Keep it subtle enough that a first-time player might not consciously notice, but would feel it
+
+### When to apply:
+- **Always on:** Very subtle VHS drift, color banding, CRT phosphor glow on text
+- **Corruption 50%+:** Chromatic aberration starts on boss name and attack number
+- **Corruption 100% / Hellquake:** Full interlace flicker, strong chroma split, heavy bloom
+- **Stoned to the Bone screen:** Maximum effect — this should look like the TV is dying
