@@ -22,7 +22,7 @@ const MAX_EMBERS=6, MAX_STRIKES=4, MAX_DISCARDS=4, HAND_SIZE=6
 
 const ENEMIES=[
   {id:'wanderer',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:40,baseDmg:3,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.'},
-  {id:'lostsoul',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:70,baseDmg:4,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.'},
+  {id:'lostsoul',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:69,baseDmg:4,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.'},
   {id:'drifter',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:100,baseDmg:5,emoji:'👁',passive:'The undisputed master of Limbo. No passive — pure relentless pressure.'},
 ]
 
