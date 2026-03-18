@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;700;900&family=IM+Fell+English:ital@0;1&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --void:       #060404;
+  --ash:        #0e0a09;
+  --char:       #1a1210;
+  --blood:      #7a0000;
+  --blood-mid:  #aa1111;
+  --blood-hot:  #dd2222;
+  --blood-fire: #ff3300;
+  --ember:      #ff6622;
+  --bone:       #d8c9a8;
+  --bone-dark:  #b09870;
+  --bone-dim:   #7a6a4a;
+  --gold:       #b07c0c;
+  --gold-bright:#e8a820;
+  --rust:       #5a2010;
+  --parch-light:#e8d9b0;
+  --parch-mid:  #c8b080;
+  --parch-dark: #a08850;
+  --parch-stain:#8a6838;
+  --parch-ink:  #2a1a08;
+}
+
+body {
+  background: var(--void);
+  font-family: 'IM Fell English', serif;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  color: var(--bone);
+  cursor: crosshair;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}

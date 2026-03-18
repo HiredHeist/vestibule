@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;700;900&family=IM+Fell+English:ital@0;1&display=swap');
+
+:root {
+  --void: #080502;
+  --parchment: #c8b060;
+  --blood: #8a0000;
+  --gold: #e8a820;
+  --ember: #ff6600;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--void);
+  color: #d8c9a8;
+  font-family: 'IM Fell English', serif;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+@keyframes throb {
+  0%, 100% { box-shadow: 0 6px 24px rgba(0,0,0,0.85), 0 0 0px rgba(190,120,25,0); }
+  50% { box-shadow: 0 6px 28px rgba(0,0,0,0.9), 0 0 18px rgba(190,120,25,0.35); }
+}
+
+@keyframes wiggle {
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-8px) rotate(-2deg); }
+  40%  { transform: translateX(10px) rotate(2deg); }
+  60%  { transform: translateX(-8px) rotate(-1deg); }
+  80%  { transform: translateX(6px) rotate(1deg); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes floatUp {
+  0%   { transform: translateX(-50%) translateY(0); opacity: 1; }
+  100% { transform: translateX(-50%) translateY(-110px); opacity: 0; }
+}
+
+@keyframes pulse {
+  from { opacity: 0.4; }
+  to   { opacity: 0.9; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes flashFade {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes bounce {
+  from { transform: translateX(-50%) translateY(0); }
+  to   { transform: translateX(-50%) translateY(-6px); }
+}
+
+@keyframes holoShimmer {
+  0%   { filter: hue-rotate(0deg) saturate(1.2) brightness(1.05); }
+  33%  { filter: hue-rotate(30deg) saturate(1.6) brightness(1.15); }
+  66%  { filter: hue-rotate(-20deg) saturate(1.4) brightness(1.1); }
+  100% { filter: hue-rotate(0deg) saturate(1.2) brightness(1.05); }
+}
+
+@keyframes uncommonGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(150,200,255,0.2); }
+  50%      { box-shadow: 0 0 18px rgba(150,200,255,0.45); }
+}
+
+:-webkit-scrollbar { width: 4px; }
+:-webkit-scrollbar-track { background: rgba(20,10,3,0.5); }
+:-webkit-scrollbar-thumb { background: rgba(160,100,25,0.4); border-radius: 2px; }
