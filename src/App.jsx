@@ -18,7 +18,7 @@ function playVictory(){[130.8,164.8,196,261.6,329.6].forEach(function(f,i){try{v
 function playDice(){playTone(300,.08,'square',false,.3);setTimeout(function(){playTone(450,.08,'square',false,.3)},100)}
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const MAX_EMBERS=6, MAX_STRIKES=4, MAX_DISCARDS=4, HAND_SIZE=6
+const MAX_EMBERS_CAP=8, MAX_STRIKES=4, MAX_DISCARDS=4, HAND_SIZE=6
 
 const ENEMIES=[
   {id:'wanderer',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:40,baseDmg:3,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.'},
@@ -341,7 +341,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 20px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
         <div style={{textAlign:'center'}}>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:st?'#555':'#ee2222',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>ATK</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.atk}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.keyword==='CORRUPT'&&!st?member.atk+Math.floor((member._corruptBonus||0)):member.atk}</div>
         </div>
         <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:st?'#555':'#e8a820',fontWeight:700,letterSpacing:1,textAlign:'center'}}>{member.keyword}</div>
         <div style={{textAlign:'center'}}>
@@ -448,11 +448,14 @@ function PhaseDots({left,total,color,wide}){
   const sz=wide?17:13;const start=total-left;return <div style={{display:'flex',gap:wide?4:4,flex:wide?1:undefined}}>{Array.from({length:total}).map((_,i)=>{const filled=i>=start;return <div key={i} style={{width:sz,height:sz,borderRadius:4,background:filled?color:'rgba(40,20,8,0.6)',border:`1px solid ${filled?color:'rgba(80,50,20,0.3)'}`,boxShadow:filled?`0 0 9px ${color}99`:'none',transition:'all 0.25s'}}/>})}</div>
 }
 
-function EndScreen({won,stats,seed,onReset}){
+function EndScreen({won,cause,stats,seed,onReset}){
+  const isStoned=cause==='stoned'
+  const isVictory=cause==='victory'
   return(
-    <div style={{position:'fixed',inset:0,zIndex:9800,background:won?'rgba(4,3,1,0.96)':'rgba(3,1,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:18,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'30px 0'}}>
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:76,color:won?'#d8c9a8':'#7a0000',textShadow:won?'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000':'0 0 60px rgba(100,0,0,0.6),3px 3px 0 #000'}}>{won?'Victory':'Fallen'}</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:17,color:'#a09060',fontStyle:'italic'}}>{won?'The Drifter has fallen. Circle II opens.':'The Vestibule claims another soul.'}</div>
+    <div style={{position:'fixed',inset:0,zIndex:9800,background:isStoned?'rgba(2,4,2,0.98)':isVictory?'rgba(4,3,1,0.96)':'rgba(3,1,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:18,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'30px 0'}}>
+      {isStoned&&<div style={{fontFamily:"'Cinzel',serif",fontSize:13,letterSpacing:8,color:'rgba(100,180,80,0.6)',textTransform:'uppercase',animation:'fadeIn 1s ease',marginBottom:-8}}>YOU DIED</div>}
+      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:isStoned?86:76,color:isStoned?'#44aa22':isVictory?'#d8c9a8':'#7a0000',textShadow:isStoned?'0 0 80px rgba(60,200,40,0.6),3px 3px 0 #000,0 0 160px rgba(40,150,20,0.3)':isVictory?'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000':'0 0 60px rgba(100,0,0,0.6),3px 3px 0 #000'}}>{isStoned?'Stoned to the Bone':isVictory?'Victory':'Fallen'}</div>
+      <div style={{fontFamily:"'IM Fell English',serif",fontSize:isStoned?22:17,color:isStoned?'rgba(120,200,80,0.8)':'#a09060',fontStyle:'italic'}}>{isStoned?'The band ran out of strikes.':isVictory?'The Drifter has fallen. Circle II opens.':'The Vestibule claims another soul.'}</div>
       <div style={{background:'rgba(20,12,4,0.8)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:6,padding:'18px 28px',minWidth:380}}>
         <div style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:12}}>Run Statistics</div>
         {[['Strikes Thrown',stats.strikesThrown],['Total Damage Dealt',stats.totalDamage],['Highest Strike Damage',stats.highestStrike],['Too Stoned Events',stats.tooStonedCount],['Cards Played',stats.cardsPlayed],['Max Corruption',stats.maxCorruption+'%'],['Stash Earned',stats.stashEarned+' 🌿'],['Fights Survived',stats.fightsSurvived+' / 3']].map(function(row){
@@ -465,8 +468,8 @@ function EndScreen({won,stats,seed,onReset}){
         })}
       </div>
       <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#5a4a20',letterSpacing:2}}>RUN SEED: {seed.toString(16).toUpperCase()} — Share with friends!</div>
-      <button onClick={onReset} style={{fontFamily:"'Cinzel',serif",fontSize:15,letterSpacing:4,color:won?'#ee2222':'#b09858',background:won?'rgba(100,0,0,0.22)':'transparent',border:won?'2px solid #7a0000':'1px solid rgba(90,60,20,0.5)',borderRadius:3,padding:'13px 46px',cursor:'pointer',textTransform:'uppercase'}}>
-        {won?'⛧ Play Again':'↺ Try Again'}
+      <button onClick={onReset} style={{fontFamily:"'Cinzel',serif",fontSize:15,letterSpacing:4,color:isStoned?'#66cc44':isVictory?'#ee2222':'#b09858',background:isStoned?'rgba(40,120,20,0.22)':isVictory?'rgba(100,0,0,0.22)':'transparent',border:isStoned?'2px solid #44aa22':isVictory?'2px solid #7a0000':'1px solid rgba(90,60,20,0.5)',borderRadius:3,padding:'13px 46px',cursor:'pointer',textTransform:'uppercase'}}>
+        {isVictory?'⛧ Play Again':isStoned?'↺ Try Again':'↺ Try Again'}
       </button>
     </div>
   )
@@ -533,7 +536,8 @@ export default function App(){
   const [deck,setDeck]=useState([]);const deckRef=useRef([]);
   const [hand,setHand]=useState([]);const handRef=useRef([]);
   const [discardPile,setDiscardPile]=useState([]);const discRef=useRef([]);
-  const [embers,setEmbers]=useState(MAX_EMBERS)
+  const [maxEmbers,setMaxEmbers]=useState(5)
+  const [embers,setEmbers]=useState(5)
   const [stash,setStash]=useState(0)
   const [strikesLeft,setStrikesLeft]=useState(MAX_STRIKES)
   const [discardsLeft,setDiscardsLeft]=useState(MAX_DISCARDS)
@@ -554,6 +558,7 @@ export default function App(){
   const [diceTarget,setDiceTarget]=useState(null)
   const [showDice,setShowDice]=useState(false)
   const [pendingEmbers,setPendingEmbers]=useState(0)
+  const [lastRiffPlayed,setLastRiffPlayed]=useState(null)
   const [circleArtifact]=useState(()=>CIRCLE_ARTIFACTS[Math.floor(Math.random()*CIRCLE_ARTIFACTS.length)])
   const [shopCards,setShopCards]=useState(()=>genShopCards())
   const [boosterPacks]=useState(()=>genBoosterPacks())
@@ -623,8 +628,17 @@ export default function App(){
     else if(card.id==='controlfeedback'){setCorruption(50);msg='🎚 Corruption set to 50%.'}
     else if(card.id==='feedbackloop'){const dmg=Math.floor(corruption);const bc2=getCenter(bossRef);setEnemyHp(function(prev){return Math.max(0,prev-dmg)});addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=20);playHit();updStat('totalDamage',dmg);msg='🎛 Feedback Loop: '+dmg+' damage!'}
     else if(card.id==='soundwall'){const bc3=getCenter(bossRef);setEnemyHp(function(prev){return Math.max(0,prev-5)});addFloat(5,bc3.x,bc3.y-60,'#dd2222');playHit();msg='🔈 Sound Wall! 5 direct damage.';updStat('totalDamage',5)}
-    else if(card.id==='groupie'){const gain=3;setEmbers(function(p){return Math.min(MAX_EMBERS,p+gain-card.embers)});spent=0;playEmber();msg='🍯 Groupie! Net +'+(gain-card.embers)+' Embers.';addFloat('+'+gain+' 🔥',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')}
+    else if(card.id==='groupie'){const gain=3;setEmbers(function(p){return Math.min(maxEmbers,p+gain-card.embers)});spent=0;playEmber();msg='🍯 Groupie! Net +'+(gain-card.embers)+' Embers.';addFloat('+'+gain+' 🔥',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')}
     else if(card.id==='tappedout'){setPendingEmbers(function(p){return p+5});spent=0;playEmber();msg='🪙 Tapped Out! +5 Embers next Strike.'}
+    else if(card.id==='demotape'){
+      if(!lastRiffPlayed){addLog('📼 No riff recorded yet.');return false}
+      spent=0
+      // Cast the last riff on the same slot
+      const lrCopy=Object.assign({},lastRiffPlayed,{uid:'demotape-'+Math.random().toString(36).slice(2),embers:0})
+      const ok2=applyCard(lrCopy,slotIdx)
+      if(ok2){msg='📼 Demo Tape! Replays: '+lastRiffPlayed.name}
+      else{return false}
+    }
     else if(card.id==='burnset'){const res=drawUpTo([],deck,discardPile,HAND_SIZE);setHand(res.h);setDeck(res.d);setDiscardPile([...res.disc,...hand]);msg='🔥 Hand burned! Drew 6 new cards.'}
     else if(card.id==='overdrive'){if(corruption>80){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{addLog('⚠ Need >80% Corruption.');return false}}
     else if(card.id==='sabbathsigil'){setCorruption(100);updStat('maxCorruption',100,true);msg='⛧ BLACK SABBATH SIGIL! Corruption 100%!';addFloat('HELLQUAKE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#aa1111',true)}
@@ -641,6 +655,7 @@ export default function App(){
     if(spent>0)setEmbers(function(p){return p-spent})
     if(msg)addLog(msg)
     updStat('cardsPlayed',1)
+    if(card.type==='RIFF')setLastRiffPlayed(card)
     return true
   },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs])
 
@@ -687,7 +702,7 @@ export default function App(){
     const actives=stage.filter(m=>m&&!m.tooStoned)
     if(actives.length===0){addLog('⚠ No active members!');return}
 
-    if(pendingEmbers>0){setEmbers(p=>Math.min(MAX_EMBERS,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
+    if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
 
     setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1)
 
@@ -696,7 +711,10 @@ export default function App(){
     if(bandBonus>1)addLog('🎸 Band synergy! '+buffed.length+' buffed: +'+Math.round((bandBonus-1)*100)+'% damage!')
 
     const hasDbl=actives.some(m=>m.role==='Drummer')
-    let dmg=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>s+m.atk,0)
+    let dmg=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
+      const effectiveAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
+      return s+effectiveAtk
+    },0)
     if(hasDbl)dmg*=2
     const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer').reduce((s,m)=>s+m.atk,0)
     dmg+=encDmg
@@ -737,7 +755,7 @@ export default function App(){
         updStat('stashEarned',stashEarned);updStat('fightsSurvived',1)
         addLog('⛧ Victory! +'+stashEarned+' Stash earned.')
         setTimeout(function(){
-          if(fightIndex>=2){playVictory();setTimeout(function(){setGameState('end')},800)}
+          if(fightIndex>=2){playVictory();setMaxEmbers(function(p){return Math.min(MAX_EMBERS_CAP,p+1)});setTimeout(function(){setGameState('end')},800)}
           else{
             setShopCards(genShopCards())
             setRecruitPack(genRecruitPack())
@@ -791,6 +809,17 @@ export default function App(){
               nh=[...nh,nd[0]];nd=nd.slice(1);
             }
             setHand(nh);setDeck(nd);setDiscardPile(ndisc);
+            // ANCHOR keyword: heal adjacent members after Strike
+            setStage(function(prev){
+              const ns=[...prev];
+              prev.forEach(function(m,i){
+                if(m&&!m.tooStoned&&m.keyword==='ANCHOR'){
+                  if(i>0&&ns[i-1]&&!ns[i-1].tooStoned)ns[i-1]=Object.assign({},ns[i-1],{hp:Math.min(ns[i-1].maxHp,ns[i-1].hp+1)});
+                  if(i<4&&ns[i+1]&&!ns[i+1].tooStoned)ns[i+1]=Object.assign({},ns[i+1],{hp:Math.min(ns[i+1].maxHp,ns[i+1].hp+1)});
+                }
+              });
+              return ns;
+            });
             setAnimPhase('idle');setSelected([]);
           },900)
         },1200)
@@ -803,7 +832,7 @@ export default function App(){
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(nextEnemy.maxHp)
-    setEmbers(MAX_EMBERS);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
+    setEmbers(maxEmbers);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
     setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([])
     setStage(p=>p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false}):null))
     // Redeal hand from current deck+discard
@@ -869,7 +898,7 @@ export default function App(){
   const handleReset=()=>{
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
-    setEmbers(MAX_EMBERS);setStash(0);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
+    setEmbers(maxEmbers);setStash(0);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0)
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([])
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -882,7 +911,8 @@ export default function App(){
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll}/>
-  if(gameState==='end')return <EndScreen won={won} stats={stats} seed={runSeed} onReset={handleReset}/>
+  const endCause=won?'victory':strikesLeft<=0&&enemyHp>0?'stoned':'fallen'
+  if(gameState==='end')return <EndScreen won={won} cause={endCause} stats={stats} seed={runSeed} onReset={handleReset}/>
 
   return(
     <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none'}}>
@@ -923,7 +953,10 @@ export default function App(){
         <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,padding:'4px 20px 6px',position:'relative',zIndex:5,flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)'}}>
           {(()=>{
             const act=stage.filter(m=>m&&!m.tooStoned)
-            let dmg=act.filter(m=>m.role!=='Drummer').reduce((s,m)=>s+m.atk,0)
+            let dmg=act.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
+              const effAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
+              return s+effAtk
+            },0)
             const dbl=act.some(m=>m.role==='Drummer')
             if(dbl)dmg*=2
             const buf=act.filter(m=>(m.buffCount||0)>0).length
@@ -969,7 +1002,7 @@ export default function App(){
             <span style={{fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555',minWidth:28,textAlign:'right'}}>{discardsLeft}/{MAX_DISCARDS}</span>
           </div>
           <div style={{height:8}}/>
-          <EmberDisplayLarge current={embers} max={MAX_EMBERS}/>
+          <EmberDisplayLarge current={embers} max={maxEmbers}/>
           <div style={{height:6}}/>
           <div style={{display:'flex',gap:14,justifyContent:'flex-end',padding:'4px 0'}}>
             {[['Fight',(fightIndex+1)+'/3','#dd2222'],['Corrupt',corruption+'%',corruption>60?'#ff3300':'#aa5500'],['Stash',stash,'#44cc44']].map(function(item){return(
