@@ -269,3 +269,10 @@ Following Dante's circles — each has thematic enemies:
 - [x] Recruit screen working
 - [x] Enemy rebalance: 40/69/100 HP
 - [x] GitHub + living GDD.md
+
+### ✅ Completed in this push
+- [x] "Stoned to the Bone" death screen (Dark Souls style, green glow, YOU DIED text)
+- [x] Ember progression: starts at 5, +1 after each Circle boss, max cap 8
+- [x] Demo Tape card implemented (replays last RIFF for free)
+- [x] CORRUPT keyword live (Loki ATK = base + floor(corruption/15))
+- [x] ANCHOR keyword live (Ingrid/Dag heal adjacent members +1HP after each Strike)
