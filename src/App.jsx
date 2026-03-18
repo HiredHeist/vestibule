@@ -839,11 +839,11 @@ export default function App(){
             const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1
             const fin=Math.round(dmg*bon)
             return <>
-              <span style={{fontFamily:"'IM Fell English',serif",fontSize:17,color:'#6a4a18',opacity:.9,fontStyle:'italic'}}>combined attack</span>
-              <span key={fin} style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block'}}>{fin}</span>
+              <span style={{fontFamily:"'IM Fell English',serif",fontSize:17,color:'#3a2508',opacity:1,fontStyle:'italic'}}>combined attack</span>
+              <span key={fin} style={{fontFamily:"'Cinzel',serif",fontSize:34,fontWeight:900,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block'}}>{fin}</span>
               {bon>1&&<span style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#e8a820',letterSpacing:1}}>+{Math.round((bon-1)*100)}% SYNERGY</span>}
               <span style={{color:'#6a3010',opacity:.5,fontSize:14}}>⟶</span>
-              <span style={{fontFamily:"'IM Fell English',serif",fontSize:17,color:'#6a4a18',opacity:.9,fontStyle:'italic'}}>{enemy.name}</span>
+              <span style={{fontFamily:"'IM Fell English',serif",fontSize:17,color:'#3a2508',opacity:1,fontStyle:'italic'}}>{enemy.name}</span>
             </>
           })()}
         </div>
@@ -851,7 +851,7 @@ export default function App(){
 
       {/* HAND AREA */}
       <div style={{flex:1,background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0',display:'flex',flexDirection:'column',zIndex:30,minHeight:0,position:'relative'}}>
-        <div style={{textAlign:'center',padding:'6px 0 0',flexShrink:0,position:'relative',zIndex:2}}>
+        <div style={{textAlign:'center',padding:'6px 0 0',flexShrink:0,position:'relative',zIndex:0}}>
           <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length} of {HAND_SIZE}</span>
           {pendingEmbers>0&&<span style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#ff6600',marginLeft:12}}>+{pendingEmbers} 🔥 pending</span>}
         </div>
@@ -891,7 +891,7 @@ export default function App(){
         </div>
 
         {/* CARD FAN — takes full height, padded to avoid overlapping columns */}
-        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:30,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',isolation:'isolate'}}>
+        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:30,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',isolation:'isolate',zIndex:1}}>
           {hand.map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length}
               isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
