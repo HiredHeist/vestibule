@@ -343,14 +343,14 @@ function BoosterScreen({onComplete,seed}){
       <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#4a3a20',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
 
       {/* MEMBER CARDS — 7 in a flexible row */}
-      <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',maxWidth:1206,flexShrink:0,marginBottom:4}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:16,maxWidth:920,flexShrink:0,marginBottom:4}}>
         {pool.map(m=>{
           const isSel=sel.includes(m.id),dis=!isSel&&sel.length>=2
           const kw=m.keyword||''
           const kwc=kwColor[kw]||'#e8a820'
           return(
             <div key={m.id} onClick={()=>!dis&&toggle(m.id)}
-              style={{width:162,background:isSel?'linear-gradient(180deg,#2a1a0a,#160c04)':'linear-gradient(180deg,#1a1008,#0e0804)',
+              style={{width:210,background:isSel?'linear-gradient(180deg,#2a1a0a,#160c04)':'linear-gradient(180deg,#1a1008,#0e0804)',
                 border:isSel?'2px solid #e8a820':dis?'1px solid rgba(80,50,10,0.25)':'1px solid rgba(160,100,25,0.5)',
                 borderRadius:7,cursor:dis?'not-allowed':'pointer',
                 boxShadow:isSel?'0 0 30px rgba(232,168,32,0.4),0 8px 24px rgba(0,0,0,0.8)':'0 4px 16px rgba(0,0,0,0.7)',
@@ -358,19 +358,19 @@ function BoosterScreen({onComplete,seed}){
                 transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',position:'relative',flexShrink:0}}>
               <div style={{height:5,borderRadius:'7px 7px 0 0',background:isSel?'linear-gradient(90deg,#e8a820,#ffcc44)':kwc+'66'}}/>
               {isSel&&<div style={{position:'absolute',top:8,right:8,width:24,height:24,borderRadius:'50%',background:'#e8a820',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,color:'#000',fontWeight:900}}>✓</div>}
-              <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:42,background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
-              <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:22,color:isSel?'#e8d090':'#c8b878',textAlign:'center',padding:'5px 4px 1px',lineHeight:1}}>{m.name}</div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:2,color:'#7a6a40',textAlign:'center',padding:'2px 4px 6px',textTransform:'uppercase'}}>{m.role}</div>
+              <div style={{height:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:54,background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
+              <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:26,color:isSel?'#e8d090':'#c8b878',textAlign:'center',padding:'5px 4px 1px',lineHeight:1}}>{m.name}</div>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:2,color:'#7a6a40',textAlign:'center',padding:'3px 4px 8px',textTransform:'uppercase'}}>{m.role}</div>
               {/* Stat bar — matches battlefield style */}
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 12px 8px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
                 <div style={{textAlign:'center'}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#ee2222',textTransform:'uppercase',fontWeight:900}}>ATK</div>
-                  <div style={{fontFamily:"'Cinzel',serif",fontSize:30,fontWeight:900,color:'#ee2222',lineHeight:1}}>{m.atk}</div>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:'#ee2222',textTransform:'uppercase',fontWeight:900}}>ATK</div>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:38,fontWeight:900,color:'#ee2222',lineHeight:1}}>{m.atk}</div>
                 </div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:kwc,fontWeight:700,textAlign:'center',letterSpacing:0.5,maxWidth:60}}>{kw}</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:12,color:kwc,fontWeight:700,textAlign:'center',letterSpacing:0.5,maxWidth:80}}>{kw}</div>
                 <div style={{textAlign:'center'}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
-                  <div style={{fontFamily:"'Cinzel',serif",fontSize:30,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:38,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
                 </div>
               </div>
             </div>
@@ -379,7 +379,7 @@ function BoosterScreen({onComplete,seed}){
       </div>
 
       {/* ABILITY EXPLANATION BOX */}
-      <div style={{background:'rgba(10,6,2,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'20px 28px',maxWidth:1206,width:'100%',flexShrink:0,marginTop:8}}>
+      <div style={{background:'rgba(10,6,2,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'20px 28px',maxWidth:920,width:'100%',flexShrink:0,marginTop:8}}>
         <div style={{fontFamily:"'Cinzel',serif",fontSize:13,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:16}}>⚗ Band Abilities — What Do They Mean?</div>
         <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
           {[
