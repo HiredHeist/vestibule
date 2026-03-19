@@ -40,27 +40,32 @@ const ALL_MUSICIANS=[
 const ALL_CARDS=[
   {id:'amp',name:'Amp It Up',type:'RIFF',rarity:'Common',emoji:'⚡',embers:2,effect:'Target member deals double ATK this turn.',color:'#9933cc',typeColor:'#7722aa'},
   {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:1,effect:'+20% Corruption immediately.',color:'#aa1111',typeColor:'#880000'},
-  {id:'soundcheck',name:'Sound Check',type:'UTILITY',rarity:'Common',emoji:'🔊',embers:2,effect:'All band members gain +3 HP.',color:'#22aa44',typeColor:'#118833'},
-  {id:'sigdecay',name:'Signal Decay',type:'CORRUPT',rarity:'Common',emoji:'📡',embers:2,effect:'-30% Corruption. Heal 5 HP.',color:'#aa1111',typeColor:'#880000'},
-  {id:'warmup',name:'Warm Up',type:'RIFF',rarity:'Common',emoji:'🎵',embers:1,effect:'Target member +1 ATK this Strike.',color:'#9933cc',typeColor:'#7722aa'},
-  {id:'roadie',name:'Roadie',type:'UTILITY',rarity:'Common',emoji:'🛡',embers:1,effect:'Target cannot go Too Stoned this Strike.',color:'#22aa44',typeColor:'#118833'},
+  {id:'soundcheck',name:'Sound Check',type:'UTILITY',rarity:'Common',emoji:'🔊',embers:2,effect:'All band members gain +3 HP.',color:'#22aa44',typeColor:'#118833',copies:2},
+  {id:'sigdecay',name:'Signal Decay',type:'CORRUPT',rarity:'Common',emoji:'📡',embers:2,effect:'-30% Corruption. Heal 5 HP.',color:'#aa1111',typeColor:'#880000',copies:2},
+  {id:'battlecry',name:'Battle Cry',type:'RIFF',rarity:'Common',emoji:'🤘',embers:1,effect:'Target member +1 ATK permanently.',color:'#9933cc',typeColor:'#7722aa'},
+  {id:'roadie',name:'Roadie',type:'UTILITY',rarity:'Common',emoji:'🛡',embers:1,effect:'Target cannot go Too Stoned this Strike.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'setlist',name:'Setlist',type:'UTILITY',rarity:'Common',emoji:'📋',embers:1,effect:'View top 4 cards. Rearrange in any order.',color:'#22aa44',typeColor:'#118833'},
   {id:'groupie',name:'Groupie',type:'EMBER',rarity:'Common',emoji:'🍯',embers:2,effect:'Spend 2 Embers, gain 3 back. Net +1.',color:'#c87820',typeColor:'#a05a10'},
   {id:'demotape',name:'Demo Tape',type:'RIFF',rarity:'Common',emoji:'📼',embers:2,effect:'Copy the last Riff played, cast it free.',color:'#9933cc',typeColor:'#7722aa'},
   {id:'newstrings',name:'New Strings',type:'RIFF',rarity:'Uncommon',emoji:'🎸',embers:3,effect:'+2 ATK permanently to target member.',color:'#9933cc',typeColor:'#7722aa'},
   {id:'encore',name:'Encore',type:'RIFF',rarity:'Uncommon',emoji:'🔁',embers:2,effect:'Target member attacks again this Strike.',color:'#9933cc',typeColor:'#7722aa'},
-  {id:'wakeup',name:'Wake Up Call',type:'UTILITY',rarity:'Uncommon',emoji:'☕',embers:2,effect:'Revive a Too Stoned member at full stats.',color:'#22aa44',typeColor:'#118833'},
+  {id:'wakeup',name:'Wake Up Call',type:'UTILITY',rarity:'Uncommon',emoji:'☕',embers:2,effect:'Revive a Too Stoned member at full stats.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'feedbackloop',name:'Feedback Loop',type:'CORRUPT',rarity:'Uncommon',emoji:'🎛',embers:3,effect:'Deal damage equal to your Corruption %.',color:'#aa1111',typeColor:'#880000'},
   {id:'tappedout',name:'Tapped Out',type:'EMBER',rarity:'Uncommon',emoji:'🪙',embers:0,effect:'Gain 5 Embers at the start of next Strike.',color:'#c87820',typeColor:'#a05a10'},
-  {id:'controlfeedback',name:'Controlled Feedback',type:'CORRUPT',rarity:'Uncommon',emoji:'🎚',embers:2,effect:'Set Corruption to exactly 50%.',color:'#aa1111',typeColor:'#880000'},
+  {id:'controlfeedback',name:'Controlled Feedback',type:'CORRUPT',rarity:'Uncommon',emoji:'🎚',embers:2,effect:'Set Corruption to exactly 50%.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:2,effect:'Discard entire hand. Draw 6 new cards.',color:'#9933cc',typeColor:'#7722aa'},
   {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:3,effect:'Deal 5/8/12 damage (scales by fight). Boss passive skips.',color:'#9933cc',typeColor:'#7722aa'},
   {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:4,effect:'Damage = target HP to boss. Once per round.',color:'#9933cc',typeColor:'#7722aa'},
   {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'If Corruption >80%, double ALL ATK this Strike.',color:'#9933cc',typeColor:'#7722aa'},
-  {id:'infencore',name:'Infernal Encore',type:'RIFF',rarity:'Rare',emoji:'👿',embers:4,effect:'ALL members attack again simultaneously.',color:'#9933cc',typeColor:'#7722aa'},
+  {id:'infencore',name:'Infernal Encore',type:'RIFF',rarity:'Rare',emoji:'👿',embers:3,effect:'ALL members attack again simultaneously.',color:'#9933cc',typeColor:'#7722aa'},
   {id:'remaster',name:'The Remaster',type:'UTILITY',rarity:'Rare',emoji:'🎙',embers:0,effect:'View 10 deck cards. Delete 2. Copy 1.',color:'#22aa44',typeColor:'#118833'},
   {id:'sabbathsigil',name:'Black Sabbath Sigil',type:'CORRUPT',rarity:'Rare',emoji:'⛧',embers:2,effect:'Corruption → 100%. Roll d10. Hellquake fires — anything can happen.',color:'#aa1111',typeColor:'#880000'},
   {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:4,effect:'All members deal triple ATK this Strike only.',color:'#9933cc',typeColor:'#7722aa'},
+  {id:'crowdsurf',name:'Crowd Surf',type:'RIFF',rarity:'Common',emoji:'🏄',embers:2,effect:'Deal damage equal to cards in hand × 2.',color:'#9933cc',typeColor:'#7722aa'},
+  {id:'doubledown',name:'Double Down',type:'RIFF',rarity:'Uncommon',emoji:'🎰',embers:3,effect:'The next card played this Strike costs 0 Embers.',color:'#9933cc',typeColor:'#7722aa'},
+  {id:'deathriff',name:'Death Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'💀',embers:0,effect:'Deal damage = (100 - Corruption)%. Raises Corruption +10%.',color:'#aa1111',typeColor:'#880000'},
+  {id:'ampoverload',name:'Amp Overload',type:'EMBER',rarity:'Uncommon',emoji:'🔋',embers:0,effect:'Gain 3 Embers. Skip your next Discard this fight.',color:'#c87820',typeColor:'#a06010'},
+  {id:'ampstatic',name:'Amp the Static',type:'CORRUPT',rarity:'Uncommon',emoji:'📶',embers:2,effect:'All members gain ATK = Corruption ÷ 20 this Strike.',color:'#aa1111',typeColor:'#880000'},
 ]
 
 const KEYWORD_DESC={
@@ -76,9 +81,8 @@ function buildDeck(seed){
   const rng=seededRng(seed)
   const deck=[]
   ALL_CARDS.forEach(function(c){
-    deck.push(Object.assign({},c,{uid:Math.random().toString(36).slice(2)}))
-    deck.push(Object.assign({},c,{uid:Math.random().toString(36).slice(2)}))
-    deck.push(Object.assign({},c,{uid:Math.random().toString(36).slice(2)}))
+    const n=c.copies||3
+    for(let i=0;i<n;i++){deck.push(Object.assign({},c,{uid:Math.random().toString(36).slice(2)}))}
   })
   for(let i=deck.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
   return deck
@@ -686,6 +690,8 @@ export default function App(){
   const [pendingEmbers,setPendingEmbers]=useState(0)
   const [lastRiffPlayed,setLastRiffPlayed]=useState(null)
   const [bossDebuff,setBossDebuff]=useState(0)
+  const [nextCardFree,setNextCardFree]=useState(false)
+  const [skipNextDiscard,setSkipNextDiscard]=useState(false)
   const [setlistOpen,setSetlistOpen]=useState(false)
   const [setlistCards,setSetlistCards]=useState([])
   const [remasterOpen,setRemasterOpen]=useState(false)
@@ -735,13 +741,15 @@ export default function App(){
   },[runSeed])
 
   const applyCard=useCallback((card,slotIdx)=>{
-    if(card.embers>0&&embers<card.embers){addLog('⚠ Need '+card.embers+' Embers, have '+embers+'.');return false}
+    const effectiveEmbers=nextCardFree&&card.id!=='doubledown'?0:card.embers
+  if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers, have '+embers+'.');return false}
+  if(nextCardFree&&card.id!=='doubledown'){setNextCardFree(false)}
     if(card.id==='stagedive'&&stageDiveUsed){addLog('⚠ Stage Dive once per round only.');return false}
     const m=stage[slotIdx]
-    let ns=[...stage],spent=card.embers,msg=''
+    let ns=[...stage],spent=effectiveEmbers,msg=''
 
     if(card.id==='amp'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk*2,_origAtk:m._origAtk||m.atk,tempBuff:true,buffCount:(m.buffCount||0)+1});msg='⚡ '+m.name+' doubled ATK!';addFloat('×2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#9933cc')}
-    else if(card.id==='warmup'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+1,buffCount:(m.buffCount||0)+1});msg='🎵 '+m.name+' +1 ATK!';addFloat('+1 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#9933cc')}
+    else if(card.id==='battlecry'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+1,buffCount:(m.buffCount||0)+1});msg='🤘 '+m.name+' Battle Cry! +1 ATK forever!';addFloat('+1 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4400')}
     else if(card.id==='newstrings'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,buffCount:(m.buffCount||0)+1});msg='🎸 '+m.name+' +2 ATK permanently!';addFloat('+2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#e8a820')}
     else if(card.id==='encore'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{encoreReady:true,buffCount:(m.buffCount||0)+1});msg='🔁 '+m.name+' encores!';addFloat('ENCORE!',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#dd2222')}
     else if(card.id==='roadie'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{stoneShield:true,buffCount:(m.buffCount||0)+1});msg='🛡 '+m.name+' shielded!'}
@@ -792,6 +800,40 @@ export default function App(){
     }
     else if(card.id==='burnset'){const res=drawUpTo([],deck,discardPile,HAND_SIZE);setHand(res.h);setDeck(res.d);setDiscardPile([...res.disc,...hand]);msg='🔥 Hand burned! Drew 6 new cards.'}
     else if(card.id==='overdrive'){if(corruption>80){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{addLog('⚠ Need >80% Corruption.');return false}}
+    else if(card.id==='crowdsurf'){
+      const dmg=hand.length*2
+      const bc=getCenter(bossRef)
+      const csHp=Math.max(0,enemyHp-dmg);setEnemyHp(csHp)
+      addFloat(dmg,bc.x,bc.y-60,'#9933cc',dmg>=10);playHit();updStat('totalDamage',dmg)
+      if(csHp<=0)setTimeout(triggerVictory,500)
+      msg='🏄 Crowd Surf! '+hand.length+' cards × 2 = '+dmg+' damage!'
+    }
+    else if(card.id==='doubledown'){
+      setNextCardFree(true)
+      msg='🎰 Double Down! Next card costs 0 Embers.'
+      addFloat('FREE!',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
+    }
+    else if(card.id==='deathriff'){
+      const ddmg=Math.floor(100-corruption)
+      const bc=getCenter(bossRef)
+      const drHp=Math.max(0,enemyHp-ddmg);setEnemyHp(drHp)
+      const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true)
+      addFloat(ddmg,bc.x,bc.y-60,'#880000',ddmg>=20);playHit();updStat('totalDamage',ddmg)
+      if(drHp<=0)setTimeout(triggerVictory,500)
+      msg='💀 Death Riff! '+(100-Math.floor(corruption))+'% = '+ddmg+' dmg. Corruption +10%.'
+    }
+    else if(card.id==='ampoverload'){
+      setEmbers(p=>Math.min(maxEmbers,p+3));setSkipNextDiscard(true);playEmber()
+      msg='🔋 Amp Overload! +3 Embers. Next Discard skipped.'
+      addFloat('+3 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#ff6600')
+    }
+    else if(card.id==='ampstatic'){
+      const bonus=Math.floor(corruption/20)
+      if(bonus===0){addLog('📶 Need some Corruption first!');return false}
+      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+bonus,tempBuff:true,_origAtk:m._origAtk||m.atk,buffCount:(m.buffCount||0)+1}):m)
+      msg='📶 Amp the Static! All members +'+bonus+' ATK this Strike!'
+      addFloat('+'+bonus+' ATK',getCenter(bossRef).x,getCenter(bossRef).y-70,'#cc4400',bonus>=3)
+    }
     else if(card.id==='sabbathsigil'){
       setCorruption(100);updStat('maxCorruption',100,true)
       const roll=Math.floor(Math.random()*10)+1
@@ -904,6 +946,7 @@ export default function App(){
 
   const handleDiscard=useCallback(()=>{
     if(selected.length===0||discardsLeft<=0||animPhase!=='idle')return
+    if(skipNextDiscard){setSkipNextDiscard(false);addLog('🔋 Discard skipped (Amp Overload).');return}
     const toDisc=hand.filter(c=>selected.includes(c.uid))
     const rem=hand.filter(c=>!selected.includes(c.uid))
     const res=drawUpTo(rem,deck,[...discardPile,...toDisc],HAND_SIZE)
@@ -1070,7 +1113,7 @@ export default function App(){
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(nextEnemy.maxHp)
     setEmbers(maxEmbers);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0)
+    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setNextCardFree(false);setSkipNextDiscard(false)
     setStage(p=>p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false}):null))
     // Redeal hand from current deck+discard
     setDeck(function(curDeck){
