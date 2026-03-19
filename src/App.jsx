@@ -139,6 +139,34 @@ function getCenter(ref){
   return{x:r.left+r.width/2,y:r.top+r.height/2}
 }
 
+// ── STARTER ARTIFACTS A1-A10 ─────────────────────────────────
+const STARTER_ARTIFACTS=[
+  {id:'a1',name:'Vintage Guitar',emoji:'🎸',effect:'Lead guitarist starts every fight with +1 ATK permanently.',cost:10},
+  {id:'a2',name:"Devil's Tuning Fork",emoji:'🔱',effect:'Every fight begins with Corruption already at 15%.',cost:8},
+  {id:'a3',name:'The Evil Eye',emoji:'🧿',effect:'The first card you play each Strike costs 0 Embers.',cost:20,rare:true},
+  {id:'a4',name:"Roadie's Toolbelt",emoji:'🧰',effect:'At the start of each fight, one random member gains Stonewall (immune to Too Stoned once).',cost:6},
+  {id:'a5',name:'Haunted Radio',emoji:'📻',effect:'Tapped Out gives +6 Embers instead of +5. Power Tap gives +2 instead of +1.',cost:8},
+  {id:'a6',name:'Black Candle',emoji:'🕯',effect:'When any band member goes Too Stoned, deal 8 damage to the boss.',cost:12},
+  {id:'a7',name:"The Serpent's Kiss",emoji:'🐍',effect:'Start each fight with 1 extra Ember permanently (max 8 total).',cost:18},
+  {id:'a8',name:'Stone Tablet',emoji:'🪨',effect:'All band members gain +3 max HP permanently.',cost:12},
+  {id:'a9',name:'Resonance Coil',emoji:'⚙️',effect:'Resonance (duplicate played) refunds 2 Embers instead of 1, and draws 1 card next Strike.',cost:10},
+  {id:'a10',name:'Burning Stage',emoji:'🔥',effect:'Win a fight in 1 Strike: gain 5 Embers at the start of the next fight.',cost:10},
+]
+
+// ── STARTER PASSIVES P1-P10 (CD-Rs) ───────────────────────────
+const STARTER_PASSIVES=[
+  {id:'p1',name:'Power Chord',emoji:'💿',effect:'Gain 1 extra Ember at the start of every fight.',cost:6},
+  {id:'p2',name:'Roadie Crew',emoji:'💿',effect:'At the start of each fight, one random member heals 3 HP.',cost:8},
+  {id:'p3',name:'Merch Table',emoji:'💿',effect:'After each fight victory, gain +2 bonus Stash.',cost:6},
+  {id:'p4',name:'Feedback Hum',emoji:'💿',effect:'All EMBER type cards give 1 additional Ember when played.',cost:10},
+  {id:'p5',name:'Amp Stack',emoji:'💿',effect:'Sound Wall deals +4 additional damage. Heavy Riff deals +2 additional damage.',cost:10},
+  {id:'p6',name:'Cult Following',emoji:'💿',effect:'Each time any member goes Too Stoned, gain 3 Stash.',cost:10},
+  {id:'p7',name:'Guitar Tech',emoji:'💿',effect:'Battle Cry gives +2 ATK permanently instead of +1.',cost:8},
+  {id:'p8',name:'Green Room',emoji:'💿',effect:'At the start of each fight, all members gain Stonewall (immune to first Too Stoned event).',cost:16},
+  {id:'p9',name:'Heavy Rotation',emoji:'💿',effect:'When you draw a duplicate card into your hand, draw 1 extra card next Strike.',cost:10},
+  {id:'p10',name:'Stage Fright Reversal',emoji:'💿',effect:'The first Strike of every fight deals +10 bonus damage.',cost:14},
+]
+
 const CIRCLE_ARTIFACTS=[
   {name:'The Goat of Mendes',emoji:'🐐',effect:'All band members gain +1 ATK permanently.',cost:14},
   {name:'Hellfire Amulet',emoji:'🔮',effect:'Start each fight with +2 bonus Embers.',cost:17},
@@ -350,7 +378,7 @@ function BoosterScreen({onComplete,seed}){
   )
 }
 
-function ShopScreen({stash,onSpend,onLeave,circleArtifact,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex}){
+function ShopScreen({stash,onSpend,onLeave,circleArtifact,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives}){
   const [pawnMode,setPawnMode]=useState(false)
   const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
   const circleNum=Math.floor(fightIndex/3)+1
@@ -462,6 +490,48 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,recruitPack,shopCards,
               })}
             </div>
           </div>
+
+          {/* Starter Artifacts for Sale */}
+          {activeArtifacts&&activeArtifacts.length<3&&<div style={{marginBottom:12}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:3,color:'#8a6020',textTransform:'uppercase',marginBottom:8}}>⚗ Artifacts ({activeArtifacts.length}/3 slots)</div>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              {(starterArtifacts||[]).filter(a=>!activeArtifacts.some(ea=>ea.id===a.id)).slice(0,3).map((art,i)=>{
+                const canBuy=stash>=art.cost
+                return(
+                  <div key={i} style={{flex:'1 1 120px',background:'linear-gradient(180deg,#1e1408,#0e0804)',border:`1px solid ${canBuy?'#c87820':'rgba(80,50,10,0.3)'}`,borderRadius:6,padding:'8px',opacity:canBuy?1:0.55}}>
+                    <div style={{fontSize:20,textAlign:'center',marginBottom:3}}>{art.emoji}</div>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#e8c070',textAlign:'center',marginBottom:2}}>{art.name}</div>
+                    <div style={{fontFamily:"'IM Fell English',serif",fontSize:8,color:'#9a8050',textAlign:'center',fontStyle:'italic',lineHeight:1.3,marginBottom:6}}>{art.effect}</div>
+                    <button onClick={()=>canBuy&&onSpend(art.cost,'artifact',art)} disabled={!canBuy}
+                      style={{width:'100%',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'4px',background:canBuy?'rgba(200,120,20,0.22)':'rgba(20,12,5,0.5)',border:`1px solid ${canBuy?'#c87820':'rgba(60,40,10,0.3)'}`,borderRadius:2,color:canBuy?'#e8a820':'#4a3010',cursor:canBuy?'pointer':'not-allowed'}}>
+                      🌿 {art.cost}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>}
+
+          {/* Starter Passives for Sale */}
+          {activePassives&&activePassives.length<5&&<div style={{marginBottom:12}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:3,color:'#8a6020',textTransform:'uppercase',marginBottom:8}}>💿 Passives / CD-Rs ({activePassives.length}/5 slots)</div>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              {(starterPassives||[]).filter(p=>!activePassives.some(ep=>ep.id===p.id)).slice(0,3).map((pas,i)=>{
+                const canBuy=stash>=pas.cost
+                return(
+                  <div key={i} style={{flex:'1 1 120px',background:'linear-gradient(180deg,#14101e,#0a0812)',border:`1px solid ${canBuy?'rgba(100,80,200,0.5)':'rgba(50,40,80,0.3)'}`,borderRadius:6,padding:'8px',opacity:canBuy?1:0.55}}>
+                    <div style={{fontSize:20,textAlign:'center',marginBottom:3}}>{pas.emoji}</div>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#aaddff',textAlign:'center',marginBottom:2}}>{pas.name}</div>
+                    <div style={{fontFamily:"'IM Fell English',serif",fontSize:8,color:'#8080b0',textAlign:'center',fontStyle:'italic',lineHeight:1.3,marginBottom:6}}>{pas.effect}</div>
+                    <button onClick={()=>canBuy&&onSpend(pas.cost,'passive',pas)} disabled={!canBuy}
+                      style={{width:'100%',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'4px',background:canBuy?'rgba(80,60,180,0.22)':'rgba(20,12,5,0.5)',border:`1px solid ${canBuy?'rgba(100,80,200,0.5)':'rgba(60,40,10,0.3)'}`,borderRadius:2,color:canBuy?'#aaddff':'#4a3010',cursor:canBuy?'pointer':'not-allowed'}}>
+                      🌿 {pas.cost}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>}
 
           {/* Booster Packs */}
           <div>
@@ -879,6 +949,12 @@ export default function App(){
   const [deathCause,setDeathCause]=useState('fallen')
   const [hellquakeAnim,setHellquakeAnim]=useState(null)
   const [circleArtifact]=useState(()=>CIRCLE_ARTIFACTS[Math.floor(Math.random()*CIRCLE_ARTIFACTS.length)])
+  const [activeArtifacts,setActiveArtifacts]=useState([]) // max 3
+  const [activePassives,setActivePassives]=useState([])   // max 5
+  const [pendingBurningStage,setPendingBurningStage]=useState(false) // burning stage bonus next fight
+  const [extraEmberNextFight,setExtraEmberNextFight]=useState(0)    // from burning stage
+  const [resonanceCoilActive,setResonanceCoilActive]=useState(false)
+  const [powerChordActive,setPowerChordActive]=useState(false)
   const [shopCards,setShopCards]=useState(()=>genShopCards(1))
   const [boosterPacks,setBoosterPacks]=useState(()=>genBoosterPacks(1))
   const [recruitPack,setRecruitPack]=useState(()=>genRecruitPack())
@@ -937,7 +1013,7 @@ export default function App(){
     let ns=[...stage],spent=effectiveEmbers,msg=''
 
     if(card.id==='amp'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk*2,_origAtk:m._origAtk||m.atk,tempBuff:true,buffCount:(m.buffCount||0)+1});msg='⚡ '+m.name+' doubled ATK!';addFloat('×2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#9933cc')}
-    else if(card.id==='battlecry'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+1,buffCount:(m.buffCount||0)+1});msg='🤘 '+m.name+' Battle Cry! +1 ATK forever!';addFloat('+1 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4400')}
+    else if(card.id==='battlecry'){if(!m)return false;const bcBonus=activePassives.some(p=>p.id==='p7')?2:1;ns[slotIdx]=Object.assign({},m,{atk:m.atk+bcBonus,buffCount:(m.buffCount||0)+1});msg='🤘 '+m.name+' Battle Cry! +'+bcBonus+' ATK forever!';addFloat('+'+bcBonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4400')}
     else if(card.id==='newstrings'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,buffCount:(m.buffCount||0)+1});msg='🎸 '+m.name+' +2 ATK permanently!';addFloat('+2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#e8a820')}
     else if(card.id==='encore'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{encoreReady:true,buffCount:(m.buffCount||0)+1});msg='🔁 '+m.name+' encores!';addFloat('ENCORE!',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#dd2222')}
     else if(card.id==='roadie'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{stoneShield:true,buffCount:(m.buffCount||0)+1});msg='🛡 '+m.name+' shielded!'}
@@ -997,8 +1073,8 @@ export default function App(){
     }
     else if(card.id==='controlfeedback'){setCorruption(50);msg='🎚 Corruption set to 50%.'}
     else if(card.id==='feedbackloop'){const dmg=Math.floor(corruption/2);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'}
-    else if(card.id==='soundwall'){const swDmg=fightIndex===0?5:fightIndex===1?8:12;const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(triggerVictory,500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
-    else if(card.id==='groupie'){const gain=3;setEmbers(function(p){return Math.min(maxEmbers,p+gain-card.embers)});spent=0;playEmber();msg='🍯 Groupie! Net +'+(gain-card.embers)+' Embers.';addFloat('+'+gain+' 🔥',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')}
+    else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?4:0;const swDmg=(fightIndex===0?5:fightIndex===1?8:12)+p5Bonus;const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(triggerVictory,500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
+    else if(card.id==='groupie'){const gain=3+(activePassives.some(p=>p.id==='p4')?1:0);setEmbers(function(p){return Math.min(maxEmbers,p+gain-card.embers)});spent=0;playEmber();msg='🍯 Groupie! Net +'+(gain-card.embers)+' Embers.';addFloat('+'+gain+' 🔥',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')}
     else if(card.id==='tappedout'){setPendingEmbers(function(p){return p+5});spent=0;playEmber();msg='🪙 Tapped Out! +5 Embers next Strike.'}
     else if(card.id==='demotape'){
       if(!lastRiffPlayed){addLog('📼 No riff recorded yet.');return false}
@@ -1078,8 +1154,10 @@ export default function App(){
       addFloat('+'+stacks+' ATK!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#6600aa',stacks>=3)
     }
     else if(card.id==='powertap'){
-      setEmbers(p=>Math.min(maxEmbers,p+1));playEmber();spent=0
-      msg='🔌 Power Tap! +1 Ember.'
+      const ptBonus=activeArtifacts.some(a=>a.id==='a5')?2:1
+      const p4Bonus=activePassives.some(p=>p.id==='p4')?1:0
+      setEmbers(p=>Math.min(maxEmbers,p+ptBonus+p4Bonus));playEmber();spent=0
+      msg='🔌 Power Tap! +'+(ptBonus+p4Bonus)+' Ember'+(ptBonus+p4Bonus>1?'s!':'!')
     }
     else if(card.id==='soundboard'){
       setEmbers(p=>Math.min(maxEmbers,p+2));playEmber();spent=0
@@ -1098,8 +1176,9 @@ export default function App(){
       addFloat('+2 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='heavyriff'){
+      const p5HeavyBonus=activePassives.some(p=>p.id==='p5')?2:0
       const activeAtk=stage.filter(m=>m&&!m.tooStoned).reduce((sum,m)=>sum+m.atk,0)
-      const dmg=Math.floor(activeAtk/2)
+      const dmg=Math.floor(activeAtk/2)+p5HeavyBonus
       const bc=getCenter(bossRef)
       const hrHp=Math.max(0,enemyHp-dmg);setEnemyHp(hrHp)
       addFloat(dmg,bc.x,bc.y-60,'#9933cc',dmg>=10);playHit();updStat('totalDamage',dmg)
@@ -1238,7 +1317,9 @@ export default function App(){
           const resonant=remaining[resonantIdx]
           const withoutResonant=remaining.filter((_,i)=>i!==resonantIdx)
           setDiscardPile(p=>[...p,card,resonant])
-          setEmbers(p=>Math.min(maxEmbers,p+1))
+          const resonanceEmbers=activeArtifacts.some(a=>a.id==='a9')?2:1
+          setEmbers(p=>Math.min(maxEmbers,p+resonanceEmbers))
+          if(activeArtifacts.some(a=>a.id==='a9'))setPendingEmbers(p=>p+1)// draw extra card via pending
           setTimeout(()=>{
             addFloat('RESONANCE +🔥',getCenter(bossRef).x,getCenter(bossRef).y-110,'#e8a820',false)
             addLog('🎵 Resonance! Duplicate discarded for +1 Ember.')
@@ -1295,6 +1376,10 @@ export default function App(){
     // Bonus scales with circle depth
   const circleNum=Math.floor(fightIndex/3)+1
   const perfectBonus=strikesLeft>=3?(circleNum):0 // won in 1 Strike = perfect
+  if(strikesLeft>=3&&activeArtifacts.some(a=>a.id==='a10')){
+    setPendingBurningStage(true)
+    addLog('🔥 Burning Stage! +5 Embers next fight.')
+  }
   const circleBaseMin=[2,4,6,8,10,10,12,12,15]
   const circleBaseRange=[3,3,3,3,4,4,5,5,6]
   const baseMin=circleBaseMin[Math.min(circleNum-1,8)]
@@ -1303,6 +1388,7 @@ export default function App(){
     setStash(function(p){return Math.min(MAX_STASH,p+stashEarned)})
     updStat('stashEarned',stashEarned);updStat('fightsSurvived',1)
     if(Math.random()<0.15){setStash(p=>Math.min(MAX_STASH,p+2));addLog('🎽 Found some merch money! +2 Stash.')}
+    if(activePassives.some(p=>p.id==='p3')){setStash(p=>Math.min(MAX_STASH,p+2));addLog('💿 Merch Table! +2 Stash.')}
     if(corruption>=69){setStash(p=>Math.min(MAX_STASH,p+3));addLog('🌀 Corruption Dividend! +3 Stash (69%+ corruption!)')}
     if(perfectBonus>0)addFloat('PERFECT! +'+perfectBonus,getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
     addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.'))
@@ -1340,10 +1426,11 @@ export default function App(){
     if(bandBonus>1)addLog('🎸 Band synergy! '+buffed.length+' buffed: +'+Math.round((bandBonus-1)*100)+'% damage!')
 
     const hasDbl=actives.some(m=>m.role==='Drummer')
+    const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===MAX_STRIKES?10:0
     let dmg=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
       const effectiveAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
       return s+effectiveAtk
-    },0)
+    },0)+p10Bonus
     // DOUBLE TIME d6 multiplier
     let dblMode='', dblMult=1
     if(hasDbl){
@@ -1434,6 +1521,16 @@ export default function App(){
                 ns2[ti]=Object.assign({},ns2[ti],{hp:0,tooStoned:true})
                 addLog('💨 '+target.name+' is TOO STONED!')
                 updStat('tooStonedCount',1)
+                // A6: Black Candle — deal 8 damage
+                if(activeArtifacts.some(a=>a.id==='a6')){
+                  setEnemyHp(ehp=>Math.max(0,ehp-8))
+                  addLog('🕯 Black Candle! 8 damage from '+target.name+''s sacrifice.')
+                }
+                // P6: Cult Following — gain 3 Stash
+                if(activePassives.some(p=>p.id==='p6')){
+                  setStash(ps=>Math.min(MAX_STASH,ps+3))
+                  addLog('🎭 Cult Following! +3 Stash.')
+                }
                 addFloat('TOO STONED',getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-60,'#888',false)
               } else {
                 ns2[ti]=Object.assign({},ns2[ti],{hp:Math.max(0,newHp),stoneShield:false})
@@ -1509,6 +1606,58 @@ export default function App(){
       return curDeck
     })
     addLog('⛧ Fight '+(nextIdx+1)+': '+nextEnemy.name+' awaits!')
+    // ── ARTIFACT FIGHT-START EFFECTS ───────────────────────
+    // A1: Vintage Guitar — lead guitarist +1 ATK
+    const hasVintageGuitar=activeArtifacts.some(a=>a.id==='a1')
+    // A2: Devil's Tuning Fork — start at 15% corruption (applied below)
+    const hasDevilsFork=activeArtifacts.some(a=>a.id==='a2')
+    // A3: Evil Eye — first card each Strike free (state reset each fight)
+    if(activeArtifacts.some(a=>a.id==='a3'))setNextCardFree(true)
+    // A4: Roadie's Toolbelt — random member Stonewall
+    const hasToolbelt=activeArtifacts.some(a=>a.id==='a4')
+    // A7: Serpent's Kiss — handled via maxEmbers permanently
+    // A8: Stone Tablet — handled via maxHp permanently
+    // A10: Burning Stage bonus embers
+    const burnBonus=pendingBurningStage?5:0
+    if(pendingBurningStage)setPendingBurningStage(false)
+    // ── PASSIVE FIGHT-START EFFECTS ──────────────────────────
+    const hasP1=activePassives.some(p=>p.id==='p1') // +1 ember
+    const hasP2=activePassives.some(p=>p.id==='p2') // +3 HP random member
+    const hasP8=activePassives.some(p=>p.id==='p8') // Stonewall all
+    // Apply stage modifications
+    setStage(prev=>{
+      let ns=[...prev]
+      // A1: Vintage Guitar — lead guitarist +1 ATK on fight start
+      if(hasVintageGuitar){
+        const li=ns.findIndex(m=>m&&m.role==='Lead Guitarist')
+        if(li>=0)ns[li]=Object.assign({},ns[li],{atk:ns[li].atk+1})
+      }
+      // A4: Roadie's Toolbelt — random member Stonewall
+      if(hasToolbelt){
+        const actives=ns.map((m,i)=>m?i:-1).filter(i=>i>=0)
+        if(actives.length>0){
+          const ri=actives[Math.floor(Math.random()*actives.length)]
+          ns[ri]=Object.assign({},ns[ri],{stoneShield:true})
+        }
+      }
+      // P2: Roadie Crew — random member +3 HP
+      if(hasP2){
+        const actives=ns.map((m,i)=>m&&!m.tooStoned?i:-1).filter(i=>i>=0)
+        if(actives.length>0){
+          const ri=actives[Math.floor(Math.random()*actives.length)]
+          ns[ri]=Object.assign({},ns[ri],{hp:Math.min(ns[ri].maxHp,ns[ri].hp+3)})
+        }
+      }
+      // P8: Green Room — all members Stonewall
+      if(hasP8){ns=ns.map(m=>m?Object.assign({},m,{stoneShield:true}):null)}
+      return ns
+    })
+    // Corruption start (A2)
+    if(hasDevilsFork)setCorruption(15)
+    // Extra embers from Serpent's Kiss (P1 + burning stage)
+    const extraEm=(hasP1?1:0)+burnBonus
+    setEmbers(p=>Math.min(maxEmbers,p+extraEm))
+    if(extraEm>0)addLog('🌿 Ember bonus: +'+(extraEm)+' (passives/artifacts)')
     // Roll DOUBLE TIME d6 if drummer is on stage
     const hasDrummer=stage.some(m=>m&&m.role==='Drummer')
     if(hasDrummer){
@@ -1528,6 +1677,18 @@ export default function App(){
       setDeck(p=>[...p,nc])
       setShopBoughtIds(p=>[...p,nc.uid])
       addLog('🛒 Bought '+item.name+'!')
+    } else if(type==='artifact'){
+      if(activeArtifacts.length>=3){addLog('⚠ Artifact slots full! Max 3.');return}
+      setActiveArtifacts(p=>[...p,item])
+      // A7: Serpent's Kiss — permanent +1 max ember
+      if(item.id==='a7')setMaxEmbers(p=>Math.min(8,p+1))
+      // A8: Stone Tablet — permanent +3 max HP all members
+      if(item.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
+      addLog('⚗ Artifact equipped: '+item.name+'!')
+    } else if(type==='passive'){
+      if(activePassives.length>=5){addLog('⚠ Passive slots full! Max 5.');return}
+      setActivePassives(p=>[...p,item])
+      addLog('💿 Passive equipped: '+item.name+'!')
     } else if(type==='recruit'){
       // Pick random candidates from ALL_MUSICIANS (more options for better packs)
       const count=item.name.includes('Demonic')?6:item.name.includes('Experienced')?4:2
@@ -1571,6 +1732,7 @@ export default function App(){
     setEmbers(5);setMaxEmbers(5);setStash(0);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0);setDeathCause('fallen')
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([])
+    setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
   }
 
@@ -1587,7 +1749,7 @@ export default function App(){
 
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES}/>
   if(gameState==='end')return <EndScreen won={won} cause={deathCause} stats={stats} seed={runSeed} onReset={handleReset}/>
 
   return(
@@ -1686,6 +1848,14 @@ export default function App(){
           <DeckPile count={discardPile.length} label="Discard"/>
         </div>
 
+        {/* ACTIVE PASSIVES/ARTIFACTS PANEL — toggleable */}
+        {(activeArtifacts.length>0||activePassives.length>0)&&<div style={{position:'absolute',right:231,bottom:0,zIndex:60,maxWidth:180}}>
+          <div style={{background:'rgba(10,5,2,0.95)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:'6px 0 0 6px',padding:'6px 8px'}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:2,color:'#8a6020',textTransform:'uppercase',marginBottom:4}}>Active</div>
+            {activeArtifacts.map((a,i)=><div key={i} style={{fontSize:11,color:'#c8a040',fontFamily:"'Cinzel',serif",marginBottom:1}}>{a.emoji} {a.name}</div>)}
+            {activePassives.map((p,i)=><div key={i} style={{fontSize:11,color:'#8090c0',fontFamily:"'Cinzel',serif",marginBottom:1}}>{p.emoji} {p.name}</div>)}
+          </div>
+        </div>}
         {/* RIGHT COLUMN: Buttons/Embers/Info — absolutely positioned */}
         <div style={{position:'absolute',right:0,top:0,bottom:32,zIndex:60,display:'flex',flexDirection:'column',gap:6,alignItems:'flex-end',justifyContent:'center',padding:'8px 12px',background:'rgba(10,5,2,0.6)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none'}}>
           <button onClick={handleStrike} disabled={!canStrike}
