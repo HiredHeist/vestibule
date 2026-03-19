@@ -167,6 +167,36 @@ const STARTER_PASSIVES=[
   {id:'p10',name:'Stage Fright Reversal',emoji:'💿',effect:'The first Strike of every fight deals +10 bonus damage.',cost:14},
 ]
 
+const BOSS_QUOTES={
+  'wanderer':'Finally... rest.',
+  'lostsoul':'I was looking for something. I forgot what.',
+  'drifter':'The road ends here. For now.',
+  'siren':'You resisted. No one resists forever.',
+  'tempter':'The flesh is weak. Even mine.',
+  'lust_boss':'Desire never truly dies. Remember that.',
+  'glutton':'Still... hungry...',
+  'feaster':'There is always... more...',
+  'gluttony_boss':'I consumed everything. Even myself.',
+  'miser':'My stash... my beautiful stash...',
+  'hoarder':'I was saving that for later...',
+  'greed_boss':'You cannot take it with you. Neither could I.',
+  'wrathful':'The rage remains. It always remains.',
+  'berserker':'I felt nothing but fury. Was that living?',
+  'anger_boss':'Your anger will outlast you. I promise.',
+  'heretic':'The truth was never yours to know.',
+  'apostate':'I chose the wrong side. Or the right one.',
+  'heresy_boss':'The doctrine... was flawed. I see that now.',
+  'brute':'Strong. But not strong enough.',
+  'hunter':'I never missed. Until today.',
+  'violence_boss':'I executed thousands. You executed me.',
+  'trickster':'Ha. Good trick.',
+  'deceiver':'Was anything real? No. Nothing was.',
+  'fraud_boss':'The greatest fraud was believing I could win.',
+  'traitor':'I betrayed everyone. Fitting that I fall last.',
+  'betrayer':'Trust no one. I never did. Still lost.',
+  'lucifer':'Impressive. I\'ll be seeing you again. Soon.',
+}
+
 const CIRCLE_ARTIFACTS=[
   {name:'The Goat of Mendes',emoji:'🐐',effect:'All band members gain +1 ATK permanently.',cost:14},
   {name:'Hellfire Amulet',emoji:'🔮',effect:'Start each fight with +2 bonus Embers.',cost:17},
@@ -644,6 +674,8 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       ):(
         <div style={{position:'absolute',top:8,right:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>
       )}
+      {card.foil&&<div style={{position:'absolute',top:8,left:28,padding:'2px 5px',borderRadius:3,background:'rgba(255,215,0,0.3)',border:'1px solid rgba(255,215,0,0.6)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#ffd700',letterSpacing:1}}>✨FOIL</div>}
+      {card.mythic&&<div style={{position:'absolute',top:8,left:28,padding:'2px 5px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#cc44ff',letterSpacing:1}}>⛧MYTHIC</div>}
       {card.rarity==='Rare'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
       {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
       <div style={{height:115,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:54,background:'rgba(0,0,0,0.35)',position:'relative'}}>
@@ -707,35 +739,71 @@ function PhaseDots({left,total,color,wide}){
   const sz=wide?17:13;const start=total-left;return <div style={{display:'flex',gap:wide?4:4}}>{Array.from({length:total}).map((_,i)=>{const filled=i>=start;return <div key={i} style={{width:sz,height:sz,borderRadius:4,background:filled?color:'rgba(40,20,8,0.6)',border:`1px solid ${filled?color:'rgba(80,50,20,0.3)'}`,boxShadow:filled?`0 0 9px ${color}99`:'none',transition:'all 0.25s'}}/>})}</div>
 }
 
-function EndScreen({won,cause,stats,seed,onReset}){
+function EndScreen({won,cause,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge}){
   const isStoned=cause==='stoned'
   const isVictory=cause==='victory'
+  const circleReached=Math.floor((stats.fightsSurvived)/3)+1
+  const streakMsg=streakWins>1?'🔥 '+streakWins+' WIN STREAK!':streakLosses>2?'💀 '+streakLosses+' losses in a row...':''
   return(
-    <div style={{position:'fixed',inset:0,zIndex:9800,background:isStoned?'rgba(2,0,0,0.97)':isVictory?'rgba(4,3,1,0.96)':'rgba(3,1,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:18,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'30px 0'}}>
+    <div style={{position:'fixed',inset:0,zIndex:9800,background:isStoned?'rgba(2,0,0,0.97)':isVictory?'rgba(4,3,1,0.96)':'rgba(3,1,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
       {isStoned&&<div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,180,0,0.04) 2px,rgba(0,180,0,0.04) 4px)',animation:'interlaceFlicker 0.1s steps(1) infinite',pointerEvents:'none',zIndex:0}}/>}
       {isStoned&&<div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 20%,rgba(0,80,0,0.4) 100%)',pointerEvents:'none',zIndex:0,animation:'bgPulse 2s ease-in-out infinite'}}/>}
-      {/* Watermark */}
       <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
-        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:340,color:'rgba(180,180,180,0.07)',userSelect:'none',lineHeight:1,textAlign:'center'}}>Vestibule</div>
+        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:280,color:'rgba(180,180,180,0.06)',userSelect:'none',lineHeight:1}}>Vestibule</div>
       </div>
-      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:18}}>
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:isStoned?138:114,color:isStoned?'#cc1111':isVictory?'#d8c9a8':'#7a0000',textShadow:isStoned?'0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000,0 0 120px rgba(140,0,0,0.5)':isVictory?'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000':'0 0 60px rgba(100,0,0,0.6),3px 3px 0 #000'}}>{isStoned?'Stoned to the Bone':isVictory?'Victory':'Fallen'}</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:isStoned?30:25,color:isStoned?'rgba(200,80,80,0.9)':'#a09060',fontStyle:'italic'}}>{isStoned?'The band ran out of herb.':isVictory?'The Drifter has fallen. Circle II opens.':'The Vestibule claims another soul.'}</div>
-      <div style={{background:'rgba(20,12,4,0.8)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:6,padding:'24px 40px',minWidth:480}}>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:16,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:16}}>Run Statistics</div>
-        {[['Strikes Thrown',stats.strikesThrown],['Total Damage Dealt',stats.totalDamage],['Highest Strike Damage',stats.highestStrike],['Too Stoned Events',stats.tooStonedCount],['Cards Played',stats.cardsPlayed],['Max Corruption',stats.maxCorruption+'%'],['Stash Earned',stats.stashEarned+' 🌿'],['Fights Survived',stats.fightsSurvived+' / 3']].map(function(row){
-          return(
-            <div key={row[0]} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'4px 0',borderBottom:'1px solid rgba(80,50,10,0.2)'}}>
-              <span style={{fontFamily:"'IM Fell English',serif",fontSize:19,color:'#8a7040',fontStyle:'italic'}}>{row[0]}</span>
-              <span style={{fontFamily:"'Cinzel',serif",fontSize:21,fontWeight:900,color:'#c8a060'}}>{row[1]}</span>
-            </div>
-          )
-        })}
-      </div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:15,color:'#5a4a20',letterSpacing:2}}>RUN SEED: {seed.toString(16).toUpperCase()} — Share with friends!</div>
-      <button onClick={onReset} style={{fontFamily:"'Cinzel',serif",fontSize:22,letterSpacing:4,color:isStoned?'#ff3333':isVictory?'#ee2222':'#b09858',background:isStoned?'rgba(80,0,0,0.3)':isVictory?'rgba(100,0,0,0.22)':'transparent',border:isStoned?'2px solid #cc1111':isVictory?'2px solid #7a0000':'1px solid rgba(90,60,20,0.5)',borderRadius:3,padding:'13px 46px',cursor:'pointer',textTransform:'uppercase',boxShadow:isStoned?'0 0 30px rgba(180,0,0,0.4)':'none'}}>
-        {isVictory?'⛧ Play Again':'↺ Try Again'}
-      </button>
+      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
+        {/* Title */}
+        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:isStoned?110:90,color:isStoned?'#cc1111':isVictory?'#d8c9a8':'#7a0000',textShadow:isStoned?'-4px 0 rgba(255,0,0,0.9),4px 0 rgba(0,255,80,0.7),0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000':isVictory?'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000':'0 0 60px rgba(100,0,0,0.6),3px 3px 0 #000'}}>{isStoned?'Stoned to the Bone':isVictory?'⛧ Victory ⛧':'Fallen'}</div>
+        <div style={{fontFamily:"'IM Fell English',serif",fontSize:20,color:isStoned?'rgba(200,80,80,0.9)':'#a09060',fontStyle:'italic',textAlign:'center'}}>{isStoned?'The band ran out of herb.':isVictory?'All 9 circles conquered. Lucifer has fallen.':'The Vestibule claims another soul.'}</div>
+
+        {/* Streak banner */}
+        {streakMsg&&<div style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,color:streakWins>1?'#ff6600':'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:`1px solid ${streakWins>1?'#ff6600':'#aa4444'}`,borderRadius:4}}>{streakMsg}</div>}
+
+        {/* Stats grid */}
+        <div style={{background:'rgba(20,12,4,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'20px 32px',minWidth:520}}>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:13,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:14}}>Run Statistics</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'4px 32px'}}>
+            {[
+              ['Circle Reached', isVictory?'ALL 9 ⛧':circleReached+' / 9'],
+              ['Fights Survived', stats.fightsSurvived],
+              ['Strikes Thrown', stats.strikesThrown],
+              ['Cards Played', stats.cardsPlayed],
+              ['Total Damage', stats.totalDamage.toLocaleString()],
+              ['Highest Strike', stats.highestStrike.toLocaleString()],
+              ['Too Stoned Events', stats.tooStonedCount],
+              ['Max Corruption', stats.maxCorruption+'%'],
+              ['Stash Earned', stats.stashEarned+' 🌿'],
+              ['Total Runs', totalRuns||1],
+            ].map(function(row){
+              return(
+                <div key={row[0]} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'5px 0',borderBottom:'1px solid rgba(80,50,10,0.15)'}}>
+                  <span style={{fontFamily:"'IM Fell English',serif",fontSize:16,color:'#7a6040',fontStyle:'italic'}}>{row[0]}</span>
+                  <span style={{fontFamily:"'Cinzel',serif",fontSize:17,fontWeight:900,color:isVictory&&row[0]==='Circle Reached'?'#ffdd44':'#c8a060'}}>{row[1]}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Seed + daily */}
+        <div style={{display:'flex',gap:20,alignItems:'center'}}>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:12,color:'#5a4a20',letterSpacing:2}}>SEED: {seed.toString(16).toUpperCase()}</div>
+          {isDailyRun&&<div style={{fontFamily:"'Cinzel',serif",fontSize:12,color:'#e8a820',letterSpacing:2,padding:'3px 12px',border:'1px solid #e8a820',borderRadius:3}}>🌍 DAILY CHALLENGE</div>}
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#4a3a18',cursor:'pointer',letterSpacing:1}}
+            onClick={()=>navigator.clipboard&&navigator.clipboard.writeText(seed.toString(16).toUpperCase())}>📋 Copy Seed</div>
+        </div>
+
+        {/* Buttons */}
+        <div style={{display:'flex',gap:16,marginTop:4}}>
+          <button onClick={onReset}
+            style={{fontFamily:"'Cinzel',serif",fontSize:18,letterSpacing:4,color:isVictory?'#ee2222':'#b09858',background:isVictory?'rgba(100,0,0,0.22)':'transparent',border:isVictory?'2px solid #7a0000':'1px solid rgba(90,60,20,0.5)',borderRadius:3,padding:'12px 40px',cursor:'pointer',textTransform:'uppercase'}}>
+            {isVictory?'⛧ Play Again':'↺ Try Again'}
+          </button>
+          <button onClick={()=>onDailyChallenge&&onDailyChallenge()}
+            style={{fontFamily:"'Cinzel',serif",fontSize:14,letterSpacing:3,color:'#e8a820',background:'rgba(50,35,5,0.4)',border:'1px solid #c87820',borderRadius:3,padding:'12px 28px',cursor:'pointer',textTransform:'uppercase'}}>
+            🌍 Daily Challenge
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -905,7 +973,9 @@ function SetlistModal({cards,onConfirm,onClose}){
 
 export default function App(){
   const [gameState,setGameState]=useState('booster')
-  const [runSeed]=useState(()=>Math.floor(Math.random()*0xFFFFFF))
+  const getDailySeed=()=>{const d=new Date();return parseInt(d.getFullYear().toString()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'))}
+  const [runSeed,setRunSeed]=useState(()=>Math.floor(Math.random()*0xFFFFFF))
+  const [isDailyRun,setIsDailyRun]=useState(false)
   const [fightIndex,setFightIndex]=useState(0)
   const [enemy,setEnemy]=useState(ENEMIES[0])
   const [enemyHp,setEnemyHp]=useState(ENEMIES[0].maxHp)
@@ -950,6 +1020,10 @@ export default function App(){
   const [hellquakeAnim,setHellquakeAnim]=useState(null)
   const [circleArtifact]=useState(()=>CIRCLE_ARTIFACTS[Math.floor(Math.random()*CIRCLE_ARTIFACTS.length)])
   const [activeArtifacts,setActiveArtifacts]=useState([]) // max 3
+  const [discovered,setDiscovered]=useState(new Set())
+  const [streakWins,setStreakWins]=useState(0)
+  const [streakLosses,setStreakLosses]=useState(0)
+  const [totalRunsPlayed,setTotalRunsPlayed]=useState(0)
   const [activePassives,setActivePassives]=useState([])   // max 5
   const [pendingBurningStage,setPendingBurningStage]=useState(false) // burning stage bonus next fight
   const [extraEmberNextFight,setExtraEmberNextFight]=useState(0)    // from burning stage
@@ -976,6 +1050,16 @@ export default function App(){
   const addFloat=(v,x,y,color,big)=>{big=big||false;const id=fid.current++;setFloats(p=>[...p,{id,v,x,y,color:color||'#dd2222',big}])}
   const remFloat=id=>setFloats(p=>p.filter(f=>f.id!==id))
   const updStat=(key,val,isMax)=>{isMax=isMax||false;setStats(p=>Object.assign({},p,{[key]:isMax?Math.max(p[key],val):p[key]+val}))}
+  const discover=(mechanic,label)=>{
+    setDiscovered(prev=>{
+      if(prev.has(mechanic))return prev
+      const next=new Set(prev)
+      next.add(mechanic)
+      addFloat('⛧ DISCOVERED: '+label,getCenter(bossRef).x,getCenter(bossRef).y-160,'#ffdd00',true)
+      addLog('⛧ DISCOVERED: '+label+' — first time!')
+      return next
+    })
+  }
 
   const drawUpTo=useCallback((h,d,disc,target)=>{
     let nh=[...h],nd=[...d],ndisc=[...disc]
@@ -1005,7 +1089,8 @@ export default function App(){
   },[runSeed])
 
   const applyCard=useCallback((card,slotIdx)=>{
-    const effectiveEmbers=nextCardFree&&card.id!=='doubledown'?0:card.embers
+    const foilDiscount=(card.foil&&card.embers>=2)?1:0
+    const effectiveEmbers=nextCardFree&&card.id!=='doubledown'?0:Math.max(0,card.embers-foilDiscount)
   if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers, have '+embers+'.');return false}
   if(nextCardFree&&card.id!=='doubledown'){setNextCardFree(false)}
     if(card.id==='stagedive'&&stageDiveUsed){addLog('⚠ Stage Dive once per round only.');return false}
@@ -1218,6 +1303,7 @@ export default function App(){
     }
     else if(card.id==='sabbathsigil'){
       setCorruption(100);updStat('maxCorruption',100,true)
+      discover('hellquake','HELLQUAKE')
       const roll=Math.floor(Math.random()*10)+1
       const bc=getCenter(bossRef)
       let hqMsg='',hqFloat='',hqColor='#aa1111'
@@ -1319,6 +1405,7 @@ export default function App(){
           setDiscardPile(p=>[...p,card,resonant])
           const resonanceEmbers=activeArtifacts.some(a=>a.id==='a9')?2:1
           setEmbers(p=>Math.min(maxEmbers,p+resonanceEmbers))
+          discover('resonance','RESONANCE')
           if(activeArtifacts.some(a=>a.id==='a9'))setPendingEmbers(p=>p+1)// draw extra card via pending
           setTimeout(()=>{
             addFloat('RESONANCE +🔥',getCenter(bossRef).x,getCenter(bossRef).y-110,'#e8a820',false)
@@ -1392,13 +1479,19 @@ export default function App(){
     if(corruption>=69){setStash(p=>Math.min(MAX_STASH,p+3));addLog('🌀 Corruption Dividend! +3 Stash (69%+ corruption!)')}
     if(perfectBonus>0)addFloat('PERFECT! +'+perfectBonus,getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
     addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.'))
+    const bq=BOSS_QUOTES[enemy&&enemy.id];if(bq)setTimeout(()=>addLog('💀 "'+bq+'"'),600)
     setTimeout(function(){
       const isCircleBoss=(fightIndex+1)%3===0
       if(isCircleBoss){
         setMaxEmbers(function(p){const newMax=Math.min(MAX_EMBERS_CAP,p+1);setEmbers(newMax);return newMax})
         addFloat('MAX EMBERS +1',getCenter(bossRef).x,getCenter(bossRef).y-130,'#ff6600',true)
       }
-      if(fightIndex>=26){playVictory();setDeathCause('victory');setTimeout(function(){setGameState('end')},800)}
+      if(fightIndex>=26){
+      playVictory();setDeathCause('victory')
+      setStreakWins(p=>p+1);setStreakLosses(0)
+      setTotalRunsPlayed(p=>p+1)
+      setTimeout(function(){setGameState('end')},800)
+    }
       else{
         const nextCn=Math.floor((fightIndex+1)/3)+1
         setShopCards(genShopCards(nextCn))
@@ -1538,7 +1631,7 @@ export default function App(){
               addFloat(actualDmg,getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-50,'#ff3300',false)
             }
             const allStoned=ns2.filter(function(m){return m}).every(function(m){return m.tooStoned})
-            if(allStoned){setDeathCause('fallen');setTimeout(function(){setGameState('end')},800)}
+            if(allStoned){discover('allstoned','TOTAL WIPEOUT');setDeathCause('fallen');setTimeout(function(){setGameState('end')},800)}
             return ns2
           })
           setDamageFlash(true);setTimeout(function(){setDamageFlash(false)},400)
@@ -1733,6 +1826,7 @@ export default function App(){
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0);setDeathCause('fallen')
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([])
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
+    setDiscovered(new Set())
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
   }
 
@@ -1750,7 +1844,7 @@ export default function App(){
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES}/>
-  if(gameState==='end')return <EndScreen won={won} cause={deathCause} stats={stats} seed={runSeed} onReset={handleReset}/>
+  if(gameState==='end')return <EndScreen won={won} cause={deathCause} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}}/>
 
   return(
     <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none'}}>
