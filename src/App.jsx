@@ -1328,7 +1328,7 @@ export default function App(){
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(nextEnemy.maxHp)
-    setEmbers(maxEmbers);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
+    setEmbers(function(){return maxEmbers});setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
     setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false)
     setStage(p=>p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false}):null))
     // Redeal hand from current deck+discard
@@ -1345,7 +1345,7 @@ export default function App(){
     })
     addLog('⛧ Fight '+(nextIdx+1)+': '+nextEnemy.name+' awaits!')
     setGameState('playing')
-  },[fightIndex])
+  },[fightIndex,maxEmbers])
 
   const handleShopSpend=useCallback((cost,type,item)=>{
     if(stash<cost)return
