@@ -73,7 +73,7 @@ const ALL_CARDS=[
   {id:'darktuning',name:'Dark Tuning',type:'CORRUPT',rarity:'Uncommon',emoji:'🌑',embers:3,effect:'For each 20% Corruption, one random member gains +1 ATK permanently.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'powertap',name:'Power Tap',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'Gain 1 Ember.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'soundboard',name:'Soundboard',type:'EMBER',rarity:'Uncommon',emoji:'🎛',embers:1,effect:'Gain 2 Embers. Draw 1 extra card next Strike.',color:'#c87820',typeColor:'#a05a10',copies:1},
-  {id:'setbreak',name:'Setbreak',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Auto-discard the lowest-cost card in hand. Gain 2 Embers.',color:'#22aa44',typeColor:'#118833',copies:2},
+  {id:'setbreak',name:'Setbreak',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Discard a random card from hand. Gain 2 Embers.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'heavyriff',name:'Heavy Riff',type:'RIFF',rarity:'Uncommon',emoji:'🥊',embers:2,effect:'Deal damage = stage total ATK ÷ 2, direct to boss.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'resonancecard',name:'Resonance',type:'RIFF',rarity:'Uncommon',emoji:'🌀',embers:1,effect:'Target member ATK becomes equal to highest ATK on stage.',color:'#9933cc',typeColor:'#7722aa',copies:1},
 ]
@@ -887,14 +887,13 @@ export default function App(){
       addFloat('+2 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='setbreak'){
-      // Find lowest-cost card in hand that isn't Setbreak itself
       const candidates=hand.filter(c=>c.uid!==card.uid)
       if(candidates.length===0){addLog('🎼 No cards to discard!');return false}
-      const lowest=candidates.reduce((a,b)=>a.embers<=b.embers?a:b)
-      setHand(p=>p.filter(c=>c.uid!==lowest.uid))
-      setDiscardPile(p=>[...p,lowest])
+      const victim=candidates[Math.floor(Math.random()*candidates.length)]
+      setHand(p=>p.filter(c=>c.uid!==victim.uid))
+      setDiscardPile(p=>[...p,victim])
       setEmbers(p=>Math.min(maxEmbers,p+2));playEmber();spent=0
-      msg='🎼 Setbreak! Discarded '+lowest.name+' ('+lowest.embers+'e) for +2 Embers.'
+      msg='🎼 Setbreak! '+victim.name+' sacrificed to the riff gods. +2 Embers.'
       addFloat('+2 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='heavyriff'){
