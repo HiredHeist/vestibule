@@ -206,7 +206,7 @@ function BoosterScreen({onComplete,seed}){
       <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#4a3a20',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
 
       {/* MEMBER CARDS — 7 in a flexible row */}
-      <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',maxWidth:1300,flexShrink:0}}>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',maxWidth:1206,flexShrink:0,marginBottom:4}}>
         {pool.map(m=>{
           const isSel=sel.includes(m.id),dis=!isSel&&sel.length>=2
           const kw=m.keyword||''
@@ -242,9 +242,9 @@ function BoosterScreen({onComplete,seed}){
       </div>
 
       {/* ABILITY EXPLANATION BOX */}
-      <div style={{background:'rgba(10,6,2,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'14px 24px',maxWidth:900,width:'100%',flexShrink:0}}>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:12}}>⚗ Band Abilities — What Do They Mean?</div>
-        <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center'}}>
+      <div style={{background:'rgba(10,6,2,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'20px 28px',maxWidth:1206,width:'100%',flexShrink:0,marginTop:8}}>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:13,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:16}}>⚗ Band Abilities — What Do They Mean?</div>
+        <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
           {[
             ['FRENZIED','#ee2222','⚡','Each time the boss is defeated, this member gains +1 ATK permanently.'],
             ['DOUBLE TIME','#ff8800','🥁','When this drummer is on stage, ALL band ATK is doubled.'],
@@ -252,11 +252,11 @@ function BoosterScreen({onComplete,seed}){
             ['CORRUPT','#cc44ff','🌀','ATK scales up the higher your Corruption is.'],
             ['DEBUFF','#4488ff','🎤','Each Strike reduces how much damage the boss deals by 1.'],
           ].map(([kw,color,icon,desc])=>(
-            <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:8,background:'rgba(0,0,0,0.4)',borderRadius:5,padding:'8px 12px',border:`1px solid ${color}33`,minWidth:160,flex:'1 1 160px',maxWidth:200}}>
-              <div style={{fontSize:18,flexShrink:0}}>{icon}</div>
+            <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:10,background:'rgba(0,0,0,0.4)',borderRadius:6,padding:'12px 16px',border:`1px solid ${color}44`,flex:'1 1 180px'}}>
+              <div style={{fontSize:26,flexShrink:0,marginTop:2}}>{icon}</div>
               <div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:900,color:color,letterSpacing:1,marginBottom:3}}>{kw}</div>
-                <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:'#a09060',lineHeight:1.4,fontStyle:'italic'}}>{desc}</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,color:color,letterSpacing:1,marginBottom:5}}>{kw}</div>
+                <div style={{fontFamily:"'IM Fell English',serif",fontSize:15,color:'#c0a870',lineHeight:1.45,fontStyle:'italic'}}>{desc}</div>
               </div>
             </div>
           ))}
