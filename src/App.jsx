@@ -343,7 +343,7 @@ function BoosterScreen({onComplete,seed}){
       <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#4a3a20',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
 
       {/* MEMBER CARDS — 7 in a flexible row */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:16,maxWidth:920,flexShrink:0,marginBottom:4}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:16,width:'960px',flexShrink:0,marginBottom:4}}>
         {pool.map(m=>{
           const isSel=sel.includes(m.id),dis=!isSel&&sel.length>=2
           const kw=m.keyword||''
@@ -355,7 +355,7 @@ function BoosterScreen({onComplete,seed}){
                 borderRadius:7,cursor:dis?'not-allowed':'pointer',minWidth:0,
                 boxShadow:isSel?'0 0 30px rgba(232,168,32,0.4),0 8px 24px rgba(0,0,0,0.8)':'0 4px 16px rgba(0,0,0,0.7)',
                 opacity:dis?0.4:1,transform:isSel?'translateY(-8px) scale(1.04)':'none',
-                transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',position:'relative',flexShrink:0}}>
+                transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',position:'relative'}}>
               <div style={{height:5,borderRadius:'7px 7px 0 0',background:isSel?'linear-gradient(90deg,#e8a820,#ffcc44)':kwc+'66'}}/>
               {isSel&&<div style={{position:'absolute',top:8,right:8,width:24,height:24,borderRadius:'50%',background:'#e8a820',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,color:'#000',fontWeight:900}}>✓</div>}
               <div style={{height:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:54,background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
@@ -379,7 +379,7 @@ function BoosterScreen({onComplete,seed}){
       </div>
 
       {/* ABILITY EXPLANATION BOX */}
-      <div style={{background:'rgba(10,6,2,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'20px 28px',maxWidth:920,width:'100%',flexShrink:0,marginTop:8}}>
+      <div style={{background:'rgba(10,6,2,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'20px 28px',width:'960px',flexShrink:0,marginTop:8}}>
         <div style={{fontFamily:"'Cinzel',serif",fontSize:13,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:16}}>⚗ Band Abilities — What Do They Mean?</div>
         <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
           {[
