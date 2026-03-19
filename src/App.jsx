@@ -1539,7 +1539,7 @@ export default function App(){
     dmg=Math.round(dmg*bandBonus)
     const hasFolkMagic=actives.some(m=>m.keyword==='FOLK MAGIC')
     const folkMagicFired=hasFolkMagic&&Math.random()<0.2
-    addLog('⚔ Band attacks for '+dmg+'!'+(hasDbl?' ('+dblMode+' ×'+dblMult+'!)')+(folkMagicFired?' 🪈 FOLK MAGIC!':''))
+    addLog('⚔ Band attacks for '+dmg+'!'+(hasDbl?' ('+dblMode+' ×'+dblMult+'!)':'')+(folkMagicFired?' 🪈 FOLK MAGIC!':''))
 
     const bc=getCenter(bossRef)
     let delay=0
