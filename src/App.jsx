@@ -200,7 +200,7 @@ function BoosterScreen({onComplete,seed}){
   const toggle=id=>setSel(p=>p.includes(id)?p.filter(x=>x!==id):p.length<2?[...p,id]:p)
   const kwColor={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff'}
   return(
-    <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',gap:16,padding:'24px 20px',overflowY:'auto'}}>
+    <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,padding:'24px 20px',overflowY:'auto'}}>
       <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:52,color:'#d0b060',textShadow:'0 0 40px rgba(200,150,20,0.4),2px 2px 0 #000',flexShrink:0}}>Opening Night</div>
       <div style={{fontFamily:"'IM Fell English',serif",fontSize:18,color:'#a09060',fontStyle:'italic',flexShrink:0}}>Select 2 musicians to start your band</div>
       <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#4a3a20',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
@@ -264,9 +264,10 @@ function BoosterScreen({onComplete,seed}){
       </div>
 
       <button onClick={()=>sel.length===2&&onComplete(sel)} disabled={sel.length<2}
-        style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'14px 52px',background:sel.length===2?'rgba(130,0,0,0.35)':'rgba(30,15,5,0.4)',border:`2px solid ${sel.length===2?'#bb1111':'#2a1508'}`,borderRadius:3,color:sel.length===2?'#ee2222':'#3a1a08',cursor:sel.length===2?'pointer':'not-allowed',transition:'all 0.2s',flexShrink:0}}>
+        style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'14px 52px',background:'rgba(130,0,0,0.35)',border:'2px solid #cc1111',borderRadius:3,color:'#ee2222',cursor:sel.length===2?'pointer':'default',transition:'all 0.2s',flexShrink:0,boxShadow:'0 0 22px rgba(180,0,0,0.5)',opacity:sel.length===2?1:0.45,textShadow:'0 0 14px rgba(200,0,0,0.6)'}}>
         {sel.length===2?'⛧  Take the Stage':'Select 2 Musicians'}
       </button>
+    
     </div>
   )
 }
