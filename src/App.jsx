@@ -470,13 +470,13 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       onMouseEnter={onHover} onMouseLeave={onLeave} onClick={onClick}
       style={{width:190,height:295,flexShrink:0,position:'relative',display:'flex',flexDirection:'column',
         background:isSelected?'linear-gradient(180deg,#2a1a0a,#160e05)':'linear-gradient(180deg,#201408,#100804)',
-        border:isSelected?`2px solid #cc0000`:isHovered&&canAfford?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
+        border:isSelected?`2px solid #cc0000`:isHovered?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
         borderRadius:7,cursor:'grab',position:'relative',
         transformOrigin:'bottom center',
-        transform:isDragging?'scale(0.85) rotate(5deg)':isHovered&&canAfford?'translateY(-52px) scale(1.18) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
+        transform:isDragging?'scale(0.85) rotate(5deg)':isHovered?'translateY(-52px) scale(1.18) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
         zIndex:isDragging?0:isHovered?9999:anyHovered?1:isSelected?50:Math.max(1,Math.round(10-Math.abs(index-mid))),
-        boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered&&canAfford?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
+        boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
         opacity:isDragging?0.4:1,
         animation:shimmerAnim,
         margin:'0 -26px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
@@ -1514,15 +1514,15 @@ export default function App(){
           <button onClick={handleStrike} disabled={!canStrike}
             style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 20px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:190}}>⚔ Strike</button>
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'flex-end',width:190}}>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555',minWidth:28,textAlign:'right'}}>{strikesLeft}/{MAX_STRIKES}</span>
             <PhaseDots left={strikesLeft} total={MAX_STRIKES} color='#dd2222' wide={true}/>
+            <span style={{fontFamily:"'Cinzel',serif",fontSize:18,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555',minWidth:32,textAlign:'right'}}>{strikesLeft}/{MAX_STRIKES}</span>
           </div>
           <div style={{height:8}}/>
           <button onClick={handleDiscard} disabled={!canDiscard}
             style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 20px',background:canDiscard?'rgba(100,70,0,0.4)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:190}}>↓ Discard</button>
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'flex-end',width:190}}>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555',minWidth:28,textAlign:'right'}}>{discardsLeft}/{MAX_DISCARDS}</span>
             <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
+            <span style={{fontFamily:"'Cinzel',serif",fontSize:18,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555',minWidth:32,textAlign:'right'}}>{discardsLeft}/{MAX_DISCARDS}</span>
           </div>
           <div style={{height:8}}/>
           <EmberDisplayLarge current={embers} max={maxEmbers}/>
@@ -1546,7 +1546,7 @@ export default function App(){
             style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'8px 12px',width:100,background:handSort==='rarity'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='rarity'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='rarity'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>⭐ RARITY</button>
         </div>
         <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:30,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',zIndex:50}}>
-          {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>a.embers-b.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).map((card,i)=>(
+          {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} isUsed={card.id==='stagedive'&&stageDiveUsed}
               isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
               anyHovered={hovered!==null}
