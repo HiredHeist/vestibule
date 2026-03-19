@@ -249,7 +249,7 @@ function BoosterScreen({onComplete,seed}){
             ['FRENZIED','#ee2222','⚡','Each time the boss is defeated, this member gains +1 ATK permanently.'],
             ['DOUBLE TIME','#ff8800','🥁','When this drummer is on stage, ALL band ATK is doubled.'],
             ['ANCHOR','#33dd33','⚓','After every Strike, heals the members next to this one for +1 HP.'],
-            ['CORRUPT','#cc44ff','🌀','This member's ATK scales up the higher your Corruption is.'],
+            ['CORRUPT','#cc44ff','🌀','ATK scales up the higher your Corruption is.'],
             ['DEBUFF','#4488ff','🎤','Each Strike reduces how much damage the boss deals by 1.'],
           ].map(([kw,color,icon,desc])=>(
             <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:8,background:'rgba(0,0,0,0.4)',borderRadius:5,padding:'8px 12px',border:`1px solid ${color}33`,minWidth:160,flex:'1 1 160px',maxWidth:200}}>
