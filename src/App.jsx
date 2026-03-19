@@ -1538,13 +1538,11 @@ export default function App(){
         </div>
 
         {/* CARD FAN — takes full height, padded to avoid overlapping columns */}
-        {/* Sort buttons */}
-        <div style={{position:'absolute',left:'50%',transform:'translateX(-50%)',top:4,zIndex:60,display:'flex',gap:6}}>
-          <button onClick={()=>setHandSort(p=>p==='embers'?'none':'embers')}
-            style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,letterSpacing:2,textTransform:'uppercase',padding:'3px 8px',background:handSort==='embers'?'rgba(200,120,20,0.4)':'rgba(20,12,4,0.7)',border:handSort==='embers'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.4)',borderRadius:2,color:handSort==='embers'?'#e8a820':'#5a4020',cursor:'pointer'}}>🔥 Cost</button>
-          <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
-            style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,letterSpacing:2,textTransform:'uppercase',padding:'3px 8px',background:handSort==='rarity'?'rgba(200,120,20,0.4)':'rgba(20,12,4,0.7)',border:handSort==='rarity'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.4)',borderRadius:2,color:handSort==='rarity'?'#e8a820':'#5a4020',cursor:'pointer'}}>⭐ Rarity</button>
-        </div>
+        {/* Sort buttons — left and right anchored */}
+        <button onClick={()=>setHandSort(p=>p==='embers'?'none':'embers')}
+          style={{position:'absolute',left:0,bottom:0,zIndex:60,fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,letterSpacing:2,textTransform:'uppercase',padding:'8px 0',width:110,background:handSort==='embers'?'rgba(200,120,20,0.5)':'rgba(10,6,2,0.85)',border:handSort==='embers'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:'0 4px 0 0',color:handSort==='embers'?'#e8a820':'#7a5a30',cursor:'pointer'}}>🔥 COST</button>
+        <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
+          style={{position:'absolute',right:0,bottom:0,zIndex:60,fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,letterSpacing:2,textTransform:'uppercase',padding:'8px 0',width:215,background:handSort==='rarity'?'rgba(200,120,20,0.5)':'rgba(10,6,2,0.85)',border:handSort==='rarity'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:'4px 0 0 0',color:handSort==='rarity'?'#e8a820':'#7a5a30',cursor:'pointer'}}>⭐ RARITY</button>
         <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:30,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',zIndex:50}}>
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>a.embers-b.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} isUsed={card.id==='stagedive'&&stageDiveUsed}
