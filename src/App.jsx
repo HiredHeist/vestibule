@@ -198,32 +198,73 @@ function BoosterScreen({onComplete,seed}){
   const [sel,setSel]=useState([])
   const pool=ALL_MUSICIANS
   const toggle=id=>setSel(p=>p.includes(id)?p.filter(x=>x!==id):p.length<2?[...p,id]:p)
+  const kwColor={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff'}
   return(
-    <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,padding:'20px 0'}}>
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:52,color:'#d0b060',textShadow:'0 0 40px rgba(200,150,20,0.4),2px 2px 0 #000'}}>Opening Night</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:18,color:'#a09060',fontStyle:'italic'}}>Select 2 musicians to start your band</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#4a3a20',letterSpacing:2}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
-      <div style={{display:'flex',gap:14,flexWrap:'wrap',justifyContent:'center',maxWidth:1200,padding:'0 20px'}}>
+    <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',gap:16,padding:'24px 20px',overflowY:'auto'}}>
+      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:52,color:'#d0b060',textShadow:'0 0 40px rgba(200,150,20,0.4),2px 2px 0 #000',flexShrink:0}}>Opening Night</div>
+      <div style={{fontFamily:"'IM Fell English',serif",fontSize:18,color:'#a09060',fontStyle:'italic',flexShrink:0}}>Select 2 musicians to start your band</div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#4a3a20',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
+
+      {/* MEMBER CARDS — 7 in a flexible row */}
+      <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',maxWidth:1300,flexShrink:0}}>
         {pool.map(m=>{
-          const s=sel.includes(m.id),dis=!s&&sel.length>=2
+          const isSel=sel.includes(m.id),dis=!isSel&&sel.length>=2
+          const kw=m.keyword||''
+          const kwc=kwColor[kw]||'#e8a820'
           return(
-            <div key={m.id} onClick={()=>!dis&&toggle(m.id)} style={{width:158,background:s?'linear-gradient(180deg,#2a1a0a,#160c04)':'linear-gradient(180deg,#1a1008,#0e0804)',border:s?'2px solid #e8a820':dis?'1px solid rgba(80,50,10,0.3)':'1px solid rgba(160,100,25,0.5)',borderRadius:7,cursor:dis?'not-allowed':'pointer',boxShadow:s?'0 0 30px rgba(232,168,32,0.4),0 8px 24px rgba(0,0,0,0.8)':'0 4px 16px rgba(0,0,0,0.7)',opacity:dis?0.45:1,transform:s?'translateY(-8px) scale(1.04)':'none',transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',position:'relative'}}>
-              <div style={{height:5,borderRadius:'7px 7px 0 0',background:s?'linear-gradient(90deg,#e8a820,#ffcc44)':'rgba(120,80,20,0.4)'}}/>
-              {s&&<div style={{position:'absolute',top:8,right:8,width:26,height:26,borderRadius:'50%',background:'#e8a820',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,color:'#000',fontWeight:900}}>✓</div>}
-              <div style={{height:88,display:'flex',alignItems:'center',justifyContent:'center',fontSize:46,background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
-              <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:22,color:s?'#e8d090':'#c8b878',textAlign:'center',padding:'5px 4px 1px',lineHeight:1}}>{m.name}</div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:2,color:s?'#a09050':'#7a6a40',textAlign:'center',padding:'2px 4px',textTransform:'uppercase'}}>{m.role}</div>
-              <div style={{display:'flex',justifyContent:'space-between',padding:'6px 14px 4px',background:'rgba(0,0,0,0.65)',borderTop:'1px solid rgba(255,255,255,0.05)'}}>
-                <div style={{textAlign:'center'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:7,color:'#6a3a3a',textTransform:'uppercase'}}>ATK</div><div style={{fontFamily:"'Cinzel',serif",fontSize:26,fontWeight:900,color:'#ee3333'}}>{m.atk}</div></div>
-                <div style={{textAlign:'center'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:7,color:'#2a5a2a',textTransform:'uppercase'}}>HP</div><div style={{fontFamily:"'Cinzel',serif",fontSize:26,fontWeight:900,color:'#33dd33'}}>{m.hp}</div></div>
+            <div key={m.id} onClick={()=>!dis&&toggle(m.id)}
+              style={{width:162,background:isSel?'linear-gradient(180deg,#2a1a0a,#160c04)':'linear-gradient(180deg,#1a1008,#0e0804)',
+                border:isSel?'2px solid #e8a820':dis?'1px solid rgba(80,50,10,0.25)':'1px solid rgba(160,100,25,0.5)',
+                borderRadius:7,cursor:dis?'not-allowed':'pointer',
+                boxShadow:isSel?'0 0 30px rgba(232,168,32,0.4),0 8px 24px rgba(0,0,0,0.8)':'0 4px 16px rgba(0,0,0,0.7)',
+                opacity:dis?0.4:1,transform:isSel?'translateY(-8px) scale(1.04)':'none',
+                transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',position:'relative',flexShrink:0}}>
+              <div style={{height:5,borderRadius:'7px 7px 0 0',background:isSel?'linear-gradient(90deg,#e8a820,#ffcc44)':kwc+'66'}}/>
+              {isSel&&<div style={{position:'absolute',top:8,right:8,width:24,height:24,borderRadius:'50%',background:'#e8a820',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,color:'#000',fontWeight:900}}>✓</div>}
+              <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:42,background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
+              <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:22,color:isSel?'#e8d090':'#c8b878',textAlign:'center',padding:'5px 4px 1px',lineHeight:1}}>{m.name}</div>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:2,color:'#7a6a40',textAlign:'center',padding:'2px 4px 6px',textTransform:'uppercase'}}>{m.role}</div>
+              {/* Stat bar — matches battlefield style */}
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 12px 8px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+                <div style={{textAlign:'center'}}>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#ee2222',textTransform:'uppercase',fontWeight:900}}>ATK</div>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:30,fontWeight:900,color:'#ee2222',lineHeight:1}}>{m.atk}</div>
+                </div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:kwc,fontWeight:700,textAlign:'center',letterSpacing:0.5,maxWidth:60}}>{kw}</div>
+                <div style={{textAlign:'center'}}>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:30,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
+                </div>
               </div>
-              <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:s?'#a09060':'#7a6a40',textAlign:'center',padding:'4px 8px 10px',fontStyle:'italic',lineHeight:1.35}}>{m.desc}</div>
             </div>
           )
         })}
       </div>
+
+      {/* ABILITY EXPLANATION BOX */}
+      <div style={{background:'rgba(10,6,2,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'14px 24px',maxWidth:900,width:'100%',flexShrink:0}}>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:12}}>⚗ Band Abilities — What Do They Mean?</div>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center'}}>
+          {[
+            ['FRENZIED','#ee2222','⚡','Each time the boss is defeated, this member gains +1 ATK permanently.'],
+            ['DOUBLE TIME','#ff8800','🥁','When this drummer is on stage, ALL band ATK is doubled.'],
+            ['ANCHOR','#33dd33','⚓','After every Strike, heals the members next to this one for +1 HP.'],
+            ['CORRUPT','#cc44ff','🌀','This member's ATK scales up the higher your Corruption is.'],
+            ['DEBUFF','#4488ff','🎤','Each Strike reduces how much damage the boss deals by 1.'],
+          ].map(([kw,color,icon,desc])=>(
+            <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:8,background:'rgba(0,0,0,0.4)',borderRadius:5,padding:'8px 12px',border:`1px solid ${color}33`,minWidth:160,flex:'1 1 160px',maxWidth:200}}>
+              <div style={{fontSize:18,flexShrink:0}}>{icon}</div>
+              <div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:900,color:color,letterSpacing:1,marginBottom:3}}>{kw}</div>
+                <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:'#a09060',lineHeight:1.4,fontStyle:'italic'}}>{desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <button onClick={()=>sel.length===2&&onComplete(sel)} disabled={sel.length<2}
-        style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'14px 52px',background:sel.length===2?'rgba(130,0,0,0.35)':'rgba(30,15,5,0.4)',border:`2px solid ${sel.length===2?'#bb1111':'#2a1508'}`,borderRadius:3,color:sel.length===2?'#ee2222':'#3a1a08',cursor:sel.length===2?'pointer':'not-allowed',transition:'all 0.2s'}}>
+        style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'14px 52px',background:sel.length===2?'rgba(130,0,0,0.35)':'rgba(30,15,5,0.4)',border:`2px solid ${sel.length===2?'#bb1111':'#2a1508'}`,borderRadius:3,color:sel.length===2?'#ee2222':'#3a1a08',cursor:sel.length===2?'pointer':'not-allowed',transition:'all 0.2s',flexShrink:0}}>
         {sel.length===2?'⛧  Take the Stage':'Select 2 Musicians'}
       </button>
     </div>
@@ -404,7 +445,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered&&canAfford?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
         opacity:isDragging?0.4:1,
         animation:shimmerAnim,
-        margin:'0 -26px',userSelect:'none'}}>
+        margin:'0 -26px',userSelect:'none',willChange:'transform'}}>
       <div style={{height:6,flexShrink:0,borderRadius:'7px 7px 0 0',background:bc,boxShadow:`0 0 14px ${glow}`}}/>
       {isUsed&&<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'rgba(0,0,0,0.85)',border:'2px solid #888',borderRadius:6,padding:'6px 14px',fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,color:'#888',letterSpacing:4,zIndex:20,pointerEvents:'none'}}>USED</div>}
       {card.embers>0?(
