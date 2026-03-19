@@ -240,22 +240,40 @@ Each circle has 3 fights (2 minions + 1 boss). All have unique passives and deat
 
 ---
 
-## The Black Market (Shop)
 
-Appears after **every fight**. Three sections.
+## The Black Market (Shop) — Session 7 Update
+
+Appears after **every fight**. Layout defined per sketch (Session 7).
+
+### Screen Layout
+```
+┌─────────────┬──────────────────────────────┬──────────────┐
+│ Band Pack   │   ⚰ The Black Market         │  Next Fight  │
+│ (rotates)   ├──────────────────────────────┼──────────────┤
+│             │                              │  🌿 Stash    │
+│ Artifact    │  [Card 1] [Card 2] [Card 3]  │              │
+│ (3 circles) │                              │  [Re-roll]   │
+│             ├──────────────────────────────┴──────────────┤
+│ Passive     │  [Booster Pack 1] [Booster Pack 2] [Pawn]  │
+│ (3 circles) │                                             │
+└─────────────┴─────────────────────────────────────────────┘
+```
 
 ### Left Column (persistent per circle)
-- **Artifact slot** — same artifact available until next circle. Players "drool" over it.
-- **Recruitment pack** — rotates each visit
-- **Pawn shop** — sell up to 2 items per visit
+- **Band Pack** (recruitment cassette) — rotates every visit, tier based on circle
+- **Vintage Amp** (artifact) — same for all 3 fights in circle. Golden border.
+- **Effect Pedal** (passive) — same for all 3 fights in circle. Purple border.
+- All 3 items same size, ~10% larger than cards. wiggle animation on hover.
 
-### Center (rotates per visit)
-- **3 cards for sale** (rarity scales with circle depth)
-  - 9% chance one slot replaced by a member appearance (5/15/30🌿)
-- **Reroll:** 2🌿 first reroll, +2 each subsequent
-- **Artifacts for sale** (up to 3 shown, filtered to slots available)
-- **Passives / CD-Rs for sale** (up to 3 shown, filtered to slots available)
-- **Booster packs** (up to 3 most advanced tiers available)
+### Center — Cards for Sale
+- 3 cards identical to battle hand cards (ember cost badge, type, emoji, name, effect)
+- 🌿 herb price floats above each card
+- Reroll button: 2🌿 → 4🌿 → 6🌿 (always +2🌿 per reroll)
+- 9% chance one slot is a band member instead of a card (5/15/30🌿)
+
+### Bottom Row
+- 2 random booster packs (MTG foil pack style, ~10% bigger than cards)
+- Pawn shop panel to the right of packs (purple border, opens as overlay, max 2 sales)
 
 ### Card Pricing
 | Rarity | Normal | Foil | Mythic |
@@ -264,30 +282,77 @@ Appears after **every fight**. Three sections.
 | Uncommon | 8🌿 | 14🌿 | — |
 | Rare | 14🌿 | 22🌿 | 35🌿 |
 
-### Booster Pack Tiers
-| Pack | Cost | Contents | Unlocks |
+### Booster Pack Contents (Updated Session 7)
+| Pack | Emoji | Cost | Contents | Circle Gate |
+|---|---|---|---|---|
+| Cassette Tape | 📼 | 6🌿 | 3 Common, pick 1 | Always |
+| CD-R | 💿 | 12🌿 | 3 Common + 2 Uncommon, pick 1, 3% foil | Always |
+| Import Vinyl | 📀 | 22🌿 | 1 Uncommon + 1 Rare, pick 1, 20% foil | Circle 2+ |
+| Rare Vinyl | 🖤 | 38🌿 | 2C+2U+1R, pick 2, 30% foil, 5% mythic | Circle 4+ |
+| Cursed Demo | ⛧ | 60🌿 | 5 cards, pick 2, 10% passive chance | Circle 6+ |
+| Ritual Pressing | 🕯️ | 25🌿 | 2 random Effect Pedals (P1-P10), pick 1 | Always |
+| Hellforged Crate | ⚰️ | 35🌿 | 2 random Vintage Amps (A1-A10), pick 1 | Always |
+
+### Booster Pack Appearance Rates (independent rolls)
+| Pack | Rate | Gate |
+|---|---|---|
+| 📼 Cassette Tape | 40% | Always |
+| 💿 CD-R | 40% | Always |
+| 📀 Import Vinyl | 30% | Circle 2+ |
+| 🖤 Rare Vinyl | 20% | Circle 4+ |
+| ⛧ Cursed Demo | 10% | Circle 6+ |
+| 🕯️ Ritual Pressing | 3% | Always |
+| ⚰️ Hellforged Crate | 5% | Always |
+| 🎸 Garage Band (recruit) | 5% | Always |
+| 🎤 Touring (recruit) | 3% | Circle 3+ |
+| ⛧ Demonic (recruit) | Never in booster slot | — |
+
+### Recruitment Pack — Reserved Slot (rotates every visit)
+| Circle | Pack Options |
+|---|---|
+| 1-2 | 100% Garage Band (10🌿) |
+| 3-4 | 30% Garage Band, 70% Touring (22🌿) |
+| 5+ | 20% Garage Band, 50% Touring, 30% Demonic (40🌿) |
+
+Demonic Pack contents: Pick 1 of 4, 25% foil + 15% mythic
+
+### Updated Artifact (Vintage Amp) Prices — DOUBLED Session 7
+| ID | Name | New Cost | Pawn Value |
 |---|---|---|---|
-| 📼 Cassette Tape | 6🌿 | 3 Common cards, pick 1 | Always |
-| 💿 CD-R | 12🌿 | 2 Common + 1 Uncommon, pick 1 | Always |
-| 📀 Import Vinyl | 22🌿 | 1 Uncommon + 1 Rare, pick 1 | Circle 2+ |
-| 🖤 Rare Vinyl | 38🌿 | 1 Rare + 30% foil chance | Circle 4+ |
-| ⛧ Cursed Demo | 60🌿 | 1 Rare, 50% foil, 20% mythic, 5% double-mythic | Circle 6+ |
+| A1 | Vintage Guitar | 20🌿 | 10🌿 |
+| A2 | Devil's Tuning Fork | 16🌿 | 8🌿 |
+| A3 | The Evil Eye | 40🌿 | 20🌿 |
+| A4 | Roadie's Toolbelt | 12🌿 | 6🌿 |
+| A5 | Haunted Radio | 16🌿 | 8🌿 |
+| A6 | Black Candle | 24🌿 | 12🌿 |
+| A7 | Serpent's Kiss | 36🌿 | 18🌿 |
+| A8 | Stone Tablet | 24🌿 | 12🌿 |
+| A9 | Resonance Coil | 20🌿 | 10🌿 |
+| A10 | Burning Stage | 20🌿 | 10🌿 |
 
-### Recruitment Packs
-| Pack | Cost | Pool | Bonus |
+### Updated Passive (Effect Pedal) Prices — DOUBLED Session 7
+| ID | Name | New Cost | Pawn Value |
 |---|---|---|---|
-| 🎸 Garage Band | 10🌿 | Pick 1 of 2 random | — |
-| 🎤 Touring | 22🌿 | Pick 1 of 3 | 15% foil chance |
-| ⛧ Demonic | 40🌿 | Pick 1 of 4 | 25% foil + 15% mythic |
+| P1 | Power Chord | 12🌿 | 6🌿 |
+| P2 | Roadie Crew | 16🌿 | 8🌿 |
+| P3 | Merch Table | 12🌿 | 6🌿 |
+| P4 | Feedback Hum | 20🌿 | 10🌿 |
+| P5 | Amp Stack | 20🌿 | 10🌿 |
+| P6 | Cult Following | 20🌿 | 10🌿 |
+| P7 | Guitar Tech | 16🌿 | 8🌿 |
+| P8 | Green Room | 32🌿 | 16🌿 |
+| P9 | Heavy Rotation | 20🌿 | 10🌿 |
+| P10 | Stage Fright Reversal | 28🌿 | 14🌿 |
 
-### Pawn Shop Values
-- Common: 1🌿 · Uncommon: 2🌿 · Rare: 4🌿
-- Foil bonus: +3🌿 · Mythic bonus: +8🌿
-- Any base member: 5🌿 · Foil member: 15🌿 · Mythic member: 30🌿
-- Artifacts: 50% of purchase price
-- Cannot fire your last 2 members
-
----
+### Pawn Shop
+- Opens as overlay (purple border)
+- Max 2 sales per visit
+- Can open mid-pack-opening to sell member and make room
+- All packs have a Pass button
+- Cannot sell last 2 members
+- Values: Common 1🌿, Uncommon 2🌿, Rare 4🌿, Foil +3🌿, Mythic +8🌿
+- Member 5🌿, Foil Member 15🌿, Mythic Member 30🌿
+- Artifacts/Passives: 50% of purchase price
 
 ## Artifacts (A1-A10, all implemented)
 
