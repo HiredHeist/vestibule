@@ -376,7 +376,8 @@ function BoosterScreen({onComplete,seed}){
                 borderRadius:7,cursor:m.locked?'default':dis?'not-allowed':'pointer',minWidth:0,
                 boxShadow:isSel?'0 0 30px rgba(232,168,32,0.4),0 8px 24px rgba(0,0,0,0.8)':'0 4px 16px rgba(0,0,0,0.7)',
                 opacity:dis?0.4:1,transform:isSel?'translateY(-8px) scale(1.04)':'none',
-                transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',position:'relative'}}>
+                transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',position:'relative',
+                animation:(!isSel&&!dis&&!m.locked)?'throbSlow 4.5s ease-in-out infinite':'none'}}>
               <div style={{height:5,borderRadius:'7px 7px 0 0',background:isSel?'linear-gradient(90deg,#e8a820,#ffcc44)':kwc+'66'}}/>
               {isSel&&<div style={{position:'absolute',top:8,right:8,width:24,height:24,borderRadius:'50%',background:'#e8a820',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,color:'#000',fontWeight:900}}>✓</div>}
               <div style={{height:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:54,background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
