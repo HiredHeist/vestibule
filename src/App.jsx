@@ -206,7 +206,7 @@ function EmberDisplayLarge({current,max}){
       <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#aa5820',letterSpacing:3,textTransform:'uppercase',fontWeight:700}}>Embers</div>
       <div style={{display:'flex',gap:5}}>
         {Array.from({length:max}).map((_,i)=>(
-          <div key={i} style={{fontSize:i<current?22:18,opacity:i<current?1:0.18,filter:i<current?'drop-shadow(0 0 8px rgba(255,120,0,0.9))':'grayscale(1)',transition:'all 0.25s'}}>🔥</div>
+          <div key={i} style={{fontSize:i>=(max-current)?22:18,opacity:i>=(max-current)?1:0.18,filter:i>=(max-current)?'drop-shadow(0 0 8px rgba(255,120,0,0.9))':'grayscale(1)',transition:'all 0.25s'}}>🔥</div>
         ))}
       </div>
       <div style={{fontFamily:"'Cinzel',serif",fontSize:18,fontWeight:900,color:current>0?'#ff6600':'#444',lineHeight:1}}>{current}/{max}</div>
@@ -219,7 +219,7 @@ function EmberDisplay({current,max}){
       <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#8a4820',letterSpacing:3,textTransform:'uppercase'}}>Embers</div>
       <div style={{display:'flex',gap:3}}>
         {Array.from({length:max}).map((_,i)=>(
-          <div key={i} style={{fontSize:i<current?15:13,opacity:i<current?1:0.22,filter:i<current?'drop-shadow(0 0 6px rgba(255,100,0,0.8))':'grayscale(1)',transition:'all 0.25s'}}>🔥</div>
+          <div key={i} style={{fontSize:i>=(max-current)?15:13,opacity:i>=(max-current)?1:0.22,filter:i>=(max-current)?'drop-shadow(0 0 6px rgba(255,100,0,0.8))':'grayscale(1)',transition:'all 0.25s'}}>🔥</div>
         ))}
       </div>
       <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:current>0?'#ff6600':'#444',lineHeight:1}}>{current}/{max}</div>
@@ -547,7 +547,7 @@ function DeckPile({count,label}){
 }
 
 function PhaseDots({left,total,color,wide}){
-  const sz=wide?17:13;const start=total-left;return <div style={{display:'flex',gap:wide?4:4,flex:wide?1:undefined}}>{Array.from({length:total}).map((_,i)=>{const filled=i>=start;return <div key={i} style={{width:sz,height:sz,borderRadius:4,background:filled?color:'rgba(40,20,8,0.6)',border:`1px solid ${filled?color:'rgba(80,50,20,0.3)'}`,boxShadow:filled?`0 0 9px ${color}99`:'none',transition:'all 0.25s'}}/>})}</div>
+  const sz=wide?17:13;const start=total-left;return <div style={{display:'flex',gap:wide?4:4}}>{Array.from({length:total}).map((_,i)=>{const filled=i>=start;return <div key={i} style={{width:sz,height:sz,borderRadius:4,background:filled?color:'rgba(40,20,8,0.6)',border:`1px solid ${filled?color:'rgba(80,50,20,0.3)'}`,boxShadow:filled?`0 0 9px ${color}99`:'none',transition:'all 0.25s'}}/>})}</div>
 }
 
 function EndScreen({won,cause,stats,seed,onReset}){
@@ -1514,15 +1514,15 @@ export default function App(){
           <button onClick={handleStrike} disabled={!canStrike}
             style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 20px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:190}}>⚔ Strike</button>
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'flex-end',width:190}}>
-            <PhaseDots left={strikesLeft} total={MAX_STRIKES} color='#dd2222' wide={true}/>
             <span style={{fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555',minWidth:28,textAlign:'right'}}>{strikesLeft}/{MAX_STRIKES}</span>
+            <PhaseDots left={strikesLeft} total={MAX_STRIKES} color='#dd2222' wide={true}/>
           </div>
           <div style={{height:8}}/>
           <button onClick={handleDiscard} disabled={!canDiscard}
             style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 20px',background:canDiscard?'rgba(100,70,0,0.4)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:190}}>↓ Discard</button>
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'flex-end',width:190}}>
-            <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
             <span style={{fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555',minWidth:28,textAlign:'right'}}>{discardsLeft}/{MAX_DISCARDS}</span>
+            <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
           </div>
           <div style={{height:8}}/>
           <EmberDisplayLarge current={embers} max={maxEmbers}/>
@@ -1539,7 +1539,7 @@ export default function App(){
 
         {/* CARD FAN — takes full height, padded to avoid overlapping columns */}
         {/* Sort buttons — stacked vertically to the right of deck/discard */}
-        <div style={{position:'absolute',left:119,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:4}}>
+        <div style={{position:'absolute',left:119,bottom:32,zIndex:60,display:'flex',flexDirection:'column',gap:4}}>
           <button onClick={()=>setHandSort(p=>p==='embers'?'none':'embers')}
             style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'8px 12px',width:100,background:handSort==='embers'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='embers'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='embers'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>🔥 COST</button>
           <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
