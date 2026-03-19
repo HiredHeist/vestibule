@@ -1158,9 +1158,8 @@ export default function App(){
     addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.'))
     setTimeout(function(){
       const isCircleBoss=(fightIndex+1)%3===0
-  if(isCircleBoss)setMaxEmbers(function(p){return Math.min(MAX_EMBERS_CAP,p+1)})
-  if(fightIndex>=26){playVictory();setDeathCause('victory');setTimeout(function(){setGameState('end')},800)}
-  else{setShopCards(genShopCards());setRecruitPack(genRecruitPack());setGameState('shop')}
+      if(isCircleBoss)setMaxEmbers(function(p){return Math.min(MAX_EMBERS_CAP,p+1)})
+      if(fightIndex>=26){playVictory();setDeathCause('victory');setTimeout(function(){setGameState('end')},800)}
       else{setShopCards(genShopCards());setRecruitPack(genRecruitPack());setGameState('shop')}
     },1000)
   },[strikesLeft,corruption,fightIndex])
