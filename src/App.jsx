@@ -350,9 +350,9 @@ function BoosterScreen({onComplete,seed}){
           const kwc=kwColor[kw]||'#e8a820'
           return(
             <div key={m.id} onClick={()=>!dis&&toggle(m.id)}
-              style={{width:210,background:isSel?'linear-gradient(180deg,#2a1a0a,#160c04)':'linear-gradient(180deg,#1a1008,#0e0804)',
+              style={{background:isSel?'linear-gradient(180deg,#2a1a0a,#160c04)':'linear-gradient(180deg,#1a1008,#0e0804)',
                 border:isSel?'2px solid #e8a820':dis?'1px solid rgba(80,50,10,0.25)':'1px solid rgba(160,100,25,0.5)',
-                borderRadius:7,cursor:dis?'not-allowed':'pointer',
+                borderRadius:7,cursor:dis?'not-allowed':'pointer',minWidth:0,
                 boxShadow:isSel?'0 0 30px rgba(232,168,32,0.4),0 8px 24px rgba(0,0,0,0.8)':'0 4px 16px rgba(0,0,0,0.7)',
                 opacity:dis?0.4:1,transform:isSel?'translateY(-8px) scale(1.04)':'none',
                 transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',position:'relative',flexShrink:0}}>
