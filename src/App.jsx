@@ -22,9 +22,42 @@ function playDraw(){[220,330,440].forEach(function(f,i){setTimeout(function(){pl
 const MAX_EMBERS_CAP=8, MAX_STRIKES=4, MAX_DISCARDS=4, HAND_SIZE=6
 
 const ENEMIES=[
-  {id:'wanderer',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:40,baseDmg:3,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.'},
-  {id:'lostsoul',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:69,baseDmg:4,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.'},
-  {id:'drifter',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:100,baseDmg:5,emoji:'👁',passive:'The undisputed master of Limbo. No passive — pure relentless pressure.'},
+  // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
+  {id:'wanderer',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:40,baseDmg:3,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
+  {id:'lostsoul',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:69,baseDmg:4,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
+  {id:'drifter',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:100,baseDmg:5,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
+  // ── CIRCLE II: LUST — Enemy buffs itself each strike ─────────
+  {id:'siren',name:'The Siren',circle:'Circle II — Lust',subtitle:'Fight 1 of 3',maxHp:60,baseDmg:4,emoji:'🌊',passive:'Seductive. Gains +1 damage each Strike.',passiveId:'selfbuff'},
+  {id:'tempter',name:'The Tempter',circle:'Circle II — Lust',subtitle:'Fight 2 of 3',maxHp:90,baseDmg:5,emoji:'🌹',passive:'Enthralling. Gains +1 damage each Strike. Starts stronger.',passiveId:'selfbuff'},
+  {id:'lust_boss',name:'The Seducer',circle:'Circle II — Lust',subtitle:'Circle Boss — Fight 3 of 3',maxHp:140,baseDmg:6,emoji:'💋',passive:'Irresistible. Gains +2 damage each Strike. Dangerous if left alive.',passiveId:'selfbuff2'},
+  // ── CIRCLE III: GLUTTONY — Heals when you play cards ─────────
+  {id:'glutton',name:'The Glutton',circle:'Circle III — Gluttony',subtitle:'Fight 1 of 3',maxHp:80,baseDmg:4,emoji:'🍖',passive:'Insatiable. Heals 2 HP every time a card is played.',passiveId:'cardHeal'},
+  {id:'feaster',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:110,baseDmg:5,emoji:'🦷',passive:'Voracious. Heals 3 HP every time a card is played.',passiveId:'cardHeal3'},
+  {id:'gluttony_boss',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:160,baseDmg:6,emoji:'🕳',passive:'Endless hunger. Heals 4 HP per card played. Strike fast.',passiveId:'cardHeal4'},
+  // ── CIRCLE IV: GREED — Steals stash on hit ───────────────────
+  {id:'miser',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:90,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1 Stash on each successful hit.',passiveId:'stealStash'},
+  {id:'hoarder',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:120,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2 Stash on each successful hit.',passiveId:'stealStash2'},
+  {id:'greed_boss',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:170,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3 Stash per hit. Win fast or go broke.',passiveId:'stealStash3'},
+  // ── CIRCLE V: ANGER — Hits harder the more you buff ─────────
+  {id:'wrathful',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:100,baseDmg:5,emoji:'🔥',passive:'Enraged. +2 damage for each buffed member on your stage.',passiveId:'rageScale'},
+  {id:'berserker',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:130,baseDmg:6,emoji:'⚔️',passive:'Furious. +3 damage per buffed member. Keep your band clean.',passiveId:'rageScale3'},
+  {id:'anger_boss',name:'The Warlord',circle:'Circle V — Anger',subtitle:'Circle Boss — Fight 3 of 3',maxHp:190,baseDmg:7,emoji:'💢',passive:'Explosive rage. +4 damage per buffed member. A buffed band is a target.',passiveId:'rageScale4'},
+  // ── CIRCLE VI: HERESY — Corrupts your corruption system ──────
+  {id:'heretic',name:'The Heretic',circle:'Circle VI — Heresy',subtitle:'Fight 1 of 3',maxHp:110,baseDmg:5,emoji:'🔱',passive:'Blasphemous. Each Strike raises your Corruption by 10%.',passiveId:'corruptPlayer'},
+  {id:'apostate',name:'The Apostate',circle:'Circle VI — Heresy',subtitle:'Fight 2 of 3',maxHp:145,baseDmg:6,emoji:'⛧',passive:'Corrupting. Raises Corruption by 15% each Strike.',passiveId:'corruptPlayer15'},
+  {id:'heresy_boss',name:'The False Prophet',circle:'Circle VI — Heresy',subtitle:'Circle Boss — Fight 3 of 3',maxHp:200,baseDmg:7,emoji:'📖',passive:'Toxic doctrine. Corruption +20% per Strike. Hellquake territory every fight.',passiveId:'corruptPlayer20'},
+  // ── CIRCLE VII: VIOLENCE — Targets your healthiest member ────
+  {id:'brute',name:'The Brute',circle:'Circle VII — Violence',subtitle:'Fight 1 of 3',maxHp:120,baseDmg:6,emoji:'🗡️',passive:'Calculated. Always targets the member with highest HP.',passiveId:'targetHighestHp'},
+  {id:'hunter',name:'The Hunter',circle:'Circle VII — Violence',subtitle:'Fight 2 of 3',maxHp:160,baseDmg:7,emoji:'🏹',passive:'Predatory. Targets highest HP member. Deals +50% damage to them.',passiveId:'targetHighestHp2'},
+  {id:'violence_boss',name:'The Executioner',circle:'Circle VII — Violence',subtitle:'Circle Boss — Fight 3 of 3',maxHp:220,baseDmg:8,emoji:'🩸',passive:'Methodical. Targets highest HP and deals double damage. Protect your strongest.',passiveId:'targetHighestHp3'},
+  // ── CIRCLE VIII: FRAUD — Disables random cards in hand ───────
+  {id:'trickster',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:130,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, one random card in hand is locked for 1 turn.',passiveId:'lockCard'},
+  {id:'deceiver',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:170,baseDmg:7,emoji:'🎭',passive:'Manipulative. Locks 2 cards in hand after each Strike.',passiveId:'lockCard2'},
+  {id:'fraud_boss',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:240,baseDmg:8,emoji:'🪞',passive:'Master of lies. Locks 3 cards after each Strike. Deck management is survival.',passiveId:'lockCard3'},
+  // ── CIRCLE IX: TREACHERY — Gets stronger as it takes damage ──
+  {id:'traitor',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:150,baseDmg:6,emoji:'🗝️',passive:'Vindictive. Gains +1 ATK permanently for each 20 damage taken.',passiveId:'damageScaleAtk'},
+  {id:'betrayer',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:190,baseDmg:7,emoji:'🔒',passive:'Vengeful. Gains +2 ATK per 20 damage taken. Kill it fast.',passiveId:'damageScaleAtk2'},
+  {id:'lucifer',name:'Lucifer',circle:'Circle IX — Treachery',subtitle:'⛧ The Final Circle — Fight 3 of 3',maxHp:300,baseDmg:9,emoji:'😈',passive:'The Lord of Hell. Gains +2 ATK per 20 HP lost. Immune to debuff. The ultimate test.',passiveId:'damageScaleAtk3'},
 ]
 
 const ALL_MUSICIANS=[
@@ -442,11 +475,11 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         transformOrigin:'bottom center',
         transform:isDragging?'scale(0.85) rotate(5deg)':isHovered&&canAfford?'translateY(-52px) scale(1.18) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
-        zIndex:isDragging?0:isHovered?9999:isSelected?50:10-Math.abs(index-mid),
+        zIndex:isDragging?0:isHovered?9999:isSelected?50:Math.max(1,10-Math.abs(index-mid)),
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered&&canAfford?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
         opacity:isDragging?0.4:1,
         animation:shimmerAnim,
-        margin:'0 -26px',userSelect:'none',willChange:'transform'}}>
+        margin:'0 -26px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
       <div style={{height:6,flexShrink:0,borderRadius:'7px 7px 0 0',background:bc,boxShadow:`0 0 14px ${glow}`}}/>
       {isUsed&&<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'rgba(0,0,0,0.85)',border:'2px solid #888',borderRadius:6,padding:'6px 14px',fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,color:'#888',letterSpacing:4,zIndex:20,pointerEvents:'none'}}>USED</div>}
       {card.embers>0?(
@@ -467,7 +500,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
   )
 }
 
-function BossSection({enemy,currentHp,isWiggling,innerRef,debuff}){
+function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr}){
   const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35
   return(
     <div ref={innerRef} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:12,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%'}}>
@@ -479,7 +512,7 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff}){
           {debuff>0&&<div style={{position:'absolute',bottom:4,right:4,background:'rgba(0,80,160,0.9)',border:'1px solid #4488ff',borderRadius:4,padding:'2px 5px',fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:900,color:'#88aaff'}}>-{debuff}dmg</div>}
         </div>
         <div style={{flex:1}}>
-          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:58,color:'#120804',lineHeight:1,marginBottom:8,textShadow:'1px 1px 0 rgba(0,0,0,0.5)'}}>{enemy.name}</div>
+          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:58,color:'#120804',lineHeight:1,marginBottom:8,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 1px 1px 0 rgba(0,0,0,0.5)`:'1px 1px 0 rgba(0,0,0,0.5)'}}>{enemy.name}</div>
           <div style={{fontFamily:"'IM Fell English',serif",fontSize:25,color:'#1a1008',fontStyle:'italic',opacity:1,lineHeight:1.5,fontWeight:700}}>{enemy.passive}</div>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:18,color:'#1a1008',marginTop:6,letterSpacing:1,fontWeight:700}}>Base damage: {enemy.baseDmg} ± 2 per Strike</div>
         </div>
@@ -522,6 +555,8 @@ function EndScreen({won,cause,stats,seed,onReset}){
   const isVictory=cause==='victory'
   return(
     <div style={{position:'fixed',inset:0,zIndex:9800,background:isStoned?'rgba(2,0,0,0.97)':isVictory?'rgba(4,3,1,0.96)':'rgba(3,1,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:18,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'30px 0'}}>
+      {isStoned&&<div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,180,0,0.04) 2px,rgba(0,180,0,0.04) 4px)',animation:'interlaceFlicker 0.1s steps(1) infinite',pointerEvents:'none',zIndex:0}}/>}
+      {isStoned&&<div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 20%,rgba(0,80,0,0.4) 100%)',pointerEvents:'none',zIndex:0,animation:'bgPulse 2s ease-in-out infinite'}}/>}
       {/* Watermark */}
       <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
         <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:340,color:'rgba(180,180,180,0.07)',userSelect:'none',lineHeight:1,textAlign:'center'}}>Vestibule</div>
@@ -742,6 +777,7 @@ export default function App(){
   const [pendingEmbers,setPendingEmbers]=useState(0)
   const [lastRiffPlayed,setLastRiffPlayed]=useState(null)
   const [bossDebuff,setBossDebuff]=useState(0)
+  const [bossRageAtk,setBossRageAtk]=useState(0)
   const [nextCardFree,setNextCardFree]=useState(false)
   const [skipNextDiscard,setSkipNextDiscard]=useState(false)
   const [setlistOpen,setSetlistOpen]=useState(false)
@@ -1034,6 +1070,10 @@ export default function App(){
     if(msg)addLog(msg)
     updStat('cardsPlayed',1)
     if(card.type==='RIFF')setLastRiffPlayed(card)
+    // cardHeal enemy passive
+    if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
+    else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
+    else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>Math.min(enemy.maxHp,p+4))
     return true
   },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs])
 
@@ -1106,7 +1146,9 @@ export default function App(){
         return m
       })
     })
-    const perfectBonus=strikesLeft>=2?3:0
+    // Bonus scales with circle depth
+  const circleNum=Math.floor(fightIndex/3)+1
+  const perfectBonus=strikesLeft>=2?(2+circleNum):0
     const stashEarned=6+Math.floor(Math.random()*3)+strikesLeft+perfectBonus
     setStash(function(p){return p+stashEarned})
     updStat('stashEarned',stashEarned);updStat('fightsSurvived',1)
@@ -1115,7 +1157,10 @@ export default function App(){
     if(perfectBonus>0)addFloat('PERFECT! +3',getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
     addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.'))
     setTimeout(function(){
-      if(fightIndex>=2){playVictory();setDeathCause('victory');setMaxEmbers(function(p){return Math.min(MAX_EMBERS_CAP,p+1)});setTimeout(function(){setGameState('end')},800)}
+      const isCircleBoss=(fightIndex+1)%3===0
+  if(isCircleBoss)setMaxEmbers(function(p){return Math.min(MAX_EMBERS_CAP,p+1)})
+  if(fightIndex>=26){playVictory();setDeathCause('victory');setTimeout(function(){setGameState('end')},800)}
+  else{setShopCards(genShopCards());setRecruitPack(genRecruitPack());setGameState('shop')}
       else{setShopCards(genShopCards());setRecruitPack(genRecruitPack());setGameState('shop')}
     },1000)
   },[strikesLeft,corruption,fightIndex])
@@ -1164,6 +1209,12 @@ export default function App(){
       setProjectiles([])
       const newEHp=Math.max(0,enemyHp-dmg)
       setEnemyHp(newEHp)
+      // damageScaleAtk: boss gains ATK per 20 damage taken
+      if(enemy.passiveId&&enemy.passiveId.startsWith('damageScaleAtk')){
+        const atkGain=enemy.passiveId==='damageScaleAtk'?1:enemy.passiveId==='damageScaleAtk2'?2:2
+        const rageStacks=Math.floor((enemy.maxHp-newEHp)/20)
+        setBossRageAtk(rageStacks*atkGain)
+      }
       addFloat(dmg,bc.x,bc.y-60,dmg>=15?'#ff4400':'#dd2222',dmg>=15)
       updStat('totalDamage',dmg);updStat('highestStrike',dmg,true)
 
@@ -1181,12 +1232,33 @@ export default function App(){
         setAnimPhase('boss')
         const activeM=stage.filter(function(m){return m&&!m.tooStoned})
         if(activeM.length===0){setAnimPhase('idle');return}
-        const target=activeM[Math.floor(Math.random()*activeM.length)]
+        // targetHighestHp passive
+        let target
+        if(enemy.passiveId&&enemy.passiveId.startsWith('targetHighestHp')){
+          target=activeM.reduce((best,m)=>m.hp>best.hp?m:best,activeM[0])
+        } else {
+          target=activeM[Math.floor(Math.random()*activeM.length)]
+        }
         setDiceTarget(target);setShowDice(true);playDice()
         setTimeout(function(){
           setShowDice(false)
           const variance=Math.floor(Math.random()*5)-2
-          const actualDmg=Math.max(1,enemy.baseDmg+variance-bossDebuff)
+          // Apply enemy passive scaling effects before damage
+        let scaledBaseDmg=enemy.baseDmg+bossRageAtk
+        // selfbuff: boss gains +1/+2 dmg per Strike
+        if(enemy.passiveId==='selfbuff'){scaledBaseDmg=enemy.baseDmg+strikesLeft}
+        else if(enemy.passiveId==='selfbuff2'){scaledBaseDmg=enemy.baseDmg+(MAX_STRIKES-strikesLeft)*2}
+        // rageScale: +X dmg per buffed member
+        else if(enemy.passiveId==='rageScale'){const buffed=stage.filter(m=>m&&(m.buffCount||0)>0).length;scaledBaseDmg=enemy.baseDmg+buffed*2}
+        else if(enemy.passiveId==='rageScale3'){const buffed=stage.filter(m=>m&&(m.buffCount||0)>0).length;scaledBaseDmg=enemy.baseDmg+buffed*3}
+        else if(enemy.passiveId==='rageScale4'){const buffed=stage.filter(m=>m&&(m.buffCount||0)>0).length;scaledBaseDmg=enemy.baseDmg+buffed*4}
+        // corruptPlayer: raises player corruption each Strike
+        else if(enemy.passiveId==='corruptPlayer'){setCorruption(p=>Math.min(100,p+10));addLog('🔱 Heretic corrupts your band! +10% Corruption.')}
+        else if(enemy.passiveId==='corruptPlayer15'){setCorruption(p=>Math.min(100,p+15));addLog('⛧ Apostate corrupts! +15% Corruption.')}
+        else if(enemy.passiveId==='corruptPlayer20'){setCorruption(p=>Math.min(100,p+20));addLog('📖 False Prophet corrupts! +20% Corruption.')}
+        // stealStash passives handled after damage
+        else{scaledBaseDmg=enemy.baseDmg}
+        const actualDmg=Math.max(1,Math.round(scaledBaseDmg)+variance-bossDebuff)
           const varLabel=variance>0?' (CRIT!)':variance<0?' (miss)':''
           const ti=stage.indexOf(target)
           setStage(function(prev){
@@ -1249,12 +1321,12 @@ export default function App(){
   },[animPhase,strikesLeft,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,strikesLeft,bossRef,stageRefs,drawUpTo])
 
   const handleShopLeave=useCallback(()=>{
-    const nextIdx=fightIndex+1
+    const nextIdx=Math.min(fightIndex+1, 26)
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(nextEnemy.maxHp)
     setEmbers(maxEmbers);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setNextCardFree(false);setSkipNextDiscard(false)
+    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false)
     setStage(p=>p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false}):null))
     // Redeal hand from current deck+discard
     setDeck(function(curDeck){
@@ -1327,7 +1399,14 @@ export default function App(){
 
   const canStrike=animPhase==='idle'&&strikesLeft>0&&enemyHp>0&&stage.some(m=>m&&!m.tooStoned)
   const canDiscard=animPhase==='idle'&&discardsLeft>0&&selected.length>0
-  const won=fightIndex>=2&&enemyHp<=0
+  const won=fightIndex>=26&&enemyHp<=0
+  // Corruption visual escalation
+  const corruptLow=corruption>=40&&corruption<70
+  const corruptHigh=corruption>=70&&corruption<100
+  const corruptMax=corruption>=100
+  const chromaStr=corruptMax?4:corruptHigh?2:corruptLow?1:0
+  const parchmentFilter=corruptMax?'sepia(0.4) hue-rotate(330deg) saturate(1.8)':corruptHigh?'sepia(0.25) hue-rotate(340deg) saturate(1.4)':corruptLow?'sepia(0.1) saturate(1.1)':'none'
+  const bgPulseAnim=corruption>=50?'bgPulse '+(corruption>=75?'1.5s':'3s')+' ease-in-out infinite':'none'
 
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass}/>
@@ -1336,14 +1415,18 @@ export default function App(){
 
   return(
     <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none'}}>
-      <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:8000,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px)',animation:'vhsDrift 8s ease-in-out infinite',mixBlendMode:'overlay'}}/>
+      <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:8000,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px)',animation:'vhsDrift 8s ease-in-out infinite',mixBlendMode:'overlay'}}/>
+      <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:8001,animation:'vhsLine 12s linear infinite',background:'transparent'}}/>
       {damageFlash&&<div style={{position:'fixed',inset:0,zIndex:8500,pointerEvents:'none',background:'radial-gradient(ellipse at center,rgba(200,0,0,0.25),rgba(100,0,0,0.4))',animation:'flashFade 0.4s ease-out forwards'}}/>}
+      {corruptHigh&&!corruptMax&&<div style={{position:'fixed',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 40%,rgba(100,0,0,0.15) 100%)',animation:bgPulseAnim}}/>}
+      {corruptMax&&<div style={{position:'fixed',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 20%,rgba(140,0,0,0.3) 100%)',animation:'bgPulse 1s ease-in-out infinite'}}/>}
       {floats.map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
       {projectiles.map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
       {showDice&&diceTarget&&<DiceRoll target={diceTarget} onDone={()=>setShowDice(false)}/>}
-      {hellquakeAnim&&<div style={{position:'fixed',inset:0,zIndex:9500,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.75)',animation:'fadeIn 0.1s ease'}}>
-        <div style={{fontSize:120,animation:'throb 0.4s ease-in-out infinite'}}>⛧</div>
-        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:64,color:hellquakeAnim.color,textShadow:'0 0 60px '+hellquakeAnim.color+',0 0 120px '+hellquakeAnim.color,animation:'fadeIn 0.3s ease'}}>{hellquakeAnim.text}</div>
+      {hellquakeAnim&&<div style={{position:'fixed',inset:0,zIndex:9500,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.85)',animation:'fadeIn 0.1s ease'}}>
+        <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.04) 3px,rgba(255,255,255,0.04) 4px)',animation:'interlaceFlicker 0.08s steps(1) infinite',pointerEvents:'none'}}/>
+        <div style={{fontSize:120,animation:'throb 0.3s ease-in-out infinite',filter:`drop-shadow(-4px 0 rgba(255,0,0,0.8)) drop-shadow(4px 0 rgba(0,80,255,0.8))`}}>⛧</div>
+        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:64,color:hellquakeAnim.color,textShadow:`-3px 0 rgba(255,0,0,0.8), 3px 0 rgba(0,80,255,0.7), 0 0 60px ${hellquakeAnim.color},0 0 120px ${hellquakeAnim.color}`,animation:'fadeIn 0.3s ease'}}>{hellquakeAnim.text}</div>
       </div>}
       {remasterOpen&&<RemasterModal cards={remasterCards} onConfirm={(delUids,copyUid)=>{
         setDeck(prev=>{
@@ -1361,11 +1444,11 @@ export default function App(){
         addLog('📋 Setlist locked in.')
       }} onClose={()=>setSetlistOpen(false)}/>}
       {/* PARCHMENT */}
-      <div style={{flex:'0 0 63%',margin:'0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'visible',background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:'2px solid #7a5820',boxShadow:'inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)',display:'flex',flexDirection:'column'}}>
+      <div style={{flex:'0 0 63%',margin:'0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'visible',background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:`2px solid ${corruptMax?'#660000':corruptHigh?'#7a2010':'#7a5820'}`,boxShadow:`inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)${corruptHigh?',0 0 60px rgba(120,0,0,0.3)':''}${corruptMax?',0 0 100px rgba(180,0,0,0.5)':''}`,filter:parchmentFilter,display:'flex',flexDirection:'column'}}>
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
         <div style={{padding:'10px 16px 8px',position:'relative',zIndex:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0}}>
           <div style={{width:'100%',maxWidth:760,background:'rgba(8,0,0,0.55)',border:'2px solid rgba(160,20,0,0.8)',borderRadius:8,padding:'12px 20px 14px',animation:'bossGlow 2s ease-in-out infinite',boxShadow:'0 0 30px rgba(150,0,0,0.4),inset 0 0 40px rgba(80,0,0,0.3)'}}>
-            <BossSection enemy={enemy} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff}/>
+            <BossSection enemy={enemy} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr}/>
           </div>
         </div>
         <div style={{position:'relative',zIndex:5,background:'rgba(20,11,3,0.42)',borderTop:'2px solid rgba(60,35,5,0.45)',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>
@@ -1445,7 +1528,7 @@ export default function App(){
           <EmberDisplayLarge current={embers} max={maxEmbers}/>
           <div style={{height:6}}/>
           <div style={{display:'flex',gap:14,justifyContent:'flex-end',padding:'4px 0'}}>
-            {[['Fight',(fightIndex+1)+'/3','#dd2222'],['Corrupt',corruption+'%',corruption>60?'#ff3300':'#aa5500'],['Stash',stash,'#44cc44']].map(function(item){return(
+            {[['Fight',(fightIndex%3+1)+'/3','#dd2222'],['Corrupt',corruption+'%',corruption>60?'#ff3300':'#aa5500'],['Stash',stash,'#44cc44']].map(function(item){return(
               <div key={item[0]} style={{textAlign:'center',padding:'0 4px'}}>
                 <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#9a7a40',letterSpacing:2,textTransform:'uppercase',marginBottom:2}}>{item[0]}</div>
                 <div style={{fontFamily:"'Cinzel',serif",fontSize:22,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
