@@ -69,6 +69,18 @@ const ALL_MUSICIANS=[
   {id:'nott',name:'Nott',role:'Vocalist',atk:2,hp:7,maxHp:7,emoji:'🎤',keyword:'DEBUFF',desc:'Reduces boss passive each turn.'},
   {id:'dag',name:'Dag',role:'Bass Player',atk:2,hp:12,maxHp:12,emoji:'🎵',keyword:'ANCHOR',desc:'Tankiest member.'},
   {id:'vitalik',name:'Vitalik',role:'Dark Minstrel',atk:6,hp:9,maxHp:9,emoji:'🪈',keyword:'FOLK MAGIC',desc:'Nobody asked. Nobody complained twice.'},
+  // ── NEW MEMBERS ────────────────────────────────────────────────
+  {id:'sigrid',name:'Sigrid',role:'Rhythm Guitarist',atk:3,hp:8,maxHp:8,emoji:'🎸',keyword:'SHREDDER',desc:'Every riff she plays, the next one comes faster.'},
+  {id:'gunnar',name:'Gunnar',role:'Rhythm Guitarist',atk:4,hp:7,maxHp:7,emoji:'🎸',keyword:'SHREDDER',desc:'Rhythm? He makes the rhythm.'},
+  {id:'astrid',name:'Astrid',role:'Vocalist',atk:3,hp:8,maxHp:8,emoji:'🎤',keyword:'DEBUFF',desc:'Her voice alone can break a curse.'},
+  {id:'freya',name:'Freya',role:'Synth Player',atk:4,hp:5,maxHp:5,emoji:'🎹',keyword:'CORRUPT',desc:'She plays the dark frequencies.'},
+  {id:'ulf',name:'Ulf',role:'Bass Player',atk:4,hp:9,maxHp:9,emoji:'🎵',keyword:'ANCHOR',desc:'The anchor that also bites.'},
+  {id:'brynja',name:'Brynja',role:'Bass Player',atk:1,hp:14,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'An immovable wall. The bass never stops.'},
+  {id:'rolf',name:'Rolf',role:'Drummer',atk:1,hp:9,maxHp:9,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Hits harder than the rest combined. Statistically speaking.'},
+  {id:'orm',name:'Orm',role:'Dark Minstrel',atk:2,hp:11,maxHp:11,emoji:'🪈',keyword:'HEXED',desc:'The longer he plays, the worse it gets. For everyone.'},
+  // ── LOCKED MEMBERS ─────────────────────────────────────────────
+  {id:'locked1',name:'???',role:'LOCKED',atk:0,hp:0,maxHp:0,emoji:'🔒',keyword:'',desc:'Can you find the key?',locked:true},
+  {id:'locked2',name:'???',role:'LOCKED',atk:0,hp:0,maxHp:0,emoji:'🔒',keyword:'',desc:'Can you find the key?',locked:true},
 ]
 
 const ALL_CARDS=[
@@ -333,9 +345,17 @@ function EmberDisplay({current,max}){
 
 function BoosterScreen({onComplete,seed}){
   const [sel,setSel]=useState([])
-  const pool=ALL_MUSICIANS
+  const getRandom8=()=>{
+    const real=ALL_MUSICIANS.filter(m=>!m.locked)
+    const locked=ALL_MUSICIANS.filter(m=>m.locked)
+    const shuffled=[...real].sort(()=>Math.random()-0.5)
+    // Pick 6 real members + up to 2 locked (always show locked if they exist)
+    const picked=shuffled.slice(0,8-Math.min(locked.length,2))
+    return [...picked,...locked.slice(0,2)].sort(()=>Math.random()-0.5)
+  }
+  const [pool]=useState(getRandom8)
   const toggle=id=>setSel(p=>p.includes(id)?p.filter(x=>x!==id):p.length<2?[...p,id]:p)
-  const kwColor={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa'}
+  const kwColor={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
   return(
     <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,padding:'24px 20px',overflowY:'auto'}}>
       <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:52,color:'#d0b060',textShadow:'0 0 40px rgba(200,150,20,0.4),2px 2px 0 #000',flexShrink:0}}>Opening Night</div>
@@ -349,10 +369,10 @@ function BoosterScreen({onComplete,seed}){
           const kw=m.keyword||''
           const kwc=kwColor[kw]||'#e8a820'
           return(
-            <div key={m.id} onClick={()=>!dis&&toggle(m.id)}
-              style={{background:isSel?'linear-gradient(180deg,#2a1a0a,#160c04)':'linear-gradient(180deg,#1a1008,#0e0804)',
-                border:isSel?'2px solid #e8a820':dis?'1px solid rgba(80,50,10,0.25)':'1px solid rgba(160,100,25,0.5)',
-                borderRadius:7,cursor:dis?'not-allowed':'pointer',minWidth:0,
+            <div key={m.id} onClick={()=>!m.locked&&!dis&&toggle(m.id)}
+              style={{background:m.locked?'linear-gradient(180deg,#0e0e0e,#060606)':isSel?'linear-gradient(180deg,#2a1a0a,#160c04)':'linear-gradient(180deg,#1a1008,#0e0804)',
+                border:m.locked?'1px solid rgba(60,60,60,0.5)':isSel?'2px solid #e8a820':dis?'1px solid rgba(80,50,10,0.25)':'1px solid rgba(160,100,25,0.5)',
+                borderRadius:7,cursor:m.locked?'default':dis?'not-allowed':'pointer',minWidth:0,
                 boxShadow:isSel?'0 0 30px rgba(232,168,32,0.4),0 8px 24px rgba(0,0,0,0.8)':'0 4px 16px rgba(0,0,0,0.7)',
                 opacity:dis?0.4:1,transform:isSel?'translateY(-8px) scale(1.04)':'none',
                 transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',position:'relative'}}>
@@ -361,18 +381,25 @@ function BoosterScreen({onComplete,seed}){
               <div style={{height:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:54,background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
               <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:26,color:isSel?'#e8d090':'#c8b878',textAlign:'center',padding:'5px 4px 1px',lineHeight:1}}>{m.name}</div>
               <div style={{fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:2,color:'#7a6a40',textAlign:'center',padding:'3px 4px 8px',textTransform:'uppercase'}}>{m.role}</div>
-              {/* Stat bar — matches battlefield style */}
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 12px 8px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
-                <div style={{textAlign:'center'}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:'#ee2222',textTransform:'uppercase',fontWeight:900}}>ATK</div>
-                  <div style={{fontFamily:"'Cinzel',serif",fontSize:38,fontWeight:900,color:'#ee2222',lineHeight:1}}>{m.atk}</div>
+              {/* Stat bar — locked vs normal */}
+              {m.locked?(
+                <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'18px 8px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)',gap:6}}>
+                  <div style={{fontSize:30,opacity:0.5}}>🔒</div>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#5a4020',letterSpacing:2,textAlign:'center',textTransform:'uppercase'}}>Can you find the key?</div>
                 </div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:12,color:kwc,fontWeight:700,textAlign:'center',letterSpacing:0.5,maxWidth:80}}>{kw}</div>
-                <div style={{textAlign:'center'}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
-                  <div style={{fontFamily:"'Cinzel',serif",fontSize:38,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
+              ):(
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 12px 8px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:'#ee2222',textTransform:'uppercase',fontWeight:900}}>ATK</div>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:38,fontWeight:900,color:'#ee2222',lineHeight:1}}>{m.atk}</div>
+                  </div>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:12,color:kwc,fontWeight:700,textAlign:'center',letterSpacing:0.5,maxWidth:80}}>{kw}</div>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:38,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )
         })}
@@ -381,7 +408,7 @@ function BoosterScreen({onComplete,seed}){
       {/* ABILITY EXPLANATION BOX */}
       <div style={{background:'rgba(10,6,2,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'20px 28px',width:'960px',flexShrink:0,marginTop:8}}>
         <div style={{fontFamily:"'Cinzel',serif",fontSize:13,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:16}}>⚗ Band Abilities — What Do They Mean?</div>
-        <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
           {[
             ['FRENZIED','#ee2222','⚡','Each time the boss is defeated, this member gains +1 ATK permanently.'],
             ['DOUBLE TIME','#ff8800','🥁','Rolls a d6 each fight: 5-6 doubles all ATK, 3-4 gives ×1.5, 1-2 gives only ×0.5. High risk, high reward.'],
@@ -389,6 +416,8 @@ function BoosterScreen({onComplete,seed}){
             ['CORRUPT','#cc44ff','🌀','ATK scales up the higher your Corruption is.'],
             ['DEBUFF','#4488ff','🎤','Each Strike permanently reduces boss damage by 2 this fight. Stacks up.'],
             ['FOLK MAGIC','#44ddaa','🪈','Each Strike has a 20% chance to refund ALL the Embers you spent. Pure luck. Pure folk magic.'],
+            ['SHREDDER','#ff4488','🎸','The first RIFF card you play each Strike costs 1 less Ember. Play fast, hit hard.'],
+            ['HEXED','#cc8800','🟠','Each Strike auto-raises Corruption +5%. Gains +1 ATK for every 10% Corruption. Gets scarier over time.'],
           ].map(([kw,color,icon,desc])=>(
             <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:10,background:'rgba(0,0,0,0.4)',borderRadius:6,padding:'12px 16px',border:`1px solid ${color}44`,flex:'1 1 180px'}}>
               <div style={{fontSize:26,flexShrink:0,marginTop:2}}>{icon}</div>
@@ -1012,6 +1041,7 @@ export default function App(){
   const [bossDebuff,setBossDebuff]=useState(0)
   const [bossRageAtk,setBossRageAtk]=useState(0)
   const [dblRoll,setDblRoll]=useState(null) // null=not rolled, 1-2=half, 3-4=offbeat, 5-6=double
+  const [shredderUsed,setShredderUsed]=useState(false) // tracks if first RIFF played this Strike
   const [nextCardFree,setNextCardFree]=useState(false)
   const [skipNextDiscard,setSkipNextDiscard]=useState(false)
   const [setlistOpen,setSetlistOpen]=useState(false)
@@ -1092,7 +1122,9 @@ export default function App(){
 
   const applyCard=useCallback((card,slotIdx)=>{
     const foilDiscount=(card.foil&&card.embers>=2)?1:0
-    const effectiveEmbers=nextCardFree&&card.id!=='doubledown'?0:Math.max(0,card.embers-foilDiscount)
+    const hasShredder=stage.some(m=>m&&!m.tooStoned&&m.keyword==='SHREDDER')
+    const shredderDiscount=(hasShredder&&!shredderUsed&&card.type==='RIFF'&&card.embers>=1)?1:0
+    const effectiveEmbers=nextCardFree&&card.id!=='doubledown'?0:Math.max(0,card.embers-foilDiscount-shredderDiscount)
   if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers, have '+embers+'.');return false}
   if(nextCardFree&&card.id!=='doubledown'){setNextCardFree(false)}
     if(card.id==='stagedive'&&stageDiveUsed){addLog('⚠ Stage Dive once per round only.');return false}
@@ -1382,6 +1414,7 @@ export default function App(){
     if(spent>0)setEmbers(function(p){return p-spent})
     if(msg)addLog(msg)
     updStat('cardsPlayed',1)
+    if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
     if(card.type==='RIFF')setLastRiffPlayed(card)
     // cardHeal enemy passive
     if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
@@ -1537,6 +1570,23 @@ export default function App(){
     const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer').reduce((s,m)=>s+m.atk,0)
     dmg+=encDmg
     dmg=Math.round(dmg*bandBonus)
+    // HEXED: auto-raise corruption +5%, member gains +1 ATK per 10% corruption
+    const hexedMembers=actives.filter(m=>m.keyword==='HEXED')
+    if(hexedMembers.length>0){
+      setCorruption(prev=>{
+        const nc=Math.min(100,prev+5*hexedMembers.length)
+        updStat('maxCorruption',nc,true)
+        // Grant ATK based on new corruption level
+        setStage(prevStage=>prevStage.map(m=>{
+          if(!m||m.tooStoned||m.keyword!=='HEXED')return m
+          const hexAtk=Math.floor(nc/10)
+          const baseAtk=ALL_MUSICIANS.find(mu=>mu.id===m.id)?.atk||2
+          return Object.assign({},m,{atk:Math.max(m.atk,baseAtk+hexAtk)})
+        }))
+        return nc
+      })
+      addLog('🟠 HEXED! Corruption +'+5*hexedMembers.length+'%. Orm grows stronger.')
+    }
     const hasFolkMagic=actives.some(m=>m.keyword==='FOLK MAGIC')
     const folkMagicFired=hasFolkMagic&&Math.random()<0.2
     addLog('⚔ Band attacks for '+dmg+'!'+(hasDbl?' ('+dblMode+' ×'+dblMult+'!)':'')+(folkMagicFired?' 🪈 FOLK MAGIC!':''))
@@ -1690,7 +1740,7 @@ export default function App(){
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(nextEnemy.maxHp)
     setEmbers(function(){return maxEmbers});setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false)
+    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false)
     // Re-roll DOUBLE TIME for next fight
     const nd=stage.some(m=>m&&m.role==='Drummer')
     if(nd){const r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
