@@ -749,9 +749,10 @@ export default function App(){
       if(!m)return false
       const dmg=m.hp
       const bc=getCenter(bossRef)
-      setEnemyHp(function(prev){const next=Math.max(0,prev-dmg);addFloat(dmg,bc.x,bc.y-60,'#ff6600',true);return next})
+      const sdHp=Math.max(0,enemyHp-dmg);setEnemyHp(sdHp);addFloat(dmg,bc.x,bc.y-60,'#ff6600',true)
       playHit();setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
       setStageDiveUsed(true);updStat('totalDamage',dmg);updStat('highestStrike',dmg,true)
+      if(sdHp<=0)setTimeout(triggerVictory,500)
       msg='🤘 '+m.name+' Stage Dives for '+dmg+' damage!'
     }
     else if(card.id==='wakeup'){if(!m)return false;if(!m.tooStoned){addLog('☕ '+m.name+' is already awake.');return false};ns[slotIdx]=Object.assign({},m,{tooStoned:false,hp:m.maxHp});msg='☕ '+m.name+' revived!';addFloat('REVIVED',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#22aa44')}
@@ -776,8 +777,8 @@ export default function App(){
       msg='📋 Setlist opened — rearrange the top of your deck.'
     }
     else if(card.id==='controlfeedback'){setCorruption(50);msg='🎚 Corruption set to 50%.'}
-    else if(card.id==='feedbackloop'){const dmg=Math.floor(corruption);const bc2=getCenter(bossRef);setEnemyHp(function(prev){return Math.max(0,prev-dmg)});addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=20);playHit();updStat('totalDamage',dmg);msg='🎛 Feedback Loop: '+dmg+' damage!'}
-    else if(card.id==='soundwall'){const swDmg=fightIndex===0?5:fightIndex===1?8:12;const bc3=getCenter(bossRef);setEnemyHp(function(prev){return Math.max(0,prev-swDmg)});addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
+    else if(card.id==='feedbackloop'){const dmg=Math.floor(corruption);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=20);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage!'}
+    else if(card.id==='soundwall'){const swDmg=fightIndex===0?5:fightIndex===1?8:12;const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(triggerVictory,500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
     else if(card.id==='groupie'){const gain=3;setEmbers(function(p){return Math.min(maxEmbers,p+gain-card.embers)});spent=0;playEmber();msg='🍯 Groupie! Net +'+(gain-card.embers)+' Embers.';addFloat('+'+gain+' 🔥',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')}
     else if(card.id==='tappedout'){setPendingEmbers(function(p){return p+5});spent=0;playEmber();msg='🪙 Tapped Out! +5 Embers next Strike.'}
     else if(card.id==='demotape'){
@@ -801,8 +802,9 @@ export default function App(){
         // 1-2: OBLITERATION — total band ATK × 4 (positive)
         const totalAtk=ns.filter(m=>m&&!m.tooStoned).reduce((sum,m)=>sum+m.atk,0)
         const hqDmg=totalAtk*4
-        setEnemyHp(function(prev){return Math.max(0,prev-hqDmg)})
+        const oblitHp=Math.max(0,enemyHp-hqDmg);setEnemyHp(oblitHp)
         updStat('totalDamage',hqDmg)
+        if(oblitHp<=0)setTimeout(triggerVictory,2100)
         hqMsg='⛧ HELLQUAKE: OBLITERATION! '+hqDmg+' damage!';hqFloat='OBLITERATION!';hqColor='#ff2200'
       } else if(roll===3){
         // 3: RESONANCE — all members +3 ATK permanently (positive)
@@ -810,14 +812,15 @@ export default function App(){
         hqMsg='⛧ HELLQUAKE: RESONANCE! All members +3 ATK forever!';hqFloat='RESONANCE!';hqColor='#ff6600'
       } else if(roll===4){
         // 4: RITUAL — boss HP halved (positive)
-        setEnemyHp(function(prev){return Math.max(1,Math.floor(prev/2))})
+        const ritualHp=Math.max(1,Math.floor(enemyHp/2));setEnemyHp(ritualHp)
         hqMsg='⛧ HELLQUAKE: RITUAL! Boss HP halved!';hqFloat='RITUAL!';hqColor='#cc44ff'
       } else if(roll===5){
         // 5: THE VOID — corruption → damage, reset to 0 (positive)
         const voidDmg=Math.floor(corruption)
-        setEnemyHp(function(prev){return Math.max(0,prev-voidDmg)})
+        const voidHp=Math.max(0,enemyHp-voidDmg);setEnemyHp(voidHp)
         updStat('totalDamage',voidDmg)
         setCorruption(0)
+        if(voidHp<=0)setTimeout(triggerVictory,2100)
         hqMsg='⛧ HELLQUAKE: THE VOID! '+voidDmg+' damage, soul cleansed!';hqFloat='THE VOID!';hqColor='#4400aa'
       } else if(roll===6){
         // 6: POSSESSION — all cards free this Strike (positive)
@@ -825,8 +828,9 @@ export default function App(){
         hqMsg='⛧ HELLQUAKE: POSSESSION! All cards free this Strike!';hqFloat='POSSESSED!';hqColor='#aa44ff'
       } else if(roll===7){
         // 7: BACKLASH — 30 damage BUT one random member falls (mixed)
-        setEnemyHp(function(prev){return Math.max(0,prev-30)})
+        const backlashHp=Math.max(0,enemyHp-30);setEnemyHp(backlashHp)
         updStat('totalDamage',30)
+        if(backlashHp<=0)setTimeout(triggerVictory,2100)
         const alive=ns.filter(m=>m&&!m.tooStoned)
         if(alive.length>0){const victim=alive[Math.floor(Math.random()*alive.length)];const vi=ns.indexOf(victim);ns[vi]=Object.assign({},victim,{hp:0,tooStoned:true})}
         hqMsg='⛧ HELLQUAKE: BACKLASH! 30 damage, one member lost!';hqFloat='BACKLASH!';hqColor='#9933cc'
@@ -908,6 +912,30 @@ export default function App(){
     addLog('🗑 '+toDisc.length+' discarded & replaced.')
   },[selected,discardsLeft,animPhase,hand,deck,discardPile,drawUpTo])
 
+  const triggerVictory=useCallback(function(){
+    setStage(function(prev){
+      return prev.map(function(m){
+        if(m&&!m.tooStoned&&m.keyword==='FRENZIED'){
+          addFloat('FRENZIED!',getCenter(stageRefs.current[prev.indexOf(m)]).x,getCenter(stageRefs.current[prev.indexOf(m)]).y-80,'#ff6600',false)
+          return Object.assign({},m,{atk:m.atk+1})
+        }
+        return m
+      })
+    })
+    const perfectBonus=strikesLeft>=2?3:0
+    const stashEarned=6+Math.floor(Math.random()*3)+strikesLeft+perfectBonus
+    setStash(function(p){return p+stashEarned})
+    updStat('stashEarned',stashEarned);updStat('fightsSurvived',1)
+    if(Math.random()<0.15){setStash(p=>p+2);addLog('🎽 Found some merch money! +2 Stash.')}
+    if(corruption>=75){setStash(p=>p+2);addLog('🌀 Corruption Dividend! +2 Stash for high corruption.')}
+    if(perfectBonus>0)addFloat('PERFECT! +3',getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
+    addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.'))
+    setTimeout(function(){
+      if(fightIndex>=2){playVictory();setDeathCause('victory');setMaxEmbers(function(p){return Math.min(MAX_EMBERS_CAP,p+1)});setTimeout(function(){setGameState('end')},800)}
+      else{setShopCards(genShopCards());setRecruitPack(genRecruitPack());setGameState('shop')}
+    },1000)
+  },[strikesLeft,corruption,fightIndex])
+
   const handleStrike=useCallback(()=>{
     if(animPhase!=='idle'||strikesLeft<=0||enemyHp<=0)return
     const actives=stage.filter(m=>m&&!m.tooStoned)
@@ -963,36 +991,7 @@ export default function App(){
         return nm
       })})
 
-      if(newEHp<=0){
-        // FRENZIED: members with keyword get +1 ATK on kill
-        setStage(function(prev){
-          return prev.map(function(m){
-            if(m&&!m.tooStoned&&m.keyword==='FRENZIED'){
-              addFloat('FRENZIED!',getCenter(stageRefs.current[prev.indexOf(m)]).x,getCenter(stageRefs.current[prev.indexOf(m)]).y-80,'#ff6600',false)
-              return Object.assign({},m,{atk:m.atk+1,maxHp:m.maxHp})
-            }
-            return m
-          })
-        })
-        const perfectBonus=strikesLeft>=2?3:0
-        const stashEarned=6+Math.floor(Math.random()*3)+strikesLeft+perfectBonus
-        setStash(function(p){return p+stashEarned})
-        updStat('stashEarned',stashEarned);updStat('fightsSurvived',1)
-        // Merch drop chance
-        if(Math.random()<0.15){setStash(p=>p+2);addLog('🎽 Found some merch money! +2 Stash.')}
-        if(corruption>=75){setStash(p=>p+2);addLog('🌀 Corruption Dividend! +2 Stash for high corruption.')}
-        if(perfectBonus>0)addFloat('PERFECT! +3',getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
-        addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.')+'')
-        setTimeout(function(){
-          if(fightIndex>=2){playVictory();setDeathCause('victory');setMaxEmbers(function(p){return Math.min(MAX_EMBERS_CAP,p+1)});setTimeout(function(){setGameState('end')},800)}
-          else{
-            setShopCards(genShopCards())
-            setRecruitPack(genRecruitPack())
-            setGameState('shop')
-          }
-        },1000)
-        return
-      }
+      if(newEHp<=0){triggerVictory();return}
 
       setTimeout(function(){
         setAnimPhase('boss')
