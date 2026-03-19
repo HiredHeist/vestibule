@@ -767,6 +767,7 @@ export default function App(){
   const [dragStageIdx,setDragStageIdx]=useState(null)
   const [dragHandIdx,setDragHandIdx]=useState(null)
   const [dragOverHandIdx,setDragOverHandIdx]=useState(null)
+  const [handSort,setHandSort]=useState('none') // 'none'|'embers'|'rarity'
   const [log,setLog]=useState(['⛧ The gig begins.'])
   const [damageFlash,setDamageFlash]=useState(false)
   const [animPhase,setAnimPhase]=useState('idle')
@@ -1243,7 +1244,7 @@ export default function App(){
           setShowDice(false)
           const variance=Math.floor(Math.random()*5)-2
           // Apply enemy passive scaling effects before damage
-        let scaledBaseDmg=enemy.baseDmg+bossRageAtk
+        let scaledBaseDmg=enemy.baseDmg+(enemy.passiveId&&enemy.passiveId.startsWith('damageScaleAtk')?bossRageAtk:0)
         // selfbuff: boss gains +1/+2 dmg per Strike
         if(enemy.passiveId==='selfbuff'){scaledBaseDmg=enemy.baseDmg+strikesLeft}
         else if(enemy.passiveId==='selfbuff2'){scaledBaseDmg=enemy.baseDmg+(MAX_STRIKES-strikesLeft)*2}
@@ -1317,7 +1318,7 @@ export default function App(){
         },1200)
       },delay+400)
     },delay+200)
-  },[animPhase,strikesLeft,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,strikesLeft,bossRef,stageRefs,drawUpTo])
+  },[animPhase,strikesLeft,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,bossRef,stageRefs,drawUpTo,triggerVictory,bossRageAtk,bossDebuff])
 
   const handleShopLeave=useCallback(()=>{
     const nextIdx=Math.min(fightIndex+1, 26)
@@ -1414,7 +1415,7 @@ export default function App(){
 
   return(
     <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none'}}>
-      <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:8000,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px)',animation:'vhsDrift 8s ease-in-out infinite',mixBlendMode:'overlay'}}/>
+      <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:8000,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px,transparent 4px,transparent 7px,rgba(0,0,0,0.10) 7px,rgba(0,0,0,0.10) 8px,transparent 8px,transparent 14px,rgba(0,0,0,0.04) 14px,rgba(0,0,0,0.04) 15px)',animation:'vhsDrift 8s ease-in-out infinite',mixBlendMode:'overlay'}}/>
       <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:8001,animation:'vhsLine 12s linear infinite',background:'transparent'}}/>
       {damageFlash&&<div style={{position:'fixed',inset:0,zIndex:8500,pointerEvents:'none',background:'radial-gradient(ellipse at center,rgba(200,0,0,0.25),rgba(100,0,0,0.4))',animation:'flashFade 0.4s ease-out forwards'}}/>}
       {corruptHigh&&!corruptMax&&<div style={{position:'fixed',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 40%,rgba(100,0,0,0.15) 100%)',animation:bgPulseAnim}}/>}
@@ -1537,8 +1538,15 @@ export default function App(){
         </div>
 
         {/* CARD FAN — takes full height, padded to avoid overlapping columns */}
-        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:30,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',zIndex:50}}>
-          {hand.map((card,i)=>(
+        {/* Sort buttons */}
+        <div style={{position:'absolute',left:110,bottom:6,zIndex:10,display:'flex',gap:6}}>
+          <button onClick={()=>setHandSort(p=>p==='embers'?'none':'embers')}
+            style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,letterSpacing:2,textTransform:'uppercase',padding:'3px 8px',background:handSort==='embers'?'rgba(200,120,20,0.4)':'rgba(20,12,4,0.7)',border:handSort==='embers'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.4)',borderRadius:2,color:handSort==='embers'?'#e8a820':'#5a4020',cursor:'pointer'}}>🔥 Cost</button>
+          <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
+            style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,letterSpacing:2,textTransform:'uppercase',padding:'3px 8px',background:handSort==='rarity'?'rgba(200,120,20,0.4)':'rgba(20,12,4,0.7)',border:handSort==='rarity'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.4)',borderRadius:2,color:handSort==='rarity'?'#e8a820':'#5a4020',cursor:'pointer'}}>⭐ Rarity</button>
+        </div>
+        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:30,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',zIndex:50,isolation:'isolate'}}>
+          {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>a.embers-b.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} isUsed={card.id==='stagedive'&&stageDiveUsed}
               isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
               anyHovered={hovered!==null}
