@@ -68,6 +68,7 @@ const ALL_MUSICIANS=[
   {id:'loki',name:'Loki',role:'Synth Player',atk:3,hp:6,maxHp:6,emoji:'🎹',keyword:'CORRUPT',desc:'Damage scales with Corruption.'},
   {id:'nott',name:'Nott',role:'Vocalist',atk:2,hp:7,maxHp:7,emoji:'🎤',keyword:'DEBUFF',desc:'Reduces boss passive each turn.'},
   {id:'dag',name:'Dag',role:'Bass Player',atk:2,hp:12,maxHp:12,emoji:'🎵',keyword:'ANCHOR',desc:'Tankiest member.'},
+  {id:'vitalik',name:'Vitalik',role:'Dark Minstrel',atk:6,hp:9,maxHp:9,emoji:'🪈',keyword:'FOLK MAGIC',desc:'Nobody asked. Nobody complained twice.'},
 ]
 
 const ALL_CARDS=[
@@ -334,7 +335,7 @@ function BoosterScreen({onComplete,seed}){
   const [sel,setSel]=useState([])
   const pool=ALL_MUSICIANS
   const toggle=id=>setSel(p=>p.includes(id)?p.filter(x=>x!==id):p.length<2?[...p,id]:p)
-  const kwColor={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff'}
+  const kwColor={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa'}
   return(
     <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,padding:'24px 20px',overflowY:'auto'}}>
       <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:52,color:'#d0b060',textShadow:'0 0 40px rgba(200,150,20,0.4),2px 2px 0 #000',flexShrink:0}}>Opening Night</div>
@@ -387,6 +388,7 @@ function BoosterScreen({onComplete,seed}){
             ['ANCHOR','#33dd33','⚓','After every Strike, heals the members next to this one for +1 HP.'],
             ['CORRUPT','#cc44ff','🌀','ATK scales up the higher your Corruption is.'],
             ['DEBUFF','#4488ff','🎤','Each Strike permanently reduces boss damage by 2 this fight. Stacks up.'],
+            ['FOLK MAGIC','#44ddaa','🪈','Each Strike has a 20% chance to refund ALL the Embers you spent. Pure luck. Pure folk magic.'],
           ].map(([kw,color,icon,desc])=>(
             <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:10,background:'rgba(0,0,0,0.4)',borderRadius:6,padding:'12px 16px',border:`1px solid ${color}44`,flex:'1 1 180px'}}>
               <div style={{fontSize:26,flexShrink:0,marginTop:2}}>{icon}</div>
@@ -1535,7 +1537,9 @@ export default function App(){
     const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer').reduce((s,m)=>s+m.atk,0)
     dmg+=encDmg
     dmg=Math.round(dmg*bandBonus)
-    addLog('⚔ Band attacks for '+dmg+'!'+(hasDbl?' ('+dblMode+' ×'+dblMult+'!)':''))
+    const hasFolkMagic=actives.some(m=>m.keyword==='FOLK MAGIC')
+    const folkMagicFired=hasFolkMagic&&Math.random()<0.2
+    addLog('⚔ Band attacks for '+dmg+'!'+(hasDbl?' ('+dblMode+' ×'+dblMult+'!)')+(folkMagicFired?' 🪈 FOLK MAGIC!':''))
 
     const bc=getCenter(bossRef)
     let delay=0
@@ -1561,6 +1565,11 @@ export default function App(){
         setBossRageAtk(rageStacks*atkGain)
       }
       addFloat(dmg,bc.x,bc.y-60,dmg>=15?'#ff4400':'#dd2222',dmg>=15)
+      if(folkMagicFired){
+        setEmbers(maxEmbers)
+        addFloat('🪈 FOLK MAGIC!',bc.x,bc.y-120,'#44ddaa',true)
+        addLog('🪈 Folk Magic! All Embers refunded!')
+      }
       updStat('totalDamage',dmg);updStat('highestStrike',dmg,true)
 
       setStage(function(p){return p.map(function(m){
