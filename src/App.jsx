@@ -1524,7 +1524,7 @@ export default function App(){
                 // A6: Black Candle — deal 8 damage
                 if(activeArtifacts.some(a=>a.id==='a6')){
                   setEnemyHp(ehp=>Math.max(0,ehp-8))
-                  addLog('🕯 Black Candle! 8 damage from '+target.name+''s sacrifice.')
+                  addLog('🕯 Black Candle! 8 damage from '+target.name+' — sacrificed!')
                 }
                 // P6: Cult Following — gain 3 Stash
                 if(activePassives.some(p=>p.id==='p6')){
