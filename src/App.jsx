@@ -73,7 +73,7 @@ const ALL_CARDS=[
   {id:'darktuning',name:'Dark Tuning',type:'CORRUPT',rarity:'Uncommon',emoji:'🌑',embers:3,effect:'For each 20% Corruption, one random member gains +1 ATK permanently.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'powertap',name:'Power Tap',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'Gain 1 Ember.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'soundboard',name:'Soundboard',type:'EMBER',rarity:'Uncommon',emoji:'🎛',embers:1,effect:'Gain 2 Embers. Draw 1 extra card next Strike.',color:'#c87820',typeColor:'#a05a10',copies:1},
-  {id:'setbreak',name:'Setbreak',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Discard 1 selected card. Gain 2 Embers.',color:'#22aa44',typeColor:'#118833',copies:2},
+  {id:'setbreak',name:'Setbreak',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Auto-discard the lowest-cost card in hand. Gain 2 Embers.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'heavyriff',name:'Heavy Riff',type:'RIFF',rarity:'Uncommon',emoji:'🥊',embers:2,effect:'Deal damage = stage total ATK ÷ 2, direct to boss.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'resonancecard',name:'Resonance',type:'RIFF',rarity:'Uncommon',emoji:'🌀',embers:1,effect:'Target member ATK becomes equal to highest ATK on stage.',color:'#9933cc',typeColor:'#7722aa',copies:1},
 ]
@@ -485,21 +485,21 @@ function EndScreen({won,cause,stats,seed,onReset}){
         <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:340,color:'rgba(180,180,180,0.07)',userSelect:'none',lineHeight:1,textAlign:'center'}}>Vestibule</div>
       </div>
       <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:18}}>
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:isStoned?92:76,color:isStoned?'#cc1111':isVictory?'#d8c9a8':'#7a0000',textShadow:isStoned?'0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000,0 0 120px rgba(140,0,0,0.5)':isVictory?'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000':'0 0 60px rgba(100,0,0,0.6),3px 3px 0 #000'}}>{isStoned?'Stoned to the Bone':isVictory?'Victory':'Fallen'}</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:isStoned?20:17,color:isStoned?'rgba(200,80,80,0.9)':'#a09060',fontStyle:'italic'}}>{isStoned?'The band ran out of herb.':isVictory?'The Drifter has fallen. Circle II opens.':'The Vestibule claims another soul.'}</div>
-      <div style={{background:'rgba(20,12,4,0.8)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:6,padding:'18px 28px',minWidth:380}}>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:12}}>Run Statistics</div>
+      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:isStoned?138:114,color:isStoned?'#cc1111':isVictory?'#d8c9a8':'#7a0000',textShadow:isStoned?'0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000,0 0 120px rgba(140,0,0,0.5)':isVictory?'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000':'0 0 60px rgba(100,0,0,0.6),3px 3px 0 #000'}}>{isStoned?'Stoned to the Bone':isVictory?'Victory':'Fallen'}</div>
+      <div style={{fontFamily:"'IM Fell English',serif",fontSize:isStoned?30:25,color:isStoned?'rgba(200,80,80,0.9)':'#a09060',fontStyle:'italic'}}>{isStoned?'The band ran out of herb.':isVictory?'The Drifter has fallen. Circle II opens.':'The Vestibule claims another soul.'}</div>
+      <div style={{background:'rgba(20,12,4,0.8)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:6,padding:'24px 40px',minWidth:480}}>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:16,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:16}}>Run Statistics</div>
         {[['Strikes Thrown',stats.strikesThrown],['Total Damage Dealt',stats.totalDamage],['Highest Strike Damage',stats.highestStrike],['Too Stoned Events',stats.tooStonedCount],['Cards Played',stats.cardsPlayed],['Max Corruption',stats.maxCorruption+'%'],['Stash Earned',stats.stashEarned+' 🌿'],['Fights Survived',stats.fightsSurvived+' / 3']].map(function(row){
           return(
             <div key={row[0]} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'4px 0',borderBottom:'1px solid rgba(80,50,10,0.2)'}}>
-              <span style={{fontFamily:"'IM Fell English',serif",fontSize:13,color:'#8a7040',fontStyle:'italic'}}>{row[0]}</span>
-              <span style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,color:'#c8a060'}}>{row[1]}</span>
+              <span style={{fontFamily:"'IM Fell English',serif",fontSize:19,color:'#8a7040',fontStyle:'italic'}}>{row[0]}</span>
+              <span style={{fontFamily:"'Cinzel',serif",fontSize:21,fontWeight:900,color:'#c8a060'}}>{row[1]}</span>
             </div>
           )
         })}
       </div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#5a4a20',letterSpacing:2}}>RUN SEED: {seed.toString(16).toUpperCase()} — Share with friends!</div>
-      <button onClick={onReset} style={{fontFamily:"'Cinzel',serif",fontSize:15,letterSpacing:4,color:isStoned?'#ff3333':isVictory?'#ee2222':'#b09858',background:isStoned?'rgba(80,0,0,0.3)':isVictory?'rgba(100,0,0,0.22)':'transparent',border:isStoned?'2px solid #cc1111':isVictory?'2px solid #7a0000':'1px solid rgba(90,60,20,0.5)',borderRadius:3,padding:'13px 46px',cursor:'pointer',textTransform:'uppercase',boxShadow:isStoned?'0 0 30px rgba(180,0,0,0.4)':'none'}}>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:15,color:'#5a4a20',letterSpacing:2}}>RUN SEED: {seed.toString(16).toUpperCase()} — Share with friends!</div>
+      <button onClick={onReset} style={{fontFamily:"'Cinzel',serif",fontSize:22,letterSpacing:4,color:isStoned?'#ff3333':isVictory?'#ee2222':'#b09858',background:isStoned?'rgba(80,0,0,0.3)':isVictory?'rgba(100,0,0,0.22)':'transparent',border:isStoned?'2px solid #cc1111':isVictory?'2px solid #7a0000':'1px solid rgba(90,60,20,0.5)',borderRadius:3,padding:'13px 46px',cursor:'pointer',textTransform:'uppercase',boxShadow:isStoned?'0 0 30px rgba(180,0,0,0.4)':'none'}}>
         {isVictory?'⛧ Play Again':'↺ Try Again'}
       </button>
       </div>
@@ -887,14 +887,14 @@ export default function App(){
       addFloat('+2 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='setbreak'){
-      if(selected.length===0){addLog('🎼 Select a card to discard first.');return false}
-      // Discard the selected cards and gain 2 embers
-      const toDiscard=hand.filter(c=>selected.includes(c.uid))
-      setHand(p=>p.filter(c=>!selected.includes(c.uid)))
-      setDiscardPile(p=>[...p,...toDiscard])
-      setSelected([])
+      // Find lowest-cost card in hand that isn't Setbreak itself
+      const candidates=hand.filter(c=>c.uid!==card.uid)
+      if(candidates.length===0){addLog('🎼 No cards to discard!');return false}
+      const lowest=candidates.reduce((a,b)=>a.embers<=b.embers?a:b)
+      setHand(p=>p.filter(c=>c.uid!==lowest.uid))
+      setDiscardPile(p=>[...p,lowest])
       setEmbers(p=>Math.min(maxEmbers,p+2));playEmber();spent=0
-      msg='🎼 Setbreak! Discarded '+toDiscard.length+' card(s) for +2 Embers.'
+      msg='🎼 Setbreak! Discarded '+lowest.name+' ('+lowest.embers+'e) for +2 Embers.'
       addFloat('+2 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='heavyriff'){
@@ -1414,7 +1414,7 @@ export default function App(){
         </div>
 
         {/* CARD FAN — takes full height, padded to avoid overlapping columns */}
-        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:30,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',isolation:'isolate',zIndex:1}}>
+        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:30,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',zIndex:50}}>
           {hand.map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} isUsed={card.id==='stagedive'&&stageDiveUsed}
               isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
