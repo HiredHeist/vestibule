@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Friday, March 20, 2026 at 06:32 PM*
+*Last updated: Friday, March 20, 2026 at 06:34 PM*
 
 ---
 
@@ -50,6 +50,13 @@ This is happening.
 ---
 
 ## ✅ COMPLETED
+
+### Session 10 — March 21 2026 (latest)
+- ~~**HOVER BUG FIXED** — hovering one Wake Up Call raised both copies. Root cause: hover tracked by card.uid, but same-id cards can have uid collisions on draw. Fixed: hover now tracked by hand INDEX. Positionally correct, immune to duplicate card issues.~~
+- ~~**AI combo rewrite** — expertStrike rebuilt from scratch, 9 phases covering every card and combo chain~~
+- ~~**Sim recruit pack circle-gated** — was offering 40st Demonic Pack in C1, AI couldn't afford, never recruited~~
+- ~~**C1-C3 survival 100%%** — full 5-member band by C4 every run after AI + recruit fixes~~
+- ~~**200k sim running** — PID 383, results in /tmp/sim-results.txt~~
 
 ### Session 10 — March 21 2026
 
