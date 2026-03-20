@@ -1491,7 +1491,6 @@ function RecruitScreen({candidates,stage,onPick,onPass}){
                   </div>
                   <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:2,alignSelf:'center'}}>
                     <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#e8a820',fontWeight:700}}>{m.keyword}</div>
-                    {m.role==='Drummer'&&dblRoll!==null&&<div style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:900,color:dblRoll<=2?'#ff3333':dblRoll<=4?'#ff9900':'#33dd33',textAlign:'center',padding:'1px 5px',background:'rgba(0,0,0,0.6)',borderRadius:3,letterSpacing:0.5,whiteSpace:'nowrap'}}>{dblRoll<=2?'HALF ×0.5':dblRoll<=4?'OFF ×1.5':'DBL ×2'} [{dblRoll}]</div>}
                   </div>
                   <div style={{textAlign:'center'}}>
                     <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
