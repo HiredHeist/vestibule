@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Friday, March 20, 2026 at 06:43 PM*
+*Last updated: Friday, March 20, 2026 at 07:00 PM*
 
 ---
 
@@ -25,7 +25,7 @@ This is happening.
 
 ## P2 — BEFORE DEMO
 
-- [ ] The Miser (360 HP) — may need reduction, steep jump from Devourer (160 HP)
+- ~~**The Miser HP 360→260** — data confirmed: median F9 damage is 192, 360 was top-10% only. Now 34%% survival rate~~
 - [ ] ANCHOR+ANCHOR starting pair unwinnable — design consideration
 - [ ] Any remaining bugs from lost playtest notes
 
