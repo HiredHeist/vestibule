@@ -2411,14 +2411,14 @@ export default function App(){
       </div>
 
       {/* HAND AREA */}
-      <div style={{flex:'0 0 340px',background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0',display:'flex',flexDirection:'column',zIndex:30,minHeight:0,position:'relative'}}>
+      <div style={{flex:'0 0 420px',background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0',display:'flex',flexDirection:'column',zIndex:30,minHeight:0,position:'relative'}}>
         <div style={{textAlign:'center',padding:'6px 0 0',flexShrink:0,position:'relative',zIndex:0}}>
           <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length} of {HAND_SIZE}</span>
           {pendingEmbers>0&&<span style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#ff6600',marginLeft:12}}>+{pendingEmbers} 🔥 pending</span>}
         </div>
 
         {/* LEFT COLUMN: Deck/Discard — absolutely positioned */}
-        <div style={{position:'absolute',left:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:14,alignItems:'center',justifyContent:'center',background:'rgba(20,12,4,0.7)',borderRadius:'0 6px 6px 0',padding:'12px 14px',border:'1px solid rgba(100,65,15,0.3)',borderLeft:'none',minWidth:90}}>
+        <div style={{position:'absolute',left:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:10,alignItems:'center',justifyContent:'center',background:'rgba(20,12,4,0.7)',borderRadius:'0 6px 6px 0',padding:'12px 14px',border:'1px solid rgba(100,65,15,0.3)',borderLeft:'none',minWidth:90}}>
           <DeckPile count={deck.length} label="Deck"/>
           <DeckPile count={discardPile.length} label="Discard"/>
         </div>
@@ -2439,7 +2439,7 @@ export default function App(){
           </div>
         </div>}
         {/* RIGHT COLUMN: Buttons/Embers/Info — absolutely positioned */}
-        <div style={{position:'absolute',right:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:6,alignItems:'flex-end',justifyContent:'center',padding:'8px 22px 8px 12px',background:'rgba(10,5,2,0.6)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none'}}>
+        <div style={{position:'absolute',right:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:4,alignItems:'flex-end',justifyContent:'center',padding:'8px 22px 8px 12px',background:'rgba(10,5,2,0.6)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none'}}>
           <button onClick={handleStrike} disabled={!canStrike}
             style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 20px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:190}}>⚔ Strike</button>
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'flex-end',width:190}}>
@@ -2474,7 +2474,7 @@ export default function App(){
           <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
             style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'8px 12px',width:100,background:handSort==='rarity'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='rarity'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='rarity'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>⭐ RARITY</button>
         </div>
-        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:14,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',zIndex:50}}>
+        <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:8,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',zIndex:50}}>
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} isUsed={card.id==='stagedive'&&stageDiveUsed}
               isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
