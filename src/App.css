@@ -139,3 +139,11 @@ body {
   0%, 100% { box-shadow: 2px 4px 14px rgba(0,0,0,0.6), 0 0 4px rgba(200,160,60,0.06); }
   50% { box-shadow: 2px 4px 14px rgba(0,0,0,0.6), 0 0 12px rgba(200,160,60,0.15); }
 }
+
+@keyframes rerollWiggle {
+  0%, 85%, 100% { transform: rotate(0deg); box-shadow: 0 0 16px rgba(180,130,20,0.3), inset 0 0 20px rgba(100,70,0,0.1); }
+  88% { transform: rotate(-4deg); box-shadow: 0 0 28px rgba(220,170,30,0.7), inset 0 0 20px rgba(100,70,0,0.1); }
+  91% { transform: rotate(4deg); box-shadow: 0 0 32px rgba(220,170,30,0.8), inset 0 0 20px rgba(100,70,0,0.1); }
+  94% { transform: rotate(-3deg); box-shadow: 0 0 24px rgba(220,170,30,0.6), inset 0 0 20px rgba(100,70,0,0.1); }
+  97% { transform: rotate(2deg); box-shadow: 0 0 20px rgba(220,170,30,0.5), inset 0 0 20px rgba(100,70,0,0.1); }
+}
