@@ -1027,16 +1027,16 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{width:'100%',height:8,flexShrink:0,
             background:'linear-gradient(90deg,'+ac+'44,'+ac+'ee,'+ac+'44)',
             boxShadow:'0 0 16px '+ac+'99'}}/>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,letterSpacing:3,
-            color:ac,textTransform:'uppercase',opacity:0.7,marginTop:8,flexShrink:0}}>VESTIBULE</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:3,
+            color:ac,textTransform:'uppercase',opacity:1,marginTop:8,flexShrink:0}}>VESTIBULE</div>
           <div style={{fontSize:72,flex:'0 0 38%',display:'flex',alignItems:'center',justifyContent:'center',
             filter:'drop-shadow(0 0 '+(hov?'20px':'8px')+' '+ac+(hov?'cc':'66')+')',
             transition:'filter 0.15s'}}>{pack.emoji}</div>
-          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:40,
             color:ac,textAlign:'center',lineHeight:1.2,
             textShadow:'0 0 16px '+ac+'99',flexShrink:0,padding:'4px 4px'}}>{pack.name}</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,
-            color:'#9a8868',textAlign:'center',fontStyle:'italic',
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,
+            color:'#c8a878',textAlign:'center',fontStyle:'italic',
             lineHeight:1.4,padding:'8px 10px 0',flex:1}}>{pack.desc}</div>
           <div style={{position:'absolute',bottom:0,left:0,right:0,height:6,
             background:'linear-gradient(90deg,'+ac+'44,'+ac+'ee,'+ac+'44)'}}/>
@@ -1150,14 +1150,14 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                   color:'#9944dd',textAlign:'center',marginBottom:14,
                   textShadow:'0 0 18px rgba(160,80,240,0.8)'}}>🪙 Pawn Shop</div>
                 <div style={{fontSize:44,textAlign:'center',margin:'6px 0'}}>🏧</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,
-                  color:'#7a5aaa',letterSpacing:1,lineHeight:2.4,textAlign:'center'}}>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,
+                  color:'#cc88ff',letterSpacing:1,lineHeight:2.4,textAlign:'center'}}>
                   Common 1🌿 · Uncommon 2🌿 · Rare 4🌿<br/>
                   Foil +3🌿 · Mythic +8🌿 · Member 5🌿<br/>
                   Artifact = 50% of buy price back
                 </div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,
-                  color:'#4a3068',textAlign:'center',marginTop:10,letterSpacing:1}}>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,
+                  color:'#cc88ff',textAlign:'center',marginTop:10,letterSpacing:1}}>
                   Max 2 sales per visit · Cannot sell last 2 members
                 </div>
               </div>
@@ -2056,7 +2056,7 @@ export default function App(){
       }
       // Dramatic flash then reveal
       setHellquakeAnim({text:hqFloat,color:hqColor})
-      setTimeout(()=>setHellquakeAnim(null),2000)
+      setTimeout(()=>setHellquakeAnim(null),5000)
       msg=hqMsg
       addFloat(hqFloat,bc.x,bc.y-80,hqColor,true)
       playHit()
