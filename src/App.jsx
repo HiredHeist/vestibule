@@ -1467,8 +1467,11 @@ function RecruitScreen({candidates,stage,onPick,onPass}){
       <div style={{display:'flex',gap:20,flexWrap:'wrap',justifyContent:'center',maxWidth:1000}}>
         {candidates.map(m=>{
           const alreadyOn=stage.some(s=>s&&s.id===m.id)
+          const hasDblTime=stage.some(s=>s&&s.keyword==='DOUBLE TIME')
+          const isDblTime=m.keyword==='DOUBLE TIME'
           const emptySlot=stage.findIndex(s=>!s)
-          const canAdd=!alreadyOn&&emptySlot!==-1
+          // Allow duplicates EXCEPT second DOUBLE TIME (two drummers = broken multiplier)
+          const canAdd=!alreadyOn&&emptySlot!==-1&&!(isDblTime&&hasDblTime)
           const tier=m.demonic?'DEMONIC':m.mythic?'MYTHIC':m.foil?'FOIL':null
           const bondTarget=stage.find(s=>s&&s.role===m.role&&!s.tooStoned)
           const bondBonus=m.demonic?3:m.mythic?2:m.foil?1:0
@@ -1499,6 +1502,7 @@ function RecruitScreen({candidates,stage,onPick,onPass}){
                 </div>
                 <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:'#8a7040',textAlign:'center',fontStyle:'italic',lineHeight:1.3}}>{m.desc}</div>
                 {alreadyOn&&<div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#aa6600',textAlign:'center',marginTop:6,letterSpacing:1}}>ALREADY ON STAGE</div>}
+                {!alreadyOn&&isDblTime&&hasDblTime&&<div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#ff8800',textAlign:'center',marginTop:6,letterSpacing:1}}>ONLY ONE DRUMMER</div>}
                 {!alreadyOn&&emptySlot===-1&&<div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#aa2200',textAlign:'center',marginTop:6,letterSpacing:1}}>STAGE FULL</div>}
               </div>
             </div>
@@ -1727,7 +1731,8 @@ export default function App(){
 
   const rollDblForStage=(stg)=>{
     const hasDrummer=stg.some(m=>m&&m.role==='Drummer')
-    if(hasDrummer){const roll=Math.floor(Math.random()*6)+1;setDblRoll(roll)}
+    const drumCount2=stg.filter(m=>m&&m.role==='Drummer').length
+    if(hasDrummer){let roll=Math.floor(Math.random()*6)+1;if(drumCount2>=2&&roll<=2)roll=Math.floor(Math.random()*6)+1;setDblRoll(roll)}
     else setDblRoll(null)
   }
   const startGame=useCallback(selIds=>{
@@ -1738,7 +1743,8 @@ export default function App(){
     setHand(d.slice(0,HAND_SIZE))
     setDeck(d.slice(HAND_SIZE))
     const hasDrummer=musicians.some(m=>m.role==='Drummer')
-    if(hasDrummer){const r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
+    const drumCount=musicians.filter(m=>m.role==='Drummer').length
+    if(hasDrummer){let r=Math.floor(Math.random()*6)+1;if(drumCount>=2&&r<=2)r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
     setGameState('playing')
     addLog('⛧ '+musicians[0].name+' and '+musicians[1].name+' take the stage!')
   },[runSeed])
@@ -2415,7 +2421,8 @@ export default function App(){
     setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null)
     // Re-roll DOUBLE TIME for next fight
     const nd=stage.some(m=>m&&m.role==='Drummer')
-    if(nd){const r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
+    const ndCount=stage.filter(m=>m&&m.role==='Drummer').length
+    if(nd){let r=Math.floor(Math.random()*6)+1;if(ndCount>=2&&r<=2)r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
     setStage(p=>p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false}):null))
     // Redeal hand from current deck+discard
     setDeck(function(curDeck){
@@ -2484,8 +2491,10 @@ export default function App(){
     if(extraEm>0)addLog('🌿 Ember bonus: +'+(extraEm)+' (passives/artifacts)')
     // Roll DOUBLE TIME d6 if drummer is on stage
     const hasDrummer=stage.some(m=>m&&m.role==='Drummer')
+    const drumCount3=stage.filter(m=>m&&m.role==='Drummer').length
     if(hasDrummer){
-      const roll=Math.floor(Math.random()*6)+1
+      let roll=Math.floor(Math.random()*6)+1
+      if(drumCount3>=2&&roll<=2)roll=Math.floor(Math.random()*6)+1
       setDblRoll(roll)
     } else {
       setDblRoll(null)
