@@ -931,9 +931,9 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             letterSpacing:2,textTransform:'uppercase',flexShrink:0}}>
             {card.isMember?card.role:card.type}{card.rarity&&!card.isMember?' · '+card.rarity:''}
           </div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,
-            color:'#9a8060',textAlign:'center',padding:'8px 14px',
-            fontStyle:'italic',lineHeight:1.5,flex:1}}>{card.effect||card.desc||''}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,
+            color:'#c8a878',textAlign:'center',padding:'8px 14px',
+            lineHeight:1.5,flex:1}}>{card.effect||card.desc||''}</div>
           {card.isMember&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',
             padding:'10px 16px',borderTop:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>
             <div style={{textAlign:'center'}}>
@@ -987,9 +987,9 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:700,
             color:'#ffe8a0',textAlign:'center',padding:'4px 8px 2px',
             lineHeight:1.2,flexShrink:0}}>{item.name}</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,
             color:'#d0b880',textAlign:'center',padding:'6px 10px 8px',
-            fontStyle:'italic',lineHeight:1.4,flex:1,overflow:'hidden'}}>{item.effect||item.desc||''}</div>
+            lineHeight:1.4,flex:1,overflow:'hidden'}}>{item.effect||item.desc||''}</div>
         </div>
       </div>
     )
@@ -1136,7 +1136,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{height:20,flexShrink:0}}/>
 
           {/* PACKS + PAWN ROW */}
-          <div style={{flexShrink:0,display:'flex',gap:80,justifyContent:'center',alignItems:'flex-start'}}>
+          <div style={{flexShrink:0,display:'flex',gap:80,justifyContent:'center',alignItems:'center'}}>
             {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
             <div style={{width:420,height:420,flexShrink:0,
               background:'linear-gradient(160deg,#0e0a16,#080510)',
