@@ -650,7 +650,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
       background:'radial-gradient(ellipse at 50% 0%,rgba(28,18,4,1) 0%,rgba(6,4,1,1) 100%)',
       display:'grid',
       gridTemplateColumns:'190px 1fr 1fr 1fr 152px',
-      gridTemplateRows:'90px 1fr 260px',
+      gridTemplateRows:'80px 1fr 1fr',
+      height:'100vh',boxSizing:'border-box',
       gap:'10px',padding:'10px',
       fontFamily:"'Cinzel',serif",
       overflow:'hidden'}}>
