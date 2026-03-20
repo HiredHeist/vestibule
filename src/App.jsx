@@ -1099,7 +1099,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         </div>
 
         {/* CENTER */}
-        <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',minHeight:0}}>
+        <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'visible',minHeight:0}}>
 
           {/* CARDS ROW */}
           <div style={{flexShrink:0,display:'flex',gap:80,justifyContent:'center',alignItems:'flex-start',paddingTop:4}}>
@@ -1133,7 +1133,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           </div>
 
           {/* GAP */}
-          <div style={{height:20,flexShrink:0}}/>
+          <div style={{flex:1,minHeight:12,maxHeight:60}}/>
 
           {/* PACKS + PAWN ROW */}
           <div style={{flexShrink:0,display:'flex',gap:80,justifyContent:'center',alignItems:'center'}}>
