@@ -511,6 +511,15 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
   })
   return(
     <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(2,1,4,0.96)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',padding:'40px 20px',overflowY:'auto'}}>
+      {/* Stash counter — top right, ticks up on each sale */}
+      <div style={{position:'fixed',top:24,right:32,display:'flex',flexDirection:'column',alignItems:'center',gap:4,
+        background:'rgba(20,10,5,0.95)',border:'2px solid #55ee66',borderRadius:10,padding:'12px 20px',
+        boxShadow:'0 0 24px rgba(60,220,80,0.4)',minWidth:100}}>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#33aa44',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Stash</div>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,color:'#55ee66',lineHeight:1,
+          textShadow:'0 0 20px rgba(60,220,80,0.8)'}}>{stash}</div>
+        <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:'#33aa44',fontStyle:'italic'}}>🌿</div>
+      </div>
       <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:44,color:'#cc88ff',textShadow:'0 0 30px rgba(180,60,255,0.6)',marginBottom:6}}>🪙 Pawn Shop</div>
       <div style={{fontFamily:"'IM Fell English',serif",fontSize:15,color:'#8a6aaa',fontStyle:'italic',marginBottom:4}}>
         {salesLeft} sale{salesLeft!==1?'s':''} remaining this visit
