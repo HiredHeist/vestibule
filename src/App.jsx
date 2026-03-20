@@ -452,7 +452,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   const rarityAnim=r=>r==='Rare'?'holoShimmer 3s ease-in-out infinite':r==='Uncommon'?'uncommonGlow 2s ease-in-out infinite':''
   function buyCard(card){if(!can(cardPrice(card)))return;onSpend(cardPrice(card),'card',card)}
 
-  // ── SALE CARD — fills its flex cell, matches hand card style ──
+  // ── SALE CARD — portrait playing card style ──
   function SaleCard({card,idx}){
     const id='sc'+idx
     const hov=hovId===id
@@ -461,96 +461,97 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     const price=cardPrice(card)
     const canBuy=can(price)
     return(
-      <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'stretch',position:'relative',paddingTop:20}}
+      <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'stretch',position:'relative',paddingTop:22}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
-        {/* price bubble */}
-        <div style={{position:'absolute',top:2,left:'50%',transform:'translateX(-50%)'+(hov&&canBuy?' scale(1.1)':''),
+        <div style={{position:'absolute',top:0,left:'50%',transform:'translateX(-50%)',
           background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
           border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
           padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
-          fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,
-          color:canBuy?'#55ee55':'#554428',letterSpacing:0.5,
-          boxShadow:canBuy?'0 2px 14px rgba(50,200,50,0.35)':'none',
-          transition:'transform 0.12s'}}>🌿 {price}</div>
-        {/* card body fills remaining space */}
+          fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,
+          color:canBuy?'#55ee55':'#554428',
+          boxShadow:canBuy?'0 2px 14px rgba(50,200,50,0.35)':'none'}}>🌿 {price}</div>
         <div onClick={()=>canBuy&&buyCard(card)}
           style={{flex:1,display:'flex',flexDirection:'column',
             background:'linear-gradient(180deg,#201408,#100804)',
             border:hov&&canBuy?'2px solid '+bc:'1px solid '+bc+(canBuy?'77':'33'),
             borderRadius:8,overflow:'hidden',cursor:canBuy?'pointer':'not-allowed',
             transform:hov&&canBuy?'translateY(-4px) scale(1.02)':'none',
-            transition:'transform 0.18s cubic-bezier(0.34,1.56,0.64,1), border-color 0.15s, box-shadow 0.15s',
+            transition:'transform 0.18s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
             boxShadow:hov&&canBuy?'0 12px 36px rgba(0,0,0,0.9),0 0 24px '+gl:'2px 4px 14px rgba(0,0,0,0.7)',
             opacity:canBuy?1:0.45,
             animation:rarityAnim(card.rarity)}}>
-          {/* colored top stripe */}
-          <div style={{height:5,flexShrink:0,background:bc,boxShadow:'0 0 10px '+gl}}/>
-          {/* badges row */}
-          <div style={{position:'relative',flexShrink:0,height:22}}>
-            {card.rarity==='Rare'&&<div style={{position:'absolute',top:4,left:6,padding:'1px 5px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
-            {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:4,left:6,padding:'1px 5px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
-            {card.foil&&<div style={{position:'absolute',top:4,right:6,padding:'1px 5px',borderRadius:3,background:'rgba(255,215,0,0.3)',border:'1px solid rgba(255,215,0,0.6)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#ffd700',letterSpacing:1}}>✨FOIL</div>}
-            {card.mythic&&<div style={{position:'absolute',top:4,right:6,padding:'1px 5px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#cc44ff',letterSpacing:1}}>⛧MYTHIC</div>}
-            {card.embers>0?<div style={{position:'absolute',top:2,right:6,width:26,height:26,borderRadius:'50%',
-              background:canBuy?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',
-              border:'2px solid '+(canBuy?'#ff6600':'#4a2a10'),
-              display:'flex',alignItems:'center',justifyContent:'center',
-              fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,
-              color:canBuy?'#fff':'#5a3a10',
-              boxShadow:canBuy?'0 0 10px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
-            :<div style={{position:'absolute',top:4,right:6,padding:'1px 5px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>}
+          <div style={{height:6,flexShrink:0,background:bc,boxShadow:'0 0 10px '+gl}}/>
+          {/* badges */}
+          <div style={{position:'relative',height:26,flexShrink:0}}>
+            {card.rarity==='Rare'&&<div style={{position:'absolute',top:5,left:8,padding:'2px 6px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
+            {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:5,left:8,padding:'2px 6px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
+            {card.foil&&<div style={{position:'absolute',top:5,right:8,padding:'2px 6px',borderRadius:3,background:'rgba(255,215,0,0.3)',border:'1px solid rgba(255,215,0,0.6)',fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,color:'#ffd700'}}>✨FOIL</div>}
+            {card.mythic&&<div style={{position:'absolute',top:5,right:8,padding:'2px 6px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,color:'#cc44ff'}}>⛧MYTHIC</div>}
+            {card.embers>0
+              ?<div style={{position:'absolute',top:3,right:8,width:30,height:30,borderRadius:'50%',
+                  background:canBuy?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',
+                  border:'2px solid '+(canBuy?'#ff6600':'#4a2a10'),
+                  display:'flex',alignItems:'center',justifyContent:'center',
+                  fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,
+                  color:canBuy?'#fff':'#5a3a10',
+                  boxShadow:canBuy?'0 0 10px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
+              :<div style={{position:'absolute',top:5,right:8,padding:'2px 6px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>}
           </div>
-          {/* emoji */}
-          <div style={{flex:'0 0 30%',display:'flex',alignItems:'center',justifyContent:'center',
-            fontSize:'min(3.5vw,54px)',background:'rgba(0,0,0,0.3)',position:'relative'}}>
+          {/* emoji — large, centered */}
+          <div style={{flex:'0 0 32%',display:'flex',alignItems:'center',justifyContent:'center',
+            fontSize:52,background:'rgba(0,0,0,0.3)',position:'relative'}}>
             <div style={{position:'absolute',inset:0,background:'radial-gradient(circle at center,'+bc+'18,transparent 70%)'}}/>
             {card.emoji}
           </div>
           {/* name */}
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:'min(1.1vw,14px)',fontWeight:700,
-            color:'#eedfc0',textAlign:'center',padding:'6px 8px 2px',
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:700,
+            color:'#eedfc0',textAlign:'center',padding:'8px 8px 3px',
             letterSpacing:0.3,lineHeight:1.2,
             borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
           {/* type */}
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:'min(0.75vw,9px)',fontWeight:700,
-            color:bc,textAlign:'center',padding:'2px 4px',
-            letterSpacing:1.8,textTransform:'uppercase',flexShrink:0}}>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:700,
+            color:bc,textAlign:'center',padding:'3px 4px',
+            letterSpacing:2,textTransform:'uppercase',flexShrink:0}}>
             {card.isMember?card.role:card.type}{card.rarity&&!card.isMember?' · '+card.rarity:''}
           </div>
           {/* effect */}
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:'min(0.8vw,10px)',
-            color:'#9a8060',textAlign:'center',padding:'4px 10px',
-            fontStyle:'italic',lineHeight:1.35,flex:1,overflow:'hidden'}}>{card.effect||card.desc||''}</div>
+          <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,
+            color:'#9a8060',textAlign:'center',padding:'6px 12px',
+            fontStyle:'italic',lineHeight:1.4,flex:1,overflow:'hidden'}}>{card.effect||card.desc||''}</div>
           {/* member stats */}
-          {card.isMember&&<div style={{display:'flex',justifyContent:'space-between',
-            padding:'4px 12px',borderTop:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#ee2222',fontWeight:900}}>ATK {card.atk}</span>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#aaa',letterSpacing:1}}>{card.keyword}</span>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#33dd33',fontWeight:900}}>HP {card.hp}</span>
+          {card.isMember&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',
+            padding:'8px 14px',borderTop:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>
+            <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
+              <span style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#888',letterSpacing:1}}>ATK</span>
+              <span style={{fontFamily:"'Cinzel',serif",fontSize:22,color:'#ee2222',fontWeight:900,lineHeight:1}}>{card.atk}</span>
+            </div>
+            <span style={{fontFamily:"'Cinzel',serif",fontSize:10,color:card.kwColor||'#aaa',letterSpacing:1,textAlign:'center'}}>{card.keyword}</span>
+            <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
+              <span style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#888',letterSpacing:1}}>HP</span>
+              <span style={{fontFamily:"'Cinzel',serif",fontSize:22,color:'#33dd33',fontWeight:900,lineHeight:1}}>{card.hp}</span>
+            </div>
           </div>}
         </div>
       </div>
     )
   }
 
-  // ── LEFT COLUMN ITEM — fills its 1/3 section ──
+  // ── LEFT COLUMN ITEM ──
   function LeftCard({item,price,label,accent,id,onBuy}){
     const hov=hovId===id
     const canBuy=can(price)
     const ac=accent||'#c87820'
     return(
-      <div style={{flex:1,display:'flex',flexDirection:'column',paddingTop:18,position:'relative'}}
+      <div style={{flex:1,display:'flex',flexDirection:'column',paddingTop:20,position:'relative'}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
-        {/* price */}
         <div style={{position:'absolute',top:0,left:'50%',
           transform:'translateX(-50%)'+(hov&&canBuy?' scale(1.08)':''),
           background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
           border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
           padding:'2px 12px',zIndex:5,whiteSpace:'nowrap',
-          fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:900,
+          fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
           transition:'transform 0.12s'}}>🌿 {price}</div>
-        {/* card */}
         <div onClick={()=>canBuy&&onBuy()}
           style={{flex:1,display:'flex',flexDirection:'column',
             background:'linear-gradient(180deg,#1c1408,#0e0a04)',
@@ -559,25 +560,21 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             borderRadius:8,overflow:'hidden',
             cursor:canBuy?'pointer':'not-allowed',
             transform:hov&&canBuy?'translateY(-3px)':'none',
-            transition:'transform 0.15s, border-color 0.15s, box-shadow 0.15s',
+            transition:'transform 0.15s,border-color 0.15s,box-shadow 0.15s',
             boxShadow:hov&&canBuy?'0 10px 30px rgba(0,0,0,0.8),0 0 16px '+ac+'44':'2px 4px 14px rgba(0,0,0,0.6)',
             opacity:canBuy?1:0.5,
             animation:'throb 3s ease-in-out infinite'}}>
-          {/* label */}
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:6.5,letterSpacing:2.5,
-            color:ac,textAlign:'center',padding:'5px 4px 2px',
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:2.5,
+            color:ac,textAlign:'center',padding:'6px 4px 2px',
             textTransform:'uppercase',opacity:0.85,flexShrink:0}}>{label}</div>
-          {/* emoji */}
-          <div style={{flex:'0 0 35%',display:'flex',alignItems:'center',justifyContent:'center',
-            fontSize:'min(2.5vw,36px)',
+          <div style={{flex:'0 0 38%',display:'flex',alignItems:'center',justifyContent:'center',
+            fontSize:34,
             filter:hov?'drop-shadow(0 0 8px '+ac+')':'none',
             transition:'filter 0.15s'}}>{item.emoji}</div>
-          {/* name */}
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:'min(0.85vw,11px)',fontWeight:700,
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:700,
             color:'#f0e0b0',textAlign:'center',padding:'4px 6px 2px',
             lineHeight:1.2,flexShrink:0}}>{item.name}</div>
-          {/* effect */}
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:'min(0.7vw,8.5px)',
+          <div style={{fontFamily:"'IM Fell English',serif",fontSize:10,
             color:'#9a8060',textAlign:'center',padding:'2px 8px 6px',
             fontStyle:'italic',lineHeight:1.35,flex:1,overflow:'hidden'}}>{item.effect||item.desc||''}</div>
         </div>
@@ -585,7 +582,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     )
   }
 
-  // ── BOOSTER PACK — MTG style, fills its cell ──
+  // ── BOOSTER PACK — MTG portrait style ──
   function BoosterPack({pack,idx}){
     const id='bp'+idx
     const hov=hovId===id
@@ -593,52 +590,49 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     const packAc={cassette:'#c87820',cdr:'#6688cc',vinyl:'#cc44ff',rarevinyl:'#ffdd44',cursed:'#cc2222',ritual:'#8844cc',hellforged:'#ff6600',garage:'#44aa44',touring:'#44aacc',demonic:'#cc44ff'}
     const ac=packAc[pack.id]||'#c87820'
     return(
-      <div style={{flex:1,display:'flex',flexDirection:'column',paddingTop:18,position:'relative'}}
+      <div style={{flex:1,display:'flex',flexDirection:'column',paddingTop:22,position:'relative'}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
-        {/* price */}
         <div style={{position:'absolute',top:0,left:'50%',
           transform:'translateX(-50%)'+(hov&&canBuy?' scale(1.08)':''),
           background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
           border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
-          padding:'2px 12px',zIndex:5,whiteSpace:'nowrap',
-          fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,
+          padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
+          fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
           transition:'transform 0.12s'}}>🌿 {pack.cost}</div>
-        {/* pack body */}
         <div onClick={()=>canBuy&&onSpend(pack.cost,'pack',pack)}
           style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',
-            justifyContent:'space-between',
-            background:'linear-gradient(160deg,#12100a 0%,#1e1a0e 45%,#120e08 100%)',
+            background:'linear-gradient(160deg,#12100a 0%,#1e1a0e 40%,#120e08 100%)',
             border:hov&&canBuy?'2px solid '+ac:'1px solid '+ac+'66',
             borderRadius:10,overflow:'hidden',
             cursor:canBuy?'pointer':'not-allowed',
             transform:hov&&canBuy?'translateY(-4px) scale(1.02)':'none',
-            transition:'transform 0.18s, box-shadow 0.15s, border-color 0.15s',
+            transition:'transform 0.18s,box-shadow 0.15s,border-color 0.15s',
             boxShadow:hov&&canBuy?'0 14px 40px rgba(0,0,0,0.9),0 0 28px '+ac+'55':'2px 6px 20px rgba(0,0,0,0.7)',
             opacity:canBuy?1:0.45,
-            position:'relative',padding:'0 10px 14px'}}>
+            position:'relative',padding:'0 12px 16px'}}>
           {/* foil top strip */}
-          <div style={{width:'100%',height:6,flexShrink:0,
+          <div style={{width:'100%',height:7,flexShrink:0,
             background:'linear-gradient(90deg,'+ac+'44,'+ac+'dd,'+ac+'44)',
-            boxShadow:'0 0 12px '+ac+'88,0 2px 8px '+ac+'44'}}/>
-          {/* vestibule label */}
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:3,
-            color:ac,textTransform:'uppercase',opacity:0.7,marginTop:4,flexShrink:0}}>VESTIBULE</div>
-          {/* main emoji */}
-          <div style={{fontSize:'min(4.5vw,58px)',
-            filter:'drop-shadow(0 0 '+(hov?'16px':'6px')+' '+ac+(hov?'cc':'66')+')',
-            transition:'filter 0.15s',flex:1,display:'flex',alignItems:'center'}}>{pack.emoji}</div>
-          {/* pack name */}
-          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:'min(1.4vw,18px)',
+            boxShadow:'0 0 14px '+ac+'88,0 2px 10px '+ac+'44'}}/>
+          {/* label */}
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:3,
+            color:ac,textTransform:'uppercase',opacity:0.75,marginTop:6,flexShrink:0}}>VESTIBULE</div>
+          {/* emoji — large */}
+          <div style={{fontSize:58,flex:'0 0 35%',display:'flex',alignItems:'center',justifyContent:'center',
+            filter:'drop-shadow(0 0 '+(hov?'18px':'8px')+' '+ac+(hov?'cc':'66')+')',
+            transition:'filter 0.15s'}}>{pack.emoji}</div>
+          {/* name */}
+          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:20,
             color:ac,textAlign:'center',lineHeight:1.2,
-            textShadow:'0 0 12px '+ac+'88',flexShrink:0,
+            textShadow:'0 0 14px '+ac+'88',flexShrink:0,
             padding:'0 4px'}}>{pack.name}</div>
           {/* contents */}
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:'min(0.75vw,9px)',
+          <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,
             color:'#9a8868',textAlign:'center',fontStyle:'italic',
-            lineHeight:1.35,padding:'4px 8px 0',flexShrink:0}}>{pack.desc}</div>
-          {/* foil bottom strip */}
-          <div style={{position:'absolute',bottom:0,left:0,right:0,height:4,
+            lineHeight:1.4,padding:'6px 8px 0',flexShrink:0}}>{pack.desc}</div>
+          {/* bottom foil strip */}
+          <div style={{position:'absolute',bottom:0,left:0,right:0,height:5,
             background:'linear-gradient(90deg,'+ac+'44,'+ac+'dd,'+ac+'44)'}}/>
         </div>
       </div>
@@ -649,26 +643,23 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     <div style={{position:'fixed',inset:0,zIndex:9500,
       background:'radial-gradient(ellipse at 50% 0%,rgba(28,18,4,1) 0%,rgba(6,4,1,1) 100%)',
       display:'grid',
-      gridTemplateColumns:'190px 1fr 1fr 1fr 152px',
-      gridTemplateRows:'80px 1fr 1fr',
-      height:'100vh',boxSizing:'border-box',
+      gridTemplateColumns:'185px 1fr 1fr 1fr 145px',
+      gridTemplateRows:'76px 1fr 32px 1fr',
       gap:'10px',padding:'10px',
       fontFamily:"'Cinzel',serif",
-      overflow:'hidden'}}>
+      overflow:'hidden',
+      boxSizing:'border-box',
+      height:'100vh'}}>
 
-      {/* ── LEFT COLUMN — spans all 3 rows ── */}
-      <div style={{gridColumn:'1',gridRow:'1/4',
-        display:'flex',flexDirection:'column',gap:12,
-        padding:'4px 0'}}>
-        {/* Band Pack */}
+      {/* ── LEFT COLUMN — spans all rows ── */}
+      <div style={{gridColumn:'1',gridRow:'1/5',
+        display:'flex',flexDirection:'column',gap:14,padding:'4px 0'}}>
         <LeftCard item={recruitPack} price={recruitPack.cost}
           label="Band Recruitment" accent='#e8a820' id='rec'
           onBuy={()=>can(recruitPack.cost)&&onSpend(recruitPack.cost,'recruit',recruitPack)} />
-        {/* Circle Artifact */}
         {circleArtifact&&<LeftCard item={circleArtifact} price={circleArtifact.cost}
           label={'Vintage Amp · C'+circleNum} accent='#c87820' id='cart'
           onBuy={()=>can(circleArtifact.cost)&&onSpend(circleArtifact.cost,'artifact',circleArtifact)} />}
-        {/* Circle Passive */}
         {circlePassive&&<LeftCard item={circlePassive} price={circlePassive.cost}
           label={'Effect Pedal · C'+circleNum} accent='#9933cc' id='cpas'
           onBuy={()=>can(circlePassive.cost)&&onSpend(circlePassive.cost,'passive',circlePassive)} />}
@@ -679,104 +670,114 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         display:'flex',alignItems:'center',justifyContent:'center',
         background:'rgba(8,4,1,0.8)',
         border:'1px solid rgba(180,20,20,0.3)',borderRadius:8,
-        boxShadow:'0 0 30px rgba(160,10,10,0.2), inset 0 0 40px rgba(100,5,5,0.1)'}}>
-        <span style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:'min(3vw,38px)',
+        boxShadow:'0 0 30px rgba(160,10,10,0.2)'}}>
+        <span style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:36,
           color:'#cc1111',letterSpacing:2,
-          textShadow:'0 0 20px rgba(200,10,10,0.9),0 0 40px rgba(180,0,0,0.6),0 0 60px rgba(150,0,0,0.3)'}}>
+          textShadow:'0 0 20px rgba(220,10,10,0.95),0 0 40px rgba(190,0,0,0.7),0 0 70px rgba(150,0,0,0.4)'}}>
           ⚰ The Black Market
         </span>
       </div>
 
       {/* ── NEXT FIGHT — col 5, row 1 ── */}
       <button onClick={onLeave}
-        onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,15,15,0.5)';e.currentTarget.style.boxShadow='0 0 20px rgba(200,10,10,0.4)'}}
-        onMouseLeave={e=>{e.currentTarget.style.background='rgba(120,8,8,0.3)';e.currentTarget.style.boxShadow='none'}}
+        onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,15,15,0.5)'}}
+        onMouseLeave={e=>{e.currentTarget.style.background='rgba(120,8,8,0.3)'}}
         style={{gridColumn:'5',gridRow:'1',
-          fontFamily:"'Cinzel',serif",fontSize:'min(1vw,12px)',fontWeight:700,letterSpacing:2,
+          fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:700,letterSpacing:2,
           background:'rgba(120,8,8,0.3)',border:'2px solid #991010',borderRadius:8,
           color:'#ee2222',cursor:'pointer',textTransform:'uppercase',
-          transition:'background 0.15s, box-shadow 0.15s',
+          transition:'background 0.15s',
           display:'flex',alignItems:'center',justifyContent:'center',
           flexDirection:'column',gap:4}}>
-        <span style={{fontSize:'min(1.6vw,20px)'}}>⛧</span>
+        <span style={{fontSize:18}}>⛧</span>
         <span>Next Fight</span>
       </button>
 
       {/* ── 3 CARDS FOR SALE — col 2-4, row 2 ── */}
       <div style={{gridColumn:'2/5',gridRow:'2',
-        display:'flex',gap:10,padding:'0 2px'}}>
+        display:'flex',gap:12,padding:'0 4px'}}>
         {shopCards.map((card,i)=><SaleCard key={i} card={card} idx={i}/>)}
       </div>
 
-      {/* ── STASH + REROLL — col 5, row 2 ── */}
+      {/* ── STASH — col 5, row 2 top half ── */}
       <div style={{gridColumn:'5',gridRow:'2',
-        display:'flex',flexDirection:'column',gap:10}}>
-        {/* Stash */}
-        <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',
-          justifyContent:'center',gap:6,
-          background:'rgba(5,15,5,0.8)',border:'1px solid rgba(50,120,50,0.4)',
-          borderRadius:8,padding:'8px 4px'}}>
-          <span style={{fontSize:'min(2vw,26px)'}}>🌿</span>
-          <span style={{fontFamily:"'Cinzel',serif",fontSize:'min(2.2vw,28px)',
-            fontWeight:900,color:stashColor,lineHeight:1}}>{stash}</span>
-          <span style={{fontFamily:"'Cinzel',serif",fontSize:'min(0.65vw,8px)',
-            color:'#2a5a2a',letterSpacing:3,textTransform:'uppercase'}}>Stash</span>
-        </div>
-        {/* Reroll */}
+        display:'flex',flexDirection:'column',gap:12,
+        justifyContent:'space-between'}}>
+        {/* Stash box — square */}
         <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',
           justifyContent:'center',gap:4,
-          background:'rgba(25,18,4,0.8)',border:'1px solid rgba(140,100,20,0.35)',
-          borderRadius:8,padding:'6px 4px',cursor:'pointer'}}>
+          background:'rgba(5,15,5,0.85)',
+          border:'2px solid rgba(50,120,50,0.5)',
+          borderRadius:8,padding:'8px 4px'}}>
+          <span style={{fontSize:22}}>🌿</span>
+          <span style={{fontFamily:"'Cinzel',serif",fontSize:30,
+            fontWeight:900,color:stashColor,lineHeight:1}}>{stash}</span>
+          <span style={{fontFamily:"'Cinzel',serif",fontSize:9,
+            color:'#2a5a2a',letterSpacing:3,textTransform:'uppercase'}}>Stash</span>
+        </div>
+        {/* Reroll box — square, thick border */}
+        <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',
+          justifyContent:'center',gap:4,
+          background:'rgba(25,18,4,0.85)',
+          border:'3px solid rgba(180,130,30,0.7)',
+          borderRadius:8,padding:'8px 4px',cursor:'pointer',
+          boxShadow:'0 0 12px rgba(160,110,20,0.2)'}}>
           <button onClick={onReroll}
-            onMouseEnter={e=>e.currentTarget.parentElement.style.background='rgba(50,38,8,0.8)'}
-            onMouseLeave={e=>e.currentTarget.parentElement.style.background='rgba(25,18,4,0.8)'}
             style={{background:'none',border:'none',cursor:'pointer',
               display:'flex',flexDirection:'column',alignItems:'center',gap:4,
-              width:'100%',height:'100%',padding:0}}>
-            <span style={{fontSize:'min(1.6vw,22px)'}}>🔄</span>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:'min(0.8vw,10px)',
+              width:'100%',padding:0}}>
+            <span style={{fontSize:22}}>🔄</span>
+            <span style={{fontFamily:"'Cinzel',serif",fontSize:10,
               fontWeight:700,color:'#c8a030',letterSpacing:1,textTransform:'uppercase'}}>Re-Roll</span>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:'min(0.9vw,12px)',
+            <span style={{fontFamily:"'Cinzel',serif",fontSize:16,
               fontWeight:900,color:'#55ee55'}}>🌿 {rerollCost}</span>
           </button>
         </div>
       </div>
 
-      {/* ── 2 BOOSTER PACKS — col 2-3, row 3 ── */}
-      <div style={{gridColumn:'2/4',gridRow:'3',display:'flex',gap:10}}>
+      {/* ── SPACER ROW — col 2-5, row 3 ── */}
+      <div style={{gridColumn:'2/6',gridRow:'3'}}/>
+
+      {/* ── 2 BOOSTER PACKS — col 2-3, row 4 ── */}
+      <div style={{gridColumn:'2/4',gridRow:'4',display:'flex',gap:12}}>
         {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
       </div>
 
-      {/* ── PAWN SHOP — col 4-5, row 3 ── */}
-      <div style={{gridColumn:'4/6',gridRow:'3',
+      {/* ── PAWN SHOP — col 4-5, row 4 ── */}
+      <div style={{gridColumn:'4/6',gridRow:'4',
         background:'linear-gradient(160deg,#0e0a16,#080510)',
         border:'2px solid rgba(150,70,220,0.6)',borderRadius:10,
-        padding:'12px 14px',
-        display:'flex',flexDirection:'column',gap:8,
-        boxShadow:'0 0 24px rgba(130,50,200,0.2)'}}>
-        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:'min(1.6vw,20px)',
-          color:'#9944dd',textAlign:'center',
-          textShadow:'0 0 12px rgba(160,80,240,0.6)'}}>🪙 Pawn Shop</div>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:'min(0.65vw,8px)',
-          color:'#6a4898',letterSpacing:1,lineHeight:2,textAlign:'center'}}>
-          Common 1 · Uncommon 2 · Rare 4<br/>
-          Foil +3 · Mythic +8 · Member 5<br/>
-          Artifact = 50% back · Max 2 sales
+        padding:'16px 16px',
+        display:'flex',flexDirection:'column',
+        justifyContent:'space-between',
+        boxShadow:'0 0 28px rgba(130,50,200,0.2)'}}>
+        <div>
+          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:26,
+            color:'#9944dd',textAlign:'center',marginBottom:10,
+            textShadow:'0 0 16px rgba(160,80,240,0.7)'}}>🪙 Pawn Shop</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:10,
+            color:'#7a5aaa',letterSpacing:1,lineHeight:2.2,textAlign:'center'}}>
+            Common 1 · Uncommon 2 · Rare 4<br/>
+            Foil +3 · Mythic +8 · Member 5<br/>
+            Artifact = 50% back
+          </div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,
+            color:'#4a3068',textAlign:'center',marginTop:6,letterSpacing:1}}>
+            Max 2 sales per visit
+          </div>
         </div>
-        <div style={{flex:1,display:'flex',alignItems:'flex-end'}}>
-          <button
-            onMouseEnter={e=>e.currentTarget.style.background='rgba(130,60,200,0.4)'}
-            onMouseLeave={e=>e.currentTarget.style.background='rgba(80,30,140,0.25)'}
-            style={{width:'100%',fontFamily:"'Cinzel',serif",
-              fontSize:'min(0.9vw,11px)',fontWeight:900,letterSpacing:1,
-              padding:'10px',background:'rgba(80,30,140,0.25)',
-              border:'1px solid rgba(160,80,240,0.5)',borderRadius:6,
-              color:'#cc88ff',cursor:'pointer',textTransform:'uppercase',
-              transition:'background 0.15s',
-              boxShadow:'0 0 14px rgba(140,60,220,0.2)'}}>
-            💰 Open Pawn Shop ({pawnSalesLeft} left)
-          </button>
-        </div>
+        <button
+          onMouseEnter={e=>e.currentTarget.style.background='rgba(130,60,200,0.45)'}
+          onMouseLeave={e=>e.currentTarget.style.background='rgba(80,30,140,0.3)'}
+          style={{width:'100%',fontFamily:"'Cinzel',serif",
+            fontSize:12,fontWeight:900,letterSpacing:1,
+            padding:'12px',background:'rgba(80,30,140,0.3)',
+            border:'2px solid rgba(160,80,240,0.6)',borderRadius:6,
+            color:'#cc88ff',cursor:'pointer',textTransform:'uppercase',
+            transition:'background 0.15s',
+            boxShadow:'0 0 16px rgba(140,60,220,0.25)'}}>
+          💰 Open Pawn Shop ({pawnSalesLeft} left)
+        </button>
       </div>
 
     </div>
@@ -1710,6 +1711,7 @@ export default function App(){
         setBoosterPacks(genBoosterPacks(1))
         setRecruitPack(genRecruitPack())
         setRerollCost(2)
+        setStash(69)
         setGameState('shop')
       }
     }
