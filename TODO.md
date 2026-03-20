@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Friday, March 20, 2026 at 06:10 PM*
+*Last updated: Friday, March 20, 2026 at 06:14 PM*
 
 ---
 
@@ -50,6 +50,16 @@ This is happening.
 ---
 
 ## ✅ COMPLETED
+
+### Recruit Pack & Balance Fix
+- ~~**Root cause found**: sim was offering Touring (22st) or Demonic (40st) packs in Circle 1 — AI couldn't afford them~~
+- ~~**Fix**: recruit pack is now Garage Band only (10st) in C1-C2, both in game and sim~~
+- ~~**Result**: C1-C3 AI survival 100%%, full 5-member band by Circle 4 every run~~
+- ~~**Stash buff reverted**: original values correct, economy was never broken~~
+- ~~**Confirmed**: 69 HP Drifter beatable with 2 members + good card play~~
+- ~~**New wall**: The Miser (F9, 360 HP, Circle 4) — real difficulty spike, correct behavior~~
+
+
 
 ### Balance Fix — Circle 1-2 Stash Rewards
 - ~~**Stash rewards C1**: 2-4st → 5-8st (players can now recruit 3rd member before Drifter)~~
