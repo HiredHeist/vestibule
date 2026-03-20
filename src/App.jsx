@@ -480,13 +480,14 @@ function BoosterScreen({onComplete,seed}){
 
 
 function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, onSellCard, onClose}){
-  const [tab, setTab] = useState('members')
-  const allCards = [...deck,...discard]
-  // dedupe by id for display, keep unique cards
-  const cardsSeen = new Set()
-  const uniqueCards = allCards.filter(c=>{
-    if(cardsSeen.has(c.id))return false
-    cardsSeen.add(c.id); return true
+  const [tab, setTab] = useState('cards')
+  // Show ALL copies individually so player can sell as many as they want
+  // Sort deck+discard by sell price descending, then by name
+  const allCards = [...deck,...discard].sort((a,b)=>{
+    const pa = (a.rarity==='Rare'?4:a.rarity==='Uncommon'?2:1)+(a.foil?3:0)+(a.mythic?8:0)
+    const pb = (b.rarity==='Rare'?4:b.rarity==='Uncommon'?2:1)+(b.foil?3:0)+(b.mythic?8:0)
+    if(pb!==pa) return pb-pa
+    return (a.name||'').localeCompare(b.name||'')
   })
   const members = stage.map((m,i)=>m?{m,i}:null).filter(Boolean)
   const canSell = salesLeft > 0
@@ -564,18 +565,17 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
 
       {/* Cards tab */}
       {tab==='cards'&&<div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',maxWidth:900}}>
-        {uniqueCards.length===0&&<div style={{fontFamily:"'IM Fell English',serif",color:'#5a3a6a',fontStyle:'italic',fontSize:16}}>Deck is empty.</div>}
-        {uniqueCards.map(c=>{
+        {allCards.length===0&&<div style={{fontFamily:"'IM Fell English',serif",color:'#5a3a6a',fontStyle:'italic',fontSize:16}}>Deck is empty.</div>}
+        {allCards.map(c=>{
           const price = cardSellPrice(c)
           const bc = c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
-          const countInDeck = allCards.filter(x=>x.id===c.id).length
           return(
             <div key={c.uid||c.id} style={{width:140,background:'linear-gradient(180deg,#201408,#100804)',border:'1px solid '+bc+'88',borderRadius:6,overflow:'hidden'}}>
               <div style={{height:4,background:bc}}/>
               <div style={{fontSize:36,textAlign:'center',padding:'10px 0',background:'rgba(0,0,0,0.3)'}}>{c.emoji}</div>
               <div style={{padding:'0 8px 10px'}}>
                 <div style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:2}}>{c.name}</div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#6a5030',textAlign:'center',marginBottom:4}}>{c.rarity} · ×{countInDeck} in deck</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#6a5030',textAlign:'center',marginBottom:4}}>{c.rarity}</div>
                 <button
                   disabled={!canSell}
                   onClick={()=>{if(canSell){onSellCard(c);if(salesLeft<=1)onClose()}}}
