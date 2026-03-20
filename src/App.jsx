@@ -478,9 +478,133 @@ function BoosterScreen({onComplete,seed}){
   )
 }
 
-function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives}){
+
+function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, onSellCard, onClose}){
+  const [tab, setTab] = useState('members')
+  const allCards = [...deck,...discard]
+  // dedupe by id for display, keep unique cards
+  const cardsSeen = new Set()
+  const uniqueCards = allCards.filter(c=>{
+    if(cardsSeen.has(c.id))return false
+    cardsSeen.add(c.id); return true
+  })
+  const members = stage.map((m,i)=>m?{m,i}:null).filter(Boolean)
+  const canSell = salesLeft > 0
+  const activeMembers = members.filter(x=>!x.m.tooStoned)
+
+  function memberSellPrice(m){
+    if(m.demonic) return 69
+    return 5 + (m.foil?3:0) + (m.mythic?8:0)
+  }
+  function cardSellPrice(c){
+    const base = c.rarity==='Rare'?4:c.rarity==='Uncommon'?2:1
+    return base + (c.foil?3:0) + (c.mythic?8:0)
+  }
+  const tabStyle = (active) => ({
+    fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:900, letterSpacing:2,
+    padding:'8px 20px', cursor:'pointer', border:'none', textTransform:'uppercase',
+    background: active?'rgba(160,80,240,0.3)':'transparent',
+    color: active?'#cc88ff':'#6a4a8a',
+    borderBottom: active?'2px solid #cc88ff':'2px solid transparent',
+    transition:'all 0.2s'
+  })
+  return(
+    <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(2,1,4,0.96)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',padding:'40px 20px',overflowY:'auto'}}>
+      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:44,color:'#cc88ff',textShadow:'0 0 30px rgba(180,60,255,0.6)',marginBottom:6}}>🪙 Pawn Shop</div>
+      <div style={{fontFamily:"'IM Fell English',serif",fontSize:15,color:'#8a6aaa',fontStyle:'italic',marginBottom:4}}>
+        {salesLeft} sale{salesLeft!==1?'s':''} remaining this visit
+      </div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#5a3a7a',letterSpacing:1,marginBottom:20}}>
+        Cannot sell last 2 members · Bonds break on member sale
+      </div>
+
+      {/* Tabs */}
+      <div style={{display:'flex',borderBottom:'1px solid rgba(160,80,240,0.2)',marginBottom:24,width:'100%',maxWidth:800}}>
+        <button style={tabStyle(tab==='members')} onClick={()=>setTab('members')}>Members</button>
+        <button style={tabStyle(tab==='cards')} onClick={()=>setTab('cards')}>Cards</button>
+      </div>
+
+      {/* Members tab */}
+      {tab==='members'&&<div style={{display:'flex',gap:16,flexWrap:'wrap',justifyContent:'center',maxWidth:900}}>
+        {members.length===0&&<div style={{fontFamily:"'IM Fell English',serif",color:'#5a3a6a',fontStyle:'italic',fontSize:16}}>No members on stage.</div>}
+        {members.map(({m,i})=>{
+          const price = memberSellPrice(m)
+          const cantSell = activeMembers.length<=2
+          const bc = {'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}[m.keyword]||'#e8a820'
+          const tierColor = m.demonic?'#ffd700':m.mythic?'#dd88ff':m.foil?'#88ccff':null
+          return(
+            <div key={m.uid||i} style={{width:180,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'1px solid '+(tierColor||'rgba(160,80,240,0.4)'),borderRadius:7,overflow:'hidden',opacity:cantSell?0.5:1}}>
+              {tierColor&&<div style={{background:tierColor,padding:'3px',textAlign:'center',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,color:'#0a0704',letterSpacing:2}}>{m.demonic?'⛧ DEMONIC':m.mythic?'✦ MYTHIC':'✨ FOIL'}</div>}
+              <div style={{fontSize:44,textAlign:'center',padding:'14px 0',background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
+              <div style={{padding:'0 10px 12px'}}>
+                <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:20,color:'#e8d090',textAlign:'center',marginBottom:2}}>{m.name}</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#6a5030',textAlign:'center',letterSpacing:1,marginBottom:6}}>{m.role}</div>
+                <div style={{display:'flex',justifyContent:'space-between',padding:'4px 6px',background:'rgba(0,0,0,0.4)',borderRadius:3,marginBottom:8}}>
+                  <div style={{textAlign:'center'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#ee2222',fontWeight:900}}>ATK</div><div style={{fontFamily:"'Cinzel',serif",fontSize:22,fontWeight:900,color:'#ee2222'}}>{m.atk}</div></div>
+                  <div style={{alignSelf:'center',fontFamily:"'Cinzel',serif",fontSize:9,color:bc,fontWeight:700}}>{m.keyword}</div>
+                  <div style={{textAlign:'center'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#33dd33',fontWeight:900}}>HP</div><div style={{fontFamily:"'Cinzel',serif",fontSize:22,fontWeight:900,color:'#33dd33'}}>{m.hp}/{m.maxHp}</div></div>
+                </div>
+                {m.roleBondBonus>0&&<div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#e8a820',textAlign:'center',marginBottom:6}}>🔗 Bond +{m.roleBondBonus} ATK (breaks)</div>}
+                <button
+                  disabled={!canSell||cantSell}
+                  onClick={()=>{if(canSell&&!cantSell){onSellMember(m,i);if(salesLeft<=1)onClose()}}
+                  }
+                  style={{width:'100%',fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:900,letterSpacing:1,padding:'8px',
+                    background:canSell&&!cantSell?'rgba(160,80,240,0.2)':'rgba(40,20,60,0.2)',
+                    border:'1px solid '+(canSell&&!cantSell?'rgba(160,80,240,0.6)':'rgba(80,40,120,0.3)'),
+                    borderRadius:4,color:canSell&&!cantSell?'#cc88ff':'#4a2a6a',cursor:canSell&&!cantSell?'pointer':'not-allowed',
+                    textTransform:'uppercase'}}>
+                  {cantSell?'Need 2+ members':'Sell for '+price+' 🌿'}
+                </button>
+              </div>
+            </div>
+          )
+        })}
+      </div>}
+
+      {/* Cards tab */}
+      {tab==='cards'&&<div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',maxWidth:900}}>
+        {uniqueCards.length===0&&<div style={{fontFamily:"'IM Fell English',serif",color:'#5a3a6a',fontStyle:'italic',fontSize:16}}>Deck is empty.</div>}
+        {uniqueCards.map(c=>{
+          const price = cardSellPrice(c)
+          const bc = c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
+          const countInDeck = allCards.filter(x=>x.id===c.id).length
+          return(
+            <div key={c.uid||c.id} style={{width:140,background:'linear-gradient(180deg,#201408,#100804)',border:'1px solid '+bc+'88',borderRadius:6,overflow:'hidden'}}>
+              <div style={{height:4,background:bc}}/>
+              <div style={{fontSize:36,textAlign:'center',padding:'10px 0',background:'rgba(0,0,0,0.3)'}}>{c.emoji}</div>
+              <div style={{padding:'0 8px 10px'}}>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:2}}>{c.name}</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#6a5030',textAlign:'center',marginBottom:4}}>{c.rarity} · ×{countInDeck} in deck</div>
+                <button
+                  disabled={!canSell}
+                  onClick={()=>{if(canSell){onSellCard(c);if(salesLeft<=1)onClose()}}}
+                  style={{width:'100%',fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:900,letterSpacing:1,padding:'6px',
+                    background:canSell?'rgba(80,30,140,0.2)':'rgba(30,15,60,0.2)',
+                    border:'1px solid '+(canSell?'rgba(140,60,220,0.5)':'rgba(60,30,100,0.3)'),
+                    borderRadius:3,color:canSell?'#aa66ee':'#4a2a6a',cursor:canSell?'pointer':'not-allowed',
+                    textTransform:'uppercase'}}>
+                  Sell for {price} 🌿
+                </button>
+              </div>
+            </div>
+          )
+        })}
+      </div>}
+
+      <button onClick={onClose} style={{marginTop:30,fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,letterSpacing:3,padding:'12px 40px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:3,color:'#7a5020',cursor:'pointer',textTransform:'uppercase'}}
+        onMouseEnter={e=>{e.currentTarget.style.borderColor='#8a6030';e.currentTarget.style.color='#c8a040'}}
+        onMouseLeave={e=>{e.currentTarget.style.borderColor='#4a3010';e.currentTarget.style.color='#7a5020'}}>
+        Close Shop
+      </button>
+    </div>
+  )
+}
+
+function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard}){
   const [hovId,setHovId]=useState(null)
   const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
+  const [pawnOpen,setPawnOpen]=useState(false)
   const [boughtIds,setBoughtIds]=useState([])
   const [leftBought,setLeftBought]=useState({cart:false,cpas:false})
   useEffect(()=>{setBoughtIds([])},[shopCards])
@@ -1031,6 +1155,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
               <button
                 onMouseEnter={e=>e.currentTarget.style.background='rgba(130,60,200,0.45)'}
                 onMouseLeave={e=>e.currentTarget.style.background='rgba(80,30,140,0.3)'}
+                onClick={()=>setPawnSalesLeft(2)||setPawnOpen(true)}
                 style={{width:'100%',fontFamily:"'Cinzel',serif",
                   fontSize:14,fontWeight:900,letterSpacing:1,
                   padding:'16px',background:'rgba(80,30,140,0.3)',
@@ -1040,6 +1165,19 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                   boxShadow:'0 0 18px rgba(140,60,220,0.3)'}}>
                 💰 Open Pawn Shop ({pawnSalesLeft} left)
               </button>
+              {pawnOpen&&<PawnShopModal
+                stage={stage||[]} deck={deck||[]} discard={discardPile||[]}
+                stash={stash} salesLeft={pawnSalesLeft}
+                onSellMember={(m,i)=>{
+                  onPawnSellMember&&onPawnSellMember(m,i)
+                  setPawnSalesLeft(p=>Math.max(0,p-1))
+                }}
+                onSellCard={(c)=>{
+                  onPawnSellCard&&onPawnSellCard(c)
+                  setPawnSalesLeft(p=>Math.max(0,p-1))
+                }}
+                onClose={()=>setPawnOpen(false)}
+              />}
             </div>
           </div>
 
@@ -2437,6 +2575,13 @@ export default function App(){
     addLog('💰 Sold '+member.name+' for '+price+' stash.'+(member.roleBondBonus>0?' 🔗 Bond broken.':''))
   },[stage])
 
+  const handlePawnSellCard=useCallback((card)=>{
+    const price=card.rarity==='Rare'?4:card.rarity==='Uncommon'?2:1
+    setDeck(p=>{ const idx=p.findIndex(c=>c.uid===card.uid); if(idx===-1)return p; const n=[...p]; n.splice(idx,1); return n })
+    setStash(p=>Math.min(420,p+price))
+    addLog('💰 Sold '+card.name+' for '+price+' stash.')
+  },[])
+
   const handleReroll=useCallback(()=>{
     if(stash<rerollCost)return
     setStash(p=>Math.min(MAX_STASH,p-rerollCost));setRerollCost(p=>p+2)
@@ -2469,7 +2614,7 @@ export default function App(){
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard}/>
   if(gameState==='end')return <EndScreen won={won} cause={deathCause} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}}/>
 
   return(
