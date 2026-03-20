@@ -445,6 +445,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   const [hovId,setHovId]=useState(null)
   const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
   const [boughtIds,setBoughtIds]=useState([])
+  const [leftBought,setLeftBought]=useState({cart:false,cpas:false})
   const circleNum=Math.floor(fightIndex/3)+1
   const can=p=>stash>=p
   const stashColor=stash>=420?'#ff3300':stash>=380?'#ff9900':'#55ee66'
@@ -455,10 +456,26 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   function buyCard(card){
     if(!can(cardPrice(card)))return
     onSpend(cardPrice(card),'card',card)
-    setBoughtIds(p=>[...p, card.uid||card.id])
+    setBoughtIds(p=>[...p,card.uid||card.id])
+  }
+  function buyLeft(key,cost,type,item){
+    if(!can(cost))return
+    onSpend(cost,type,item)
+    setLeftBought(p=>({...p,[key]:true}))
   }
 
-  // ── SALE CARD — fixed 210px wide portrait card ──
+  // ── SOLD PLACEHOLDER ──
+  function SoldSlot({w}){
+    return(
+      <div style={{width:w,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',
+        border:'1px dashed rgba(80,50,10,0.2)',borderRadius:8,
+        background:'rgba(8,5,2,0.4)',opacity:0.25}}>
+        <span style={{fontFamily:"'Cinzel',serif",fontSize:14,color:'#4a3010',letterSpacing:3}}>SOLD</span>
+      </div>
+    )
+  }
+
+  // ── SALE CARD ──
   function SaleCard({card,idx}){
     const id='sc'+idx
     const hov=hovId===id
@@ -467,76 +484,70 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     const price=cardPrice(card)
     const canBuy=can(price)
     const bought=boughtIds.includes(card.uid||card.id)
-    if(bought) return(
-      <div style={{width:210,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',
-        border:'1px solid rgba(80,50,10,0.2)',borderRadius:8,
-        background:'rgba(8,5,2,0.5)',opacity:0.3}}>
-        <span style={{fontFamily:"'Cinzel',serif",fontSize:12,color:'#4a3010',letterSpacing:2}}>SOLD</span>
-      </div>
-    )
+    if(bought)return <SoldSlot w={300} />
     return(
-      <div style={{width:210,flexShrink:0,display:'flex',flexDirection:'column',position:'relative',paddingTop:22}}
+      <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',position:'relative',paddingTop:24}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
         <div style={{position:'absolute',top:0,left:'50%',transform:'translateX(-50%)',
           background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
           border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
-          padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
-          fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,
+          padding:'4px 16px',zIndex:5,whiteSpace:'nowrap',
+          fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
-          boxShadow:canBuy?'0 2px 14px rgba(50,200,50,0.35)':'none'}}>🌿 {price}</div>
+          boxShadow:canBuy?'0 2px 16px rgba(50,200,50,0.4)':'none'}}>🌿 {price}</div>
         <div onClick={()=>canBuy&&buyCard(card)}
           style={{flex:1,display:'flex',flexDirection:'column',
             background:'linear-gradient(180deg,#201408,#100804)',
             border:hov&&canBuy?'2px solid '+bc:'1px solid '+bc+(canBuy?'77':'33'),
             borderRadius:8,overflow:'hidden',cursor:canBuy?'pointer':'not-allowed',
-            transform:hov&&canBuy?'translateY(-5px) scale(1.03)':'none',
+            transform:hov&&canBuy?'translateY(-6px) scale(1.02)':'none',
             transition:'transform 0.18s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
-            boxShadow:hov&&canBuy?'0 16px 40px rgba(0,0,0,0.95),0 0 28px '+gl:'2px 4px 14px rgba(0,0,0,0.7)',
+            boxShadow:hov&&canBuy?'0 16px 48px rgba(0,0,0,0.95),0 0 28px '+gl:'2px 4px 16px rgba(0,0,0,0.7)',
             opacity:canBuy?1:0.45,
             animation:rarityAnim(card.rarity)}}>
-          <div style={{height:6,flexShrink:0,background:bc,boxShadow:'0 0 10px '+gl}}/>
-          <div style={{position:'relative',height:28,flexShrink:0}}>
-            {card.rarity==='Rare'&&<div style={{position:'absolute',top:5,left:8,padding:'2px 6px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
-            {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:5,left:8,padding:'2px 6px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
-            {card.foil&&<div style={{position:'absolute',top:5,right:8,padding:'2px 6px',borderRadius:3,background:'rgba(255,215,0,0.3)',border:'1px solid rgba(255,215,0,0.6)',fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,color:'#ffd700'}}>✨FOIL</div>}
-            {card.mythic&&<div style={{position:'absolute',top:5,right:8,padding:'2px 6px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,color:'#cc44ff'}}>⛧MYTHIC</div>}
+          <div style={{height:7,flexShrink:0,background:bc,boxShadow:'0 0 12px '+gl}}/>
+          <div style={{position:'relative',height:32,flexShrink:0}}>
+            {card.rarity==='Rare'&&<div style={{position:'absolute',top:6,left:10,padding:'2px 7px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
+            {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:6,left:10,padding:'2px 7px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
+            {card.foil&&<div style={{position:'absolute',top:6,right:10,padding:'2px 7px',borderRadius:3,background:'rgba(255,215,0,0.3)',border:'1px solid rgba(255,215,0,0.6)',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#ffd700'}}>✨FOIL</div>}
+            {card.mythic&&<div style={{position:'absolute',top:6,right:10,padding:'2px 7px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#cc44ff'}}>⛧MYTHIC</div>}
             {card.embers>0
-              ?<div style={{position:'absolute',top:3,right:8,width:28,height:28,borderRadius:'50%',
+              ?<div style={{position:'absolute',top:4,right:10,width:32,height:32,borderRadius:'50%',
                   background:canBuy?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',
                   border:'2px solid '+(canBuy?'#ff6600':'#4a2a10'),
                   display:'flex',alignItems:'center',justifyContent:'center',
-                  fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,
+                  fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,
                   color:canBuy?'#fff':'#5a3a10',
-                  boxShadow:canBuy?'0 0 10px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
-              :<div style={{position:'absolute',top:5,right:8,padding:'2px 6px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>}
+                  boxShadow:canBuy?'0 0 12px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
+              :<div style={{position:'absolute',top:7,right:10,padding:'2px 7px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>}
           </div>
-          <div style={{height:110,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',
-            fontSize:56,background:'rgba(0,0,0,0.3)',position:'relative'}}>
+          <div style={{height:130,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',
+            fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative'}}>
             <div style={{position:'absolute',inset:0,background:'radial-gradient(circle at center,'+bc+'18,transparent 70%)'}}/>
             {card.emoji}
           </div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:700,
-            color:'#eedfc0',textAlign:'center',padding:'8px 8px 3px',
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:700,
+            color:'#eedfc0',textAlign:'center',padding:'10px 10px 3px',
             letterSpacing:0.3,lineHeight:1.2,
             borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,
-            color:bc,textAlign:'center',padding:'3px 4px',
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:700,
+            color:bc,textAlign:'center',padding:'4px 6px',
             letterSpacing:2,textTransform:'uppercase',flexShrink:0}}>
             {card.isMember?card.role:card.type}{card.rarity&&!card.isMember?' · '+card.rarity:''}
           </div>
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,
-            color:'#9a8060',textAlign:'center',padding:'8px 12px',
+          <div style={{fontFamily:"'IM Fell English',serif",fontSize:12,
+            color:'#9a8060',textAlign:'center',padding:'8px 14px',
             fontStyle:'italic',lineHeight:1.45,flex:1}}>{card.effect||card.desc||''}</div>
           {card.isMember&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',
-            padding:'8px 14px',borderTop:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>
+            padding:'10px 16px',borderTop:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>
             <div style={{textAlign:'center'}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#666',letterSpacing:1}}>ATK</div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:24,color:'#ee2222',fontWeight:900,lineHeight:1}}>{card.atk}</div>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#666',letterSpacing:1}}>ATK</div>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:26,color:'#ee2222',fontWeight:900,lineHeight:1}}>{card.atk}</div>
             </div>
-            <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:card.kwColor||'#aaa',letterSpacing:1,textAlign:'center'}}>{card.keyword}</div>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:card.kwColor||'#aaa',letterSpacing:1,textAlign:'center'}}>{card.keyword}</div>
             <div style={{textAlign:'center'}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#666',letterSpacing:1}}>HP</div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:24,color:'#33dd33',fontWeight:900,lineHeight:1}}>{card.hp}</div>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#666',letterSpacing:1}}>HP</div>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:26,color:'#33dd33',fontWeight:900,lineHeight:1}}>{card.hp}</div>
             </div>
           </div>}
         </div>
@@ -544,11 +555,17 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     )
   }
 
-  // ── LEFT COLUMN ITEM — fixed proportions ──
-  function LeftCard({item,price,label,accent,id,onBuy}){
+  // ── LEFT COLUMN ITEM ──
+  function LeftCard({item,price,label,accent,id,onBuy,sold}){
     const hov=hovId===id
-    const canBuy=can(price)
+    const canBuy=can(price)&&!sold
     const ac=accent||'#c87820'
+    if(sold)return(
+      <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',
+        border:'1px dashed '+ac+'33',borderRadius:8,background:'rgba(8,5,2,0.4)',opacity:0.25}}>
+        <span style={{fontFamily:"'Cinzel',serif",fontSize:12,color:'#4a3010',letterSpacing:3}}>PURCHASED</span>
+      </div>
+    )
     return(
       <div style={{flex:1,display:'flex',flexDirection:'column',paddingTop:20,position:'relative'}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
@@ -556,8 +573,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           transform:'translateX(-50%)'+(hov&&canBuy?' scale(1.08)':''),
           background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
           border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
-          padding:'2px 12px',zIndex:5,whiteSpace:'nowrap',
-          fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,
+          padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
+          fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
           transition:'transform 0.12s'}}>🌿 {price}</div>
         <div onClick={()=>canBuy&&onBuy()}
@@ -572,25 +589,24 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             boxShadow:hov&&canBuy?'0 10px 30px rgba(0,0,0,0.8),0 0 16px '+ac+'44':'2px 4px 14px rgba(0,0,0,0.6)',
             opacity:canBuy?1:0.5,
             animation:'throb 3s ease-in-out infinite'}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:7.5,letterSpacing:2,
-            color:ac,textAlign:'center',padding:'5px 4px 0',
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:2,
+            color:ac,textAlign:'center',padding:'6px 4px 0',
             textTransform:'uppercase',opacity:0.85,flexShrink:0}}>{label}</div>
           <div style={{flex:'0 0 36%',display:'flex',alignItems:'center',justifyContent:'center',
-            fontSize:36,
-            filter:hov?'drop-shadow(0 0 8px '+ac+')':'none',
+            fontSize:38,filter:hov?'drop-shadow(0 0 8px '+ac+')':'none',
             transition:'filter 0.15s'}}>{item.emoji}</div>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,
-            color:'#f0e0b0',textAlign:'center',padding:'3px 8px 2px',
+            color:'#f0e0b0',textAlign:'center',padding:'4px 8px 2px',
             lineHeight:1.2,flexShrink:0}}>{item.name}</div>
           <div style={{fontFamily:"'IM Fell English',serif",fontSize:10,
-            color:'#9a8060',textAlign:'center',padding:'3px 10px 8px',
+            color:'#9a8060',textAlign:'center',padding:'3px 10px 6px',
             fontStyle:'italic',lineHeight:1.35,flex:1,overflow:'hidden'}}>{item.effect||item.desc||''}</div>
         </div>
       </div>
     )
   }
 
-  // ── BOOSTER PACK — fixed 210px wide portrait MTG style ──
+  // ── BOOSTER PACK ──
   function BoosterPack({pack,idx}){
     const id='bp'+idx
     const hov=hovId===id
@@ -598,14 +614,14 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     const packAc={cassette:'#c87820',cdr:'#6688cc',vinyl:'#cc44ff',rarevinyl:'#ffdd44',cursed:'#cc2222',ritual:'#8844cc',hellforged:'#ff6600',garage:'#44aa44',touring:'#44aacc',demonic:'#cc44ff'}
     const ac=packAc[pack.id]||'#c87820'
     return(
-      <div style={{width:210,flexShrink:0,display:'flex',flexDirection:'column',paddingTop:22,position:'relative'}}
+      <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',paddingTop:24,position:'relative'}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
         <div style={{position:'absolute',top:0,left:'50%',
           transform:'translateX(-50%)'+(hov&&canBuy?' scale(1.08)':''),
           background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
           border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
-          padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
-          fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,
+          padding:'4px 16px',zIndex:5,whiteSpace:'nowrap',
+          fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
           transition:'transform 0.12s'}}>🌿 {pack.cost}</div>
         <div onClick={()=>canBuy&&onSpend(pack.cost,'pack',pack)}
@@ -614,167 +630,156 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             border:hov&&canBuy?'2px solid '+ac:'1px solid '+ac+'66',
             borderRadius:10,overflow:'hidden',
             cursor:canBuy?'pointer':'not-allowed',
-            transform:hov&&canBuy?'translateY(-5px) scale(1.03)':'none',
+            transform:hov&&canBuy?'translateY(-6px) scale(1.02)':'none',
             transition:'transform 0.18s,box-shadow 0.15s,border-color 0.15s',
-            boxShadow:hov&&canBuy?'0 16px 40px rgba(0,0,0,0.95),0 0 30px '+ac+'55':'2px 6px 20px rgba(0,0,0,0.7)',
+            boxShadow:hov&&canBuy?'0 16px 48px rgba(0,0,0,0.95),0 0 32px '+ac+'55':'2px 6px 20px rgba(0,0,0,0.7)',
             opacity:canBuy?1:0.45,
-            position:'relative',padding:'0 12px 16px'}}>
-          <div style={{width:'100%',height:7,flexShrink:0,
-            background:'linear-gradient(90deg,'+ac+'44,'+ac+'dd,'+ac+'44)',
-            boxShadow:'0 0 14px '+ac+'88'}}/>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:3,
-            color:ac,textTransform:'uppercase',opacity:0.7,marginTop:6,flexShrink:0}}>VESTIBULE</div>
-          <div style={{fontSize:60,flex:'0 0 38%',display:'flex',alignItems:'center',justifyContent:'center',
-            filter:'drop-shadow(0 0 '+(hov?'18px':'8px')+' '+ac+(hov?'cc':'66')+')',
+            position:'relative',padding:'0 14px 18px'}}>
+          <div style={{width:'100%',height:8,flexShrink:0,
+            background:'linear-gradient(90deg,'+ac+'44,'+ac+'ee,'+ac+'44)',
+            boxShadow:'0 0 16px '+ac+'99'}}/>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:3,
+            color:ac,textTransform:'uppercase',opacity:0.7,marginTop:8,flexShrink:0}}>VESTIBULE</div>
+          <div style={{fontSize:72,flex:'0 0 38%',display:'flex',alignItems:'center',justifyContent:'center',
+            filter:'drop-shadow(0 0 '+(hov?'20px':'8px')+' '+ac+(hov?'cc':'66')+')',
             transition:'filter 0.15s'}}>{pack.emoji}</div>
-          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:22,
+          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:24,
             color:ac,textAlign:'center',lineHeight:1.2,
-            textShadow:'0 0 14px '+ac+'88',flexShrink:0,
-            padding:'2px 4px'}}>{pack.name}</div>
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,
+            textShadow:'0 0 16px '+ac+'99',flexShrink:0,
+            padding:'4px 4px'}}>{pack.name}</div>
+          <div style={{fontFamily:"'IM Fell English',serif",fontSize:12,
             color:'#9a8868',textAlign:'center',fontStyle:'italic',
-            lineHeight:1.4,padding:'6px 8px 0',flex:1}}>{pack.desc}</div>
-          <div style={{position:'absolute',bottom:0,left:0,right:0,height:5,
-            background:'linear-gradient(90deg,'+ac+'44,'+ac+'dd,'+ac+'44)'}}/>
+            lineHeight:1.4,padding:'8px 10px 0',flex:1}}>{pack.desc}</div>
+          <div style={{position:'absolute',bottom:0,left:0,right:0,height:6,
+            background:'linear-gradient(90deg,'+ac+'44,'+ac+'ee,'+ac+'44)'}}/>
         </div>
       </div>
     )
   }
 
-  // Card dimensions for stash/reroll square sizing
-  const SQ = 120
-
   return(
     <div style={{position:'fixed',inset:0,zIndex:9500,
       background:'radial-gradient(ellipse at 50% 0%,rgba(28,18,4,1) 0%,rgba(6,4,1,1) 100%)',
-      display:'flex',flexDirection:'column',gap:10,padding:10,
-      fontFamily:"'Cinzel',serif",
-      overflow:'hidden',
-      boxSizing:'border-box',
-      height:'100vh'}}>
+      display:'flex',flexDirection:'column',gap:10,padding:12,
+      fontFamily:"'Cinzel',serif",overflow:'hidden',
+      boxSizing:'border-box',height:'100vh'}}>
 
-      {/* ── TOP BAR ── */}
+      {/* TOP BAR */}
       <div style={{flexShrink:0,height:72,display:'flex',gap:10,alignItems:'stretch'}}>
-        {/* Left column header spacer */}
-        <div style={{width:220,flexShrink:0}}/>
-        {/* Title */}
+        <div style={{width:240,flexShrink:0}}/>
         <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',
           background:'rgba(8,4,1,0.85)',border:'1px solid rgba(180,20,20,0.3)',borderRadius:8,
           boxShadow:'0 0 30px rgba(160,10,10,0.2)'}}>
-          <span style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:36,color:'#cc1111',letterSpacing:2,
-            textShadow:'0 0 20px rgba(220,10,10,0.95),0 0 40px rgba(190,0,0,0.7),0 0 70px rgba(150,0,0,0.4)'}}>
+          <span style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:38,color:'#cc1111',letterSpacing:2,
+            textShadow:'0 0 20px rgba(220,10,10,0.95),0 0 40px rgba(190,0,0,0.7),0 0 80px rgba(150,0,0,0.4)'}}>
             ⚰ The Black Market
           </span>
         </div>
-        {/* Next Fight */}
         <button onClick={onLeave}
           onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,15,15,0.5)'}}
           onMouseLeave={e=>{e.currentTarget.style.background='rgba(120,8,8,0.3)'}}
           style={{width:130,flexShrink:0,
-            fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:700,letterSpacing:2,
+            fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:700,letterSpacing:2,
             background:'rgba(120,8,8,0.3)',border:'2px solid #991010',borderRadius:8,
             color:'#ee2222',cursor:'pointer',textTransform:'uppercase',
             transition:'background 0.15s',
             display:'flex',alignItems:'center',justifyContent:'center',
             flexDirection:'column',gap:4}}>
-          <span style={{fontSize:18}}>⛧</span>
+          <span style={{fontSize:20}}>⛧</span>
           <span>Next Fight</span>
         </button>
       </div>
 
-      {/* ── MAIN AREA ── */}
+      {/* MAIN AREA */}
       <div style={{flex:1,display:'flex',gap:10,overflow:'hidden',minHeight:0}}>
 
-        {/* ── LEFT COLUMN ── */}
-        <div style={{width:220,flexShrink:0,display:'flex',flexDirection:'column',gap:12}}>
+        {/* LEFT COLUMN */}
+        <div style={{width:240,flexShrink:0,display:'flex',flexDirection:'column',gap:14}}>
           <LeftCard item={recruitPack} price={recruitPack.cost}
-            label="Band Recruitment" accent='#e8a820' id='rec'
+            label="Band Recruitment" accent='#e8a820' id='rec' sold={false}
             onBuy={()=>can(recruitPack.cost)&&onSpend(recruitPack.cost,'recruit',recruitPack)} />
           {circleArtifact&&<LeftCard item={circleArtifact} price={circleArtifact.cost}
             label={'Vintage Amp · C'+circleNum} accent='#c87820' id='cart'
-            onBuy={()=>can(circleArtifact.cost)&&onSpend(circleArtifact.cost,'artifact',circleArtifact)} />}
+            sold={leftBought.cart}
+            onBuy={()=>buyLeft('cart',circleArtifact.cost,'artifact',circleArtifact)} />}
           {circlePassive&&<LeftCard item={circlePassive} price={circlePassive.cost}
             label={'Effect Pedal · C'+circleNum} accent='#9933cc' id='cpas'
-            onBuy={()=>can(circlePassive.cost)&&onSpend(circlePassive.cost,'passive',circlePassive)} />}
+            sold={leftBought.cpas}
+            onBuy={()=>buyLeft('cpas',circlePassive.cost,'passive',circlePassive)} />}
         </div>
 
-        {/* ── CENTER + RIGHT ── */}
-        <div style={{flex:1,display:'flex',flexDirection:'column',gap:10,overflow:'hidden',minHeight:0}}>
+        {/* CENTER SCROLL AREA */}
+        <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',minHeight:0}}>
 
           {/* CARDS ROW */}
-          <div style={{flex:1,display:'flex',gap:16,justifyContent:'center',alignItems:'stretch',minHeight:0}}>
+          <div style={{flexShrink:0,display:'flex',gap:80,justifyContent:'center',alignItems:'flex-start',paddingTop:4}}>
             {shopCards.map((card,i)=><SaleCard key={i} card={card} idx={i}/>)}
-            {/* Stash + Reroll stacked on right */}
-            <div style={{display:'flex',flexDirection:'column',gap:10,justifyContent:'stretch',alignSelf:'stretch'}}>
-              {/* Stash — square */}
-              <div style={{width:SQ,height:SQ,flexShrink:0,
+            {/* Stash + Reroll — vertically centered with cards */}
+            <div style={{display:'flex',flexDirection:'column',gap:12,alignSelf:'center'}}>
+              <div style={{width:130,height:130,
                 display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
-                background:'rgba(5,15,5,0.9)',
+                background:'rgba(5,15,5,0.92)',
                 border:'2px solid rgba(50,140,50,0.6)',
-                borderRadius:8,padding:'8px'}}>
-                <span style={{fontSize:20}}>🌿</span>
-                <span style={{fontFamily:"'Cinzel',serif",fontSize:28,fontWeight:900,color:stashColor,lineHeight:1}}>{stash}</span>
+                borderRadius:8}}>
+                <span style={{fontSize:22}}>🌿</span>
+                <span style={{fontFamily:"'Cinzel',serif",fontSize:30,fontWeight:900,color:stashColor,lineHeight:1}}>{stash}</span>
                 <span style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#2a5a2a',letterSpacing:2,textTransform:'uppercase'}}>Stash</span>
               </div>
-              {/* Reroll — square, thick border */}
-              <div style={{width:SQ,height:SQ,flexShrink:0,
+              <div style={{width:130,height:130,
                 display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
-                background:'rgba(25,18,4,0.9)',
-                border:'3px solid rgba(200,150,30,0.8)',
+                background:'rgba(25,18,4,0.92)',
+                border:'3px solid rgba(200,150,30,0.85)',
                 borderRadius:8,cursor:'pointer',
-                boxShadow:'0 0 14px rgba(180,130,20,0.25), inset 0 0 20px rgba(100,70,0,0.1)'}}
+                boxShadow:'0 0 16px rgba(180,130,20,0.3),inset 0 0 20px rgba(100,70,0,0.1)'}}
                 onClick={onReroll}
-                onMouseEnter={e=>e.currentTarget.style.background='rgba(50,36,8,0.9)'}
-                onMouseLeave={e=>e.currentTarget.style.background='rgba(25,18,4,0.9)'}>
-                <span style={{fontSize:20}}>🔄</span>
+                onMouseEnter={e=>e.currentTarget.style.background='rgba(55,40,8,0.95)'}
+                onMouseLeave={e=>e.currentTarget.style.background='rgba(25,18,4,0.92)'}>
+                <span style={{fontSize:22}}>🔄</span>
                 <span style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#c8a030',letterSpacing:1,textTransform:'uppercase'}}>Re-Roll</span>
-                <span style={{fontFamily:"'Cinzel',serif",fontSize:18,fontWeight:900,color:'#55ee55'}}>🌿 {rerollCost}</span>
+                <span style={{fontFamily:"'Cinzel',serif",fontSize:20,fontWeight:900,color:'#55ee55'}}>🌿 {rerollCost}</span>
               </div>
             </div>
           </div>
 
-          {/* GAP ROW */}
-          <div style={{height:16,flexShrink:0}}/>
+          {/* GAP */}
+          <div style={{height:100,flexShrink:0}}/>
 
-          {/* BOOSTER + PAWN ROW */}
-          <div style={{flex:1,display:'flex',gap:16,minHeight:0}}>
-            {/* 2 packs centered */}
-            <div style={{flex:1,display:'flex',gap:16,justifyContent:'center',alignItems:'stretch'}}>
-              {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
-            </div>
-            {/* Pawn shop */}
-            <div style={{width:280,flexShrink:0,
+          {/* PACKS + PAWN ROW */}
+          <div style={{flex:1,display:'flex',gap:80,justifyContent:'center',alignItems:'flex-start',minHeight:0}}>
+            {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
+            {/* Pawn shop — 420px, same top as packs */}
+            <div style={{width:420,flexShrink:0,
               background:'linear-gradient(160deg,#0e0a16,#080510)',
               border:'2px solid rgba(150,70,220,0.65)',borderRadius:10,
-              padding:'16px 16px',
+              padding:'20px 20px',
               display:'flex',flexDirection:'column',
               justifyContent:'space-between',
-              boxShadow:'0 0 28px rgba(130,50,200,0.2)'}}>
+              boxShadow:'0 0 30px rgba(130,50,200,0.2)'}}>
               <div>
-                <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:28,
-                  color:'#9944dd',textAlign:'center',marginBottom:12,
-                  textShadow:'0 0 16px rgba(160,80,240,0.7)'}}>🪙 Pawn Shop</div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:11,
-                  color:'#7a5aaa',letterSpacing:1,lineHeight:2.2,textAlign:'center'}}>
-                  Common 1 · Uncommon 2 · Rare 4<br/>
-                  Foil +3 · Mythic +8 · Member 5<br/>
-                  Artifact = 50% back
+                <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:30,
+                  color:'#9944dd',textAlign:'center',marginBottom:14,
+                  textShadow:'0 0 18px rgba(160,80,240,0.8)'}}>🪙 Pawn Shop</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:12,
+                  color:'#7a5aaa',letterSpacing:1,lineHeight:2.4,textAlign:'center'}}>
+                  Common 1🌿 · Uncommon 2🌿 · Rare 4🌿<br/>
+                  Foil +3🌿 · Mythic +8🌿 · Member 5🌿<br/>
+                  Artifact = 50% of buy price back
                 </div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:9,
-                  color:'#4a3068',textAlign:'center',marginTop:6,letterSpacing:1}}>
-                  Max 2 sales per visit
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:10,
+                  color:'#4a3068',textAlign:'center',marginTop:10,letterSpacing:1}}>
+                  Max 2 sales per visit · Cannot sell last 2 members
                 </div>
               </div>
               <button
                 onMouseEnter={e=>e.currentTarget.style.background='rgba(130,60,200,0.45)'}
                 onMouseLeave={e=>e.currentTarget.style.background='rgba(80,30,140,0.3)'}
                 style={{width:'100%',fontFamily:"'Cinzel',serif",
-                  fontSize:13,fontWeight:900,letterSpacing:1,
-                  padding:'14px',background:'rgba(80,30,140,0.3)',
-                  border:'2px solid rgba(160,80,240,0.6)',borderRadius:6,
+                  fontSize:14,fontWeight:900,letterSpacing:1,
+                  padding:'16px',background:'rgba(80,30,140,0.3)',
+                  border:'2px solid rgba(160,80,240,0.65)',borderRadius:6,
                   color:'#cc88ff',cursor:'pointer',textTransform:'uppercase',
                   transition:'background 0.15s',
-                  boxShadow:'0 0 16px rgba(140,60,220,0.25)'}}>
+                  boxShadow:'0 0 18px rgba(140,60,220,0.3)'}}>
                 💰 Open Pawn Shop ({pawnSalesLeft} left)
               </button>
             </div>
