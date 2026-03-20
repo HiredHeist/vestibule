@@ -2169,8 +2169,8 @@ export default function App(){
     setPendingBurningStage(true)
     addLog('🔥 Burning Stage! +5 Embers next fight.')
   }
-  const circleBaseMin=[5,7,8,10,12,12,14,14,18]
-  const circleBaseRange=[4,4,4,4,5,5,6,6,8]
+  const circleBaseMin=[2,4,6,8,10,10,12,12,15]
+  const circleBaseRange=[3,3,3,3,4,4,5,5,6]
   const baseMin=circleBaseMin[Math.min(circleNum-1,8)]
   const baseRange=circleBaseRange[Math.min(circleNum-1,8)]
   const stashEarned=baseMin+Math.floor(Math.random()*baseRange)+strikesLeft+perfectBonus
