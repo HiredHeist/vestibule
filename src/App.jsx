@@ -1164,14 +1164,14 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
               <button
                 onMouseEnter={e=>e.currentTarget.style.background='rgba(130,60,200,0.45)'}
                 onMouseLeave={e=>e.currentTarget.style.background='rgba(80,30,140,0.3)'}
-                onClick={()=>setPawnSalesLeft(2)||setPawnOpen(true)}
+                onClick={()=>{if(pawnSalesLeft>0)setPawnOpen(true)}}
                 style={{width:'100%',fontFamily:"'Cinzel',serif",
                   fontSize:14,fontWeight:900,letterSpacing:1,
                   padding:'16px',background:'rgba(80,30,140,0.3)',
                   border:'2px solid rgba(160,80,240,0.65)',borderRadius:6,
-                  color:'#cc88ff',cursor:'pointer',textTransform:'uppercase',
-                  transition:'background 0.15s',
-                  boxShadow:'0 0 18px rgba(140,60,220,0.3)'}}>
+                  color:pawnSalesLeft>0?'#cc88ff':'#4a2a6a',cursor:pawnSalesLeft>0?'pointer':'not-allowed',textTransform:'uppercase',
+                  transition:'background 0.15s',opacity:pawnSalesLeft>0?1:0.5,
+                  boxShadow:pawnSalesLeft>0?'0 0 18px rgba(140,60,220,0.3)':'none'}}>
                 💰 Open Pawn Shop ({pawnSalesLeft} left)
               </button>
               {pawnOpen&&<PawnShopModal
