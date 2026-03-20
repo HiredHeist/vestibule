@@ -2362,7 +2362,18 @@ export default function App(){
           </div>
           <div style={{display:'flex',alignItems:'center',gap:8,padding:'12px 10px 12px 220px',justifyContent:'center',flex:1,position:'relative'}}>
             <div style={{display:'flex',flexDirection:'column',gap:8,alignSelf:'center',flexShrink:0,background:'rgba(0,0,0,0.22)',borderRadius:'0 6px 6px 0',padding:'8px 10px 8px 10px',borderRight:'1px solid rgba(140,90,20,0.35)',position:'absolute',left:0,top:'50%',transform:'translateY(-50%)'}}>
-              {[0,1,2].map(i=>{const a=(activeArtifacts||[])[i];return a?(<div key={i} style={{width:80,height:105,border:'1px solid rgba(200,140,30,0.65)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 10px rgba(200,140,20,0.25)'}}><div style={{fontSize:22}}>{a.emoji}</div><div style={{fontFamily:"'Cinzel',serif",fontSize:6,letterSpacing:0.5,color:'#c8a040',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 3px'}}>{a.name}</div></div>):(<div key={i} style={{width:80,height:105,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:24,opacity:.28}}>⚗</div><div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>)})}
+              {[0,1,2].map(i=>{const a=(activeArtifacts||[])[i];return(
+                <div key={i} style={{position:'relative'}}
+                  onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='1'}}
+                  onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='0'}}>
+                  {a?<div style={{width:80,height:105,border:'1px solid rgba(200,140,30,0.65)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 10px rgba(200,140,20,0.25)',cursor:'help'}}><div style={{fontSize:22}}>{a.emoji}</div><div style={{fontFamily:"'Cinzel',serif",fontSize:6,letterSpacing:0.5,color:'#c8a040',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 3px'}}>{a.name}</div></div>
+                  :<div style={{width:80,height:105,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:24,opacity:.28}}>⚗</div><div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>}
+                  {a&&<div data-artip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:88,top:0,zIndex:9999,pointerEvents:'none',minWidth:180,maxWidth:240,background:'rgba(12,7,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
+                    <div style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:700,color:'#e8c060',marginBottom:4}}>{a.emoji} {a.name}</div>
+                    <div style={{fontFamily:"'IM Fell English',serif",fontSize:9,color:'#9a8050',fontStyle:'italic',lineHeight:1.4}}>{a.effect}</div>
+                  </div>}
+                </div>
+              )})}
             </div>
             {stage.map((m,i)=>(
               <StageSlot key={i} member={m} slotIdx={i}
@@ -2400,7 +2411,7 @@ export default function App(){
       </div>
 
       {/* HAND AREA */}
-      <div style={{flex:1,background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0',display:'flex',flexDirection:'column',zIndex:30,minHeight:0,position:'relative'}}>
+      <div style={{flex:'0 0 340px',background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0',display:'flex',flexDirection:'column',zIndex:30,minHeight:0,position:'relative'}}>
         <div style={{textAlign:'center',padding:'6px 0 0',flexShrink:0,position:'relative',zIndex:0}}>
           <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length} of {HAND_SIZE}</span>
           {pendingEmbers>0&&<span style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#ff6600',marginLeft:12}}>+{pendingEmbers} 🔥 pending</span>}
@@ -2413,11 +2424,18 @@ export default function App(){
         </div>
 
         {/* ACTIVE PASSIVES/ARTIFACTS PANEL — toggleable */}
-        {(activeArtifacts.length>0||activePassives.length>0)&&<div style={{position:'absolute',right:231,bottom:0,zIndex:60,maxWidth:180}}>
-          <div style={{background:'rgba(10,5,2,0.95)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:'6px 0 0 6px',padding:'6px 8px'}}>
-            <div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:2,color:'#8a6020',textTransform:'uppercase',marginBottom:4}}>Active</div>
-            {activeArtifacts.map((a,i)=><div key={i} style={{fontSize:11,color:'#c8a040',fontFamily:"'Cinzel',serif",marginBottom:1}}>{a.emoji} {a.name}</div>)}
-            {activePassives.map((p,i)=><div key={i} style={{fontSize:11,color:'#8090c0',fontFamily:"'Cinzel',serif",marginBottom:1}}>{p.emoji} {p.name}</div>)}
+        {activePassives.length>0&&<div style={{position:'absolute',right:231,bottom:0,zIndex:60,maxWidth:240}}
+          onMouseEnter={e=>{const d=e.currentTarget.querySelector('[data-passdetail]');if(d)d.style.display='block'}}
+          onMouseLeave={e=>{const d=e.currentTarget.querySelector('[data-passdetail]');if(d)d.style.display='none'}}>
+          <div style={{background:'rgba(10,5,2,0.95)',border:'1px solid rgba(80,60,160,0.45)',borderRadius:'6px 0 0 6px',padding:'7px 10px',cursor:'help'}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:2,color:'#6070a0',textTransform:'uppercase',marginBottom:4}}>💿 Passives</div>
+            {activePassives.map((p,i)=><div key={i} style={{fontSize:11,color:'#8090c0',fontFamily:"'Cinzel',serif",marginBottom:2}}>{p.emoji} {p.name}</div>)}
+            <div data-passdetail="" style={{display:'none',marginTop:8,borderTop:'1px solid rgba(80,60,160,0.3)',paddingTop:6}}>
+              {activePassives.map((p,i)=><div key={i} style={{marginBottom:6}}>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#aabbee',fontWeight:700,marginBottom:1}}>{p.emoji} {p.name}</div>
+                <div style={{fontFamily:"'IM Fell English',serif",fontSize:8,color:'#7080aa',fontStyle:'italic',lineHeight:1.4}}>{p.effect}</div>
+              </div>)}
+            </div>
           </div>
         </div>}
         {/* RIGHT COLUMN: Buttons/Embers/Info — absolutely positioned */}
