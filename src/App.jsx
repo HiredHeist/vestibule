@@ -2808,11 +2808,11 @@ export default function App(){
         <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:50,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',zIndex:50}}>
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
-              isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
+              isHovered={hovered===i} isSelected={selected.includes(card.uid)}
               anyHovered={hovered!==null}
               canAfford={card.embers===0||embers>=card.embers}
               isDragging={dragHandIdx===i} isShopBought={shopBoughtIds.includes(card.uid)}
-              onHover={()=>setHovered(card.uid)} onLeave={()=>setHovered(null)}
+              onHover={()=>setHovered(i)} onLeave={()=>setHovered(null)}
               onClick={()=>setSelected(p=>p.includes(card.uid)?p.filter(x=>x!==card.uid):[...p,card.uid])}
               onDragStart={()=>{setDragHandIdx(i);setDragCardUid(card.uid)}}
               onDragEnd={()=>{setDragHandIdx(null);setDragOverHandIdx(null);setDragCardUid(null)}}

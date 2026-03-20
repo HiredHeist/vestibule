@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Friday, March 20, 2026 at 06:14 PM*
+*Last updated: Friday, March 20, 2026 at 06:32 PM*
 
 ---
 
@@ -51,125 +51,111 @@ This is happening.
 
 ## ✅ COMPLETED
 
-### Recruit Pack & Balance Fix
-- ~~**Root cause found**: sim was offering Touring (22st) or Demonic (40st) packs in Circle 1 — AI couldn't afford them~~
-- ~~**Fix**: recruit pack is now Garage Band only (10st) in C1-C2, both in game and sim~~
-- ~~**Result**: C1-C3 AI survival 100%%, full 5-member band by Circle 4 every run~~
-- ~~**Stash buff reverted**: original values correct, economy was never broken~~
-- ~~**Confirmed**: 69 HP Drifter beatable with 2 members + good card play~~
-- ~~**New wall**: The Miser (F9, 360 HP, Circle 4) — real difficulty spike, correct behavior~~
-
-
-
-### Balance Fix — Circle 1-2 Stash Rewards
-- ~~**Stash rewards C1**: 2-4st → 5-8st (players can now recruit 3rd member before Drifter)~~
-- ~~**Stash rewards C2**: 4-6st → 7-10st~~
-- ~~**Result**: C4 survival rate 31% → 59% in sim, Drifter deaths 20% → 10%~~
-
-
-
-### Session 10 continued
-- ~~**Hand hard-cap removed** — hand CAN exceed 6 if draw cards allow, display shows ⚡ when over base~~
-- ~~**Expert AI completely rewritten** — human-level combo awareness: Amp+Encore chains, DoubleDown+Overdrive, CrowdSurf first, buffer stacking, ember management~~
-- ~~**Sim card scores fixed** — CrowdSurf, SoundWall, HeavyRiff no longer undervalued by 0.3x multiplier~~
-
-
-
 ### Session 10 — March 21 2026
-- ~~**Resonance auto-discard bug** — duplicate cards now play independently; Resonance only fires with Resonance Coil artifact (a9)~~
-- ~~**Recruit screen duplicates** — alreadyOn check removed, all duplicates allowed except DOUBLE TIME~~
-- ~~**leftBought.rec initialized** — recruit pack sold state now persists correctly~~
-- ~~**Recruit pack circle-gated** — Circles 1-2: Garage Band only; C3-4: Garage/Touring; C5+: all packs~~
+
+#### Hover Bug Fix
+- ~~**Duplicate card hover bug** — both Wake Up Calls rising when one hovered. Fixed: hover now tracks by hand INDEX not card.uid. Positionally correct, immune to uid issues~~
+
+#### AI Rewrite (Full Combo Logic)
+- ~~**expertStrike rewritten from scratch** — reads all 35 cards, understands every combo~~
+- ~~**Phase 0**: emergency ember gen when hand is too expensive to play~~
+- ~~**Phase 1**: Crowd Surf first (value = hand.length × 2, must play before hand shrinks)~~
+- ~~**Phase 2**: Going Broke burst when stash high + enemy low~~
+- ~~**Phase 3**: Stage Dive when member HP can kill enemy~~
+- ~~**Phase 4**: Full ATK combo — NewStrings/BattleCry × N → Amp → Demo Tape → Encore → Overdrive → PossessedPerf → InfernalEncore~~
+- ~~**Phase 5**: Corrupt build — Distortion, Dial to Eleven, FeedbackLoop, AmpStatic, DarkTuning, DeathRiff~~
+- ~~**Phase 6**: Direct damage — SoundWall, HeavyRiff, HerbMoney~~
+- ~~**Phase 7**: Ember generation for next strike~~
+- ~~**Phase 8**: Utility — SoundCheck, WakeUp, Roadie, Séance~~
+- ~~**Phase 9**: Mop-up remaining positive-value cards~~
+- ~~**cardHeal enemy logic**: minimal plays when enemy heals per card~~
+- ~~**Result**: C1-C3 AI survival 100%%, full 5-member band at C4 every run~~
+
+#### Recruit Pack & Circle Gating
+- ~~**genRecruitPack takes fightIndex** — Circles 1-2: Garage Band only (10st), C3-4: Garage/Touring, C5+: all~~
+- ~~**Sim recruit pack fixed** — was randomly offering 40st Demonic Pack in C1, AI couldn't afford it~~
+- ~~**Root cause confirmed**: sim offering wrong packs = no recruits = death. Not a balance issue~~
+
+#### Core Bug Fixes
+- ~~**Resonance auto-discard** — was silently eating second copy of any card played. Now only fires with Resonance Coil artifact (a9)~~
 - ~~**Hand hard-capped at 6** — excess cards return to deck, no over-soft-cap rendering bugs~~
-
-
-
-### Session 10 — March 21 2026 (today)
-- ~~**Duplicate card hover bug fixed** — Resonance auto-discard only fires with Resonance Coil artifact (a9), not by default~~
-- ~~**Recruit screen duplicates allowed** — removed alreadyOn block, all duplicates allowed except DOUBLE TIME~~
-- ~~**leftBought.rec initialized correctly** — recruit pack sold state now persists properly~~
-- ~~**Sim bugs fixed** — Soundcheck origAtk + genShop always has recruit pack~~
-- ~~**Simulator ran** — 0%% win rate, Circle 4 wall identified (Miser 360HP too high for band scaling)~~
-
- — Session 9 (March 20-21 2026)
-
-### End Screen
+- ~~**Recruit screen duplicates** — alreadyOn check removed, all duplicates allowed except DOUBLE TIME~~
+- ~~**leftBought.rec initialized** — was {cart:false,cpas:false} missing rec key, now {cart:false,cpas:false,rec:false}~~
 - ~~**Shift+D dev shortcut** — instant death screen from any screen~~
-- ~~**"The band ran out of herb." 200% bigger, bright green glow**~~
-- ~~**Run Statistics box 150% larger** — MBScribblesFont, easy to read~~
 
-### Battle Screen
-- ~~**HandCard ability text** — MBScribblesFont everywhere~~
-- ~~**Circle/fight header** — bold, bright orange-red, triple glow~~
-- ~~**Boss HP right-justified** — after name, 20% bigger, pulsing red when low~~
-- ~~**Boss passive text 50% bigger**~~
-- ~~**Combined attack text** — matches number size, glowing gold~~
-- ~~**Artifact slot placeholders** — big ⛧ pentagram emoji~~
-- ~~**Hover z-index fix** — only hovered card lifts, no duplicate rising~~
+#### Balance Analysis
+- ~~**Confirmed**: 69 HP Drifter beatable with 2 members + good card play~~
+- ~~**New wall**: The Miser (F9, 360 HP, Circle 4) — 33%% of deaths~~
+- ~~**Best pairs**: FOLK MAGIC+DEBUFF (avg F9), SHREDDER+FRENZIED (avg F8.8)~~
+- ~~**Worst pairs**: ANCHOR+ANCHOR (avg F2.8) — two pure supports can't carry~~
 
-### Shop Screen
-- ~~**Left column cards** — emoji 72px, name 20px, desc 16px, all MBScribblesFont~~
-- ~~**Recruit pack sold once per visit** — SOLD! stamp, exploit fixed~~
-- ~~**Booster pack desc** — MBScribblesFont, readable~~
-- ~~**Pawn shop text** — bright purple #cc88ff, all readable~~
-- ~~**Pawn shop pixel-perfect alignment** — paddingTop:24 matches booster packs~~
-- ~~**Shop layout** — flex gap scales with window, rows stack correctly~~
-- ~~**Row gap** — flex:1 spacer pushes bottom row to align with left column~~
-- ~~**Hellquake splash 5 seconds** — was 2s, now readable~~
+#### UI/Font Polish
+- ~~**MBScribblesFont** on all HandCard ability text~~
+- ~~**Circle header** — bold, glowing orange-red~~
+- ~~**Boss HP** — 20% bigger, pulsing red when low~~
+- ~~**"The band ran out of herb."** — 60px bright green glow~~
+- ~~**Run Statistics box** — 150%% bigger, MBScribblesFont~~
 
-### Opening Night Screen
-- ~~**Opening Night title** — Break Gothic, 88px, 20px letter spacing, glowing~~
-- ~~**Subtitle** — 50% bigger, readable gold~~
-- ~~**Member names** — 2px letter spacing~~
-- ~~**Ability description font** — MBScribblesFont to match keyword labels~~
-- ~~**Seed/subtitle colors** — bright #e8d090, visible on black~~
-
-### Fonts (all local, in public/fonts/)
-- ~~**4 fonts deployed**: Bogarts Metal (titles/names), Scratch (flavour text), MBScribbles (all UI), Break Gothic (key screen titles)~~
-- ~~**CSS @font-face system** — no more Google Fonts dependency~~
-
-### Gameplay Fixes
-- ~~**Duplicate members allowed** — all except second DOUBLE TIME drummer~~
-- ~~**Two drummers re-roll** — d6 re-rolls on 1-2 if two drummers on stage~~
-- ~~**Recruit pack sold bug** — && chain fixed, setLeftBought now fires correctly~~
-- ~~**Black screen crash** — dblRoll removed from RecruitScreen~~
-- ~~**Pawn shop exploit** — button disabled at 0 sales, counter reset removed~~
-- ~~**Demo Tape** — inline replay, hover shows queued card, persists across strikes~~
-- ~~**All dead cards confirmed** — Setlist, Remaster, Hellquake all working~~
-- ~~**All keyword passives confirmed** — FRENZIED, ANCHOR, CORRUPT, DEBUFF~~
-
-### Previously Completed (Sessions 1-8)
-- ~~Full card set, all artifacts, all passives~~
+### Previously Completed (Sessions 1-9)
+- ~~Full card set (35 cards), all artifacts (a1-a10), all passives (p1-p10)~~
 - ~~27 fights, 9 circles, all enemy passives~~
 - ~~Mentor Link system (foil/mythic/demonic tiers, bonds, auras, demonic conflict)~~
-- ~~Pawn shop full sell modal~~
-- ~~Opening Night, band synergy, DOUBLE TIME, Too Stoned~~
-- ~~Stage drag-and-drop~~
-- ~~Booster + recruitment pack system~~
+- ~~Pawn shop, booster + recruitment pack system~~
+- ~~Stage drag-and-drop, DOUBLE TIME, Too Stoned, ANCHOR positioning~~
+- ~~Opening Night, band synergy, keyword ability descriptions~~
+- ~~4 fonts deployed: Bogarts Metal, Scratch, MBScribbles, Break Gothic~~
+
+---
+
+## P1 — READY TO RUN SIM
+
+- [x] Circle-gated recruit packs confirmed working  
+- [x] AI combo logic rewritten  
+- [x] Hover bug fixed  
+- [x] Hand cap working  
+- [x] Resonance fixed  
+- **→ Run 200k simulation (scaled from 1M for speed)**
+
+## P2 — BEFORE DEMO
+
+- [ ] The Miser (360 HP) may need slight HP reduction — steep jump from Devourer (160 HP)
+- [ ] ANCHOR+ANCHOR starting pair is unwinnable — design consideration
+- [ ] Full playthrough stress test with real player
+- [ ] Any remaining bugs from lost playtest notes
+
+## P3 — FUTURE
+
+- [ ] A11-A20 unlockable artifacts
+- [ ] P11-P20 unlockable passives  
+- [ ] Collection/unlock screen
+- [ ] Daily challenge leaderboard
+- [ ] Settings menu
+- [ ] Steam / mobile / PS release prep
+- [ ] A&R Rep bonus stage after beating Lucifer
+
+---
+
+## RULE: Update TODO on EVERY push. No exceptions.
 
 ---
 
 ## Dev Shortcuts
-- **Shift+S** — jump to shop with 69 stash
-- **Shift+D** — jump to death/end screen
+- **Shift+S** — jump to shop with 69 stash (works from any screen)
+- **Shift+D** — jump to death/end screen (works from any screen)
 
 ## Game Constants
 - MAX_STRIKES: 4 | MAX_DISCARDS: 4 | HAND_SIZE: 6 | MAX_STASH: 420 | MAX_EMBERS_CAP: 8
 - Starting embers: 5 | Starting stash: 0 | Fights: 27 (index 0-26)
-- Circle boss every 3rd fight — +1 max ember permanently
+- Circle boss every 3rd fight → +1 max ember permanently
 - 420 is sacred. Never change card height.
+- Stash rewards: circleBaseMin=[2,4,6,8,10,10,12,12,15], circleBaseRange=[3,3,3,3,4,4,5,5,6]
 
 ## Enemy HP Scaling
 Wanderer 27 > Lost Soul 42 > Drifter 69 > Siren 60 > Seducer 140 > Glutton 80 > Devourer 160
 > Miser 360 > Usurer 680 > Wrathful 800 > Warlord 1520 > Heretic 1650 > False Prophet 3000
 > Brute 3000 > Executioner 5500 > Archfraud 9600 > Betrayer 11400 > LUCIFER 420,666
 
-## Shop System
-**Card Booster Packs:** Cassette 6st(C1) / CD-R 12st(C1) / Import Vinyl 22st(C2) / Rare Vinyl 38st(C4) / Cursed Demo 60st(C6)
-**Recruitment Pack (always left column):** Garage Band 10st / Touring 22st / Demonic Pack 40st
-
 ## Repo
 - github.com/HiredHeist/vestibule (private)
 - PAT: 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 (expires Jun 2026)
-- Dev shortcuts: Shift+S = shop 69 stash | Shift+D = death screen
-- Stable tag: v0.9-pre-megapush
+- Latest stable: see git log
