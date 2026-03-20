@@ -275,12 +275,49 @@ function genBoosterPacks(circleNum){
 // Recruitment packs
 function genRecruitPack(){
   const packs=[
-    {name:'Garage Band Pack',emoji:'🎸',cost:10,desc:'Pick 1 of 2 random musicians.',members:2,foilChance:0},
-    {name:'Touring Pack',emoji:'🎤',cost:22,desc:'Pick 1 of 3. 15% Foil chance.',members:3,foilChance:0.15},
-    {name:'Demonic Pack',emoji:'⛧',cost:40,desc:'Pick 1 of 4. 25% Foil + 15% Mythic chance.',members:4,foilChance:0.25,mythicChance:0.15},
+    {name:'Garage Band Pack',emoji:'🎸',cost:10,desc:'Pick 1 of 2 musicians.',members:2,foilChance:0,mythicChance:0,demonicChance:0},
+    {name:'Touring Pack',emoji:'🎤',cost:22,desc:'Pick 1 of 3. 15% Foil chance.',members:3,foilChance:0.15,mythicChance:0,demonicChance:0},
+    {name:'Demonic Pack',emoji:'⛧',cost:40,desc:'Pick 1 of 4. 25% Foil, 15% Mythic, 3% DEMONIC.',members:4,foilChance:0.25,mythicChance:0.15,demonicChance:0.03},
   ]
   return packs[Math.floor(Math.random()*packs.length)]
 }
+
+// ── MENTOR LINK SYSTEM ────────────────────────────────────────────
+const KW_BOND_COLOR={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
+function memberTier(m){return m&&m.demonic?'demonic':m&&m.mythic?'mythic':m&&m.foil?'foil':'base'}
+function tierAtkBonus(m){return m.demonic?5:m.mythic?3:m.foil?1:0}
+function tierHpBonus(m){return m.demonic?5:m.mythic?3:m.foil?1:0}
+function roleBondBonus(tier){return tier==='demonic'?3:tier==='mythic'?2:tier==='foil'?1:0}
+function getBondColor(member,stage){
+  if(!member||!member.roleBondWith||member.roleBondWith.length===0)return null
+  if(!stage.some(m=>m&&member.roleBondWith.includes(m.uid)))return null
+  return KW_BOND_COLOR[member.keyword]||'#e8a820'
+}
+function applyMentorLink(newMember,ns){
+  const tier=memberTier(newMember)
+  const atkB=tierAtkBonus(newMember),hpB=tierHpBonus(newMember)
+  let m={...newMember,atk:newMember.atk+atkB,maxHp:(newMember.maxHp||newMember.hp)+hpB,hp:(newMember.hp)+hpB,roleBondWith:[],roleBondBonus:0}
+  if(tier==='base')return m
+  const rb=roleBondBonus(tier)
+  ns.forEach((s,i)=>{
+    if(!s||!s.id||s.uid===m.uid||s.locked)return
+    if(s.role===m.role){
+      m={...m,atk:m.atk+rb,roleBondWith:[...m.roleBondWith,s.uid],roleBondBonus:m.roleBondBonus+rb}
+      ns[i]={...s,atk:s.atk+rb,roleBondWith:[...(s.roleBondWith||[]),m.uid],roleBondBonus:(s.roleBondBonus||0)+rb}
+    }
+  })
+  return m
+}
+function breakMentorLink(sold,stage){
+  if(!sold.roleBondWith||sold.roleBondWith.length===0)return stage
+  const rb=roleBondBonus(memberTier(sold))
+  return stage.map(m=>{
+    if(!m||!sold.roleBondWith.includes(m.uid))return m
+    const base=(ALL_MUSICIANS.find(mu=>mu.id===m.id)||{atk:1}).atk
+    return{...m,atk:Math.max(base,m.atk-rb),roleBondWith:(m.roleBondWith||[]).filter(u=>u!==sold.uid),roleBondBonus:Math.max(0,(m.roleBondBonus||0)-rb)}
+  })
+}
+
 
 // ── Projectile ────────────────────────────────────────────────────────────────
 function Projectile({from,to,emoji,onDone}){
@@ -1013,7 +1050,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   )
 }
 
-function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef}){
+function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor}){
   const [over,setOver]=useState(false)
   const [showTip,setShowTip]=useState(false)
   if(!member){
@@ -1028,9 +1065,9 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   return(
     <div ref={innerRef} draggable onDragStart={onDragStart} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}} onMouseEnter={()=>setShowTip(true)} onMouseLeave={()=>setShowTip(false)}
       style={{width:230,height:345,display:'flex',flexDirection:'column',background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
-        border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':over?'2px solid #e8a820':st?'1px solid #333':'2px solid rgba(190,120,25,0.85)',
+        border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':bondColor?'2px solid '+bondColor:over?'2px solid #e8a820':st?'1px solid #333':'2px solid rgba(190,120,25,0.85)',
         borderRadius:6,
-        boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':'0 6px 24px rgba(0,0,0,0.85)',
+        boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':'0 6px 24px rgba(0,0,0,0.85)',
         transform:st?'rotate(15deg) scale(0.95)':'none',
         opacity:st?0.5:1,
         animation:(!st&&!isAttacking&&!isDiceTarget)?'throb 3s ease-in-out infinite':'none',
@@ -1234,6 +1271,47 @@ function EndScreen({won,cause,stats,seed,onReset,streakWins,streakLosses,totalRu
 
 // ── Main App ──────────────────────────────────────────────────────────────────
 
+
+function DemonicConflictScreen({conflict,onChoice}){
+  const {incoming,existing}=conflict
+  const kwc={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
+  function MemberCard({m,onPick,label}){
+    const bc=kwc[m.keyword]||'#e8a820'
+    return(
+      <div onClick={onPick} style={{width:260,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'3px solid #e8a820',borderRadius:8,overflow:'hidden',cursor:'pointer',transition:'all 0.2s',boxShadow:'0 0 40px rgba(232,168,32,0.5)'}}
+        onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.04)';e.currentTarget.style.boxShadow='0 0 60px rgba(232,168,32,0.8)'}}
+        onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='0 0 40px rgba(232,168,32,0.5)'}}>
+        <div style={{background:'linear-gradient(90deg,#e8a820,#ffcc44)',padding:'6px',textAlign:'center',fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:900,letterSpacing:3,color:'#0a0704'}}>{label}</div>
+        <div style={{fontSize:64,textAlign:'center',padding:'20px 0',background:'rgba(0,0,0,0.4)'}}>{m.emoji}</div>
+        <div style={{padding:'0 16px 16px'}}>
+          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:28,color:'#e8d090',textAlign:'center',marginBottom:4}}>{m.name}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:2,color:'#8a7040',textAlign:'center',marginBottom:10}}>{m.role}</div>
+          <div style={{display:'flex',justifyContent:'space-between',padding:'8px',background:'rgba(0,0,0,0.5)',borderRadius:4,marginBottom:8}}>
+            <div style={{textAlign:'center'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#ee2222',fontWeight:900}}>ATK</div><div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:'#ee2222'}}>{m.atk}</div></div>
+            <div style={{textAlign:'center',alignSelf:'center'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:bc,fontWeight:700}}>{m.keyword}</div></div>
+            <div style={{textAlign:'center'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#33dd33',fontWeight:900}}>HP</div><div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:'#33dd33'}}>{m.hp}</div></div>
+          </div>
+          <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:'#8a7040',textAlign:'center',fontStyle:'italic'}}>{m.desc}</div>
+          {m.roleBondBonus>0&&<div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#e8a820',textAlign:'center',marginTop:8}}>🔗 +{m.roleBondBonus} ATK Bond</div>}
+        </div>
+        <div style={{background:'rgba(232,168,32,0.15)',padding:'12px',textAlign:'center',fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,color:'#e8a820',letterSpacing:2}}>KEEP THIS ONE</div>
+      </div>
+    )
+  }
+  return(
+    <div style={{position:'fixed',inset:0,zIndex:9900,background:'rgba(2,1,0,0.98)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:32,padding:'40px 20px'}}>
+      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:56,color:'#cc1111',textShadow:'0 0 40px rgba(200,0,0,0.9),0 0 80px rgba(150,0,0,0.6)',textAlign:'center'}}>Only One May Remain</div>
+      <div style={{fontFamily:"'IM Fell English',serif",fontSize:18,color:'#a09060',fontStyle:'italic',textAlign:'center'}}>Two demonic powers cannot share the same stage.<br/>Choose who stays — the other is gone forever.</div>
+      <div style={{display:'flex',gap:60,alignItems:'center',flexWrap:'wrap',justifyContent:'center'}}>
+        <MemberCard m={existing} onPick={()=>onChoice(existing,incoming)} label="CURRENTLY ON STAGE"/>
+        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:48,color:'#660000',textShadow:'0 0 20px rgba(200,0,0,0.8)'}}>VS</div>
+        <MemberCard m={incoming} onPick={()=>onChoice(incoming,existing)} label="NEWLY ARRIVED"/>
+      </div>
+      <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#4a3020',letterSpacing:2,textAlign:'center'}}>THE UNCHOSEN WILL BE PERMANENTLY REMOVED</div>
+    </div>
+  )
+}
+
 function RecruitScreen({candidates,stage,onPick,onPass}){
   return(
     <div style={{position:'fixed',inset:0,zIndex:9600,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:24,padding:'40px 20px'}}>
@@ -1244,12 +1322,17 @@ function RecruitScreen({candidates,stage,onPick,onPass}){
           const alreadyOn=stage.some(s=>s&&s.id===m.id)
           const emptySlot=stage.findIndex(s=>!s)
           const canAdd=!alreadyOn&&emptySlot!==-1
+          const tier=m.demonic?'DEMONIC':m.mythic?'MYTHIC':m.foil?'FOIL':null
+          const bondTarget=stage.find(s=>s&&s.role===m.role&&!s.tooStoned)
+          const bondBonus=m.demonic?3:m.mythic?2:m.foil?1:0
           return(
             <div key={m.id} onClick={()=>canAdd&&onPick(m)}
               style={{width:200,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'1px solid rgba(160,100,25,0.5)',borderRadius:7,overflow:'hidden',cursor:canAdd?'pointer':'not-allowed',opacity:canAdd?1:0.4,transition:'all 0.2s',transform:canAdd?'none':'none'}}
               onMouseEnter={e=>{if(canAdd)e.currentTarget.style.transform='translateY(-6px) scale(1.03)';e.currentTarget.style.boxShadow='0 0 30px rgba(232,168,32,0.4)'}}
               onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none'}}>
-              <div style={{height:4,background:'linear-gradient(90deg,#e8a820,#ffcc44)'}}/>
+              <div style={{height:4,background:m.demonic?'linear-gradient(90deg,#e8a820,#ffd700,#e8a820)':m.mythic?'linear-gradient(90deg,#cc44ff,#ff88ff,#cc44ff)':m.foil?'linear-gradient(90deg,#88ccff,#ffffff,#88ccff)':'linear-gradient(90deg,#e8a820,#ffcc44)'}}/>
+              {tier&&<div style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:900,letterSpacing:3,textAlign:'center',padding:'4px 0',background:m.demonic?'rgba(200,160,0,0.25)':m.mythic?'rgba(180,0,255,0.2)':'rgba(100,180,255,0.15)',color:m.demonic?'#ffd700':m.mythic?'#dd88ff':'#88ccff',textShadow:m.demonic?'0 0 12px rgba(255,200,0,0.9)':m.mythic?'0 0 12px rgba(200,0,255,0.9)':'0 0 12px rgba(100,180,255,0.9)'}}>{m.demonic?'⛧ DEMONIC ⛧':m.mythic?'✦ MYTHIC ✦':'✨ FOIL ✨'} +{m.demonic?5:m.mythic?3:1} ATK/HP</div>}
+              {tier&&bondTarget&&<div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,letterSpacing:1,textAlign:'center',padding:'3px 0',background:'rgba(232,168,32,0.15)',color:'#e8a820'}}>⚡ BONDS WITH {bondTarget.name.toUpperCase()} +{bondBonus} ATK</div>}
               <div style={{height:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:52,background:'rgba(0,0,0,0.35)'}}>{m.emoji}</div>
               <div style={{padding:'8px 12px 12px'}}>
                 <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:24,color:'#e8d090',textAlign:'center',marginBottom:2}}>{m.name}</div>
@@ -1458,6 +1541,7 @@ export default function App(){
   const [boosterPacks,setBoosterPacks]=useState(()=>genBoosterPacks(1))
   const [recruitPack,setRecruitPack]=useState(()=>genRecruitPack())
   const [recruitCandidates,setRecruitCandidates]=useState([])
+  const [demonicConflict,setDemonicConflict]=useState(null)
   const [rerollCost,setRerollCost]=useState(2)
   const [shopBoughtIds,setShopBoughtIds]=useState([])
   const [stats,setStats]=useState({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -2253,34 +2337,74 @@ export default function App(){
       setActivePassives(p=>[...p,item])
       addLog('💿 Passive equipped: '+item.name+'!')
     } else if(type==='recruit'){
-      // Pick random candidates from ALL_MUSICIANS (more options for better packs)
-      const count=item.name.includes('Demonic')?6:item.name.includes('Experienced')?4:2
-      const shuffled=[...ALL_MUSICIANS].sort(()=>Math.random()-.5)
-      setRecruitCandidates(shuffled.slice(0,count))
+      const count=item.members||2
+      const real=ALL_MUSICIANS.filter(m=>!m.locked)
+      const shuffled=[...real].sort(()=>Math.random()-.5).slice(0,count)
+      const fc=item.foilChance||0,mc=item.mythicChance||0,dc=item.demonicChance||0
+      const candidates=shuffled.map(m=>{
+        const r=Math.random()
+        if(dc&&r<dc)return{...m,demonic:true,mythic:false,foil:false}
+        if(mc&&r<mc)return{...m,mythic:true,foil:false,demonic:false}
+        if(fc&&r<fc)return{...m,foil:true,mythic:false,demonic:false}
+        return{...m,foil:false,mythic:false,demonic:false}
+      })
+      setRecruitCandidates(candidates)
       setGameState('recruit')
     } else {addLog('📦 Purchased: '+item.name+'!')}
   },[stash])
 
   const handleRecruitPick=useCallback((member)=>{
-    // Find first empty slot on stage
+    const tier=memberTier(member)
+    if(member.demonic){
+      const existing=stage.find(m=>m&&m.demonic)
+      if(existing){setDemonicConflict({incoming:member,existing});setRecruitCandidates([]);return}
+    }
     setStage(prev=>{
       const ns=[...prev]
       const idx=ns.findIndex(m=>!m)
       if(idx!==-1){
-        ns[idx]=Object.assign({},member,{uid:Math.random().toString(36).slice(2)})
-        addLog('🎸 '+member.name+' joins the band!')
+        const withUid={...member,uid:Math.random().toString(36).slice(2),roleBondWith:[],roleBondBonus:0}
+        const bonded=applyMentorLink(withUid,ns)
+        ns[idx]=bonded
+        const tl=tier!=='base'?' ['+tier.toUpperCase()+']':''
+        addLog('🎸 '+member.name+tl+' joins!'+(bonded.roleBondBonus>0?' 🔗 Bond +'+bonded.roleBondBonus+' ATK!':''))
       }
       return ns
     })
     setGameState('shop')
     setRecruitCandidates([])
-  },[])
+  },[stage])
 
   const handleRecruitPass=useCallback(()=>{
     addLog('👋 No new members recruited.')
     setGameState('shop')
     setRecruitCandidates([])
   },[])
+
+  const handleDemonicChoice=useCallback((keep,remove)=>{
+    setStage(prev=>{
+      const ns=breakMentorLink(remove,[...prev])
+      const ri=ns.findIndex(m=>m&&m.uid===remove.uid)
+      if(ri>=0)ns[ri]=null
+      return ns
+    })
+    setDemonicConflict(null)
+    addLog('⛧ '+keep.name+' reigns! '+remove.name+' is gone forever.')
+    setGameState('shop')
+  },[])
+
+  const handlePawnSellMember=useCallback((member,slotIdx)=>{
+    const bandSize=stage.filter(m=>m).length
+    if(bandSize<=2){addLog('⚠ Cannot sell — need at least 2 members!');return}
+    const price=member.demonic?69:5+(member.foil?3:0)+(member.mythic?8:0)
+    setStage(prev=>{
+      const ns=breakMentorLink(member,[...prev])
+      ns[slotIdx]=null
+      return ns
+    })
+    setStash(p=>Math.min(420,p+price))
+    addLog('💰 Sold '+member.name+' for '+price+' stash.'+(member.roleBondBonus>0?' 🔗 Bond broken.':''))
+  },[stage])
 
   const handleReroll=useCallback(()=>{
     if(stash<rerollCost)return
@@ -2312,6 +2436,7 @@ export default function App(){
   const bgPulseAnim=corruption>=50?'bgPulse '+(corruption>=75?'1.5s':'3s')+' ease-in-out infinite':'none'
 
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
+  if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES}/>
   if(gameState==='end')return <EndScreen won={won} cause={deathCause} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}}/>
@@ -2383,6 +2508,7 @@ export default function App(){
                 onDragStart={function(){if(m)setDragStageIdx(i)}}
                 onDragOver={function(){}}
                 onDrop={function(){handleStageDrop(i)}}
+                bondColor={m?getBondColor(m,stage):null}
               />
             ))}
           </div>
