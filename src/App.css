@@ -1,4 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;700;900&family=IM+Fell+English:ital@0;1&display=swap');
+/* ── LOCAL FONTS ──────────────────────────────────────────── */
+@font-face {
+  font-family: 'BogartsMetalFont';
+  src: url('/fonts/Bogarts Metal.ttf') format('truetype');
+  font-weight: normal;
+}
+@font-face {
+  font-family: 'ScratchFont';
+  src: url('/fonts/Scratch.ttf') format('truetype');
+  font-weight: normal;
+}
+@font-face {
+  font-family: 'MBScribblesFont';
+  src: url('/fonts/MBScribbles.ttf') format('truetype');
+  font-weight: normal;
+}
+@font-face {
+  font-family: 'BreakGothicFont';
+  src: url('/fonts/Break gothic.ttf') format('truetype');
+  font-weight: normal;
+}
+/* Keep Cinzel as fallback via Google for now */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap');
 
 :root {
   --void: #080502;
