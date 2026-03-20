@@ -1087,7 +1087,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         <div style={{width:240,flexShrink:0,display:'flex',flexDirection:'column',gap:14}}>
           <LeftCard item={recruitPack} price={recruitPack.cost}
             label="Band Recruitment" accent='#e8a820' id='rec' sold={leftBought.rec===true}
-            onBuy={()=>can(recruitPack.cost)&&onSpend(recruitPack.cost,'recruit',recruitPack)&&setLeftBought(p=>({...p,rec:true}))} />
+            onBuy={()=>{if(can(recruitPack.cost)){onSpend(recruitPack.cost,'recruit',recruitPack);setLeftBought(p=>({...p,rec:true}))}}} />
           {circleArtifact&&<LeftCard item={circleArtifact} price={circleArtifact.cost}
             label={'Vintage Amp · C'+circleNum} accent='#c87820' id='cart'
             sold={leftBought.cart}
