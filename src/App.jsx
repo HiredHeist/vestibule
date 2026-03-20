@@ -446,6 +446,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
   const [boughtIds,setBoughtIds]=useState([])
   const [leftBought,setLeftBought]=useState({cart:false,cpas:false})
+  useEffect(()=>{setBoughtIds([])},[shopCards])
   const [openPackModal,setOpenPackModal]=useState(null) // {pack, cards, picksLeft, picked}
   const circleNum=Math.floor(fightIndex/3)+1
   const can=p=>stash>=p
@@ -572,10 +573,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     const cardBg=card.mythic?mythicBg:card.foil?foilBg:'linear-gradient(180deg,#201408,#100804)'
     const shimmer=card.mythic?'holoShimmer 2s ease-in-out infinite':card.foil?'holoShimmer 3s ease-in-out infinite':rarityAnim(card.rarity)
     return(
-      <div style={{width:220,flexShrink:0,display:'flex',flexDirection:'column',position:'relative',paddingTop:20,opacity:isPicked?0.4:1,transition:'opacity 0.2s'}}
+      <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',position:'relative',paddingTop:24,opacity:isPicked?0.4:1,transition:'opacity 0.2s'}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
         <div onClick={()=>!isPicked&&picksLeft>0&&onPick(card)}
-          style={{flex:1,minHeight:320,display:'flex',flexDirection:'column',position:'relative',
+          style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',position:'relative',
             background:cardBg,
             border:hov&&!isPicked?'2px solid '+bc:isPicked?'2px solid #333':'1px solid '+bc+'55',
             borderRadius:8,overflow:'hidden',
@@ -978,6 +979,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:30,
                   color:'#9944dd',textAlign:'center',marginBottom:14,
                   textShadow:'0 0 18px rgba(160,80,240,0.8)'}}>🪙 Pawn Shop</div>
+                <div style={{fontSize:44,textAlign:'center',margin:'6px 0'}}>🏧</div>
                 <div style={{fontFamily:"'Cinzel',serif",fontSize:12,
                   color:'#7a5aaa',letterSpacing:1,lineHeight:2.4,textAlign:'center'}}>
                   Common 1🌿 · Uncommon 2🌿 · Rare 4🌿<br/>
@@ -2360,7 +2362,7 @@ export default function App(){
           </div>
           <div style={{display:'flex',alignItems:'center',gap:8,padding:'12px 10px 12px 220px',justifyContent:'center',flex:1,position:'relative'}}>
             <div style={{display:'flex',flexDirection:'column',gap:8,alignSelf:'center',flexShrink:0,background:'rgba(0,0,0,0.22)',borderRadius:'0 6px 6px 0',padding:'8px 10px 8px 10px',borderRight:'1px solid rgba(140,90,20,0.35)',position:'absolute',left:0,top:'50%',transform:'translateY(-50%)'}}>
-              {[1,2,3].map(i=><div key={i} style={{width:80,height:105,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:24,opacity:.28}}>⚗</div><div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>)}
+              {[0,1,2].map(i=>{const a=(activeArtifacts||[])[i];return a?(<div key={i} style={{width:80,height:105,border:'1px solid rgba(200,140,30,0.65)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 10px rgba(200,140,20,0.25)'}}><div style={{fontSize:22}}>{a.emoji}</div><div style={{fontFamily:"'Cinzel',serif",fontSize:6,letterSpacing:0.5,color:'#c8a040',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 3px'}}>{a.name}</div></div>):(<div key={i} style={{width:80,height:105,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:24,opacity:.28}}>⚗</div><div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>)})}
             </div>
             {stage.map((m,i)=>(
               <StageSlot key={i} member={m} slotIdx={i}
