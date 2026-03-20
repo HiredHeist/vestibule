@@ -35,7 +35,7 @@ const ENEMIES=[
   {id:'feaster',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:110,baseDmg:5,emoji:'🦷',passive:'Voracious. Heals 3 HP every time a card is played.',passiveId:'cardHeal3'},
   {id:'gluttony_boss',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:160,baseDmg:6,emoji:'🕳',passive:'Endless hunger. Heals 4 HP per card played. Strike fast.',passiveId:'cardHeal4'},
   // ── CIRCLE IV: GREED — Steals stash on hit ───────────────────
-  {id:'miser',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:360,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1 Stash on each successful hit.',passiveId:'stealStash'},
+  {id:'miser',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:260,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1 Stash on each successful hit.',passiveId:'stealStash'},
   {id:'hoarder',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:480,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2 Stash on each successful hit.',passiveId:'stealStash2'},
   {id:'greed_boss',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:680,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3 Stash per hit. Win fast or go broke.',passiveId:'stealStash3'},
   // ── CIRCLE V: ANGER — Hits harder the more you buff ─────────
