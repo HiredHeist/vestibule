@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Friday, March 20, 2026 at 05:33 PM*
+*Last updated: Friday, March 20, 2026 at 05:45 PM*
 
 ---
 
@@ -22,10 +22,15 @@ This is happening.
 
 ## P2 — BEFORE DEMO
 
-### Polish still needed (from tonight playtesting)
+### Known bugs still to fix
+- [ ] Any remaining issues from playtest (player had more bugs but couldn't remember them all)
 - [ ] Full playthrough stress test — no crashes start to finish
-- [ ] Review Too Stoned / member death clarity
-- [ ] Any remaining font/readability issues found during testing
+- [ ] Too Stoned / member death clarity
+- [ ] Sim AI needs improvement — currently dies at Circle 4 despite player clearing it manually
+
+### Ready to run sim when:
+- [ ] Player finishes playtesting and confirms no more critical bugs
+- [ ] Sim scaled to 200k runs (not 1M) for faster iteration
 
 ---
 
@@ -45,6 +50,15 @@ This is happening.
 ---
 
 ## ✅ COMPLETED
+
+### Session 10 — March 21 2026
+- ~~**Resonance auto-discard bug** — duplicate cards now play independently; Resonance only fires with Resonance Coil artifact (a9)~~
+- ~~**Recruit screen duplicates** — alreadyOn check removed, all duplicates allowed except DOUBLE TIME~~
+- ~~**leftBought.rec initialized** — recruit pack sold state now persists correctly~~
+- ~~**Recruit pack circle-gated** — Circles 1-2: Garage Band only; C3-4: Garage/Touring; C5+: all packs~~
+- ~~**Hand hard-capped at 6** — excess cards return to deck, no over-soft-cap rendering bugs~~
+
+
 
 ### Session 10 — March 21 2026 (today)
 - ~~**Duplicate card hover bug fixed** — Resonance auto-discard only fires with Resonance Coil artifact (a9), not by default~~
