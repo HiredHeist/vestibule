@@ -464,13 +464,24 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     setLeftBought(p=>({...p,[key]:true}))
   }
 
-  // ── SOLD PLACEHOLDER ──
-  function SoldSlot({w}){
+  // ── SOLD OVERLAY — greyed out card with diagonal SOLD! ──
+  function SoldOverlay(){
     return(
-      <div style={{width:w,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',
-        border:'1px dashed rgba(80,50,10,0.2)',borderRadius:8,
-        background:'rgba(8,5,2,0.4)',opacity:0.25}}>
-        <span style={{fontFamily:"'Cinzel',serif",fontSize:14,color:'#4a3010',letterSpacing:3}}>SOLD</span>
+      <div style={{position:'absolute',inset:0,zIndex:10,
+        background:'rgba(0,0,0,0.55)',borderRadius:8,
+        display:'flex',alignItems:'center',justifyContent:'center',
+        pointerEvents:'none'}}>
+        <div style={{
+          fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,
+          color:'#cc1111',letterSpacing:4,
+          textShadow:'0 0 20px rgba(200,0,0,0.8),2px 2px 0 rgba(0,0,0,0.9)',
+          transform:'rotate(-45deg)',
+          border:'4px solid #cc1111',
+          padding:'6px 14px',
+          borderRadius:4,
+          background:'rgba(0,0,0,0.4)',
+          whiteSpace:'nowrap',
+        }}>SOLD!</div>
       </div>
     )
   }
@@ -484,27 +495,27 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     const price=cardPrice(card)
     const canBuy=can(price)
     const bought=boughtIds.includes(card.uid||card.id)
-    if(bought)return <SoldSlot w={300} />
     return(
       <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',position:'relative',paddingTop:24}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
         <div style={{position:'absolute',top:0,left:'50%',transform:'translateX(-50%)',
           background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
           border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
-          padding:'4px 16px',zIndex:5,whiteSpace:'nowrap',
+          padding:'4px 16px',zIndex:15,whiteSpace:'nowrap',
           fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
           boxShadow:canBuy?'0 2px 16px rgba(50,200,50,0.4)':'none'}}>🌿 {price}</div>
-        <div onClick={()=>canBuy&&buyCard(card)}
-          style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',
+        <div onClick={()=>canBuy&&!bought&&buyCard(card)}
+          style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',position:'relative',
             background:'linear-gradient(180deg,#201408,#100804)',
-            border:hov&&canBuy?'2px solid '+bc:'1px solid '+bc+(canBuy?'77':'33'),
-            borderRadius:8,overflow:'hidden',cursor:canBuy?'pointer':'not-allowed',
-            transform:hov&&canBuy?'translateY(-6px) scale(1.02)':'none',
+            border:hov&&canBuy&&!bought?'2px solid '+bc:'1px solid '+bc+'55',
+            borderRadius:8,overflow:'hidden',
+            cursor:canBuy&&!bought?'pointer':'default',
+            transform:hov&&canBuy&&!bought?'translateY(-6px) scale(1.02)':'none',
             transition:'transform 0.18s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
-            boxShadow:hov&&canBuy?'0 16px 48px rgba(0,0,0,0.95),0 0 28px '+gl:'2px 4px 16px rgba(0,0,0,0.7)',
-            opacity:canBuy?1:0.45,
-            animation:rarityAnim(card.rarity)}}>
+            boxShadow:hov&&canBuy&&!bought?'0 16px 48px rgba(0,0,0,0.95),0 0 28px '+gl:'2px 4px 16px rgba(0,0,0,0.7)',
+            animation:bought?'':('throbShop 4.5s ease-in-out infinite, '+(rarityAnim(card.rarity)||'')).replace(/^, /,'').replace(/, $/,'')}}>
+          {bought&&<SoldOverlay/>}
           <div style={{height:7,flexShrink:0,background:bc,boxShadow:'0 0 12px '+gl}}/>
           <div style={{position:'relative',height:32,flexShrink:0}}>
             {card.rarity==='Rare'&&<div style={{position:'absolute',top:6,left:10,padding:'2px 7px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
@@ -513,11 +524,11 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             {card.mythic&&<div style={{position:'absolute',top:6,right:10,padding:'2px 7px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#cc44ff'}}>⛧MYTHIC</div>}
             {card.embers>0
               ?<div style={{position:'absolute',top:4,right:10,width:32,height:32,borderRadius:'50%',
-                  background:canBuy?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',
-                  border:'2px solid '+(canBuy?'#ff6600':'#4a2a10'),
+                  background:canBuy?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(60,30,5,0.9)',
+                  border:'2px solid '+(canBuy?'#ff6600':'#6a3a10'),
                   display:'flex',alignItems:'center',justifyContent:'center',
                   fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,
-                  color:canBuy?'#fff':'#5a3a10',
+                  color:canBuy?'#fff':'#8a5a30',
                   boxShadow:canBuy?'0 0 12px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
               :<div style={{position:'absolute',top:7,right:10,padding:'2px 7px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>}
           </div>
@@ -560,12 +571,6 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     const hov=hovId===id
     const canBuy=can(price)&&!sold
     const ac=accent||'#c87820'
-    if(sold)return(
-      <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',
-        border:'1px dashed '+ac+'33',borderRadius:8,background:'rgba(8,5,2,0.4)',opacity:0.25}}>
-        <span style={{fontFamily:"'Cinzel',serif",fontSize:12,color:'#4a3010',letterSpacing:3}}>PURCHASED</span>
-      </div>
-    )
     return(
       <div style={{flex:1,display:'flex',flexDirection:'column',paddingTop:20,position:'relative'}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
@@ -573,27 +578,27 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           transform:'translateX(-50%)'+(hov&&canBuy?' scale(1.08)':''),
           background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
           border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
-          padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
+          padding:'3px 14px',zIndex:15,whiteSpace:'nowrap',
           fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
           transition:'transform 0.12s'}}>🌿 {price}</div>
         <div onClick={()=>canBuy&&onBuy()}
-          style={{flex:1,display:'flex',flexDirection:'column',
+          style={{flex:1,position:'relative',display:'flex',flexDirection:'column',
             background:'linear-gradient(180deg,#1c1408,#0e0a04)',
-            border:hov&&canBuy?'2px solid '+ac:'1px solid '+ac+(canBuy?'88':'33'),
+            border:hov&&canBuy?'2px solid '+ac:'1px solid '+ac+(canBuy?'88':'44'),
             borderTop:'4px solid '+ac,
             borderRadius:8,overflow:'hidden',
-            cursor:canBuy?'pointer':'not-allowed',
+            cursor:canBuy?'pointer':'default',
             transform:hov&&canBuy?'translateY(-3px)':'none',
             transition:'transform 0.15s,border-color 0.15s,box-shadow 0.15s',
             boxShadow:hov&&canBuy?'0 10px 30px rgba(0,0,0,0.8),0 0 16px '+ac+'44':'2px 4px 14px rgba(0,0,0,0.6)',
-            opacity:canBuy?1:0.5,
-            animation:'throb 3s ease-in-out infinite'}}>
+            animation:'throbLeft 4.5s ease-in-out infinite'}}>
+          {sold&&<SoldOverlay/>}
           <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:2,
             color:ac,textAlign:'center',padding:'6px 4px 0',
             textTransform:'uppercase',opacity:0.85,flexShrink:0}}>{label}</div>
           <div style={{flex:'0 0 36%',display:'flex',alignItems:'center',justifyContent:'center',
-            fontSize:38,filter:hov?'drop-shadow(0 0 8px '+ac+')':'none',
+            fontSize:38,filter:hov&&canBuy?'drop-shadow(0 0 8px '+ac+')':'none',
             transition:'filter 0.15s'}}>{item.emoji}</div>
           <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,
             color:'#f0e0b0',textAlign:'center',padding:'4px 8px 2px',
@@ -620,7 +625,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           transform:'translateX(-50%)'+(hov&&canBuy?' scale(1.08)':''),
           background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
           border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
-          padding:'4px 16px',zIndex:5,whiteSpace:'nowrap',
+          padding:'4px 16px',zIndex:15,whiteSpace:'nowrap',
           fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
           transition:'transform 0.12s'}}>🌿 {pack.cost}</div>
@@ -629,12 +634,12 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             background:'linear-gradient(160deg,#12100a 0%,#1e1a0e 40%,#120e08 100%)',
             border:hov&&canBuy?'2px solid '+ac:'1px solid '+ac+'66',
             borderRadius:10,overflow:'hidden',
-            cursor:canBuy?'pointer':'not-allowed',
+            cursor:canBuy?'pointer':'default',
             transform:hov&&canBuy?'translateY(-6px) scale(1.02)':'none',
             transition:'transform 0.18s,box-shadow 0.15s,border-color 0.15s',
             boxShadow:hov&&canBuy?'0 16px 48px rgba(0,0,0,0.95),0 0 32px '+ac+'55':'2px 6px 20px rgba(0,0,0,0.7)',
-            opacity:canBuy?1:0.45,
-            position:'relative',padding:'0 14px 18px'}}>
+            position:'relative',padding:'0 14px 18px',
+            animation:'throbShop 4.5s ease-in-out infinite'}}>
           <div style={{width:'100%',height:8,flexShrink:0,
             background:'linear-gradient(90deg,'+ac+'44,'+ac+'ee,'+ac+'44)',
             boxShadow:'0 0 16px '+ac+'99'}}/>
@@ -708,7 +713,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             onBuy={()=>buyLeft('cpas',circlePassive.cost,'passive',circlePassive)} />}
         </div>
 
-        {/* CENTER SCROLL AREA */}
+        {/* CENTER */}
         <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',minHeight:0}}>
 
           {/* CARDS ROW */}
@@ -744,10 +749,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           {/* GAP */}
           <div style={{height:100,flexShrink:0}}/>
 
-          {/* PACKS + PAWN ROW */}
-          <div style={{flex:1,display:'flex',gap:80,justifyContent:'center',alignItems:'flex-start',minHeight:0}}>
+          {/* PACKS + PAWN ROW — pawn aligns to bottom of packs */}
+          <div style={{flex:1,display:'flex',gap:80,justifyContent:'center',alignItems:'flex-end',minHeight:0}}>
             {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
-            {/* Pawn shop — 420px, same top as packs */}
+            {/* Pawn shop — 420px wide x 420px tall, bottom-aligned */}
             <div style={{width:420,height:420,flexShrink:0,
               background:'linear-gradient(160deg,#0e0a16,#080510)',
               border:'2px solid rgba(150,70,220,0.65)',borderRadius:10,
