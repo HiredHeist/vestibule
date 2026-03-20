@@ -1363,15 +1363,15 @@ function EndScreen({won,cause,stats,seed,onReset,streakWins,streakLosses,totalRu
       <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
         {/* Title */}
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:isStoned?110:90,color:isStoned?'#cc1111':isVictory?'#d8c9a8':'#7a0000',textShadow:isStoned?'-4px 0 rgba(255,0,0,0.9),4px 0 rgba(0,255,80,0.7),0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000':isVictory?'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000':'0 0 60px rgba(100,0,0,0.6),3px 3px 0 #000'}}>{isStoned?'Stoned to the Bone':isVictory?'⛧ Victory ⛧':'Fallen'}</div>
-        <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:isStoned?'rgba(200,80,80,0.9)':'#a09060',fontStyle:'italic',textAlign:'center'}}>{isStoned?'The band ran out of herb.':isVictory?'All 9 circles conquered. Lucifer has fallen.':'The Vestibule claims another soul.'}</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:isStoned?60:20,color:isStoned?'#44ff44':'#a09060',fontStyle:'italic',textAlign:'center',textShadow:isStoned?'0 0 20px rgba(60,255,60,0.9),0 0 50px rgba(30,200,30,0.6),0 0 100px rgba(0,150,0,0.4)':'none'}}>{isStoned?'The band ran out of herb.':isVictory?'All 9 circles conquered. Lucifer has fallen.':'The Vestibule claims another soul.'}</div>
 
         {/* Streak banner */}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:streakWins>1?'#ff6600':'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:`1px solid ${streakWins>1?'#ff6600':'#aa4444'}`,borderRadius:4}}>{streakMsg}</div>}
 
         {/* Stats grid */}
-        <div style={{background:'rgba(20,12,4,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'20px 32px',minWidth:520}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:14}}>Run Statistics</div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'4px 32px'}}>
+        <div style={{background:'rgba(20,12,4,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'30px 48px',minWidth:780}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:20}}>Run Statistics</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px 48px'}}>
             {[
               ['Circle Reached', isVictory?'ALL 9 ⛧':circleReached+' / 9'],
               ['Fights Survived', stats.fightsSurvived],
@@ -1386,8 +1386,8 @@ function EndScreen({won,cause,stats,seed,onReset,streakWins,streakLosses,totalRu
             ].map(function(row){
               return(
                 <div key={row[0]} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'5px 0',borderBottom:'1px solid rgba(80,50,10,0.15)'}}>
-                  <span style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'#7a6040',fontStyle:'italic'}}>{row[0]}</span>
-                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,fontWeight:900,color:isVictory&&row[0]==='Circle Reached'?'#ffdd44':'#c8a060'}}>{row[1]}</span>
+                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#b09060'}}>{row[0]}</span>
+                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:26,fontWeight:900,color:isVictory&&row[0]==='Circle Reached'?'#ffdd44':'#c8a060'}}>{row[1]}</span>
                 </div>
               )
             })}
@@ -2211,6 +2211,12 @@ export default function App(){
         setRerollCost(2)
         setStash(69)
         setGameState('shop')
+      }
+      if(e.shiftKey&&e.key==='D'){
+        setWon(false)
+        setDeathCause('stoned')
+        setStats({fightsSurvived:6,strikesThrown:24,totalDamage:420,highestStrike:69,tooStonedCount:2,maxCorruption:66,stashEarned:42,cardsPlayed:99})
+        setGameState('end')
       }
     }
     window.addEventListener('keydown',onKey)
