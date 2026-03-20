@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Friday, March 20, 2026 at 06:07 PM*
+*Last updated: Friday, March 20, 2026 at 06:10 PM*
 
 ---
 
@@ -50,6 +50,13 @@ This is happening.
 ---
 
 ## ✅ COMPLETED
+
+### Balance Fix — Circle 1-2 Stash Rewards
+- ~~**Stash rewards C1**: 2-4st → 5-8st (players can now recruit 3rd member before Drifter)~~
+- ~~**Stash rewards C2**: 4-6st → 7-10st~~
+- ~~**Result**: C4 survival rate 31% → 59% in sim, Drifter deaths 20% → 10%~~
+
+
 
 ### Session 10 continued
 - ~~**Hand hard-cap removed** — hand CAN exceed 6 if draw cards allow, display shows ⚡ when over base~~
