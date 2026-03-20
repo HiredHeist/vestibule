@@ -793,9 +793,9 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             {card.isMember?card.role:isPassive?'EFFECT PEDAL':isArtifact?'VINTAGE AMP':card.type}
             {card.rarity&&!card.isMember&&!isPassive&&!isArtifact?' · '+card.rarity:''}
           </div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:12,
-            color:'#9a8060',textAlign:'center',padding:'8px 14px',
-            fontStyle:'italic',lineHeight:1.45,flex:1}}>{card.id==='demotape'?(lastRiffPlayed?'📼 Will replay: '+lastRiffPlayed.name+' (free)':'📼 No riff recorded yet — play a RIFF card first'):card.effect||card.desc||''}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,
+            color:'#c8a878',textAlign:'center',padding:'8px 14px',
+            lineHeight:1.45,flex:1}}>{card.id==='demotape'?(lastRiffPlayed?'📼 Will replay: '+lastRiffPlayed.name+' (free)':'📼 No riff recorded yet — play a RIFF card first'):card.effect||card.desc||''}</div>
           {card.isMember&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',
             padding:'8px 14px',borderTop:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>
             <div style={{textAlign:'center'}}>
@@ -978,17 +978,17 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             boxShadow:hov&&canBuy?'0 10px 30px rgba(0,0,0,0.8),0 0 16px '+ac+'44':'2px 4px 14px rgba(0,0,0,0.6)',
             animation:'throbLeft 4.5s ease-in-out infinite'}}>
           {sold&&<SoldOverlay/>}
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,letterSpacing:2,
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:2,
             color:ac,textAlign:'center',padding:'6px 4px 0',
-            textTransform:'uppercase',opacity:0.85,flexShrink:0}}>{label}</div>
+            textTransform:'uppercase',opacity:1,flexShrink:0}}>{label}</div>
           <div style={{flex:'0 0 36%',display:'flex',alignItems:'center',justifyContent:'center',
-            fontSize:38,filter:hov&&canBuy?'drop-shadow(0 0 8px '+ac+')':'none',
+            fontSize:72,filter:hov&&canBuy?'drop-shadow(0 0 12px '+ac+')':'none',
             transition:'filter 0.15s'}}>{item.emoji}</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,
-            color:'#f0e0b0',textAlign:'center',padding:'4px 8px 2px',
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:700,
+            color:'#ffe8a0',textAlign:'center',padding:'4px 8px 2px',
             lineHeight:1.2,flexShrink:0}}>{item.name}</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,
-            color:'#9a8060',textAlign:'center',padding:'3px 10px 6px',
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,
+            color:'#d0b880',textAlign:'center',padding:'6px 10px 8px',
             fontStyle:'italic',lineHeight:1.4,flex:1,overflow:'hidden'}}>{item.effect||item.desc||''}</div>
         </div>
       </div>
@@ -1086,8 +1086,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         {/* LEFT COLUMN */}
         <div style={{width:240,flexShrink:0,display:'flex',flexDirection:'column',gap:14}}>
           <LeftCard item={recruitPack} price={recruitPack.cost}
-            label="Band Recruitment" accent='#e8a820' id='rec' sold={false}
-            onBuy={()=>can(recruitPack.cost)&&onSpend(recruitPack.cost,'recruit',recruitPack)} />
+            label="Band Recruitment" accent='#e8a820' id='rec' sold={leftBought.rec===true}
+            onBuy={()=>can(recruitPack.cost)&&onSpend(recruitPack.cost,'recruit',recruitPack)&&setLeftBought(p=>({...p,rec:true}))} />
           {circleArtifact&&<LeftCard item={circleArtifact} price={circleArtifact.cost}
             label={'Vintage Amp · C'+circleNum} accent='#c87820' id='cart'
             sold={leftBought.cart}
@@ -1269,7 +1269,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         transformOrigin:'bottom center',
         transform:isDragging?'scale(0.85) rotate(5deg)':isHovered?'translateY(-52px) scale(1.18) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
-        zIndex:isDragging?0:isHovered?9999:anyHovered?1:isSelected?50:Math.max(1,Math.round(10-Math.abs(index-mid))),
+        zIndex:isDragging?0:isHovered?9999:isSelected?50:Math.max(1,Math.round(10-Math.abs(index-mid))),
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
         opacity:isDragging?0.4:1,
         animation:shimmerAnim,
@@ -1290,7 +1290,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         {card.emoji}
       </div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'9px 6px 3px',letterSpacing:.4,lineHeight:1.2,borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:bc,textAlign:'center',padding:'3px 4px',letterSpacing:1.8,textTransform:'uppercase',flexShrink:0}}>{card.type}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:bc,textAlign:'center',padding:'3px 4px',letterSpacing:1.8,textTransform:'uppercase',flexShrink:0,textShadow:'0 0 8px '+bc+'88'}}>{card.type}</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#b09870',textAlign:'center',padding:'4px 8px 8px',lineHeight:1.4,fontStyle:'italic',flex:1,display:'flex',alignItems:'center',justifyContent:'center'}}>{card.effect}</div>
     </div>
   )
@@ -1308,16 +1308,16 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
           {debuff>0&&<div style={{position:'absolute',bottom:4,right:4,background:'rgba(0,80,160,0.9)',border:'1px solid #4488ff',borderRadius:4,padding:'2px 5px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#88aaff'}}>-{debuff}dmg</div>}
         </div>
         <div style={{flex:1}}>
-          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:58,color:'#120804',lineHeight:1,marginBottom:8,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 1px 1px 0 rgba(0,0,0,0.5)`:'1px 1px 0 rgba(0,0,0,0.5)'}}>{enemy.name}</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:25,color:'#1a1008',fontStyle:'italic',opacity:1,lineHeight:1.5,fontWeight:700}}>{enemy.passive}</div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:8}}>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:58,color:'#120804',lineHeight:1,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 1px 1px 0 rgba(0,0,0,0.5)`:'1px 1px 0 rgba(0,0,0,0.5)'}}>{enemy.name}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:26,fontWeight:900,color:isLow?'#ee2222':'#6a3010',textAlign:'right',lineHeight:1,flexShrink:0,marginLeft:12}}>{Math.max(0,currentHp)}<span style={{fontSize:14,color:'#4a2a0a',fontWeight:400}}> / {enemy.maxHp}</span></div>
+            </div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:37,color:'#1a1008',fontStyle:'italic',opacity:1,lineHeight:1.4,fontWeight:700}}>{enemy.passive}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#1a1008',marginTop:6,letterSpacing:1,fontWeight:700}}>Base damage: {enemy.baseDmg} ± 2 per Strike</div>
         </div>
       </div>
       <div style={{width:'70%',margin:'0 auto'}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:4}}>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:3,color:'#6a4a10',textTransform:'uppercase'}}>Vitality</span>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:isLow?'#ee2222':'#6a3010',transition:'color 0.5s'}}>{Math.max(0,currentHp)} / {enemy.maxHp}</span>
-        </div>
+        
         <div style={{width:'100%',height:28,background:'rgba(50,25,8,0.75)',border:'1px solid rgba(100,55,15,0.6)',borderRadius:2,overflow:'hidden',boxShadow:'inset 0 2px 6px rgba(0,0,0,0.7)',position:'relative'}}>
           {[25,50,75].map(pp=><div key={pp} style={{position:'absolute',top:0,bottom:0,left:`${pp}%`,width:1,background:'rgba(0,0,0,0.35)',zIndex:2}}/>)}
           <div style={{height:'100%',background:isLow?'linear-gradient(90deg,#660000,#cc0000,#ff2200)':'linear-gradient(90deg,#7a0000,#aa1100,#cc2200)',width:`${pct}%`,transition:'width 0.7s cubic-bezier(0.4,0,0.2,1)'}}/>
@@ -2719,11 +2719,11 @@ export default function App(){
             const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1
             const fin=Math.round(dmg*bon)
             return <>
-              <span style={{fontFamily:"'ScratchFont',serif",fontSize:17,color:'#3a2508',opacity:1,fontStyle:'italic'}}>combined attack</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:34,color:'#c8a060',fontWeight:700,textShadow:'0 0 10px rgba(200,160,60,0.6)'}}>combined attack</span>
               <span key={fin} style={{fontFamily:"'MBScribblesFont',serif",fontSize:34,fontWeight:900,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block'}}>{fin}</span>
               {bon>1&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#e8a820',letterSpacing:1}}>+{Math.round((bon-1)*100)}% SYNERGY</span>}
               <span style={{color:'#6a3010',opacity:.5,fontSize:14}}>⟶</span>
-              <span style={{fontFamily:"'ScratchFont',serif",fontSize:17,color:'#3a2508',opacity:1,fontStyle:'italic'}}>{enemy.name}</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#c8a060',fontWeight:700}}>{enemy.name}</span>
             </>
           })()}
         </div>
