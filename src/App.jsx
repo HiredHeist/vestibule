@@ -2396,8 +2396,6 @@ export default function App(){
               }
               nh=[...nh,nd[0]];nd=nd.slice(1);
             }
-            // Hard cap: never exceed HAND_SIZE — excess cards go back to deck
-            if(nh.length>HAND_SIZE){nd=[...nh.slice(HAND_SIZE),...nd];nh=nh.slice(0,HAND_SIZE);}
             setHand(nh);setDeck(nd);setDiscardPile(ndisc);
             playDraw();
             // ANCHOR keyword: heal adjacent members after Strike
@@ -2746,7 +2744,7 @@ export default function App(){
       {/* HAND AREA */}
       <div style={{flex:'0 0 420px',background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0',display:'flex',flexDirection:'column',zIndex:30,minHeight:0,position:'relative'}}>
         <div style={{textAlign:'center',padding:'6px 0 0',flexShrink:0,position:'relative',zIndex:0}}>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length} of {HAND_SIZE}</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length}{hand.length>HAND_SIZE?' ⚡':' of '+HAND_SIZE}</span>
           {pendingEmbers>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff6600',marginLeft:12}}>+{pendingEmbers} 🔥 pending</span>}
         </div>
 
