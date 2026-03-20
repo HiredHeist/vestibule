@@ -396,8 +396,8 @@ function BoosterScreen({onComplete,seed}){
   const kwColor={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
   return(
     <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,padding:'24px 20px',overflowY:'auto'}}>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.8),0 0 80px rgba(140,0,0,0.5),3px 3px 0 #000',flexShrink:0,fontFamily:"'BreakGothicFont',cursive"}}>Opening Night</div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#e8d090',fontStyle:'italic',flexShrink:0}}>Select 2 musicians to start your band</div>
+      <div style={{fontFamily:"'BreakGothicFont',cursive",fontSize:104,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.8),0 0 80px rgba(140,0,0,0.5),3px 3px 0 #000',flexShrink:0}}>Opening Night</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:27,color:'#e8d090',fontStyle:'italic',flexShrink:0}}>Select 2 musicians to start your band</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#e8d090',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
 
       {/* MEMBER CARDS — 7 in a flexible row */}
@@ -462,7 +462,7 @@ function BoosterScreen({onComplete,seed}){
               <div style={{fontSize:26,flexShrink:0,marginTop:2}}>{icon}</div>
               <div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:color,letterSpacing:1,marginBottom:5}}>{kw}</div>
-                <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'#c0a870',lineHeight:1.45,fontStyle:'italic'}}>{desc}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#c0a870',lineHeight:1.45,fontStyle:'italic'}}>{desc}</div>
               </div>
             </div>
           ))}
