@@ -1035,8 +1035,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:40,
             color:ac,textAlign:'center',lineHeight:1.2,
             textShadow:'0 0 16px '+ac+'99',flexShrink:0,padding:'4px 4px'}}>{pack.name}</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,
-            color:'#c8a878',textAlign:'center',fontStyle:'italic',
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,
+            color:'#c8a878',textAlign:'center',
             lineHeight:1.4,padding:'8px 10px 0',flex:1}}>{pack.desc}</div>
           <div style={{position:'absolute',bottom:0,left:0,right:0,height:6,
             background:'linear-gradient(90deg,'+ac+'44,'+ac+'ee,'+ac+'44)'}}/>
@@ -1133,7 +1133,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           </div>
 
           {/* GAP */}
-          <div style={{height:100,flexShrink:0}}/>
+          <div style={{height:20,flexShrink:0}}/>
 
           {/* PACKS + PAWN ROW */}
           <div style={{flex:1,display:'flex',gap:80,justifyContent:'center',alignItems:'flex-end',minHeight:0}}>
@@ -1141,7 +1141,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             <div style={{width:420,height:420,flexShrink:0,
               background:'linear-gradient(160deg,#0e0a16,#080510)',
               border:'2px solid rgba(150,70,220,0.65)',borderRadius:10,
-              padding:'20px 20px',
+              padding:'14px 16px',
               display:'flex',flexDirection:'column',
               justifyContent:'space-between',
               boxShadow:'0 0 30px rgba(130,50,200,0.2)'}}>
@@ -1150,14 +1150,14 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                   color:'#9944dd',textAlign:'center',marginBottom:14,
                   textShadow:'0 0 18px rgba(160,80,240,0.8)'}}>🪙 Pawn Shop</div>
                 <div style={{fontSize:44,textAlign:'center',margin:'6px 0'}}>🏧</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,
-                  color:'#cc88ff',letterSpacing:1,lineHeight:2.4,textAlign:'center'}}>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,
+                  color:'#cc88ff',letterSpacing:1,lineHeight:2.2,textAlign:'center'}}>
                   Common 1🌿 · Uncommon 2🌿 · Rare 4🌿<br/>
                   Foil +3🌿 · Mythic +8🌿 · Member 5🌿<br/>
                   Artifact = 50% of buy price back
                 </div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,
-                  color:'#cc88ff',textAlign:'center',marginTop:10,letterSpacing:1}}>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,
+                  color:'#cc88ff',textAlign:'center',marginTop:8,letterSpacing:1}}>
                   Max 2 sales per visit · Cannot sell last 2 members
                 </div>
               </div>
