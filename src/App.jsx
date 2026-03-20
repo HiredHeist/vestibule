@@ -2212,14 +2212,14 @@ export default function App(){
         setStash(69)
         setGameState('shop')
       }
-      if(e.shiftKey&&e.key==='D'){
+      if(e.shiftKey&&(e.key==='D'||e.key==='d')){
         setDeathCause('stoned')
         setStats({fightsSurvived:6,strikesThrown:24,totalDamage:420,highestStrike:69,tooStonedCount:2,maxCorruption:66,stashEarned:42,cardsPlayed:99})
         setGameState('end')
       }
     }
-    window.addEventListener('keydown',onKey)
-    return function(){window.removeEventListener('keydown',onKey)}
+    window.addEventListener('keydown',onKey,true)
+    return function(){window.removeEventListener('keydown',onKey,true)}
   },[])
 
   const handleStrike=useCallback(()=>{
