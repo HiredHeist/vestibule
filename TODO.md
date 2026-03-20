@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Friday, March 20, 2026 at 05:45 PM*
+*Last updated: Friday, March 20, 2026 at 06:07 PM*
 
 ---
 
@@ -50,6 +50,13 @@ This is happening.
 ---
 
 ## ✅ COMPLETED
+
+### Session 10 continued
+- ~~**Hand hard-cap removed** — hand CAN exceed 6 if draw cards allow, display shows ⚡ when over base~~
+- ~~**Expert AI completely rewritten** — human-level combo awareness: Amp+Encore chains, DoubleDown+Overdrive, CrowdSurf first, buffer stacking, ember management~~
+- ~~**Sim card scores fixed** — CrowdSurf, SoundWall, HeavyRiff no longer undervalued by 0.3x multiplier~~
+
+
 
 ### Session 10 — March 21 2026
 - ~~**Resonance auto-discard bug** — duplicate cards now play independently; Resonance only fires with Resonance Coil artifact (a9)~~
