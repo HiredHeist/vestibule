@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Friday, March 20, 2026 at 05:12 PM*
+*Last updated: Friday, March 20, 2026 at 05:33 PM*
 
 ---
 
@@ -44,7 +44,16 @@ This is happening.
 
 ---
 
-## ✅ COMPLETED — Session 9 (March 20-21 2026)
+## ✅ COMPLETED
+
+### Session 10 — March 21 2026 (today)
+- ~~**Duplicate card hover bug fixed** — Resonance auto-discard only fires with Resonance Coil artifact (a9), not by default~~
+- ~~**Recruit screen duplicates allowed** — removed alreadyOn block, all duplicates allowed except DOUBLE TIME~~
+- ~~**leftBought.rec initialized correctly** — recruit pack sold state now persists properly~~
+- ~~**Sim bugs fixed** — Soundcheck origAtk + genShop always has recruit pack~~
+- ~~**Simulator ran** — 0%% win rate, Circle 4 wall identified (Miser 360HP too high for band scaling)~~
+
+ — Session 9 (March 20-21 2026)
 
 ### End Screen
 - ~~**Shift+D dev shortcut** — instant death screen from any screen~~

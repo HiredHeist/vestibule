@@ -615,7 +615,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
   const [pawnOpen,setPawnOpen]=useState(false)
   const [boughtIds,setBoughtIds]=useState([])
-  const [leftBought,setLeftBought]=useState({cart:false,cpas:false})
+  const [leftBought,setLeftBought]=useState({cart:false,cpas:false,rec:false})
   useEffect(()=>{setBoughtIds([])},[shopCards])
   const [openPackModal,setOpenPackModal]=useState(null) // {pack, cards, picksLeft, picked}
   const circleNum=Math.floor(fightIndex/3)+1
@@ -1468,12 +1468,11 @@ function RecruitScreen({candidates,stage,onPick,onPass}){
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic'}}>Choose one musician to join your band — or pass</div>
       <div style={{display:'flex',gap:20,flexWrap:'wrap',justifyContent:'center',maxWidth:1000}}>
         {candidates.map(m=>{
-          const alreadyOn=stage.some(s=>s&&s.id===m.id)
           const hasDblTime=stage.some(s=>s&&s.keyword==='DOUBLE TIME')
           const isDblTime=m.keyword==='DOUBLE TIME'
           const emptySlot=stage.findIndex(s=>!s)
-          // Allow duplicates EXCEPT second DOUBLE TIME (two drummers = broken multiplier)
-          const canAdd=!alreadyOn&&emptySlot!==-1&&!(isDblTime&&hasDblTime)
+          // Allow ALL duplicates — only block second DOUBLE TIME drummer
+          const canAdd=emptySlot!==-1&&!(isDblTime&&hasDblTime)
           const tier=m.demonic?'DEMONIC':m.mythic?'MYTHIC':m.foil?'FOIL':null
           const bondTarget=stage.find(s=>s&&s.role===m.role&&!s.tooStoned)
           const bondBonus=m.demonic?3:m.mythic?2:m.foil?1:0
@@ -1503,9 +1502,8 @@ function RecruitScreen({candidates,stage,onPick,onPass}){
                   </div>
                 </div>
                 <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'#8a7040',textAlign:'center',fontStyle:'italic',lineHeight:1.3}}>{m.desc}</div>
-                {alreadyOn&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#aa6600',textAlign:'center',marginTop:6,letterSpacing:1}}>ALREADY ON STAGE</div>}
-                {!alreadyOn&&isDblTime&&hasDblTime&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#ff8800',textAlign:'center',marginTop:6,letterSpacing:1}}>ONLY ONE DRUMMER</div>}
-                {!alreadyOn&&emptySlot===-1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#aa2200',textAlign:'center',marginTop:6,letterSpacing:1}}>STAGE FULL</div>}
+                {isDblTime&&hasDblTime&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#ff8800',textAlign:'center',marginTop:6,letterSpacing:1}}>ONLY ONE DRUMMER</div>}
+                {emptySlot===-1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#aa2200',textAlign:'center',marginTop:6,letterSpacing:1}}>STAGE FULL</div>}
               </div>
             </div>
           )
