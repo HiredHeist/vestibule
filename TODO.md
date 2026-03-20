@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Friday, March 20, 2026 at 04:16 PM*
+*Last updated: Friday, March 20, 2026 at 05:12 PM*
 
 ---
 
@@ -10,85 +10,107 @@ This is happening.
 
 ---
 
-
 ## P1 — NEXT
 
 ### 1. Simulator Fix & Run
-- [ ] Fix Soundcheck temp buff: set origAtk on injured members so +1 ATK reverts end-of-strike
-- [ ] Fix genShop() in simulator: always guarantee recruitment pack (Garage Band 10, Touring 22, Demonic 40)
-- [ ] Run 1M simulations — generate full balance report
+- [ ] Fix Soundcheck temp buff in sim: origAtk on injured members reverts end-of-strike
+- [ ] Fix genShop() in sim: always guarantee recruitment pack (Garage Band 10, Touring 22, Demonic 40)
+- [ ] Run 3 x 1M simulations: Expert base, Beginner base, Expert with tiers
+- [ ] Generate 4 balance reports + comparison
 
 ---
 
-## P2 — FUTURE
+## P2 — BEFORE DEMO
+
+### Polish still needed (from tonight playtesting)
+- [ ] Full playthrough stress test — no crashes start to finish
+- [ ] Review Too Stoned / member death clarity
+- [ ] Any remaining font/readability issues found during testing
+
+---
+
+## P3 — FUTURE
 - [ ] A11-A20 unlockable artifacts
 - [ ] P11-P20 unlockable passives
 - [ ] Collection/unlock screen
 - [ ] Daily challenge leaderboard
 - [ ] Settings menu
-- [ ] Font swap (owner providing TTF files)
 - [ ] Steam / mobile / PS release prep
+- [ ] A&R Rep bonus stage — second album demand after beating Lucifer
 
 ---
 
-## RULE: Update this file every push
-Every time code is pushed to GitHub, update this file with:
-- New timestamp in the title
-- Newly completed items moved to COMPLETED with strikethrough
-- Any new tasks added if discovered
+## RULE: Update this file every single push, no exceptions.
 
 ---
 
-## ✅ COMPLETED
+## ✅ COMPLETED — Session 9 (March 20-21 2026)
 
-### Session 9 — March 20 2026
-- ~~**Allow duplicate band members** — all duplicates allowed except second DOUBLE TIME drummer~~
-- ~~**DOUBLE TIME re-roll mechanic** — two drummers re-roll d6 if it lands on 1 or 2~~
-- ~~**Black screen crash fix** — removed dblRoll reference from RecruitScreen (not a prop)~~
-- ~~**Pawn Shop sell modal** — full UI, Members + Cards tabs, sell prices, bond-breaking~~
-- ~~**Pawn shop opens on Cards tab** — sorted by price high to low, all copies shown individually~~
-- ~~**Pawn shop stash counter** — live counter top-right, ticks up on each sale~~
-- ~~**Pawn shop exploit fix** — button disabled at 0 sales, removed counter reset bug~~
-- ~~**Max 2 sales per visit enforced** — button greyed out + no-click at 0~~
-- ~~**handlePawnSellCard** — removes one copy from deck, adds sell price to stash~~
-- ~~**Demo Tape fix** — inline riff replay, no recursive crash~~
-- ~~**Demo Tape hover tooltip** — shows queued card name or 'No riff recorded yet'~~
-- ~~**Demo Tape persists across strikes** — resets between fights only~~
-- ~~**Pack opening confirmed working** — no blank screen~~
-- ~~**All keyword passives confirmed** — FRENZIED, ANCHOR, CORRUPT, DEBUFF all fire~~
-- ~~**Setlist modal confirmed working** — drag reorder top 4 deck cards~~
-- ~~**Remaster modal confirmed working** — delete 2, copy 1~~
-- ~~**Hellquake d10 confirmed working** — full dramatic outcome table~~
+### End Screen
+- ~~**Shift+D dev shortcut** — instant death screen from any screen~~
+- ~~**"The band ran out of herb." 200% bigger, bright green glow**~~
+- ~~**Run Statistics box 150% larger** — MBScribblesFont, easy to read~~
 
-### Mentor Link System
-- ~~**Foil/Mythic/Demonic tier system** — +1/+3/+5 ATK & HP on recruit~~
-- ~~**Role Bond** — permanent ATK bonus on arrival, breaks on sell~~
-- ~~**Keyword Bond** — adjacency amplification for all 8 keywords~~
-- ~~**Mythic/Demonic Aura** — whole-stage passives~~
-- ~~**DEMONIC conflict UI** — Only One May Remain showdown~~
-- ~~**Bond glow in battle** — bonded members pulse matching color~~
-- ~~**Recruit screen tier visuals** — foil/mythic/demonic banners + BONDS WITH hint~~
+### Battle Screen
+- ~~**HandCard ability text** — MBScribblesFont everywhere~~
+- ~~**Circle/fight header** — bold, bright orange-red, triple glow~~
+- ~~**Boss HP right-justified** — after name, 20% bigger, pulsing red when low~~
+- ~~**Boss passive text 50% bigger**~~
+- ~~**Combined attack text** — matches number size, glowing gold~~
+- ~~**Artifact slot placeholders** — big ⛧ pentagram emoji~~
+- ~~**Hover z-index fix** — only hovered card lifts, no duplicate rising~~
 
-### Session 8 — Shop & Battle UI
-- ~~**Shop screen** — 300x420 card ratio, booster packs, left column~~
-- ~~**Battle hand area** — 420px fixed, card fan~~
-- ~~**Artifact slots** — 3 stage slots with tooltips~~
-- ~~**Reroll** — cost increases, clears sold state~~
+### Shop Screen
+- ~~**Left column cards** — emoji 72px, name 20px, desc 16px, all MBScribblesFont~~
+- ~~**Recruit pack sold once per visit** — SOLD! stamp, exploit fixed~~
+- ~~**Booster pack desc** — MBScribblesFont, readable~~
+- ~~**Pawn shop text** — bright purple #cc88ff, all readable~~
+- ~~**Pawn shop pixel-perfect alignment** — paddingTop:24 matches booster packs~~
+- ~~**Shop layout** — flex gap scales with window, rows stack correctly~~
+- ~~**Row gap** — flex:1 spacer pushes bottom row to align with left column~~
+- ~~**Hellquake splash 5 seconds** — was 2s, now readable~~
 
-### Sessions 1-7 — Core Game
-- ~~All 8 keyword mechanics~~
+### Opening Night Screen
+- ~~**Opening Night title** — Break Gothic, 88px, 20px letter spacing, glowing~~
+- ~~**Subtitle** — 50% bigger, readable gold~~
+- ~~**Member names** — 2px letter spacing~~
+- ~~**Ability description font** — MBScribblesFont to match keyword labels~~
+- ~~**Seed/subtitle colors** — bright #e8d090, visible on black~~
+
+### Fonts (all local, in public/fonts/)
+- ~~**4 fonts deployed**: Bogarts Metal (titles/names), Scratch (flavour text), MBScribbles (all UI), Break Gothic (key screen titles)~~
+- ~~**CSS @font-face system** — no more Google Fonts dependency~~
+
+### Gameplay Fixes
+- ~~**Duplicate members allowed** — all except second DOUBLE TIME drummer~~
+- ~~**Two drummers re-roll** — d6 re-rolls on 1-2 if two drummers on stage~~
+- ~~**Recruit pack sold bug** — && chain fixed, setLeftBought now fires correctly~~
+- ~~**Black screen crash** — dblRoll removed from RecruitScreen~~
+- ~~**Pawn shop exploit** — button disabled at 0 sales, counter reset removed~~
+- ~~**Demo Tape** — inline replay, hover shows queued card, persists across strikes~~
+- ~~**All dead cards confirmed** — Setlist, Remaster, Hellquake all working~~
+- ~~**All keyword passives confirmed** — FRENZIED, ANCHOR, CORRUPT, DEBUFF~~
+
+### Previously Completed (Sessions 1-8)
+- ~~Full card set, all artifacts, all passives~~
 - ~~27 fights, 9 circles, all enemy passives~~
-- ~~Complete card set, all artifacts, all passives~~
-- ~~Booster + recruitment pack system~~
+- ~~Mentor Link system (foil/mythic/demonic tiers, bonds, auras, demonic conflict)~~
+- ~~Pawn shop full sell modal~~
 - ~~Opening Night, band synergy, DOUBLE TIME, Too Stoned~~
 - ~~Stage drag-and-drop~~
+- ~~Booster + recruitment pack system~~
 
 ---
+
+## Dev Shortcuts
+- **Shift+S** — jump to shop with 69 stash
+- **Shift+D** — jump to death/end screen
 
 ## Game Constants
 - MAX_STRIKES: 4 | MAX_DISCARDS: 4 | HAND_SIZE: 6 | MAX_STASH: 420 | MAX_EMBERS_CAP: 8
 - Starting embers: 5 | Starting stash: 0 | Fights: 27 (index 0-26)
 - Circle boss every 3rd fight — +1 max ember permanently
+- 420 is sacred. Never change card height.
 
 ## Enemy HP Scaling
 Wanderer 27 > Lost Soul 42 > Drifter 69 > Siren 60 > Seducer 140 > Glutton 80 > Devourer 160
@@ -102,4 +124,5 @@ Wanderer 27 > Lost Soul 42 > Drifter 69 > Siren 60 > Seducer 140 > Glutton 80 > 
 ## Repo
 - github.com/HiredHeist/vestibule (private)
 - PAT: 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 (expires Jun 2026)
-- Dev shortcut: Shift+S = shop with 69 stash | Stable tag: v0.9-pre-megapush
+- Dev shortcuts: Shift+S = shop 69 stash | Shift+D = death screen
+- Stable tag: v0.9-pre-megapush
