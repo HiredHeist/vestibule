@@ -397,8 +397,8 @@ function BoosterScreen({onComplete,seed}){
   return(
     <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,padding:'24px 20px',overflowY:'auto'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.8),0 0 80px rgba(140,0,0,0.5),3px 3px 0 #000',flexShrink:0,fontFamily:"'BreakGothicFont',cursive"}}>Opening Night</div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic',flexShrink:0}}>Select 2 musicians to start your band</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#4a3a20',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#e8d090',fontStyle:'italic',flexShrink:0}}>Select 2 musicians to start your band</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#e8d090',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
 
       {/* MEMBER CARDS — 7 in a flexible row */}
       <div style={{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:16,width:'960px',flexShrink:0,marginBottom:4}}>
