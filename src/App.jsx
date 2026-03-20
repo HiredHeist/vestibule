@@ -273,12 +273,18 @@ function genBoosterPacks(circleNum){
 }
 
 // Recruitment packs
-function genRecruitPack(){
+function genRecruitPack(fightIndex=0){
+  const circle=Math.floor(fightIndex/3)+1
   const packs=[
     {name:'Garage Band Pack',emoji:'🎸',cost:10,desc:'Pick 1 of 2 musicians.',members:2,foilChance:0,mythicChance:0,demonicChance:0},
     {name:'Touring Pack',emoji:'🎤',cost:22,desc:'Pick 1 of 3. 15% Foil chance.',members:3,foilChance:0.15,mythicChance:0,demonicChance:0},
     {name:'Demonic Pack',emoji:'⛧',cost:40,desc:'Pick 1 of 4. 25% Foil, 15% Mythic, 3% DEMONIC.',members:4,foilChance:0.25,mythicChance:0.15,demonicChance:0.03},
   ]
+  // Circles 1 & 2: only Garage Band (affordable for new players)
+  // Circle 3+: Garage Band or Touring
+  // Circle 5+: all packs available
+  if(circle<=2) return packs[0]
+  if(circle<=4) return packs[Math.floor(Math.random()*2)]
   return packs[Math.floor(Math.random()*packs.length)]
 }
 
@@ -1689,7 +1695,7 @@ export default function App(){
   const [powerChordActive,setPowerChordActive]=useState(false)
   const [shopCards,setShopCards]=useState(()=>genShopCards(1))
   const [boosterPacks,setBoosterPacks]=useState(()=>genBoosterPacks(1))
-  const [recruitPack,setRecruitPack]=useState(()=>genRecruitPack())
+  const [recruitPack,setRecruitPack]=useState(()=>genRecruitPack(0))
   const [recruitCandidates,setRecruitCandidates]=useState([])
   const [demonicConflict,setDemonicConflict]=useState(null)
   const [rerollCost,setRerollCost]=useState(2)
@@ -2092,19 +2098,20 @@ export default function App(){
       const playedId=card.id
       setHand(function(curHand){
         const remaining=curHand.filter(c=>c.uid!==dragCardUid)
-        // Resonance: if another copy of same card is in hand, auto-discard it for +1 ember
-        const resonantIdx=remaining.findIndex(c=>c.id===playedId)
+        // Resonance: ONLY auto-discard duplicate if player has Resonance Coil artifact (a9)
+        // Without a9, two copies of the same card can both be played independently
+        const hasResonanceCoil=activeArtifacts.some(a=>a.id==='a9')
+        const resonantIdx=hasResonanceCoil?remaining.findIndex(c=>c.id===playedId):-1
         if(resonantIdx!==-1){
           const resonant=remaining[resonantIdx]
           const withoutResonant=remaining.filter((_,i)=>i!==resonantIdx)
           setDiscardPile(p=>[...p,card,resonant])
-          const resonanceEmbers=activeArtifacts.some(a=>a.id==='a9')?2:1
-          setEmbers(p=>Math.min(maxEmbers,p+resonanceEmbers))
+          setEmbers(p=>Math.min(maxEmbers,p+2))
+          setPendingEmbers(p=>p+1)
           discover('resonance','RESONANCE')
-          if(activeArtifacts.some(a=>a.id==='a9'))setPendingEmbers(p=>p+1)// draw extra card via pending
           setTimeout(()=>{
             addFloat('RESONANCE +🔥',getCenter(bossRef).x,getCenter(bossRef).y-110,'#e8a820',false)
-            addLog('🎵 Resonance! Duplicate discarded for +1 Ember.')
+            addLog('🎵 Resonance! Duplicate discarded for +2 Embers.')
           },100)
           return withoutResonant
         }
@@ -2191,7 +2198,7 @@ export default function App(){
         const nextCn=Math.floor((fightIndex+1)/3)+1
         setShopCards(genShopCards(nextCn))
         setBoosterPacks(genBoosterPacks(nextCn))
-        setRecruitPack(genRecruitPack())
+        setRecruitPack(genRecruitPack(fightIndex))
         setGameState('shop')
       }
     },1000)
@@ -2205,7 +2212,7 @@ export default function App(){
       if(e.shiftKey&&e.key==='S'){
         setShopCards(genShopCards(1))
         setBoosterPacks(genBoosterPacks(1))
-        setRecruitPack(genRecruitPack())
+        setRecruitPack(genRecruitPack(fightIndex))
         setRerollCost(2)
         setStash(69)
         setGameState('shop')
@@ -2389,6 +2396,8 @@ export default function App(){
               }
               nh=[...nh,nd[0]];nd=nd.slice(1);
             }
+            // Hard cap: never exceed HAND_SIZE — excess cards go back to deck
+            if(nh.length>HAND_SIZE){nd=[...nh.slice(HAND_SIZE),...nd];nh=nh.slice(0,HAND_SIZE);}
             setHand(nh);setDeck(nd);setDiscardPile(ndisc);
             playDraw();
             // ANCHOR keyword: heal adjacent members after Strike
