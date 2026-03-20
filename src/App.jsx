@@ -1136,9 +1136,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{flex:1,minHeight:12,maxHeight:60}}/>
 
           {/* PACKS + PAWN ROW */}
-          <div style={{flexShrink:0,display:'flex',gap:80,justifyContent:'center',alignItems:'center'}}>
+          <div style={{flexShrink:0,display:'flex',gap:80,justifyContent:'center',alignItems:'flex-start'}}>
             {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
-            <div style={{width:420,height:420,flexShrink:0,
+            <div style={{paddingTop:24,flexShrink:0}}>
+            <div style={{width:420,height:420,
               background:'linear-gradient(160deg,#0e0a16,#080510)',
               border:'2px solid rgba(150,70,220,0.65)',borderRadius:10,
               padding:'14px 16px',
@@ -1174,6 +1175,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                   boxShadow:pawnSalesLeft>0?'0 0 18px rgba(140,60,220,0.3)':'none'}}>
                 💰 Open Pawn Shop ({pawnSalesLeft} left)
               </button>
+            </div>
               {pawnOpen&&<PawnShopModal
                 stage={stage||[]} deck={deck||[]} discard={discardPile||[]}
                 stash={stash} salesLeft={pawnSalesLeft}
