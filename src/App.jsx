@@ -662,7 +662,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           </div>
           <div style={{fontFamily:"'IM Fell English',serif",fontSize:12,
             color:'#9a8060',textAlign:'center',padding:'8px 14px',
-            fontStyle:'italic',lineHeight:1.45,flex:1}}>{card.effect||card.desc||''}</div>
+            fontStyle:'italic',lineHeight:1.45,flex:1}}>{card.id==='demotape'?(lastRiffPlayed?'📼 Will replay: '+lastRiffPlayed.name+' (free)':'📼 No riff recorded yet — play a RIFF card first'):card.effect||card.desc||''}</div>
           {card.isMember&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',
             padding:'8px 14px',borderTop:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>
             <div style={{textAlign:'center'}}>
@@ -1101,7 +1101,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   )
 }
 
-function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop,isUsed}){
+function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop,isUsed,lastRiffPlayed}){
   const spread=Math.min(4,20/total),mid=(total-1)/2
   const rot=(index-mid)*spread,yOff=Math.abs(index-mid)*2
   const bc=card.type==='CORRUPT'?'#aa1111':card.type==='UTILITY'?'#22aa44':card.type==='EMBER'?'#c87820':'#9933cc'
@@ -1675,11 +1675,42 @@ export default function App(){
     else if(card.id==='demotape'){
       if(!lastRiffPlayed){addLog('📼 No riff recorded yet.');return false}
       spent=0
-      // Cast the last riff on the same slot
-      const lrCopy=Object.assign({},lastRiffPlayed,{uid:'demotape-'+Math.random().toString(36).slice(2),embers:0})
-      const ok2=applyCard(lrCopy,slotIdx)
-      if(ok2){msg='📼 Demo Tape! Replays: '+lastRiffPlayed.name}
-      else{return false}
+      // Inline replay — directly apply the last riff effect without recursive applyCard
+      const lr=lastRiffPlayed
+      const lrTarget=ns[slotIdx]
+      if(lr.id==='amp'&&lrTarget&&!lrTarget.tooStoned){
+        ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk*2,_origAtk:lrTarget._origAtk||lrTarget.atk,tempBuff:true,buffCount:(lrTarget.buffCount||0)+1})
+      } else if(lr.id==='battlecry'&&lrTarget&&!lrTarget.tooStoned){
+        const bcB=activePassives.some(p=>p.id==='p7')?2:1
+        ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk+bcB,buffCount:(lrTarget.buffCount||0)+1})
+      } else if(lr.id==='newstrings'&&lrTarget&&!lrTarget.tooStoned){
+        ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk+2,buffCount:(lrTarget.buffCount||0)+1})
+      } else if(lr.id==='encore'&&lrTarget&&!lrTarget.tooStoned){
+        ns[slotIdx]=Object.assign({},lrTarget,{encoreReady:true,buffCount:(lrTarget.buffCount||0)+1})
+      } else if(lr.id==='soundwall'){
+        const p5B=activePassives.some(p=>p.id==='p5')?4:0
+        const swD=(fightIndex<=0?5:fightIndex<=1?8:12)+p5B
+        const swHp=Math.max(0,enemyHp-swD);setEnemyHp(swHp);updStat('totalDamage',swD)
+        addFloat(swD,getCenter(bossRef).x,getCenter(bossRef).y-60,'#dd2222',true);playHit()
+        if(swHp<=0)setTimeout(triggerVictory,500)
+      } else if(lr.id==='feedbackloop'){
+        const flD=Math.floor(corruption/2)
+        const flHp=Math.max(0,enemyHp-flD);setEnemyHp(flHp);updStat('totalDamage',flD)
+        addFloat(flD,getCenter(bossRef).x,getCenter(bossRef).y-60,'#aa1111',flD>=15);playHit()
+        if(flHp<=0)setTimeout(triggerVictory,500)
+      } else if(lr.id==='crowdsurf'){
+        const csDmg=hand.length*2
+        const csHp=Math.max(0,enemyHp-csDmg);setEnemyHp(csHp);updStat('totalDamage',csDmg)
+        addFloat(csDmg,getCenter(bossRef).x,getCenter(bossRef).y-60,'#9933cc',csDmg>=10);playHit()
+        if(csHp<=0)setTimeout(triggerVictory,500)
+      } else if(lr.id==='overdrive'&&corruption>=60){
+        ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s)
+        addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)
+      } else if(lr.id==='infencore'){
+        ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{encoreReady:true,buffCount:(s.buffCount||0)+1}):s)
+      }
+      msg='📼 Demo Tape! Replays: '+lr.name
+      addFloat('📼 '+lr.name,getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
     }
     else if(card.id==='burnset'){const res=drawUpTo([],deck,discardPile,HAND_SIZE);setHand(res.h);setDeck(res.d);setDiscardPile([...res.disc,...hand]);msg='🔥 Hand burned! Drew 6 new cards.'}
     else if(card.id==='overdrive'){if(corruption>=60){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{addLog('⚠ Need >=60% Corruption.');return false}}
@@ -2235,7 +2266,7 @@ export default function App(){
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(nextEnemy.maxHp)
     setEmbers(function(){return maxEmbers});setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false)
+    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null)
     // Re-roll DOUBLE TIME for next fight
     const nd=stage.some(m=>m&&m.role==='Drummer')
     if(nd){const r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
@@ -2602,7 +2633,7 @@ export default function App(){
         </div>
         <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:50,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',zIndex:50}}>
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).map((card,i)=>(
-            <HandCard key={card.uid} card={card} index={i} total={hand.length} isUsed={card.id==='stagedive'&&stageDiveUsed}
+            <HandCard key={card.uid} card={card} index={i} total={hand.length} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
               isHovered={hovered===card.uid} isSelected={selected.includes(card.uid)}
               anyHovered={hovered!==null}
               canAfford={card.embers===0||embers>=card.embers}
