@@ -1,7 +1,15 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Friday, March 20, 2026 at 03:31 PM*
+*Last updated: Friday, March 20, 2026 at 03:36 PM*
 
 ---
+
+## 🔥 THE VISION
+1,000,000 copies at $6.66 on Steam — Week 1.
+YouTubers and streamers will push it because it is genuinely unique.
+This is happening.
+
+---
+
 
 ## P1 — NEXT
 
