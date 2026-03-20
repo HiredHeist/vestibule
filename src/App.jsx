@@ -1136,7 +1136,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{height:20,flexShrink:0}}/>
 
           {/* PACKS + PAWN ROW */}
-          <div style={{flex:1,display:'flex',gap:80,justifyContent:'center',alignItems:'flex-end',minHeight:0}}>
+          <div style={{flexShrink:0,display:'flex',gap:80,justifyContent:'center',alignItems:'flex-start'}}>
             {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
             <div style={{width:420,height:420,flexShrink:0,
               background:'linear-gradient(160deg,#0e0a16,#080510)',
