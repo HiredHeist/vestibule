@@ -1700,6 +1700,23 @@ export default function App(){
     },1000)
   },[strikesLeft,corruption,fightIndex])
 
+
+
+  // ── DEV SHORTCUT: Shift+S = jump to shop ─────────────────────────
+  useEffect(function(){
+    function onKey(e){
+      if(e.shiftKey&&e.key==='S'){
+        setShopCards(genShopCards(1))
+        setBoosterPacks(genBoosterPacks(1))
+        setRecruitPack(genRecruitPack())
+        setRerollCost(2)
+        setGameState('shop')
+      }
+    }
+    window.addEventListener('keydown',onKey)
+    return function(){window.removeEventListener('keydown',onKey)}
+  },[])
+
   const handleStrike=useCallback(()=>{
     if(animPhase!=='idle'||strikesLeft<=0||enemyHp<=0)return
     const actives=stage.filter(m=>m&&!m.tooStoned)
