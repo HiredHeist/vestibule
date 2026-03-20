@@ -496,7 +496,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           color:canBuy?'#55ee55':'#554428',
           boxShadow:canBuy?'0 2px 16px rgba(50,200,50,0.4)':'none'}}>🌿 {price}</div>
         <div onClick={()=>canBuy&&buyCard(card)}
-          style={{flex:1,display:'flex',flexDirection:'column',
+          style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',
             background:'linear-gradient(180deg,#201408,#100804)',
             border:hov&&canBuy?'2px solid '+bc:'1px solid '+bc+(canBuy?'77':'33'),
             borderRadius:8,overflow:'hidden',cursor:canBuy?'pointer':'not-allowed',
@@ -625,7 +625,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           color:canBuy?'#55ee55':'#554428',
           transition:'transform 0.12s'}}>🌿 {pack.cost}</div>
         <div onClick={()=>canBuy&&onSpend(pack.cost,'pack',pack)}
-          style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',
+          style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',alignItems:'center',
             background:'linear-gradient(160deg,#12100a 0%,#1e1a0e 40%,#120e08 100%)',
             border:hov&&canBuy?'2px solid '+ac:'1px solid '+ac+'66',
             borderRadius:10,overflow:'hidden',
@@ -748,7 +748,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{flex:1,display:'flex',gap:80,justifyContent:'center',alignItems:'flex-start',minHeight:0}}>
             {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
             {/* Pawn shop — 420px, same top as packs */}
-            <div style={{width:420,flexShrink:0,
+            <div style={{width:420,height:420,flexShrink:0,
               background:'linear-gradient(160deg,#0e0a16,#080510)',
               border:'2px solid rgba(150,70,220,0.65)',borderRadius:10,
               padding:'20px 20px',
