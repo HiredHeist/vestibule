@@ -340,7 +340,7 @@ function Projectile({from,to,emoji,onDone}){
 function Float({v,x,y,color,big,onDone}){
   color=color||'#dd2222';big=big||false
   useEffect(()=>{const t=setTimeout(onDone,1400);return ()=>clearTimeout(t)},[])
-  return <div style={{position:'fixed',left:x,top:y,transform:'translateX(-50%)',fontFamily:"'Cinzel',serif",fontSize:big?'4.5rem':'2.8rem',fontWeight:900,color:color,textShadow:`0 0 24px ${color}`,pointerEvents:'none',zIndex:9000,animation:'floatUp 1.4s ease-out forwards'}}>{typeof v==='number'&&v>0?'-'+v:v}</div>
+  return <div style={{position:'fixed',left:x,top:y,transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:big?'4.5rem':'2.8rem',fontWeight:900,color:color,textShadow:`0 0 24px ${color}`,pointerEvents:'none',zIndex:9000,animation:'floatUp 1.4s ease-out forwards'}}>{typeof v==='number'&&v>0?'-'+v:v}</div>
 }
 
 function DiceRoll({target,onDone}){
@@ -348,7 +348,7 @@ function DiceRoll({target,onDone}){
   return(
     <div style={{position:'fixed',left:'50%',top:'40%',transform:'translate(-50%,-50%)',zIndex:9100,pointerEvents:'none',display:'flex',flexDirection:'column',alignItems:'center',gap:8,animation:'fadeIn 0.2s ease'}}>
       <div style={{fontSize:56,animation:'wiggle 0.4s ease infinite'}}>🎲</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,color:'#e8a820',letterSpacing:2,textShadow:'0 0 12px rgba(232,168,32,0.8)',background:'rgba(0,0,0,0.8)',padding:'6px 16px',borderRadius:4,border:'1px solid rgba(232,168,32,0.4)'}}>TARGET: {target&&target.name}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#e8a820',letterSpacing:2,textShadow:'0 0 12px rgba(232,168,32,0.8)',background:'rgba(0,0,0,0.8)',padding:'6px 16px',borderRadius:4,border:'1px solid rgba(232,168,32,0.4)'}}>TARGET: {target&&target.name}</div>
     </div>
   )
 }
@@ -356,26 +356,26 @@ function DiceRoll({target,onDone}){
 function EmberDisplayLarge({current,max}){
   return(
     <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:5}}>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#aa5820',letterSpacing:3,textTransform:'uppercase',fontWeight:700}}>Embers</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#aa5820',letterSpacing:3,textTransform:'uppercase',fontWeight:700}}>Embers</div>
       <div style={{display:'flex',gap:5}}>
         {Array.from({length:max}).map((_,i)=>(
           <div key={i} style={{fontSize:i>=(max-current)?22:18,opacity:i>=(max-current)?1:0.18,filter:i>=(max-current)?'drop-shadow(0 0 8px rgba(255,120,0,0.9))':'grayscale(1)',transition:'all 0.25s'}}>🔥</div>
         ))}
       </div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:18,fontWeight:900,color:current>0?'#ff6600':'#444',lineHeight:1}}>{current}/{max}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:current>0?'#ff6600':'#444',lineHeight:1}}>{current}/{max}</div>
     </div>
   )
 }
 function EmberDisplay({current,max}){
   return(
     <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:4}}>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#8a4820',letterSpacing:3,textTransform:'uppercase'}}>Embers</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#8a4820',letterSpacing:3,textTransform:'uppercase'}}>Embers</div>
       <div style={{display:'flex',gap:3}}>
         {Array.from({length:max}).map((_,i)=>(
           <div key={i} style={{fontSize:i>=(max-current)?15:13,opacity:i>=(max-current)?1:0.22,filter:i>=(max-current)?'drop-shadow(0 0 6px rgba(255,100,0,0.8))':'grayscale(1)',transition:'all 0.25s'}}>🔥</div>
         ))}
       </div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:current>0?'#ff6600':'#444',lineHeight:1}}>{current}/{max}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:current>0?'#ff6600':'#444',lineHeight:1}}>{current}/{max}</div>
     </div>
   )
 }
@@ -396,9 +396,9 @@ function BoosterScreen({onComplete,seed}){
   const kwColor={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
   return(
     <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,padding:'24px 20px',overflowY:'auto'}}>
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.8),0 0 80px rgba(140,0,0,0.5),3px 3px 0 #000',flexShrink:0}}>Opening Night</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:18,color:'#a09060',fontStyle:'italic',flexShrink:0}}>Select 2 musicians to start your band</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#4a3a20',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.8),0 0 80px rgba(140,0,0,0.5),3px 3px 0 #000',flexShrink:0,fontFamily:"'BreakGothicFont',cursive"}}>Opening Night</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic',flexShrink:0}}>Select 2 musicians to start your band</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#4a3a20',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
 
       {/* MEMBER CARDS — 7 in a flexible row */}
       <div style={{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:16,width:'960px',flexShrink:0,marginBottom:4}}>
@@ -418,24 +418,24 @@ function BoosterScreen({onComplete,seed}){
               <div style={{height:5,borderRadius:'7px 7px 0 0',background:isSel?'linear-gradient(90deg,#e8a820,#ffcc44)':kwc+'66'}}/>
               {isSel&&<div style={{position:'absolute',top:8,right:8,width:24,height:24,borderRadius:'50%',background:'#e8a820',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,color:'#000',fontWeight:900}}>✓</div>}
               <div style={{height:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:54,background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
-              <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:26,color:isSel?'#e8d090':'#c8b878',textAlign:'center',padding:'5px 4px 1px',lineHeight:1}}>{m.name}</div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:2,color:'#7a6a40',textAlign:'center',padding:'3px 4px 8px',textTransform:'uppercase'}}>{m.role}</div>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,color:isSel?'#e8d090':'#c8b878',textAlign:'center',padding:'5px 4px 1px',lineHeight:1}}>{m.name}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,letterSpacing:2,color:'#7a6a40',textAlign:'center',padding:'3px 4px 8px',textTransform:'uppercase'}}>{m.role}</div>
               {/* Stat bar — locked vs normal */}
               {m.locked?(
                 <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'18px 8px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)',gap:6}}>
                   <div style={{fontSize:30,opacity:0.5}}>🔒</div>
-                  <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#5a4020',letterSpacing:2,textAlign:'center',textTransform:'uppercase'}}>Can you find the key?</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#5a4020',letterSpacing:2,textAlign:'center',textTransform:'uppercase'}}>Can you find the key?</div>
                 </div>
               ):(
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 12px 8px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
                   <div style={{textAlign:'center'}}>
-                    <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:'#ee2222',textTransform:'uppercase',fontWeight:900}}>ATK</div>
-                    <div style={{fontFamily:"'Cinzel',serif",fontSize:38,fontWeight:900,color:'#ee2222',lineHeight:1}}>{m.atk}</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#ee2222',textTransform:'uppercase',fontWeight:900}}>ATK</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,color:'#ee2222',lineHeight:1}}>{m.atk}</div>
                   </div>
-                  <div style={{fontFamily:"'Cinzel',serif",fontSize:12,color:kwc,fontWeight:700,textAlign:'center',letterSpacing:0.5,maxWidth:80}}>{kw}</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:kwc,fontWeight:700,textAlign:'center',letterSpacing:0.5,maxWidth:80}}>{kw}</div>
                   <div style={{textAlign:'center'}}>
-                    <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
-                    <div style={{fontFamily:"'Cinzel',serif",fontSize:38,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
                   </div>
                 </div>
               )}
@@ -446,7 +446,7 @@ function BoosterScreen({onComplete,seed}){
 
       {/* ABILITY EXPLANATION BOX */}
       <div style={{background:'rgba(10,6,2,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'20px 28px',width:'960px',flexShrink:0,marginTop:8}}>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:13,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:16}}>⚗ Band Abilities — What Do They Mean?</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:16}}>⚗ Band Abilities — What Do They Mean?</div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
           {[
             ['FRENZIED','#ee2222','⚡','Each time the boss is defeated, this member gains +1 ATK permanently.'],
@@ -461,8 +461,8 @@ function BoosterScreen({onComplete,seed}){
             <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:10,background:'rgba(0,0,0,0.4)',borderRadius:6,padding:'12px 16px',border:`1px solid ${color}44`,flex:'1 1 180px'}}>
               <div style={{fontSize:26,flexShrink:0,marginTop:2}}>{icon}</div>
               <div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,color:color,letterSpacing:1,marginBottom:5}}>{kw}</div>
-                <div style={{fontFamily:"'IM Fell English',serif",fontSize:15,color:'#c0a870',lineHeight:1.45,fontStyle:'italic'}}>{desc}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:color,letterSpacing:1,marginBottom:5}}>{kw}</div>
+                <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'#c0a870',lineHeight:1.45,fontStyle:'italic'}}>{desc}</div>
               </div>
             </div>
           ))}
@@ -470,7 +470,7 @@ function BoosterScreen({onComplete,seed}){
       </div>
 
       <button onClick={()=>sel.length===2&&onComplete(sel)} disabled={sel.length<2}
-        style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'14px 52px',background:'rgba(130,0,0,0.35)',border:'2px solid #cc1111',borderRadius:3,color:'#ee2222',cursor:sel.length===2?'pointer':'default',transition:'all 0.2s',flexShrink:0,boxShadow:'0 0 22px rgba(180,0,0,0.5)',opacity:sel.length===2?1:0.45,textShadow:'0 0 14px rgba(200,0,0,0.6)'}}>
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'14px 52px',background:'rgba(130,0,0,0.35)',border:'2px solid #cc1111',borderRadius:3,color:'#ee2222',cursor:sel.length===2?'pointer':'default',transition:'all 0.2s',flexShrink:0,boxShadow:'0 0 22px rgba(180,0,0,0.5)',opacity:sel.length===2?1:0.45,textShadow:'0 0 14px rgba(200,0,0,0.6)'}}>
         {sel.length===2?'⛧  Take the Stage':'Select 2 Musicians'}
       </button>
     
@@ -502,7 +502,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
     return base + (c.foil?3:0) + (c.mythic?8:0)
   }
   const tabStyle = (active) => ({
-    fontFamily:"'Cinzel',serif", fontSize:12, fontWeight:900, letterSpacing:2,
+    fontFamily:"'MBScribblesFont',serif", fontSize:12, fontWeight:900, letterSpacing:2,
     padding:'8px 20px', cursor:'pointer', border:'none', textTransform:'uppercase',
     background: active?'rgba(160,80,240,0.3)':'transparent',
     color: active?'#cc88ff':'#6a4a8a',
@@ -515,16 +515,16 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
       <div style={{position:'fixed',top:24,right:32,display:'flex',flexDirection:'column',alignItems:'center',gap:4,
         background:'rgba(20,10,5,0.95)',border:'2px solid #55ee66',borderRadius:10,padding:'12px 20px',
         boxShadow:'0 0 24px rgba(60,220,80,0.4)',minWidth:100}}>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#33aa44',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Stash</div>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,color:'#55ee66',lineHeight:1,
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#33aa44',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Stash</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,color:'#55ee66',lineHeight:1,
           textShadow:'0 0 20px rgba(60,220,80,0.8)'}}>{stash}</div>
-        <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:'#33aa44',fontStyle:'italic'}}>🌿</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'#33aa44',fontStyle:'italic'}}>🌿</div>
       </div>
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:44,color:'#cc88ff',textShadow:'0 0 30px rgba(180,60,255,0.6)',marginBottom:6}}>🪙 Pawn Shop</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:15,color:'#8a6aaa',fontStyle:'italic',marginBottom:4}}>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#cc88ff',textShadow:'0 0 30px rgba(180,60,255,0.6)',marginBottom:6}}>🪙 Pawn Shop</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'#8a6aaa',fontStyle:'italic',marginBottom:4}}>
         {salesLeft} sale{salesLeft!==1?'s':''} remaining this visit
       </div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#5a3a7a',letterSpacing:1,marginBottom:20}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#5a3a7a',letterSpacing:1,marginBottom:20}}>
         Cannot sell last 2 members · Bonds break on member sale
       </div>
 
@@ -536,7 +536,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
 
       {/* Members tab */}
       {tab==='members'&&<div style={{display:'flex',gap:16,flexWrap:'wrap',justifyContent:'center',maxWidth:900}}>
-        {members.length===0&&<div style={{fontFamily:"'IM Fell English',serif",color:'#5a3a6a',fontStyle:'italic',fontSize:16}}>No members on stage.</div>}
+        {members.length===0&&<div style={{fontFamily:"'ScratchFont',serif",color:'#5a3a6a',fontStyle:'italic',fontSize:16}}>No members on stage.</div>}
         {members.map(({m,i})=>{
           const price = memberSellPrice(m)
           const cantSell = activeMembers.length<=2
@@ -544,22 +544,22 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
           const tierColor = m.demonic?'#ffd700':m.mythic?'#dd88ff':m.foil?'#88ccff':null
           return(
             <div key={m.uid||i} style={{width:180,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'1px solid '+(tierColor||'rgba(160,80,240,0.4)'),borderRadius:7,overflow:'hidden',opacity:cantSell?0.5:1}}>
-              {tierColor&&<div style={{background:tierColor,padding:'3px',textAlign:'center',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,color:'#0a0704',letterSpacing:2}}>{m.demonic?'⛧ DEMONIC':m.mythic?'✦ MYTHIC':'✨ FOIL'}</div>}
+              {tierColor&&<div style={{background:tierColor,padding:'3px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:'#0a0704',letterSpacing:2}}>{m.demonic?'⛧ DEMONIC':m.mythic?'✦ MYTHIC':'✨ FOIL'}</div>}
               <div style={{fontSize:44,textAlign:'center',padding:'14px 0',background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
               <div style={{padding:'0 10px 12px'}}>
-                <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:20,color:'#e8d090',textAlign:'center',marginBottom:2}}>{m.name}</div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#6a5030',textAlign:'center',letterSpacing:1,marginBottom:6}}>{m.role}</div>
+                <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:20,color:'#e8d090',textAlign:'center',marginBottom:2}}>{m.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#6a5030',textAlign:'center',letterSpacing:1,marginBottom:6}}>{m.role}</div>
                 <div style={{display:'flex',justifyContent:'space-between',padding:'4px 6px',background:'rgba(0,0,0,0.4)',borderRadius:3,marginBottom:8}}>
-                  <div style={{textAlign:'center'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#ee2222',fontWeight:900}}>ATK</div><div style={{fontFamily:"'Cinzel',serif",fontSize:22,fontWeight:900,color:'#ee2222'}}>{m.atk}</div></div>
-                  <div style={{alignSelf:'center',fontFamily:"'Cinzel',serif",fontSize:9,color:bc,fontWeight:700}}>{m.keyword}</div>
-                  <div style={{textAlign:'center'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#33dd33',fontWeight:900}}>HP</div><div style={{fontFamily:"'Cinzel',serif",fontSize:22,fontWeight:900,color:'#33dd33'}}>{m.hp}/{m.maxHp}</div></div>
+                  <div style={{textAlign:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#ee2222',fontWeight:900}}>ATK</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,color:'#ee2222'}}>{m.atk}</div></div>
+                  <div style={{alignSelf:'center',fontFamily:"'MBScribblesFont',serif",fontSize:9,color:bc,fontWeight:700}}>{m.keyword}</div>
+                  <div style={{textAlign:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#33dd33',fontWeight:900}}>HP</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,color:'#33dd33'}}>{m.hp}/{m.maxHp}</div></div>
                 </div>
-                {m.roleBondBonus>0&&<div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#e8a820',textAlign:'center',marginBottom:6}}>🔗 Bond +{m.roleBondBonus} ATK (breaks)</div>}
+                {m.roleBondBonus>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#e8a820',textAlign:'center',marginBottom:6}}>🔗 Bond +{m.roleBondBonus} ATK (breaks)</div>}
                 <button
                   disabled={!canSell||cantSell}
                   onClick={()=>{if(canSell&&!cantSell){onSellMember(m,i);if(salesLeft<=1)onClose()}}
                   }
-                  style={{width:'100%',fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:900,letterSpacing:1,padding:'8px',
+                  style={{width:'100%',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,padding:'8px',
                     background:canSell&&!cantSell?'rgba(160,80,240,0.2)':'rgba(40,20,60,0.2)',
                     border:'1px solid '+(canSell&&!cantSell?'rgba(160,80,240,0.6)':'rgba(80,40,120,0.3)'),
                     borderRadius:4,color:canSell&&!cantSell?'#cc88ff':'#4a2a6a',cursor:canSell&&!cantSell?'pointer':'not-allowed',
@@ -574,7 +574,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
 
       {/* Cards tab */}
       {tab==='cards'&&<div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',maxWidth:900}}>
-        {allCards.length===0&&<div style={{fontFamily:"'IM Fell English',serif",color:'#5a3a6a',fontStyle:'italic',fontSize:16}}>Deck is empty.</div>}
+        {allCards.length===0&&<div style={{fontFamily:"'ScratchFont',serif",color:'#5a3a6a',fontStyle:'italic',fontSize:16}}>Deck is empty.</div>}
         {allCards.map(c=>{
           const price = cardSellPrice(c)
           const bc = c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
@@ -583,12 +583,12 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
               <div style={{height:4,background:bc}}/>
               <div style={{fontSize:36,textAlign:'center',padding:'10px 0',background:'rgba(0,0,0,0.3)'}}>{c.emoji}</div>
               <div style={{padding:'0 8px 10px'}}>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:2}}>{c.name}</div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#6a5030',textAlign:'center',marginBottom:4}}>{c.rarity}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:2}}>{c.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#6a5030',textAlign:'center',marginBottom:4}}>{c.rarity}</div>
                 <button
                   disabled={!canSell}
                   onClick={()=>{if(canSell){onSellCard(c);if(salesLeft<=1)onClose()}}}
-                  style={{width:'100%',fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:900,letterSpacing:1,padding:'6px',
+                  style={{width:'100%',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,padding:'6px',
                     background:canSell?'rgba(80,30,140,0.2)':'rgba(30,15,60,0.2)',
                     border:'1px solid '+(canSell?'rgba(140,60,220,0.5)':'rgba(60,30,100,0.3)'),
                     borderRadius:3,color:canSell?'#aa66ee':'#4a2a6a',cursor:canSell?'pointer':'not-allowed',
@@ -601,7 +601,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
         })}
       </div>}
 
-      <button onClick={onClose} style={{marginTop:30,fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,letterSpacing:3,padding:'12px 40px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:3,color:'#7a5020',cursor:'pointer',textTransform:'uppercase'}}
+      <button onClick={onClose} style={{marginTop:30,fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,padding:'12px 40px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:3,color:'#7a5020',cursor:'pointer',textTransform:'uppercase'}}
         onMouseEnter={e=>{e.currentTarget.style.borderColor='#8a6030';e.currentTarget.style.color='#c8a040'}}
         onMouseLeave={e=>{e.currentTarget.style.borderColor='#4a3010';e.currentTarget.style.color='#7a5020'}}>
         Close Shop
@@ -718,7 +718,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         display:'flex',alignItems:'center',justifyContent:'center',
         pointerEvents:'none'}}>
         <div style={{
-          fontFamily:"'Cinzel',serif",fontSize:38,fontWeight:900,
+          fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,
           color:'#cc1111',letterSpacing:4,
           textShadow:'0 0 20px rgba(200,0,0,0.8),2px 2px 0 rgba(0,0,0,0.9)',
           transform:'rotate(-45deg)',
@@ -763,57 +763,57 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             boxShadow:'0 0 14px '+(card.mythic?'rgba(180,0,255,0.8)':card.foil?'rgba(255,200,0,0.8)':gl)}}/>
           {/* Foil / Mythic badges — big and prominent */}
           {card.mythic&&<div style={{position:'absolute',top:10,left:0,right:0,textAlign:'center',
-            fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:'#cc44ff',letterSpacing:2,
+            fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#cc44ff',letterSpacing:2,
             textShadow:'0 0 14px rgba(200,0,255,0.9)',
             background:'rgba(80,0,120,0.6)',padding:'4px 0'}}>⛧ MYTHIC ⛧</div>}
           {!card.mythic&&card.foil&&<div style={{position:'absolute',top:10,left:0,right:0,textAlign:'center',
-            fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:'#ffd700',letterSpacing:2,
+            fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#ffd700',letterSpacing:2,
             textShadow:'0 0 14px rgba(255,200,0,0.9)',
             background:'rgba(80,60,0,0.6)',padding:'4px 0'}}>✨ FOIL ✨</div>}
-          {card.rarity==='Rare'&&!card.foil&&!card.mythic&&<div style={{position:'absolute',top:10,left:10,padding:'2px 7px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
+          {card.rarity==='Rare'&&!card.foil&&!card.mythic&&<div style={{position:'absolute',top:10,left:10,padding:'2px 7px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
           {/* ember cost */}
           {card.embers>0&&<div style={{position:'absolute',top:card.foil||card.mythic?38:8,right:10,width:32,height:32,borderRadius:'50%',
             background:'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)',
             border:'2px solid #ff6600',
             display:'flex',alignItems:'center',justifyContent:'center',
-            fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,color:'#fff',
+            fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#fff',
             boxShadow:'0 0 12px rgba(255,100,0,0.6)'}}>{card.embers}</div>}
           <div style={{flex:'0 0 35%',display:'flex',alignItems:'center',justifyContent:'center',
             fontSize:60,marginTop:card.foil||card.mythic?28:0,background:'rgba(0,0,0,0.25)',position:'relative'}}>
             <div style={{position:'absolute',inset:0,background:'radial-gradient(circle at center,'+bc+'20,transparent 70%)'}}/>
             {card.emoji}
           </div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:700,
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:700,
             color:card.mythic?'#e8aaff':card.foil?'#ffd700':'#eedfc0',
             textAlign:'center',padding:'8px 8px 3px',lineHeight:1.2,
             borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:700,
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:700,
             color:bc,textAlign:'center',padding:'3px 4px',letterSpacing:2,
             textTransform:'uppercase',flexShrink:0}}>
             {card.isMember?card.role:isPassive?'EFFECT PEDAL':isArtifact?'VINTAGE AMP':card.type}
             {card.rarity&&!card.isMember&&!isPassive&&!isArtifact?' · '+card.rarity:''}
           </div>
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:12,
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:12,
             color:'#9a8060',textAlign:'center',padding:'8px 14px',
             fontStyle:'italic',lineHeight:1.45,flex:1}}>{card.id==='demotape'?(lastRiffPlayed?'📼 Will replay: '+lastRiffPlayed.name+' (free)':'📼 No riff recorded yet — play a RIFF card first'):card.effect||card.desc||''}</div>
           {card.isMember&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',
             padding:'8px 14px',borderTop:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>
             <div style={{textAlign:'center'}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#666',letterSpacing:1}}>ATK</div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:24,color:'#ee2222',fontWeight:900,lineHeight:1}}>{card.atk}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#666',letterSpacing:1}}>ATK</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#ee2222',fontWeight:900,lineHeight:1}}>{card.atk}</div>
             </div>
-            <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#aaa',letterSpacing:1,textAlign:'center'}}>{card.keyword}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#aaa',letterSpacing:1,textAlign:'center'}}>{card.keyword}</div>
             <div style={{textAlign:'center'}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#666',letterSpacing:1}}>HP</div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:24,color:'#33dd33',fontWeight:900,lineHeight:1}}>{card.hp}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#666',letterSpacing:1}}>HP</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#33dd33',fontWeight:900,lineHeight:1}}>{card.hp}</div>
             </div>
           </div>}
           {isPicked&&<div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.6)',
             display:'flex',alignItems:'center',justifyContent:'center',borderRadius:8}}>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:20,color:'#55ee55',letterSpacing:2}}>✓ PICKED</span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#55ee55',letterSpacing:2}}>✓ PICKED</span>
           </div>}
         </div>
-        {!isPicked&&picksLeft>0&&<div style={{marginTop:8,fontFamily:"'Cinzel',serif",fontSize:11,
+        {!isPicked&&picksLeft>0&&<div style={{marginTop:8,fontFamily:"'MBScribblesFont',serif",fontSize:11,
           color:hov?'#55ee55':'#2a5a2a',textAlign:'center',letterSpacing:2,
           transition:'color 0.15s'}}>
           {hov?'► PICK THIS':'click to pick'}
@@ -836,9 +836,9 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         backdropFilter:'blur(4px)'}}>
         {/* Header */}
         <div style={{textAlign:'center'}}>
-          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:36,color:ac,
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:ac,
             textShadow:'0 0 20px '+ac+'99',marginBottom:6}}>{pack.emoji} {pack.name}</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:12,color:'#8a8060',letterSpacing:2}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#8a8060',letterSpacing:2}}>
             {remaining>0?'Pick '+remaining+' card'+(remaining>1?'s':''):remaining===0?'All picks made':''}
           </div>
         </div>
@@ -852,14 +852,14 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         {/* Pass / Done button */}
         <div style={{display:'flex',gap:16}}>
           {remaining>0&&<button onClick={()=>setOpenPackModal(null)}
-            style={{fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:700,letterSpacing:2,
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:700,letterSpacing:2,
               padding:'12px 32px',background:'rgba(40,25,8,0.6)',
               border:'1px solid rgba(120,80,20,0.4)',borderRadius:6,
               color:'#6a5020',cursor:'pointer',textTransform:'uppercase'}}>
             Pass — Take Nothing
           </button>}
           {remaining===0&&<button onClick={()=>setOpenPackModal(null)}
-            style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:2,
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:2,
               padding:'14px 40px',background:'rgba(20,80,20,0.4)',
               border:'2px solid #44aa44',borderRadius:6,
               color:'#55ee55',cursor:'pointer',textTransform:'uppercase',
@@ -887,7 +887,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
           border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
           padding:'4px 16px',zIndex:15,whiteSpace:'nowrap',
-          fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,
+          fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
           boxShadow:canBuy?'0 2px 16px rgba(50,200,50,0.4)':'none'}}>🌿 {price}</div>
         <div onClick={()=>canBuy&&!bought&&buyCard(card)}
@@ -903,47 +903,47 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           {bought&&<SoldOverlay/>}
           <div style={{height:7,flexShrink:0,background:bc,boxShadow:'0 0 12px '+gl}}/>
           <div style={{position:'relative',height:32,flexShrink:0}}>
-            {card.rarity==='Rare'&&<div style={{position:'absolute',top:6,left:10,padding:'2px 7px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
-            {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:6,left:10,padding:'2px 7px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
-            {card.foil&&<div style={{position:'absolute',top:6,right:10,padding:'2px 7px',borderRadius:3,background:'rgba(255,215,0,0.3)',border:'1px solid rgba(255,215,0,0.6)',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#ffd700'}}>✨FOIL</div>}
-            {card.mythic&&<div style={{position:'absolute',top:6,right:10,padding:'2px 7px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#cc44ff'}}>⛧MYTHIC</div>}
+            {card.rarity==='Rare'&&<div style={{position:'absolute',top:6,left:10,padding:'2px 7px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
+            {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:6,left:10,padding:'2px 7px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
+            {card.foil&&<div style={{position:'absolute',top:6,right:10,padding:'2px 7px',borderRadius:3,background:'rgba(255,215,0,0.3)',border:'1px solid rgba(255,215,0,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#ffd700'}}>✨FOIL</div>}
+            {card.mythic&&<div style={{position:'absolute',top:6,right:10,padding:'2px 7px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#cc44ff'}}>⛧MYTHIC</div>}
             {card.embers>0
               ?<div style={{position:'absolute',top:4,right:10,width:32,height:32,borderRadius:'50%',
                   background:canBuy?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(60,30,5,0.9)',
                   border:'2px solid '+(canBuy?'#ff6600':'#6a3a10'),
                   display:'flex',alignItems:'center',justifyContent:'center',
-                  fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,
+                  fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
                   color:canBuy?'#fff':'#8a5a30',
                   boxShadow:canBuy?'0 0 12px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
-              :<div style={{position:'absolute',top:7,right:10,padding:'2px 7px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>}
+              :<div style={{position:'absolute',top:7,right:10,padding:'2px 7px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>}
           </div>
           <div style={{height:130,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',
             fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative'}}>
             <div style={{position:'absolute',inset:0,background:'radial-gradient(circle at center,'+bc+'18,transparent 70%)'}}/>
             {card.emoji}
           </div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:18,fontWeight:700,
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:700,
             color:'#eedfc0',textAlign:'center',padding:'10px 10px 4px',
             letterSpacing:0.3,lineHeight:1.2,
             borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:700,
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:700,
             color:bc,textAlign:'center',padding:'4px 6px',
             letterSpacing:2,textTransform:'uppercase',flexShrink:0}}>
             {card.isMember?card.role:card.type}{card.rarity&&!card.isMember?' · '+card.rarity:''}
           </div>
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:13,
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,
             color:'#9a8060',textAlign:'center',padding:'8px 14px',
             fontStyle:'italic',lineHeight:1.5,flex:1}}>{card.effect||card.desc||''}</div>
           {card.isMember&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',
             padding:'10px 16px',borderTop:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>
             <div style={{textAlign:'center'}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#666',letterSpacing:1}}>ATK</div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:28,color:'#ee2222',fontWeight:900,lineHeight:1}}>{card.atk}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#666',letterSpacing:1}}>ATK</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,color:'#ee2222',fontWeight:900,lineHeight:1}}>{card.atk}</div>
             </div>
-            <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:card.kwColor||'#aaa',letterSpacing:1,textAlign:'center'}}>{card.keyword}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:card.kwColor||'#aaa',letterSpacing:1,textAlign:'center'}}>{card.keyword}</div>
             <div style={{textAlign:'center'}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#666',letterSpacing:1}}>HP</div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:28,color:'#33dd33',fontWeight:900,lineHeight:1}}>{card.hp}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#666',letterSpacing:1}}>HP</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,color:'#33dd33',fontWeight:900,lineHeight:1}}>{card.hp}</div>
             </div>
           </div>}
         </div>
@@ -964,7 +964,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
           border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
           padding:'3px 14px',zIndex:15,whiteSpace:'nowrap',
-          fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,
+          fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
           transition:'transform 0.12s'}}>🌿 {price}</div>
         <div onClick={()=>canBuy&&onBuy()}
@@ -978,16 +978,16 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             boxShadow:hov&&canBuy?'0 10px 30px rgba(0,0,0,0.8),0 0 16px '+ac+'44':'2px 4px 14px rgba(0,0,0,0.6)',
             animation:'throbLeft 4.5s ease-in-out infinite'}}>
           {sold&&<SoldOverlay/>}
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:2,
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,letterSpacing:2,
             color:ac,textAlign:'center',padding:'6px 4px 0',
             textTransform:'uppercase',opacity:0.85,flexShrink:0}}>{label}</div>
           <div style={{flex:'0 0 36%',display:'flex',alignItems:'center',justifyContent:'center',
             fontSize:38,filter:hov&&canBuy?'drop-shadow(0 0 8px '+ac+')':'none',
             transition:'filter 0.15s'}}>{item.emoji}</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:700,
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,
             color:'#f0e0b0',textAlign:'center',padding:'4px 8px 2px',
             lineHeight:1.2,flexShrink:0}}>{item.name}</div>
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,
             color:'#9a8060',textAlign:'center',padding:'3px 10px 6px',
             fontStyle:'italic',lineHeight:1.4,flex:1,overflow:'hidden'}}>{item.effect||item.desc||''}</div>
         </div>
@@ -1010,7 +1010,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
           border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
           padding:'4px 16px',zIndex:15,whiteSpace:'nowrap',
-          fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:900,
+          fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
           transition:'transform 0.12s'}}>🌿 {pack.cost}</div>
         <div onClick={()=>handleOpenPack(pack)}
@@ -1027,15 +1027,15 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{width:'100%',height:8,flexShrink:0,
             background:'linear-gradient(90deg,'+ac+'44,'+ac+'ee,'+ac+'44)',
             boxShadow:'0 0 16px '+ac+'99'}}/>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:3,
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,letterSpacing:3,
             color:ac,textTransform:'uppercase',opacity:0.7,marginTop:8,flexShrink:0}}>VESTIBULE</div>
           <div style={{fontSize:72,flex:'0 0 38%',display:'flex',alignItems:'center',justifyContent:'center',
             filter:'drop-shadow(0 0 '+(hov?'20px':'8px')+' '+ac+(hov?'cc':'66')+')',
             transition:'filter 0.15s'}}>{pack.emoji}</div>
-          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:24,
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,
             color:ac,textAlign:'center',lineHeight:1.2,
             textShadow:'0 0 16px '+ac+'99',flexShrink:0,padding:'4px 4px'}}>{pack.name}</div>
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:13,
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,
             color:'#9a8868',textAlign:'center',fontStyle:'italic',
             lineHeight:1.4,padding:'8px 10px 0',flex:1}}>{pack.desc}</div>
           <div style={{position:'absolute',bottom:0,left:0,right:0,height:6,
@@ -1051,7 +1051,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     <div style={{position:'fixed',inset:0,zIndex:9500,
       background:'radial-gradient(ellipse at 50% 0%,rgba(28,18,4,1) 0%,rgba(6,4,1,1) 100%)',
       display:'flex',flexDirection:'column',gap:10,padding:12,
-      fontFamily:"'Cinzel',serif",overflow:'hidden',
+      fontFamily:"'MBScribblesFont',serif",overflow:'hidden',
       boxSizing:'border-box',height:'100vh'}}>
 
       {/* TOP BAR */}
@@ -1060,7 +1060,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',
           background:'rgba(8,4,1,0.85)',border:'1px solid rgba(180,20,20,0.3)',borderRadius:8,
           boxShadow:'0 0 30px rgba(160,10,10,0.2)'}}>
-          <span style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:38,color:'#cc1111',letterSpacing:2,
+          <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:38,color:'#cc1111',letterSpacing:2,
             textShadow:'0 0 20px rgba(220,10,10,0.95),0 0 40px rgba(190,0,0,0.7),0 0 80px rgba(150,0,0,0.4)'}}>
             ⚰ The Black Market
           </span>
@@ -1069,7 +1069,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,15,15,0.5)'}}
           onMouseLeave={e=>{e.currentTarget.style.background='rgba(120,8,8,0.3)'}}
           style={{width:130,flexShrink:0,
-            fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:700,letterSpacing:2,
+            fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:700,letterSpacing:2,
             background:'rgba(120,8,8,0.3)',border:'2px solid #991010',borderRadius:8,
             color:'#ee2222',cursor:'pointer',textTransform:'uppercase',
             transition:'background 0.15s',
@@ -1112,8 +1112,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 border:'2px solid rgba(50,140,50,0.6)',
                 borderRadius:8}}>
                 <span style={{fontSize:22}}>🌿</span>
-                <span style={{fontFamily:"'Cinzel',serif",fontSize:30,fontWeight:900,color:stashColor,lineHeight:1}}>{stash}</span>
-                <span style={{fontFamily:"'Cinzel',serif",fontSize:8,color:'#2a5a2a',letterSpacing:2,textTransform:'uppercase'}}>Stash</span>
+                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:30,fontWeight:900,color:stashColor,lineHeight:1}}>{stash}</span>
+                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#2a5a2a',letterSpacing:2,textTransform:'uppercase'}}>Stash</span>
               </div>
               <div style={{width:130,height:130,
                 display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
@@ -1126,8 +1126,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 onMouseEnter={e=>{e.currentTarget.style.animation='none';e.currentTarget.style.background='rgba(55,40,8,0.95)'}}
                 onMouseLeave={e=>{e.currentTarget.style.animation='rerollWiggle 3s ease-in-out infinite';e.currentTarget.style.background='rgba(25,18,4,0.92)'}}>
                 <span style={{fontSize:22}}>🔄</span>
-                <span style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#c8a030',letterSpacing:1,textTransform:'uppercase'}}>Re-Roll</span>
-                <span style={{fontFamily:"'Cinzel',serif",fontSize:20,fontWeight:900,color:'#55ee55'}}>🌿 {rerollCost}</span>
+                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#c8a030',letterSpacing:1,textTransform:'uppercase'}}>Re-Roll</span>
+                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:'#55ee55'}}>🌿 {rerollCost}</span>
               </div>
             </div>
           </div>
@@ -1146,17 +1146,17 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
               justifyContent:'space-between',
               boxShadow:'0 0 30px rgba(130,50,200,0.2)'}}>
               <div>
-                <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:30,
+                <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:30,
                   color:'#9944dd',textAlign:'center',marginBottom:14,
                   textShadow:'0 0 18px rgba(160,80,240,0.8)'}}>🪙 Pawn Shop</div>
                 <div style={{fontSize:44,textAlign:'center',margin:'6px 0'}}>🏧</div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:12,
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,
                   color:'#7a5aaa',letterSpacing:1,lineHeight:2.4,textAlign:'center'}}>
                   Common 1🌿 · Uncommon 2🌿 · Rare 4🌿<br/>
                   Foil +3🌿 · Mythic +8🌿 · Member 5🌿<br/>
                   Artifact = 50% of buy price back
                 </div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:10,
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,
                   color:'#4a3068',textAlign:'center',marginTop:10,letterSpacing:1}}>
                   Max 2 sales per visit · Cannot sell last 2 members
                 </div>
@@ -1165,7 +1165,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 onMouseEnter={e=>e.currentTarget.style.background='rgba(130,60,200,0.45)'}
                 onMouseLeave={e=>e.currentTarget.style.background='rgba(80,30,140,0.3)'}
                 onClick={()=>{if(pawnSalesLeft>0)setPawnOpen(true)}}
-                style={{width:'100%',fontFamily:"'Cinzel',serif",
+                style={{width:'100%',fontFamily:"'MBScribblesFont',serif",
                   fontSize:14,fontWeight:900,letterSpacing:1,
                   padding:'16px',background:'rgba(80,30,140,0.3)',
                   border:'2px solid rgba(160,80,240,0.65)',borderRadius:6,
@@ -1204,7 +1204,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
     return <div ref={innerRef} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}}
       style={{width:230,height:345,border:`1px dashed ${over?'rgba(232,168,32,0.6)':'rgba(160,100,30,0.22)'}`,borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,background:over?'rgba(100,70,15,0.18)':'rgba(28,16,4,0.14)',transition:'all 0.2s'}}>
       <div style={{fontSize:28,opacity:.1}}>⛧</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:'rgba(160,100,30,0.28)',fontStyle:'italic'}}>empty</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'rgba(160,100,30,0.28)',fontStyle:'italic'}}>empty</div>
     </div>
   }
   const st=member.tooStoned
@@ -1221,8 +1221,8 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
         transition:'border 0.2s, box-shadow 0.2s, opacity 0.3s, transform 0.3s',
         cursor:'grab',position:'relative'}}>
       {/* Keyword tooltip */}
-      {showTip&&member&&KEYWORD_DESC[member.keyword]&&<div style={{position:'absolute',bottom:'105%',left:'50%',transform:'translateX(-50%)',background:'rgba(8,4,2,0.97)',border:'1px solid rgba(160,100,25,0.6)',borderRadius:6,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:200,maxWidth:260,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:900,color:'#e8a820',letterSpacing:2,textTransform:'uppercase',marginBottom:5}}>{member.keyword}</div><div style={{fontFamily:"'IM Fell English',serif",fontSize:13,color:'#c8b080',lineHeight:1.5,fontStyle:'italic'}}>{KEYWORD_DESC[member.keyword]}</div></div>}
-      {buffCount>0&&<div style={{position:'absolute',top:6,left:6,background:buffCount>=3?'#aa1111':'#9933cc',borderRadius:10,padding:'1px 6px',fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:900,color:'#fff',zIndex:10,boxShadow:'0 0 8px rgba(0,0,0,0.6)'}}>+{buffCount}</div>}
+      {showTip&&member&&KEYWORD_DESC[member.keyword]&&<div style={{position:'absolute',bottom:'105%',left:'50%',transform:'translateX(-50%)',background:'rgba(8,4,2,0.97)',border:'1px solid rgba(160,100,25,0.6)',borderRadius:6,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:200,maxWidth:260,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'#e8a820',letterSpacing:2,textTransform:'uppercase',marginBottom:5}}>{member.keyword}</div><div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#c8b080',lineHeight:1.5,fontStyle:'italic'}}>{KEYWORD_DESC[member.keyword]}</div></div>}
+      {buffCount>0&&<div style={{position:'absolute',top:6,left:6,background:buffCount>=3?'#aa1111':'#9933cc',borderRadius:10,padding:'1px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#fff',zIndex:10,boxShadow:'0 0 8px rgba(0,0,0,0.6)'}}>+{buffCount}</div>}
       {isDiceTarget&&<div style={{position:'absolute',top:-16,left:'50%',transform:'translateX(-50%)',fontSize:20}}>🎯</div>}
       <div style={{height:5,borderRadius:'6px 6px 0 0',background:st?'#333':'linear-gradient(90deg,#dd2222,#ff7700)',boxShadow:st?'none':'0 0 14px rgba(220,50,0,0.5)'}}/>
       <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:72,background:'rgba(0,0,0,0.3)',position:'relative',minHeight:100}}>
@@ -1230,17 +1230,17 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
         {st&&<div style={{position:'absolute',top:4,right:4,fontSize:22}}>💨</div>}
         {isAttacking&&<div style={{position:'absolute',inset:0,background:'rgba(255,50,0,0.12)',animation:'pulse 0.4s ease infinite alternate'}}/>}
       </div>
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:30,color:st?'#555':'#e8d8a0',textAlign:'center',padding:'10px 4px 3px',lineHeight:1}}>{member.name}</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:12,letterSpacing:1.5,color:st?'#444':'#8a7a50',textAlign:'center',padding:'4px 4px 8px',textTransform:'uppercase'}}>{member.role}</div>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:30,color:st?'#555':'#e8d8a0',textAlign:'center',padding:'10px 4px 3px',lineHeight:1}}>{member.name}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,letterSpacing:1.5,color:st?'#444':'#8a7a50',textAlign:'center',padding:'4px 4px 8px',textTransform:'uppercase'}}>{member.role}</div>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 20px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
         <div style={{textAlign:'center'}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:st?'#555':'#ee2222',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>ATK</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.atk}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:st?'#555':'#ee2222',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>ATK</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.atk}</div>
         </div>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:st?'#555':'#e8a820',fontWeight:700,letterSpacing:1,textAlign:'center'}}>{member.keyword}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:st?'#555':'#e8a820',fontWeight:700,letterSpacing:1,textAlign:'center'}}>{member.keyword}</div>
         <div style={{textAlign:'center'}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:st?'#555':member.hp<=2?'#ff4400':'#33dd33',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>HP</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:42,fontWeight:900,lineHeight:1,color:st?'#555':member.hp<=2?'#ff4400':'#33dd33',textShadow:st?'none':'0 0 12px rgba(0,190,0,0.5)'}}>{member.hp}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:st?'#555':member.hp<=2?'#ff4400':'#33dd33',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>HP</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,lineHeight:1,color:st?'#555':member.hp<=2?'#ff4400':'#33dd33',textShadow:st?'none':'0 0 12px rgba(0,190,0,0.5)'}}>{member.hp}</div>
         </div>
       </div>
       <div style={{height:5,background:'rgba(0,0,0,0.5)',borderRadius:'0 0 6px 6px'}}><div style={{height:'100%',borderRadius:'0 0 6px 6px',background:st?'#333':'linear-gradient(90deg,#003800,#33dd33)',width:`${(member.hp/member.maxHp)*100}%`,transition:'width 0.4s ease'}}/></div>
@@ -1275,23 +1275,23 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         animation:shimmerAnim,
         margin:'0 -26px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
       <div style={{height:6,flexShrink:0,borderRadius:'7px 7px 0 0',background:bc,boxShadow:`0 0 14px ${glow}`}}/>
-      {isUsed&&<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'rgba(0,0,0,0.85)',border:'2px solid #888',borderRadius:6,padding:'6px 14px',fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,color:'#888',letterSpacing:4,zIndex:20,pointerEvents:'none'}}>USED</div>}
+      {isUsed&&<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'rgba(0,0,0,0.85)',border:'2px solid #888',borderRadius:6,padding:'6px 14px',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#888',letterSpacing:4,zIndex:20,pointerEvents:'none'}}>USED</div>}
       {card.embers>0?(
-        <div style={{position:'absolute',top:8,right:8,width:28,height:28,borderRadius:'50%',background:canAfford?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',border:`2px solid ${canAfford?'#ff6600':'#4a2a10'}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,color:canAfford?'#fff':'#5a3a10',boxShadow:canAfford?'0 0 10px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
+        <div style={{position:'absolute',top:8,right:8,width:28,height:28,borderRadius:'50%',background:canAfford?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',border:`2px solid ${canAfford?'#ff6600':'#4a2a10'}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:canAfford?'#fff':'#5a3a10',boxShadow:canAfford?'0 0 10px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
       ):(
-        <div style={{position:'absolute',top:8,right:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>
+        <div style={{position:'absolute',top:8,right:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>
       )}
-      {card.foil&&<div style={{position:'absolute',top:8,left:28,padding:'2px 5px',borderRadius:3,background:'rgba(255,215,0,0.3)',border:'1px solid rgba(255,215,0,0.6)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#ffd700',letterSpacing:1}}>✨FOIL</div>}
-      {card.mythic&&<div style={{position:'absolute',top:8,left:28,padding:'2px 5px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#cc44ff',letterSpacing:1}}>⛧MYTHIC</div>}
-      {card.rarity==='Rare'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
-      {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'Cinzel',serif",fontSize:7,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
+      {card.foil&&<div style={{position:'absolute',top:8,left:28,padding:'2px 5px',borderRadius:3,background:'rgba(255,215,0,0.3)',border:'1px solid rgba(255,215,0,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#ffd700',letterSpacing:1}}>✨FOIL</div>}
+      {card.mythic&&<div style={{position:'absolute',top:8,left:28,padding:'2px 5px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#cc44ff',letterSpacing:1}}>⛧MYTHIC</div>}
+      {card.rarity==='Rare'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
+      {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
       <div style={{height:115,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:54,background:'rgba(0,0,0,0.35)',position:'relative'}}>
         <div style={{position:'absolute',inset:0,background:`radial-gradient(circle at center,${bc}18,transparent 70%)`}}/>
         {card.emoji}
       </div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'9px 6px 3px',letterSpacing:.4,lineHeight:1.2,borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:bc,textAlign:'center',padding:'3px 4px',letterSpacing:1.8,textTransform:'uppercase',flexShrink:0}}>{card.type}</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:13,color:'#b09870',textAlign:'center',padding:'4px 8px 8px',lineHeight:1.4,fontStyle:'italic',flex:1,display:'flex',alignItems:'center',justifyContent:'center'}}>{card.effect}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'9px 6px 3px',letterSpacing:.4,lineHeight:1.2,borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:bc,textAlign:'center',padding:'3px 4px',letterSpacing:1.8,textTransform:'uppercase',flexShrink:0}}>{card.type}</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#b09870',textAlign:'center',padding:'4px 8px 8px',lineHeight:1.4,fontStyle:'italic',flex:1,display:'flex',alignItems:'center',justifyContent:'center'}}>{card.effect}</div>
     </div>
   )
 }
@@ -1300,28 +1300,28 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
   const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35
   return(
     <div ref={innerRef} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:12,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%'}}>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:21,letterSpacing:4,color:'#cc3300',textTransform:'uppercase',fontWeight:900,textShadow:'0 0 10px rgba(200,50,0,0.4)'}}>{enemy.circle} · {enemy.subtitle}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'#cc3300',textTransform:'uppercase',fontWeight:900,textShadow:'0 0 10px rgba(200,50,0,0.4)'}}>{enemy.circle} · {enemy.subtitle}</div>
       <div style={{display:'flex',alignItems:'center',gap:16,width:'100%'}}>
         <div style={{width:130,height:130,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:6,display:'flex',alignItems:'center',justifyContent:'center',fontSize:70,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:'hidden',transition:'all 0.5s'}}>
           {enemy.emoji}
           {isLow&&<div style={{position:'absolute',inset:0,background:'rgba(120,0,0,0.2)',animation:'pulse 1.2s ease infinite alternate'}}/>}
-          {debuff>0&&<div style={{position:'absolute',bottom:4,right:4,background:'rgba(0,80,160,0.9)',border:'1px solid #4488ff',borderRadius:4,padding:'2px 5px',fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:900,color:'#88aaff'}}>-{debuff}dmg</div>}
+          {debuff>0&&<div style={{position:'absolute',bottom:4,right:4,background:'rgba(0,80,160,0.9)',border:'1px solid #4488ff',borderRadius:4,padding:'2px 5px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#88aaff'}}>-{debuff}dmg</div>}
         </div>
         <div style={{flex:1}}>
-          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:58,color:'#120804',lineHeight:1,marginBottom:8,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 1px 1px 0 rgba(0,0,0,0.5)`:'1px 1px 0 rgba(0,0,0,0.5)'}}>{enemy.name}</div>
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:25,color:'#1a1008',fontStyle:'italic',opacity:1,lineHeight:1.5,fontWeight:700}}>{enemy.passive}</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:18,color:'#1a1008',marginTop:6,letterSpacing:1,fontWeight:700}}>Base damage: {enemy.baseDmg} ± 2 per Strike</div>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:58,color:'#120804',lineHeight:1,marginBottom:8,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 1px 1px 0 rgba(0,0,0,0.5)`:'1px 1px 0 rgba(0,0,0,0.5)'}}>{enemy.name}</div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:25,color:'#1a1008',fontStyle:'italic',opacity:1,lineHeight:1.5,fontWeight:700}}>{enemy.passive}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#1a1008',marginTop:6,letterSpacing:1,fontWeight:700}}>Base damage: {enemy.baseDmg} ± 2 per Strike</div>
         </div>
       </div>
       <div style={{width:'70%',margin:'0 auto'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:4}}>
-          <span style={{fontFamily:"'Cinzel',serif",fontSize:13,letterSpacing:3,color:'#6a4a10',textTransform:'uppercase'}}>Vitality</span>
-          <span style={{fontFamily:"'Cinzel',serif",fontSize:28,fontWeight:900,color:isLow?'#ee2222':'#6a3010',transition:'color 0.5s'}}>{Math.max(0,currentHp)} / {enemy.maxHp}</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:3,color:'#6a4a10',textTransform:'uppercase'}}>Vitality</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:isLow?'#ee2222':'#6a3010',transition:'color 0.5s'}}>{Math.max(0,currentHp)} / {enemy.maxHp}</span>
         </div>
         <div style={{width:'100%',height:28,background:'rgba(50,25,8,0.75)',border:'1px solid rgba(100,55,15,0.6)',borderRadius:2,overflow:'hidden',boxShadow:'inset 0 2px 6px rgba(0,0,0,0.7)',position:'relative'}}>
           {[25,50,75].map(pp=><div key={pp} style={{position:'absolute',top:0,bottom:0,left:`${pp}%`,width:1,background:'rgba(0,0,0,0.35)',zIndex:2}}/>)}
           <div style={{height:'100%',background:isLow?'linear-gradient(90deg,#660000,#cc0000,#ff2200)':'linear-gradient(90deg,#7a0000,#aa1100,#cc2200)',width:`${pct}%`,transition:'width 0.7s cubic-bezier(0.4,0,0.2,1)'}}/>
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:'rgba(240,220,180,0.95)',letterSpacing:2,textShadow:'0 1px 3px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)} HP REMAINING</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,color:'rgba(240,220,180,0.95)',letterSpacing:2,textShadow:'0 1px 3px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)} HP REMAINING</div>
         </div>
       </div>
     </div>
@@ -1336,8 +1336,8 @@ function DeckPile({count,label}){
           {i===0&&<div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,opacity:.2,color:'#c8a060'}}>⛧</div>}
         </div>)}
       </div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:26,fontWeight:900,color:'#c8a060'}}>{count}</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:2,color:'#6a5a30',textTransform:'uppercase'}}>{label}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:26,fontWeight:900,color:'#c8a060'}}>{count}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,letterSpacing:2,color:'#6a5a30',textTransform:'uppercase'}}>{label}</div>
     </div>
   )
 }
@@ -1356,19 +1356,19 @@ function EndScreen({won,cause,stats,seed,onReset,streakWins,streakLosses,totalRu
       {isStoned&&<div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,180,0,0.04) 2px,rgba(0,180,0,0.04) 4px)',animation:'interlaceFlicker 0.1s steps(1) infinite',pointerEvents:'none',zIndex:0}}/>}
       {isStoned&&<div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 20%,rgba(0,80,0,0.4) 100%)',pointerEvents:'none',zIndex:0,animation:'bgPulse 2s ease-in-out infinite'}}/>}
       <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
-        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:280,color:'rgba(180,180,180,0.06)',userSelect:'none',lineHeight:1}}>Vestibule</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:280,color:'rgba(180,180,180,0.06)',userSelect:'none',lineHeight:1}}>Vestibule</div>
       </div>
       <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
         {/* Title */}
-        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:isStoned?110:90,color:isStoned?'#cc1111':isVictory?'#d8c9a8':'#7a0000',textShadow:isStoned?'-4px 0 rgba(255,0,0,0.9),4px 0 rgba(0,255,80,0.7),0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000':isVictory?'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000':'0 0 60px rgba(100,0,0,0.6),3px 3px 0 #000'}}>{isStoned?'Stoned to the Bone':isVictory?'⛧ Victory ⛧':'Fallen'}</div>
-        <div style={{fontFamily:"'IM Fell English',serif",fontSize:20,color:isStoned?'rgba(200,80,80,0.9)':'#a09060',fontStyle:'italic',textAlign:'center'}}>{isStoned?'The band ran out of herb.':isVictory?'All 9 circles conquered. Lucifer has fallen.':'The Vestibule claims another soul.'}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:isStoned?110:90,color:isStoned?'#cc1111':isVictory?'#d8c9a8':'#7a0000',textShadow:isStoned?'-4px 0 rgba(255,0,0,0.9),4px 0 rgba(0,255,80,0.7),0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000':isVictory?'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000':'0 0 60px rgba(100,0,0,0.6),3px 3px 0 #000'}}>{isStoned?'Stoned to the Bone':isVictory?'⛧ Victory ⛧':'Fallen'}</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:isStoned?'rgba(200,80,80,0.9)':'#a09060',fontStyle:'italic',textAlign:'center'}}>{isStoned?'The band ran out of herb.':isVictory?'All 9 circles conquered. Lucifer has fallen.':'The Vestibule claims another soul.'}</div>
 
         {/* Streak banner */}
-        {streakMsg&&<div style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,color:streakWins>1?'#ff6600':'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:`1px solid ${streakWins>1?'#ff6600':'#aa4444'}`,borderRadius:4}}>{streakMsg}</div>}
+        {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:streakWins>1?'#ff6600':'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:`1px solid ${streakWins>1?'#ff6600':'#aa4444'}`,borderRadius:4}}>{streakMsg}</div>}
 
         {/* Stats grid */}
         <div style={{background:'rgba(20,12,4,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'20px 32px',minWidth:520}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:13,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:14}}>Run Statistics</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:14}}>Run Statistics</div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'4px 32px'}}>
             {[
               ['Circle Reached', isVictory?'ALL 9 ⛧':circleReached+' / 9'],
@@ -1384,8 +1384,8 @@ function EndScreen({won,cause,stats,seed,onReset,streakWins,streakLosses,totalRu
             ].map(function(row){
               return(
                 <div key={row[0]} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'5px 0',borderBottom:'1px solid rgba(80,50,10,0.15)'}}>
-                  <span style={{fontFamily:"'IM Fell English',serif",fontSize:16,color:'#7a6040',fontStyle:'italic'}}>{row[0]}</span>
-                  <span style={{fontFamily:"'Cinzel',serif",fontSize:17,fontWeight:900,color:isVictory&&row[0]==='Circle Reached'?'#ffdd44':'#c8a060'}}>{row[1]}</span>
+                  <span style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'#7a6040',fontStyle:'italic'}}>{row[0]}</span>
+                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,fontWeight:900,color:isVictory&&row[0]==='Circle Reached'?'#ffdd44':'#c8a060'}}>{row[1]}</span>
                 </div>
               )
             })}
@@ -1394,20 +1394,20 @@ function EndScreen({won,cause,stats,seed,onReset,streakWins,streakLosses,totalRu
 
         {/* Seed + daily */}
         <div style={{display:'flex',gap:20,alignItems:'center'}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:12,color:'#5a4a20',letterSpacing:2}}>SEED: {seed.toString(16).toUpperCase()}</div>
-          {isDailyRun&&<div style={{fontFamily:"'Cinzel',serif",fontSize:12,color:'#e8a820',letterSpacing:2,padding:'3px 12px',border:'1px solid #e8a820',borderRadius:3}}>🌍 DAILY CHALLENGE</div>}
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#4a3a18',cursor:'pointer',letterSpacing:1}}
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#5a4a20',letterSpacing:2}}>SEED: {seed.toString(16).toUpperCase()}</div>
+          {isDailyRun&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#e8a820',letterSpacing:2,padding:'3px 12px',border:'1px solid #e8a820',borderRadius:3}}>🌍 DAILY CHALLENGE</div>}
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#4a3a18',cursor:'pointer',letterSpacing:1}}
             onClick={()=>navigator.clipboard&&navigator.clipboard.writeText(seed.toString(16).toUpperCase())}>📋 Copy Seed</div>
         </div>
 
         {/* Buttons */}
         <div style={{display:'flex',gap:16,marginTop:4}}>
           <button onClick={onReset}
-            style={{fontFamily:"'Cinzel',serif",fontSize:18,letterSpacing:4,color:isVictory?'#ee2222':'#b09858',background:isVictory?'rgba(100,0,0,0.22)':'transparent',border:isVictory?'2px solid #7a0000':'1px solid rgba(90,60,20,0.5)',borderRadius:3,padding:'12px 40px',cursor:'pointer',textTransform:'uppercase'}}>
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:isVictory?'#ee2222':'#b09858',background:isVictory?'rgba(100,0,0,0.22)':'transparent',border:isVictory?'2px solid #7a0000':'1px solid rgba(90,60,20,0.5)',borderRadius:3,padding:'12px 40px',cursor:'pointer',textTransform:'uppercase'}}>
             {isVictory?'⛧ Play Again':'↺ Try Again'}
           </button>
           <button onClick={()=>onDailyChallenge&&onDailyChallenge()}
-            style={{fontFamily:"'Cinzel',serif",fontSize:14,letterSpacing:3,color:'#e8a820',background:'rgba(50,35,5,0.4)',border:'1px solid #c87820',borderRadius:3,padding:'12px 28px',cursor:'pointer',textTransform:'uppercase'}}>
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,color:'#e8a820',background:'rgba(50,35,5,0.4)',border:'1px solid #c87820',borderRadius:3,padding:'12px 28px',cursor:'pointer',textTransform:'uppercase'}}>
             🌍 Daily Challenge
           </button>
         </div>
@@ -1428,33 +1428,33 @@ function DemonicConflictScreen({conflict,onChoice}){
       <div onClick={onPick} style={{width:260,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'3px solid #e8a820',borderRadius:8,overflow:'hidden',cursor:'pointer',transition:'all 0.2s',boxShadow:'0 0 40px rgba(232,168,32,0.5)'}}
         onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.04)';e.currentTarget.style.boxShadow='0 0 60px rgba(232,168,32,0.8)'}}
         onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='0 0 40px rgba(232,168,32,0.5)'}}>
-        <div style={{background:'linear-gradient(90deg,#e8a820,#ffcc44)',padding:'6px',textAlign:'center',fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:900,letterSpacing:3,color:'#0a0704'}}>{label}</div>
+        <div style={{background:'linear-gradient(90deg,#e8a820,#ffcc44)',padding:'6px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:3,color:'#0a0704'}}>{label}</div>
         <div style={{fontSize:64,textAlign:'center',padding:'20px 0',background:'rgba(0,0,0,0.4)'}}>{m.emoji}</div>
         <div style={{padding:'0 16px 16px'}}>
-          <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:28,color:'#e8d090',textAlign:'center',marginBottom:4}}>{m.name}</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:2,color:'#8a7040',textAlign:'center',marginBottom:10}}>{m.role}</div>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#e8d090',textAlign:'center',marginBottom:4}}>{m.name}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,letterSpacing:2,color:'#8a7040',textAlign:'center',marginBottom:10}}>{m.role}</div>
           <div style={{display:'flex',justifyContent:'space-between',padding:'8px',background:'rgba(0,0,0,0.5)',borderRadius:4,marginBottom:8}}>
-            <div style={{textAlign:'center'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#ee2222',fontWeight:900}}>ATK</div><div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:'#ee2222'}}>{m.atk}</div></div>
-            <div style={{textAlign:'center',alignSelf:'center'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:bc,fontWeight:700}}>{m.keyword}</div></div>
-            <div style={{textAlign:'center'}}><div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#33dd33',fontWeight:900}}>HP</div><div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:'#33dd33'}}>{m.hp}</div></div>
+            <div style={{textAlign:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#ee2222',fontWeight:900}}>ATK</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,color:'#ee2222'}}>{m.atk}</div></div>
+            <div style={{textAlign:'center',alignSelf:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:bc,fontWeight:700}}>{m.keyword}</div></div>
+            <div style={{textAlign:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#33dd33',fontWeight:900}}>HP</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,color:'#33dd33'}}>{m.hp}</div></div>
           </div>
-          <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:'#8a7040',textAlign:'center',fontStyle:'italic'}}>{m.desc}</div>
-          {m.roleBondBonus>0&&<div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#e8a820',textAlign:'center',marginTop:8}}>🔗 +{m.roleBondBonus} ATK Bond</div>}
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'#8a7040',textAlign:'center',fontStyle:'italic'}}>{m.desc}</div>
+          {m.roleBondBonus>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#e8a820',textAlign:'center',marginTop:8}}>🔗 +{m.roleBondBonus} ATK Bond</div>}
         </div>
-        <div style={{background:'rgba(232,168,32,0.15)',padding:'12px',textAlign:'center',fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:900,color:'#e8a820',letterSpacing:2}}>KEEP THIS ONE</div>
+        <div style={{background:'rgba(232,168,32,0.15)',padding:'12px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:'#e8a820',letterSpacing:2}}>KEEP THIS ONE</div>
       </div>
     )
   }
   return(
     <div style={{position:'fixed',inset:0,zIndex:9900,background:'rgba(2,1,0,0.98)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:32,padding:'40px 20px'}}>
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:56,color:'#cc1111',textShadow:'0 0 40px rgba(200,0,0,0.9),0 0 80px rgba(150,0,0,0.6)',textAlign:'center'}}>Only One May Remain</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:18,color:'#a09060',fontStyle:'italic',textAlign:'center'}}>Two demonic powers cannot share the same stage.<br/>Choose who stays — the other is gone forever.</div>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,color:'#cc1111',textShadow:'0 0 40px rgba(200,0,0,0.9),0 0 80px rgba(150,0,0,0.6)',textAlign:'center'}}>Only One May Remain</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic',textAlign:'center'}}>Two demonic powers cannot share the same stage.<br/>Choose who stays — the other is gone forever.</div>
       <div style={{display:'flex',gap:60,alignItems:'center',flexWrap:'wrap',justifyContent:'center'}}>
         <MemberCard m={existing} onPick={()=>onChoice(existing,incoming)} label="CURRENTLY ON STAGE"/>
-        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:48,color:'#660000',textShadow:'0 0 20px rgba(200,0,0,0.8)'}}>VS</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#660000',textShadow:'0 0 20px rgba(200,0,0,0.8)'}}>VS</div>
         <MemberCard m={incoming} onPick={()=>onChoice(incoming,existing)} label="NEWLY ARRIVED"/>
       </div>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#4a3020',letterSpacing:2,textAlign:'center'}}>THE UNCHOSEN WILL BE PERMANENTLY REMOVED</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#4a3020',letterSpacing:2,textAlign:'center'}}>THE UNCHOSEN WILL BE PERMANENTLY REMOVED</div>
     </div>
   )
 }
@@ -1462,8 +1462,8 @@ function DemonicConflictScreen({conflict,onChoice}){
 function RecruitScreen({candidates,stage,onPick,onPass}){
   return(
     <div style={{position:'fixed',inset:0,zIndex:9600,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:24,padding:'40px 20px'}}>
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:44,color:'#d0b060',textShadow:'0 0 30px rgba(200,150,20,0.4)'}}>Recruit a Member</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:18,color:'#a09060',fontStyle:'italic'}}>Choose one musician to join your band — or pass</div>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#d0b060',textShadow:'0 0 30px rgba(200,150,20,0.4)'}}>Recruit a Member</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic'}}>Choose one musician to join your band — or pass</div>
       <div style={{display:'flex',gap:20,flexWrap:'wrap',justifyContent:'center',maxWidth:1000}}>
         {candidates.map(m=>{
           const alreadyOn=stage.some(s=>s&&s.id===m.id)
@@ -1481,36 +1481,36 @@ function RecruitScreen({candidates,stage,onPick,onPass}){
               onMouseEnter={e=>{if(canAdd)e.currentTarget.style.transform='translateY(-6px) scale(1.03)';e.currentTarget.style.boxShadow='0 0 30px rgba(232,168,32,0.4)'}}
               onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none'}}>
               <div style={{height:4,background:m.demonic?'linear-gradient(90deg,#e8a820,#ffd700,#e8a820)':m.mythic?'linear-gradient(90deg,#cc44ff,#ff88ff,#cc44ff)':m.foil?'linear-gradient(90deg,#88ccff,#ffffff,#88ccff)':'linear-gradient(90deg,#e8a820,#ffcc44)'}}/>
-              {tier&&<div style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:900,letterSpacing:3,textAlign:'center',padding:'4px 0',background:m.demonic?'rgba(200,160,0,0.25)':m.mythic?'rgba(180,0,255,0.2)':'rgba(100,180,255,0.15)',color:m.demonic?'#ffd700':m.mythic?'#dd88ff':'#88ccff',textShadow:m.demonic?'0 0 12px rgba(255,200,0,0.9)':m.mythic?'0 0 12px rgba(200,0,255,0.9)':'0 0 12px rgba(100,180,255,0.9)'}}>{m.demonic?'⛧ DEMONIC ⛧':m.mythic?'✦ MYTHIC ✦':'✨ FOIL ✨'} +{m.demonic?5:m.mythic?3:1} ATK/HP</div>}
-              {tier&&bondTarget&&<div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,letterSpacing:1,textAlign:'center',padding:'3px 0',background:'rgba(232,168,32,0.15)',color:'#e8a820'}}>⚡ BONDS WITH {bondTarget.name.toUpperCase()} +{bondBonus} ATK</div>}
+              {tier&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:3,textAlign:'center',padding:'4px 0',background:m.demonic?'rgba(200,160,0,0.25)':m.mythic?'rgba(180,0,255,0.2)':'rgba(100,180,255,0.15)',color:m.demonic?'#ffd700':m.mythic?'#dd88ff':'#88ccff',textShadow:m.demonic?'0 0 12px rgba(255,200,0,0.9)':m.mythic?'0 0 12px rgba(200,0,255,0.9)':'0 0 12px rgba(100,180,255,0.9)'}}>{m.demonic?'⛧ DEMONIC ⛧':m.mythic?'✦ MYTHIC ✦':'✨ FOIL ✨'} +{m.demonic?5:m.mythic?3:1} ATK/HP</div>}
+              {tier&&bondTarget&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,letterSpacing:1,textAlign:'center',padding:'3px 0',background:'rgba(232,168,32,0.15)',color:'#e8a820'}}>⚡ BONDS WITH {bondTarget.name.toUpperCase()} +{bondBonus} ATK</div>}
               <div style={{height:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:52,background:'rgba(0,0,0,0.35)'}}>{m.emoji}</div>
               <div style={{padding:'8px 12px 12px'}}>
-                <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:24,color:'#e8d090',textAlign:'center',marginBottom:2}}>{m.name}</div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:2,color:'#8a7040',textAlign:'center',textTransform:'uppercase',marginBottom:8}}>{m.role}</div>
+                <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,color:'#e8d090',textAlign:'center',marginBottom:2}}>{m.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,letterSpacing:2,color:'#8a7040',textAlign:'center',textTransform:'uppercase',marginBottom:8}}>{m.role}</div>
                 <div style={{display:'flex',justifyContent:'space-between',padding:'6px 8px',background:'rgba(0,0,0,0.5)',borderRadius:4,marginBottom:6}}>
                   <div style={{textAlign:'center'}}>
-                    <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#ee2222',textTransform:'uppercase',fontWeight:900}}>ATK</div>
-                    <div style={{fontFamily:"'Cinzel',serif",fontSize:28,fontWeight:900,color:'#ee2222',lineHeight:1}}>{m.atk}</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#ee2222',textTransform:'uppercase',fontWeight:900}}>ATK</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#ee2222',lineHeight:1}}>{m.atk}</div>
                   </div>
                   <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:2,alignSelf:'center'}}>
-                    <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:'#e8a820',fontWeight:700}}>{m.keyword}</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#e8a820',fontWeight:700}}>{m.keyword}</div>
                   </div>
                   <div style={{textAlign:'center'}}>
-                    <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
-                    <div style={{fontFamily:"'Cinzel',serif",fontSize:28,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
                   </div>
                 </div>
-                <div style={{fontFamily:"'IM Fell English',serif",fontSize:11,color:'#8a7040',textAlign:'center',fontStyle:'italic',lineHeight:1.3}}>{m.desc}</div>
-                {alreadyOn&&<div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#aa6600',textAlign:'center',marginTop:6,letterSpacing:1}}>ALREADY ON STAGE</div>}
-                {!alreadyOn&&isDblTime&&hasDblTime&&<div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#ff8800',textAlign:'center',marginTop:6,letterSpacing:1}}>ONLY ONE DRUMMER</div>}
-                {!alreadyOn&&emptySlot===-1&&<div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#aa2200',textAlign:'center',marginTop:6,letterSpacing:1}}>STAGE FULL</div>}
+                <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'#8a7040',textAlign:'center',fontStyle:'italic',lineHeight:1.3}}>{m.desc}</div>
+                {alreadyOn&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#aa6600',textAlign:'center',marginTop:6,letterSpacing:1}}>ALREADY ON STAGE</div>}
+                {!alreadyOn&&isDblTime&&hasDblTime&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#ff8800',textAlign:'center',marginTop:6,letterSpacing:1}}>ONLY ONE DRUMMER</div>}
+                {!alreadyOn&&emptySlot===-1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#aa2200',textAlign:'center',marginTop:6,letterSpacing:1}}>STAGE FULL</div>}
               </div>
             </div>
           )
         })}
       </div>
       <button onClick={onPass}
-        style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'12px 40px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:3,color:'#7a5020',cursor:'pointer',transition:'all 0.2s'}}
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'12px 40px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:3,color:'#7a5020',cursor:'pointer',transition:'all 0.2s'}}
         onMouseEnter={e=>{e.currentTarget.style.borderColor='#8a6030';e.currentTarget.style.color='#c8a040'}}
         onMouseLeave={e=>{e.currentTarget.style.borderColor='#4a3010';e.currentTarget.style.color='#7a5020'}}>
         Pass — No Recruitment
@@ -1530,8 +1530,8 @@ function RemasterModal({cards,onConfirm,onClose}){
   const ready=toDelete.length===2&&toCopy!==null
   return(
     <div style={{position:'fixed',inset:0,zIndex:9700,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,padding:'20px'}}>
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:44,color:'#d0b060'}}>The Remaster</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:15,color:'#a09060',fontStyle:'italic',textAlign:'center'}}>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#d0b060'}}>The Remaster</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'#a09060',fontStyle:'italic',textAlign:'center'}}>
         Click <span style={{color:'#ee2222',fontWeight:900}}>2 cards to delete</span> · Click <span style={{color:'#22aa44',fontWeight:900}}>1 card to copy</span>
       </div>
       <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center',maxWidth:1100,overflowY:'auto',maxHeight:'55vh'}}>
@@ -1546,16 +1546,16 @@ function RemasterModal({cards,onConfirm,onClose}){
               <div style={{height:4,background:bc}}/>
               <div style={{height:70,display:'flex',alignItems:'center',justifyContent:'center',fontSize:36,background:'rgba(0,0,0,0.35)'}}>{card.emoji}</div>
               <div style={{padding:'6px 8px 4px'}}>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:2}}>{card.name}</div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:7,color:bc,textAlign:'center',letterSpacing:2,textTransform:'uppercase'}}>{card.type}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:2}}>{card.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:7,color:bc,textAlign:'center',letterSpacing:2,textTransform:'uppercase'}}>{card.type}</div>
               </div>
               <div style={{display:'flex',gap:4,padding:'4px 6px 8px'}}>
                 <button onClick={()=>canDel&&toggleDelete(card.uid)}
-                  style={{flex:1,padding:'4px 0',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,background:isDel?'rgba(180,0,0,0.4)':'rgba(60,20,10,0.4)',border:isDel?'1px solid #ee2222':'1px solid rgba(100,40,20,0.4)',borderRadius:2,color:isDel?'#ff4444':'#6a3020',cursor:canDel?'pointer':'not-allowed'}}>
+                  style={{flex:1,padding:'4px 0',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,background:isDel?'rgba(180,0,0,0.4)':'rgba(60,20,10,0.4)',border:isDel?'1px solid #ee2222':'1px solid rgba(100,40,20,0.4)',borderRadius:2,color:isDel?'#ff4444':'#6a3020',cursor:canDel?'pointer':'not-allowed'}}>
                   {isDel?'✓ DEL':'✗ DEL'}
                 </button>
                 <button onClick={()=>canCopy&&setToCopy(isCopy?null:card.uid)}
-                  style={{flex:1,padding:'4px 0',fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:900,background:isCopy?'rgba(0,120,40,0.4)':'rgba(10,40,20,0.4)',border:isCopy?'1px solid #22aa44':'1px solid rgba(20,60,30,0.4)',borderRadius:2,color:isCopy?'#44dd44':'#2a5a30',cursor:canCopy?'pointer':'not-allowed'}}>
+                  style={{flex:1,padding:'4px 0',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,background:isCopy?'rgba(0,120,40,0.4)':'rgba(10,40,20,0.4)',border:isCopy?'1px solid #22aa44':'1px solid rgba(20,60,30,0.4)',borderRadius:2,color:isCopy?'#44dd44':'#2a5a30',cursor:canCopy?'pointer':'not-allowed'}}>
                   {isCopy?'✓ CPY':'+CPY'}
                 </button>
               </div>
@@ -1565,11 +1565,11 @@ function RemasterModal({cards,onConfirm,onClose}){
       </div>
       <div style={{display:'flex',gap:16}}>
         <button onClick={()=>ready&&onConfirm(toDelete,toCopy)} disabled={!ready}
-          style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:ready?'rgba(30,130,30,0.3)':'rgba(20,20,20,0.3)',border:ready?'2px solid #22aa44':'1px solid #333',borderRadius:3,color:ready?'#44dd44':'#555',cursor:ready?'pointer':'not-allowed'}}>
+          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:ready?'rgba(30,130,30,0.3)':'rgba(20,20,20,0.3)',border:ready?'2px solid #22aa44':'1px solid #333',borderRadius:3,color:ready?'#44dd44':'#555',cursor:ready?'pointer':'not-allowed'}}>
           ✓ Apply
         </button>
         <button onClick={onClose}
-          style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(80,40,10,0.3)',border:'1px solid rgba(100,60,20,0.5)',borderRadius:3,color:'#8a6030',cursor:'pointer'}}>
+          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(80,40,10,0.3)',border:'1px solid rgba(100,60,20,0.5)',borderRadius:3,color:'#8a6030',cursor:'pointer'}}>
           Cancel
         </button>
       </div>
@@ -1589,8 +1589,8 @@ function SetlistModal({cards,onConfirm,onClose}){
   const ordered=order.map(i=>cards[i])
   return(
     <div style={{position:'fixed',inset:0,zIndex:9700,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:24}}>
-      <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:48,color:'#d0b060'}}>Setlist</div>
-      <div style={{fontFamily:"'IM Fell English',serif",fontSize:16,color:'#a09060',fontStyle:'italic'}}>Drag to reorder the top of your deck</div>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#d0b060',fontFamily:"'BreakGothicFont',cursive"}}>Setlist</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'#a09060',fontStyle:'italic'}}>Drag to reorder the top of your deck</div>
       <div style={{display:'flex',gap:16,alignItems:'flex-end'}}>
         {ordered.map((card,i)=>{
           const bc=card.type==='CORRUPT'?'#aa1111':card.type==='UTILITY'?'#22aa44':card.type==='EMBER'?'#c87820':'#9933cc'
@@ -1604,22 +1604,22 @@ function SetlistModal({cards,onConfirm,onClose}){
               <div style={{height:5,background:bc}}/>
               <div style={{height:90,display:'flex',alignItems:'center',justifyContent:'center',fontSize:44,background:'rgba(0,0,0,0.35)'}}>{card.emoji}</div>
               <div style={{padding:'8px 10px 12px'}}>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:3}}>{card.name}</div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:8,color:bc,textAlign:'center',letterSpacing:2,textTransform:'uppercase',marginBottom:6}}>{card.type}</div>
-                <div style={{fontFamily:"'IM Fell English',serif",fontSize:10,color:'#b09870',textAlign:'center',fontStyle:'italic',lineHeight:1.4}}>{card.effect}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:3}}>{card.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:bc,textAlign:'center',letterSpacing:2,textTransform:'uppercase',marginBottom:6}}>{card.type}</div>
+                <div style={{fontFamily:"'ScratchFont',serif",fontSize:10,color:'#b09870',textAlign:'center',fontStyle:'italic',lineHeight:1.4}}>{card.effect}</div>
               </div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'rgba(200,160,60,0.5)',textAlign:'center',padding:'4px',background:'rgba(0,0,0,0.4)'}}>#{i+1}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'rgba(200,160,60,0.5)',textAlign:'center',padding:'4px',background:'rgba(0,0,0,0.4)'}}>#{i+1}</div>
             </div>
           )
         })}
       </div>
       <div style={{display:'flex',gap:16}}>
         <button onClick={()=>onConfirm(ordered)}
-          style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(30,130,30,0.3)',border:'2px solid #22aa44',borderRadius:3,color:'#44dd44',cursor:'pointer'}}>
+          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(30,130,30,0.3)',border:'2px solid #22aa44',borderRadius:3,color:'#44dd44',cursor:'pointer'}}>
           ✓ Lock In
         </button>
         <button onClick={onClose}
-          style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(80,40,10,0.3)',border:'1px solid rgba(100,60,20,0.5)',borderRadius:3,color:'#8a6030',cursor:'pointer'}}>
+          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(80,40,10,0.3)',border:'1px solid rgba(100,60,20,0.5)',borderRadius:3,color:'#8a6030',cursor:'pointer'}}>
           Cancel
         </button>
       </div>
@@ -2647,7 +2647,7 @@ export default function App(){
       {hellquakeAnim&&<div style={{position:'fixed',inset:0,zIndex:9500,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.85)',animation:'fadeIn 0.1s ease'}}>
         <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.04) 3px,rgba(255,255,255,0.04) 4px)',animation:'interlaceFlicker 0.08s steps(1) infinite',pointerEvents:'none'}}/>
         <div style={{fontSize:120,animation:'throb 0.3s ease-in-out infinite',filter:`drop-shadow(-4px 0 rgba(255,0,0,0.8)) drop-shadow(4px 0 rgba(0,80,255,0.8))`}}>⛧</div>
-        <div style={{fontFamily:"'UnifrakturMaguntia',cursive",fontSize:64,color:hellquakeAnim.color,textShadow:`-3px 0 rgba(255,0,0,0.8), 3px 0 rgba(0,80,255,0.7), 0 0 60px ${hellquakeAnim.color},0 0 120px ${hellquakeAnim.color}`,animation:'fadeIn 0.3s ease'}}>{hellquakeAnim.text}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:hellquakeAnim.color,textShadow:`-3px 0 rgba(255,0,0,0.8), 3px 0 rgba(0,80,255,0.7), 0 0 60px ${hellquakeAnim.color},0 0 120px ${hellquakeAnim.color}`,animation:'fadeIn 0.3s ease'}}>{hellquakeAnim.text}</div>
       </div>}
       {remasterOpen&&<RemasterModal cards={remasterCards} onConfirm={(delUids,copyUid)=>{
         setDeck(prev=>{
@@ -2675,7 +2675,7 @@ export default function App(){
         <div style={{position:'relative',zIndex:5,background:'rgba(20,11,3,0.42)',borderTop:'2px solid rgba(60,35,5,0.45)',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>
           <div style={{display:'flex',alignItems:'center',gap:10,padding:'3px 16px 1px'}}>
             <div style={{flex:1,height:1,background:'rgba(60,35,5,0.2)'}}/>
-            <div style={{fontFamily:"'IM Fell English',serif",fontSize:10,color:'#8a6838',opacity:.4,fontStyle:'italic',letterSpacing:4}}>— stage —</div>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:10,color:'#8a6838',opacity:.4,fontStyle:'italic',letterSpacing:4}}>— stage —</div>
             <div style={{flex:1,height:1,background:'rgba(60,35,5,0.2)'}}/>
           </div>
           <div style={{display:'flex',alignItems:'center',gap:8,padding:'12px 10px 12px 220px',justifyContent:'center',flex:1,position:'relative'}}>
@@ -2684,11 +2684,11 @@ export default function App(){
                 <div key={i} style={{position:'relative'}}
                   onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='1'}}
                   onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='0'}}>
-                  {a?<div style={{width:80,height:105,border:'1px solid rgba(200,140,30,0.65)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 10px rgba(200,140,20,0.25)',cursor:'help'}}><div style={{fontSize:22}}>{a.emoji}</div><div style={{fontFamily:"'Cinzel',serif",fontSize:6,letterSpacing:0.5,color:'#c8a040',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 3px'}}>{a.name}</div></div>
-                  :<div style={{width:80,height:105,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:24,opacity:.28}}>⚗</div><div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>}
+                  {a?<div style={{width:80,height:105,border:'1px solid rgba(200,140,30,0.65)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 10px rgba(200,140,20,0.25)',cursor:'help'}}><div style={{fontSize:22}}>{a.emoji}</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:6,letterSpacing:0.5,color:'#c8a040',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 3px'}}>{a.name}</div></div>
+                  :<div style={{width:80,height:105,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:24,opacity:.28}}>⚗</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>}
                   {a&&<div data-artip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:88,top:0,zIndex:9999,pointerEvents:'none',minWidth:180,maxWidth:240,background:'rgba(12,7,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
-                    <div style={{fontFamily:"'Cinzel',serif",fontSize:10,fontWeight:700,color:'#e8c060',marginBottom:4}}>{a.emoji} {a.name}</div>
-                    <div style={{fontFamily:"'IM Fell English',serif",fontSize:9,color:'#9a8050',fontStyle:'italic',lineHeight:1.4}}>{a.effect}</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:700,color:'#e8c060',marginBottom:4}}>{a.emoji} {a.name}</div>
+                    <div style={{fontFamily:"'ScratchFont',serif",fontSize:9,color:'#9a8050',fontStyle:'italic',lineHeight:1.4}}>{a.effect}</div>
                   </div>}
                 </div>
               )})}
@@ -2719,11 +2719,11 @@ export default function App(){
             const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1
             const fin=Math.round(dmg*bon)
             return <>
-              <span style={{fontFamily:"'IM Fell English',serif",fontSize:17,color:'#3a2508',opacity:1,fontStyle:'italic'}}>combined attack</span>
-              <span key={fin} style={{fontFamily:"'Cinzel',serif",fontSize:34,fontWeight:900,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block'}}>{fin}</span>
-              {bon>1&&<span style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#e8a820',letterSpacing:1}}>+{Math.round((bon-1)*100)}% SYNERGY</span>}
+              <span style={{fontFamily:"'ScratchFont',serif",fontSize:17,color:'#3a2508',opacity:1,fontStyle:'italic'}}>combined attack</span>
+              <span key={fin} style={{fontFamily:"'MBScribblesFont',serif",fontSize:34,fontWeight:900,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block'}}>{fin}</span>
+              {bon>1&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#e8a820',letterSpacing:1}}>+{Math.round((bon-1)*100)}% SYNERGY</span>}
               <span style={{color:'#6a3010',opacity:.5,fontSize:14}}>⟶</span>
-              <span style={{fontFamily:"'IM Fell English',serif",fontSize:17,color:'#3a2508',opacity:1,fontStyle:'italic'}}>{enemy.name}</span>
+              <span style={{fontFamily:"'ScratchFont',serif",fontSize:17,color:'#3a2508',opacity:1,fontStyle:'italic'}}>{enemy.name}</span>
             </>
           })()}
         </div>
@@ -2732,8 +2732,8 @@ export default function App(){
       {/* HAND AREA */}
       <div style={{flex:'0 0 420px',background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0',display:'flex',flexDirection:'column',zIndex:30,minHeight:0,position:'relative'}}>
         <div style={{textAlign:'center',padding:'6px 0 0',flexShrink:0,position:'relative',zIndex:0}}>
-          <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length} of {HAND_SIZE}</span>
-          {pendingEmbers>0&&<span style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#ff6600',marginLeft:12}}>+{pendingEmbers} 🔥 pending</span>}
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length} of {HAND_SIZE}</span>
+          {pendingEmbers>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff6600',marginLeft:12}}>+{pendingEmbers} 🔥 pending</span>}
         </div>
 
         {/* LEFT COLUMN: Deck/Discard — absolutely positioned */}
@@ -2747,12 +2747,12 @@ export default function App(){
           onMouseEnter={e=>{const d=e.currentTarget.querySelector('[data-passdetail]');if(d)d.style.display='block'}}
           onMouseLeave={e=>{const d=e.currentTarget.querySelector('[data-passdetail]');if(d)d.style.display='none'}}>
           <div style={{background:'rgba(10,5,2,0.95)',border:'1px solid rgba(80,60,160,0.45)',borderRadius:'6px 0 0 6px',padding:'7px 10px',cursor:'help'}}>
-            <div style={{fontFamily:"'Cinzel',serif",fontSize:7,letterSpacing:2,color:'#6070a0',textTransform:'uppercase',marginBottom:4}}>💿 Passives</div>
-            {activePassives.map((p,i)=><div key={i} style={{fontSize:11,color:'#8090c0',fontFamily:"'Cinzel',serif",marginBottom:2}}>{p.emoji} {p.name}</div>)}
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:7,letterSpacing:2,color:'#6070a0',textTransform:'uppercase',marginBottom:4}}>💿 Passives</div>
+            {activePassives.map((p,i)=><div key={i} style={{fontSize:11,color:'#8090c0',fontFamily:"'MBScribblesFont',serif",marginBottom:2}}>{p.emoji} {p.name}</div>)}
             <div data-passdetail="" style={{display:'none',marginTop:8,borderTop:'1px solid rgba(80,60,160,0.3)',paddingTop:6}}>
               {activePassives.map((p,i)=><div key={i} style={{marginBottom:6}}>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:'#aabbee',fontWeight:700,marginBottom:1}}>{p.emoji} {p.name}</div>
-                <div style={{fontFamily:"'IM Fell English',serif",fontSize:8,color:'#7080aa',fontStyle:'italic',lineHeight:1.4}}>{p.effect}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#aabbee',fontWeight:700,marginBottom:1}}>{p.emoji} {p.name}</div>
+                <div style={{fontFamily:"'ScratchFont',serif",fontSize:8,color:'#7080aa',fontStyle:'italic',lineHeight:1.4}}>{p.effect}</div>
               </div>)}
             </div>
           </div>
@@ -2760,17 +2760,17 @@ export default function App(){
         {/* RIGHT COLUMN: Buttons/Embers/Info — absolutely positioned */}
         <div style={{position:'absolute',right:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:4,alignItems:'flex-end',justifyContent:'center',padding:'8px 22px 8px 12px',background:'rgba(10,5,2,0.6)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none'}}>
           <button onClick={handleStrike} disabled={!canStrike}
-            style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 20px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:190}}>⚔ Strike</button>
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 20px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:190}}>⚔ Strike</button>
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'flex-end',width:190}}>
             <PhaseDots left={strikesLeft} total={MAX_STRIKES} color='#dd2222' wide={true}/>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:18,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555',minWidth:32,textAlign:'right'}}>{strikesLeft}/{MAX_STRIKES}</span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555',minWidth:32,textAlign:'right'}}>{strikesLeft}/{MAX_STRIKES}</span>
           </div>
           <div style={{height:8}}/>
           <button onClick={handleDiscard} disabled={!canDiscard}
-            style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 20px',background:canDiscard?'rgba(100,70,0,0.4)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:190}}>↓ Discard</button>
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 20px',background:canDiscard?'rgba(100,70,0,0.4)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:190}}>↓ Discard</button>
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'flex-end',width:190}}>
             <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:18,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555',minWidth:32,textAlign:'right'}}>{discardsLeft}/{MAX_DISCARDS}</span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555',minWidth:32,textAlign:'right'}}>{discardsLeft}/{MAX_DISCARDS}</span>
           </div>
           <div style={{height:8}}/>
           <EmberDisplayLarge current={embers} max={maxEmbers}/>
@@ -2778,8 +2778,8 @@ export default function App(){
           <div style={{display:'flex',gap:14,justifyContent:'flex-end',padding:'4px 0'}}>
             {[['Fight',(fightIndex%3+1)+'/3','#dd2222'],['Corrupt',corruption+'%',corruption>60?'#ff3300':'#aa5500'],['Stash',stash+(stash>=420?' 🔒':stash>=380?' ⚠':''),(stash>=420?'#ff3300':stash>=380?'#ff9900':'#44cc44')]].map(function(item){return(
               <div key={item[0]} style={{textAlign:'center',padding:'0 4px'}}>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:'#9a7a40',letterSpacing:2,textTransform:'uppercase',marginBottom:2}}>{item[0]}</div>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:22,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#9a7a40',letterSpacing:2,textTransform:'uppercase',marginBottom:2}}>{item[0]}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
               </div>
             )})}
           </div>
@@ -2789,9 +2789,9 @@ export default function App(){
         {/* Sort buttons — stacked vertically to the right of deck/discard */}
         <div style={{position:'absolute',left:119,bottom:32,zIndex:60,display:'flex',flexDirection:'column',gap:4}}>
           <button onClick={()=>setHandSort(p=>p==='embers'?'none':'embers')}
-            style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'8px 12px',width:100,background:handSort==='embers'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='embers'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='embers'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>🔥 COST</button>
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'8px 12px',width:100,background:handSort==='embers'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='embers'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='embers'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>🔥 COST</button>
           <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
-            style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'8px 12px',width:100,background:handSort==='rarity'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='rarity'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='rarity'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>⭐ RARITY</button>
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'8px 12px',width:100,background:handSort==='rarity'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='rarity'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='rarity'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>⭐ RARITY</button>
         </div>
         <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:50,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',zIndex:50}}>
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).map((card,i)=>(
