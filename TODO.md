@@ -1,111 +1,84 @@
 # Vestibule — Master TODO & Design Reference
-*Priority ranked. Updated end of Session 8. No encoding garbage.*
+*Priority ranked. Last updated: Friday, March 20, 2026 07:46 PM*
 
 ---
 
 ## P1 — NEXT (implement in order)
 
-### 1. Mentor Link System
-Complete design confirmed. Build in this order:
+### 1. Dead Cards — Fix all 4 (most urgent)
+These appear 2-3x in every deck. If they do nothing, players lose trust fast.
+- [ ] **Demo Tape** — track `lastRiffPlayed` in state. On play: replay that card for free. Show 'No riff recorded yet' if none played
+- [ ] **Setlist** — modal overlay: show top 4 deck cards as large draggable tiles, player reorders order, hits Confirm
+- [ ] **The Remaster** — modal: show 10 random deck cards, player clicks 2 red X to delete, 1 green + to copy, Confirm
+- [ ] **Hellquake** (Black Sabbath Sigil) — implement d10 result table with dramatic random outcomes
 
-**A. Member object — new fields on recruit:**
-- tier: base / foil / mythic / demonic
-- roleBondWith: [uid, ...] — UIDs of role-bonded stage members
-- roleBondBonus: number — ATK added by role bond (subtract on sell)
-- keywordBondActive: boolean — keyword bond currently firing
+### 2. Pack Opening — Blank screen bug
+- [ ] Booster pack cards show at 300x420 but screen goes blank on open — investigate and fix
 
-**B. Stat bonuses on recruit:**
-- Foil: +1 ATK, +1 HP vs base
-- Mythic: +3 ATK, +3 HP vs base
-- Demonic: +5 ATK, +5 HP vs base
+### 3. Keyword Passives — Wire into combat fully
+- [ ] **FRENZIED**: each Strike, if this member ATK alone > 10 dmg, gain +1 ATK perm (max +5/fight)
+- [ ] **ANCHOR**: end of each Strike heal adjacent members 1HP. If both neighbors alive, self heals 1HP too
+- [ ] **CORRUPT**: ATK = baseATK + floor(corruption/15). At 100% corruption ATK doubles. Show dynamically on card
+- [ ] **DEBUFF**: each Strike reduces boss base dmg by 1 (min 1). Visual indicator on boss. Resets between fights
 
-**C. Role Bond — permanent, retroactive, breaks on sell:**
-- Foil joins: foil AND any same-role member both get +1 ATK permanently
-- Mythic joins: both get +2 ATK permanently
-- Demonic joins: both get +3 ATK permanently
-- On sell: revert roleBondBonus from all bonded partners
+### 4. Pawn Shop Sell UI
+- [ ] Wire 'Open Pawn Shop' button to show owned cards/members with sell prices
+- [ ] Backend logic exists (handlePawnSellMember) — just needs the modal UI to select what to sell
 
-**D. Keyword Bond — adjacency required, per-strike:**
-- FRENZIED foil/mythic/demonic: both adj FRENZIED get +1/+2/+3 ATK on kill
-- ANCHOR foil/mythic/demonic: heals +2/+3/+4 HP per strike to neighbors
-- SHREDDER foil: first 2 RIFFs discounted. Mythic: 3 RIFFs + adj. Demonic: all RIFFs
-- DOUBLE TIME foil: d6 roll +1 (min x1.5). Mythic: no x0.5 possible. Demonic: min x1.5 max x3.0
-- DEBUFF foil/mythic/demonic: boss loses 3/4/5 per strike
-- FOLK MAGIC foil/mythic/demonic: 30%/40%/50% ember refill chance, +0/+1/+2 bonus ember
-- CORRUPT foil/mythic/demonic: ATK + floor(corrupt/12) / floor(corrupt/10) / floor(corrupt/8)
-- HEXED foil/mythic/demonic: +7%/+10%/+15% corruption per strike, scales at /8% / /8% / /6%
-
-**E. Mythic Aura — whole stage, no adjacency:**
-- FRENZIED mythic/demonic: all members +1/+2 ATK at fight start
-- ANCHOR mythic/demonic: all members heal +1/+2 HP per strike
-- SHREDDER mythic: all RIFFs -1 ember first Strike. Demonic: all Strikes
-- DOUBLE TIME mythic/demonic: band dmg floor +0.50 (bad=x1.0 mid=x2.0 good=x2.5) / min x1.5 always
-- DEBUFF mythic/demonic: boss starts at -2/-4 dmg before Strike 1 fires
-- FOLK MAGIC mythic/demonic: 40%/50% whole-band refill, +1/+2 bonus ember on proc
-- CORRUPT mythic/demonic: all CORRUPT members get scaling / scaling doubled
-- HEXED mythic/demonic: all HEXED gain ATK at double / triple rate
-
-**F. DEMONIC rules:**
-- Only ONE demonic on stage at a time
-- Second demonic triggers 'ONLY ONE MAY REMAIN' full-screen showdown UI
-- Both cards shown side by side with full stats, bonds, aura listed
-- Player picks one — the other is permanently removed (not sold)
-- Sell price: 69 stash flat
-
-**G. Pawn shop sell logic (build alongside mentor link):**
-- Max 2 sells per visit, cannot sell last 2 members
-- Sell prices: Common 1, Uncommon 2, Rare 4, Foil +3, Mythic +8, Demonic 69 flat, Member 5, Artifact 50% buyback
-- On member sell: break all bonds, revert roleBondBonus from remaining partners
-
-**H. Visual indicators:**
-- Foil: glossy shimmer overlay on card
-- Mythic: animated shiny pattern on card
-- Demonic: thick glowing gold border on card
-- Bonded members shop + battle: matching color glow + chain-link icon on both
-- Recruit screen: show BONDS WITH [NAME] on foil/mythic/demonic candidates
-- Battle: bonded pair pulses matching color when keyword bond fires
-
-**I. Opening Night stays base tier — no foil/mythic/demonic at start**
+### 5. Simulator Fix & Run
+- [ ] Fix Soundcheck temp buff: set origAtk on injured members so +1 ATK reverts end-of-strike
+- [ ] Fix genShop(): always guarantee recruitment pack (Garage Band 10, Touring 22, Demonic 40)
+- [ ] Run 1M simulations, generate full balance report
 
 ---
 
-### 2. Simulator Fix & Run (after mentor link is live)
-Bugs to fix before running 1M sims:
-- Soundcheck temp buff: set origAtk on injured members so +1 ATK reverts end-of-strike
-- genShop(): always show recruitment pack (Garage Band 10, Touring 22, Demonic Pack 40)
-- Then run 1M simulations and generate balance report
+## P2 — FUTURE
+- [ ] A11-A20 unlockable artifacts
+- [ ] P11-P20 unlockable passives
+- [ ] Collection/unlock screen
+- [ ] Daily challenge leaderboard
+- [ ] Settings menu
+- [ ] Font swap (owner providing TTF files for IM Fell English + UnifrakturMaguntia)
+- [ ] Steam / mobile / PS release prep
 
 ---
 
-## P2 — HIGH IMPACT
+## ✅ COMPLETED
 
-### Dead Cards (all appear 2-3x in deck — broken trust if they do nothing)
-- Demo Tape: track lastRiffPlayed in state. On play: cast that card free. Show error if no riff yet
-- Setlist: modal overlay showing top 4 deck cards as draggable tiles, player reorders, Confirm
-- The Remaster: modal showing 10 random deck cards, click 2 red X to delete, 1 green + to copy, Confirm
-- Hellquake (Black Sabbath Sigil): implement d10 result table with dramatic outcomes
+### Session 9 — Mentor Link System
+- ~~**Foil/Mythic/Demonic tier system** — base stat bonuses on recruit (+1/+3/+5 ATK & HP)~~
+- ~~**Role Bond** — foil/mythic/demonic arriving bonds with same-role member, both get permanent ATK bonus, breaks on sell~~
+- ~~**Keyword Bond** — adjacency-based amplification for all 8 keywords at foil/mythic/demonic tier~~
+- ~~**Mythic/Demonic Aura** — whole-stage passive effects at mythic and demonic tier~~
+- ~~**DEMONIC conflict UI** — 'Only One May Remain' full-screen showdown when second demonic arrives~~
+- ~~**Pawn shop sell backend** — handlePawnSellMember wired with bond-breaking~~
+- ~~**Bond glow in battle** — bonded members pulse matching keyword color~~
+- ~~**Recruit screen tier visuals** — foil/mythic/demonic banners + BONDS WITH hint~~
+- ~~**genRecruitPack updated** — Demonic Pack now has 3% demonic chance~~
 
-### Keyword Passives — Make them real
-- FRENZIED: each Strike, if this member ATK alone > 10 dmg, gain +1 ATK perm (max +5/fight)
-- ANCHOR: end of each Strike phase heal adjacent members 1HP. If both neighbors alive, self heals 1HP too
-- CORRUPT: ATK = baseATK + floor(corruption/15). At 100% corruption ATK doubles. Show dynamically on card
-- DEBUFF: each Strike reduces boss base dmg by 1 (min 1). Visual indicator on boss. Resets between fights
+### Session 8 — Shop & Battle UI
+- ~~**Shop screen layout** — 300x420 card ratio, booster packs, left column artifacts/passives~~
+- ~~**Battle hand area** — 420px fixed, card fan with paddingBottom:50~~
+- ~~**Artifact slots** — 3 stage slots show equipped artifacts with hover tooltips~~
+- ~~**Active panel** — shows passives only, hover expands effect text~~
+- ~~**Reroll** — clears sold state, cost increases each reroll~~
+- ~~**SOLD! overlay** — red diagonal on purchased cards~~
 
-### Pack Opening — Blank screen bug
-- Booster pack cards display at 300x420 but screen goes blank on open — investigate + fix
-
-### Font Swap
-- Owner will provide TTF files for IM Fell English + UnifrakturMaguntia replacements
-
----
-
-## P3 — FUTURE
-- A11-A20 unlockable artifacts
-- P11-P20 unlockable passives
-- Collection/unlock screen
-- Daily challenge leaderboard
-- Settings menu
-- Steam / mobile / PS release prep
+### Sessions 1-7 — Core Game
+- ~~**All 8 keyword mechanics** — FRENZIED, ANCHOR, SHREDDER, DOUBLE TIME, DEBUFF, FOLK MAGIC, CORRUPT, HEXED~~
+- ~~**Full enemy roster** — 27 fights, 9 circles, all passives (selfbuff, cardHeal, stealStash, rageScale, corruptPlayer, targetHighestHp, lockCard, damageScaleAtk)~~
+- ~~**Complete card set** — all RIFF, CORRUPT, EMBER, UTILITY cards implemented~~
+- ~~**All 10 starter artifacts + all 10 starter passives**~~
+- ~~**4 circle artifacts** — Goat of Mendes, Hellfire Amulet, Sabbath Crown, Wailing Guitar~~
+- ~~**Booster pack system** — Cassette, CD-R, Import Vinyl, Rare Vinyl, Cursed Demo~~
+- ~~**Recruitment pack system** — Garage Band, Touring, Demonic packs always in shop~~
+- ~~**Opening Night** — pick 2 from 8 random base-tier members~~
+- ~~**Band synergy bonus** — 3/4/5 buffed members = +10/+20/+35% damage~~
+- ~~**Stash reward scaling** — per circle, perfect bonus, corruption dividend~~
+- ~~**DOUBLE TIME d6 roll** — per fight, multiplier affects whole band~~
+- ~~**Too Stoned system** — members die, Black Candle, Cult Following~~
+- ~~**Stage drag-and-drop** — members repositionable~~
+- ~~**Pawn shop UI** — prices displayed, sell logic backend added~~
 
 ---
 
@@ -130,7 +103,7 @@ Wanderer 27 > Lost Soul 42 > Drifter 69 > Siren 60 > Seducer 140 > Glutton 80 > 
 **Recruitment Pack (always left column, refreshes each shop):**
 - Garage Band Pack 10st: pick 1 of 2, no foil
 - Touring Pack 22st: pick 1 of 3, 15% foil
-- Demonic Pack 40st: pick 1 of 4, 25% foil + 15% mythic
+- Demonic Pack 40st: pick 1 of 4, 25% foil + 15% mythic + 3% demonic
 
 ## Repo
 - github.com/HiredHeist/vestibule (private)
