@@ -2505,7 +2505,7 @@ export default function App(){
     const nd=stage.some(m=>m&&m.role==='Drummer')
     const ndCount=stage.filter(m=>m&&m.role==='Drummer').length
     if(nd){let r=Math.floor(Math.random()*6)+1;if(ndCount>=2&&r<=2)r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
-    setStage(p=>p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false}):null))
+    setStage(p=>p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined}):null))
     // Redeal hand from current deck+discard
     setDeck(function(curDeck){
       setDiscardPile(function(curDisc){
