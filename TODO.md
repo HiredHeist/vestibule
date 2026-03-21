@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Saturday, March 21, 2026 at 01:15 PM*
+*Last updated: Saturday, March 21, 2026 at 01:27 PM*
 
 ---
 
@@ -49,7 +49,7 @@ This is happening.
 
 ## ✅ COMPLETED — Session 10
 
-- ~~**Fire & Recruit panel** — when stage is full (5/5) on recruit screen, a fire panel appears bottom-right showing all members with sell prices. Fire one to open a slot, recruit cards light up instantly. Subtitle changes to explain the situation.~~
+- ~~**Fire & Recruit panel** (2× larger — width 520, fonts 15-38px, emoji 36px, HP shown on each member row) — when stage is full (5/5) on recruit screen, a fire panel appears bottom-right showing all members with sell prices. Fire one to open a slot, recruit cards light up instantly. Subtitle changes to explain the situation.~~
 
 
 - ~~**Stage Dive** 2→1 copy — once per fight, 2nd copy was always dead~~
