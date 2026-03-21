@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Saturday, March 21, 2026 at 12:48 PM*
+*Last updated: Saturday, March 21, 2026 at 12:58 PM*
 
 ---
 
@@ -48,6 +48,18 @@ This is happening.
 ---
 
 ## ✅ COMPLETED — Session 10
+
+- ~~**Stage Dive** 2→1 copy — once per fight, 2nd copy was always dead~~
+- ~~**Signal Decay** 2→1 copy — anti-synergy in corrupt builds, 1 is enough~~
+- ~~**Controlled Feedback** 2→1 copy — too niche to appear twice~~
+- ~~**The Remaster** 2→1 copy — powerful deck surgery, twice was too much~~
+- ~~**Power Tap** +1→+2 embers (free) — +1 was nearly useless~~
+- ~~**Groupie** net+1 ember → +2 embers + draw 1 card immediately~~
+- ~~**Setbreak** random discard → player selects card to discard first, then plays~~
+- ~~**Roadie** immune only → immune + heal 2HP (always useful now)~~
+- ~~**Distortion** +10%%→+15%% corruption (competes better with Dial to Eleven)~~
+- ~~**Static Charge** simplified: +2 embers always, +4 if corruption = 0%%~~
+
 
 - ~~**Burn the Set reworked** — was: discard whole hand draw 6. Now: 1 ember, select up to 3 cards to discard, draw that many +1~~
 - ~~**Hand over-cap display** — 7 of 6 ⚡ label, cards spread wider when over-cap so they are all reachable~~
