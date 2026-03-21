@@ -2618,6 +2618,43 @@ export default function App(){
       })
       setRecruitCandidates(candidates)
       setGameState('recruit')
+    } else if(type==='pack'){
+      // Handle booster pack picks — route each picked card to the right place
+      const picked = item.pickedCards || []
+      const members = picked.filter(c => c.isMember)
+      const cards = picked.filter(c => !c.isMember && !c._isPack)
+      const artifacts = picked.filter(c => c._isPack && !c.cost && !c.isMember)
+      const passives = picked.filter(c => c._isPack && c.cost)
+
+      // Add regular cards to deck
+      cards.forEach(c => {
+        const nc = Object.assign({},c,{uid:Math.random().toString(36).slice(2),shopBought:true})
+        setDeck(p=>[...p,nc])
+        setShopBoughtIds(p=>[...p,nc.uid])
+        addLog('🛒 Added '+c.name+' to deck!')
+      })
+      // Equip artifacts
+      artifacts.forEach(a => {
+        if(activeArtifacts.length>=3){addLog('⚠ Artifact slots full!');return}
+        setActiveArtifacts(p=>[...p,a])
+        if(a.id==='a7')setMaxEmbers(p=>Math.min(8,p+1))
+        if(a.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
+        addLog('⚗ Artifact equipped: '+a.name+'!')
+      })
+      // Equip passives
+      passives.forEach(p => {
+        if(activePassives.length>=5){addLog('⚠ Passive slots full!');return}
+        setActivePassives(prev=>[...prev,p])
+        addLog('💿 Passive equipped: '+p.name+'!')
+      })
+      // Members — trigger recruit flow (same as buying a recruitment pack)
+      if(members.length>0){
+        const enriched = members.map(m=>{
+          return {...m, foil:m.foil||false, mythic:m.mythic||false, demonic:m.demonic||false}
+        })
+        setRecruitCandidates(enriched)
+        setGameState('recruit')
+      }
     } else {addLog('📦 Purchased: '+item.name+'!')}
   },[stash])
 
