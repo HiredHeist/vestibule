@@ -1527,28 +1527,28 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
 
       {/* FIRE PANEL — only shown when stage is full */}
       {isFull&&onFireMember&&(
-        <div style={{position:'fixed',bottom:24,right:24,width:280,background:'linear-gradient(160deg,#0e0a16,#080510)',border:'2px solid rgba(220,60,20,0.7)',borderRadius:10,padding:'14px 16px',boxShadow:'0 0 30px rgba(200,40,0,0.25)',zIndex:9700}}>
-          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:'#ff4422',textAlign:'center',marginBottom:4,textShadow:'0 0 16px rgba(255,60,20,0.7)'}}>🔥 Fire a Member</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'#aa5533',textAlign:'center',fontStyle:'italic',marginBottom:10}}>Fire one to open a slot</div>
+        <div style={{position:'fixed',bottom:24,right:24,width:520,background:'linear-gradient(160deg,#0e0a16,#080510)',border:'2px solid rgba(220,60,20,0.7)',borderRadius:12,padding:'20px 24px',boxShadow:'0 0 40px rgba(200,40,0,0.35)',zIndex:9700}}>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:38,color:'#ff4422',textAlign:'center',marginBottom:6,textShadow:'0 0 20px rgba(255,60,20,0.8)'}}>🔥 Fire a Member</div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#aa5533',textAlign:'center',fontStyle:'italic',marginBottom:16}}>Fire one to open a slot</div>
           {activeMembers.map(({m,i})=>(
-            <div key={m.uid||i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'6px 8px',marginBottom:6,background:'rgba(0,0,0,0.35)',borderRadius:5,border:'1px solid rgba(180,60,20,0.25)'}}>
-              <div style={{display:'flex',alignItems:'center',gap:8,flex:1,minWidth:0}}>
-                <span style={{fontSize:20}}>{m.emoji}</span>
+            <div key={m.uid||i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 14px',marginBottom:10,background:'rgba(0,0,0,0.35)',borderRadius:8,border:'1px solid rgba(180,60,20,0.35)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:14,flex:1,minWidth:0}}>
+                <span style={{fontSize:36}}>{m.emoji}</span>
                 <div style={{minWidth:0}}>
-                  <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:14,color:'#e8d090',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{m.name}</div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#8a6040',letterSpacing:1}}>{m.keyword} · ATK {m.atk}</div>
+                  <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,color:'#e8d090',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{m.name}</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#8a6040',letterSpacing:1}}>{m.keyword} · ATK {m.atk} · HP {m.hp}</div>
                 </div>
               </div>
               <button
                 onClick={()=>onFireMember(m,i)}
-                style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,padding:'5px 8px',background:'rgba(160,30,10,0.4)',border:'1px solid rgba(220,60,20,0.6)',borderRadius:4,color:'#ff6644',cursor:'pointer',whiteSpace:'nowrap',flexShrink:0,marginLeft:8}}
-                onMouseEnter={e=>{e.currentTarget.style.background='rgba(200,40,10,0.6)'}}
+                style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:1,padding:'10px 16px',background:'rgba(160,30,10,0.4)',border:'2px solid rgba(220,60,20,0.6)',borderRadius:6,color:'#ff6644',cursor:'pointer',whiteSpace:'nowrap',flexShrink:0,marginLeft:14}}
+                onMouseEnter={e=>{e.currentTarget.style.background='rgba(200,40,10,0.65)'}}
                 onMouseLeave={e=>{e.currentTarget.style.background='rgba(160,30,10,0.4)'}}>
                 🔥 {fireSellPrice(m)}🌿
               </button>
             </div>
           ))}
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#664422',textAlign:'center',marginTop:6,letterSpacing:1}}>Stash: {stash}🌿 · Refund shown per member</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#664422',textAlign:'center',marginTop:10,letterSpacing:1}}>Stash: {stash}🌿 · Refund shown per member</div>
         </div>
       )}
     </div>
