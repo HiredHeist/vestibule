@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Saturday, March 21, 2026 at 01:27 PM*
+*Last updated: Saturday, March 21, 2026 at 02:19 PM*
 
 ---
 
@@ -7,6 +7,39 @@
 1,000,000 copies at $6.66 on Steam — Week 1.
 YouTubers and streamers will push it because it is genuinely unique.
 This is happening.
+
+---
+
+## 🔴 PLAYTEST BUGS — Fix before demo (Session 10, March 21)
+
+1. **Amp the Static silently unplayable** — card greys out with no explanation when corruption = 0. Need a clear "Requires Corruption" label on the card when it can't fire.
+
+2. **Burn the Set — no selection UI** — player must select cards BEFORE playing it but there is zero indication of this. Need hint text on the card and a visual cue when playing with nothing selected.
+
+3. **Artifacts/passives re-appear after purchase** — bought Sabbath Crown, left shop, came back and it was available again. `boughtIds` resets when `shopCards` changes. Need persistent sold tracking in App state, not ShopScreen state.
+
+4. **Stage Dive selected state gets stuck** — after using Stage Dive (once per fight), second copy in hand stays selected with no way to deselect/play. Selection state needs to clear when a card becomes unplayable.
+
+5. **8 cards in hand (over-cap)** — Groupie's new "draw 1" can push hand over HAND_SIZE mid-strike. Hard cap needs to be enforced at the point of draw, not just at end-of-strike.
+
+6. **Foil/Mythic/Demonic members have no visual on stage** — foil Vitalik looks identical to a base Vitalik on the stage card. Need colored top bar / badge / glow on StageSlot for tiered members.
+
+7. **Circle artifacts/passives never rotate** — `circleArtifact` and `circlePassive` are initialized once and never change. Should rotate at each circle boss shop.
+
+8. **Permanent ATK buffs may not carry over between fights** — `_origAtk` is not cleared at fight start. If a fight ends mid-temp-buff, `_origAtk` carries into next fight and could revert permanent gains. Fix: always clear `_origAtk` at fight start.
+
+9. **FOLK MAGIC ember refill has no explanation** — embers mysteriously refilling is confusing. The 20% FOLK MAGIC proc needs a visible float/log entry every time it fires (currently fires but player doesn't know why).
+
+10. **Death Riff confusing and broken** — unplayable if corruption is 0 (does 60 dmg at 0% but returns false? Needs checking). Effect text says "(100 - Corruption)% max 60" which is unclear. Fix text to say "Deal up to 60 damage. Reduced by your Corruption level."
+
+11. **Booster pack member cards lost** — buying a pack with a member card (garage/touring/demonic packs in booster slot) calls `handleShopSpend` with type='pack' which has NO handler. pickedCards are silently lost. Members should trigger recruit flow; cards should go to deck; artifacts should equip.
+
+12. **Member HP reaches 0 without going Too Stoned** — possible stoneShield edge case or display bug. Needs investigation.
+
+13. **Hand fills with unplayable cards in late circles** — C4+ cards cost 3-5 embers, max embers is 5-6. Hand jams with expensive unaffordable cards. Need discard strategy UX hint, or consider making Setbreak/discard more accessible.
+
+14. **Foil member card played from hand with no effect** — related to bug #11. Member card ended up in deck from booster pack, player dragged it to stage and nothing happened. Member cards in hand need to trigger a "join band" flow or show why they can't be played.
+
 
 ---
 
