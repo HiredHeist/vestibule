@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Saturday, March 21, 2026 at 12:10 PM*
+*Last updated: Saturday, March 21, 2026 at 12:16 PM*
 
 ---
 
@@ -48,6 +48,11 @@ This is happening.
 ---
 
 ## ✅ COMPLETED — Session 10
+
+- ~~**Starting stash 3🌿** — was 0, now guarantees Garage Band Pack after fight 1~~
+- ~~**stealStash passive removed** — Miser/Hoarder/Usurer no longer steal herb on hit~~
+- ~~**stashScale passive added** — Circle IV enemies hit harder based on stash carried (incentivises spending before fighting)~~
+
 
 - ~~**Herb economy rebalanced** — C1 stash: 2-4 base → 8-10 base. Garage Band Pack (10🌿) now affordable after fight 1. C1 deaths dropped from 7.6%% to 0.2%% in sim~~
  (March 21 2026)
