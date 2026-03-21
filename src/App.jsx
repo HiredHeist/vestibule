@@ -99,7 +99,7 @@ const ALL_CARDS=[
   {id:'feedbackloop',name:'Feedback Loop',type:'CORRUPT',rarity:'Uncommon',emoji:'🎛',embers:3,effect:'Deal damage equal to Corruption ÷ 2.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'tappedout',name:'Tapped Out',type:'EMBER',rarity:'Uncommon',emoji:'🪙',embers:0,effect:'Gain 5 Embers at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'controlfeedback',name:'Controlled Feedback',type:'CORRUPT',rarity:'Uncommon',emoji:'🎚',embers:2,effect:'Set Corruption to exactly 50%.',color:'#aa1111',typeColor:'#880000',copies:2},
-  {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:2,effect:'Discard entire hand. Draw 6 new cards.',color:'#9933cc',typeColor:'#7722aa',copies:2},
+  {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:1,effect:'Discard up to 3 cards of your choice. Draw that many +1.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:3,effect:'Deal 5/8/12 damage (scales by fight). Boss passive skips.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:4,effect:'Damage = target HP to boss. Once per round.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'If Corruption >=60%, double ALL ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:2},
@@ -1281,7 +1281,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
         opacity:isDragging?0.4:1,
         animation:shimmerAnim,
-        margin:'0 -26px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
+        margin:total>HAND_SIZE?'0 -32px':'0 -26px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
       <div style={{height:6,flexShrink:0,borderRadius:'7px 7px 0 0',background:bc,boxShadow:`0 0 14px ${glow}`}}/>
       {isUsed&&<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'rgba(0,0,0,0.85)',border:'2px solid #888',borderRadius:6,padding:'6px 14px',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#888',letterSpacing:4,zIndex:20,pointerEvents:'none'}}>USED</div>}
       {card.embers>0?(
@@ -1870,7 +1870,18 @@ export default function App(){
       msg='📼 Demo Tape! Replays: '+lr.name
       addFloat('📼 '+lr.name,getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
     }
-    else if(card.id==='burnset'){const res=drawUpTo([],deck,discardPile,HAND_SIZE);setHand(res.h);setDeck(res.d);setDiscardPile([...res.disc,...hand]);msg='🔥 Hand burned! Drew 6 new cards.'}
+    else if(card.id==='burnset'){
+      // Discard up to 3 selected cards (not including Burn the Set itself), draw that many + 1
+      const toDiscard=selected.filter(uid=>uid!==card.uid).slice(0,3)
+      const discardCount=toDiscard.length
+      const drawCount=discardCount+1
+      const remainingHand=hand.filter(c=>c.uid!==card.uid&&!toDiscard.includes(c.uid))
+      const discarded=hand.filter(c=>toDiscard.includes(c.uid))
+      const res=drawUpTo(remainingHand,deck,[...discardPile,...discarded],Math.min(remainingHand.length+drawCount,HAND_SIZE))
+      setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
+      setSelected([])
+      msg='🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+(Math.min(drawCount,res.h.length-remainingHand.length)>0?drawCount:1)+'.'
+    }
     else if(card.id==='overdrive'){if(corruption>=60){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{addLog('⚠ Need >=60% Corruption.');return false}}
     else if(card.id==='crowdsurf'){
       const dmg=hand.length*2
@@ -2006,7 +2017,7 @@ export default function App(){
       discover('hellquake','HELLQUAKE')
       const roll=Math.floor(Math.random()*10)+1
       const bc=getCenter(bossRef)
-      let hqMsg='',hqFloat='',hqColor='#aa1111'
+      let hqMsg='',hqFloat='',hqColor='#aa1111',hqDesc=''
       // d10 outcomes: 5 positive, 2 mixed, 3 negative
       if(roll<=2){
         // 1-2: OBLITERATION — total band ATK × 4 (positive)
@@ -2015,15 +2026,15 @@ export default function App(){
         const oblitHp=Math.max(0,enemyHp-hqDmg);setEnemyHp(oblitHp)
         updStat('totalDamage',hqDmg)
         if(oblitHp<=0)setTimeout(triggerVictory,2100)
-        hqMsg='⛧ HELLQUAKE: OBLITERATION! '+hqDmg+' damage!';hqFloat='OBLITERATION!';hqColor='#ff2200'
+        hqMsg='⛧ HELLQUAKE: OBLITERATION! '+hqDmg+' damage!';hqFloat='OBLITERATION!';hqColor='#ff2200';hqDesc='Total band ATK × 4 — '+hqDmg+' damage dealt to the boss.'
       } else if(roll===3){
         // 3: RESONANCE — all members +3 ATK permanently (positive)
         ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3}):m)
-        hqMsg='⛧ HELLQUAKE: RESONANCE! All members +3 ATK forever!';hqFloat='RESONANCE!';hqColor='#ff6600'
+        hqMsg='⛧ HELLQUAKE: RESONANCE! All members +3 ATK forever!';hqFloat='RESONANCE!';hqColor='#ff6600';hqDesc='All members gain +3 ATK permanently.'
       } else if(roll===4){
         // 4: RITUAL — boss HP halved (positive)
         const ritualHp=Math.max(1,Math.floor(enemyHp/2));setEnemyHp(ritualHp)
-        hqMsg='⛧ HELLQUAKE: RITUAL! Boss HP halved!';hqFloat='RITUAL!';hqColor='#cc44ff'
+        hqMsg='⛧ HELLQUAKE: RITUAL! Boss HP halved!';hqFloat='RITUAL!';hqColor='#cc44ff';hqDesc='The boss HP has been cut in half.'
       } else if(roll===5){
         // 5: THE VOID — corruption → damage, reset to 0 (positive)
         const voidDmg=Math.floor(corruption)
@@ -2031,11 +2042,11 @@ export default function App(){
         updStat('totalDamage',voidDmg)
         setCorruption(0)
         if(voidHp<=0)setTimeout(triggerVictory,2100)
-        hqMsg='⛧ HELLQUAKE: THE VOID! '+voidDmg+' damage, soul cleansed!';hqFloat='THE VOID!';hqColor='#4400aa'
+        hqMsg='⛧ HELLQUAKE: THE VOID! '+voidDmg+' damage, soul cleansed!';hqFloat='THE VOID!';hqColor='#4400aa';hqDesc='Corruption converted to '+voidDmg+' damage. Soul cleansed to 0%.'
       } else if(roll===6){
         // 6: POSSESSION — all cards free this Strike (positive)
         setEmbers(maxEmbers);setPendingEmbers(maxEmbers)
-        hqMsg='⛧ HELLQUAKE: POSSESSION! All cards free this Strike!';hqFloat='POSSESSED!';hqColor='#aa44ff'
+        hqMsg='⛧ HELLQUAKE: POSSESSION! All cards free this Strike!';hqFloat='POSSESSED!';hqColor='#aa44ff';hqDesc='All cards cost 0 Embers this Strike and next.'
       } else if(roll===7){
         // 7: BACKLASH — 30 damage BUT one random member falls (mixed)
         const backlashHp=Math.max(0,enemyHp-30);setEnemyHp(backlashHp)
@@ -2043,25 +2054,25 @@ export default function App(){
         if(backlashHp<=0)setTimeout(triggerVictory,2100)
         const alive=ns.filter(m=>m&&!m.tooStoned)
         if(alive.length>0){const victim=alive[Math.floor(Math.random()*alive.length)];const vi=ns.indexOf(victim);ns[vi]=Object.assign({},victim,{hp:0,tooStoned:true})}
-        hqMsg='⛧ HELLQUAKE: BACKLASH! 30 damage, one member lost!';hqFloat='BACKLASH!';hqColor='#9933cc'
+        hqMsg='⛧ HELLQUAKE: BACKLASH! 30 damage, one member lost!';hqFloat='BACKLASH!';hqColor='#9933cc';hqDesc='30 damage dealt — but one member went Too Stoned.'
       } else if(roll===8){
         // 8: FEEDBACK — boss dmg doubles 2 strikes but +3 embers (mixed)
         setPendingEmbers(p=>p+3)
         setBossDebuff(p=>p-4) // negative debuff = extra boss damage for 2 strikes effectively
-        hqMsg='⛧ HELLQUAKE: FEEDBACK! Boss energised but you gain 3 Embers!';hqFloat='FEEDBACK!';hqColor='#ff8800'
+        hqMsg='⛧ HELLQUAKE: FEEDBACK! Boss energised but you gain 3 Embers!';hqFloat='FEEDBACK!';hqColor='#ff8800';hqDesc='+3 Embers gained — but the boss is energised for 2 Strikes.'
       } else if(roll===9){
         // 9: THE RIFF CURSE — entire hand discarded, no redraw (negative)
         setHand([]);setDiscardPile(p=>[...p,...hand])
-        hqMsg='⛧ HELLQUAKE: THE RIFF CURSE! Hand obliterated!';hqFloat='CURSED!';hqColor='#880000'
+        hqMsg='⛧ HELLQUAKE: THE RIFF CURSE! Hand obliterated!';hqFloat='CURSED!';hqColor='#880000';hqDesc='Your entire hand has been obliterated. No redraw.'
       } else {
         // 10: TOTAL WIPEOUT — random member Too Stoned AND boss heals 15 (negative)
         const alive2=ns.filter(m=>m&&!m.tooStoned)
         if(alive2.length>0){const v2=alive2[Math.floor(Math.random()*alive2.length)];const vi2=ns.indexOf(v2);ns[vi2]=Object.assign({},v2,{hp:0,tooStoned:true})}
         setEnemyHp(function(prev){return Math.min(enemy.maxHp,prev+15)})
-        hqMsg='⛧ HELLQUAKE: TOTAL WIPEOUT! A member falls and the boss recovers!';hqFloat='WIPEOUT!';hqColor='#440000'
+        hqMsg='⛧ HELLQUAKE: TOTAL WIPEOUT! A member falls and the boss recovers!';hqFloat='WIPEOUT!';hqColor='#440000';hqDesc='A member fell and the boss recovered 15 HP.'
       }
       // Dramatic flash then reveal
-      setHellquakeAnim({text:hqFloat,color:hqColor})
+      setHellquakeAnim({text:hqFloat,color:hqColor,desc:hqDesc})
       setTimeout(()=>setHellquakeAnim(null),5000)
       msg=hqMsg
       addFloat(hqFloat,bc.x,bc.y-80,hqColor,true)
@@ -2663,6 +2674,7 @@ export default function App(){
         <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.04) 3px,rgba(255,255,255,0.04) 4px)',animation:'interlaceFlicker 0.08s steps(1) infinite',pointerEvents:'none'}}/>
         <div style={{fontSize:120,animation:'throb 0.3s ease-in-out infinite',filter:`drop-shadow(-4px 0 rgba(255,0,0,0.8)) drop-shadow(4px 0 rgba(0,80,255,0.8))`}}>⛧</div>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:hellquakeAnim.color,textShadow:`-3px 0 rgba(255,0,0,0.8), 3px 0 rgba(0,80,255,0.7), 0 0 60px ${hellquakeAnim.color},0 0 120px ${hellquakeAnim.color}`,animation:'fadeIn 0.3s ease'}}>{hellquakeAnim.text}</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:26,color:'rgba(255,255,255,0.9)',textAlign:'center',maxWidth:600,fontStyle:'italic',textShadow:'0 0 20px rgba(0,0,0,0.9)',animation:'fadeIn 0.5s ease',padding:'0 40px',lineHeight:1.5}}>{hellquakeAnim.desc}</div>
       </div>}
       {remasterOpen&&<RemasterModal cards={remasterCards} onConfirm={(delUids,copyUid)=>{
         setDeck(prev=>{
@@ -2747,7 +2759,7 @@ export default function App(){
       {/* HAND AREA */}
       <div style={{flex:'0 0 420px',background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',padding:'0',display:'flex',flexDirection:'column',zIndex:30,minHeight:0,position:'relative'}}>
         <div style={{textAlign:'center',padding:'6px 0 0',flexShrink:0,position:'relative',zIndex:0}}>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length}{hand.length>HAND_SIZE?' ⚡':' of '+HAND_SIZE}</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length}{hand.length>HAND_SIZE?' of '+HAND_SIZE+' ⚡':' of '+HAND_SIZE}</span>
           {pendingEmbers>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff6600',marginLeft:12}}>+{pendingEmbers} 🔥 pending</span>}
         </div>
 
