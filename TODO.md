@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Saturday, March 21, 2026 at 02:19 PM*
+*Last updated: Saturday, March 21, 2026 at 11:56 PM*
 
 ---
 
@@ -32,7 +32,7 @@ This is happening.
 
 10. **Death Riff confusing and broken** — unplayable if corruption is 0 (does 60 dmg at 0% but returns false? Needs checking). Effect text says "(100 - Corruption)% max 60" which is unclear. Fix text to say "Deal up to 60 damage. Reduced by your Corruption level."
 
-11. **Booster pack member cards lost** — buying a pack with a member card (garage/touring/demonic packs in booster slot) calls `handleShopSpend` with type='pack' which has NO handler. pickedCards are silently lost. Members should trigger recruit flow; cards should go to deck; artifacts should equip.
+11. ~~**Booster pack member cards lost** — FIXED: handleShopSpend now has pack handler, members→recruit flow, cards→deck, artifacts+passives→equip~~ — buying a pack with a member card (garage/touring/demonic packs in booster slot) calls `handleShopSpend` with type='pack' which has NO handler. pickedCards are silently lost. Members should trigger recruit flow; cards should go to deck; artifacts should equip.
 
 12. **Member HP reaches 0 without going Too Stoned** — possible stoneShield edge case or display bug. Needs investigation.
 
