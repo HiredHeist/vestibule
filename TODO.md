@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Friday, March 20, 2026 at 07:00 PM*
+*Last updated: Saturday, March 21, 2026 at 12:10 PM*
 
 ---
 
@@ -47,7 +47,10 @@ This is happening.
 
 ---
 
-## ✅ COMPLETED — Session 10 (March 21 2026)
+## ✅ COMPLETED — Session 10
+
+- ~~**Herb economy rebalanced** — C1 stash: 2-4 base → 8-10 base. Garage Band Pack (10🌿) now affordable after fight 1. C1 deaths dropped from 7.6%% to 0.2%% in sim~~
+ (March 21 2026)
 
 - ~~**Hover bug** — both same-id cards (e.g. Wake Up Call x2) rising on hover. Fixed: hover now tracked by hand INDEX not card.uid~~
 - ~~**AI combo rewrite** — expertStrike rebuilt, 9 phases, all 35 cards and combos understood~~
