@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Saturday, March 21, 2026 at 11:57 PM*
+*Last updated: Saturday, March 21, 2026 at 11:59 PM*
 
 ---
 
@@ -16,7 +16,7 @@ This is happening.
 
 2. **Burn the Set — no selection UI** — player must select cards BEFORE playing it but there is zero indication of this. Need hint text on the card and a visual cue when playing with nothing selected.
 
-3. **Artifacts/passives re-appear after purchase** — bought Sabbath Crown, left shop, came back and it was available again. `boughtIds` resets when `shopCards` changes. Need persistent sold tracking in App state, not ShopScreen state.
+3. ~~**Artifacts/passives re-appear after purchase** — FIXED: App-level shopSoldIds persists sold state across visits, clears only on shop rotation~~ — bought Sabbath Crown, left shop, came back and it was available again. `boughtIds` resets when `shopCards` changes. Need persistent sold tracking in App state, not ShopScreen state.
 
 4. **Stage Dive selected state gets stuck** — after using Stage Dive (once per fight), second copy in hand stays selected with no way to deselect/play. Selection state needs to clear when a card becomes unplayable.
 
