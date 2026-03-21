@@ -35,9 +35,9 @@ const ENEMIES=[
   {id:'feaster',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:110,baseDmg:5,emoji:'🦷',passive:'Voracious. Heals 3 HP every time a card is played.',passiveId:'cardHeal3'},
   {id:'gluttony_boss',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:160,baseDmg:6,emoji:'🕳',passive:'Endless hunger. Heals 4 HP per card played. Strike fast.',passiveId:'cardHeal4'},
   // ── CIRCLE IV: GREED — Steals stash on hit ───────────────────
-  {id:'miser',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:260,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1 Stash on each successful hit.',passiveId:'stealStash'},
-  {id:'hoarder',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:480,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2 Stash on each successful hit.',passiveId:'stealStash2'},
-  {id:'greed_boss',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:680,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3 Stash per hit. Win fast or go broke.',passiveId:'stealStash3'},
+  {id:'miser',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:260,baseDmg:4,emoji:'💰',passive:'Greedy. Hits harder the more Stash you carry — each 10🌿 = +1 damage.',passiveId:'stashScale'},
+  {id:'hoarder',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:480,baseDmg:5,emoji:'🪙',passive:'Avaricious. Hits harder the more Stash you carry — each 8🌿 = +1 damage.',passiveId:'stashScale2'},
+  {id:'greed_boss',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:680,baseDmg:6,emoji:'🏦',passive:'Extracting. Hits harder the more Stash you carry — each 5🌿 = +1 damage. Spend wisely.',passiveId:'stashScale3'},
   // ── CIRCLE V: ANGER — Hits harder the more you buff ─────────
   {id:'wrathful',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:800,baseDmg:5,emoji:'🔥',passive:'Enraged. +2 damage for each buffed member on your stage.',passiveId:'rageScale'},
   {id:'berserker',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:1040,baseDmg:6,emoji:'⚔️',passive:'Furious. +3 damage per buffed member. Keep your band clean.',passiveId:'rageScale3'},
@@ -1647,7 +1647,7 @@ export default function App(){
   const [discardPile,setDiscardPile]=useState([]);const discRef=useRef([]);
   const [maxEmbers,setMaxEmbers]=useState(5)
   const [embers,setEmbers]=useState(5)
-  const [stash,setStash]=useState(0)
+  const [stash,setStash]=useState(3)
   const [strikesLeft,setStrikesLeft]=useState(MAX_STRIKES)
   const [discardsLeft,setDiscardsLeft]=useState(MAX_DISCARDS)
   const [isWiggling,setIsWiggling]=useState(false)
@@ -2350,7 +2350,10 @@ export default function App(){
         else if(enemy.passiveId==='corruptPlayer'){setCorruption(p=>Math.min(100,p+10));addLog('🔱 Heretic corrupts your band! +10% Corruption.')}
         else if(enemy.passiveId==='corruptPlayer15'){setCorruption(p=>Math.min(100,p+15));addLog('⛧ Apostate corrupts! +15% Corruption.')}
         else if(enemy.passiveId==='corruptPlayer20'){setCorruption(p=>Math.min(100,p+20));addLog('📖 False Prophet corrupts! +20% Corruption.')}
-        // stealStash passives handled after damage
+        // stashScale: hits harder based on player's current stash
+        else if(enemy.passiveId==='stashScale'){scaledBaseDmg=enemy.baseDmg+Math.floor(stash/10)}
+        else if(enemy.passiveId==='stashScale2'){scaledBaseDmg=enemy.baseDmg+Math.floor(stash/8)}
+        else if(enemy.passiveId==='stashScale3'){scaledBaseDmg=enemy.baseDmg+Math.floor(stash/5)}
         else{scaledBaseDmg=enemy.baseDmg}
         const actualDmg=Math.max(1,Math.round(scaledBaseDmg)+variance-bossDebuff)
           const varLabel=variance>0?' (CRIT!)':variance<0?' (miss)':''
@@ -2621,7 +2624,7 @@ export default function App(){
   const handleReset=()=>{
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
-    setEmbers(5);setMaxEmbers(5);setStash(0);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
+    setEmbers(5);setMaxEmbers(5);setStash(3);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0);setDeathCause('fallen')
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([])
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
