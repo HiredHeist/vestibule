@@ -1467,11 +1467,14 @@ function DemonicConflictScreen({conflict,onChoice}){
   )
 }
 
-function RecruitScreen({candidates,stage,onPick,onPass}){
+function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
+  const isFull=stage.filter(Boolean).length>=5
+  const activeMembers=stage.map((m,i)=>m?{m,i}:null).filter(Boolean).filter(x=>!x.m.tooStoned)
+  function fireSellPrice(m){return m.demonic?69:5+(m.foil?3:0)+(m.mythic?8:0)}
   return(
     <div style={{position:'fixed',inset:0,zIndex:9600,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:24,padding:'40px 20px'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#d0b060',textShadow:'0 0 30px rgba(200,150,20,0.4)'}}>Recruit a Member</div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic'}}>Choose one musician to join your band — or pass</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic'}}>{isFull?'🔥 Stage is full — fire a member to make room, or pass':'Choose one musician to join your band — or pass'}</div>
       <div style={{display:'flex',gap:20,flexWrap:'wrap',justifyContent:'center',maxWidth:1000}}>
         {candidates.map(m=>{
           const hasDblTime=stage.some(s=>s&&s.keyword==='DOUBLE TIME')
@@ -1521,6 +1524,33 @@ function RecruitScreen({candidates,stage,onPick,onPass}){
         onMouseLeave={e=>{e.currentTarget.style.borderColor='#4a3010';e.currentTarget.style.color='#7a5020'}}>
         Pass — No Recruitment
       </button>
+
+      {/* FIRE PANEL — only shown when stage is full */}
+      {isFull&&onFireMember&&(
+        <div style={{position:'fixed',bottom:24,right:24,width:280,background:'linear-gradient(160deg,#0e0a16,#080510)',border:'2px solid rgba(220,60,20,0.7)',borderRadius:10,padding:'14px 16px',boxShadow:'0 0 30px rgba(200,40,0,0.25)',zIndex:9700}}>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:'#ff4422',textAlign:'center',marginBottom:4,textShadow:'0 0 16px rgba(255,60,20,0.7)'}}>🔥 Fire a Member</div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'#aa5533',textAlign:'center',fontStyle:'italic',marginBottom:10}}>Fire one to open a slot</div>
+          {activeMembers.map(({m,i})=>(
+            <div key={m.uid||i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'6px 8px',marginBottom:6,background:'rgba(0,0,0,0.35)',borderRadius:5,border:'1px solid rgba(180,60,20,0.25)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:8,flex:1,minWidth:0}}>
+                <span style={{fontSize:20}}>{m.emoji}</span>
+                <div style={{minWidth:0}}>
+                  <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:14,color:'#e8d090',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{m.name}</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#8a6040',letterSpacing:1}}>{m.keyword} · ATK {m.atk}</div>
+                </div>
+              </div>
+              <button
+                onClick={()=>onFireMember(m,i)}
+                style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,padding:'5px 8px',background:'rgba(160,30,10,0.4)',border:'1px solid rgba(220,60,20,0.6)',borderRadius:4,color:'#ff6644',cursor:'pointer',whiteSpace:'nowrap',flexShrink:0,marginLeft:8}}
+                onMouseEnter={e=>{e.currentTarget.style.background='rgba(200,40,10,0.6)'}}
+                onMouseLeave={e=>{e.currentTarget.style.background='rgba(160,30,10,0.4)'}}>
+                🔥 {fireSellPrice(m)}🌿
+              </button>
+            </div>
+          ))}
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#664422',textAlign:'center',marginTop:6,letterSpacing:1}}>Stash: {stash}🌿 · Refund shown per member</div>
+        </div>
+      )}
     </div>
   )
 }
@@ -2682,7 +2712,7 @@ export default function App(){
 
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
-  if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass}/>
+  if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard}/>
   if(gameState==='end')return <EndScreen won={won} cause={deathCause} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}}/>
 
