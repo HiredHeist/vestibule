@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Saturday, March 21, 2026 at 12:16 PM*
+*Last updated: Saturday, March 21, 2026 at 12:48 PM*
 
 ---
 
@@ -48,6 +48,11 @@ This is happening.
 ---
 
 ## ✅ COMPLETED — Session 10
+
+- ~~**Burn the Set reworked** — was: discard whole hand draw 6. Now: 1 ember, select up to 3 cards to discard, draw that many +1~~
+- ~~**Hand over-cap display** — 7 of 6 ⚡ label, cards spread wider when over-cap so they are all reachable~~
+- ~~**Hellquake explainer text** — all 10 outcomes now show a plain-English description below the title~~
+
 
 - ~~**Starting stash 3🌿** — was 0, now guarantees Garage Band Pack after fight 1~~
 - ~~**stealStash passive removed** — Miser/Hoarder/Usurer no longer steal herb on hit~~
