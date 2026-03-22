@@ -89,6 +89,34 @@ function saveRunHistory(stats,won,enemy,seed){
 }
 function getRunHistory(){try{return JSON.parse(localStorage.getItem('vst_history')||'[]')}catch(e){return[]}}
 
+// ── ACHIEVEMENT SYSTEM ──────────────────────────────────────────
+const ACHIEVEMENTS=[
+  {id:'first_blood',label:'First Blood',desc:'Win your first fight',emoji:'🗡'},
+  {id:'circle_3',label:'Into the Deep',desc:'Reach Circle 3',emoji:'🔥'},
+  {id:'circle_5',label:'Halfway to Hell',desc:'Reach Circle 5',emoji:'⛧'},
+  {id:'circle_7',label:'The Abyss',desc:'Reach Circle 7',emoji:'🕳'},
+  {id:'circle_9',label:'Treachery',desc:'Reach Circle 9',emoji:'🗝'},
+  {id:'beat_lucifer',label:'Lucifer Slayer',desc:'Defeat Lucifer',emoji:'👑'},
+  {id:'hellquake',label:'Hellquake Survivor',desc:'Trigger a Hellquake and survive',emoji:'⛧'},
+  {id:'perfect_strike',label:'Perfect Strike',desc:'Kill a boss in 1 Strike',emoji:'⚔'},
+  {id:'corruption_lord',label:'Corruption Lord',desc:'Reach 100% Corruption and win the fight',emoji:'🌀'},
+  {id:'sober_run',label:'Sober Run',desc:'Reach Circle 5 without using any drugs',emoji:'☕'},
+  {id:'high_score_5k',label:'Rising Star',desc:'Score over 5,000 in a single run',emoji:'⭐'},
+  {id:'high_score_10k',label:'Headliner',desc:'Score over 10,000 in a single run',emoji:'🌟'},
+  {id:'drug_lord',label:'Drug Lord',desc:'Use both shrooms and acid in one run',emoji:'🍄'},
+  {id:'full_band',label:'Full House',desc:'Have 5 members on stage at once',emoji:'🎸'},
+  {id:'mentor_link',label:'Master and Student',desc:'Form a Mentor Link',emoji:'⛓'},
+  {id:'ten_runs',label:'Dedicated',desc:'Complete 10 runs',emoji:'🔟'},
+]
+function getAchievements(){try{return JSON.parse(localStorage.getItem('vst_achievements')||'[]')}catch(e){return[]}}
+function unlockAchievement(id){
+  const current=getAchievements()
+  if(current.includes(id))return false
+  current.push(id)
+  localStorage.setItem('vst_achievements',JSON.stringify(current))
+  return true
+}
+
 const ENEMIES=[
   // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
   {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:27,baseDmg:2,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
@@ -1592,7 +1620,7 @@ function PhaseDots({left,total,color,wide}){
   const sz=wide?17:13;const start=total-left;return <div style={{display:'flex',gap:wide?4:4}}>{Array.from({length:total}).map((_,i)=>{const filled=i>=start;return <div key={i} style={{width:sz,height:sz,borderRadius:4,background:filled?color:'rgba(40,20,8,0.6)',border:`1px solid ${filled?color:'rgba(80,50,20,0.3)'}`,boxShadow:filled?`0 0 9px ${color}99`:'none',transition:'all 0.25s'}}/>})}</div>
 }
 
-function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered}){
+function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered,newAchievements}){
   const isStoned=cause==='stoned'
   const isBeaten=cause==='beaten'
   const isVictory=cause==='victory'
@@ -1668,6 +1696,19 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   const Discoveries=()=>discoveryList.length>0?(<div style={{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'center',maxWidth:600,margin:'4px 0'}}>
     {discoveryList.slice(0,8).map((d,i)=><div key={i} style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#e8a820',background:'rgba(40,25,5,0.8)',border:'1px solid rgba(200,140,30,0.4)',borderRadius:4,padding:'3px 10px',letterSpacing:1}}>NEW: {d}</div>)}
   </div>):null
+
+  // ── ACHIEVEMENT BADGES ─────────────────────────────────────
+  const allAchievements=getAchievements()
+  const newAchIds=newAchievements||[]
+  const AchievementBadges=()=>{
+    if(newAchIds.length===0&&allAchievements.length===0)return null
+    return(<div style={{width:'100%',maxWidth:600,margin:'6px 0'}}>
+      {newAchIds.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'center',marginBottom:6}}>
+        {newAchIds.map(id=>{const a=ACHIEVEMENTS.find(x=>x.id===id);if(!a)return null;return <div key={id} style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#ffd700',background:'rgba(60,40,0,0.8)',border:'2px solid #ffd700',borderRadius:6,padding:'4px 12px',letterSpacing:1,animation:'throb 1.5s ease-in-out infinite'}}>{a.emoji} NEW: {a.label}</div>})}
+      </div>}
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#665533',textAlign:'center'}}>{allAchievements.length} / {ACHIEVEMENTS.length} achievements</div>
+    </div>)
+  }
 
   // ── SHARE BUTTON ───────────────────────────────────────────
   const shareText='⛧ VESTIBULE — RUN #'+(totalRuns||1)+' ⛧\nSCORE: '+finalScore.toLocaleString()+' — '+grade.label+'\n'+(isVictory?'DEFEATED LUCIFER!':'Fell to '+(enemy?.name||'The Vestibule')+' at Circle '+circleReached)+'\nSEED: '+seed.toString(16).toUpperCase()+'\nCan you beat this?'
@@ -1776,6 +1817,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         </div>
         <UnlockBar/>
         <Discoveries/>
+        <AchievementBadges/>
                 {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #aa4444',borderRadius:4}}>{streakMsg}</div>}
         <StatsGrid/>
@@ -1814,6 +1856,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         </div>
         <UnlockBar/>
         <Discoveries/>
+        <AchievementBadges/>
                 {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:streakWins>1?'#ff6600':'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:`1px solid ${streakWins>1?'#ff6600':'#aa4444'}`,borderRadius:4}}>{streakMsg}</div>}
         <StatsGrid/>
@@ -1842,6 +1885,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         </div>
         <UnlockBar/>
         <Discoveries/>
+        <AchievementBadges/>
                 {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>{streakMsg}</div>}
         <StatsGrid/>
@@ -2136,6 +2180,8 @@ export default function App(){
   const [circlePassive,setCirclePassive]=useState(()=>STARTER_PASSIVES[Math.floor(Math.random()*STARTER_PASSIVES.length)])
   const [activeArtifacts,setActiveArtifacts]=useState([]) // max 3
   const [discovered,setDiscovered]=useState(new Set())
+  const [newAchievements,setNewAchievements]=useState([])
+  const tryAchieve=useCallback((id)=>{if(unlockAchievement(id))setNewAchievements(p=>[...p,id])},[])
   const [streakWins,setStreakWins]=useState(0)
   const [streakLosses,setStreakLosses]=useState(0)
   const [totalRunsPlayed,setTotalRunsPlayed]=useState(()=>parseInt(localStorage.getItem('vst_runs')||'0'))
@@ -2162,6 +2208,7 @@ export default function App(){
   // ── DEALER: Mushrooms & Acid ──────────────────────────────────
   const [heldShrooms,setHeldShrooms]=useState(0) // player is holding shrooms
   const [heldAcid,setHeldAcid]=useState(0) // player is holding acid
+  const [drugsUsedThisRun,setDrugsUsedThisRun]=useState({shrooms:0,acid:0})
   const [shroomsInStock,setShroomsInStock]=useState(()=>Math.random()<0.50)
   const [acidInStock,setAcidInStock]=useState(()=>Math.random()<0.50)
   const [activeTripEffect,setActiveTripEffect]=useState(null) // {type,name,desc,color} — shown as dramatic reveal
@@ -2548,7 +2595,7 @@ export default function App(){
     }
     else if(card.id==='sabbathsigil'){
       setCorruption(100);updStat('maxCorruption',100,true)
-      discover('hellquake','HELLQUAKE')
+      discover('hellquake','HELLQUAKE');tryAchieve('hellquake')
       const roll=Math.floor(Math.random()*10)+1
       const bc=getCenter(bossRef)
       let hqMsg='',hqFloat='',hqColor='#aa1111',hqDesc=''
@@ -2830,6 +2877,18 @@ export default function App(){
     }
     if(perfectBonus>0)addFloat('PERFECT! +'+perfectBonus,getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
     addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.'))
+    // ── ACHIEVEMENT TRIGGERS ─────────────────────────────────
+    tryAchieve('first_blood')
+    const cn=Math.floor(fightIndex/3)+1
+    if(cn>=3)tryAchieve('circle_3')
+    if(cn>=5)tryAchieve('circle_5')
+    if(cn>=5&&drugsUsedThisRun.shrooms===0&&drugsUsedThisRun.acid===0)tryAchieve('sober_run')
+    if(cn>=7)tryAchieve('circle_7')
+    if(cn>=9)tryAchieve('circle_9')
+    if(strikesLeft>=3&&(fightIndex+1)%3===0)tryAchieve('perfect_strike')
+    if(corruption>=100)tryAchieve('corruption_lord')
+    if(stage.filter(m=>m&&!m.tooStoned).length>=5)tryAchieve('full_band')
+    if(fightIndex===26)tryAchieve('beat_lucifer')
     const bq=BOSS_QUOTES[enemy&&enemy.id];if(bq)setTimeout(()=>addLog('💀 "'+bq+'"'),600)
     setTimeout(function(){
       const isCircleBoss=(fightIndex+1)%3===0
@@ -2910,6 +2969,7 @@ export default function App(){
 
     if(type==='shrooms'){
       setHeldShrooms(p=>Math.max(0,p-1))
+      setDrugsUsedThisRun(p=>{const n={...p,shrooms:p.shrooms+1};if(n.shrooms>0&&n.acid>0)tryAchieve('drug_lord');return n})
       if(roll<0.05){
         // 5% bad trip
         effectName='BAD TRIP';effectDesc='Paranoia! All members -2 ATK this fight.';effectColor='#cc2222'
@@ -2942,6 +3002,7 @@ export default function App(){
       }
     } else if(type==='acid'){
       setHeldAcid(p=>Math.max(0,p-1))
+      setDrugsUsedThisRun(p=>{const n={...p,acid:p.acid+1};if(n.shrooms>0&&n.acid>0)tryAchieve('drug_lord');return n})
       if(roll<0.05){
         // 5% bad trip — Hellquake
         effectName='BAD TRIP';effectDesc='Corruption hits 100%! Hellquake!';effectColor='#cc2222'
@@ -3040,7 +3101,7 @@ export default function App(){
         const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/15):_bs.atk
         const _b=Math.round((_ma+_ba)*(_bs.mentorMult-1))
         _mlb+=_b
-        addLog('⛓ Mentor Link! '+_mn.name+'+'+_bs.name+' ×'+_bs.mentorMult+' (+'+_b+'!)')
+        addLog('⛓ Mentor Link! '+_mn.name+'+'+_bs.name+' ×'+_bs.mentorMult+' (+'+_b+'!)');tryAchieve('mentor_link')
         addFloat('⛓ ×'+_bs.mentorMult,getCenter(stageRefs.current[_i]).x,getCenter(stageRefs.current[_i]).y-80,'#ffd700',true)
       }
     }
@@ -3328,7 +3389,12 @@ export default function App(){
             setStrikesLeft(function(cur){
               if(cur<=0){
                 setDeathCause('beaten');
-                {const _rs=calcRunScore(stats,false);saveRunHistory(stats,false,enemy,runSeed);const _nr=totalRunsPlayed+1;setTotalRunsPlayed(_nr);localStorage.setItem('vst_runs',_nr);if(_rs>personalBest){setPersonalBest(_rs);localStorage.setItem('vst_best',_rs)}const _nl=lifetimeScore+_rs;setLifetimeScore(_nl);localStorage.setItem('vst_lifetime',_nl);setStreakLosses(p=>p+1);setStreakWins(0);const _td=new Date().toISOString().slice(0,10);const _yd=new Date(Date.now()-86400000).toISOString().slice(0,10);const _ns=lastPlayedDate===_yd||lastPlayedDate===_td?dailyStreak+1:1;setDailyStreak(_ns);localStorage.setItem('vst_streak',_ns);setLastPlayedDate(_td);localStorage.setItem('vst_lastdate',_td)}
+                {const _rs=calcRunScore(stats,false);saveRunHistory(stats,false,enemy,runSeed);
+                // Achievement checks at game end
+                if(_rs>=5000)unlockAchievement('high_score_5k')
+                if(_rs>=10000)unlockAchievement('high_score_10k')
+                if((totalRunsPlayed+1)>=10)unlockAchievement('ten_runs')
+                const _nr=totalRunsPlayed+1;setTotalRunsPlayed(_nr);localStorage.setItem('vst_runs',_nr);if(_rs>personalBest){setPersonalBest(_rs);localStorage.setItem('vst_best',_rs)}const _nl=lifetimeScore+_rs;setLifetimeScore(_nl);localStorage.setItem('vst_lifetime',_nl);setStreakLosses(p=>p+1);setStreakWins(0);const _td=new Date().toISOString().slice(0,10);const _yd=new Date(Date.now()-86400000).toISOString().slice(0,10);const _ns=lastPlayedDate===_yd||lastPlayedDate===_td?dailyStreak+1:1;setDailyStreak(_ns);localStorage.setItem('vst_streak',_ns);setLastPlayedDate(_td);localStorage.setItem('vst_lastdate',_td)}
                 setTimeout(function(){setGameState('end')},800);
               }
               return cur;
@@ -3634,7 +3700,7 @@ export default function App(){
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(5);setMaxEmbers(5);setStash(3);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0);setDeathCause('fallen')
-    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0)
+    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -3655,7 +3721,7 @@ export default function App(){
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
-  if(gameState==='end')return <EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered}/>
+  if(gameState==='end')return <EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements}/>
 
   return(
     <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none'}}>

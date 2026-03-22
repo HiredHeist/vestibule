@@ -1,5 +1,5 @@
 # VESTIBULE — AI Development Handoff Document
-*Last updated: Monday, March 23, 2026 at 12:15 AM (JST) — Session 13 end state*
+*Last updated: Monday, March 23, 2026 at 03:00 AM (JST) — Session 13 end state*
 *This is a living document. Update it at the end of every session.*
 
 ---
@@ -68,6 +68,13 @@ Developer = "player" in dev sessions. Music producer, doom metal, lives in rural
 17. ✅ **Card balance** — Seance ÷4, Herb Money keep stash, Wake Up free, Roadie 2 strikes
 18. ✅ **C9 rework** — Traitor (Paranoia), Betrayer (Soul Thief), new unique passives
 19. ✅ **Lucifer 2-phase** — 420,666→6,666 HP, Phase 1 ice + Phase 2 satan with full reset
+20. ✅ **Drug prices** — shrooms 6🌿, acid 12🌿, 50% stock chance
+21. ✅ **Death Screen Overhaul** — BestGap, UnlockBar, Discoveries, Share Score, huge Play Again
+22. ✅ **Unlock System** — 8 milestones, Tanuki, Lucifer member, Mosh Pit, Blood Ritual, War Drums
+23. ✅ **Double Dealer** — hold 2 drugs at 50k lifetime
+24. ✅ **Daily Seed + Streak Bonuses** — banner on Opening Night, +5/10/20% score
+25. ✅ **Run History** — last 20 runs saved, collapsible on death screen
+26. ✅ **Achievement Badges** — 16 achievements, gold NEW badges on death screen
 14. ✅ **Seance buffed** — 1 ember, corruption ÷ 4 (was 2 embers, ÷ 8)
 15. ✅ **Herb Money reworked** — stash ÷ 2 damage, keep stash (was 10% + lose stash)
 16. ✅ **Wake Up Call free** — 0 embers (was 2)

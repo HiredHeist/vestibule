@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Monday, March 23, 2026 at 01:30 AM (JST) — Session 13*
+*Last updated: Monday, March 23, 2026 at 03:00 AM (JST) — Session 13*
 
 ---
 
@@ -40,9 +40,12 @@ This is happening.
 ### Layer 5: Run History
 - [ ] Past Runs screen — last 20 runs: score, grade, death cause, circle, discoveries
 
-### Layer 6: Achievement Badges
-- [ ] One-time achievements: Hellquake Survivor, Sober Run, Perfect Strike, Corruption Lord, etc.
-- [ ] Achievement display on death screen and profile
+### Layer 6: Achievement Badges ✅ COMPLETE
+- [x] 16 achievements defined (first_blood, circle milestones, beat_lucifer, hellquake, perfect_strike, corruption_lord, sober_run, drug_lord, full_band, mentor_link, high_score_5k/10k, ten_runs, dedicated)
+- [x] localStorage persistence (vst_achievements)
+- [x] Triggers wired throughout game logic
+- [x] Gold pulsing NEW badges on death screen
+- [x] Achievement count shown (X / 16)
 
 ### Layer 7: "Almost" Mechanics
 - [ ] "127 more damage would have won that fight"
