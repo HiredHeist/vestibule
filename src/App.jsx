@@ -23,41 +23,41 @@ const MAX_EMBERS_CAP=8, MAX_STRIKES=4, MAX_DISCARDS=4, HAND_SIZE=6, MAX_STASH=42
 
 const ENEMIES=[
   // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
-  {id:'wanderer',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:27,baseDmg:2,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
-  {id:'lostsoul',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:42,baseDmg:4,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
-  {id:'drifter',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:69,baseDmg:5,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
+  {id:'wanderer',tagline:'Couldn't even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:27,baseDmg:2,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
+  {id:'lostsoul',tagline:'You were lost before you started.',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:42,baseDmg:4,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
+  {id:'drifter',tagline:'69 HP. Should've been easy.',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:69,baseDmg:5,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
   // ── CIRCLE II: LUST — Enemy buffs itself each strike ─────────
-  {id:'siren',name:'The Siren',circle:'Circle II — Lust',subtitle:'Fight 1 of 3',maxHp:60,baseDmg:4,emoji:'🌊',passive:'Seductive. Gains +1 damage each Strike.',passiveId:'selfbuff'},
-  {id:'tempter',name:'The Tempter',circle:'Circle II — Lust',subtitle:'Fight 2 of 3',maxHp:90,baseDmg:5,emoji:'🌹',passive:'Enthralling. Gains +1 damage each Strike. Starts stronger.',passiveId:'selfbuff'},
-  {id:'lust_boss',name:'The Seducer',circle:'Circle II — Lust',subtitle:'Circle Boss — Fight 3 of 3',maxHp:140,baseDmg:6,emoji:'💋',passive:'Irresistible. Gains +2 damage each Strike. Dangerous if left alive.',passiveId:'selfbuff2'},
+  {id:'siren',tagline:'She sang. You listened. You lost.',name:'The Siren',circle:'Circle II — Lust',subtitle:'Fight 1 of 3',maxHp:60,baseDmg:4,emoji:'🌊',passive:'Seductive. Gains +1 damage each Strike.',passiveId:'selfbuff'},
+  {id:'tempter',tagline:'Temptation wins again.',name:'The Tempter',circle:'Circle II — Lust',subtitle:'Fight 2 of 3',maxHp:90,baseDmg:5,emoji:'🌹',passive:'Enthralling. Gains +1 damage each Strike. Starts stronger.',passiveId:'selfbuff'},
+  {id:'lust_boss',tagline:'Irresistible to the end.',name:'The Seducer',circle:'Circle II — Lust',subtitle:'Circle Boss — Fight 3 of 3',maxHp:140,baseDmg:6,emoji:'💋',passive:'Irresistible. Gains +2 damage each Strike. Dangerous if left alive.',passiveId:'selfbuff2'},
   // ── CIRCLE III: GLUTTONY — Heals when you play cards ─────────
-  {id:'glutton',name:'The Glutton',circle:'Circle III — Gluttony',subtitle:'Fight 1 of 3',maxHp:80,baseDmg:4,emoji:'🍖',passive:'Insatiable. Heals 2 HP every time a card is played.',passiveId:'cardHeal'},
-  {id:'feaster',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:110,baseDmg:5,emoji:'🦷',passive:'Voracious. Heals 3 HP every time a card is played.',passiveId:'cardHeal3'},
-  {id:'gluttony_boss',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:160,baseDmg:6,emoji:'🕳',passive:'Endless hunger. Heals 4 HP per card played. Strike fast.',passiveId:'cardHeal4'},
+  {id:'glutton',tagline:'It ate your strikes for breakfast.',name:'The Glutton',circle:'Circle III — Gluttony',subtitle:'Fight 1 of 3',maxHp:80,baseDmg:4,emoji:'🍖',passive:'Insatiable. Heals 2 HP every time a card is played.',passiveId:'cardHeal'},
+  {id:'feaster',tagline:'Still hungry. Always hungry.',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:110,baseDmg:5,emoji:'🦷',passive:'Voracious. Heals 3 HP every time a card is played.',passiveId:'cardHeal3'},
+  {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:160,baseDmg:6,emoji:'🕳',passive:'Endless hunger. Heals 4 HP per card played. Strike fast.',passiveId:'cardHeal4'},
   // ── CIRCLE IV: GREED — Steals stash on hit ───────────────────
-  {id:'miser',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:260,baseDmg:4,emoji:'💰',passive:'Greedy. Hits harder the more Stash you carry — each 10🌿 = +1 damage.',passiveId:'stashScale'},
-  {id:'hoarder',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:480,baseDmg:5,emoji:'🪙',passive:'Avaricious. Hits harder the more Stash you carry — each 8🌿 = +1 damage.',passiveId:'stashScale2'},
-  {id:'greed_boss',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:680,baseDmg:6,emoji:'🏦',passive:'Extracting. Hits harder the more Stash you carry — each 5🌿 = +1 damage. Spend wisely.',passiveId:'stashScale3'},
+  {id:'miser',tagline:'You couldn't afford to win.',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:260,baseDmg:4,emoji:'💰',passive:'Greedy. Hits harder the more Stash you carry — each 10🌿 = +1 damage.',passiveId:'stashScale'},
+  {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:480,baseDmg:5,emoji:'🪙',passive:'Avaricious. Hits harder the more Stash you carry — each 8🌿 = +1 damage.',passiveId:'stashScale2'},
+  {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:680,baseDmg:6,emoji:'🏦',passive:'Extracting. Hits harder the more Stash you carry — each 5🌿 = +1 damage. Spend wisely.',passiveId:'stashScale3'},
   // ── CIRCLE V: ANGER — Hits harder the more you buff ─────────
-  {id:'wrathful',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:800,baseDmg:5,emoji:'🔥',passive:'Enraged. +2 damage for each buffed member on your stage.',passiveId:'rageScale'},
-  {id:'berserker',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:1040,baseDmg:6,emoji:'⚔️',passive:'Furious. +3 damage per buffed member. Keep your band clean.',passiveId:'rageScale3'},
-  {id:'anger_boss',name:'The Warlord',circle:'Circle V — Anger',subtitle:'Circle Boss — Fight 3 of 3',maxHp:1520,baseDmg:7,emoji:'💢',passive:'Explosive rage. +4 damage per buffed member. A buffed band is a target.',passiveId:'rageScale4'},
+  {id:'wrathful',tagline:'Your buffs fed its rage.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:800,baseDmg:5,emoji:'🔥',passive:'Enraged. +2 damage for each buffed member on your stage.',passiveId:'rageScale'},
+  {id:'berserker',tagline:'Fury without limit.',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:1040,baseDmg:6,emoji:'⚔️',passive:'Furious. +3 damage per buffed member. Keep your band clean.',passiveId:'rageScale3'},
+  {id:'anger_boss',tagline:'Strategy means nothing to rage.',name:'The Warlord',circle:'Circle V — Anger',subtitle:'Circle Boss — Fight 3 of 3',maxHp:1520,baseDmg:7,emoji:'💢',passive:'Explosive rage. +4 damage per buffed member. A buffed band is a target.',passiveId:'rageScale4'},
   // ── CIRCLE VI: HERESY — Corrupts your corruption system ──────
-  {id:'heretic',name:'The Heretic',circle:'Circle VI — Heresy',subtitle:'Fight 1 of 3',maxHp:1650,baseDmg:5,emoji:'🔱',passive:'Blasphemous. Each Strike raises your Corruption by 10%.',passiveId:'corruptPlayer'},
-  {id:'apostate',name:'The Apostate',circle:'Circle VI — Heresy',subtitle:'Fight 2 of 3',maxHp:2175,baseDmg:6,emoji:'⛧',passive:'Corrupting. Raises Corruption by 15% each Strike.',passiveId:'corruptPlayer15'},
-  {id:'heresy_boss',name:'The False Prophet',circle:'Circle VI — Heresy',subtitle:'Circle Boss — Fight 3 of 3',maxHp:3000,baseDmg:7,emoji:'📖',passive:'Toxic doctrine. Corruption +20% per Strike. Hellquake territory every fight.',passiveId:'corruptPlayer20'},
+  {id:'heretic',tagline:'Your soul is sufficiently corrupted now.',name:'The Heretic',circle:'Circle VI — Heresy',subtitle:'Fight 1 of 3',maxHp:1650,baseDmg:5,emoji:'🔱',passive:'Blasphemous. Each Strike raises your Corruption by 10%.',passiveId:'corruptPlayer'},
+  {id:'apostate',tagline:'Corruption claimed another believer.',name:'The Apostate',circle:'Circle VI — Heresy',subtitle:'Fight 2 of 3',maxHp:2175,baseDmg:6,emoji:'⛧',passive:'Corrupting. Raises Corruption by 15% each Strike.',passiveId:'corruptPlayer15'},
+  {id:'heresy_boss',tagline:'Even your chaos served its doctrine.',name:'The False Prophet',circle:'Circle VI — Heresy',subtitle:'Circle Boss — Fight 3 of 3',maxHp:3000,baseDmg:7,emoji:'📖',passive:'Toxic doctrine. Corruption +20% per Strike. Hellquake territory every fight.',passiveId:'corruptPlayer20'},
   // ── CIRCLE VII: VIOLENCE — Targets your healthiest member ────
-  {id:'brute',name:'The Brute',circle:'Circle VII — Violence',subtitle:'Fight 1 of 3',maxHp:3000,baseDmg:6,emoji:'🗡️',passive:'Calculated. Always targets the member with highest HP.',passiveId:'targetHighestHp'},
-  {id:'hunter',name:'The Hunter',circle:'Circle VII — Violence',subtitle:'Fight 2 of 3',maxHp:4000,baseDmg:7,emoji:'🏹',passive:'Predatory. Targets highest HP member. Deals +50% damage to them.',passiveId:'targetHighestHp2'},
-  {id:'violence_boss',name:'The Executioner',circle:'Circle VII — Violence',subtitle:'Circle Boss — Fight 3 of 3',maxHp:5500,baseDmg:8,emoji:'🩸',passive:'Methodical. Targets highest HP and deals double damage. Protect your strongest.',passiveId:'targetHighestHp3'},
+  {id:'brute',tagline:'Your healthiest fell first.',name:'The Brute',circle:'Circle VII — Violence',subtitle:'Fight 1 of 3',maxHp:3000,baseDmg:6,emoji:'🗡️',passive:'Calculated. Always targets the member with highest HP.',passiveId:'targetHighestHp'},
+  {id:'hunter',tagline:'Prey spotted. Prey eliminated.',name:'The Hunter',circle:'Circle VII — Violence',subtitle:'Fight 2 of 3',maxHp:4000,baseDmg:7,emoji:'🏹',passive:'Predatory. Targets highest HP member. Deals +50% damage to them.',passiveId:'targetHighestHp2'},
+  {id:'violence_boss',tagline:'The sentence was carried out.',name:'The Executioner',circle:'Circle VII — Violence',subtitle:'Circle Boss — Fight 3 of 3',maxHp:5500,baseDmg:8,emoji:'🩸',passive:'Methodical. Targets highest HP and deals double damage. Protect your strongest.',passiveId:'targetHighestHp3'},
   // ── CIRCLE VIII: FRAUD — Disables random cards in hand ───────
-  {id:'trickster',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:5200,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, one random card in hand is locked for 1 turn.',passiveId:'lockCard'},
-  {id:'deceiver',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:6800,baseDmg:7,emoji:'🎭',passive:'Manipulative. Locks 2 cards in hand after each Strike.',passiveId:'lockCard2'},
-  {id:'fraud_boss',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:9600,baseDmg:8,emoji:'🪞',passive:'Master of lies. Locks 3 cards after each Strike. Deck management is survival.',passiveId:'lockCard3'},
+  {id:'trickster',tagline:'You played right into its hands.',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:5200,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, one random card in hand is locked for 1 turn.',passiveId:'lockCard'},
+  {id:'deceiver',tagline:'Nothing was what it seemed.',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:6800,baseDmg:7,emoji:'🎭',passive:'Manipulative. Locks 2 cards in hand after each Strike.',passiveId:'lockCard2'},
+  {id:'fraud_boss',tagline:'The greatest con: you thought you could win.',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:9600,baseDmg:8,emoji:'🪞',passive:'Master of lies. Locks 3 cards after each Strike. Deck management is survival.',passiveId:'lockCard3'},
   // ── CIRCLE IX: TREACHERY — Gets stronger as it takes damage ──
-  {id:'traitor',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:9000,baseDmg:6,emoji:'🗝️',passive:'Vindictive. Gains +1 ATK permanently for each 20 damage taken.',passiveId:'damageScaleAtk'},
-  {id:'betrayer',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:11400,baseDmg:7,emoji:'🔒',passive:'Vengeful. Gains +2 ATK per 20 damage taken. Kill it fast.',passiveId:'damageScaleAtk2'},
-  {id:'lucifer',name:'Lucifer',circle:'Circle IX — Treachery',subtitle:'⛧ The Final Circle — Fight 3 of 3',maxHp:420666,baseDmg:9,emoji:'😈',passive:'The Lord of Hell. Gains +2 ATK per 20 HP lost. Immune to debuff. The ultimate test.',passiveId:'damageScaleAtk3'},
+  {id:'traitor',tagline:'Every hit made it stronger. You knew that.',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:9000,baseDmg:6,emoji:'🗝️',passive:'Vindictive. Gains +1 ATK permanently for each 20 damage taken.',passiveId:'damageScaleAtk'},
+  {id:'betrayer',tagline:'Betrayal is its native language.',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:11400,baseDmg:7,emoji:'🔒',passive:'Vengeful. Gains +2 ATK per 20 damage taken. Kill it fast.',passiveId:'damageScaleAtk2'},
+  {id:'lucifer',tagline:'He's seen better challengers. A lot of them.',name:'Lucifer',circle:'Circle IX — Treachery',subtitle:'⛧ The Final Circle — Fight 3 of 3',maxHp:420666,baseDmg:9,emoji:'😈',passive:'The Lord of Hell. Gains +2 ATK per 20 HP lost. Immune to debuff. The ultimate test.',passiveId:'damageScaleAtk3'},
 ]
 
 const ALL_MUSICIANS=[
@@ -1370,71 +1370,124 @@ function PhaseDots({left,total,color,wide}){
   const sz=wide?17:13;const start=total-left;return <div style={{display:'flex',gap:wide?4:4}}>{Array.from({length:total}).map((_,i)=>{const filled=i>=start;return <div key={i} style={{width:sz,height:sz,borderRadius:4,background:filled?color:'rgba(40,20,8,0.6)',border:`1px solid ${filled?color:'rgba(80,50,20,0.3)'}`,boxShadow:filled?`0 0 9px ${color}99`:'none',transition:'all 0.25s'}}/>})}</div>
 }
 
-function EndScreen({won,cause,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge}){
+function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge}){
   const isStoned=cause==='stoned'
+  const isBeaten=cause==='beaten'
   const isVictory=cause==='victory'
   const circleReached=Math.floor((stats.fightsSurvived)/3)+1
   const streakMsg=streakWins>1?'🔥 '+streakWins+' WIN STREAK!':streakLosses>2?'💀 '+streakLosses+' losses in a row...':''
-  return(
-    <div style={{position:'fixed',inset:0,zIndex:9800,background:isStoned?'rgba(2,0,0,0.97)':isVictory?'rgba(4,3,1,0.96)':'rgba(3,1,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
-      {isStoned&&<div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,180,0,0.04) 2px,rgba(0,180,0,0.04) 4px)',animation:'interlaceFlicker 0.1s steps(1) infinite',pointerEvents:'none',zIndex:0}}/>}
-      {isStoned&&<div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 20%,rgba(0,80,0,0.4) 100%)',pointerEvents:'none',zIndex:0,animation:'bgPulse 2s ease-in-out infinite'}}/>}
+
+  // Shared stats grid
+  const StatsGrid=()=>(
+    <div style={{background:'rgba(20,12,4,0.88)',border:'1px solid rgba(100,65,15,0.35)',borderRadius:8,padding:'28px 48px',minWidth:780}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:18}}>Run Statistics</div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'5px 48px'}}>
+        {[
+          ['Circle Reached',isVictory?'ALL 9 ⛧':circleReached+' / 9'],
+          ['Fights Survived',stats.fightsSurvived],
+          ['Strikes Thrown',stats.strikesThrown],
+          ['Cards Played',stats.cardsPlayed],
+          ['Total Damage',stats.totalDamage.toLocaleString()],
+          ['Highest Strike',stats.highestStrike.toLocaleString()],
+          ['Too Stoned Events',stats.tooStonedCount],
+          ['Max Corruption',stats.maxCorruption+'%'],
+          ['Stash Earned',stats.stashEarned+' 🌿'],
+          ['Total Runs',totalRuns||1],
+        ].map(function(row){
+          return(
+            <div key={row[0]} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'5px 0',borderBottom:'1px solid rgba(80,50,10,0.12)'}}>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#b09060'}}>{row[0]}</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,fontWeight:900,color:isVictory&&row[0]==='Circle Reached'?'#ffdd44':'#c8a060'}}>{row[1]}</span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+
+  // Shared bottom row
+  const BottomRow=()=>(
+    <div style={{display:'flex',gap:20,alignItems:'center'}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#5a4a20',letterSpacing:2}}>SEED: {seed.toString(16).toUpperCase()}</div>
+      {isDailyRun&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#e8a820',letterSpacing:2,padding:'3px 12px',border:'1px solid #e8a820',borderRadius:3}}>🌍 DAILY CHALLENGE</div>}
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#4a3a18',cursor:'pointer',letterSpacing:1}}
+        onClick={()=>navigator.clipboard&&navigator.clipboard.writeText(seed.toString(16).toUpperCase())}>📋 Copy Seed</div>
+    </div>
+  )
+
+  // Shared button row
+  const Buttons=({victory})=>(
+    <div style={{display:'flex',gap:16,marginTop:4}}>
+      <button onClick={onReset}
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:victory?'#ee2222':'#b09858',background:victory?'rgba(100,0,0,0.22)':'transparent',border:victory?'2px solid #7a0000':'1px solid rgba(90,60,20,0.5)',borderRadius:3,padding:'12px 40px',cursor:'pointer',textTransform:'uppercase'}}>
+        {victory?'⛧ Play Again':'↺ Try Again'}
+      </button>
+      <button onClick={()=>onDailyChallenge&&onDailyChallenge()}
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,color:'#e8a820',background:'rgba(50,35,5,0.4)',border:'1px solid #c87820',borderRadius:3,padding:'12px 28px',cursor:'pointer',textTransform:'uppercase'}}>
+        🌍 Daily Challenge
+      </button>
+    </div>
+  )
+
+  // ── STONED TO THE BONE ─────────────────────────────────────
+  if(isStoned) return(
+    <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(2,0,0,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
+      <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,180,0,0.04) 2px,rgba(0,180,0,0.04) 4px)',animation:'interlaceFlicker 0.1s steps(1) infinite',pointerEvents:'none',zIndex:0}}/>
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 20%,rgba(0,80,0,0.4) 100%)',pointerEvents:'none',zIndex:0,animation:'bgPulse 2s ease-in-out infinite'}}/>
       <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:280,color:'rgba(180,180,180,0.06)',userSelect:'none',lineHeight:1}}>Vestibule</div>
       </div>
       <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
-        {/* Title */}
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:isStoned?110:90,color:isStoned?'#cc1111':isVictory?'#d8c9a8':'#7a0000',textShadow:isStoned?'-4px 0 rgba(255,0,0,0.9),4px 0 rgba(0,255,80,0.7),0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000':isVictory?'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000':'0 0 60px rgba(100,0,0,0.6),3px 3px 0 #000'}}>{isStoned?'Stoned to the Bone':isVictory?'⛧ Victory ⛧':'Fallen'}</div>
-        <div style={{fontFamily:"'ScratchFont',serif",fontSize:isStoned?60:20,color:isStoned?'#44ff44':'#a09060',fontStyle:'italic',textAlign:'center',textShadow:isStoned?'0 0 20px rgba(60,255,60,0.9),0 0 50px rgba(30,200,30,0.6),0 0 100px rgba(0,150,0,0.4)':'none'}}>{isStoned?'The band ran out of herb.':isVictory?'All 9 circles conquered. Lucifer has fallen.':'The Vestibule claims another soul.'}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:110,color:'#cc1111',textShadow:'-4px 0 rgba(255,0,0,0.9),4px 0 rgba(0,255,80,0.7),0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000'}}>Stoned to the Bone</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:60,color:'#44ff44',fontStyle:'italic',textAlign:'center',textShadow:'0 0 20px rgba(60,255,60,0.9),0 0 50px rgba(30,200,30,0.6),0 0 100px rgba(0,150,0,0.4)'}}>The band ran out of herb.</div>
+        {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #aa4444',borderRadius:4}}>{streakMsg}</div>}
+        <StatsGrid/>
+        <BottomRow/>
+        <Buttons victory={false}/>
+      </div>
+    </div>
+  )
 
-        {/* Streak banner */}
+  // ── BEATEN BY BOSS ─────────────────────────────────────────
+  if(isBeaten) return(
+    <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(6,0,0,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:14,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
+      <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(180,0,0,0.035) 2px,rgba(180,0,0,0.035) 4px)',pointerEvents:'none',zIndex:0}}/>
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 30%,rgba(80,0,0,0.5) 100%)',pointerEvents:'none',zIndex:0}}/>
+      <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:280,color:'rgba(180,180,180,0.05)',userSelect:'none',lineHeight:1}}>Vestibule</div>
+      </div>
+      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:12}}>
+        {/* Boss emoji large */}
+        <div style={{fontSize:100,filter:'drop-shadow(0 0 30px rgba(200,0,0,0.6))',animation:'throb 2s ease-in-out infinite'}}>{enemy?.emoji||'💀'}</div>
+        {/* Defeated by */}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:6,color:'#662222',textTransform:'uppercase'}}>Defeated by</div>
+        {/* Boss name */}
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:88,color:'#cc2222',lineHeight:1,textShadow:'-3px 0 rgba(255,0,0,0.7),3px 0 rgba(180,0,0,0.5),0 0 50px rgba(160,0,0,0.7),3px 3px 0 #000',textAlign:'center'}}>{enemy?.name||'The Vestibule'}</div>
+        {/* Circle/subtitle */}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:3,color:'#552222',textTransform:'uppercase'}}>{enemy?.circle||''} · {enemy?.subtitle||''}</div>
+        {/* Sassy tagline */}
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:28,color:'#cc6666',fontStyle:'italic',textAlign:'center',textShadow:'0 0 20px rgba(180,0,0,0.5)',maxWidth:700,marginTop:4}}>"{enemy?.tagline||'The Vestibule claims another soul.'}"</div>
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:streakWins>1?'#ff6600':'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:`1px solid ${streakWins>1?'#ff6600':'#aa4444'}`,borderRadius:4}}>{streakMsg}</div>}
+        <StatsGrid/>
+        <BottomRow/>
+        <Buttons victory={false}/>
+      </div>
+    </div>
+  )
 
-        {/* Stats grid */}
-        <div style={{background:'rgba(20,12,4,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,padding:'30px 48px',minWidth:780}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:20}}>Run Statistics</div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px 48px'}}>
-            {[
-              ['Circle Reached', isVictory?'ALL 9 ⛧':circleReached+' / 9'],
-              ['Fights Survived', stats.fightsSurvived],
-              ['Strikes Thrown', stats.strikesThrown],
-              ['Cards Played', stats.cardsPlayed],
-              ['Total Damage', stats.totalDamage.toLocaleString()],
-              ['Highest Strike', stats.highestStrike.toLocaleString()],
-              ['Too Stoned Events', stats.tooStonedCount],
-              ['Max Corruption', stats.maxCorruption+'%'],
-              ['Stash Earned', stats.stashEarned+' 🌿'],
-              ['Total Runs', totalRuns||1],
-            ].map(function(row){
-              return(
-                <div key={row[0]} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'5px 0',borderBottom:'1px solid rgba(80,50,10,0.15)'}}>
-                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#b09060'}}>{row[0]}</span>
-                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:26,fontWeight:900,color:isVictory&&row[0]==='Circle Reached'?'#ffdd44':'#c8a060'}}>{row[1]}</span>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Seed + daily */}
-        <div style={{display:'flex',gap:20,alignItems:'center'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#5a4a20',letterSpacing:2}}>SEED: {seed.toString(16).toUpperCase()}</div>
-          {isDailyRun&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#e8a820',letterSpacing:2,padding:'3px 12px',border:'1px solid #e8a820',borderRadius:3}}>🌍 DAILY CHALLENGE</div>}
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#4a3a18',cursor:'pointer',letterSpacing:1}}
-            onClick={()=>navigator.clipboard&&navigator.clipboard.writeText(seed.toString(16).toUpperCase())}>📋 Copy Seed</div>
-        </div>
-
-        {/* Buttons */}
-        <div style={{display:'flex',gap:16,marginTop:4}}>
-          <button onClick={onReset}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:isVictory?'#ee2222':'#b09858',background:isVictory?'rgba(100,0,0,0.22)':'transparent',border:isVictory?'2px solid #7a0000':'1px solid rgba(90,60,20,0.5)',borderRadius:3,padding:'12px 40px',cursor:'pointer',textTransform:'uppercase'}}>
-            {isVictory?'⛧ Play Again':'↺ Try Again'}
-          </button>
-          <button onClick={()=>onDailyChallenge&&onDailyChallenge()}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,color:'#e8a820',background:'rgba(50,35,5,0.4)',border:'1px solid #c87820',borderRadius:3,padding:'12px 28px',cursor:'pointer',textTransform:'uppercase'}}>
-            🌍 Daily Challenge
-          </button>
-        </div>
+  // ── VICTORY ────────────────────────────────────────────────
+  return(
+    <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,3,1,0.96)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
+      <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:280,color:'rgba(180,180,180,0.06)',userSelect:'none',lineHeight:1}}>Vestibule</div>
+      </div>
+      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:90,color:'#d8c9a8',textShadow:'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000'}}>⛧ Victory ⛧</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#a09060',fontStyle:'italic',textAlign:'center'}}>All 9 circles conquered. Lucifer has fallen.</div>
+        {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>{streakMsg}</div>}
+        <StatsGrid/>
+        <BottomRow/>
+        <Buttons victory={true}/>
       </div>
     </div>
   )
@@ -2812,7 +2865,7 @@ export default function App(){
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)}/>
-  if(gameState==='end')return <EndScreen won={won} cause={deathCause} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}}/>
+  if(gameState==='end')return <EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}}/>
 
   return(
     <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none'}}>
