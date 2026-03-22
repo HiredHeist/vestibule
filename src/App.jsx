@@ -2242,6 +2242,7 @@ export default function App(){
   const [discovered,setDiscovered]=useState(new Set())
   const [newAchievements,setNewAchievements]=useState([])
   const [menuView,setMenuView]=useState(null) // null, 'unlocks', 'rules', 'options'
+  const [showPauseOptions,setShowPauseOptions]=useState(false)
   const [activeStakeId,setActiveStakeId]=useState(()=>localStorage.getItem('vst_active_stake')||'bronze')
   const activeStake=STAKES.find(s=>s.id===activeStakeId)||STAKES[0]
   const [musicVol,setMusicVol]=useState(()=>parseFloat(localStorage.getItem('vst_music_vol')||'0.3'))
@@ -3086,6 +3087,7 @@ export default function App(){
         setStats({fightsSurvived:6,strikesThrown:24,totalDamage:420,highestStrike:69,tooStonedCount:2,maxCorruption:66,stashEarned:42,cardsPlayed:99})
         setGameState('end')
       }
+      if(e.key==='Escape'){setShowPauseOptions(p=>!p)}
     }
     window.addEventListener('keydown',onKey,true)
     return function(){window.removeEventListener('keydown',onKey,true)}
@@ -4349,6 +4351,43 @@ export default function App(){
         </div>
 
       </div>
+      {/* PAUSE OPTIONS OVERLAY (ESC key) */}
+      {showPauseOptions&&<div style={{position:'fixed',inset:0,zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.85)'}} onClick={()=>setShowPauseOptions(false)}>
+        <div onClick={e=>e.stopPropagation()} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16,padding:'40px 60px',background:'rgba(10,6,2,0.98)',border:'2px solid rgba(100,65,15,0.5)',borderRadius:12,maxWidth:500,width:'90%'}}>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:6}}>Paused</div>
+          <div style={{display:'flex',flexDirection:'column',gap:10,width:'100%'}}>
+            {[
+              ['Scanlines','vst_scanlines',localStorage.getItem('vst_scanlines')!=='off'],
+              ['Screen Shake','vst_shake',localStorage.getItem('vst_shake')!=='off'],
+              ['Card Hover Zoom','vst_hoverzoom',localStorage.getItem('vst_hoverzoom')!=='off'],
+              ['Damage Numbers','vst_dmgnums',localStorage.getItem('vst_dmgnums')!=='off'],
+            ].map(([label,key,on])=>(
+              <div key={key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820'}}>{label}</span>
+                <button onClick={()=>{localStorage.setItem(key,on?'off':'on');setShowPauseOptions(false);setTimeout(()=>setShowPauseOptions(true),10)}}
+                  style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:on?'#44cc44':'#cc4444',background:'rgba(0,0,0,0.4)',border:'1px solid '+(on?'#44cc44':'#cc4444'),borderRadius:4,padding:'6px 20px',cursor:'pointer',minWidth:60,textAlign:'center'}}>{on?'ON':'OFF'}</button>
+              </div>
+            ))}
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820'}}>Combat Speed</span>
+              <button onClick={()=>{const cur=localStorage.getItem('vst_speed')||'normal';localStorage.setItem('vst_speed',cur==='normal'?'fast':'normal');setShowPauseOptions(false);setTimeout(()=>setShowPauseOptions(true),10)}}
+                style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#e8a820',background:'rgba(0,0,0,0.4)',border:'1px solid #c87820',borderRadius:4,padding:'6px 20px',cursor:'pointer',minWidth:60,textAlign:'center'}}>{(localStorage.getItem('vst_speed')||'normal').toUpperCase()}</button>
+            </div>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820'}}>Music Volume</span>
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                <input type="range" min="0" max="1" step="0.05" value={musicVol}
+                  onChange={e=>setMusicVolume(e.target.value)}
+                  style={{width:100,accentColor:'#e8a820',cursor:'pointer'}}/>
+                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#aa8030',minWidth:30,textAlign:'right'}}>{Math.round(musicVol*100)}%</span>
+              </div>
+            </div>
+          </div>
+          <button onClick={()=>setShowPauseOptions(false)}
+            style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,letterSpacing:4,color:'#ee2222',background:'rgba(120,0,0,0.25)',border:'2px solid #aa0000',borderRadius:8,padding:'12px 60px',cursor:'pointer',marginTop:8,animation:'throb 2s ease-in-out infinite'}}>Resume</button>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#555',letterSpacing:2,marginTop:4}}>Press ESC to close</div>
+        </div>
+      </div>}
     </div>
   )
 }
