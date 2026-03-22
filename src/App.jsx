@@ -1321,9 +1321,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
 
         </div>
 
-        {/* RIGHT COLUMN — fixed width, never cut off */}
-        <div style={{width:150,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-end'}}>
-          <div style={{flex:1,display:'flex',alignItems:'flex-end',paddingBottom:12}}>
+        {/* RIGHT COLUMN — mirrors center layout for alignment */}
+        <div style={{width:150,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center'}}>
+          {/* Matches cards row — reroll at bottom */}
+          <div style={{flexShrink:0,display:'flex',alignItems:'flex-end',paddingTop:4}}>
             <div style={{width:130,height:130,
               display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
               background:'rgba(25,18,4,0.92)',
@@ -1339,7 +1340,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:'#55ee55'}}>🌿 {rerollCost}</span>
             </div>
           </div>
-          <div style={{flexShrink:0,display:'flex',alignItems:'flex-end',paddingBottom:10}}>
+          {/* Matches gap */}
+          <div style={{flex:1,minHeight:12,maxHeight:60}}/>
+          {/* Matches packs row — stash at bottom */}
+          <div style={{flexShrink:0,display:'flex',alignItems:'flex-end',minHeight:420,paddingTop:24}}>
             <div style={{width:130,height:130,
               display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
               background:'rgba(5,15,5,0.92)',
