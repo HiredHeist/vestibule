@@ -1,0 +1,9 @@
+Options -Indexes
+<Files "submit.php">
+    Order Allow,Deny
+    Allow from all
+</Files>
+<FilesMatch "\.(md|txt|json)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
