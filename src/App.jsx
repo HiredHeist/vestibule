@@ -2006,7 +2006,7 @@ export default function App(){
   const [heldShrooms,setHeldShrooms]=useState(false) // player is holding shrooms
   const [heldAcid,setHeldAcid]=useState(false) // player is holding acid
   const [shroomsInStock,setShroomsInStock]=useState(()=>Math.random()<0.69)
-  const [acidInStock,setAcidInStock]=useState(()=>Math.random()<0.4)
+  const [acidInStock,setAcidInStock]=useState(()=>Math.random()<0.69)
   const [activeTripEffect,setActiveTripEffect]=useState(null) // {type,name,desc,color} — shown as dramatic reveal
   const [fightTripBuff,setFightTripBuff]=useState(null) // persists for entire fight — combat checks read this
   const [tripUsedThisFight,setTripUsedThisFight]=useState(false)
@@ -2669,7 +2669,7 @@ export default function App(){
         setBoosterPacks(genBoosterPacks(nextCn))
         setRecruitPack(genRecruitPack(fightIndex))
         setShroomsInStock(Math.random()<0.69)
-        setAcidInStock(Math.random()<0.4)
+        setAcidInStock(Math.random()<0.69)
         setShopSoldIds([]) // clear sold state when shop rotates
         // Rotate circle artifact + passive at each new circle (every 3rd fight)
         const isCircleBoss=(fightIndex+1)%3===0
@@ -2696,7 +2696,7 @@ export default function App(){
         setRerollCost(2)
         setStash(69)
         setShroomsInStock(Math.random()<0.69)
-        setAcidInStock(Math.random()<0.4)
+        setAcidInStock(Math.random()<0.69)
         setGameState('shop')
       }
       if(e.shiftKey&&(e.key==='D'||e.key==='d')){
