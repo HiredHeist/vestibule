@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Saturday, March 21, 2026 at 11:59 PM*
+*Last updated: Sunday, March 22, 2026 at 12:00 AM*
 
 ---
 
@@ -22,7 +22,7 @@ This is happening.
 
 5. **8 cards in hand (over-cap)** — Groupie's new "draw 1" can push hand over HAND_SIZE mid-strike. Hard cap needs to be enforced at the point of draw, not just at end-of-strike.
 
-6. **Foil/Mythic/Demonic members have no visual on stage** — foil Vitalik looks identical to a base Vitalik on the stage card. Need colored top bar / badge / glow on StageSlot for tiered members.
+6. ~~**Foil/Mythic/Demonic no stage visual** — FIXED: tier badge top-right, colored top bar (silver/purple/gold), matching border glow~~ — foil Vitalik looks identical to a base Vitalik on the stage card. Need colored top bar / badge / glow on StageSlot for tiered members.
 
 7. **Circle artifacts/passives never rotate** — `circleArtifact` and `circlePassive` are initialized once and never change. Should rotate at each circle boss shop.
 
