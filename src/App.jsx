@@ -1200,8 +1200,59 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'visible',minHeight:0}}>
 
           {/* CARDS ROW */}
-          <div style={{flexShrink:0,display:'flex',gap:80,justifyContent:'center',alignItems:'flex-start',paddingTop:4}}>
+          <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start',paddingTop:4}}>
             {shopCards.map((card,i)=><SaleCard key={i} card={card} idx={i}/>)}
+            {/* THE DEALER */}
+            <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',paddingTop:24,position:'relative'}}>
+              <div style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',
+                background:'linear-gradient(160deg,#0a100a,#040804)',
+                border:'2px solid rgba(50,180,50,0.5)',borderRadius:10,
+                padding:'0 14px 14px',overflow:'hidden',
+                boxShadow:'0 0 30px rgba(40,150,40,0.15)'}}>
+                <div style={{height:7,flexShrink:0,background:'linear-gradient(90deg,#22882244,#44cc44ee,#22882244)',boxShadow:'0 0 12px rgba(40,200,40,0.5)'}}/> 
+                <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,
+                  color:'#44cc44',textAlign:'center',marginTop:10,
+                  textShadow:'0 0 18px rgba(60,200,60,0.8)'}}>🌿 The Dealer</div>
+                {/* Mushrooms */}
+                <div onClick={()=>{if(shroomsInStock&&!heldShrooms&&can(8)){onSpend(8,'dealer',null);onBuyShrooms()}}}
+                  style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+                    background:shroomsInStock&&!heldShrooms?'rgba(80,40,10,0.4)':'rgba(20,15,10,0.4)',
+                    border:shroomsInStock&&!heldShrooms?'1px solid rgba(200,150,50,0.5)':'1px solid rgba(60,40,20,0.3)',
+                    borderRadius:8,cursor:shroomsInStock&&!heldShrooms&&can(8)?'pointer':'default',
+                    margin:'8px 0 4px',transition:'all 0.15s',position:'relative',
+                    opacity:shroomsInStock?1:0.5}}>
+                  <div style={{fontSize:36}}>🍄</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,
+                    color:shroomsInStock?'#e8a820':'#554428',marginTop:2}}>
+                    {heldShrooms?'HOLDING':shroomsInStock?'Magic Mushrooms':'DRY'}</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,
+                    color:shroomsInStock&&!heldShrooms?'#55ee55':'#554428'}}>
+                    {heldShrooms?'Ready to use':shroomsInStock?'8🌿 · 90% good trip':'Not in stock'}</div>
+                  {heldShrooms&&<div style={{position:'absolute',top:4,right:4,background:'rgba(40,180,40,0.9)',
+                    borderRadius:4,padding:'1px 5px',fontFamily:"'MBScribblesFont',serif",fontSize:9,
+                    fontWeight:900,color:'#fff'}}>HELD</div>}
+                </div>
+                {/* Acid */}
+                <div onClick={()=>{if(acidInStock&&!heldAcid&&can(18)){onSpend(18,'dealer',null);onBuyAcid()}}}
+                  style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+                    background:acidInStock&&!heldAcid?'rgba(40,10,80,0.4)':'rgba(15,10,20,0.4)',
+                    border:acidInStock&&!heldAcid?'1px solid rgba(150,50,220,0.5)':'1px solid rgba(40,20,60,0.3)',
+                    borderRadius:8,cursor:acidInStock&&!heldAcid&&can(18)?'pointer':'default',
+                    margin:'4px 0 8px',transition:'all 0.15s',position:'relative',
+                    opacity:acidInStock?1:0.5}}>
+                  <div style={{fontSize:36}}>🧪</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,
+                    color:acidInStock?'#cc44ff':'#4a2a6a',marginTop:2}}>
+                    {heldAcid?'HOLDING':acidInStock?'Blotter Acid':'DRY'}</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,
+                    color:acidInStock&&!heldAcid?'#cc88ff':'#4a2a6a'}}>
+                    {heldAcid?'Ready to use':acidInStock?'18🌿 · 90% good trip':'Not in stock'}</div>
+                  {heldAcid&&<div style={{position:'absolute',top:4,right:4,background:'rgba(160,40,220,0.9)',
+                    borderRadius:4,padding:'1px 5px',fontFamily:"'MBScribblesFont',serif",fontSize:9,
+                    fontWeight:900,color:'#fff'}}>HELD</div>}
+                </div>
+              </div>
+            </div>
             {/* Stash + Reroll — 100px gap between them, vertically centered */}
             <div style={{display:'flex',flexDirection:'column',gap:100,alignSelf:'center'}}>
               <div style={{width:130,height:130,
@@ -1234,7 +1285,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{flex:1,minHeight:12,maxHeight:60}}/>
 
           {/* PACKS + PAWN ROW */}
-          <div style={{flexShrink:0,display:'flex',gap:80,justifyContent:'center',alignItems:'flex-start'}}>
+          <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start'}}>
             {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
             <div style={{paddingTop:24,flexShrink:0}}>
             <div style={{width:420,height:420,
@@ -1287,57 +1338,6 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 }}
                 onClose={()=>setPawnOpen(false)}
               />}
-            </div>
-            {/* ── DEALER ── */}
-            <div style={{paddingTop:24,flexShrink:0}}>
-            <div style={{width:280,height:420,
-              background:'linear-gradient(160deg,#0a100a,#040804)',
-              border:'2px solid rgba(50,180,50,0.5)',borderRadius:10,
-              padding:'14px 16px',
-              display:'flex',flexDirection:'column',gap:10,
-              boxShadow:'0 0 30px rgba(40,150,40,0.15)'}}>
-              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,
-                color:'#44cc44',textAlign:'center',
-                textShadow:'0 0 18px rgba(60,200,60,0.8)'}}>🌿 The Dealer</div>
-              {/* Mushrooms */}
-              <div onClick={()=>{if(shroomsInStock&&!heldShrooms&&stash>=8){onSpend(8,'dealer',null);onBuyShrooms()}}}
-                style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
-                  background:shroomsInStock&&!heldShrooms?'rgba(80,40,10,0.4)':'rgba(20,15,10,0.4)',
-                  border:shroomsInStock&&!heldShrooms?'1px solid rgba(200,150,50,0.5)':'1px solid rgba(60,40,20,0.3)',
-                  borderRadius:8,cursor:shroomsInStock&&!heldShrooms&&stash>=8?'pointer':'default',
-                  transition:'all 0.15s',position:'relative',
-                  opacity:shroomsInStock?1:0.5}}>
-                <div style={{fontSize:48}}>{shroomsInStock?'🍄':'🍄'}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,
-                  color:shroomsInStock?'#e8a820':'#554428',marginTop:4}}>
-                  {heldShrooms?'HOLDING':shroomsInStock?'Magic Mushrooms':'DRY'}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,
-                  color:shroomsInStock&&!heldShrooms?'#55ee55':'#554428',marginTop:2}}>
-                  {heldShrooms?'Ready to use in battle':shroomsInStock?'8🌿 · 90% good trip':'Not in stock'}</div>
-                {heldShrooms&&<div style={{position:'absolute',top:6,right:6,background:'rgba(40,180,40,0.9)',
-                  borderRadius:4,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,
-                  fontWeight:900,color:'#fff'}}>HELD</div>}
-              </div>
-              {/* Acid */}
-              <div onClick={()=>{if(acidInStock&&!heldAcid&&stash>=18){onSpend(18,'dealer',null);onBuyAcid()}}}
-                style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
-                  background:acidInStock&&!heldAcid?'rgba(40,10,80,0.4)':'rgba(15,10,20,0.4)',
-                  border:acidInStock&&!heldAcid?'1px solid rgba(150,50,220,0.5)':'1px solid rgba(40,20,60,0.3)',
-                  borderRadius:8,cursor:acidInStock&&!heldAcid&&stash>=18?'pointer':'default',
-                  transition:'all 0.15s',position:'relative',
-                  opacity:acidInStock?1:0.5}}>
-                <div style={{fontSize:48}}>{acidInStock?'🧪':'🧪'}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,
-                  color:acidInStock?'#cc44ff':'#4a2a6a',marginTop:4}}>
-                  {heldAcid?'HOLDING':acidInStock?'Blotter Acid':'DRY'}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,
-                  color:acidInStock&&!heldAcid?'#cc88ff':'#4a2a6a',marginTop:2}}>
-                  {heldAcid?'Ready to use in battle':acidInStock?'18🌿 · 90% good trip':'Not in stock'}</div>
-                {heldAcid&&<div style={{position:'absolute',top:6,right:6,background:'rgba(160,40,220,0.9)',
-                  borderRadius:4,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,
-                  fontWeight:900,color:'#fff'}}>HELD</div>}
-              </div>
-            </div>
             </div>
           </div>
 
