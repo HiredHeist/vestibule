@@ -1556,7 +1556,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       onDragEnd={onDragEnd}
       onDragOver={e=>{e.preventDefault();onHandDragOver&&onHandDragOver()}}
       onDrop={e=>{e.stopPropagation();onHandDrop&&onHandDrop()}}
-      onMouseEnter={onHover} onMouseLeave={onLeave} onClick={onClick}
+      onMouseEnter={onHover} onMouseLeave={onLeave} onClick={e=>{e.stopPropagation();onClick()}}
       style={{width:190,height:295,flexShrink:0,position:'relative',display:'flex',flexDirection:'column',
         background:isSelected?'linear-gradient(180deg,#2a1a0a,#160e05)':'linear-gradient(180deg,#201408,#100804)',
         border:isSelected?`2px solid #cc0000`:isHovered?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
@@ -1564,7 +1564,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         transformOrigin:'bottom center',
         transform:isDragging?'scale(0.85) rotate(5deg)':isHovered?'translateY(-52px) scale(1.18) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
-        zIndex:isDragging?0:isHovered?9999:isSelected?50:Math.max(1,Math.round(10-Math.abs(index-mid))),
+        zIndex:isDragging?0:isHovered?9999:isSelected?50+index:10+index,
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
         opacity:isDragging?0.4:1,
         animation:shimmerAnim,
@@ -3139,7 +3139,7 @@ export default function App(){
         setStage(p=>p.map(m=>m&&m.uid===target.uid?Object.assign({},m,{hp:Math.max(0,m.hp-3)}):m))
         addLog('🗝 '+paranoiaVictim.name+' turns paranoid! Attacks '+target.name+' for 3 damage!')}
     }
-    const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===MAX_STRIKES?10:0
+    const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===activeStake.maxStrikes?10:0
     let dmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
       const effectiveAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
       return s+effectiveAtk
@@ -3171,7 +3171,7 @@ export default function App(){
     }
     if(_mlb>0)dmg+=_mlb}
     // CA4: Wailing Guitar — first Strike deals double damage
-    if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===MAX_STRIKES){dmg*=2;addLog('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')}
+    if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===activeStake.maxStrikes){dmg*=2;addLog('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')}
     // HEXED: auto-raise corruption +5%, member gains +1 ATK per 10% corruption
     const hexedMembers=actives.filter(m=>m.keyword==='HEXED')
     if(hexedMembers.length>0){
@@ -3241,7 +3241,7 @@ export default function App(){
           // Full band reset
           setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,stoneShield:false,tempBuff:false,encoreReady:false,ampedThisStrike:false}):null))
           setEmbers(maxEmbers)
-          setStrikesLeft(MAX_STRIKES)
+          setStrikesLeft(activeStake.maxStrikes)
           setDiscardsLeft(MAX_DISCARDS)
           setTripUsedThisFight(false)
           setFightTripBuff(null)
@@ -3280,7 +3280,7 @@ export default function App(){
         let scaledBaseDmg=stakeBaseDmg+(enemy.passiveId&&enemy.passiveId.startsWith('damageScaleAtk')?bossRageAtk:0)
         // selfbuff: boss gains +1/+2 dmg per Strike
         if(enemy.passiveId==='selfbuff'){scaledBaseDmg=stakeBaseDmg+strikesLeft}
-        else if(enemy.passiveId==='selfbuff2'){scaledBaseDmg=stakeBaseDmg+(MAX_STRIKES-strikesLeft)*2}
+        else if(enemy.passiveId==='selfbuff2'){scaledBaseDmg=stakeBaseDmg+(activeStake.maxStrikes-strikesLeft)*2}
         // rageScale: +X dmg per buffed member
         else if(enemy.passiveId==='rageScale1'){const buffed=stage.filter(m=>m&&(m.buffCount||0)>0).length;scaledBaseDmg=stakeBaseDmg+buffed*1}
         else if(enemy.passiveId==='rageScale2'){const buffed=stage.filter(m=>m&&(m.buffCount||0)>0).length;scaledBaseDmg=stakeBaseDmg+buffed*2}
@@ -3393,8 +3393,8 @@ export default function App(){
               const ns=[...prev];
               prev.forEach(function(m,i){
                 if(m&&!m.tooStoned&&m.keyword==='ANCHOR'){
-                  if(i>0&&ns[i-1]&&!ns[i-1].tooStoned)ns[i-1]=Object.assign({},ns[i-1],{hp:Math.min(ns[i-1].maxHp,ns[i-1].hp+1)});
-                  if(i<4&&ns[i+1]&&!ns[i+1].tooStoned)ns[i+1]=Object.assign({},ns[i+1],{hp:Math.min(ns[i+1].maxHp,ns[i+1].hp+1)});
+                  if(i>0&&ns[i-1]&&!ns[i-1].tooStoned&&ns[i-1].keyword!=='FALLEN')ns[i-1]=Object.assign({},ns[i-1],{hp:Math.min(ns[i-1].maxHp,ns[i-1].hp+1)});
+                  if(i<4&&ns[i+1]&&!ns[i+1].tooStoned&&ns[i+1].keyword!=='FALLEN')ns[i+1]=Object.assign({},ns[i+1],{hp:Math.min(ns[i+1].maxHp,ns[i+1].hp+1)});
                 }
               });
               return ns;
@@ -3475,7 +3475,7 @@ export default function App(){
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(Math.ceil(nextEnemy.maxHp*activeStake.hpMult))
-    setEmbers(function(){return maxEmbers});setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
+    setEmbers(function(){return maxEmbers});setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
     setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
     if(fightIndex===26){
@@ -3558,7 +3558,7 @@ export default function App(){
         const actives=ns.map((m,i)=>m&&!m.tooStoned?i:-1).filter(i=>i>=0)
         if(actives.length>0){
           const ri=actives[Math.floor(Math.random()*actives.length)]
-          ns[ri]=Object.assign({},ns[ri],{hp:Math.min(ns[ri].maxHp,ns[ri].hp+3)})
+          if(ns[ri].keyword!=='FALLEN')ns[ri]=Object.assign({},ns[ri],{hp:Math.min(ns[ri].maxHp,ns[ri].hp+3)})
         }
       }
       // P8: Green Room — all members Stonewall
@@ -4129,7 +4129,7 @@ export default function App(){
             if(dbl)dmg*=2
             const buf=act.filter(m=>(m.buffCount||0)>0).length
             const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1
-            const fin=Math.round(dmg*bon)
+            const fin=Math.floor(dmg*bon)
             return <>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:27,color:'#c8a060',fontWeight:700,textShadow:'0 0 10px rgba(200,160,60,0.6)'}}>Combined Attack</span>
               <span key={fin} style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block'}}>{fin}</span>
@@ -4174,8 +4174,8 @@ export default function App(){
           <button onClick={handleStrike} disabled={!canStrike}
             style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 20px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:190}}>⚔ Strike</button>
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'flex-end',width:190}}>
-            <PhaseDots left={strikesLeft} total={MAX_STRIKES} color='#dd2222' wide={true}/>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555',minWidth:32,textAlign:'right'}}>{strikesLeft}/{MAX_STRIKES}</span>
+            <PhaseDots left={strikesLeft} total={activeStake.maxStrikes} color='#dd2222' wide={true}/>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555',minWidth:32,textAlign:'right'}}>{strikesLeft}/{activeStake.maxStrikes}</span>
           </div>
           <div style={{height:8}}/>
           <button onClick={handleDiscard} disabled={!canDiscard}
@@ -4210,12 +4210,12 @@ export default function App(){
           <div style={{position:'relative'}}
             onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='block'}}
             onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='none'}}>
-            <button onClick={()=>{if(heldShrooms&&strikesLeft===MAX_STRIKES&&!tripUsedThisFight)activateTrip('shrooms')}}
+            <button onClick={()=>{if(heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight)activateTrip('shrooms')}}
               style={{width:100,padding:'8px 12px',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase',
-                background:heldShrooms&&strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'rgba(80,40,10,0.7)':'rgba(10,6,2,0.85)',
+                background:heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'rgba(80,40,10,0.7)':'rgba(10,6,2,0.85)',
                 border:heldShrooms&&!tripUsedThisFight?'2px solid #cc8800':'1px solid rgba(100,65,15,0.3)',
                 borderRadius:3,color:heldShrooms&&!tripUsedThisFight?'#ffcc44':'#4a3018',
-                cursor:heldShrooms&&strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'pointer':'not-allowed',
+                cursor:heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'pointer':'not-allowed',
                 textShadow:heldShrooms&&!tripUsedThisFight?'0 0 8px rgba(200,150,0,0.6)':'none',
                 opacity:heldShrooms?1:0.4,textAlign:'center',transition:'all 0.15s'}}>🍄 {heldShrooms?'USE':'—'}</button>
             <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(200,150,50,0.6)',borderRadius:6,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
@@ -4226,12 +4226,12 @@ export default function App(){
           <div style={{position:'relative'}}
             onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='block'}}
             onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='none'}}>
-            <button onClick={()=>{if(heldAcid&&strikesLeft===MAX_STRIKES&&!tripUsedThisFight)activateTrip('acid')}}
+            <button onClick={()=>{if(heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight)activateTrip('acid')}}
               style={{width:100,padding:'8px 12px',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase',
-                background:heldAcid&&strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'rgba(40,10,80,0.7)':'rgba(10,6,2,0.85)',
+                background:heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'rgba(40,10,80,0.7)':'rgba(10,6,2,0.85)',
                 border:heldAcid&&!tripUsedThisFight?'2px solid #aa44ff':'1px solid rgba(100,65,15,0.3)',
                 borderRadius:3,color:heldAcid&&!tripUsedThisFight?'#cc88ff':'#4a2a6a',
-                cursor:heldAcid&&strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'pointer':'not-allowed',
+                cursor:heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'pointer':'not-allowed',
                 textShadow:heldAcid&&!tripUsedThisFight?'0 0 8px rgba(160,60,240,0.6)':'none',
                 opacity:heldAcid?1:0.4,textAlign:'center',transition:'all 0.15s'}}>🧪 {heldAcid?'USE':'—'}</button>
             <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(150,50,220,0.6)',borderRadius:6,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
