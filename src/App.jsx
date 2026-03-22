@@ -1803,7 +1803,14 @@ export default function App(){
   const stageRefs=useRef(Array(5).fill(null).map(()=>({current:null})))
   const fid=useRef(0),prid=useRef(0)
 
-  const addLog=m=>setLog(p=>[m,...p.slice(0,7)])
+  const addLog=m=>{
+    // DEV ONLY: pipe every game log entry to window.__devLog for debugging
+    if(typeof window!=='undefined'){
+      if(!window.__devLog)window.__devLog=[]
+      window.__devLog.push({t:new Date().toLocaleTimeString('en-US',{timeZone:'Asia/Tokyo',hour12:false}),msg:m})
+    }
+    setLog(p=>[m,...p.slice(0,99)])
+  }
   const addFloat=(v,x,y,color,big)=>{big=big||false;const id=fid.current++;setFloats(p=>[...p,{id,v,x,y,color:color||'#dd2222',big}])}
   const remFloat=id=>setFloats(p=>p.filter(f=>f.id!==id))
   const updStat=(key,val,isMax)=>{isMax=isMax||false;setStats(p=>Object.assign({},p,{[key]:isMax?Math.max(p[key],val):p[key]+val}))}
