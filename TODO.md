@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 12:00 AM*
+*Last updated: Sunday, March 22, 2026 at 12:01 AM*
 
 ---
 
@@ -24,7 +24,7 @@ This is happening.
 
 6. ~~**Foil/Mythic/Demonic no stage visual** — FIXED: tier badge top-right, colored top bar (silver/purple/gold), matching border glow~~ — foil Vitalik looks identical to a base Vitalik on the stage card. Need colored top bar / badge / glow on StageSlot for tiered members.
 
-7. **Circle artifacts/passives never rotate** — `circleArtifact` and `circlePassive` are initialized once and never change. Should rotate at each circle boss shop.
+7. ~~**Circle artifacts/passives never rotate** — FIXED: new random circle artifact+passive generated at each circle boss fight~~ — `circleArtifact` and `circlePassive` are initialized once and never change. Should rotate at each circle boss shop.
 
 8. **Permanent ATK buffs may not carry over between fights** — `_origAtk` is not cleared at fight start. If a fight ends mid-temp-buff, `_origAtk` carries into next fight and could revert permanent gains. Fix: always clear `_origAtk` at fight start.
 
