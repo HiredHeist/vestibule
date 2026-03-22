@@ -21,6 +21,38 @@ function playDraw(){[220,330,440].forEach(function(f,i){setTimeout(function(){pl
 // ── Constants ─────────────────────────────────────────────────────────────────
 const MAX_EMBERS_CAP=8, MAX_STRIKES=4, MAX_DISCARDS=4, HAND_SIZE=6, MAX_STASH=420
 
+// ── SCORE SYSTEM ──────────────────────────────────────────────────
+function calcRunScore(stats, won){
+  const s = stats
+  const score = Math.floor(
+    (Math.min(9,Math.floor(s.fightsSurvived/3)+1)) * 1000 +
+    s.fightsSurvived * 150 +
+    (s.totalDamage||0) / 10 +
+    (s.highestStrike||0) * 5 +
+    (s.stashEarned||0) * 2 -
+    (s.tooStonedCount||0) * 50 +
+    (won ? 50000 : 0)
+  )
+  return Math.max(0, Math.round(score))
+}
+const SCORE_GRADES=[
+  {min:0,     label:'GARAGE BAND',  color:'#888888'},
+  {min:500,   label:'OPENING ACT',  color:'#aa8844'},
+  {min:1000,  label:'LOCAL LEGEND', color:'#c8a060'},
+  {min:2000,  label:'TOURING ACT',  color:'#44aacc'},
+  {min:3500,  label:'HEADLINER',    color:'#aa44ff'},
+  {min:6000,  label:'CULT LEGEND',  color:'#ee2222'},
+  {min:9999,  label:'LUCIFER SLAYER',color:'#ffd700'},
+]
+function getScoreGrade(score, won){
+  if(won) return SCORE_GRADES[SCORE_GRADES.length-1]
+  let grade=SCORE_GRADES[0]
+  for(const g of SCORE_GRADES){ if(score>=g.min) grade=g }
+  // LUCIFER SLAYER only by actually winning
+  if(grade.label==='LUCIFER SLAYER'&&!won) grade=SCORE_GRADES[SCORE_GRADES.length-2]
+  return grade
+}
+
 const ENEMIES=[
   // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
   {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:27,baseDmg:2,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
@@ -1425,12 +1457,31 @@ function PhaseDots({left,total,color,wide}){
   const sz=wide?17:13;const start=total-left;return <div style={{display:'flex',gap:wide?4:4}}>{Array.from({length:total}).map((_,i)=>{const filled=i>=start;return <div key={i} style={{width:sz,height:sz,borderRadius:4,background:filled?color:'rgba(40,20,8,0.6)',border:`1px solid ${filled?color:'rgba(80,50,20,0.3)'}`,boxShadow:filled?`0 0 9px ${color}99`:'none',transition:'all 0.25s'}}/>})}</div>
 }
 
-function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge}){
+function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore}){
   const isStoned=cause==='stoned'
   const isBeaten=cause==='beaten'
   const isVictory=cause==='victory'
   const circleReached=Math.floor((stats.fightsSurvived)/3)+1
   const streakMsg=streakWins>1?'🔥 '+streakWins+' WIN STREAK!':streakLosses>2?'💀 '+streakLosses+' losses in a row...':''
+  const finalScore=calcRunScore(stats,isVictory)
+  const grade=getScoreGrade(finalScore,isVictory)
+  const isBest=finalScore>=(personalBest||0)&&finalScore>0
+  const beatBy=isBest&&(personalBest||0)>0?finalScore-(personalBest||0):0
+  const [displayScore,setDisplayScore]=useState(0)
+  const [scoreReady,setScoreReady]=useState(false)
+  useEffect(()=>{
+    let start=null,duration=1800
+    const step=ts=>{
+      if(!start)start=ts
+      const p=Math.min(1,(ts-start)/duration)
+      const eased=1-Math.pow(1-p,3)
+      setDisplayScore(Math.round(eased*finalScore))
+      if(p<1)requestAnimationFrame(step)
+      else{setDisplayScore(finalScore);setScoreReady(true)}
+    }
+    const t=setTimeout(()=>requestAnimationFrame(step),300)
+    return()=>clearTimeout(t)
+  },[finalScore])
 
   // Shared stats grid
   const StatsGrid=()=>(
@@ -1495,9 +1546,19 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
       <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:110,color:'#cc1111',textShadow:'-4px 0 rgba(255,0,0,0.9),4px 0 rgba(0,255,80,0.7),0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000'}}>Stoned to the Bone</div>
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:60,color:'#44ff44',fontStyle:'italic',textAlign:'center',textShadow:'0 0 20px rgba(60,255,60,0.9),0 0 50px rgba(30,200,30,0.6),0 0 100px rgba(0,150,0,0.4)'}}>The band ran out of herb.</div>
+                {/* Score */}
+        <div style={{textAlign:'center',margin:'4px 0'}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
+          {isBest&&scoreReady&&beatBy>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#ffd700',fontStyle:'italic',marginTop:4}}>🏆 NEW BEST! +{beatBy.toLocaleString()} pts</div>}
+          {isBest&&scoreReady&&beatBy===0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#ffd700',fontStyle:'italic',marginTop:4}}>🏆 PERSONAL BEST!</div>}
+          {!isBest&&(personalBest||0)>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#665533',fontStyle:'italic',marginTop:4}}>Best: {(personalBest||0).toLocaleString()} — {((personalBest||0)-finalScore).toLocaleString()} away</div>}
+        </div>
+                {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #aa4444',borderRadius:4}}>{streakMsg}</div>}
         <StatsGrid/>
         <BottomRow/>
+                {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#443322',letterSpacing:3}}>RUN #{totalRuns}</div>}
         <Buttons victory={false}/>
       </div>
     </div>
@@ -1522,9 +1583,19 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:3,color:'#552222',textTransform:'uppercase'}}>{enemy?.circle||''} · {enemy?.subtitle||''}</div>
         {/* Sassy tagline */}
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:28,color:'#cc6666',fontStyle:'italic',textAlign:'center',textShadow:'0 0 20px rgba(180,0,0,0.5)',maxWidth:700,marginTop:4}}>"{enemy?.tagline||'The Vestibule claims another soul.'}"</div>
+                {/* Score */}
+        <div style={{textAlign:'center',margin:'4px 0'}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
+          {isBest&&scoreReady&&beatBy>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#ffd700',fontStyle:'italic',marginTop:4}}>🏆 NEW BEST! +{beatBy.toLocaleString()} pts</div>}
+          {isBest&&scoreReady&&beatBy===0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#ffd700',fontStyle:'italic',marginTop:4}}>🏆 PERSONAL BEST!</div>}
+          {!isBest&&(personalBest||0)>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#665533',fontStyle:'italic',marginTop:4}}>Best: {(personalBest||0).toLocaleString()} — {((personalBest||0)-finalScore).toLocaleString()} away</div>}
+        </div>
+                {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:streakWins>1?'#ff6600':'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:`1px solid ${streakWins>1?'#ff6600':'#aa4444'}`,borderRadius:4}}>{streakMsg}</div>}
         <StatsGrid/>
         <BottomRow/>
+                {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#443322',letterSpacing:3}}>RUN #{totalRuns}</div>}
         <Buttons victory={false}/>
       </div>
     </div>
@@ -1539,9 +1610,19 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
       <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:90,color:'#d8c9a8',textShadow:'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000'}}>⛧ Victory ⛧</div>
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#a09060',fontStyle:'italic',textAlign:'center'}}>All 9 circles conquered. Lucifer has fallen.</div>
+                {/* Score */}
+        <div style={{textAlign:'center',margin:'4px 0'}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
+          {isBest&&scoreReady&&beatBy>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#ffd700',fontStyle:'italic',marginTop:4}}>🏆 NEW BEST! +{beatBy.toLocaleString()} pts</div>}
+          {isBest&&scoreReady&&beatBy===0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#ffd700',fontStyle:'italic',marginTop:4}}>🏆 PERSONAL BEST!</div>}
+          {!isBest&&(personalBest||0)>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#665533',fontStyle:'italic',marginTop:4}}>Best: {(personalBest||0).toLocaleString()} — {((personalBest||0)-finalScore).toLocaleString()} away</div>}
+        </div>
+                {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>{streakMsg}</div>}
         <StatsGrid/>
         <BottomRow/>
+                {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#443322',letterSpacing:3}}>RUN #{totalRuns}</div>}
         <Buttons victory={true}/>
       </div>
     </div>
@@ -1832,7 +1913,11 @@ export default function App(){
   const [discovered,setDiscovered]=useState(new Set())
   const [streakWins,setStreakWins]=useState(0)
   const [streakLosses,setStreakLosses]=useState(0)
-  const [totalRunsPlayed,setTotalRunsPlayed]=useState(0)
+  const [totalRunsPlayed,setTotalRunsPlayed]=useState(()=>parseInt(localStorage.getItem('vst_runs')||'0'))
+  const [personalBest,setPersonalBest]=useState(()=>parseInt(localStorage.getItem('vst_best')||'0'))
+  const [lifetimeScore,setLifetimeScore]=useState(()=>parseInt(localStorage.getItem('vst_lifetime')||'0'))
+  const [dailyStreak,setDailyStreak]=useState(()=>parseInt(localStorage.getItem('vst_streak')||'0'))
+  const [lastPlayedDate,setLastPlayedDate]=useState(()=>localStorage.getItem('vst_lastdate')||'')
   const [activePassives,setActivePassives]=useState([])   // max 5
   const [pendingBurningStage,setPendingBurningStage]=useState(false) // burning stage bonus next fight
   const [extraEmberNextFight,setExtraEmberNextFight]=useState(0)    // from burning stage
@@ -2440,7 +2525,18 @@ export default function App(){
       if(fightIndex>=26){
       playVictory();setDeathCause('victory')
       setStreakWins(p=>p+1);setStreakLosses(0)
-      setTotalRunsPlayed(p=>p+1)
+      const newRuns=totalRunsPlayed+1
+      setTotalRunsPlayed(newRuns)
+      localStorage.setItem('vst_runs', newRuns)
+      const runScore=calcRunScore(stats, true)
+      if(runScore>personalBest){setPersonalBest(runScore);localStorage.setItem('vst_best',runScore)}
+      const newLifetime=lifetimeScore+runScore
+      setLifetimeScore(newLifetime);localStorage.setItem('vst_lifetime',newLifetime)
+      const today=new Date().toISOString().slice(0,10)
+      const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10)
+      const newStreak=lastPlayedDate===yesterday||lastPlayedDate===today?dailyStreak+1:1
+      setDailyStreak(newStreak);localStorage.setItem('vst_streak',newStreak)
+      setLastPlayedDate(today);localStorage.setItem('vst_lastdate',today)
       setTimeout(function(){setGameState('end')},800)
     }
       else{
@@ -2708,6 +2804,7 @@ export default function App(){
             setStrikesLeft(function(cur){
               if(cur<=0){
                 setDeathCause('beaten');
+                {const _rs=calcRunScore(stats,false);const _nr=totalRunsPlayed+1;setTotalRunsPlayed(_nr);localStorage.setItem('vst_runs',_nr);if(_rs>personalBest){setPersonalBest(_rs);localStorage.setItem('vst_best',_rs)}const _nl=lifetimeScore+_rs;setLifetimeScore(_nl);localStorage.setItem('vst_lifetime',_nl);setStreakLosses(p=>p+1);setStreakWins(0);const _td=new Date().toISOString().slice(0,10);const _yd=new Date(Date.now()-86400000).toISOString().slice(0,10);const _ns=lastPlayedDate===_yd||lastPlayedDate===_td?dailyStreak+1:1;setDailyStreak(_ns);localStorage.setItem('vst_streak',_ns);setLastPlayedDate(_td);localStorage.setItem('vst_lastdate',_td)}
                 setTimeout(function(){setGameState('end')},800);
               }
               return cur;
@@ -2995,7 +3092,7 @@ export default function App(){
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)}/>
-  if(gameState==='end')return <EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}}/>
+  if(gameState==='end')return <EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore}/>
 
   return(
     <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none'}}>
