@@ -53,6 +53,15 @@ function getScoreGrade(score, won){
   return grade
 }
 
+// ── UNLOCK SYSTEM ──────────────────────────────────────────────
+function isUnlocked(id,lifetimeScore){
+  const milestone=UNLOCK_MILESTONES.find(m=>m.id===id)
+  if(!milestone)return true // not in milestone list = always available
+  return(lifetimeScore||0)>=milestone.score
+}
+function getUnlockedCards(lifetimeScore){return ALL_CARDS.filter(c=>!c.locked||isUnlocked(c.id,lifetimeScore))}
+function getUnlockedMusicians(lifetimeScore){return ALL_MUSICIANS.filter(m=>!m.locked||isUnlocked(m.id,lifetimeScore))}
+
 const ENEMIES=[
   // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
   {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:27,baseDmg:2,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
@@ -110,9 +119,21 @@ const ALL_MUSICIANS=[
   {id:'brynja',name:'Brynja',role:'Bass Player',atk:1,hp:14,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'An immovable wall. The bass never stops.'},
   {id:'rolf',name:'Rolf',role:'Drummer',atk:1,hp:9,maxHp:9,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Hits harder than the rest combined. Statistically speaking.'},
   {id:'orm',name:'Orm',role:'Dark Minstrel',atk:2,hp:11,maxHp:11,emoji:'🪈',keyword:'HEXED',desc:'The longer he plays, the worse it gets. For everyone.'},
-  // ── LOCKED MEMBERS ─────────────────────────────────────────────
-  {id:'locked1',name:'???',role:'LOCKED',atk:0,hp:0,maxHp:0,emoji:'🔒',keyword:'',desc:'Can you find the key?',locked:true},
-  {id:'locked2',name:'???',role:'LOCKED',atk:0,hp:0,maxHp:0,emoji:'🔒',keyword:'',desc:'Can you find the key?',locked:true},
+  // ── UNLOCKABLE MEMBERS (locked until lifetime score milestone) ──
+  {id:'tanuki',name:'Tanuki',role:'Bass Player',atk:8,hp:8,maxHp:8,emoji:'🦝',keyword:'ANCHOR',desc:'The heaviest bass in Hell. Built like a tank, hits like a truck.',locked:true,unlockAt:3000},
+  {id:'lucifer_member',name:'Lucifer',role:'The Devil',atk:20,hp:69,maxHp:69,emoji:'😈',keyword:'FALLEN',desc:'Cannot be healed. Loses 1 HP per strike. If he dies, game over. Max 3 band members. Sell for 69 herb.',locked:true,unlockAt:100000},
+]
+
+// ── UNLOCK MILESTONES ──────────────────────────────────────────
+const UNLOCK_MILESTONES=[
+  {score:1000,type:'card',id:'moshpit',label:'New Card: Mosh Pit',emoji:'🤘'},
+  {score:3000,type:'member',id:'tanuki',label:'New Member: Tanuki',emoji:'🦝'},
+  {score:5000,type:'artifact',id:'wardrums',label:'New Artifact: War Drums',emoji:'🪘'},
+  {score:10000,type:'card',id:'bloodritual',label:'New Card: Blood Ritual',emoji:'🩸'},
+  {score:15000,type:'foil',id:'vitalik_foil',label:'Foil Vitalik in Packs',emoji:'✨'},
+  {score:25000,type:'shop',id:'demonic_c3',label:'Demonic Pack from C3',emoji:'😈'},
+  {score:50000,type:'dealer',id:'double_dealer',label:'Hold 2 Drugs at Once',emoji:'🍄'},
+  {score:100000,type:'member',id:'lucifer_member',label:'Lucifer Playable',emoji:'👑'},
 ]
 
 const ALL_CARDS=[
@@ -156,6 +177,9 @@ const ALL_CARDS=[
   {id:'resonancecard',name:'Resonance',type:'RIFF',rarity:'Uncommon',emoji:'🌀',embers:1,effect:'Target member ATK becomes equal to highest ATK on stage.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'herbmoney',name:'Herb Money',type:'RIFF',rarity:'Uncommon',emoji:'🌿',embers:1,effect:'Deal damage = half your current Stash. Keep your Stash.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'goingbroke',name:'Going Broke',type:'RIFF',rarity:'Rare',emoji:'💸',embers:0,effect:'Spend ALL your Stash. Deal that much damage to the boss.',color:'#9933cc',typeColor:'#7722aa',copies:1,shopOnly:true},
+  // ── UNLOCKABLE CARDS ───────────────────────────────────────────
+  {id:'moshpit',name:'Mosh Pit',type:'RIFF',rarity:'Uncommon',emoji:'🤘',embers:2,effect:'Deal 3 damage per alive member on stage.',color:'#9933cc',typeColor:'#7722aa',copies:2,locked:true,unlockAt:1000},
+  {id:'bloodritual',name:'Blood Ritual',type:'CORRUPT',rarity:'Rare',emoji:'🩸',embers:2,effect:'Sacrifice 25% of target HP. Deal that HP as damage to the boss. Corruption +15%.',color:'#aa1111',typeColor:'#880000',copies:1,locked:true,unlockAt:10000},
 ]
 
 const KEYWORD_DESC={
@@ -196,6 +220,8 @@ const STARTER_ARTIFACTS=[
   {id:'a8',name:'Stone Tablet',emoji:'🪨',effect:'All band members gain +3 max HP permanently.',cost:12},
   {id:'a9',name:'Resonance Coil',emoji:'⚙️',effect:'Resonance (duplicate played) refunds 2 Embers instead of 1, and draws 1 card next Strike.',cost:10},
   {id:'a10',name:'Burning Stage',emoji:'🔥',effect:'Win a fight in 1 Strike: gain 5 Embers at the start of the next fight.',cost:10},
+  // ── UNLOCKABLE ARTIFACT ────────────────────────────────────────
+  {id:'wardrums',name:'War Drums',emoji:'🪘',effect:'+1 Strike per fight permanently (5 Strikes instead of 4).',cost:30,locked:true,unlockAt:5000},
 ]
 
 // ── STARTER PASSIVES P1-P10 (CD-Rs) ───────────────────────────
