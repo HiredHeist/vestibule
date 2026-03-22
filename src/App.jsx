@@ -2250,7 +2250,7 @@ export default function App(){
   // ── MUSIC SYSTEM ─────────────────────────────────────────────
   const audioRef=useRef({})
   const currentTrackRef=useRef(null)
-  const TRACK_MAP={menu:'menu',booster:'select',playing:'battle',shop:'shop',recruit:'shop',end:'menu'}
+  const TRACK_MAP={menu:'menu',booster:'select',playing:'battle',shop:'shop',recruit:'shop',end:'death'}
   useEffect(()=>{
     const trackName=TRACK_MAP[gameState]||'menu'
     if(trackName===currentTrackRef.current)return
