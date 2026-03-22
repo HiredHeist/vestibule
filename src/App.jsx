@@ -722,6 +722,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
 }
 
 function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,shroomsInStock,acidInStock,onBuyShrooms,onBuyAcid}){
+  const drugMax=isUnlocked('double_dealer')?2:1
   const [hovId,setHovId]=useState(null)
   const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
   const [pawnOpen,setPawnOpen]=useState(false)
@@ -1248,46 +1249,46 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                   color:'#44cc44',textAlign:'center',marginTop:8,
                   textShadow:'0 0 18px rgba(60,200,60,0.8)'}}>🌿 The Dealer</div>
                 {/* Mushrooms */}
-                <div onClick={()=>{if(shroomsInStock&&!heldShrooms&&can(6)){onSpend(6,'dealer',null);onBuyShrooms()}}}
+                <div onClick={()=>{if(shroomsInStock&&heldShrooms<drugMax&&can(6)){onSpend(6,'dealer',null);onBuyShrooms()}}}
                   style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
-                    background:shroomsInStock&&!heldShrooms?'rgba(80,40,10,0.4)':'rgba(20,15,10,0.4)',
-                    border:shroomsInStock&&!heldShrooms?'1px solid rgba(200,150,50,0.5)':'1px solid rgba(60,40,20,0.3)',
-                    borderRadius:8,cursor:shroomsInStock&&!heldShrooms&&can(6)?'pointer':'default',
+                    background:shroomsInStock&&heldShrooms<drugMax?'rgba(80,40,10,0.4)':'rgba(20,15,10,0.4)',
+                    border:shroomsInStock&&heldShrooms<drugMax?'1px solid rgba(200,150,50,0.5)':'1px solid rgba(60,40,20,0.3)',
+                    borderRadius:8,cursor:shroomsInStock&&heldShrooms<drugMax&&can(6)?'pointer':'default',
                     margin:'8px 0 4px',transition:'all 0.15s',position:'relative',
                     opacity:shroomsInStock?1:0.5}}>
                   {/* Cost oval */}
                   <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',
-                    background:shroomsInStock&&!heldShrooms&&can(6)?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
-                    border:'2px solid '+(shroomsInStock&&!heldShrooms&&can(6)?'#44bb44':'#4a3318'),borderRadius:20,
+                    background:shroomsInStock&&heldShrooms<drugMax&&can(6)?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
+                    border:'2px solid '+(shroomsInStock&&heldShrooms<drugMax&&can(6)?'#44bb44':'#4a3318'),borderRadius:20,
                     padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
                     fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-                    color:shroomsInStock&&!heldShrooms&&can(6)?'#55ee55':'#554428'}}>🌿 6</div>
+                    color:shroomsInStock&&heldShrooms<drugMax&&can(6)?'#55ee55':'#554428'}}>🌿 6</div>
                   <div style={{fontSize:72}}>🍄</div>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
                     color:shroomsInStock?'#e8a820':'#554428',marginTop:4}}>
-                    {heldShrooms?'HOLDING':shroomsInStock?'Magic Mushrooms':'DRY'}</div>
-                  {heldShrooms&&<SoldOverlay/>}
+                    {heldShrooms>=drugMax?'HOLDING'+(heldShrooms>1?' ×'+heldShrooms:''):shroomsInStock?'Magic Mushrooms':'DRY'}</div>
+                  {heldShrooms>=drugMax&&<SoldOverlay/>}
                 </div>
                 {/* Acid */}
-                <div onClick={()=>{if(acidInStock&&!heldAcid&&can(12)){onSpend(12,'dealer',null);onBuyAcid()}}}
+                <div onClick={()=>{if(acidInStock&&heldAcid<drugMax&&can(12)){onSpend(12,'dealer',null);onBuyAcid()}}}
                   style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
-                    background:acidInStock&&!heldAcid?'rgba(40,10,80,0.4)':'rgba(15,10,20,0.4)',
-                    border:acidInStock&&!heldAcid?'1px solid rgba(150,50,220,0.5)':'1px solid rgba(40,20,60,0.3)',
-                    borderRadius:8,cursor:acidInStock&&!heldAcid&&can(12)?'pointer':'default',
+                    background:acidInStock&&heldAcid<drugMax?'rgba(40,10,80,0.4)':'rgba(15,10,20,0.4)',
+                    border:acidInStock&&heldAcid<drugMax?'1px solid rgba(150,50,220,0.5)':'1px solid rgba(40,20,60,0.3)',
+                    borderRadius:8,cursor:acidInStock&&heldAcid<drugMax&&can(12)?'pointer':'default',
                     margin:'4px 0 8px',transition:'all 0.15s',position:'relative',
                     opacity:acidInStock?1:0.5}}>
                   {/* Cost oval */}
                   <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',
-                    background:acidInStock&&!heldAcid&&can(12)?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
-                    border:'2px solid '+(acidInStock&&!heldAcid&&can(12)?'#44bb44':'#4a3318'),borderRadius:20,
+                    background:acidInStock&&heldAcid<drugMax&&can(12)?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
+                    border:'2px solid '+(acidInStock&&heldAcid<drugMax&&can(12)?'#44bb44':'#4a3318'),borderRadius:20,
                     padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
                     fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-                    color:acidInStock&&!heldAcid&&can(12)?'#55ee55':'#554428'}}>🌿 12</div>
+                    color:acidInStock&&heldAcid<drugMax&&can(12)?'#55ee55':'#554428'}}>🌿 12</div>
                   <div style={{fontSize:72}}>🧪</div>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
                     color:acidInStock?'#cc44ff':'#4a2a6a',marginTop:4}}>
-                    {heldAcid?'HOLDING':acidInStock?'Blotter Acid':'DRY'}</div>
-                  {heldAcid&&<SoldOverlay/>}
+                    {heldAcid>=drugMax?'HOLDING'+(heldAcid>1?' ×'+heldAcid:''):acidInStock?'Blotter Acid':'DRY'}</div>
+                  {heldAcid>=drugMax&&<SoldOverlay/>}
                 </div>
               </div>
             </div>
@@ -2107,8 +2108,8 @@ export default function App(){
   const [circleCartBought,setCircleCartBought]=useState(false)
   const [circleCpasBought,setCirCleCpasBought]=useState(false)
   // ── DEALER: Mushrooms & Acid ──────────────────────────────────
-  const [heldShrooms,setHeldShrooms]=useState(false) // player is holding shrooms
-  const [heldAcid,setHeldAcid]=useState(false) // player is holding acid
+  const [heldShrooms,setHeldShrooms]=useState(0) // player is holding shrooms
+  const [heldAcid,setHeldAcid]=useState(0) // player is holding acid
   const [shroomsInStock,setShroomsInStock]=useState(()=>Math.random()<0.50)
   const [acidInStock,setAcidInStock]=useState(()=>Math.random()<0.50)
   const [activeTripEffect,setActiveTripEffect]=useState(null) // {type,name,desc,color} — shown as dramatic reveal
@@ -2855,7 +2856,7 @@ export default function App(){
     let effectName='',effectDesc='',effectColor='#44dd44'
 
     if(type==='shrooms'){
-      setHeldShrooms(false)
+      setHeldShrooms(p=>Math.max(0,p-1))
       if(roll<0.05){
         // 5% bad trip
         effectName='BAD TRIP';effectDesc='Paranoia! All members -2 ATK this fight.';effectColor='#cc2222'
@@ -2887,7 +2888,7 @@ export default function App(){
         }
       }
     } else if(type==='acid'){
-      setHeldAcid(false)
+      setHeldAcid(p=>Math.max(0,p-1))
       if(roll<0.05){
         // 5% bad trip — Hellquake
         effectName='BAD TRIP';effectDesc='Corruption hits 100%! Hellquake!';effectColor='#cc2222'
@@ -3580,7 +3581,7 @@ export default function App(){
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(5);setMaxEmbers(5);setStash(3);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0);setDeathCause('fallen')
-    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(false);setHeldAcid(false);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0)
+    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0)
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -3600,7 +3601,7 @@ export default function App(){
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(true)} onBuyAcid={()=>setHeldAcid(true)}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
   if(gameState==='end')return <EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered}/>
 
   return(
