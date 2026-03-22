@@ -75,7 +75,8 @@ Developer = "player" in dev sessions. Music producer, doom metal, lives in rural
 24. ✅ **Daily Seed + Streak Bonuses** — banner on Opening Night, +5/10/20% score
 25. ✅ **Run History** — last 20 runs saved, collapsible on death screen
 26. ✅ **Achievement Badges** — 16 achievements, gold NEW badges on death screen
-27. ✅ **Near-Miss Mechanics** — almost-killed boss, almost-survived member, almost-cleared circle, almost-beat-best
+27. ✅ **Near-Miss Mechanics** — almost-killed boss, almost-survived member, almost-cleared circle
+28. ✅ **Main Menu** — logo, title, Play/Unlocks/Rules/Options, deck selection placeholder — almost-killed boss, almost-survived member, almost-cleared circle, almost-beat-best
 14. ✅ **Seance buffed** — 1 ember, corruption ÷ 4 (was 2 embers, ÷ 8)
 15. ✅ **Herb Money reworked** — stash ÷ 2 damage, keep stash (was 10% + lose stash)
 16. ✅ **Wake Up Call free** — 0 embers (was 2)

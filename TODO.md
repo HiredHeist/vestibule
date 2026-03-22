@@ -54,12 +54,15 @@ This is happening.
 - [x] "Just X pts from your personal best!" — when within 500 pts
 - [x] Shows up to 3 near-miss messages, italic orange, emotional
 
-### Layer 8: Main Menu / Intro Screen (Balatro-style)
-- [ ] **Deck selection** — "Demo Deck" (only option initially), more decks unlock later
-- [ ] **Unlocks gallery** — shows all 8 milestones: unlocked (glowing) + locked (silhouette + score needed)
-- [ ] **Rules screen** — basic game rules, card types, keywords, how strikes/discards work
-- [ ] **Options** — scanlines on/off, screen shake, volume (future), reset progress (with confirm)
-- [ ] **Visual:** dark metal aesthetic, Vestibule logo, pulsing pentagram, "Press to Enter the Vestibule"
+### Layer 8: Main Menu / Intro Screen ✅ COMPLETE
+- [x] **Logo** — vestibule_logo.png (white on transparent) as hero + background
+- [x] **Title** — BogartsMetalFont 96px, red glow, tagline
+- [x] **Play button** — huge pulsing 'Enter the Vestibule'
+- [x] **Deck selection** — 'Demo Deck' placeholder (more decks coming)
+- [x] **Unlocks gallery** — all 8 milestones with progress bars, locked silhouettes
+- [x] **Rules screen** — 10 rules covering all mechanics
+- [x] **Options** — scanlines on/off, reset progress with confirm
+- [x] **Stats row** — lifetime score, runs, streak, personal best
 
 ### Layer 9: Difficulty Stakes (Balatro chip system)
 - [ ] **Stake 1: Bronze** — default difficulty, white border on deck. Beat Lucifer to unlock Silver.
