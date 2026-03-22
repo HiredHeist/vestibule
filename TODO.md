@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 09:16 AM (JST)*
+*Last updated: Sunday, March 22, 2026 at 09:36 AM (JST)*
 
 ---
 
@@ -12,6 +12,10 @@ This is happening.
 
 ## 🔴 PLAYTEST BUGS — Session 10 (March 21–22)
 **✅ CODE VERIFIED: 26/26 checks passed — all 13 bugs confirmed fixed**
+
+- ~~**Burn the Set black screen** — FIXED: was calling setHand/setDeck/setDiscardPile inside applyCard AND handleDropOnStage — two competing state updates. Now handled entirely in handleDropOnStage, applyCard skipped~~
+- ~~**buildDeck copies fallback was 3** — FIXED: `c.copies||3` changed to `c.copies||2` so no card accidentally gets 3 copies~~
+
 
 - ~~**#1 Amp the Static silently unplayable** — FIXED: effect text says "Requires Corruption > 0", shows "Need Corruption!" float at boss~~
 - ~~**#2 Burn the Set no selection UI** — FIXED: effect text rewritten to explain mechanic, tip shown in log when played with no cards selected~~
