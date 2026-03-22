@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 11:33 AM (JST)*
+*Last updated: Sunday, March 22, 2026 at 12:09 PM (JST)*
 
 ---
 
@@ -34,6 +34,9 @@ This is happening.
 
 ---
 
+- ~~**Setlist draw lost** — same double state update bug as Burn the Set. Moved to handleDropOnStage, draws now persist correctly~~
+- ~~**Double member join log** — addLog inside setStage updater fired twice. Moved outside updater~~
+- ~~**Double Too Stoned log** — same cause, deferred with setTimeout~~
 ### ✅ Batch 3 — Pushed
 - ~~**Two distinct death screens** — "Stoned to the Bone" only when all members Too Stoned. "Beaten" screen when strikes run out~~
 - ~~**Beaten screen shows boss** — large boss emoji, boss name, circle, subtitle, sassy tagline~~
