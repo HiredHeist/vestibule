@@ -189,6 +189,10 @@ const KEYWORD_DESC={
   'ANCHOR':'After each Strike, heals adjacent members +1 HP.',
   'CORRUPT':'ATK increases with Corruption level. Thrives in chaos.',
   'DEBUFF':'Reduces boss damage by 2 each Strike, stacking permanently this fight.',
+  'FOLK MAGIC':'20% chance each Strike to refill all Embers.',
+  'SHREDDER':'First RIFF card each Strike costs 1 less Ember.',
+  'HEXED':'Gains +Corruption each Strike, ATK scales with Corruption.',
+  'FALLEN':'Cannot be healed. Loses 1 HP per Strike. If Lucifer dies, game over. Max 3 band members.',
 }
 function seededRng(seed){let s=seed;return function(){s=Math.imul(48271,s)|0;return(s&0x7fffffff)/0x7fffffff}}
 
@@ -355,7 +359,7 @@ function genRecruitPack(fightIndex=0){
 }
 
 // ── MENTOR LINK SYSTEM ────────────────────────────────────────────
-const KW_BOND_COLOR={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
+const KW_BOND_COLOR={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800','FALLEN':'#ff0000'}
 function memberTier(m){return m&&m.demonic?'demonic':m&&m.mythic?'mythic':m&&m.foil?'foil':'base'}
 function tierAtkBonus(m){return m.demonic?4:m.mythic?2:m.foil?1:0}
 function tierHpBonus(m){return m.demonic?8:m.mythic?4:m.foil?2:0}
@@ -2185,7 +2189,7 @@ export default function App(){
     else if(card.id==='battlecry'){if(!m)return false;const bcBonus=activePassives.some(p=>p.id==='p7')?2:1;ns[slotIdx]=Object.assign({},m,{atk:m.atk+bcBonus,buffCount:(m.buffCount||0)+1});msg='🤘 '+m.name+' Battle Cry! +'+bcBonus+' ATK forever!';addFloat('+'+bcBonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4400')}
     else if(card.id==='newstrings'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,buffCount:(m.buffCount||0)+1});msg='🎸 '+m.name+' +2 ATK permanently!';addFloat('+2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#e8a820')}
     else if(card.id==='encore'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{encoreReady:true,buffCount:(m.buffCount||0)+1});msg='🔁 '+m.name+' encores!';addFloat('ENCORE!',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#dd2222')}
-    else if(card.id==='roadie'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{stoneShield:2,hp:Math.min(m.maxHp,m.hp+2),buffCount:(m.buffCount||0)+1});msg='🛡 '+m.name+' shielded for 2 Strikes and healed 2 HP!'}
+    else if(card.id==='roadie'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{stoneShield:2,hp:m.keyword==='FALLEN'?m.hp:Math.min(m.maxHp,m.hp+2),buffCount:(m.buffCount||0)+1});msg='🛡 '+m.name+' shielded for 2 Strikes and healed 2 HP!'}
     else if(card.id==='stagedive'){
       if(!m)return false
       const dmg=m.hp
@@ -2198,7 +2202,7 @@ export default function App(){
     }
     else if(card.id==='wakeup'){
       // Heal all active members 2 HP
-      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m)
+      ns=ns.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m)
       // Revive first Too Stoned member with 50% permanent ATK loss
       const stonedIdx=ns.findIndex(m=>m&&m.tooStoned)
       if(stonedIdx>=0){
@@ -2218,7 +2222,7 @@ export default function App(){
     }
     else if(card.id==='soundcheck'){
       const injuredCount=ns.filter(m=>m&&!m.tooStoned&&m.hp<m.maxHp).length
-      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+4),atk:m.hp<m.maxHp?m.atk+1:m.atk,tempBuff:m.hp<m.maxHp?true:m.tempBuff,_origAtk:m.hp<m.maxHp&&!m._origAtk?m.atk:m._origAtk}):m)
+      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.keyword==='FALLEN'?m.hp:Math.min(m.maxHp,m.hp+4),atk:m.hp<m.maxHp&&m.keyword!=='FALLEN'?m.atk+1:m.atk,tempBuff:m.hp<m.maxHp&&m.keyword!=='FALLEN'?true:m.tempBuff,_origAtk:m.hp<m.maxHp&&!m._origAtk&&m.keyword!=='FALLEN'?m.atk:m._origAtk}):m)
       msg='🔊 Sound Check! All +4 HP'+(injuredCount>0?' + '+injuredCount+' injured member(s) +1 ATK!':'!')
       addFloat('+4 HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')
     }
@@ -2240,7 +2244,7 @@ export default function App(){
       const cfTarget=ns[slotIdx]
       if(cfTarget&&!cfTarget.tooStoned){
         const healAmt=Math.floor(cfTarget.maxHp/2)
-        ns[slotIdx]=Object.assign({},cfTarget,{hp:Math.min(cfTarget.maxHp,cfTarget.hp+healAmt)})
+        ns[slotIdx]=Object.assign({},cfTarget,{hp:cfTarget.keyword==='FALLEN'?cfTarget.hp:Math.min(cfTarget.maxHp,cfTarget.hp+healAmt)})
         msg='🎚 Controlled Feedback! Corruption → 50%. '+cfTarget.name+' healed '+healAmt+' HP.'
         addFloat('+'+healAmt+'❤',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#44dd44')
       } else {
@@ -2374,7 +2378,7 @@ export default function App(){
     }
     else if(card.id==='seance'){
       const healAmt=Math.max(1,Math.floor(corruption/4))
-      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+healAmt)}):m)
+      ns=ns.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+healAmt)}):m)
       msg='🔮 Séance! All members +'+healAmt+' HP'+(corruption>0?' ('+Math.floor(corruption)+'% ÷ 4)':' (min 1)')
       addFloat('+'+healAmt+' HP',getCenter(bossRef).x,getCenter(bossRef).y-70,'#22aa44')
     }
