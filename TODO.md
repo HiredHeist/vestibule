@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 12:09 PM (JST)*
+*Last updated: Sunday, March 22, 2026 at 12:24 PM (JST)*
 
 ---
 
@@ -55,6 +55,21 @@ This is happening.
 - ~~**deathCause triggers fixed** — allStoned→'stoned', out of strikes→'beaten' (was backwards)~~
 - ~~**Amp Overload reworked** — now costs 1 discard (sacrifices a yellow block), unplayable at 0 discards~~
 - ~~**Remaster Option C** — delete 1 selected card from hand, draw 3. No more self-copy exploit~~
+
+## 🔴 STRESS TEST BUGS — Session 11 (March 22, found during live play)
+
+### Batch A — Double-log / React double-fire (all same root cause)
+- [ ] **Recruit joins twice** — Ingrid, Sigrid, Dag all logged `🎸 X joins!` twice at same timestamp
+- [ ] **Too Stoned fires twice** — `💨 TOO STONED` same timestamp x2 in damage handler
+- [ ] **Hellquake DISCOVERED fires twice** — discover() called twice on same event
+- [ ] **Setlist modal opens twice** — `Drew 2 cards` logged twice in same fight
+- [ ] **Soundboard draws twice** — `pendingDraw` fires twice from one play
+
+### Batch B — Card behaviour bugs
+- [ ] **Demo Tape no effect on Dag** — logged as replayed but target effect didn't apply
+- [ ] **Distortion impl still +10% not +15%** — def updated but impl never synced
+- [ ] **Circle artifact/passive re-appears after buying** — Batch 1 fix not working in practice
+- [ ] **NEED X🔥 label not prominent enough** — players think Feedback Loop/Distortion are broken, not unaffordable
 
 ## P1 — DO NEXT
 
