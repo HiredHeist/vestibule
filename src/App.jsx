@@ -82,10 +82,10 @@ const ENEMIES=[
   {id:'brute',tagline:'Your healthiest fell first.',name:'The Brute',circle:'Circle VII — Violence',subtitle:'Fight 1 of 3',maxHp:3000,baseDmg:6,emoji:'🗡️',passive:'Calculated. Always targets the member with highest HP.',passiveId:'targetHighestHp'},
   {id:'hunter',tagline:'Prey spotted. Prey eliminated.',name:'The Hunter',circle:'Circle VII — Violence',subtitle:'Fight 2 of 3',maxHp:4000,baseDmg:7,emoji:'🏹',passive:'Predatory. Targets highest HP member. Deals +50% damage to them.',passiveId:'targetHighestHp2'},
   {id:'violence_boss',tagline:'The sentence was carried out.',name:'The Executioner',circle:'Circle VII — Violence',subtitle:'Circle Boss — Fight 3 of 3',maxHp:5500,baseDmg:8,emoji:'🩸',passive:'Methodical. Targets highest HP and deals double damage. Protect your strongest.',passiveId:'targetHighestHp3'},
-  // ── CIRCLE VIII: FRAUD — Disables random cards in hand ───────
-  {id:'trickster',tagline:'You played right into its hands.',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:5200,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, one random card in hand is locked for 1 turn.',passiveId:'lockCard'},
-  {id:'deceiver',tagline:'Nothing was what it seemed.',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:6800,baseDmg:7,emoji:'🎭',passive:'Manipulative. Locks 2 cards in hand after each Strike.',passiveId:'lockCard2'},
-  {id:'fraud_boss',tagline:'The greatest con: you thought you could win.',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:9600,baseDmg:8,emoji:'🪞',passive:'Master of lies. Locks 3 cards after each Strike. Deck management is survival.',passiveId:'lockCard3'},
+  // ── CIRCLE VIII: FRAUD — Shuffles your hand after each strike ──
+  {id:'trickster',tagline:'You played right into its hands.',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:5200,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle'},
+  {id:'deceiver',tagline:'Nothing was what it seemed.',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:6800,baseDmg:7,emoji:'🎭',passive:'Manipulative. After each Strike, 2 cards in hand are discarded and replaced.',passiveId:'fraudShuffle2'},
+  {id:'fraud_boss',tagline:'The greatest con: you thought you could win.',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:9600,baseDmg:8,emoji:'🪞',passive:'Master of lies. After each Strike, 3 cards in hand are discarded and replaced.',passiveId:'fraudShuffle3'},
   // ── CIRCLE IX: TREACHERY — Gets stronger as it takes damage ──
   {id:'traitor',tagline:'Every hit made it stronger. You knew that.',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:9000,baseDmg:6,emoji:'🗝️',passive:'Vindictive. Gains +1 ATK permanently for each 20 damage taken.',passiveId:'damageScaleAtk'},
   {id:'betrayer',tagline:'Betrayal is its native language.',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:11400,baseDmg:7,emoji:'🔒',passive:'Vengeful. Gains +2 ATK per 20 damage taken. Kill it fast.',passiveId:'damageScaleAtk2'},
@@ -2660,6 +2660,8 @@ export default function App(){
       }
     }
     if(_mlb>0)dmg+=_mlb}
+    // CA4: Wailing Guitar — first Strike deals double damage
+    if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===MAX_STRIKES){dmg*=2;addLog('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')}
     // HEXED: auto-raise corruption +5%, member gains +1 ATK per 10% corruption
     const hexedMembers=actives.filter(m=>m.keyword==='HEXED')
     if(hexedMembers.length>0){
@@ -2817,6 +2819,40 @@ export default function App(){
               });
               return ns;
             });
+            // CA3: Sabbath Crown — revive Too Stoned members at 50% HP after each Strike
+            if(activeArtifacts.some(a=>a.id==='ca3')){
+              setStage(prev=>{
+                let revived=false
+                const ns=prev.map(m=>{
+                  if(m&&m.tooStoned){revived=true;return Object.assign({},m,{tooStoned:false,hp:Math.max(1,Math.floor(m.maxHp*0.5))})}
+                  return m
+                })
+                if(revived)addLog('👑 Sabbath Crown! Fallen members revived at 50% HP.')
+                return ns
+              })
+            }
+            // C8 FRAUD: discard N random cards from hand, draw N replacements
+            if(enemy.passiveId==='fraudShuffle'||enemy.passiveId==='fraudShuffle2'||enemy.passiveId==='fraudShuffle3'){
+              const shuffleCount=enemy.passiveId==='fraudShuffle'?1:enemy.passiveId==='fraudShuffle2'?2:3
+              setHand(prev=>{
+                if(prev.length===0)return prev
+                const toDiscard=Math.min(shuffleCount,prev.length)
+                const indices=[]
+                while(indices.length<toDiscard){const idx=Math.floor(Math.random()*prev.length);if(!indices.includes(idx))indices.push(idx)}
+                const discarded=indices.map(i=>prev[i])
+                const remaining=prev.filter((_,i)=>!indices.includes(i))
+                setDiscardPile(dp=>[...dp,...discarded])
+                // Draw replacements
+                setDeck(curDeck=>{
+                  const nd=[...curDeck],drawn=[]
+                  for(let i=0;i<toDiscard&&nd.length>0;i++)drawn.push(nd.shift())
+                  if(drawn.length>0)setHand(h=>[...remaining,...drawn])
+                  return nd
+                })
+                addLog('🃏 '+enemy.name+' shuffles your hand! '+toDiscard+' card'+(toDiscard>1?'s':'')+' swapped.')
+                return remaining
+              })
+            }
             setAnimPhase('idle');setSelected([]);
             // Check out-of-strikes death AFTER this strike resolves
             setStrikesLeft(function(cur){
@@ -2875,6 +2911,11 @@ export default function App(){
     // A10: Burning Stage bonus embers
     const burnBonus=pendingBurningStage?5:0
     if(pendingBurningStage)setPendingBurningStage(false)
+    // ── CIRCLE ARTIFACT FIGHT-START EFFECTS ──────────────────
+    const hasGoat=activeArtifacts.some(a=>a.id==='ca1')     // Goat of Mendes: all +1 ATK
+    const hasHellfire=activeArtifacts.some(a=>a.id==='ca2')  // Hellfire Amulet: +2 embers
+    const hasCrown=activeArtifacts.some(a=>a.id==='ca3')     // Sabbath Crown: revive (handled post-strike)
+    const hasWailing=activeArtifacts.some(a=>a.id==='ca4')   // Wailing Guitar: first strike x2 (handled in handleStrike)
     // ── PASSIVE FIGHT-START EFFECTS ──────────────────────────
     const hasP1=activePassives.some(p=>p.id==='p1') // +1 ember
     const hasP2=activePassives.some(p=>p.id==='p2') // +3 HP random member
@@ -2905,12 +2946,14 @@ export default function App(){
       }
       // P8: Green Room — all members Stonewall
       if(hasP8){ns=ns.map(m=>m?Object.assign({},m,{stoneShield:true}):null)}
+      // CA1: Goat of Mendes — all members +1 ATK
+      if(hasGoat){ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1}):m);addLog('🐐 Goat of Mendes! All members +1 ATK.')}
       return ns
     })
     // Corruption start (A2)
     if(hasDevilsFork)setCorruption(15)
-    // Extra embers from Serpent's Kiss (P1 + burning stage)
-    const extraEm=(hasP1?1:0)+burnBonus
+    // Extra embers from Serpent's Kiss (P1 + burning stage + Hellfire Amulet)
+    const extraEm=(hasP1?1:0)+burnBonus+(hasHellfire?2:0)
     setEmbers(p=>Math.min(maxEmbers,p+extraEm))
     if(extraEm>0)addLog('🌿 Ember bonus: +'+(extraEm)+' (passives/artifacts)')
     // Roll DOUBLE TIME d6 if drummer is on stage
