@@ -3762,21 +3762,86 @@ export default function App(){
     if(menuView==='unlocks')return(
       <div style={{position:'fixed',inset:0,zIndex:9900,background:'rgba(4,2,1,0.98)',display:'flex',flexDirection:'column',alignItems:'center',gap:14,padding:'40px 20px',overflowY:'auto'}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Unlocks</div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#8a6020',letterSpacing:2}}>Lifetime Score: {lt.toLocaleString()}</div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:12,maxWidth:700,width:'100%'}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#8a6020',letterSpacing:2}}>Lifetime Score: {lt.toLocaleString()}</div>
+        {/* SCORE MILESTONES */}
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#e8a820',letterSpacing:4,marginTop:8}}>Score Milestones</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:10,maxWidth:750,width:'100%'}}>
           {UNLOCK_MILESTONES.map(u=>{const done=lt>=u.score;const pct=Math.min(100,Math.round(lt/u.score*100));return(
-            <div key={u.id} style={{background:done?'rgba(40,25,5,0.8)':'rgba(10,6,2,0.8)',border:done?'2px solid #e8a820':'1px solid rgba(60,40,15,0.4)',borderRadius:8,padding:'14px 18px',display:'flex',gap:14,alignItems:'center'}}>
-              <div style={{fontSize:36,filter:done?'none':'grayscale(1) brightness(0.3)',minWidth:44,textAlign:'center'}}>{done?u.emoji:'🔒'}</div>
+            <div key={u.id} style={{background:done?'rgba(40,25,5,0.8)':'rgba(10,6,2,0.8)',border:done?'2px solid #e8a820':'1px solid rgba(60,40,15,0.4)',borderRadius:8,padding:'12px 16px',display:'flex',gap:12,alignItems:'center'}}>
+              <div style={{fontSize:32,filter:done?'none':'grayscale(1) brightness(0.3)',minWidth:40,textAlign:'center'}}>{done?u.emoji:'\ud83d\udd12'}</div>
               <div style={{flex:1}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:done?'#e8a820':'#4a3a18',letterSpacing:1}}>{done?u.label:'???'}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:done?'#aa8030':'#3a2a10'}}>{u.score.toLocaleString()} pts {done?'✓ UNLOCKED':' — '+pct+'%'}</div>
-                {!done&&<div style={{height:4,background:'rgba(20,12,4,0.8)',borderRadius:2,marginTop:4,overflow:'hidden'}}><div style={{height:'100%',width:pct+'%',background:'linear-gradient(90deg,#8a2200,#e8a820)',borderRadius:2}}/></div>}
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:done?'#e8a820':'#4a3a18',letterSpacing:1}}>{done?u.label:'???'}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:done?'#aa8030':'#3a2a10'}}>{u.score.toLocaleString()} pts {done?'\u2713 UNLOCKED':' \u2014 '+pct+'%'}</div>
+                {!done&&<div style={{height:4,background:'rgba(20,12,4,0.8)',borderRadius:2,marginTop:3,overflow:'hidden'}}><div style={{height:'100%',width:pct+'%',background:'linear-gradient(90deg,#8a2200,#e8a820)',borderRadius:2}}/></div>}
               </div>
             </div>
           )})}
         </div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#665533',marginTop:8}}>{earned.length} / {UNLOCK_MILESTONES.length} unlocked · {achs.length} / {ACHIEVEMENTS.length} achievements</div>
-        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'10px 40px',cursor:'pointer',marginTop:8}}>← Back</button>
+        {/* MEMBERS */}
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#cc44ff',letterSpacing:4,marginTop:12}}>Band Members</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:8,maxWidth:750,width:'100%'}}>
+          {ALL_MUSICIANS.filter(m=>!m.locked).map(m=>(
+            <div key={m.id} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(160,100,25,0.4)',borderRadius:6,padding:'8px',textAlign:'center'}}>
+              <div style={{fontSize:28}}>{m.emoji}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#e8a820'}}>{m.name}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#8a7040'}}>{m.keyword}</div>
+            </div>
+          ))}
+          {ALL_MUSICIANS.filter(m=>m.locked).map(m=>{const done=!m.unlockAt||lt>=m.unlockAt;return(
+            <div key={m.id} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'8px',textAlign:'center',opacity:done?1:0.4}}>
+              <div style={{fontSize:28,filter:done?'none':'grayscale(1)'}}>{done?m.emoji:'\ud83d\udd12'}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:done?'#e8a820':'#4a3a18'}}>{done?m.name:'???'}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#3a2a10'}}>{done?m.keyword:'LOCKED'}</div>
+            </div>
+          )})}
+          {[1,2,3,4,5,6,7,8,9,10].map(i=>(
+            <div key={'future_m'+i} style={{background:'rgba(10,6,2,0.4)',border:'1px dashed rgba(40,25,10,0.3)',borderRadius:6,padding:'8px',textAlign:'center',opacity:0.25}}>
+              <div style={{fontSize:28}}>\ud83d\udd12</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#3a2a10'}}>???</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#2a1a08'}}>COMING SOON</div>
+            </div>
+          ))}
+        </div>
+        {/* ARTIFACTS */}
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#c87820',letterSpacing:4,marginTop:12}}>Artifacts</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:8,maxWidth:750,width:'100%'}}>
+          {STARTER_ARTIFACTS.filter(a=>!a.locked).map(a=>(
+            <div key={a.id} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(160,100,25,0.4)',borderRadius:6,padding:'8px',textAlign:'center'}}>
+              <div style={{fontSize:24}}>{a.emoji}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:'#c8a040',lineHeight:1.2}}>{a.name}</div>
+            </div>
+          ))}
+          {STARTER_ARTIFACTS.filter(a=>a.locked).map(a=>{const done=lt>=(a.unlockAt||999999);return(
+            <div key={a.id} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'8px',textAlign:'center',opacity:done?1:0.4}}>
+              <div style={{fontSize:24,filter:done?'none':'grayscale(1)'}}>{done?a.emoji:'\ud83d\udd12'}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:done?'#c8a040':'#4a3a18'}}>{done?a.name:'???'}</div>
+            </div>
+          )})}
+          {[1,2,3,4,5,6,7,8,9,10].map(i=>(
+            <div key={'future_a'+i} style={{background:'rgba(10,6,2,0.4)',border:'1px dashed rgba(40,25,10,0.3)',borderRadius:6,padding:'8px',textAlign:'center',opacity:0.25}}>
+              <div style={{fontSize:24}}>\ud83d\udd12</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#3a2a10'}}>???</div>
+            </div>
+          ))}
+        </div>
+        {/* PASSIVES */}
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#9933cc',letterSpacing:4,marginTop:12}}>Effect Pedals</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:8,maxWidth:750,width:'100%'}}>
+          {STARTER_PASSIVES.map(p=>(
+            <div key={p.id} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(120,60,180,0.4)',borderRadius:6,padding:'8px',textAlign:'center'}}>
+              <div style={{fontSize:24}}>{p.emoji}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:'#aa88cc',lineHeight:1.2}}>{p.name}</div>
+            </div>
+          ))}
+          {[1,2,3,4,5,6,7,8,9,10].map(i=>(
+            <div key={'future_p'+i} style={{background:'rgba(10,6,2,0.4)',border:'1px dashed rgba(40,20,60,0.3)',borderRadius:6,padding:'8px',textAlign:'center',opacity:0.25}}>
+              <div style={{fontSize:24}}>\ud83d\udd12</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#3a2a10'}}>???</div>
+            </div>
+          ))}
+        </div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#665533',marginTop:12}}>{earned.length} / {UNLOCK_MILESTONES.length} milestones \u00b7 {achs.length} / {ACHIEVEMENTS.length} achievements</div>
+        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:8}}>\u2190 Back</button>
       </div>
     )
 
@@ -3784,24 +3849,24 @@ export default function App(){
     if(menuView==='rules')return(
       <div style={{position:'fixed',inset:0,zIndex:9900,background:'rgba(4,2,1,0.98)',display:'flex',flexDirection:'column',alignItems:'center',gap:12,padding:'40px 20px',overflowY:'auto'}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Rules</div>
-        <div style={{maxWidth:700,width:'100%',display:'flex',flexDirection:'column',gap:10}}>
+        <div style={{maxWidth:800,width:'100%',display:'flex',flexDirection:'column',gap:12}}>
           {[
-            ['🎸 The Goal','Build a metal band and fight through 9 Circles of Hell. Defeat Lucifer to win.'],
-            ['⚔ Strikes','You get 4 Strikes per fight. Play cards from your hand, then Strike to deal damage.'],
-            ['↓ Discards','You get 4 Discards per fight. Select cards and discard to cycle for better ones.'],
-            ['🔥 Embers','Cards cost Embers to play. You refill Embers each Strike. Manage them wisely.'],
-            ['🌿 Stash','Your currency. Earned from victories, spent in the shop on packs, cards, artifacts, and drugs.'],
-            ['💀 Too Stoned','When a member hits 0 HP, they go Too Stoned and cannot attack. Lose all members = game over.'],
-            ['🌀 Corruption','A risk/reward axis. Some cards raise it for power. Overdrive needs 60%+. Seance heals more at high corruption.'],
-            ['⛓ Mentor Link','Place a Foil/Mythic/Demonic member LEFT of the same basic member for a damage multiplier.'],
-            ['🍄 The Dealer','Buy shrooms or acid in the shop. Use before your first Strike for powerful (or disastrous) effects.'],
-            ['🏆 Score','Every run earns score. Lifetime score unlocks new cards, members, and artifacts permanently.'],
-          ].map(([title,desc],i)=><div key={i} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6,padding:'10px 16px'}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#e8a820',marginBottom:4}}>{title}</div>
-            <div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#c8b080',lineHeight:1.5,fontStyle:'italic'}}>{desc}</div>
+            ['\ud83c\udfb8 The Goal','Build a metal band and fight through 9 Circles of Hell. Defeat Lucifer to win.'],
+            ['\u2694 Strikes','You get 4 Strikes per fight. Play cards from your hand, then Strike to deal damage.'],
+            ['\u2193 Discards','You get 4 Discards per fight. Select cards and discard to cycle for better ones.'],
+            ['\ud83d\udd25 Embers','Cards cost Embers to play. You refill Embers each Strike. Manage them wisely.'],
+            ['\ud83c\udf3f Stash','Your currency. Earned from victories, spent in the shop on packs, cards, artifacts, and drugs.'],
+            ['\ud83d\udc80 Too Stoned','When a member hits 0 HP, they go Too Stoned and cannot attack. Lose all members = game over.'],
+            ['\ud83c\udf00 Corruption','A risk/reward axis. Some cards raise it for power. Overdrive needs 60%+. Seance heals more at high corruption.'],
+            ['\u26d3 Mentor Link','Place a Foil/Mythic/Demonic member LEFT of the same basic member for a damage multiplier.'],
+            ['\ud83c\udf44 The Dealer','Buy shrooms or acid in the shop. Use before your first Strike for powerful (or disastrous) effects.'],
+            ['\ud83c\udfc6 Score','Every run earns score. Lifetime score unlocks new cards, members, and artifacts permanently.'],
+          ].map(([title,desc],i)=><div key={i} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:8,padding:'14px 20px'}}>
+            <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#e8a820',marginBottom:6}}>{title}</div>
+            <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:'#c8b080',lineHeight:1.5}}>{desc}</div>
           </div>)}
         </div>
-        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'10px 40px',cursor:'pointer',marginTop:8}}>← Back</button>
+        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:8}}>\u2190 Back</button>
       </div>
     )
 
@@ -3809,19 +3874,31 @@ export default function App(){
     if(menuView==='options')return(
       <div style={{position:'fixed',inset:0,zIndex:9900,background:'rgba(4,2,1,0.98)',display:'flex',flexDirection:'column',alignItems:'center',gap:16,padding:'60px 20px',overflowY:'auto'}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Options</div>
-        <div style={{display:'flex',flexDirection:'column',gap:12,maxWidth:400,width:'100%'}}>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820'}}>Scanlines</span>
-            <button onClick={()=>{const next=scanlines?'off':'on';localStorage.setItem('vst_scanlines',next);setMenuView('options')}}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:scanlines?'#44cc44':'#cc4444',background:'rgba(0,0,0,0.4)',border:'1px solid '+(scanlines?'#44cc44':'#cc4444'),borderRadius:4,padding:'6px 20px',cursor:'pointer'}}>{scanlines?'ON':'OFF'}</button>
+        <div style={{display:'flex',flexDirection:'column',gap:12,maxWidth:500,width:'100%'}}>
+          {[
+            ['Scanlines','vst_scanlines',scanlines],
+            ['Screen Shake','vst_shake',localStorage.getItem('vst_shake')!=='off'],
+            ['Card Hover Zoom','vst_hoverzoom',localStorage.getItem('vst_hoverzoom')!=='off'],
+            ['Damage Numbers','vst_dmgnums',localStorage.getItem('vst_dmgnums')!=='off'],
+          ].map(([label,key,on])=>(
+            <div key={key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#e8a820'}}>{label}</span>
+              <button onClick={()=>{localStorage.setItem(key,on?'off':'on');setMenuView('options')}}
+                style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:on?'#44cc44':'#cc4444',background:'rgba(0,0,0,0.4)',border:'1px solid '+(on?'#44cc44':'#cc4444'),borderRadius:4,padding:'8px 24px',cursor:'pointer',minWidth:70,textAlign:'center'}}>{on?'ON':'OFF'}</button>
+            </div>
+          ))}
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#e8a820'}}>Combat Speed</span>
+            <button onClick={()=>{const cur=localStorage.getItem('vst_speed')||'normal';localStorage.setItem('vst_speed',cur==='normal'?'fast':'normal');setMenuView('options')}}
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#e8a820',background:'rgba(0,0,0,0.4)',border:'1px solid #c87820',borderRadius:4,padding:'8px 24px',cursor:'pointer',minWidth:70,textAlign:'center'}}>{(localStorage.getItem('vst_speed')||'normal').toUpperCase()}</button>
           </div>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820'}}>Reset All Progress</span>
+          <div style={{marginTop:12,display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(40,5,5,0.4)',border:'1px solid rgba(180,40,40,0.3)',borderRadius:6}}>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#cc4444'}}>Reset All Progress</span>
             <button onClick={()=>{if(confirm('This will erase ALL progress, scores, achievements, and unlocks. Are you sure?')){localStorage.clear();window.location.reload()}}}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#cc4444',background:'rgba(80,0,0,0.2)',border:'1px solid #cc4444',borderRadius:4,padding:'6px 20px',cursor:'pointer'}}>RESET</button>
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#cc4444',background:'rgba(80,0,0,0.2)',border:'1px solid #cc4444',borderRadius:4,padding:'8px 24px',cursor:'pointer'}}>RESET</button>
           </div>
         </div>
-        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'10px 40px',cursor:'pointer',marginTop:16}}>← Back</button>
+        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:16}}>\u2190 Back</button>
       </div>
     )
 
