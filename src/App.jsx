@@ -243,10 +243,10 @@ const BOSS_QUOTES={
 }
 
 const CIRCLE_ARTIFACTS=[
-  {name:'The Goat of Mendes',emoji:'🐐',effect:'All band members gain +1 ATK permanently.',cost:14},
-  {name:'Hellfire Amulet',emoji:'🔮',effect:'Start each fight with +2 bonus Embers.',cost:17},
-  {name:'Sabbath Crown',emoji:'👑',effect:'Too Stoned members revive at 50% HP each round.',cost:22},
-  {name:'Wailing Guitar',emoji:'🎸',effect:'First Strike each fight deals double damage.',cost:16},
+  {id:'ca1',name:'The Goat of Mendes',emoji:'🐐',effect:'All band members gain +1 ATK permanently.',cost:14},
+  {id:'ca2',name:'Hellfire Amulet',emoji:'🔮',effect:'Start each fight with +2 bonus Embers.',cost:17},
+  {id:'ca3',name:'Sabbath Crown',emoji:'👑',effect:'Too Stoned members revive at 50% HP each round.',cost:22},
+  {id:'ca4',name:'Wailing Guitar',emoji:'🎸',effect:'First Strike each fight deals double damage.',cost:16},
 ]
 
 // Card prices by rarity
@@ -1184,11 +1184,11 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             onBuy={()=>{if(can(recruitPack.cost)){onSpend(recruitPack.cost,'recruit',recruitPack);setLeftBought(p=>({...p,rec:true}))}}} />
           {circleArtifact&&<LeftCard item={circleArtifact} price={circleArtifact.cost}
             label={'Vintage Amp · C'+circleNum} accent='#c87820' id='cart'
-            sold={leftBought.cart||!!circleCartBought||(soldIds||[]).includes(circleArtifact?.id)}
+            sold={leftBought.cart||!!circleCartBought||activeArtifacts.some(a=>a.id===circleArtifact.id)||(soldIds||[]).includes(circleArtifact.id)}
             onBuy={()=>buyLeft('cart',circleArtifact.cost,'artifact',circleArtifact)} />}
           {circlePassive&&<LeftCard item={circlePassive} price={circlePassive.cost}
             label={'Effect Pedal · C'+circleNum} accent='#9933cc' id='cpas'
-            sold={leftBought.cpas||!!circleCpasBought||(soldIds||[]).includes(circlePassive?.id)}
+            sold={leftBought.cpas||!!circleCpasBought||activePassives.some(p=>p.id===circlePassive.id)||(soldIds||[]).includes(circlePassive.id)}
             onBuy={()=>buyLeft('cpas',circlePassive.cost,'passive',circlePassive)} />}
         </div>
 
