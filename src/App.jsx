@@ -2380,7 +2380,7 @@ export default function App(){
     else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
     else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>Math.min(enemy.maxHp,p+4))
     return true
-  },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs])
+  },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected])
 
   const handleDropOnStage=useCallback((slotIdx)=>{
     if(!dragCardUid||animPhase!=='idle')return
