@@ -1921,13 +1921,8 @@ export default function App(){
       addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
     }
     else if(card.id==='setlist'){
-      // Draw 2 cards immediately (uncapped), then force discard 1
-      const drawRes=drawUpTo(hand.filter(c=>c.uid!==card.uid),deck,discardPile,hand.filter(c=>c.uid!==card.uid).length+2)
-      setHand(drawRes.h);setDeck(drawRes.d);setDiscardPile(drawRes.disc)
-      setSetlistCards(drawRes.h) // pass updated hand to modal
-      setSetlistOpen(true)
-      spent=0
-      msg='📋 Setlist! Drew 2 cards — now pick 1 to discard.'
+      // Handled in handleDropOnStage to avoid double state update (same fix as burnset)
+      return false
     }
     else if(card.id==='controlfeedback'){setCorruption(50);msg='🎚 Corruption set to 50%.'}
     else if(card.id==='feedbackloop'){const dmg=Math.floor(corruption/2);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'}
@@ -2234,6 +2229,24 @@ export default function App(){
     if(!dragCardUid||animPhase!=='idle')return
     const card=hand.find(c=>c.uid===dragCardUid)
     if(!card)return
+
+    // ── SETLIST: handle entirely here to avoid double state updates ──
+    if(card.id==='setlist'){
+      const effectiveEmbers=nextCardFree?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
+      if(nextCardFree)setNextCardFree(false)
+      // Draw 2 cards immediately (uncapped), then open force-discard modal
+      const handWithout=hand.filter(c=>c.uid!==card.uid)
+      const drawRes=drawUpTo(handWithout,deck,discardPile,handWithout.length+2)
+      setHand(drawRes.h);setDeck(drawRes.d);setDiscardPile(drawRes.disc)
+      setSetlistCards(drawRes.h)
+      setSetlistOpen(true)
+      if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
+      addLog('📋 Setlist! Drew 2 cards — now pick 1 to discard.')
+      updStat('cardsPlayed',1)
+      setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
+      return
+    }
 
     // ── BURN THE SET: handle entirely here to avoid double state updates ──
     if(card.id==='burnset'){
@@ -2546,7 +2559,7 @@ export default function App(){
               const newHp=ns2[ti].hp-actualDmg
               if(newHp<=0&&!ns2[ti].stoneShield){
                 ns2[ti]=Object.assign({},ns2[ti],{hp:0,tooStoned:true})
-                addLog('💨 '+target.name+' is TOO STONED!')
+                const _stonedName=target.name;setTimeout(()=>addLog('💨 '+_stonedName+' is TOO STONED!'),0)
                 updStat('tooStonedCount',1)
                 // A6: Black Candle — deal 8 damage
                 if(activeArtifacts.some(a=>a.id==='a6')){
@@ -2785,6 +2798,7 @@ export default function App(){
       const existing=stage.find(m=>m&&m.demonic)
       if(existing){setDemonicConflict({incoming:member,existing});setRecruitCandidates([]);return}
     }
+    let joinMsg=''
     setStage(prev=>{
       const ns=[...prev]
       const idx=ns.findIndex(m=>!m)
@@ -2793,10 +2807,11 @@ export default function App(){
         const bonded=applyMentorLink(withUid,ns)
         ns[idx]=bonded
         const tl=tier!=='base'?' ['+tier.toUpperCase()+']':''
-        addLog('🎸 '+member.name+tl+' joins!'+(bonded.roleBondBonus>0?' 🔗 Bond +'+bonded.roleBondBonus+' ATK!':''))
+        joinMsg='🎸 '+member.name+tl+' joins!'+(bonded.roleBondBonus>0?' 🔗 Bond +'+bonded.roleBondBonus+' ATK!':'')
       }
       return ns
     })
+    if(joinMsg)addLog(joinMsg)
     setGameState('shop')
     setRecruitCandidates([])
   },[stage])
