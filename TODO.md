@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Monday, March 23, 2026 at 12:15 AM (JST) — Session 13*
+*Last updated: Monday, March 23, 2026 at 01:30 AM (JST) — Session 13*
 
 ---
 
@@ -10,14 +10,54 @@ This is happening.
 
 ---
 
-## 🔴 TONIGHT — REMAINING TASKS
+## 🔴 THE ADDICTION STACK — 7 Layers (in priority order)
 
-- [ ] **Run sim v10.0 at 20k** — all Session 13 balance changes are in, need survival curve data
-- [ ] **Evaluate War Drums artifact** — +1 Strike permanently, C4+ shop, 35🌿. Only if sim says we need it for 6.66% Lucifer win rate
-- [ ] **Share score button** — "Vestibule RUN #N — SCORE: X — Fell to Y at CZ — SEED: ABC" → clipboard
-- [ ] **Score display playtest** — play a real run to death, verify score renders (Shift+D uses dummy data showing 0)
-- [ ] **Full playthrough stress test** — clean run start to finish, verify no bugs
-- [ ] **Target:** ~6.66% Lucifer win rate
+### Layer 1: Death Screen Overhaul ← BUILDING NOW
+- [ ] **A) Score + Personal Best gap** — "YOUR BEST: 14,200 — YOU NEED 1,780 MORE" in big red. Near-miss > win.
+- [ ] **B) Unlock progress bar** — "NEXT UNLOCK: 2,340 / 5,000 pts" with mystery silhouette. Lifetime cumulative.
+- [ ] **C) Run discoveries** — "NEW: First time reaching Circle 7! First Hellquake!" Permanent progress feeling.
+- [ ] **D) One-tap restart** — HUGE glowing pulsing Play Again button. Restarting = the obvious default.
+
+### Layer 2: Share Score Button
+- [ ] **Clipboard copy** — "⛧ VESTIBULE — RUN #47 ⛧ SCORE: 12,420 — HEADLINER — Fell to Warlord at C5 — Can you beat this?"
+- [ ] Format for Discord/Twitter/Reddit (emoji, short, punchy)
+
+### Layer 3: Unlock System (lifetime score milestones)
+- [ ] 1,000 pts → New card: Mosh Pit (RIFF)
+- [ ] 3,000 pts → Unlock Vitalik (FOLK MAGIC) in pack pool
+- [ ] 5,000 pts → 6th artifact slot
+- [ ] 10,000 pts → New card: Blood Ritual (CORRUPT, Rare)
+- [ ] 15,000 pts → Brynja available as Foil in packs
+- [ ] 25,000 pts → Demonic Pack from C3 (was C4)
+- [ ] 50,000 pts → ??? (locked silhouette)
+- [ ] 100,000 pts → Lucifer as playable member
+
+### Layer 4: Daily Challenge + Streak Bonuses
+- [ ] **Daily seed banner** — "TODAY'S SEED: 4F2A" on start screen, one attempt locked
+- [ ] **Streak bonuses** — 3-day +5% score, 7-day +10% + border, 30-day Veteran badge
+- [x] Daily streak counter (already built)
+
+### Layer 5: Run History
+- [ ] Past Runs screen — last 20 runs: score, grade, death cause, circle, discoveries
+
+### Layer 6: Achievement Badges
+- [ ] One-time achievements: Hellquake Survivor, Sober Run, Perfect Strike, Corruption Lord, etc.
+- [ ] Achievement display on death screen and profile
+
+### Layer 7: "Almost" Mechanics
+- [ ] "127 more damage would have won that fight"
+- [ ] "Bjorn was 2 HP from surviving"
+- [ ] Near-miss messages on death screen
+
+---
+
+## ✅ COMPLETED TONIGHT
+- [x] Sim v10.0 + v11.0 run (100k + 20k games)
+- [x] Lucifer 2-phase boss (420,666 → 6,666 HP) — 5.01% win rate
+- [x] C9 rework (Paranoia + Soul Thief)
+- [x] The Dealer (shrooms 6🌿 + acid 12🌿, 50% stock)
+- [x] Card balance: Seance, Herb Money, Wake Up Call, Roadie, Signal Decay, Groupie
+- [x] All card buffs confirmed via sim
 
 ---
 

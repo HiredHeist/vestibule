@@ -1525,7 +1525,7 @@ function PhaseDots({left,total,color,wide}){
   const sz=wide?17:13;const start=total-left;return <div style={{display:'flex',gap:wide?4:4}}>{Array.from({length:total}).map((_,i)=>{const filled=i>=start;return <div key={i} style={{width:sz,height:sz,borderRadius:4,background:filled?color:'rgba(40,20,8,0.6)',border:`1px solid ${filled?color:'rgba(80,50,20,0.3)'}`,boxShadow:filled?`0 0 9px ${color}99`:'none',transition:'all 0.25s'}}/>})}</div>
 }
 
-function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore}){
+function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered}){
   const isStoned=cause==='stoned'
   const isBeaten=cause==='beaten'
   const isVictory=cause==='victory'
@@ -1535,8 +1535,10 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   const grade=getScoreGrade(finalScore,isVictory)
   const isBest=finalScore>=(personalBest||0)&&finalScore>0
   const beatBy=isBest&&(personalBest||0)>0?finalScore-(personalBest||0):0
+  const shortBy=!isBest&&(personalBest||0)>0?(personalBest||0)-finalScore:0
   const [displayScore,setDisplayScore]=useState(0)
   const [scoreReady,setScoreReady]=useState(false)
+  const [copied,setCopied]=useState(false)
   useEffect(()=>{
     let start=null,duration=1800
     const step=ts=>{
@@ -1550,6 +1552,57 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
     const t=setTimeout(()=>requestAnimationFrame(step),300)
     return()=>clearTimeout(t)
   },[finalScore])
+
+  // ── UNLOCK MILESTONES ──────────────────────────────────────
+  const UNLOCKS=[
+    {score:1000,label:'New Card: Mosh Pit',emoji:'🤘'},
+    {score:3000,label:'Unlock Vitalik',emoji:'🪈'},
+    {score:5000,label:'6th Artifact Slot',emoji:'⛧'},
+    {score:10000,label:'New Card: Blood Ritual',emoji:'🩸'},
+    {score:15000,label:'Brynja Foil Available',emoji:'✨'},
+    {score:25000,label:'Demonic Pack from C3',emoji:'😈'},
+    {score:50000,label:'???',emoji:'❓'},
+    {score:100000,label:'Lucifer Playable',emoji:'👑'},
+  ]
+  const newLifetime=(lifetimeScore||0)+finalScore
+  const nextUnlock=UNLOCKS.find(u=>u.score>newLifetime)||UNLOCKS[UNLOCKS.length-1]
+  const prevUnlockScore=UNLOCKS.filter(u=>u.score<=newLifetime).reduce((a,u)=>Math.max(a,u.score),0)
+  const unlockProgress=nextUnlock.score>prevUnlockScore?Math.min(1,(newLifetime-prevUnlockScore)/(nextUnlock.score-prevUnlockScore)):1
+  const unlocksEarned=UNLOCKS.filter(u=>u.score<=newLifetime).length
+
+  // ── PERSONAL BEST GAP (prominent) ─────────────────────────
+  const BestGap=()=>{
+    if(isBest&&scoreReady&&beatBy>0)return <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#ffd700',fontWeight:900,textShadow:'0 0 20px rgba(255,200,0,0.6)',marginTop:6,animation:'throb 1.5s ease-in-out infinite'}}>🏆 NEW PERSONAL BEST! +{beatBy.toLocaleString()}</div>
+    if(isBest&&scoreReady&&beatBy===0)return <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#ffd700',fontWeight:900,textShadow:'0 0 20px rgba(255,200,0,0.6)',marginTop:6}}>🏆 PERSONAL BEST!</div>
+    if(shortBy>0&&shortBy<=2000)return <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#cc2222',fontWeight:900,textShadow:'0 0 14px rgba(200,0,0,0.5)',marginTop:6}}>SO CLOSE! Only {shortBy.toLocaleString()} pts from your best!</div>
+    if(shortBy>0)return <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#886633',marginTop:6}}>Your Best: {(personalBest||0).toLocaleString()} — {shortBy.toLocaleString()} to beat</div>
+    return null
+  }
+
+  // ── UNLOCK PROGRESS BAR ────────────────────────────────────
+  const UnlockBar=()=>(<div style={{width:'100%',maxWidth:600,margin:'8px 0'}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
+      <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#8a6020',letterSpacing:2,textTransform:'uppercase'}}>Next Unlock</span>
+      <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#aa8030'}}>{newLifetime.toLocaleString()} / {nextUnlock.score.toLocaleString()}</span>
+    </div>
+    <div style={{height:24,background:'rgba(20,12,4,0.8)',border:'1px solid rgba(100,65,15,0.5)',borderRadius:12,overflow:'hidden',position:'relative'}}>
+      <div style={{height:'100%',width:(unlockProgress*100)+'%',background:'linear-gradient(90deg,#8a2200,#cc4400,#e8a820)',borderRadius:12,transition:'width 1.5s ease',boxShadow:'0 0 16px rgba(200,100,0,0.5)'}}/>
+      <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center'}}>
+        <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#fff',textShadow:'0 0 8px rgba(0,0,0,0.9)',letterSpacing:1}}>{nextUnlock.emoji} {nextUnlock.label}</span>
+      </div>
+    </div>
+    {unlocksEarned>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'#665533',fontStyle:'italic',textAlign:'center',marginTop:3}}>{unlocksEarned} unlock{unlocksEarned>1?'s':''} earned so far</div>}
+  </div>)
+
+  // ── DISCOVERIES ────────────────────────────────────────────
+  const discoveryList=discovered?[...discovered]:[]
+  const Discoveries=()=>discoveryList.length>0?(<div style={{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'center',maxWidth:600,margin:'4px 0'}}>
+    {discoveryList.slice(0,8).map((d,i)=><div key={i} style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#e8a820',background:'rgba(40,25,5,0.8)',border:'1px solid rgba(200,140,30,0.4)',borderRadius:4,padding:'3px 10px',letterSpacing:1}}>NEW: {d}</div>)}
+  </div>):null
+
+  // ── SHARE BUTTON ───────────────────────────────────────────
+  const shareText='⛧ VESTIBULE — RUN #'+(totalRuns||1)+' ⛧\nSCORE: '+finalScore.toLocaleString()+' — '+grade.label+'\n'+(isVictory?'DEFEATED LUCIFER!':'Fell to '+(enemy?.name||'The Vestibule')+' at Circle '+circleReached)+'\nSEED: '+seed.toString(16).toUpperCase()+'\nCan you beat this?'
+  const handleShare=()=>{if(navigator.clipboard){navigator.clipboard.writeText(shareText);setCopied(true);setTimeout(()=>setCopied(false),2000)}}
 
   // Shared stats grid
   const StatsGrid=()=>(
@@ -1589,17 +1642,33 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
     </div>
   )
 
-  // Shared button row
+  // ── HUGE PLAY AGAIN + SHARE ────────────────────────────────
   const Buttons=({victory})=>(
-    <div style={{display:'flex',gap:16,marginTop:4}}>
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:12,marginTop:8}}>
       <button onClick={onReset}
-        style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:victory?'#ee2222':'#b09858',background:victory?'rgba(100,0,0,0.22)':'transparent',border:victory?'2px solid #7a0000':'1px solid rgba(90,60,20,0.5)',borderRadius:3,padding:'12px 40px',cursor:'pointer',textTransform:'uppercase'}}>
-        {victory?'⛧ Play Again':'↺ Try Again'}
+        style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,letterSpacing:6,
+          color:victory?'#ffd700':'#ee2222',
+          background:victory?'rgba(60,40,0,0.4)':'rgba(120,0,0,0.3)',
+          border:victory?'3px solid #c8a020':'3px solid #aa0000',
+          borderRadius:8,padding:'18px 80px',cursor:'pointer',textTransform:'uppercase',
+          textShadow:victory?'0 0 30px rgba(200,150,0,0.6)':'0 0 30px rgba(200,0,0,0.6)',
+          boxShadow:victory?'0 0 40px rgba(200,150,0,0.3)':'0 0 40px rgba(200,0,0,0.3)',
+          animation:'throb 2s ease-in-out infinite',transition:'all 0.15s'}}>
+        {victory?'⛧ Play Again ⛧':'↺ Play Again'}
       </button>
-      <button onClick={()=>onDailyChallenge&&onDailyChallenge()}
-        style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,color:'#e8a820',background:'rgba(50,35,5,0.4)',border:'1px solid #c87820',borderRadius:3,padding:'12px 28px',cursor:'pointer',textTransform:'uppercase'}}>
-        🌍 Daily Challenge
-      </button>
+      <div style={{display:'flex',gap:12}}>
+        <button onClick={handleShare}
+          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,
+            color:copied?'#44cc44':'#e8a820',background:'rgba(50,35,5,0.4)',
+            border:'1px solid '+(copied?'#44cc44':'#c87820'),borderRadius:3,
+            padding:'10px 24px',cursor:'pointer',textTransform:'uppercase',transition:'all 0.2s'}}>
+          {copied?'✓ Copied!':'📋 Share Score'}
+        </button>
+        <button onClick={()=>onDailyChallenge&&onDailyChallenge()}
+          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,color:'#e8a820',background:'rgba(50,35,5,0.4)',border:'1px solid #c87820',borderRadius:3,padding:'10px 24px',cursor:'pointer',textTransform:'uppercase'}}>
+          🌍 Daily Challenge
+        </button>
+      </div>
     </div>
   )
 
@@ -1618,10 +1687,10 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <div style={{textAlign:'center',margin:'4px 0'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
-          {isBest&&scoreReady&&beatBy>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#ffd700',fontStyle:'italic',marginTop:4}}>🏆 NEW BEST! +{beatBy.toLocaleString()} pts</div>}
-          {isBest&&scoreReady&&beatBy===0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#ffd700',fontStyle:'italic',marginTop:4}}>🏆 PERSONAL BEST!</div>}
-          {!isBest&&(personalBest||0)>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#665533',fontStyle:'italic',marginTop:4}}>Best: {(personalBest||0).toLocaleString()} — {((personalBest||0)-finalScore).toLocaleString()} away</div>}
+          <BestGap/>
         </div>
+        <UnlockBar/>
+        <Discoveries/>
                 {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #aa4444',borderRadius:4}}>{streakMsg}</div>}
         <StatsGrid/>
@@ -1655,10 +1724,10 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <div style={{textAlign:'center',margin:'4px 0'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
-          {isBest&&scoreReady&&beatBy>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#ffd700',fontStyle:'italic',marginTop:4}}>🏆 NEW BEST! +{beatBy.toLocaleString()} pts</div>}
-          {isBest&&scoreReady&&beatBy===0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#ffd700',fontStyle:'italic',marginTop:4}}>🏆 PERSONAL BEST!</div>}
-          {!isBest&&(personalBest||0)>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#665533',fontStyle:'italic',marginTop:4}}>Best: {(personalBest||0).toLocaleString()} — {((personalBest||0)-finalScore).toLocaleString()} away</div>}
+          <BestGap/>
         </div>
+        <UnlockBar/>
+        <Discoveries/>
                 {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:streakWins>1?'#ff6600':'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:`1px solid ${streakWins>1?'#ff6600':'#aa4444'}`,borderRadius:4}}>{streakMsg}</div>}
         <StatsGrid/>
@@ -1682,10 +1751,10 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <div style={{textAlign:'center',margin:'4px 0'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
-          {isBest&&scoreReady&&beatBy>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#ffd700',fontStyle:'italic',marginTop:4}}>🏆 NEW BEST! +{beatBy.toLocaleString()} pts</div>}
-          {isBest&&scoreReady&&beatBy===0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#ffd700',fontStyle:'italic',marginTop:4}}>🏆 PERSONAL BEST!</div>}
-          {!isBest&&(personalBest||0)>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#665533',fontStyle:'italic',marginTop:4}}>Best: {(personalBest||0).toLocaleString()} — {((personalBest||0)-finalScore).toLocaleString()} away</div>}
+          <BestGap/>
         </div>
+        <UnlockBar/>
+        <Discoveries/>
                 {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>{streakMsg}</div>}
         <StatsGrid/>
@@ -3448,7 +3517,7 @@ export default function App(){
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(true)} onBuyAcid={()=>setHeldAcid(true)}/>
-  if(gameState==='end')return <EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore}/>
+  if(gameState==='end')return <EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered}/>
 
   return(
     <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none'}}>
