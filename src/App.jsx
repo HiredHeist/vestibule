@@ -2244,7 +2244,47 @@ export default function App(){
   const [menuView,setMenuView]=useState(null) // null, 'unlocks', 'rules', 'options'
   const [activeStakeId,setActiveStakeId]=useState(()=>localStorage.getItem('vst_active_stake')||'bronze')
   const activeStake=STAKES.find(s=>s.id===activeStakeId)||STAKES[0]
+  const [musicVol,setMusicVol]=useState(()=>parseFloat(localStorage.getItem('vst_music_vol')||'0.3'))
   const tryAchieve=useCallback((id)=>{if(unlockAchievement(id))setNewAchievements(p=>[...p,id])},[])
+
+  // ── MUSIC SYSTEM ─────────────────────────────────────────────
+  const audioRef=useRef({})
+  const currentTrackRef=useRef(null)
+  const TRACK_MAP={menu:'menu',booster:'select',playing:'battle',shop:'shop',recruit:'shop',end:'menu'}
+  useEffect(()=>{
+    const trackName=TRACK_MAP[gameState]||'menu'
+    if(trackName===currentTrackRef.current)return
+    const vol=parseFloat(localStorage.getItem('vst_music_vol')||'0.3')
+    // Fade out current
+    if(currentTrackRef.current&&audioRef.current[currentTrackRef.current]){
+      const old=audioRef.current[currentTrackRef.current]
+      const fadeOut=setInterval(()=>{if(old.volume>0.02){old.volume=Math.max(0,old.volume-0.05)}else{old.pause();old.volume=0;clearInterval(fadeOut)}},50)
+    }
+    // Start new track
+    if(!audioRef.current[trackName]){
+      const a=new Audio('/music/'+trackName+'.mp3')
+      a.loop=true
+      a.volume=0
+      audioRef.current[trackName]=a
+    }
+    const next=audioRef.current[trackName]
+    next.volume=0
+    const playPromise=next.play()
+    if(playPromise)playPromise.catch(()=>{})
+    // Fade in
+    const targetVol=vol
+    const fadeIn=setInterval(()=>{if(next.volume<targetVol-0.02){next.volume=Math.min(targetVol,next.volume+0.05)}else{next.volume=targetVol;clearInterval(fadeIn)}},50)
+    currentTrackRef.current=trackName
+  },[gameState])
+  // Volume change handler
+  const setMusicVolume=useCallback((v)=>{
+    const fv=parseFloat(v)
+    localStorage.setItem('vst_music_vol',fv)
+    setMusicVol(fv)
+    const trackName=currentTrackRef.current
+    if(trackName&&audioRef.current[trackName])audioRef.current[trackName].volume=fv
+  },[])
+
   const [streakWins,setStreakWins]=useState(0)
   const [streakLosses,setStreakLosses]=useState(0)
   const [totalRunsPlayed,setTotalRunsPlayed]=useState(()=>parseInt(localStorage.getItem('vst_runs')||'0'))
@@ -3934,6 +3974,15 @@ export default function App(){
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#e8a820'}}>Combat Speed</span>
             <button onClick={()=>{const cur=localStorage.getItem('vst_speed')||'normal';localStorage.setItem('vst_speed',cur==='normal'?'fast':'normal');setMenuView('options')}}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#e8a820',background:'rgba(0,0,0,0.4)',border:'1px solid #c87820',borderRadius:4,padding:'8px 24px',cursor:'pointer',minWidth:70,textAlign:'center'}}>{(localStorage.getItem('vst_speed')||'normal').toUpperCase()}</button>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#e8a820'}}>Music Volume</span>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <input type="range" min="0" max="1" step="0.05" value={musicVol}
+                onChange={e=>setMusicVolume(e.target.value)}
+                style={{width:120,accentColor:'#e8a820',cursor:'pointer'}}/>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#aa8030',minWidth:36,textAlign:'right'}}>{Math.round(musicVol*100)}%</span>
+            </div>
           </div>
           <div style={{marginTop:12,display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(40,5,5,0.4)',border:'1px solid rgba(180,40,40,0.3)',borderRadius:6}}>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#cc4444'}}>Reset All Progress</span>
