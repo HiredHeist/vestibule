@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 12:01 AM*
+*Last updated: Sunday, March 22, 2026 at 12:02 AM*
 
 ---
 
@@ -34,7 +34,7 @@ This is happening.
 
 11. ~~**Booster pack member cards lost** — FIXED: handleShopSpend now has pack handler, members→recruit flow, cards→deck, artifacts+passives→equip~~ — buying a pack with a member card (garage/touring/demonic packs in booster slot) calls `handleShopSpend` with type='pack' which has NO handler. pickedCards are silently lost. Members should trigger recruit flow; cards should go to deck; artifacts should equip.
 
-12. **Member HP reaches 0 without going Too Stoned** — possible stoneShield edge case or display bug. Needs investigation.
+12. ~~**HP 0 without Too Stoned** — FIXED: stoneShield now saves at 1HP minimum, shows SHIELDED float, no zombie state~~ — possible stoneShield edge case or display bug. Needs investigation.
 
 13. **Hand fills with unplayable cards in late circles** — C4+ cards cost 3-5 embers, max embers is 5-6. Hand jams with expensive unaffordable cards. Need discard strategy UX hint, or consider making Setbreak/discard more accessible.
 
