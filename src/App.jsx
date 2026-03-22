@@ -3784,21 +3784,21 @@ export default function App(){
             <div key={m.id} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(160,100,25,0.4)',borderRadius:6,padding:'14px 10px',textAlign:'center'}}>
               <div style={{fontSize:48}}>{m.emoji}</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#e8a820'}}>{m.name}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#8a7040'}}>{m.keyword}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#c8a040'}}>{m.keyword}</div>
             </div>
           ))}
           {ALL_MUSICIANS.filter(m=>m.locked).map(m=>{const done=!m.unlockAt||lt>=m.unlockAt;return(
             <div key={m.id} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:done?1:0.4}}>
               <div style={{fontSize:48,filter:done?'none':'grayscale(1)'}}>{done?m.emoji:'🔒'}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:done?'#e8a820':'#4a3a18'}}>{done?m.name:'???'}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#3a2a10'}}>{done?m.keyword:'LOCKED'}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:done?'#e8a820':'#c8a040'}}>{done?m.name:'???'}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#c8a040'}}>{done?m.keyword:'LOCKED'}</div>
             </div>
           )})}
           {[1,2,3,4,5,6,7,8,9,10].map(i=>(
             <div key={'future_m'+i} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.35}}>
               <div style={{fontSize:48,filter:'grayscale(1) brightness(0.4)'}}>🔒</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#3a2a10'}}>???</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#2a1a08'}}>COMING SOON</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#c8a040'}}>???</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#c8a040'}}>COMING SOON</div>
             </div>
           ))}
         </div>
@@ -3814,13 +3814,13 @@ export default function App(){
           {STARTER_ARTIFACTS.filter(a=>a.locked).map(a=>{const done=lt>=(a.unlockAt||999999);return(
             <div key={a.id} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:done?1:0.4}}>
               <div style={{fontSize:48,filter:done?'none':'grayscale(1)'}}>{done?a.emoji:'🔒'}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:done?'#c8a040':'#4a3a18'}}>{done?a.name:'???'}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:done?'#c8a040':'#c8a040'}}>{done?a.name:'???'}</div>
             </div>
           )})}
           {[1,2,3,4,5,6,7,8,9,10].map(i=>(
             <div key={'future_a'+i} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.35}}>
               <div style={{fontSize:48,filter:'grayscale(1) brightness(0.4)'}}>🔒</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#3a2a10'}}>???</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8a040'}}>???</div>
             </div>
           ))}
         </div>
@@ -3836,11 +3836,11 @@ export default function App(){
           {[1,2,3,4,5,6,7,8,9,10].map(i=>(
             <div key={'future_p'+i} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.35}}>
               <div style={{fontSize:48,filter:'grayscale(1) brightness(0.4)'}}>🔒</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#3a2a10'}}>???</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8a040'}}>???</div>
             </div>
           ))}
         </div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#665533',marginTop:12}}>{earned.length} / {UNLOCK_MILESTONES.length} milestones · {achs.length} / {ACHIEVEMENTS.length} achievements</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8a040',marginTop:12}}>{earned.length} / {UNLOCK_MILESTONES.length} milestones · {achs.length} / {ACHIEVEMENTS.length} achievements</div>
         <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:8}}>← Back</button>
       </div>
     )
