@@ -8,405 +8,201 @@
   @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:#0a0604;color:#c8b080;font-family:'Inter',sans-serif;min-height:100vh;padding:20px}
-  .container{max-width:800px;margin:0 auto;padding:40px 20px}
-  h1{font-family:'Cinzel',serif;font-size:48px;color:#cc1111;text-align:center;letter-spacing:6px;margin-bottom:4px;text-shadow:0 0 40px rgba(200,0,0,0.4)}
+  @media print{body{background:#fff;color:#222} .section{border-color:#ccc!important;background:#fafafa!important} .section-title{color:#8B0000!important} .qnum{color:#8B0000!important} label{color:#333!important} .hint{color:#888!important} textarea,input[type=text],input[type=email]{border-color:#ccc!important;background:#fff!important;color:#222!important} .header-rule{border-color:#8B0000!important} .subtitle{color:#666!important} .intro{color:#555!important} .footer{color:#666!important} .print-btn{display:none!important}}
+  .container{max-width:820px;margin:0 auto;padding:20px}
+  h1{font-family:'Cinzel',serif;font-size:44px;color:#cc1111;text-align:center;letter-spacing:6px;margin-bottom:4px;text-shadow:0 0 40px rgba(200,0,0,0.4)}
   .subtitle{font-family:'Cinzel',serif;font-size:16px;color:#8a6a40;text-align:center;letter-spacing:4px;margin-bottom:8px}
-  .intro{text-align:center;color:#aa9060;font-size:14px;line-height:1.7;margin-bottom:32px;max-width:600px;margin-left:auto;margin-right:auto}
-  .section{margin-bottom:28px;background:rgba(20,12,4,0.6);border:1px solid rgba(100,65,15,0.3);border-radius:10px;padding:24px}
-  .section-title{font-family:'Cinzel',serif;font-size:20px;color:#e8a820;margin-bottom:6px;letter-spacing:2px}
-  .section-desc{font-size:13px;color:#8a7a50;margin-bottom:16px;line-height:1.5}
-  label{display:block;font-size:14px;color:#c8a060;margin-bottom:6px;font-weight:500}
-  input[type="text"],input[type="email"],textarea,select{width:100%;padding:12px 16px;background:rgba(10,6,2,0.8);border:1px solid rgba(100,65,15,0.4);border-radius:6px;color:#e8d8b0;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s}
-  input:focus,textarea:focus,select:focus{border-color:#e8a820}
-  textarea{min-height:100px;resize:vertical;line-height:1.6}
-  select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23e8a820'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center}
-  select option{background:#1a0e04;color:#e8d8b0}
-  .field{margin-bottom:16px}
-  .stars{display:flex;gap:8px;margin-bottom:12px}
-  .star{width:40px;height:40px;border-radius:50%;border:2px solid rgba(100,65,15,0.4);background:rgba(10,6,2,0.8);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:all 0.15s;user-select:none}
-  .star:hover,.star.active{border-color:#e8a820;background:rgba(60,40,5,0.8);transform:scale(1.1)}
-  .star.active{box-shadow:0 0 12px rgba(200,140,20,0.4)}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media(max-width:600px){.row{grid-template-columns:1fr}}
-  .checkbox-group{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
-  .checkbox-group label{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(10,6,2,0.8);border:1px solid rgba(100,65,15,0.3);border-radius:6px;cursor:pointer;font-size:13px;transition:all 0.15s;user-select:none}
-  .checkbox-group label:hover{border-color:#e8a820}
-  .checkbox-group input{accent-color:#e8a820;width:16px;height:16px}
-  .submit-btn{display:block;width:100%;padding:18px;font-family:'Cinzel',serif;font-size:24px;letter-spacing:6px;color:#ee2222;background:rgba(120,0,0,0.25);border:3px solid #aa0000;border-radius:10px;cursor:pointer;text-transform:uppercase;text-shadow:0 0 20px rgba(220,0,0,0.5);box-shadow:0 0 30px rgba(180,0,0,0.2);transition:all 0.2s}
-  .submit-btn:hover{background:rgba(150,0,0,0.35);box-shadow:0 0 50px rgba(200,0,0,0.3)}
-  .submit-btn:disabled{opacity:0.5;cursor:not-allowed}
-  .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:16px 32px;border-radius:8px;font-family:'Cinzel',serif;font-size:18px;letter-spacing:3px;z-index:9999;display:none}
-  .toast.success{background:rgba(0,80,0,0.95);border:2px solid #44cc44;color:#44cc44;display:block}
-  .toast.error{background:rgba(80,0,0,0.95);border:2px solid #cc4444;color:#cc4444;display:block}
-  .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(200,140,20,0.3),transparent);margin:8px 0 20px}
-  .required{color:#cc4444;font-size:11px;margin-left:4px}
-  .anon-note{font-size:11px;color:#665533;text-align:center;margin-top:8px}
+  .intro{text-align:center;color:#aa9060;font-size:14px;line-height:1.7;margin-bottom:12px;max-width:620px;margin-left:auto;margin-right:auto}
+  .header-rule{border:none;border-top:2px solid #cc1111;margin:16px auto 28px;width:60%}
+  .section{margin-bottom:24px;background:rgba(20,12,4,0.6);border:1px solid rgba(100,65,15,0.3);border-radius:10px;padding:24px 28px}
+  .section-title{font-family:'Cinzel',serif;font-size:20px;color:#e8a820;margin-bottom:14px;letter-spacing:2px;border-bottom:1px solid rgba(200,140,20,0.2);padding-bottom:8px}
+  .q{margin-bottom:18px}
+  .qlabel{font-size:15px;color:#d8c090;margin-bottom:6px;line-height:1.5}
+  .qnum{font-weight:700;color:#cc1111;margin-right:4px}
+  .hint{font-size:12px;color:#8a7a50;margin-bottom:6px;font-style:italic}
+  textarea,input[type=text],input[type=email]{width:100%;padding:10px 14px;background:rgba(10,6,2,0.8);border:1px solid rgba(100,65,15,0.4);border-radius:6px;color:#e8d8b0;font-family:'Inter',sans-serif;font-size:14px;outline:none;resize:vertical;transition:border-color 0.2s}
+  textarea:focus,input:focus{border-color:#e8a820}
+  textarea{min-height:70px;line-height:1.5}
+  /* Checkbox styling */
+  .cb-group{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+  .cb-group label{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(10,6,2,0.7);border:1px solid rgba(100,65,15,0.3);border-radius:6px;cursor:pointer;font-size:14px;color:#c8b080;transition:all 0.15s;user-select:none}
+  .cb-group label:hover{border-color:#e8a820;background:rgba(30,18,4,0.8)}
+  .cb-group label:has(input:checked){border-color:#e8a820;background:rgba(60,40,5,0.7);color:#e8d8b0}
+  .cb-group input[type=checkbox],.cb-group input[type=radio]{width:18px;height:18px;accent-color:#e8a820;cursor:pointer;flex-shrink:0}
+  /* Rating */
+  .rating{display:flex;gap:0;margin:6px 0}
+  .rating label{flex:1;text-align:center;padding:10px 0;border:1px solid rgba(100,65,15,0.3);cursor:pointer;font-size:15px;font-weight:700;color:#887755;transition:all 0.15s;user-select:none}
+  .rating label:first-child{border-radius:6px 0 0 6px}
+  .rating label:last-child{border-radius:0 6px 6px 0}
+  .rating label:hover{background:rgba(60,40,5,0.6);color:#e8a820}
+  .rating label:has(input:checked){background:rgba(200,140,20,0.25);color:#e8a820;border-color:#e8a820;box-shadow:0 0 8px rgba(200,140,20,0.2)}
+  .rating input{display:none}
+  .rating-labels{display:flex;justify-content:space-between;font-size:11px;color:#665533;font-style:italic;margin-top:3px;padding:0 4px}
+  .print-btn{display:block;width:100%;padding:16px;font-family:'Cinzel',serif;font-size:22px;letter-spacing:6px;color:#ee2222;background:rgba(120,0,0,0.25);border:2px solid #aa0000;border-radius:10px;cursor:pointer;text-transform:uppercase;margin-top:20px;transition:all 0.2s}
+  .print-btn:hover{background:rgba(150,0,0,0.35);box-shadow:0 0 30px rgba(200,0,0,0.3)}
+  .footer{text-align:center;margin-top:20px;font-size:13px;color:#8a6a40}
 </style>
 </head>
 <body>
 <div class="container">
   <h1>⛧ Vestibule ⛧</h1>
-  <div class="subtitle">Playtester Feedback Report</div>
-  <div class="intro">
-    Your feedback is critical to making this game unforgettable. Be honest, be brutal, be specific.
-    Every bug you find and every idea you share directly shapes the final product.
-    This form takes ~5 minutes. Your responses are submitted directly to the development team.
+  <div class="subtitle">Playtester Feedback Form</div>
+  <div class="intro">Your feedback directly shapes the final game. Be honest, be brutal, be specific. Fill out as much or as little as you like — every response helps.</div>
+  <hr class="header-rule">
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-title">⛧ About You</div>
+    <div class="q"><div class="qlabel"><span class="qnum">1.</span> Name or handle (anonymous is fine):</div><input type="text" placeholder="Your name or handle"></div>
+    <div class="q"><div class="qlabel"><span class="qnum">2.</span> What device and browser did you play on?</div><input type="text" placeholder="e.g. Mac / Chrome, Windows / Firefox, iPhone / Safari"></div>
+    <div class="q"><div class="qlabel"><span class="qnum">3.</span> How many runs did you complete?</div>
+      <div class="cb-group"><label><input type="radio" name="runs" value="1"> 1</label><label><input type="radio" name="runs" value="2-5"> 2–5</label><label><input type="radio" name="runs" value="6-15"> 6–15</label><label><input type="radio" name="runs" value="16-30"> 16–30</label><label><input type="radio" name="runs" value="30+"> 30+</label></div></div>
+    <div class="q"><div class="qlabel"><span class="qnum">4.</span> What is the farthest Circle you reached?</div>
+      <div class="cb-group"><label><input type="radio" name="circle" value="1"> C1 Limbo</label><label><input type="radio" name="circle" value="2"> C2 Lust</label><label><input type="radio" name="circle" value="3"> C3 Gluttony</label><label><input type="radio" name="circle" value="4"> C4 Greed</label><label><input type="radio" name="circle" value="5"> C5 Anger</label><label><input type="radio" name="circle" value="6"> C6 Heresy</label><label><input type="radio" name="circle" value="7"> C7 Violence</label><label><input type="radio" name="circle" value="8"> C8 Fraud</label><label><input type="radio" name="circle" value="9"> C9 Treachery</label><label><input type="radio" name="circle" value="lucifer"> Beat Lucifer!</label></div></div>
   </div>
 
-  <form id="feedbackForm">
-    <!-- IDENTITY -->
-    <div class="section">
-      <div class="section-title">⛧ Tester Identity</div>
-      <div class="section-desc">Optional. Anonymous feedback is equally valued.</div>
-      <div class="row">
-        <div class="field">
-          <label>Name / Handle</label>
-          <input type="text" name="tester_name" placeholder="Anonymous is fine">
-        </div>
-        <div class="field">
-          <label>Email (for follow-up questions only)</label>
-          <input type="email" name="tester_email" placeholder="Optional">
-        </div>
-      </div>
-      <div class="row">
-        <div class="field">
-          <label>Platform</label>
-          <select name="platform">
-            <option value="">Select...</option>
-            <option>Mac — Chrome</option>
-            <option>Mac — Safari</option>
-            <option>Mac — Firefox</option>
-            <option>Windows — Chrome</option>
-            <option>Windows — Edge</option>
-            <option>Windows — Firefox</option>
-            <option>iPhone / iPad</option>
-            <option>Android</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>How many runs have you completed?</label>
-          <select name="runs_completed">
-            <option value="">Select...</option>
-            <option>First run (just started)</option>
-            <option>2-5 runs</option>
-            <option>6-15 runs</option>
-            <option>16-30 runs</option>
-            <option>30+ runs</option>
-          </select>
-        </div>
-      </div>
-    </div>
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-title">🔥 First Impressions</div>
+    <div class="q"><div class="qlabel"><span class="qnum">5.</span> Describe the game in exactly 3 words:</div><input type="text" placeholder="e.g. dark, strategic, addictive"></div>
+    <div class="q"><div class="qlabel"><span class="qnum">6.</span> What was your first thought when you saw the main menu?</div><textarea placeholder="First impression of the title screen, music, atmosphere..."></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">7.</span> How quickly did you understand the rules?</div><div class="hint">Did you read the Rules screen or figure it out by playing?</div><textarea placeholder="Was anything confusing at first?"></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">8.</span> What was your gut reaction after your first death?</div>
+      <div class="cb-group"><label><input type="checkbox"> Frustrated</label><label><input type="checkbox"> Curious</label><label><input type="checkbox"> Confused</label><label><input type="checkbox"> Excited</label><label><input type="checkbox"> Immediately hit Play Again</label><label><input type="checkbox"> Closed the tab</label></div></div>
+    <div class="q"><div class="qlabel"><span class="qnum">9.</span> Rate your overall ENJOYMENT:</div>
+      <div class="rating"><label><input type="radio" name="r_enjoy" value="1">1</label><label><input type="radio" name="r_enjoy" value="2">2</label><label><input type="radio" name="r_enjoy" value="3">3</label><label><input type="radio" name="r_enjoy" value="4">4</label><label><input type="radio" name="r_enjoy" value="5">5</label><label><input type="radio" name="r_enjoy" value="6">6</label><label><input type="radio" name="r_enjoy" value="7">7</label><label><input type="radio" name="r_enjoy" value="8">8</label><label><input type="radio" name="r_enjoy" value="9">9</label><label><input type="radio" name="r_enjoy" value="10">10</label></div>
+      <div class="rating-labels"><span>Not fun</span><span>Could not stop playing</span></div></div>
+  </div>
 
-    <!-- OVERALL IMPRESSION -->
-    <div class="section">
-      <div class="section-title">🔥 First Impression & Overall Feel</div>
-      <div class="section-desc">Your gut reaction matters. How did the game make you feel?</div>
-      <div class="field">
-        <label>Overall enjoyment (1 = miserable, 5 = could not stop playing)</label>
-        <div class="stars" data-name="rating_enjoyment">
-          <div class="star" data-val="1">1</div>
-          <div class="star" data-val="2">2</div>
-          <div class="star" data-val="3">3</div>
-          <div class="star" data-val="4">4</div>
-          <div class="star" data-val="5">5</div>
-        </div>
-      </div>
-      <div class="field">
-        <label>"One more run" factor — did you want to immediately play again after dying?</label>
-        <div class="stars" data-name="rating_onemore">
-          <div class="star" data-val="1">1</div>
-          <div class="star" data-val="2">2</div>
-          <div class="star" data-val="3">3</div>
-          <div class="star" data-val="4">4</div>
-          <div class="star" data-val="5">5</div>
-        </div>
-      </div>
-      <div class="field">
-        <label>What was your first thought after your first death?</label>
-        <textarea name="first_death_thought" placeholder="Be honest. Frustration? Curiosity? Confusion? Excitement?"></textarea>
-      </div>
-      <div class="field">
-        <label>Describe the game in 3 words.</label>
-        <input type="text" name="three_words" placeholder="e.g. dark, strategic, addictive">
-      </div>
-    </div>
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-title">⚔ Gameplay & Mechanics</div>
+    <div class="q"><div class="qlabel"><span class="qnum">10.</span> Which mechanics did you enjoy the MOST? (select all)</div>
+      <div class="cb-group"><label><input type="checkbox"> Card combos</label><label><input type="checkbox"> Band building</label><label><input type="checkbox"> Shop decisions</label><label><input type="checkbox"> Corruption risk/reward</label><label><input type="checkbox"> The Dealer (drugs)</label><label><input type="checkbox"> Mentor Links</label><label><input type="checkbox"> Boss fights</label><label><input type="checkbox"> Unlock progression</label></div></div>
+    <div class="q"><div class="qlabel"><span class="qnum">11.</span> Which mechanic felt the WEAKEST or most confusing?</div><textarea placeholder="What slowed you down or felt pointless?"></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">12.</span> Were there any cards that felt overpowered or broken?</div><div class="hint">Name the card and what felt off</div><textarea placeholder="e.g. 'Possessed Performance felt unstoppable'"></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">13.</span> Were there any cards that felt useless or never worth playing?</div><textarea placeholder="Card name and why you never picked it"></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">14.</span> Did the shop feel rewarding or overwhelming?</div><textarea placeholder="Enough to buy? Too much? Not enough variety?"></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">15.</span> Did you use The Dealer (shrooms/acid)? How did it feel?</div>
+      <div class="cb-group"><label><input type="checkbox"> Fun / exciting</label><label><input type="checkbox"> Too risky</label><label><input type="checkbox"> Confusing</label><label><input type="checkbox"> Game-changing</label><label><input type="checkbox"> Pointless</label><label><input type="checkbox"> Did not use them</label></div></div>
+    <div class="q"><div class="qlabel"><span class="qnum">16.</span> Did you understand the Mentor Link system?</div>
+      <div class="cb-group"><label><input type="radio" name="mentor"> Yes, built around it</label><label><input type="radio" name="mentor"> Understood but ignored it</label><label><input type="radio" name="mentor"> Did not understand</label><label><input type="radio" name="mentor"> Did not notice it</label></div></div>
+  </div>
 
-    <!-- GAMEPLAY -->
-    <div class="section">
-      <div class="section-title">⚔ Gameplay & Mechanics</div>
-      <div class="section-desc">The card system, combat, and core loop.</div>
-      <div class="field">
-        <label>Were the rules intuitive or confusing?</label>
-        <div class="stars" data-name="rating_intuitive">
-          <div class="star" data-val="1">1</div>
-          <div class="star" data-val="2">2</div>
-          <div class="star" data-val="3">3</div>
-          <div class="star" data-val="4">4</div>
-          <div class="star" data-val="5">5</div>
-        </div>
-        <div style="font-size:11px;color:#665533;margin-top:-8px">1 = totally lost, 5 = immediately understood</div>
-      </div>
-      <div class="field">
-        <label>Which mechanics did you enjoy most? (check all that apply)</label>
-        <div class="checkbox-group">
-          <label><input type="checkbox" name="enjoyed_mechanics" value="Card combos"> Card combos</label>
-          <label><input type="checkbox" name="enjoyed_mechanics" value="Band building"> Band building</label>
-          <label><input type="checkbox" name="enjoyed_mechanics" value="Shop decisions"> Shop decisions</label>
-          <label><input type="checkbox" name="enjoyed_mechanics" value="Corruption risk/reward"> Corruption risk/reward</label>
-          <label><input type="checkbox" name="enjoyed_mechanics" value="The Dealer (drugs)"> The Dealer (drugs)</label>
-          <label><input type="checkbox" name="enjoyed_mechanics" value="Mentor Links"> Mentor Links</label>
-          <label><input type="checkbox" name="enjoyed_mechanics" value="Boss fights"> Boss fights</label>
-          <label><input type="checkbox" name="enjoyed_mechanics" value="Unlock progression"> Unlock progression</label>
-        </div>
-      </div>
-      <div class="field">
-        <label>Which mechanics felt weak, confusing, or unnecessary?</label>
-        <textarea name="weak_mechanics" placeholder="Anything that slowed you down or felt pointless."></textarea>
-      </div>
-      <div class="field">
-        <label>Did any specific card feel broken (too strong or too weak)?</label>
-        <textarea name="card_balance" placeholder="Card name + what felt off. e.g. 'Possessed Performance felt unstoppable'"></textarea>
-      </div>
-      <div class="field">
-        <label>Farthest circle reached?</label>
-        <select name="farthest_circle">
-          <option value="">Select...</option>
-          <option>Circle 1 — Limbo</option>
-          <option>Circle 2 — Lust</option>
-          <option>Circle 3 — Gluttony</option>
-          <option>Circle 4 — Greed</option>
-          <option>Circle 5 — Anger</option>
-          <option>Circle 6 — Heresy</option>
-          <option>Circle 7 — Violence</option>
-          <option>Circle 8 — Fraud</option>
-          <option>Circle 9 — Treachery</option>
-          <option>Beat Lucifer!</option>
-        </select>
-      </div>
-    </div>
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-title">💀 Difficulty & Pacing</div>
+    <div class="q"><div class="qlabel"><span class="qnum">17.</span> Rate the DIFFICULTY:</div>
+      <div class="rating"><label><input type="radio" name="r_diff" value="1">1</label><label><input type="radio" name="r_diff" value="2">2</label><label><input type="radio" name="r_diff" value="3">3</label><label><input type="radio" name="r_diff" value="4">4</label><label><input type="radio" name="r_diff" value="5">5</label><label><input type="radio" name="r_diff" value="6">6</label><label><input type="radio" name="r_diff" value="7">7</label><label><input type="radio" name="r_diff" value="8">8</label><label><input type="radio" name="r_diff" value="9">9</label><label><input type="radio" name="r_diff" value="10">10</label></div>
+      <div class="rating-labels"><span>Way too easy</span><span>Impossibly hard</span></div></div>
+    <div class="q"><div class="qlabel"><span class="qnum">18.</span> Which fight or circle was the first big difficulty wall?</div><textarea placeholder="Which enemy made you say 'oh no'?"></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">19.</span> Did any death feel UNFAIR — like you had zero chance to win?</div><textarea placeholder="Describe the situation. What happened?"></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">20.</span> Pacing between fights:</div>
+      <div class="cb-group"><label><input type="radio" name="pace"> Too fast — need more time to think</label><label><input type="radio" name="pace"> Perfect pace</label><label><input type="radio" name="pace"> Too slow — skip to the action</label></div></div>
+  </div>
 
-    <!-- DIFFICULTY -->
-    <div class="section">
-      <div class="section-title">💀 Difficulty & Pacing</div>
-      <div class="section-desc">The fine line between challenge and frustration.</div>
-      <div class="field">
-        <label>Overall difficulty (1 = too easy, 3 = perfect, 5 = unfairly hard)</label>
-        <div class="stars" data-name="rating_difficulty">
-          <div class="star" data-val="1">1</div>
-          <div class="star" data-val="2">2</div>
-          <div class="star" data-val="3">3</div>
-          <div class="star" data-val="4">4</div>
-          <div class="star" data-val="5">5</div>
-        </div>
-      </div>
-      <div class="field">
-        <label>Where did you first feel the difficulty spike?</label>
-        <textarea name="difficulty_spike" placeholder="Which fight or circle made you say 'oh no'?"></textarea>
-      </div>
-      <div class="field">
-        <label>Did any death feel unfair (like you had no way to win)?</label>
-        <textarea name="unfair_deaths" placeholder="Describe the situation. What happened?"></textarea>
-      </div>
-      <div class="field">
-        <label>Pacing between fights — too fast, too slow, or just right?</label>
-        <select name="pacing">
-          <option value="">Select...</option>
-          <option>Too fast — I need more time to think</option>
-          <option>Slightly fast</option>
-          <option>Perfect pace</option>
-          <option>Slightly slow</option>
-          <option>Too slow — skip animations, get to the action</option>
-        </select>
-      </div>
-    </div>
+  <!-- SECTION 5 -->
+  <div class="section">
+    <div class="section-title">🎨 Visuals, Music & UI</div>
+    <div class="q"><div class="qlabel"><span class="qnum">21.</span> Rate the VISUAL STYLE:</div>
+      <div class="rating"><label><input type="radio" name="r_vis" value="1">1</label><label><input type="radio" name="r_vis" value="2">2</label><label><input type="radio" name="r_vis" value="3">3</label><label><input type="radio" name="r_vis" value="4">4</label><label><input type="radio" name="r_vis" value="5">5</label><label><input type="radio" name="r_vis" value="6">6</label><label><input type="radio" name="r_vis" value="7">7</label><label><input type="radio" name="r_vis" value="8">8</label><label><input type="radio" name="r_vis" value="9">9</label><label><input type="radio" name="r_vis" value="10">10</label></div>
+      <div class="rating-labels"><span>Ugly</span><span>Gorgeous</span></div></div>
+    <div class="q"><div class="qlabel"><span class="qnum">22.</span> Rate the MUSIC and atmosphere:</div>
+      <div class="rating"><label><input type="radio" name="r_mus" value="1">1</label><label><input type="radio" name="r_mus" value="2">2</label><label><input type="radio" name="r_mus" value="3">3</label><label><input type="radio" name="r_mus" value="4">4</label><label><input type="radio" name="r_mus" value="5">5</label><label><input type="radio" name="r_mus" value="6">6</label><label><input type="radio" name="r_mus" value="7">7</label><label><input type="radio" name="r_mus" value="8">8</label><label><input type="radio" name="r_mus" value="9">9</label><label><input type="radio" name="r_mus" value="10">10</label></div>
+      <div class="rating-labels"><span>Muted it</span><span>Turned it up</span></div></div>
+    <div class="q"><div class="qlabel"><span class="qnum">23.</span> Was anything hard to read, click, or visually confusing?</div><textarea placeholder="Small text, overlapping elements, unclear buttons, hard to find features..."></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">24.</span> Did the death screen make you want to play again?</div>
+      <div class="cb-group"><label><input type="checkbox"> Yes — hit Play Again immediately</label><label><input type="checkbox"> The near-miss messages hooked me</label><label><input type="checkbox"> The unlock bar motivated me</label><label><input type="checkbox"> The score made me competitive</label><label><input type="checkbox"> No — I closed the tab</label></div></div>
+  </div>
 
-    <!-- UI/UX -->
-    <div class="section">
-      <div class="section-title">🎨 UI, Visuals & Audio</div>
-      <div class="section-desc">How the game looks, sounds, and feels to interact with.</div>
-      <div class="field">
-        <label>Visual quality & style (1 = ugly, 5 = gorgeous)</label>
-        <div class="stars" data-name="rating_visuals">
-          <div class="star" data-val="1">1</div>
-          <div class="star" data-val="2">2</div>
-          <div class="star" data-val="3">3</div>
-          <div class="star" data-val="4">4</div>
-          <div class="star" data-val="5">5</div>
-        </div>
-      </div>
-      <div class="field">
-        <label>Music & atmosphere (1 = mute it, 5 = turned it up)</label>
-        <div class="stars" data-name="rating_music">
-          <div class="star" data-val="1">1</div>
-          <div class="star" data-val="2">2</div>
-          <div class="star" data-val="3">3</div>
-          <div class="star" data-val="4">4</div>
-          <div class="star" data-val="5">5</div>
-        </div>
-      </div>
-      <div class="field">
-        <label>Was anything hard to read, hard to click, or visually confusing?</label>
-        <textarea name="ui_issues" placeholder="Small text, overlapping elements, unclear buttons, etc."></textarea>
-      </div>
-      <div class="field">
-        <label>Did the death screen make you want to play again?</label>
-        <select name="death_screen_feel">
-          <option value="">Select...</option>
-          <option>Yes — I immediately hit Play Again</option>
-          <option>Somewhat — I paused but came back</option>
-          <option>No — I closed the tab</option>
-          <option>The near-miss messages hooked me</option>
-          <option>The unlock progress bar motivated me</option>
-        </select>
-      </div>
-    </div>
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-title">🔁 Addiction & Retention</div>
+    <div class="q"><div class="qlabel"><span class="qnum">25.</span> After your first session, did you come back to play again later?</div><textarea placeholder="If yes, what pulled you back? If no, what stopped you?"></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">26.</span> Did you care about the unlock progress bar on the death screen?</div>
+      <div class="cb-group"><label><input type="radio" name="unlock_bar"> Yes, it motivated me</label><label><input type="radio" name="unlock_bar"> Noticed but ignored</label><label><input type="radio" name="unlock_bar"> Did not notice</label></div></div>
+    <div class="q"><div class="qlabel"><span class="qnum">27.</span> Did the achievements feel rewarding?</div>
+      <div class="cb-group"><label><input type="radio" name="achieve"> Yes, chased them</label><label><input type="radio" name="achieve"> Nice but not important</label><label><input type="radio" name="achieve"> Did not notice them</label><label><input type="radio" name="achieve"> Pointless</label></div></div>
+    <div class="q"><div class="qlabel"><span class="qnum">28.</span> Did you notice or care about the daily streak?</div>
+      <div class="cb-group"><label><input type="radio" name="streak"> Yes, came back for it</label><label><input type="radio" name="streak"> Noticed but did not care</label><label><input type="radio" name="streak"> Did not notice</label></div></div>
+    <div class="q"><div class="qlabel"><span class="qnum">29.</span> How many times did you hit Play Again in your longest session?</div><input type="text" placeholder="e.g. 3, 10, lost count..."><div class="hint" style="margin-top:6px">What kept you going?</div><textarea placeholder="The near-miss? The score? The music? Pure stubbornness?"></textarea></div>
+  </div>
 
-    <!-- BUGS -->
-    <div class="section">
-      <div class="section-title">🐛 Bug Reports</div>
-      <div class="section-desc">If something broke, glitched, or behaved unexpectedly. Be as specific as possible.</div>
-      <div class="field">
-        <label>Bug #1 — What happened?</label>
-        <textarea name="bug1" placeholder="Steps to reproduce: I did X, then Y happened. Expected Z instead."></textarea>
-      </div>
-      <div class="field">
-        <label>Bug #2 (if applicable)</label>
-        <textarea name="bug2" placeholder="Another bug..."></textarea>
-      </div>
-      <div class="field">
-        <label>Bug #3 (if applicable)</label>
-        <textarea name="bug3" placeholder="Another bug..."></textarea>
-      </div>
-    </div>
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-title">🐛 Bugs & Issues</div>
+    <div class="q"><div class="qlabel"><span class="qnum">30.</span> Bug #1 — What happened?</div><div class="hint">What were you doing? What did you expect? What happened instead?</div><textarea placeholder="Steps to reproduce if possible..."></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">31.</span> Bug #2 (if applicable):</div><textarea placeholder="Another bug..."></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">32.</span> Bug #3 (if applicable):</div><textarea placeholder="Another bug..."></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">33.</span> Did the game ever freeze, crash, or become unresponsive?</div><textarea placeholder="What were you doing when it happened?"></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">34.</span> Did any text appear broken, missing, or display weird characters?</div><textarea placeholder="Where did you see it?"></textarea></div>
+  </div>
 
-    <!-- IDEAS -->
-    <div class="section">
-      <div class="section-title">💡 Ideas & Feature Requests</div>
-      <div class="section-desc">What would make this game better? Dream big. Nothing is off limits.</div>
-      <div class="field">
-        <label>What feature or content do you most want to see added?</label>
-        <textarea name="feature_request" placeholder="New cards, new mechanics, new modes, quality-of-life improvements..."></textarea>
-      </div>
-      <div class="field">
-        <label>What would make you recommend this game to a friend?</label>
-        <textarea name="recommend_reason" placeholder="What is missing that would push it over the edge?"></textarea>
-      </div>
-      <div class="field">
-        <label>Games this reminds you of (helps us understand your frame of reference)</label>
-        <input type="text" name="similar_games" placeholder="e.g. Slay the Spire, Balatro, Inscryption, etc.">
-      </div>
-    </div>
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-title">💡 Ideas & Suggestions</div>
+    <div class="q"><div class="qlabel"><span class="qnum">35.</span> What is the ONE thing you would ADD to this game?</div><textarea placeholder="New cards, mechanics, modes, quality-of-life..."></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">36.</span> What is the ONE thing you would REMOVE or change?</div><textarea placeholder="What annoyed you or felt wrong?"></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">37.</span> If you could design one new card, what would it do?</div><div class="hint">Give it a name and describe its effect:</div><textarea placeholder="e.g. 'Encore of the Damned' — all members attack twice but take 3 damage each"></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">38.</span> What games does Vestibule remind you of?</div><input type="text" placeholder="e.g. Slay the Spire, Balatro, Inscryption..."></div>
+    <div class="q"><div class="qlabel"><span class="qnum">39.</span> What would make you recommend this game to a friend?</div><textarea placeholder="What is missing that would push it over the edge?"></textarea></div>
+  </div>
 
-    <!-- FINAL -->
-    <div class="section">
-      <div class="section-title">⛧ Final Thoughts</div>
-      <div class="section-desc">Anything else. Stream of consciousness welcome.</div>
-      <div class="field">
-        <label>Would you pay $6.66 for this game on Steam?</label>
-        <select name="would_pay">
-          <option value="">Select...</option>
-          <option>Yes, absolutely</option>
-          <option>Yes, but only after more polish</option>
-          <option>Maybe — need more content</option>
-          <option>No — here is why (explain below)</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Anything else you want us to know?</label>
-        <textarea name="final_thoughts" placeholder="Rants, raves, hot takes, emotional reactions — all welcome."></textarea>
-      </div>
-    </div>
+  <!-- SECTION 9 -->
+  <div class="section">
+    <div class="section-title">⛧ The Big Questions</div>
+    <div class="q"><div class="qlabel"><span class="qnum">40.</span> Would you pay $6.66 for this game on Steam?</div>
+      <div class="cb-group"><label><input type="radio" name="pay"> Yes, absolutely</label><label><input type="radio" name="pay"> Yes, but needs more polish</label><label><input type="radio" name="pay"> Maybe — needs more content</label><label><input type="radio" name="pay"> No</label></div>
+      <textarea placeholder="If no, explain why:" style="margin-top:8px"></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">41.</span> Would you play this on your phone during a commute?</div>
+      <div class="cb-group"><label><input type="radio" name="mobile"> Yes</label><label><input type="radio" name="mobile"> No</label><label><input type="radio" name="mobile"> Maybe</label></div></div>
+    <div class="q"><div class="qlabel"><span class="qnum">42.</span> If you could change ONE thing about the entire game, what?</div><textarea placeholder="The one thing that would make the biggest difference..."></textarea></div>
+    <div class="q"><div class="qlabel"><span class="qnum">43.</span> How likely are you to recommend this to a friend?</div>
+      <div class="rating"><label><input type="radio" name="r_rec" value="1">1</label><label><input type="radio" name="r_rec" value="2">2</label><label><input type="radio" name="r_rec" value="3">3</label><label><input type="radio" name="r_rec" value="4">4</label><label><input type="radio" name="r_rec" value="5">5</label><label><input type="radio" name="r_rec" value="6">6</label><label><input type="radio" name="r_rec" value="7">7</label><label><input type="radio" name="r_rec" value="8">8</label><label><input type="radio" name="r_rec" value="9">9</label><label><input type="radio" name="r_rec" value="10">10</label></div>
+      <div class="rating-labels"><span>Never</span><span>Already did</span></div></div>
+    <div class="q"><div class="qlabel"><span class="qnum">44.</span> Anything else? Rants, raves, hot takes, stream of consciousness:</div><textarea placeholder="Whatever is on your mind. Nothing is off limits." style="min-height:120px"></textarea></div>
+  </div>
 
-    <div class="divider"></div>
-    <button type="submit" class="submit-btn" id="submitBtn">⛧ Submit Feedback ⛧</button>
-    <div class="anon-note">Your feedback is submitted directly to the development repo. Thank you for helping shape Vestibule.</div>
-  </form>
+  <button class="print-btn" onclick="sendFeedback()">⛧ Send Feedback to VomitWizard ⛧</button>
+  <button class="print-btn" onclick="window.print()" style="background:rgba(60,40,5,0.3);border-color:#c87820;color:#e8a820;font-size:16px;letter-spacing:4px;margin-top:10px">Print / Save as PDF</button>
+  <div class="footer">
+    <p>Thank you for your time. Every response directly shapes the final game.</p>
+    <p style="margin-top:12px"><a href="https://royceprinting.com/vestibule/" style="color:#cc1111;text-decoration:none;font-family:'Cinzel',serif;font-size:16px;letter-spacing:4px">⛧ Return to Vestibule ⛧</a></p>
+    <p style="margin-top:4px;font-size:11px;color:#665533">⛧ VESTIBULE — A roguelite descent through the 9 Circles of Hell</p>
+  </div>
 </div>
-
-<div class="toast" id="toast"></div>
-
 <script>
-// Star rating interactions
-document.querySelectorAll('.stars').forEach(group=>{
-  const stars=group.querySelectorAll('.star')
-  let val=0
-  stars.forEach(star=>{
-    star.addEventListener('click',()=>{
-      val=parseInt(star.dataset.val)
-      stars.forEach(s=>{s.classList.toggle('active',parseInt(s.dataset.val)<=val)})
-    })
-  })
-})
-
-// Form submission
-document.getElementById('feedbackForm').addEventListener('submit',async(e)=>{
-  e.preventDefault()
-  const btn=document.getElementById('submitBtn')
-  btn.disabled=true
-  btn.textContent='Submitting...'
-
-  const form=e.target
-  const data={}
-
-  // Text/select fields
-  form.querySelectorAll('input[type="text"],input[type="email"],textarea,select').forEach(el=>{
-    if(el.name&&el.value)data[el.name]=el.value
-  })
-
-  // Checkboxes
-  const checked=[]
-  form.querySelectorAll('input[type="checkbox"]:checked').forEach(el=>checked.push(el.value))
-  if(checked.length)data.enjoyed_mechanics=checked.join(', ')
-
-  // Star ratings
-  form.querySelectorAll('.stars').forEach(group=>{
-    const name=group.dataset.name
-    const active=group.querySelectorAll('.star.active')
-    if(active.length)data[name]=active.length
-  })
-
-  // Build markdown body
-  const sections=[
-    ['Tester',`**Name:** ${data.tester_name||'Anonymous'}\n**Email:** ${data.tester_email||'N/A'}\n**Platform:** ${data.platform||'N/A'}\n**Runs Completed:** ${data.runs_completed||'N/A'}`],
-    ['Ratings',`**Enjoyment:** ${data.rating_enjoyment||'-'}/5\n**One More Run:** ${data.rating_onemore||'-'}/5\n**Intuitive:** ${data.rating_intuitive||'-'}/5\n**Difficulty:** ${data.rating_difficulty||'-'}/5\n**Visuals:** ${data.rating_visuals||'-'}/5\n**Music:** ${data.rating_music||'-'}/5`],
-    ['First Impression',`**Three Words:** ${data.three_words||'-'}\n**First Death Thought:** ${data.first_death_thought||'-'}`],
-    ['Gameplay',`**Enjoyed Mechanics:** ${data.enjoyed_mechanics||'-'}\n**Weak Mechanics:** ${data.weak_mechanics||'-'}\n**Card Balance:** ${data.card_balance||'-'}\n**Farthest Circle:** ${data.farthest_circle||'-'}`],
-    ['Difficulty',`**Difficulty Spike:** ${data.difficulty_spike||'-'}\n**Unfair Deaths:** ${data.unfair_deaths||'-'}\n**Pacing:** ${data.pacing||'-'}`],
-    ['UI/Audio',`**UI Issues:** ${data.ui_issues||'-'}\n**Death Screen Feel:** ${data.death_screen_feel||'-'}`],
-    ['Bugs',[data.bug1,data.bug2,data.bug3].filter(Boolean).map((b,i)=>`**Bug ${i+1}:** ${b}`).join('\n')||'No bugs reported'],
-    ['Ideas',`**Feature Request:** ${data.feature_request||'-'}\n**Recommend Reason:** ${data.recommend_reason||'-'}\n**Similar Games:** ${data.similar_games||'-'}`],
-    ['Final',`**Would Pay $6.66:** ${data.would_pay||'-'}\n**Final Thoughts:** ${data.final_thoughts||'-'}`],
-  ]
-  const body=sections.map(([title,content])=>`## ${title}\n${content}`).join('\n\n---\n\n')
-  const title=`Playtest Feedback — ${data.tester_name||'Anonymous'} — ${new Date().toISOString().slice(0,10)}`
-
-  try{
-    const res=await fetch('/vestibule/feedback/submit.php',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({title,body})
-    })
-    const result=await res.json()
-    if(result.ok){
-      showToast('⛧ Feedback submitted! Thank you for helping shape Vestibule.','success')
-      form.reset()
-      document.querySelectorAll('.star').forEach(s=>s.classList.remove('active'))
-    }else{
-      showToast('Error: '+result.error,'error')
+function sendFeedback(){
+  const data=[];
+  // Text inputs + textareas
+  document.querySelectorAll('input[type=text],input[type=email],textarea').forEach(el=>{
+    if(el.value.trim()){
+      const q=el.closest('.q');
+      const label=q?q.querySelector('.qlabel')?.textContent.trim():'';
+      data.push(label+'%0D%0A'+encodeURIComponent(el.value.trim())+'%0D%0A');
     }
-  }catch(err){
-    showToast('Network error. Please try again.','error')
+  });
+  // Radio buttons
+  document.querySelectorAll('input[type=radio]:checked').forEach(el=>{
+    const label=el.closest('label')?.textContent.trim()||el.value;
+    const q=el.closest('.q');
+    const qlabel=q?q.querySelector('.qlabel')?.textContent.trim():'';
+    data.push(qlabel+'%0D%0A'+encodeURIComponent(label)+'%0D%0A');
+  });
+  // Checkboxes
+  const cbGroups={};
+  document.querySelectorAll('input[type=checkbox]:checked').forEach(el=>{
+    const q=el.closest('.q');
+    const qlabel=q?q.querySelector('.qlabel')?.textContent.trim():'';
+    if(!cbGroups[qlabel])cbGroups[qlabel]=[];
+    cbGroups[qlabel].push(el.closest('label')?.textContent.trim()||'');
+  });
+  for(const[q,vals] of Object.entries(cbGroups)){
+    data.push(q+'%0D%0A'+encodeURIComponent(vals.join(', '))+'%0D%0A');
   }
-  btn.disabled=false
-  btn.textContent='⛧ Submit Feedback ⛧'
-})
-
-function showToast(msg,type){
-  const t=document.getElementById('toast')
-  t.textContent=msg
-  t.className='toast '+type
-  setTimeout(()=>{t.className='toast'},5000)
+  const body=data.join('%0D%0A──────────────────────────%0D%0A');
+  const subject=encodeURIComponent('⛧ Vestibule Playtest Feedback — '+(document.querySelector('input[type=text]')?.value||'Anonymous'));
+  window.location.href='mailto:vomitwizard@gmail.com?subject='+subject+'&body='+body;
 }
 </script>
 </body>
