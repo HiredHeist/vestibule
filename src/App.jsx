@@ -2276,6 +2276,22 @@ export default function App(){
     const fadeIn=setInterval(()=>{if(next.volume<targetVol-0.02){next.volume=Math.min(targetVol,next.volume+0.05)}else{next.volume=targetVol;clearInterval(fadeIn)}},50)
     currentTrackRef.current=trackName
   },[gameState])
+  // First interaction: retry music (browser autoplay policy blocks before click)
+  useEffect(()=>{
+    const unlock=()=>{
+      const trackName=currentTrackRef.current
+      if(trackName&&audioRef.current[trackName]&&audioRef.current[trackName].paused){
+        const vol=parseFloat(localStorage.getItem('vst_music_vol')||'0.3')
+        audioRef.current[trackName].volume=vol
+        audioRef.current[trackName].play().catch(()=>{})
+      }
+      document.removeEventListener('click',unlock)
+      document.removeEventListener('keydown',unlock)
+    }
+    document.addEventListener('click',unlock)
+    document.addEventListener('keydown',unlock)
+    return()=>{document.removeEventListener('click',unlock);document.removeEventListener('keydown',unlock)}
+  },[])
   // Volume change handler
   const setMusicVolume=useCallback((v)=>{
     const fv=parseFloat(v)
