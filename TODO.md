@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 11:20 AM (JST)*
+*Last updated: Sunday, March 22, 2026 at 11:24 AM (JST)*
 
 ---
 
@@ -33,6 +33,12 @@ This is happening.
 - ~~**#14 Foil member card played from hand with no effect** — FIXED: members never go to deck now, always route to recruit flow~~
 
 ---
+
+### ✅ Batch 2 — Pushed
+- ~~**Hand over-cap uncapped** — Groupie draws above HAND_SIZE, between-strike refill fills back to max(6, current hand size)~~
+- ~~**Soundboard actually draws** — pendingDraw state fires at start of next strike, draw is uncapped~~
+- ~~**Setlist reworked** — draws 2 cards immediately (uncapped), then forces player to discard 1 before continuing~~
+- ~~**Hover overlap reduced** — card fan margins tightened so hover misfires are less frequent~~
 
 ### ✅ Batch 1 — Pushed 26c51f9
 - ~~**Circle artifact/passive SOLD persists** — circleCartBought/circleCpasBought moved to App state, reset only on circle rotation~~
