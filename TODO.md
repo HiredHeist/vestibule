@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Monday, March 23, 2026 at 06:30 AM (JST) — Session 13*
+*Last updated: Monday, March 23, 2026 at 07:00 AM (JST) — Session 13*
 
 ---
 
@@ -115,6 +115,7 @@ This is happening.
 - [x] The Dealer (shrooms 6🌿 + acid 12🌿, 50% stock)
 - [x] Card balance: Seance, Herb Money, Wake Up Call, Roadie, Signal Decay, Groupie
 - [x] All card buffs confirmed via sim
+- [x] Sim v11.1 synced (Wake Up 1 ember, Herb Money 1 ember, Mosh Pit, Blood Ritual)
 
 ---
 
