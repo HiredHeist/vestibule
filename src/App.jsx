@@ -98,7 +98,7 @@ const ALL_CARDS=[
   {id:'wakeup',name:'Wake Up Call',type:'UTILITY',rarity:'Uncommon',emoji:'☕',embers:2,effect:'Heal all members 2 HP. If any member is Too Stoned, revive them (they lose 50% permanent ATK buffs).',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'feedbackloop',name:'Feedback Loop',type:'CORRUPT',rarity:'Uncommon',emoji:'🎛',embers:3,effect:'Deal damage equal to Corruption ÷ 2.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'tappedout',name:'Tapped Out',type:'EMBER',rarity:'Uncommon',emoji:'🪙',embers:0,effect:'Gain 5 Embers at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
-  {id:'controlfeedback',name:'Controlled Feedback',type:'CORRUPT',rarity:'Uncommon',emoji:'🎚',embers:2,effect:'Set Corruption to exactly 50%.',color:'#aa1111',typeColor:'#880000',copies:1},
+  {id:'controlfeedback',name:'Controlled Feedback',type:'CORRUPT',rarity:'Uncommon',emoji:'🎚',embers:2,effect:'Set Corruption to 50%. Heal target member for half their max HP.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:1,effect:'Select up to 3 cards first, then play this to discard them and draw that many +1. (No selection = draw 1 card.)',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:3,effect:'Deal 5/8/12 damage (scales by fight). Boss passive skips.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:4,effect:'Damage = target HP to boss. Once per round.',color:'#9933cc',typeColor:'#7722aa',copies:1},
@@ -231,9 +231,16 @@ function genShopCards(circleNum){
   // 9% chance to replace one slot with a member appearance
   const memberChance=Math.random()
   let memberSlot=null
-  if(memberChance<0.05)memberSlot={isMember:true,name:'Band Member',emoji:'🎸',cost:5,rarity:'Common',type:'RECRUIT',effect:'A new musician joins your band.',foil:false,mythic:false}
-  else if(memberChance<0.08)memberSlot={isMember:true,name:'Foil Member',emoji:'✨',cost:15,rarity:'Uncommon',type:'RECRUIT',effect:'A rare foil musician joins your band.',foil:true,mythic:false}
-  else if(memberChance<0.09)memberSlot={isMember:true,name:'Mythic Member',emoji:'⛧',cost:30,rarity:'Rare',type:'RECRUIT',effect:'A mythic musician joins your band.',foil:false,mythic:true}
+  if(memberChance<0.05){
+    const _sm=ALL_MUSICIANS.filter(m=>!m.locked)[Math.floor(Math.random()*ALL_MUSICIANS.filter(m=>!m.locked).length)]
+    memberSlot={..._sm,isMember:true,cost:5,rarity:'Common',type:'RECRUIT',effect:_sm.keyword+' · '+_sm.role,foil:false,mythic:false,demonic:false,uid:Math.random().toString(36).slice(2)}
+  } else if(memberChance<0.08){
+    const _sm=ALL_MUSICIANS.filter(m=>!m.locked)[Math.floor(Math.random()*ALL_MUSICIANS.filter(m=>!m.locked).length)]
+    memberSlot={..._sm,isMember:true,name:'✨ Foil '+_sm.name,cost:15,rarity:'Uncommon',type:'RECRUIT',effect:'FOIL · '+_sm.keyword+' · '+_sm.role,foil:true,mythic:false,demonic:false,uid:Math.random().toString(36).slice(2)}
+  } else if(memberChance<0.09){
+    const _sm=ALL_MUSICIANS.filter(m=>!m.locked)[Math.floor(Math.random()*ALL_MUSICIANS.filter(m=>!m.locked).length)]
+    memberSlot={..._sm,isMember:true,name:'✦ Mythic '+_sm.name,cost:30,rarity:'Rare',type:'RECRUIT',effect:'MYTHIC · '+_sm.keyword+' · '+_sm.role,foil:false,mythic:true,demonic:false,uid:Math.random().toString(36).slice(2)}
+  }
 
   // Filter cards by circle depth
   const pool=[...ALL_CARDS].filter(c=>{
@@ -1971,7 +1978,18 @@ export default function App(){
       // Handled in handleDropOnStage to avoid double state update (same fix as burnset)
       return false
     }
-    else if(card.id==='controlfeedback'){setCorruption(50);msg='🎚 Corruption set to 50%.'}
+    else if(card.id==='controlfeedback'){
+      setCorruption(50)
+      const cfTarget=ns[slotIdx]
+      if(cfTarget&&!cfTarget.tooStoned){
+        const healAmt=Math.floor(cfTarget.maxHp/2)
+        ns[slotIdx]=Object.assign({},cfTarget,{hp:Math.min(cfTarget.maxHp,cfTarget.hp+healAmt)})
+        msg='🎚 Controlled Feedback! Corruption → 50%. '+cfTarget.name+' healed '+healAmt+' HP.'
+        addFloat('+'+healAmt+'❤',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#44dd44')
+      } else {
+        msg='🎚 Corruption set to 50%.'
+      }
+    }
     else if(card.id==='feedbackloop'){const dmg=Math.floor(corruption/2);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'}
     else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?4:0;const swDmg=(fightIndex===0?5:fightIndex===1?8:12)+p5Bonus;const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(triggerVictory,500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
     else if(card.id==='groupie'){
@@ -2816,11 +2834,10 @@ export default function App(){
     } else if(type==='recruit'){
       let candidates
       if(item._memberOverride){
-        // Center shop member card — one specific member, already tiered
+        // Center shop member card — specific named member, already tiered
         const m=item._memberOverride
-        const real=ALL_MUSICIANS.filter(mu=>!mu.locked)
-        // Pick a random member to be this tiered card's identity
-        const base=real[Math.floor(Math.random()*real.length)]
+        // Use the member's actual identity (id, atk, hp, keyword etc)
+        const base=ALL_MUSICIANS.find(mu=>mu.id===m.id)||m
         candidates=[{...base,foil:m.foil||false,mythic:m.mythic||false,demonic:m.demonic||false,uid:Math.random().toString(36).slice(2)}]
       } else {
         const count=item.members||2
