@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 02:13 PM (JST)*
+*Last updated: Sunday, March 22, 2026 at 02:36 PM (JST)*
 
 ---
 
@@ -30,6 +30,14 @@ We need all three.
 - ~~**Revival restores bond** if mentor is revived mid-fight~~
 - ~~**Hoarder HP 480→300**~~
 - ~~**PostCSS @import ordering fix** in App.css~~
+
+### ✅ Pack + Recruit fixes
+- ~~**Member card in center shop now triggers recruit screen** — was wrongly going to deck via buyCard~~
+- ~~**Buying member card no longer marks artifact as sold** — onMarkSold now uses uid only~~
+- ~~**Touring Pack available from C2** (was C3) — enables Mentor Link earlier~~
+- ~~**Demonic Pack available from C4** (was C5) — available before Hoarder wall~~
+- ~~**Touring Pack odds: 25% Foil, 5% Mythic** (was 15% Foil, 0% Mythic)~~
+- ~~**Demonic Pack odds: 5% Demonic** (was 3%)~~
 
 ## 🔴 P1 — UNBLOCK THE GAME (do first, everything else depends on this)
 
