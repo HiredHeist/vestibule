@@ -109,7 +109,7 @@ const ALL_CARDS=[
   {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:4,effect:'All members deal triple ATK this Strike only.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'crowdsurf',name:'Crowd Surf',type:'RIFF',rarity:'Common',emoji:'🏄',embers:2,effect:'Deal damage equal to cards in hand × 2.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'doubledown',name:'Double Down',type:'RIFF',rarity:'Uncommon',emoji:'🎰',embers:3,effect:'The next card played this Strike costs 0 Embers.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'deathriff',name:'Death Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'💀',embers:1,effect:'Deal damage = (100 - Corruption)%, max 60. Corruption +10%.',color:'#aa1111',typeColor:'#880000',copies:2},
+  {id:'deathriff',name:'Death Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'💀',embers:1,effect:'Deal up to 60 damage, reduced by your Corruption%. Best at 0%, weakest at 100%. Corruption +10%.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'ampoverload',name:'Amp Overload',type:'EMBER',rarity:'Uncommon',emoji:'🔋',embers:0,effect:'Gain 3 Embers. Skip your next Discard this fight.',color:'#c87820',typeColor:'#a06010',copies:2},
   {id:'ampstatic',name:'Amp the Static',type:'CORRUPT',rarity:'Uncommon',emoji:'📶',embers:3,effect:'Target member gains ATK = Corruption ÷ 15 this Strike.',color:'#aa1111',typeColor:'#880000',copies:2},
   // ── NEW CARDS ──────────────────────────────────────────────────
@@ -1955,14 +1955,13 @@ export default function App(){
       addFloat('FREE!',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='deathriff'){
-      if(corruption>=100){addLog('💀 Corruption maxed — Death Riff fizzles!');return false}
       const ddmg=Math.min(60,Math.floor(100-corruption))
       const bc=getCenter(bossRef)
       const drHp=Math.max(0,enemyHp-ddmg);setEnemyHp(drHp)
       const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true)
       addFloat(ddmg,bc.x,bc.y-60,'#880000',ddmg>=30);playHit();updStat('totalDamage',ddmg)
       if(drHp<=0)setTimeout(triggerVictory,500)
-      msg='💀 Death Riff! '+ddmg+' damage. Corruption +10%.'
+      msg='💀 Death Riff! '+ddmg+' damage. Corruption +10%.'+(ddmg===0?' (maxed corruption)':'')
     }
     else if(card.id==='ampoverload'){
       setEmbers(p=>Math.min(maxEmbers,p+3));setSkipNextDiscard(true);playEmber()
