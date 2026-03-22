@@ -718,8 +718,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
       return
     }
     onSpend(cardPrice(card),'card',card)
-    setBoughtIds(p=>[...p,card.uid])
-    onMarkSold&&onMarkSold(card.uid) // uid only, not card.id
+    setBoughtIds(p=>[...p,card.uid||card.id])
+    onMarkSold&&onMarkSold(card.uid||card.id)
   }
   function buyLeft(key,cost,type,item){
     if(!can(cost))return
