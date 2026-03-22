@@ -2995,15 +2995,12 @@ export default function App(){
         }
         // Post-fight heal (disabled on higher stakes)
         if(activeStake.healAfterFight){setStage(prev=>prev.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m))}
-        // Circle cleared flash for boss kills
-        if((fightIndex+1)%3===0){
-          const cn=Math.floor(fightIndex/3)+1
-          const circleNames=['','I — Limbo','II — Lust','III — Gluttony','IV — Greed','V — Anger','VI — Heresy','VII — Violence','VIII — Fraud','IX — Treachery']
-          setCircleClearedData({circle:cn,circleName:circleNames[cn]||cn,bossName:enemy.name,bossEmoji:enemy.emoji})
-          setTimeout(()=>{setCircleClearedData(null);setGameState('shop')},2800)
-        } else {
-          setGameState('shop')
-        }
+        // Victory flash before shop (circle cleared extra for bosses)
+        const isBossKill=(fightIndex+1)%3===0
+        const cn=Math.floor(fightIndex/3)+1
+        const circleNames=['','I — Limbo','II — Lust','III — Gluttony','IV — Greed','V — Anger','VI — Heresy','VII — Violence','VIII — Fraud','IX — Treachery']
+        setCircleClearedData({circle:cn,circleName:circleNames[cn]||cn,bossName:enemy.name,bossEmoji:enemy.emoji,isBoss:isBossKill})
+        setTimeout(()=>{setCircleClearedData(null);setGameState('shop')},isBossKill?2800:1800)
       }
     },1000)
   },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake])
@@ -4082,8 +4079,8 @@ export default function App(){
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:'#aa4444',textTransform:'uppercase'}}>Defeated</div>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:'#cc2222',textShadow:'0 0 40px rgba(200,0,0,0.7),3px 3px 0 #000',textAlign:'center',lineHeight:1}}>{circleClearedData.bossName}</div>
           <div style={{width:200,height:2,background:'linear-gradient(90deg,transparent,#cc2222,transparent)',margin:'8px 0'}}/>
-          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#e8a820',textShadow:'0 0 30px rgba(200,150,0,0.6),0 0 60px rgba(150,100,0,0.3),3px 3px 0 #000',animation:'fadeIn 0.8s ease'}}>⛧ Circle {circleClearedData.circleName} Cleared ⛧</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#ff6600',letterSpacing:3,marginTop:8,animation:'fadeIn 1.2s ease'}}>+1 MAX EMBERS</div>
+          {circleClearedData.isBoss&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#e8a820',textShadow:'0 0 30px rgba(200,150,0,0.6),0 0 60px rgba(150,100,0,0.3),3px 3px 0 #000',animation:'fadeIn 0.8s ease'}}>⛧ Circle {circleClearedData.circleName} Cleared ⛧</div>}
+          {circleClearedData.isBoss&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#ff6600',letterSpacing:3,marginTop:8,animation:'fadeIn 1.2s ease'}}>+1 MAX EMBERS</div>}
         </div>
       </div>}
       {remasterOpen&&<RemasterModal cards={remasterCards} onConfirm={(delUids,copyUid)=>{
