@@ -1322,29 +1322,33 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         </div>
 
         {/* RIGHT COLUMN — fixed width, never cut off */}
-        <div style={{width:150,flexShrink:0,display:'flex',flexDirection:'column',gap:20,alignItems:'center',justifyContent:'space-between',paddingTop:10,paddingBottom:10}}>
-          <div style={{width:130,height:130,
-            display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
-            background:'rgba(25,18,4,0.92)',
-            border:'3px solid rgba(200,150,30,0.85)',
-            borderRadius:8,cursor:'pointer',
-            boxShadow:'0 0 16px rgba(180,130,20,0.3),inset 0 0 20px rgba(100,70,0,0.1)',
-            animation:'rerollWiggle 3s ease-in-out infinite'}}
-            onClick={onReroll}
-            onMouseEnter={e=>{e.currentTarget.style.animation='none';e.currentTarget.style.background='rgba(55,40,8,0.95)'}}
-            onMouseLeave={e=>{e.currentTarget.style.animation='rerollWiggle 3s ease-in-out infinite';e.currentTarget.style.background='rgba(25,18,4,0.92)'}}>
-            <span style={{fontSize:22}}>🔄</span>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#c8a030',letterSpacing:1,textTransform:'uppercase'}}>Re-Roll</span>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:'#55ee55'}}>🌿 {rerollCost}</span>
+        <div style={{width:150,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-end'}}>
+          <div style={{flex:1,display:'flex',alignItems:'flex-end',paddingBottom:12}}>
+            <div style={{width:130,height:130,
+              display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
+              background:'rgba(25,18,4,0.92)',
+              border:'3px solid rgba(200,150,30,0.85)',
+              borderRadius:8,cursor:'pointer',
+              boxShadow:'0 0 16px rgba(180,130,20,0.3),inset 0 0 20px rgba(100,70,0,0.1)',
+              animation:'rerollWiggle 3s ease-in-out infinite'}}
+              onClick={onReroll}
+              onMouseEnter={e=>{e.currentTarget.style.animation='none';e.currentTarget.style.background='rgba(55,40,8,0.95)'}}
+              onMouseLeave={e=>{e.currentTarget.style.animation='rerollWiggle 3s ease-in-out infinite';e.currentTarget.style.background='rgba(25,18,4,0.92)'}}>
+              <span style={{fontSize:22}}>🔄</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#c8a030',letterSpacing:1,textTransform:'uppercase'}}>Re-Roll</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:'#55ee55'}}>🌿 {rerollCost}</span>
+            </div>
           </div>
-          <div style={{width:130,height:130,
-            display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
-            background:'rgba(5,15,5,0.92)',
-            border:'2px solid rgba(50,140,50,0.6)',
-            borderRadius:8}}>
-            <span style={{fontSize:22}}>🌿</span>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:30,fontWeight:900,color:stashColor,lineHeight:1}}>{stash}</span>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#2a5a2a',letterSpacing:2,textTransform:'uppercase'}}>Stash</span>
+          <div style={{flexShrink:0,display:'flex',alignItems:'flex-end',paddingBottom:10}}>
+            <div style={{width:130,height:130,
+              display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
+              background:'rgba(5,15,5,0.92)',
+              border:'2px solid rgba(50,140,50,0.6)',
+              borderRadius:8}}>
+              <span style={{fontSize:22}}>🌿</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:30,fontWeight:900,color:stashColor,lineHeight:1}}>{stash}</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#2a5a2a',letterSpacing:2,textTransform:'uppercase'}}>Stash</span>
+            </div>
           </div>
         </div>
 
