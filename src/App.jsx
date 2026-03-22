@@ -2215,6 +2215,7 @@ export default function App(){
   const [log,setLog]=useState(['⛧ The gig begins.'])
   const [damageFlash,setDamageFlash]=useState(false)
   const [animPhase,setAnimPhase]=useState('idle')
+  const [circleClearedData,setCircleClearedData]=useState(null) // {circle, bossName, bossEmoji}
   const [corruption,setCorruption]=useState(0)
   const [stageDiveUsed,setStageDiveUsed]=useState(false)
   const [diceTarget,setDiceTarget]=useState(null)
@@ -2994,7 +2995,15 @@ export default function App(){
         }
         // Post-fight heal (disabled on higher stakes)
         if(activeStake.healAfterFight){setStage(prev=>prev.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m))}
-        setGameState('shop')
+        // Circle cleared flash for boss kills
+        if((fightIndex+1)%3===0){
+          const cn=Math.floor(fightIndex/3)+1
+          const circleNames=['','I — Limbo','II — Lust','III — Gluttony','IV — Greed','V — Anger','VI — Heresy','VII — Violence','VIII — Fraud','IX — Treachery']
+          setCircleClearedData({circle:cn,circleName:circleNames[cn]||cn,bossName:enemy.name,bossEmoji:enemy.emoji})
+          setTimeout(()=>{setCircleClearedData(null);setGameState('shop')},2800)
+        } else {
+          setGameState('shop')
+        }
       }
     },1000)
   },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake])
@@ -3764,7 +3773,7 @@ export default function App(){
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
-    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen')
+    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null)
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
@@ -4057,6 +4066,20 @@ export default function App(){
           {luciferCinematic.phase===2?'Phase 2: Satan, Lord of the Flies':'420,666 → '+luciferCinematic.hp+' HP'}</div>
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'rgba(255,255,255,0.7)',fontStyle:'italic',animation:'fadeIn 0.8s ease'}}>
           {luciferCinematic.phase===2?'Band fully restored. All strikes reset. Finish this.':'8 Circle Bosses defeated. Their echoes weaken the Devil.'}</div>
+      </div>}
+      {/* CIRCLE CLEARED FLASH */}
+      {circleClearedData&&<div style={{position:'fixed',inset:0,zIndex:9750,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:0,background:'rgba(0,0,0,0.94)',animation:'fadeIn 0.3s ease'}}>
+        <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',opacity:0.06}}>
+          <img src="/vestibule_logo.png" alt="" style={{width:'80vmin',height:'80vmin',objectFit:'contain'}}/>
+        </div>
+        <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:12}}>
+          <div style={{fontSize:100,filter:'drop-shadow(0 0 30px rgba(200,0,0,0.6))',animation:'throb 0.6s ease-in-out infinite'}}>{circleClearedData.bossEmoji}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:'#aa4444',textTransform:'uppercase'}}>Defeated</div>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:'#cc2222',textShadow:'0 0 40px rgba(200,0,0,0.7),3px 3px 0 #000',textAlign:'center',lineHeight:1}}>{circleClearedData.bossName}</div>
+          <div style={{width:200,height:2,background:'linear-gradient(90deg,transparent,#cc2222,transparent)',margin:'8px 0'}}/>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#e8a820',textShadow:'0 0 30px rgba(200,150,0,0.6),0 0 60px rgba(150,100,0,0.3),3px 3px 0 #000',animation:'fadeIn 0.8s ease'}}>⛧ Circle {circleClearedData.circleName} Cleared ⛧</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#ff6600',letterSpacing:3,marginTop:8,animation:'fadeIn 1.2s ease'}}>+1 MAX EMBERS</div>
+        </div>
       </div>}
       {remasterOpen&&<RemasterModal cards={remasterCards} onConfirm={(delUids,copyUid)=>{
         setDeck(prev=>{
