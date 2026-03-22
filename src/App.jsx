@@ -90,7 +90,7 @@ const ALL_CARDS=[
   {id:'sigdecay',name:'Signal Decay',type:'CORRUPT',rarity:'Common',emoji:'📡',embers:2,effect:'-30% Corruption. Heal 5 HP.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'battlecry',name:'Battle Cry',type:'RIFF',rarity:'Common',emoji:'🤘',embers:1,effect:'Target member +1 ATK permanently.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'roadie',name:'Roadie',type:'UTILITY',rarity:'Common',emoji:'🛡',embers:1,effect:'Target cannot go Too Stoned this Strike. Heals 2 HP.',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'setlist',name:'Setlist',type:'UTILITY',rarity:'Common',emoji:'📋',embers:1,effect:'View top 4 cards. Rearrange in any order.',color:'#22aa44',typeColor:'#118833',copies:2},
+  {id:'setlist',name:'Setlist',type:'UTILITY',rarity:'Common',emoji:'📋',embers:1,effect:'Draw 2 cards (above hand cap). Then discard 1 card of your choice.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'groupie',name:'Groupie',type:'EMBER',rarity:'Common',emoji:'🍯',embers:2,effect:'Gain 2 Embers. Draw 1 card immediately.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'demotape',name:'Demo Tape',type:'RIFF',rarity:'Common',emoji:'📼',embers:2,effect:'Copy the last Riff played, cast it free.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'newstrings',name:'New Strings',type:'RIFF',rarity:'Uncommon',emoji:'🎸',embers:3,effect:'+2 ATK permanently to target member.',color:'#9933cc',typeColor:'#7722aa',copies:2},
@@ -118,7 +118,7 @@ const ALL_CARDS=[
   {id:'staticcharge',name:'Static Charge',type:'CORRUPT',rarity:'Common',emoji:'⚡',embers:0,effect:'Gain 2 Embers. Gain 4 instead if Corruption is 0%.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'darktuning',name:'Dark Tuning',type:'CORRUPT',rarity:'Uncommon',emoji:'🌑',embers:3,effect:'For each 15% Corruption, one random member gains +1 ATK permanently.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'powertap',name:'Power Tap',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'Gain 2 Embers.',color:'#c87820',typeColor:'#a05a10',copies:2},
-  {id:'soundboard',name:'Soundboard',type:'EMBER',rarity:'Uncommon',emoji:'🎛',embers:1,effect:'Gain 2 Embers. Draw 1 extra card next Strike.',color:'#c87820',typeColor:'#a05a10',copies:1},
+  {id:'soundboard',name:'Soundboard',type:'EMBER',rarity:'Uncommon',emoji:'🎛',embers:1,effect:'Gain 2 Embers. Draw 1 extra card at the start of next Strike (above hand cap).',color:'#c87820',typeColor:'#a05a10',copies:1},
   {id:'setbreak',name:'Setbreak',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Select 1 card first, then play to discard it. Gain 2 Embers. (Random if no selection)',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'heavyriff',name:'Heavy Riff',type:'RIFF',rarity:'Uncommon',emoji:'🥊',embers:2,effect:'Deal damage = stage total ATK ÷ 2, direct to boss.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'resonancecard',name:'Resonance',type:'RIFF',rarity:'Uncommon',emoji:'🌀',embers:1,effect:'Target member ATK becomes equal to highest ATK on stage.',color:'#9933cc',typeColor:'#7722aa',copies:1},
@@ -1294,7 +1294,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
         opacity:isDragging?0.4:1,
         animation:shimmerAnim,
-        margin:total>HAND_SIZE?'0 -32px':'0 -26px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
+        margin:total>HAND_SIZE?'0 -28px':'0 -22px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
       <div style={{height:6,flexShrink:0,borderRadius:'7px 7px 0 0',background:bc,boxShadow:`0 0 14px ${glow}`}}/>
       {isUsed&&<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'rgba(0,0,0,0.85)',border:'2px solid #888',borderRadius:6,padding:'6px 14px',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#888',letterSpacing:4,zIndex:20,pointerEvents:'none'}}>USED</div>}
       {card.embers>0?(
@@ -1629,52 +1629,41 @@ function RemasterModal({cards,onConfirm,onClose}){
   )
 }
 
-function SetlistModal({cards,onConfirm,onClose}){
-  const [order,setOrder]=useState(cards.map((_,i)=>i))
-  const [dragging,setDragging]=useState(null)
-  const move=(from,to)=>{
-    const next=[...order]
-    const [item]=next.splice(from,1)
-    next.splice(to,0,item)
-    setOrder(next)
-  }
-  const ordered=order.map(i=>cards[i])
+function SetlistModal({hand,onConfirm}){
+  // Draw 2 already happened — player must pick 1 card to discard before continuing
+  const [picked,setPicked]=useState(null)
   return(
-    <div style={{position:'fixed',inset:0,zIndex:9700,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:24}}>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#d0b060',fontFamily:"'BreakGothicFont',cursive"}}>Setlist</div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'#a09060',fontStyle:'italic'}}>Drag to reorder the top of your deck</div>
-      <div style={{display:'flex',gap:16,alignItems:'flex-end'}}>
-        {ordered.map((card,i)=>{
+    <div style={{position:'fixed',inset:0,zIndex:9700,background:'rgba(4,2,1,0.95)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,padding:'40px 20px'}}>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#44dd44',textShadow:'0 0 30px rgba(40,200,60,0.5)'}}>Setlist</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#88bb88',fontStyle:'italic'}}>You drew 2 cards. Now discard 1 to continue.</div>
+      <div style={{display:'flex',gap:14,flexWrap:'wrap',justifyContent:'center',maxWidth:1100}}>
+        {hand.map((card)=>{
           const bc=card.type==='CORRUPT'?'#aa1111':card.type==='UTILITY'?'#22aa44':card.type==='EMBER'?'#c87820':'#9933cc'
+          const sel=picked===card.uid
           return(
-            <div key={card.uid} draggable
-              onDragStart={()=>setDragging(i)}
-              onDragOver={e=>{e.preventDefault()}}
-              onDrop={()=>{if(dragging!==null&&dragging!==i){move(dragging,i);setDragging(null)}}}
-              onDragEnd={()=>setDragging(null)}
-              style={{width:160,background:'linear-gradient(180deg,#201408,#100804)',border:'2px solid '+bc,borderRadius:7,overflow:'hidden',cursor:'grab',opacity:dragging===i?0.5:1,transition:'transform 0.15s',transform:dragging===i?'scale(0.95)':'scale(1)'}}>
-              <div style={{height:5,background:bc}}/>
-              <div style={{height:90,display:'flex',alignItems:'center',justifyContent:'center',fontSize:44,background:'rgba(0,0,0,0.35)'}}>{card.emoji}</div>
-              <div style={{padding:'8px 10px 12px'}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:3}}>{card.name}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:bc,textAlign:'center',letterSpacing:2,textTransform:'uppercase',marginBottom:6}}>{card.type}</div>
-                <div style={{fontFamily:"'ScratchFont',serif",fontSize:10,color:'#b09870',textAlign:'center',fontStyle:'italic',lineHeight:1.4}}>{card.effect}</div>
+            <div key={card.uid} onClick={()=>setPicked(sel?null:card.uid)}
+              style={{width:150,background:sel?'linear-gradient(180deg,#2a1a0a,#160e05)':'linear-gradient(180deg,#201408,#100804)',
+                border:sel?'2px solid #cc0000':'2px solid '+bc+'66',borderRadius:7,overflow:'hidden',cursor:'pointer',
+                transform:sel?'translateY(-12px) scale(1.05)':'none',transition:'all 0.15s',
+                boxShadow:sel?'0 0 20px rgba(200,0,0,0.6)':'none'}}>
+              <div style={{height:4,background:sel?'#cc0000':bc}}/>
+              <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:40,background:'rgba(0,0,0,0.3)'}}>{card.emoji}</div>
+              <div style={{padding:'6px 8px 10px'}}>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:700,color:sel?'#ff6666':'#eedfc0',textAlign:'center',marginBottom:3}}>{card.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:bc,textAlign:'center',letterSpacing:2,textTransform:'uppercase'}}>{card.type}</div>
               </div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'rgba(200,160,60,0.5)',textAlign:'center',padding:'4px',background:'rgba(0,0,0,0.4)'}}>#{i+1}</div>
+              {sel&&<div style={{background:'rgba(180,0,0,0.3)',padding:'4px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#ff6666',letterSpacing:2}}>DISCARD</div>}
             </div>
           )
         })}
       </div>
-      <div style={{display:'flex',gap:16}}>
-        <button onClick={()=>onConfirm(ordered)}
-          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(30,130,30,0.3)',border:'2px solid #22aa44',borderRadius:3,color:'#44dd44',cursor:'pointer'}}>
-          ✓ Lock In
-        </button>
-        <button onClick={onClose}
-          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(80,40,10,0.3)',border:'1px solid rgba(100,60,20,0.5)',borderRadius:3,color:'#8a6030',cursor:'pointer'}}>
-          Cancel
-        </button>
-      </div>
+      <button onClick={()=>picked&&onConfirm(picked)} disabled={!picked}
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',
+          padding:'14px 60px',background:picked?'rgba(30,130,30,0.4)':'rgba(20,20,20,0.4)',
+          border:picked?'2px solid #44dd44':'2px solid #333',borderRadius:3,
+          color:picked?'#44dd44':'#444',cursor:picked?'pointer':'not-allowed',transition:'all 0.15s'}}>
+        ✓ Discard &amp; Continue
+      </button>
     </div>
   )
 }
@@ -1714,6 +1703,7 @@ export default function App(){
   const [diceTarget,setDiceTarget]=useState(null)
   const [showDice,setShowDice]=useState(false)
   const [pendingEmbers,setPendingEmbers]=useState(0)
+  const [pendingDraw,setPendingDraw]=useState(0)
   const [lastRiffPlayed,setLastRiffPlayed]=useState(null)
   const [bossDebuff,setBossDebuff]=useState(0)
   const [bossRageAtk,setBossRageAtk]=useState(0)
@@ -1871,13 +1861,13 @@ export default function App(){
       addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
     }
     else if(card.id==='setlist'){
-      // Show top 4 deck cards in a reorder modal
-      const top4=deck.slice(0,4)
-      if(top4.length===0){addLog('📋 Deck is empty!');return false}
-      setSetlistCards(top4)
+      // Draw 2 cards immediately (uncapped), then force discard 1
+      const drawRes=drawUpTo(hand.filter(c=>c.uid!==card.uid),deck,discardPile,hand.filter(c=>c.uid!==card.uid).length+2)
+      setHand(drawRes.h);setDeck(drawRes.d);setDiscardPile(drawRes.disc)
+      setSetlistCards(drawRes.h) // pass updated hand to modal
       setSetlistOpen(true)
       spent=0
-      msg='📋 Setlist opened — rearrange the top of your deck.'
+      msg='📋 Setlist! Drew 2 cards — now pick 1 to discard.'
     }
     else if(card.id==='controlfeedback'){setCorruption(50);msg='🎚 Corruption set to 50%.'}
     else if(card.id==='feedbackloop'){const dmg=Math.floor(corruption/2);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'}
@@ -1885,19 +1875,19 @@ export default function App(){
     else if(card.id==='groupie'){
       const p4Bonus=activePassives.some(p=>p.id==='p4')?1:0
       setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus));playEmber();spent=0
-      // Draw 1 card immediately — hard cap at HAND_SIZE
+      // Draw 1 card immediately — NO cap, bonus draws are playable all fight
       setDeck(function(curDeck){
         const nd=[...curDeck]
         if(nd.length>0){
           const drawn=nd.shift()
-          setHand(function(h){return h.length<HAND_SIZE?[...h,drawn]:h})
+          setHand(function(h){return [...h,drawn]})
           return nd
         }
         setDiscardPile(function(curDisc){
           if(curDisc.length>0){
             const shuffled=[...curDisc].sort(()=>Math.random()-.5)
             const drawn=shuffled[0]
-            setHand(function(h){return h.length<HAND_SIZE?[...h,drawn]:h})
+            setHand(function(h){return [...h,drawn]})
             return shuffled.slice(1)
           }
           return curDisc
@@ -2032,9 +2022,9 @@ export default function App(){
     }
     else if(card.id==='soundboard'){
       setEmbers(p=>Math.min(maxEmbers,p+2));playEmber();spent=0
-      setPendingEmbers(p=>p+1) // draw 1 extra next strike via pending
-      msg='🎛 Soundboard! +2 Embers. +1 draw next Strike.'
-      addFloat('+2 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
+      setPendingDraw(p=>p+1) // draw 1 extra card at start of next strike
+      msg='🎛 Soundboard! +2 Embers. Draw 1 extra card next Strike.'
+      addFloat('+2 🔥 +1 DRAW',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='setbreak'){
       const candidates=hand.filter(c=>c.uid!==card.uid)
@@ -2355,6 +2345,16 @@ export default function App(){
     if(actives.length===0){addLog('⚠ No active members!');return}
 
     if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
+    if(pendingDraw>0){
+      setDeck(function(curDeck){
+        const nd=[...curDeck]
+        const drawn=[]
+        for(let i=0;i<pendingDraw&&nd.length>0;i++){drawn.push(nd.shift())}
+        if(drawn.length>0){setHand(function(h){return [...h,...drawn]});addLog('🎛 Soundboard draw! +'+drawn.length+' card'+(drawn.length>1?'s':'')+'.')}
+        return nd
+      })
+      setPendingDraw(0)
+    }
 
     // DEBUFF keyword: Nott reduces boss damage each Strike
     const debuffCount=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='DEBUFF').length
@@ -2518,7 +2518,8 @@ export default function App(){
           setDiceTarget(null)
           setTimeout(function(){
             let nh=[...handRef.current],nd=[...deckRef.current],ndisc=[...discRef.current];
-            while(nh.length<HAND_SIZE){
+            const refillTarget=Math.max(HAND_SIZE,nh.length);
+            while(nh.length<refillTarget){
               if(nd.length===0){
                 if(ndisc.length===0)break;
                 nd=[...ndisc].sort(()=>Math.random()-.5);
@@ -2559,7 +2560,7 @@ export default function App(){
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(nextEnemy.maxHp)
-    setEmbers(function(){return maxEmbers});setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
+    setEmbers(function(){return maxEmbers});setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
     setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null)
     // Re-roll DOUBLE TIME for next fight
     const nd=stage.some(m=>m&&m.role==='Drummer')
@@ -2788,7 +2789,7 @@ export default function App(){
   const handleReset=()=>{
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
-    setEmbers(5);setMaxEmbers(5);setStash(3);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
+    setEmbers(5);setMaxEmbers(5);setStash(3);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0);setDeathCause('fallen')
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([])
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
@@ -2839,8 +2840,9 @@ export default function App(){
         setRemasterOpen(false)
         addLog('🎙 Remastered: deleted 2, copied 1.')
       }} onClose={()=>setRemasterOpen(false)}/>}
-      {setlistOpen&&<SetlistModal cards={setlistCards} onConfirm={(ordered)=>{
-        setDeck(prev=>[...ordered,...prev.slice(setlistCards.length)])
+      {setlistOpen&&<SetlistModal hand={setlistCards} onConfirm={(discardUid)=>{
+        setHand(prev=>prev.filter(c=>c.uid!==discardUid))
+        setDiscardPile(prev=>[...prev,...setlistCards.filter(c=>c.uid===discardUid)])
         setSetlistOpen(false)
         addLog('📋 Setlist locked in.')
       }} onClose={()=>setSetlistOpen(false)}/>}
