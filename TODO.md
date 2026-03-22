@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 04:04 PM (JST)*
+*Last updated: Sunday, March 22, 2026 at 08:45 PM (JST) — Session 13*
 
 ---
 
@@ -8,11 +8,28 @@
 YouTubers and streamers will push it because it is genuinely unique.
 This is happening.
 
----
+## ✅ Session 13 — In Progress (March 22 evening)
+- [x] **Usurer HP 680→420** — C4 wall solved (98.9% survive now)
+- [x] **Remaster stale closure fix** — moved to handleDropOnStage (same fix as Setlist/Burnset)
+- [x] **Sim v9.0 rebuilt from scratch** — accurate packs (2/3/4 candidates), Touring C2, Demonic C4, correct tier odds, smart shop AI, mentor link optimization, stage rearrangement, pawn shop selling, CF heal targets weakest, Distortion +15%, Remaster Option C, full tracking stats
+- [ ] **C5 Anger wall** — 65.5% of runs die here. Warlord (1520HP) kills 30.9% alone. Needs balance pass.
+- [ ] **Re-sim after C5 fix** — target: ~45-50% C5 survival, 2-4% Lucifer encounters
+- [ ] **War Drums artifact** — +1 Strike permanently, C4+ shop, 30-40🌿 (discussion needed)
+- [ ] **Share score button** — copy formatted string to clipboard
+
+## 🔴 TONIGHT'S PRIORITY LIST (ordered)
+
+1. **C5 Anger balance** — soften rageScale: Berserker +3→+2, Warlord +4→+3 AND HP 1520→1200
+2. **Re-sim 20k** — confirm C5 survival ~45-50%, check C6-C9 flow
+3. **War Drums artifact** — +1 Strike per fight, rare, C4+ shop, 35🌿. Chase item that enables late-game.
+4. **Re-sim with War Drums** — check if 6.66% Lucifer win rate is reachable
+5. **Share score button** — "Vestibule RUN #N — SCORE: X — Fell to Y at CZ — SEED: ABC" → clipboard
+6. **Score display playtest** — verify real death screen renders score (Shift+D uses dummy data)
+7. **Full playthrough stress test** — clean run start to finish, verify no bugs
 
 ---
 
-## 🎯 ADDICTION LAYER — Design Decisions (Session 11, March 22)
+ — Design Decisions (Session 11, March 22)
 
 ### Core Philosophy
 The loop is currently: play → die → play again. That is habit, not addiction.
@@ -58,11 +75,15 @@ We need all three.
 
 ## 🔴 P1 — UNBLOCK THE GAME (do first, everything else depends on this)
 
-- [x] **Hoarder HP 480→300** — sim confirms 67% of all runs end here, 0% get past. Cut to 300.
-- [ ] **Re-sim 5k after Hoarder cut** — find the new wall before touching other balance
-- [x] **Implement Mentor Link** — currently unimplemented stub. Bonded member pairs deal 1.5x→3x damage multiplier when they both attack same strike. Required for late-game damage scaling.
-- [ ] **Re-sim after Mentor Link** — validate C5+ survival rate. Target: ~6.66% Lucifer win rate.
-- [ ] **Lucifer phase system (consider)** — instead of raw 420,666 HP, consider 3 phases of 140,222 HP with different passives each phase. Same total HP, more achievable, more epic. Discussion needed.
+- [x] **Hoarder HP 480→300** — sim confirms fixed
+- [x] **Usurer HP 680→420** — sim confirms 98.9% survive C4 now
+- [x] **Implement Mentor Link** — fully implemented Session 12
+- [x] **Sim v9.0** — accurate pack system, mentor link aware, smart shop AI
+- [ ] **C5 Anger balance** — Warlord kills 30.9%, rageScale too punishing. Cut Berserker +3→+2, Warlord +4→+3, HP 1520→1200.
+- [ ] **Re-sim after C5 fix** — target ~45-50% C5 survival
+- [ ] **War Drums artifact** — +1 Strike permanently, rare C4+ artifact, 35🌿. Enables late-game.
+- [ ] **Lucifer phase system (P2)** — 3 phases × 140,222 HP with different passives. DISCUSS before implementing.
+- [ ] **Target:** ~6.66% Lucifer win rate
 
 ---
 
