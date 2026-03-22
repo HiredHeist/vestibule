@@ -3836,25 +3836,24 @@ export default function App(){
         <div style={{position:'absolute',inset:0,pointerEvents:'none',backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.015) 2px,rgba(255,255,255,0.015) 4px)',zIndex:1}}/>
         {/* Content */}
         <div style={{position:'relative',zIndex:2,display:'flex',flexDirection:'column',alignItems:'center',gap:8}}>
-          {/* Logo */}
-          <img src="/vestibule_logo.png" alt="Vestibule" style={{width:280,height:280,objectFit:'contain',filter:'drop-shadow(0 0 40px rgba(200,0,0,0.4))',marginBottom:-10}}/>
+
           {/* Title */}
-          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:96,color:'#cc1111',textShadow:'0 0 60px rgba(200,0,0,0.8),0 0 120px rgba(150,0,0,0.4),4px 4px 0 #000',letterSpacing:12,lineHeight:1}}>Vestibule</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#8a6a40',fontStyle:'italic',letterSpacing:4,marginBottom:20}}>A roguelite descent through the 9 Circles of Hell</div>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:192,color:'#cc1111',textShadow:'0 0 60px rgba(200,0,0,0.8),0 0 120px rgba(150,0,0,0.4),4px 4px 0 #000',letterSpacing:12,lineHeight:1}}>Vestibule</div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:36,color:'#8a6a40',fontStyle:'italic',letterSpacing:6,marginBottom:24}}>A roguelite descent through the 9 Circles of Hell</div>
 
           {/* Stats row */}
           <div style={{display:'flex',gap:20,marginBottom:16}}>
-            {lt>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#665533',letterSpacing:2}}>LIFETIME: {lt.toLocaleString()}</div>}
-            {(totalRunsPlayed||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#665533',letterSpacing:2}}>RUNS: {totalRunsPlayed}</div>}
-            {streak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#ff6600',letterSpacing:2}}>🔥 {streak} DAY STREAK</div>}
-            {(personalBest||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#aa8030',letterSpacing:2}}>BEST: {personalBest.toLocaleString()}</div>}
+            {lt>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#665533',letterSpacing:2}}>LIFETIME: {lt.toLocaleString()}</div>}
+            {(totalRunsPlayed||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#665533',letterSpacing:2}}>RUNS: {totalRunsPlayed}</div>}
+            {streak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#ff6600',letterSpacing:2}}>🔥 {streak} DAY STREAK</div>}
+            {(personalBest||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#aa8030',letterSpacing:2}}>BEST: {personalBest.toLocaleString()}</div>}
           </div>
 
           {/* PLAY button — HUGE */}
           <button onClick={()=>setGameState('booster')}
-            style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,letterSpacing:8,color:'#ee2222',
+            style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:63,letterSpacing:10,color:'#ee2222',
               background:'rgba(120,0,0,0.25)',border:'3px solid #aa0000',borderRadius:10,
-              padding:'20px 100px',cursor:'pointer',textTransform:'uppercase',
+              padding:'28px 140px',cursor:'pointer',textTransform:'uppercase',
               textShadow:'0 0 30px rgba(220,0,0,0.7)',
               boxShadow:'0 0 50px rgba(180,0,0,0.3)',
               animation:'throb 2s ease-in-out infinite',transition:'all 0.2s',marginBottom:16}}>
@@ -3864,28 +3863,28 @@ export default function App(){
           {/* Menu buttons row */}
           <div style={{display:'flex',gap:12}}>
             <button onClick={()=>setMenuView('unlocks')}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,color:'#e8a820',
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'#e8a820',
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(200,140,30,0.5)',borderRadius:6,
-                padding:'10px 24px',cursor:'pointer',textTransform:'uppercase'}}>
+                padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
               🔓 Unlocks ({earned.length}/{UNLOCK_MILESTONES.length})
             </button>
             <button onClick={()=>setMenuView('rules')}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,color:'#c8a060',
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'#c8a060',
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(160,120,40,0.4)',borderRadius:6,
-                padding:'10px 24px',cursor:'pointer',textTransform:'uppercase'}}>
+                padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
               📜 Rules
             </button>
             <button onClick={()=>setMenuView('options')}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,color:'#8a7a50',
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'#8a7a50',
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(120,100,50,0.3)',borderRadius:6,
-                padding:'10px 24px',cursor:'pointer',textTransform:'uppercase'}}>
+                padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
               ⚙ Options
             </button>
           </div>
 
           {/* Deck selection placeholder */}
           <div style={{marginTop:20,padding:'8px 20px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#665533',letterSpacing:2,textAlign:'center'}}>DECK: Demo Deck (more decks coming soon)</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#665533',letterSpacing:3,textAlign:'center'}}>DECK: Demo Deck (more decks coming soon)</div>
           </div>
         </div>
       </div>
