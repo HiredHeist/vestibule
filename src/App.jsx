@@ -1421,10 +1421,9 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
         <div style={{flex:1}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:8}}>
               <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:58,color:'#120804',lineHeight:1,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 1px 1px 0 rgba(0,0,0,0.5)`:'1px 1px 0 rgba(0,0,0,0.5)'}}>{enemy.name}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:31,fontWeight:900,color:isLow?'#ff2222':'#cc2200',textAlign:'right',lineHeight:1,flexShrink:0,marginLeft:12,textShadow:isLow?'0 0 20px rgba(255,0,0,0.9),0 0 40px rgba(200,0,0,0.6)':'0 0 12px rgba(180,30,0,0.6)',animation:isLow?'pulse 1.2s ease infinite alternate':'none'}}>{Math.max(0,currentHp)}<span style={{fontSize:18,color:isLow?'#ff6644':'#6a3010',fontWeight:700}}> / {enemy.maxHp}</span></div>
             </div>
           <div style={{fontFamily:"'ScratchFont',serif",fontSize:37,color:'#1a1008',fontStyle:'italic',opacity:1,lineHeight:1.4,fontWeight:700}}>{enemy.passive}</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#1a1008',marginTop:6,letterSpacing:1,fontWeight:700}}>Base damage: {enemy.baseDmg} ± 2 per Strike</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#1a1008',marginTop:6,letterSpacing:1,fontWeight:700}}>Base damage: {enemy.baseDmg} per Strike</div>
         </div>
       </div>
       <div style={{width:'70%',margin:'0 auto'}}>
@@ -3198,11 +3197,11 @@ export default function App(){
             const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1
             const fin=Math.round(dmg*bon)
             return <>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:34,color:'#c8a060',fontWeight:700,textShadow:'0 0 10px rgba(200,160,60,0.6)'}}>combined attack</span>
-              <span key={fin} style={{fontFamily:"'MBScribblesFont',serif",fontSize:34,fontWeight:900,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block'}}>{fin}</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,color:'#c8a060',fontWeight:700,textShadow:'0 0 10px rgba(200,160,60,0.6)'}}>Combined Attack</span>
+              <span key={fin} style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block'}}>{fin}</span>
               {bon>1&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#e8a820',letterSpacing:1}}>+{Math.round((bon-1)*100)}% SYNERGY</span>}
-              <span style={{color:'#6a3010',opacity:.5,fontSize:14}}>⟶</span>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#c8a060',fontWeight:700}}>{enemy.name}</span>
+              <span style={{color:'#e8a820',fontSize:18,textShadow:'0 0 8px rgba(200,160,60,0.5)'}}>⟶</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,color:'#c8a060',fontWeight:700}}>{enemy.name}</span>
             </>
           })()}
         </div>
