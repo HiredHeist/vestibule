@@ -139,7 +139,7 @@ function buildDeck(seed){
   const rng=seededRng(seed)
   const deck=[]
   ALL_CARDS.forEach(function(c){
-    const n=c.copies||3
+    const n=c.copies||2
     for(let i=0;i<n;i++){deck.push(Object.assign({},c,{uid:Math.random().toString(36).slice(2)}))}
   })
   for(let i=deck.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
@@ -1940,16 +1940,9 @@ export default function App(){
       addFloat('📼 '+lr.name,getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
     }
     else if(card.id==='burnset'){
-      // Discard up to 3 selected cards (not including Burn the Set itself), draw that many + 1
-      const toDiscard=selected.filter(uid=>uid!==card.uid).slice(0,3)
-      const discardCount=toDiscard.length
-      const drawCount=discardCount+1
-      const remainingHand=hand.filter(c=>c.uid!==card.uid&&!toDiscard.includes(c.uid))
-      const discarded=hand.filter(c=>toDiscard.includes(c.uid))
-      const res=drawUpTo(remainingHand,deck,[...discardPile,...discarded],Math.min(remainingHand.length+drawCount,HAND_SIZE))
-      setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
-      setSelected([])
-      msg='🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+(Math.min(drawCount,res.h.length-remainingHand.length)>0?drawCount:1)+'.'+(discardCount===0?' (Tip: select cards before playing to discard them)':'')
+      // Handled entirely in handleDropOnStage to avoid double state updates
+      // applyCard returns false here so handleDropOnStage runs the burnset logic directly
+      return false
     }
     else if(card.id==='overdrive'){if(corruption>=60){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{addLog('⚠ Need >=60% Corruption.');return false}}
     else if(card.id==='crowdsurf'){
@@ -2179,6 +2172,28 @@ export default function App(){
     if(!dragCardUid||animPhase!=='idle')return
     const card=hand.find(c=>c.uid===dragCardUid)
     if(!card)return
+
+    // ── BURN THE SET: handle entirely here to avoid double state updates ──
+    if(card.id==='burnset'){
+      const effectiveEmbers=nextCardFree?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
+      if(nextCardFree)setNextCardFree(false)
+      const toDiscard=selected.filter(uid=>uid!==card.uid).slice(0,3)
+      const discardCount=toDiscard.length
+      const drawCount=discardCount+1
+      const remainingHand=hand.filter(c=>c.uid!==card.uid&&!toDiscard.includes(c.uid))
+      const discarded=hand.filter(c=>toDiscard.includes(c.uid))
+      const res=drawUpTo(remainingHand,deck,[...discardPile,...discarded],Math.min(remainingHand.length+drawCount,HAND_SIZE))
+      setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
+      setSelected([])
+      if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
+      addLog('🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+drawCount+'.'+(discardCount===0?' (Tip: select cards before playing)':''))
+      updStat('cardsPlayed',1)
+      setLastRiffPlayed(card)
+      setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
+      return
+    }
+
     const ok=applyCard(card,slotIdx)
     if(ok){
       const playedId=card.id
