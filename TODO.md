@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 02:36 PM (JST)*
+*Last updated: Sunday, March 22, 2026 at 02:43 PM (JST)*
 
 ---
 
@@ -22,7 +22,15 @@ We need all three.
 
 ---
 
-### ✅ Mentor Link + Hoarder HP — Pushed e51626f
+#### ✅ Pack + Feedback + Shop Member fixes
+- ~~**Touring Pack from C2** (was C3) — Mentor Link possible from C2~~
+- ~~**Touring Pack odds** — foil 15%→25%, mythic 0%→5%~~
+- ~~**Demonic Pack from C4** (was C5) — available before Hoarder wall~~
+- ~~**Demonic Pack odds** — demonic 3%→5%~~
+- ~~**Controlled Feedback** — now heals target member 50% max HP on play~~
+- ~~**Center shop member** — shows specific named member (Foil Bjorn etc) not mystery card~~
+
+## ✅ Mentor Link + Hoarder HP — Pushed e51626f
 - ~~**Mentor Link fully implemented** — scanMentorLinks(), MENTOR_LINK_BONUS constants, all triggers wired~~
 - ~~**Tier bonuses:** Foil +1ATK/+2HP/×1.5, Mythic +2ATK/+4HP/×2.0, Demonic +4ATK/+8HP/×3.0~~
 - ~~**Gold border + ⛓ pulse animation** on active links, 💔 when mentor is dead~~
