@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 12:04 AM*
+*Last updated: Sunday, March 22, 2026 at 12:08 AM*
 
 ---
 
@@ -14,7 +14,7 @@ This is happening.
 
 1. ~~**Amp the Static silently unplayable** — FIXED: effect text says requires corruption, shows Need Corruption! float~~ — card greys out with no explanation when corruption = 0. Need a clear "Requires Corruption" label on the card when it can't fire.
 
-2. **Burn the Set — no selection UI** — player must select cards BEFORE playing it but there is zero indication of this. Need hint text on the card and a visual cue when playing with nothing selected.
+2. ~~**Burn the Set no selection UI** — FIXED: effect text explains mechanic, tip shown in log when played with no selection~~ — player must select cards BEFORE playing it but there is zero indication of this. Need hint text on the card and a visual cue when playing with nothing selected.
 
 3. ~~**Artifacts/passives re-appear after purchase** — FIXED: App-level shopSoldIds persists sold state across visits, clears only on shop rotation~~ — bought Sabbath Crown, left shop, came back and it was available again. `boughtIds` resets when `shopCards` changes. Need persistent sold tracking in App state, not ShopScreen state.
 
