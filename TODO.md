@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 01:34 PM (JST)*
+*Last updated: Sunday, March 22, 2026 at 02:13 PM (JST)*
 
 ---
 
@@ -22,11 +22,20 @@ We need all three.
 
 ---
 
+### ✅ Mentor Link + Hoarder HP — Pushed e51626f
+- ~~**Mentor Link fully implemented** — scanMentorLinks(), MENTOR_LINK_BONUS constants, all triggers wired~~
+- ~~**Tier bonuses:** Foil +1ATK/+2HP/×1.5, Mythic +2ATK/+4HP/×2.0, Demonic +4ATK/+8HP/×3.0~~
+- ~~**Gold border + ⛓ pulse animation** on active links, 💔 when mentor is dead~~
+- ~~**Strike multiplier stacks** with Overdrive and Double Time~~
+- ~~**Revival restores bond** if mentor is revived mid-fight~~
+- ~~**Hoarder HP 480→300**~~
+- ~~**PostCSS @import ordering fix** in App.css~~
+
 ## 🔴 P1 — UNBLOCK THE GAME (do first, everything else depends on this)
 
-- [ ] **Hoarder HP 480→300** — sim confirms 67% of all runs end here, 0% get past. Cut to 300.
+- [x] **Hoarder HP 480→300** — sim confirms 67% of all runs end here, 0% get past. Cut to 300.
 - [ ] **Re-sim 5k after Hoarder cut** — find the new wall before touching other balance
-- [ ] **Implement Mentor Link** — currently unimplemented stub. Bonded member pairs deal 1.5x→3x damage multiplier when they both attack same strike. Required for late-game damage scaling.
+- [x] **Implement Mentor Link** — currently unimplemented stub. Bonded member pairs deal 1.5x→3x damage multiplier when they both attack same strike. Required for late-game damage scaling.
 - [ ] **Re-sim after Mentor Link** — validate C5+ survival rate. Target: ~6.66% Lucifer win rate.
 - [ ] **Lucifer phase system (consider)** — instead of raw 420,666 HP, consider 3 phases of 140,222 HP with different passives each phase. Same total HP, more achievable, more epic. Discussion needed.
 
