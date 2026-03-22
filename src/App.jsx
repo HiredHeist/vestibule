@@ -99,7 +99,7 @@ const ALL_CARDS=[
   {id:'feedbackloop',name:'Feedback Loop',type:'CORRUPT',rarity:'Uncommon',emoji:'🎛',embers:3,effect:'Deal damage equal to Corruption ÷ 2.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'tappedout',name:'Tapped Out',type:'EMBER',rarity:'Uncommon',emoji:'🪙',embers:0,effect:'Gain 5 Embers at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'controlfeedback',name:'Controlled Feedback',type:'CORRUPT',rarity:'Uncommon',emoji:'🎚',embers:2,effect:'Set Corruption to exactly 50%.',color:'#aa1111',typeColor:'#880000',copies:1},
-  {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:1,effect:'Discard up to 3 cards of your choice. Draw that many +1.',color:'#9933cc',typeColor:'#7722aa',copies:2},
+  {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:1,effect:'Select up to 3 cards first, then play this to discard them and draw that many +1. (No selection = draw 1 card.)',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:3,effect:'Deal 5/8/12 damage (scales by fight). Boss passive skips.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:4,effect:'Damage = target HP to boss. Once per round.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'If Corruption >=60%, double ALL ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:2},
@@ -1294,7 +1294,10 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       <div style={{height:6,flexShrink:0,borderRadius:'7px 7px 0 0',background:bc,boxShadow:`0 0 14px ${glow}`}}/>
       {isUsed&&<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'rgba(0,0,0,0.85)',border:'2px solid #888',borderRadius:6,padding:'6px 14px',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#888',letterSpacing:4,zIndex:20,pointerEvents:'none'}}>USED</div>}
       {card.embers>0?(
-        <div style={{position:'absolute',top:8,right:8,width:28,height:28,borderRadius:'50%',background:canAfford?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',border:`2px solid ${canAfford?'#ff6600':'#4a2a10'}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:canAfford?'#fff':'#5a3a10',boxShadow:canAfford?'0 0 10px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
+        <div style={{position:'absolute',top:8,right:8,display:'flex',flexDirection:'column',alignItems:'center',gap:1}}>
+          <div style={{width:28,height:28,borderRadius:'50%',background:canAfford?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',border:`2px solid ${canAfford?'#ff6600':'#4a2a10'}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:canAfford?'#fff':'#5a3a10',boxShadow:canAfford?'0 0 10px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
+          {!canAfford&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,fontWeight:900,color:'#cc4400',letterSpacing:0.5,whiteSpace:'nowrap',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>NEED {card.embers}🔥</div>}
+        </div>
       ):(
         <div style={{position:'absolute',top:8,right:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>
       )}
@@ -1870,18 +1873,23 @@ export default function App(){
     else if(card.id==='groupie'){
       const p4Bonus=activePassives.some(p=>p.id==='p4')?1:0
       setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus));playEmber();spent=0
-      // Draw 1 card immediately from deck
+      // Draw 1 card immediately — hard cap at HAND_SIZE
       setDeck(function(curDeck){
         const nd=[...curDeck]
         if(nd.length>0){
           const drawn=nd.shift()
           setHand(function(h){return h.length<HAND_SIZE?[...h,drawn]:h})
-        } else {
-          setDiscardPile(function(curDisc){
-            if(curDisc.length>0){const shuffled=[...curDisc].sort(()=>Math.random()-.5);const drawn=shuffled[0];setHand(function(h){return h.length<HAND_SIZE?[...h,drawn]:h});return shuffled.slice(1)}
-            return curDisc
-          })
+          return nd
         }
+        setDiscardPile(function(curDisc){
+          if(curDisc.length>0){
+            const shuffled=[...curDisc].sort(()=>Math.random()-.5)
+            const drawn=shuffled[0]
+            setHand(function(h){return h.length<HAND_SIZE?[...h,drawn]:h})
+            return shuffled.slice(1)
+          }
+          return curDisc
+        })
         return nd
       })
       msg='🍯 Groupie! +2 Embers, drew 1 card.'
@@ -1938,7 +1946,7 @@ export default function App(){
       const res=drawUpTo(remainingHand,deck,[...discardPile,...discarded],Math.min(remainingHand.length+drawCount,HAND_SIZE))
       setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
       setSelected([])
-      msg='🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+(Math.min(drawCount,res.h.length-remainingHand.length)>0?drawCount:1)+'.'
+      msg='🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+(Math.min(drawCount,res.h.length-remainingHand.length)>0?drawCount:1)+'.'+(discardCount===0?' (Tip: select cards before playing to discard them)':'')
     }
     else if(card.id==='overdrive'){if(corruption>=60){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{addLog('⚠ Need >=60% Corruption.');return false}}
     else if(card.id==='crowdsurf'){
@@ -2389,8 +2397,8 @@ export default function App(){
       addFloat(dmg,bc.x,bc.y-60,dmg>=15?'#ff4400':'#dd2222',dmg>=15)
       if(folkMagicFired){
         setEmbers(maxEmbers)
-        addFloat('🪈 FOLK MAGIC!',bc.x,bc.y-120,'#44ddaa',true)
-        addLog('🪈 Folk Magic! All Embers refunded!')
+        addFloat('🪈 FOLK MAGIC! Full Embers!',window.innerWidth/2,window.innerHeight*0.35,'#44ddaa',true)
+        addLog('🪈 Folk Magic proc! All Embers refunded.')
       }
       updStat('totalDamage',dmg);updStat('highestStrike',dmg,true)
 
