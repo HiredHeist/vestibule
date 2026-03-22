@@ -285,16 +285,16 @@ const STARTER_ARTIFACTS=[
 
 // ── STARTER PASSIVES P1-P10 (CD-Rs) ───────────────────────────
 const STARTER_PASSIVES=[
-  {id:'p1',name:'Power Chord',emoji:'💿',effect:'Gain 1 extra Ember at the start of every fight.',cost:6},
-  {id:'p2',name:'Roadie Crew',emoji:'💿',effect:'At the start of each fight, one random member heals 3 HP.',cost:8},
-  {id:'p3',name:'Merch Table',emoji:'💿',effect:'After each fight victory, gain +2 bonus Stash.',cost:6},
-  {id:'p4',name:'Feedback Hum',emoji:'💿',effect:'All EMBER type cards give 1 additional Ember when played.',cost:10},
-  {id:'p5',name:'Amp Stack',emoji:'💿',effect:'Sound Wall deals +4 additional damage. Heavy Riff deals +2 additional damage.',cost:10},
-  {id:'p6',name:'Cult Following',emoji:'💿',effect:'Each time any member goes Too Stoned, gain 3 Stash.',cost:10},
-  {id:'p7',name:'Guitar Tech',emoji:'💿',effect:'Battle Cry gives +2 ATK permanently instead of +1.',cost:8},
-  {id:'p8',name:'Green Room',emoji:'💿',effect:'At the start of each fight, all members gain Stonewall (immune to first Too Stoned event).',cost:16},
-  {id:'p9',name:'Heavy Rotation',emoji:'💿',effect:'When you draw a duplicate card into your hand, draw 1 extra card next Strike.',cost:10},
-  {id:'p10',name:'Stage Fright Reversal',emoji:'💿',effect:'The first Strike of every fight deals +10 bonus damage.',cost:14},
+  {id:'p1',name:'Power Chord',emoji:'⚡',effect:'Gain 1 extra Ember at the start of every fight.',cost:6},
+  {id:'p2',name:'Roadie Crew',emoji:'🔧',effect:'At the start of each fight, one random member heals 3 HP.',cost:8},
+  {id:'p3',name:'Merch Table',emoji:'👕',effect:'After each fight victory, gain +2 bonus Stash.',cost:6},
+  {id:'p4',name:'Feedback Hum',emoji:'🔊',effect:'All EMBER type cards give 1 additional Ember when played.',cost:10},
+  {id:'p5',name:'Amp Stack',emoji:'📻',effect:'Sound Wall deals +4 additional damage. Heavy Riff deals +2 additional damage.',cost:10},
+  {id:'p6',name:'Cult Following',emoji:'🕯',effect:'Each time any member goes Too Stoned, gain 3 Stash.',cost:10},
+  {id:'p7',name:'Guitar Tech',emoji:'🎛',effect:'Battle Cry gives +2 ATK permanently instead of +1.',cost:8},
+  {id:'p8',name:'Green Room',emoji:'🛋',effect:'At the start of each fight, all members gain Stonewall (immune to first Too Stoned event).',cost:16},
+  {id:'p9',name:'Heavy Rotation',emoji:'🎚',effect:'When you draw a duplicate card into your hand, draw 1 extra card next Strike.',cost:10},
+  {id:'p10',name:'Stage Fright Reversal',emoji:'🎙',effect:'The first Strike of every fight deals +10 bonus damage.',cost:14},
 ]
 
 const BOSS_QUOTES={
@@ -3795,8 +3795,8 @@ export default function App(){
             </div>
           )})}
           {[1,2,3,4,5,6,7,8,9,10].map(i=>(
-            <div key={'future_m'+i} style={{background:'rgba(10,6,2,0.4)',border:'1px dashed rgba(40,25,10,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.25}}>
-              <div style={{fontSize:48}}>🔒</div>
+            <div key={'future_m'+i} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.35}}>
+              <div style={{fontSize:48,filter:'grayscale(1) brightness(0.4)'}}>🔒</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#3a2a10'}}>???</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#2a1a08'}}>COMING SOON</div>
             </div>
@@ -3818,8 +3818,8 @@ export default function App(){
             </div>
           )})}
           {[1,2,3,4,5,6,7,8,9,10].map(i=>(
-            <div key={'future_a'+i} style={{background:'rgba(10,6,2,0.4)',border:'1px dashed rgba(40,25,10,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.25}}>
-              <div style={{fontSize:48}}>🔒</div>
+            <div key={'future_a'+i} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.35}}>
+              <div style={{fontSize:48,filter:'grayscale(1) brightness(0.4)'}}>🔒</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#3a2a10'}}>???</div>
             </div>
           ))}
@@ -3834,8 +3834,8 @@ export default function App(){
             </div>
           ))}
           {[1,2,3,4,5,6,7,8,9,10].map(i=>(
-            <div key={'future_p'+i} style={{background:'rgba(10,6,2,0.4)',border:'1px dashed rgba(40,20,60,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.25}}>
-              <div style={{fontSize:48}}>🔒</div>
+            <div key={'future_p'+i} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.35}}>
+              <div style={{fontSize:48,filter:'grayscale(1) brightness(0.4)'}}>🔒</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#3a2a10'}}>???</div>
             </div>
           ))}
@@ -3862,8 +3862,8 @@ export default function App(){
             ['🍄 The Dealer','Buy shrooms or acid in the shop. Use before your first Strike for powerful (or disastrous) effects.'],
             ['🏆 Score','Every run earns score. Lifetime score unlocks new cards, members, and artifacts permanently.'],
           ].map(([title,desc],i)=><div key={i} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:8,padding:'14px 20px'}}>
-            <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#e8a820',marginBottom:6}}>{title}</div>
-            <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:'#c8b080',lineHeight:1.5}}>{desc}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#e8a820',marginBottom:6}}>{title}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#c8b080',lineHeight:1.5}}>{desc}</div>
           </div>)}
         </div>
         <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:8}}>← Back</button>
