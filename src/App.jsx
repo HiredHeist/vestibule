@@ -24,7 +24,7 @@ const MAX_EMBERS_CAP=8, MAX_STRIKES=4, MAX_DISCARDS=4, HAND_SIZE=6, MAX_STASH=42
 // ── SCORE SYSTEM ──────────────────────────────────────────────────
 function calcRunScore(stats, won){
   const s = stats
-  const score = Math.floor(
+  const baseScore = Math.floor(
     (Math.min(9,Math.floor(s.fightsSurvived/3)+1)) * 1000 +
     s.fightsSurvived * 150 +
     (s.totalDamage||0) / 10 +
@@ -33,7 +33,10 @@ function calcRunScore(stats, won){
     (s.tooStonedCount||0) * 50 +
     (won ? 50000 : 0)
   )
-  return Math.max(0, Math.round(score))
+  // Streak bonus: 3-day +5%, 7-day +10%, 30-day +20%
+  const streak=parseInt(localStorage.getItem('vst_streak')||'0')
+  const streakMult=streak>=30?1.20:streak>=7?1.10:streak>=3?1.05:1.0
+  return Math.max(0, Math.round(baseScore*streakMult))
 }
 const SCORE_GRADES=[
   {min:0,     label:'GARAGE BAND',  color:'#888888'},
@@ -508,6 +511,11 @@ function BoosterScreen({onComplete,seed}){
   return(
     <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,padding:'60px 20px 24px 20px',overflowY:'auto'}}>
       <div style={{fontFamily:"'BreakGothicFont',cursive",fontSize:88,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.8),0 0 80px rgba(140,0,0,0.5),3px 3px 0 #000',flexShrink:0,letterSpacing:20}}>Opening Night</div>
+      {/* DAILY SEED BANNER */}
+      <div style={{display:'flex',gap:16,alignItems:'center',flexShrink:0}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820',letterSpacing:3,padding:'6px 20px',background:'rgba(40,25,5,0.8)',border:'1px solid #c87820',borderRadius:4}}>🌍 TODAY'S SEED: {(()=>{const d=new Date();return parseInt(d.getFullYear().toString()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')).toString(16).toUpperCase()})()}</div>
+        {parseInt(localStorage.getItem('vst_streak')||'0')>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#ff6600',letterSpacing:2,padding:'6px 16px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {localStorage.getItem('vst_streak')} DAY STREAK</div>}
+      </div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:27,color:'#e8d090',fontStyle:'italic',flexShrink:0}}>Select 2 musicians to start your band</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#e8d090',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
 
@@ -1569,6 +1577,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   const streakMsg=streakWins>1?'🔥 '+streakWins+' WIN STREAK!':streakLosses>2?'💀 '+streakLosses+' losses in a row...':''
   const finalScore=calcRunScore(stats,isVictory)
   const grade=getScoreGrade(finalScore,isVictory)
+  const streakBonus=dailyStreak>=30?20:dailyStreak>=7?10:dailyStreak>=3?5:0
   const isBest=finalScore>=(personalBest||0)&&finalScore>0
   const beatBy=isBest&&(personalBest||0)>0?finalScore-(personalBest||0):0
   const shortBy=!isBest&&(personalBest||0)>0?(personalBest||0)-finalScore:0
@@ -1608,11 +1617,12 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
 
   // ── PERSONAL BEST GAP (prominent) ─────────────────────────
   const BestGap=()=>{
-    if(isBest&&scoreReady&&beatBy>0)return <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#ffd700',fontWeight:900,textShadow:'0 0 20px rgba(255,200,0,0.6)',marginTop:6,animation:'throb 1.5s ease-in-out infinite'}}>🏆 NEW PERSONAL BEST! +{beatBy.toLocaleString()}</div>
-    if(isBest&&scoreReady&&beatBy===0)return <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#ffd700',fontWeight:900,textShadow:'0 0 20px rgba(255,200,0,0.6)',marginTop:6}}>🏆 PERSONAL BEST!</div>
-    if(shortBy>0&&shortBy<=2000)return <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#cc2222',fontWeight:900,textShadow:'0 0 14px rgba(200,0,0,0.5)',marginTop:6}}>SO CLOSE! Only {shortBy.toLocaleString()} pts from your best!</div>
-    if(shortBy>0)return <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#886633',marginTop:6}}>Your Best: {(personalBest||0).toLocaleString()} — {shortBy.toLocaleString()} to beat</div>
-    return null
+    const streakLabel=streakBonus>0?<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#ff6600',marginTop:4}}>🔥 Streak Bonus: +{streakBonus}% score</div>:null
+    if(isBest&&scoreReady&&beatBy>0)return <>{streakLabel}<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#ffd700',fontWeight:900,textShadow:'0 0 20px rgba(255,200,0,0.6)',marginTop:6,animation:'throb 1.5s ease-in-out infinite'}}>🏆 NEW PERSONAL BEST! +{beatBy.toLocaleString()}</div></>
+    if(isBest&&scoreReady&&beatBy===0)return <>{streakLabel}<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#ffd700',fontWeight:900,textShadow:'0 0 20px rgba(255,200,0,0.6)',marginTop:6}}>🏆 PERSONAL BEST!</div></>
+    if(shortBy>0&&shortBy<=2000)return <>{streakLabel}<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#cc2222',fontWeight:900,textShadow:'0 0 14px rgba(200,0,0,0.5)',marginTop:6}}>SO CLOSE! Only {shortBy.toLocaleString()} pts from your best!</div></>
+    if(shortBy>0)return <>{streakLabel}<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#886633',marginTop:6}}>Your Best: {(personalBest||0).toLocaleString()} — {shortBy.toLocaleString()} to beat</div></>
+    return streakLabel
   }
 
   // ── UNLOCK PROGRESS BAR ────────────────────────────────────
