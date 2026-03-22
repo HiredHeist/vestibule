@@ -687,7 +687,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
   )
 }
 
-function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas}){
+function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,shroomsInStock,acidInStock,onBuyShrooms,onBuyAcid}){
   const [hovId,setHovId]=useState(null)
   const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
   const [pawnOpen,setPawnOpen]=useState(false)
@@ -1287,6 +1287,57 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 }}
                 onClose={()=>setPawnOpen(false)}
               />}
+            </div>
+            {/* ── DEALER ── */}
+            <div style={{paddingTop:24,flexShrink:0}}>
+            <div style={{width:280,height:420,
+              background:'linear-gradient(160deg,#0a100a,#040804)',
+              border:'2px solid rgba(50,180,50,0.5)',borderRadius:10,
+              padding:'14px 16px',
+              display:'flex',flexDirection:'column',gap:10,
+              boxShadow:'0 0 30px rgba(40,150,40,0.15)'}}>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,
+                color:'#44cc44',textAlign:'center',
+                textShadow:'0 0 18px rgba(60,200,60,0.8)'}}>🌿 The Dealer</div>
+              {/* Mushrooms */}
+              <div onClick={()=>{if(shroomsInStock&&!heldShrooms&&stash>=8){onSpend(8,'dealer',null);onBuyShrooms()}}}
+                style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+                  background:shroomsInStock&&!heldShrooms?'rgba(80,40,10,0.4)':'rgba(20,15,10,0.4)',
+                  border:shroomsInStock&&!heldShrooms?'1px solid rgba(200,150,50,0.5)':'1px solid rgba(60,40,20,0.3)',
+                  borderRadius:8,cursor:shroomsInStock&&!heldShrooms&&stash>=8?'pointer':'default',
+                  transition:'all 0.15s',position:'relative',
+                  opacity:shroomsInStock?1:0.5}}>
+                <div style={{fontSize:48}}>{shroomsInStock?'🍄':'🍄'}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,
+                  color:shroomsInStock?'#e8a820':'#554428',marginTop:4}}>
+                  {heldShrooms?'HOLDING':shroomsInStock?'Magic Mushrooms':'DRY'}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,
+                  color:shroomsInStock&&!heldShrooms?'#55ee55':'#554428',marginTop:2}}>
+                  {heldShrooms?'Ready to use in battle':shroomsInStock?'8🌿 · 90% good trip':'Not in stock'}</div>
+                {heldShrooms&&<div style={{position:'absolute',top:6,right:6,background:'rgba(40,180,40,0.9)',
+                  borderRadius:4,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,
+                  fontWeight:900,color:'#fff'}}>HELD</div>}
+              </div>
+              {/* Acid */}
+              <div onClick={()=>{if(acidInStock&&!heldAcid&&stash>=18){onSpend(18,'dealer',null);onBuyAcid()}}}
+                style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+                  background:acidInStock&&!heldAcid?'rgba(40,10,80,0.4)':'rgba(15,10,20,0.4)',
+                  border:acidInStock&&!heldAcid?'1px solid rgba(150,50,220,0.5)':'1px solid rgba(40,20,60,0.3)',
+                  borderRadius:8,cursor:acidInStock&&!heldAcid&&stash>=18?'pointer':'default',
+                  transition:'all 0.15s',position:'relative',
+                  opacity:acidInStock?1:0.5}}>
+                <div style={{fontSize:48}}>{acidInStock?'🧪':'🧪'}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,
+                  color:acidInStock?'#cc44ff':'#4a2a6a',marginTop:4}}>
+                  {heldAcid?'HOLDING':acidInStock?'Blotter Acid':'DRY'}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,
+                  color:acidInStock&&!heldAcid?'#cc88ff':'#4a2a6a',marginTop:2}}>
+                  {heldAcid?'Ready to use in battle':acidInStock?'18🌿 · 90% good trip':'Not in stock'}</div>
+                {heldAcid&&<div style={{position:'absolute',top:6,right:6,background:'rgba(160,40,220,0.9)',
+                  borderRadius:4,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,
+                  fontWeight:900,color:'#fff'}}>HELD</div>}
+              </div>
+            </div>
             </div>
           </div>
 
@@ -1937,6 +1988,13 @@ export default function App(){
   const [shopSoldIds,setShopSoldIds]=useState([])
   const [circleCartBought,setCircleCartBought]=useState(false)
   const [circleCpasBought,setCirCleCpasBought]=useState(false)
+  // ── DEALER: Mushrooms & Acid ──────────────────────────────────
+  const [heldShrooms,setHeldShrooms]=useState(false) // player is holding shrooms
+  const [heldAcid,setHeldAcid]=useState(false) // player is holding acid
+  const [shroomsInStock,setShroomsInStock]=useState(()=>Math.random()<0.6)
+  const [acidInStock,setAcidInStock]=useState(()=>Math.random()<0.4)
+  const [activeTripEffect,setActiveTripEffect]=useState(null) // {type,name,desc,color} — shown as dramatic reveal
+  const [tripUsedThisFight,setTripUsedThisFight]=useState(false)
   const [stats,setStats]=useState({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
 
   
@@ -2000,7 +2058,8 @@ export default function App(){
     const foilDiscount=(card.foil&&card.embers>=2)?1:0
     const hasShredder=stage.some(m=>m&&!m.tooStoned&&m.keyword==='SHREDDER')
     const shredderDiscount=(hasShredder&&!shredderUsed&&card.type==='RIFF'&&card.embers>=1)?1:0
-    const effectiveEmbers=nextCardFree&&card.id!=='doubledown'?0:Math.max(0,card.embers-foilDiscount-shredderDiscount)
+    const synesthesiaDiscount=(activeTripEffect&&activeTripEffect.name==='SYNESTHESIA')?1:0
+    const effectiveEmbers=nextCardFree&&card.id!=='doubledown'?0:Math.max(0,card.embers-foilDiscount-shredderDiscount-synesthesiaDiscount)
   if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers, have '+embers+'.');return false}
   if(nextCardFree&&card.id!=='doubledown'){setNextCardFree(false)}
     if(card.id==='stagedive'&&stageDiveUsed){addLog('⚠ Stage Dive once per round only.');return false}
@@ -2375,7 +2434,7 @@ export default function App(){
     else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
     else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>Math.min(enemy.maxHp,p+4))
     return true
-  },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected])
+  },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected,activeTripEffect])
 
   const handleDropOnStage=useCallback((slotIdx)=>{
     if(!dragCardUid||animPhase!=='idle')return
@@ -2594,6 +2653,8 @@ export default function App(){
         setShopCards(genShopCards(nextCn))
         setBoosterPacks(genBoosterPacks(nextCn))
         setRecruitPack(genRecruitPack(fightIndex))
+        setShroomsInStock(Math.random()<0.6)
+        setAcidInStock(Math.random()<0.4)
         setShopSoldIds([]) // clear sold state when shop rotates
         // Rotate circle artifact + passive at each new circle (every 3rd fight)
         const isCircleBoss=(fightIndex+1)%3===0
@@ -2630,6 +2691,81 @@ export default function App(){
     window.addEventListener('keydown',onKey,true)
     return function(){window.removeEventListener('keydown',onKey,true)}
   },[])
+
+  // ── TRIP ACTIVATION ──────────────────────────────────────────────
+  const activateTrip=useCallback((type)=>{
+    if(tripUsedThisFight)return
+    setTripUsedThisFight(true)
+    const roll=Math.random()
+    let effectName='',effectDesc='',effectColor='#44dd44'
+
+    if(type==='shrooms'){
+      setHeldShrooms(false)
+      if(roll<0.05){
+        // 5% bad trip
+        effectName='BAD TRIP';effectDesc='Paranoia! All members -2 ATK this fight.';effectColor='#cc2222'
+        setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:Math.max(1,m.atk-2)}):m))
+        addLog('🍄 BAD TRIP! Paranoia — all members -2 ATK!')
+      } else if(roll<0.10){
+        // 5% bunk
+        effectName='BUNK SHROOMS';effectDesc='Nothing happens. You feel slightly disappointed.';effectColor='#888888'
+        addLog('🍄 Bunk shrooms. Nothing happened.')
+      } else {
+        // 90% good trip — roll d4
+        const d4=Math.floor(Math.random()*4)
+        if(d4===0){
+          effectName='EGO DEATH';effectDesc='All members +2 ATK this fight!';effectColor='#ffdd44'
+          setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+2}):m))
+          addLog('🍄 EGO DEATH! All members +2 ATK!')
+        } else if(d4===1){
+          effectName='TIME DILATION';effectDesc='+1 bonus Strike this fight!';effectColor='#ff8800'
+          setStrikesLeft(p=>p+1)
+          addLog('🍄 TIME DILATION! +1 Strike this fight!')
+        } else if(d4===2){
+          effectName='SYNESTHESIA';effectDesc='All cards cost 1 less ember this fight!';effectColor='#cc44ff'
+          // Handled via activeTripEffect check in card cost calculation
+          addLog('🍄 SYNESTHESIA! All cards cost 1 less ember!')
+        } else {
+          effectName='COSMIC UNITY';effectDesc='All members healed to full HP + Stonewall!';effectColor='#44ddaa'
+          setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp,stoneShield:2}):m))
+          addLog('🍄 COSMIC UNITY! Full HP + Stonewall for all!')
+        }
+      }
+    } else if(type==='acid'){
+      setHeldAcid(false)
+      if(roll<0.05){
+        // 5% bad trip — Hellquake
+        effectName='BAD TRIP';effectDesc='Corruption hits 100%! Hellquake!';effectColor='#cc2222'
+        setCorruption(100)
+        addLog('🧪 BAD TRIP! Corruption maxed — Hellquake territory!')
+      } else if(roll<0.10){
+        // 5% bunk
+        effectName='BUNK ACID';effectDesc='Just paper. Nothing happens.';effectColor='#888888'
+        addLog('🧪 Bunk acid. It was just paper.')
+      } else {
+        // 90% good trip — roll d4
+        const d4=Math.floor(Math.random()*4)
+        if(d4===0){
+          effectName='FRACTAL VISION';effectDesc='Every card played fires TWICE this fight!';effectColor='#ff44ff'
+          addLog('🧪 FRACTAL VISION! Every card effect fires twice!')
+        } else if(d4===1){
+          effectName='DIMENSIONAL RIFT';effectDesc='Boss takes DOUBLE damage this fight!';effectColor='#ff3300'
+          addLog('🧪 DIMENSIONAL RIFT! Boss takes double damage!')
+        } else if(d4===2){
+          effectName='EGO DISSOLUTION';effectDesc='Corruption → 69%. All members +3 ATK permanently!';effectColor='#aa44ff'
+          setCorruption(69)
+          setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3}):m))
+          addLog('🧪 EGO DISSOLUTION! Corruption → 69%. All +3 ATK!')
+        } else {
+          effectName='ASTRAL PROJECTION';effectDesc='All members immune to boss damage this fight!';effectColor='#44ddff'
+          addLog('🧪 ASTRAL PROJECTION! Band is untouchable!')
+        }
+      }
+    }
+
+    setActiveTripEffect({type,name:effectName,desc:effectDesc,color:effectColor})
+    setTimeout(()=>setActiveTripEffect(null),4000)
+  },[tripUsedThisFight,strikesLeft])
 
   const handleStrike=useCallback(()=>{
     if(animPhase!=='idle'||strikesLeft<=0||enemyHp<=0)return
@@ -2728,7 +2864,7 @@ export default function App(){
     setTimeout(function(){
       playHit();setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
       setProjectiles([])
-      const newEHp=Math.max(0,enemyHp-dmg)
+      const newEHp=Math.max(0,enemyHp-(dmg*(activeTripEffect&&(activeTripEffect.name==='DIMENSIONAL RIFT'||activeTripEffect.name==='FRACTAL VISION')?2:1)))
       setEnemyHp(newEHp)
       // damageScaleAtk: boss gains ATK per 20 damage taken
       if(enemy.passiveId&&enemy.passiveId.startsWith('damageScaleAtk')){
@@ -2786,7 +2922,7 @@ export default function App(){
         else if(enemy.passiveId==='stashSteal2'){if(stash>0){const stolen=Math.min(stash,2);setStash(p=>Math.max(0,p-stolen));setStashStolenThisFight(p=>p+stolen);addLog('🪙 The Hoarder steals '+stolen+'🌿!')}}
         else if(enemy.passiveId==='stashSteal3'){if(stash>0){const stolen=Math.min(stash,3);setStash(p=>Math.max(0,p-stolen));setStashStolenThisFight(p=>p+stolen);addLog('🏦 The Usurer steals '+stolen+'🌿!')}}
         else{scaledBaseDmg=enemy.baseDmg}
-        const actualDmg=Math.max(1,Math.round(scaledBaseDmg)-bossDebuff)
+        const actualDmg=(activeTripEffect&&activeTripEffect.name==='ASTRAL PROJECTION')?0:Math.max(1,Math.round(scaledBaseDmg)-bossDebuff)
           const ti=stage.indexOf(target)
           setStage(function(prev){
             const ns2=[...prev]
@@ -2898,7 +3034,7 @@ export default function App(){
         },1200)
       },delay+400)
     },delay+200)
-  },[animPhase,strikesLeft,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,bossRef,stageRefs,drawUpTo,triggerVictory,bossRageAtk,bossDebuff])
+  },[animPhase,strikesLeft,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,bossRef,stageRefs,drawUpTo,triggerVictory,bossRageAtk,bossDebuff,activeTripEffect])
 
   const handleShopLeave=useCallback(()=>{
     const nextIdx=Math.min(fightIndex+1, 26)
@@ -2906,7 +3042,7 @@ export default function App(){
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(nextEnemy.maxHp)
     setEmbers(function(){return maxEmbers});setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0)
+    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null)
     // Re-roll DOUBLE TIME for next fight
     const nd=stage.some(m=>m&&m.role==='Drummer')
     const ndCount=stage.filter(m=>m&&m.role==='Drummer').length
@@ -3082,6 +3218,9 @@ export default function App(){
         setRecruitCandidates(enriched)
         setGameState('recruit')
       }
+    } else if(type==='dealer'){
+      // Dealer purchases handled by onBuyShrooms/onBuyAcid callbacks, just deduct stash
+      addLog('🌿 Dealer transaction complete.')
     } else {addLog('📦 Purchased: '+item.name+'!')}
   },[stash])
 
@@ -3163,7 +3302,7 @@ export default function App(){
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(5);setMaxEmbers(5);setStash(3);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0);setDeathCause('fallen')
-    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([])
+    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(false);setHeldAcid(false);setActiveTripEffect(null);setTripUsedThisFight(false)
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -3183,7 +3322,7 @@ export default function App(){
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(true)} onBuyAcid={()=>setHeldAcid(true)}/>
   if(gameState==='end')return <EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore}/>
 
   return(
@@ -3201,6 +3340,12 @@ export default function App(){
         <div style={{fontSize:120,animation:'throb 0.3s ease-in-out infinite',filter:`drop-shadow(-4px 0 rgba(255,0,0,0.8)) drop-shadow(4px 0 rgba(0,80,255,0.8))`}}>⛧</div>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:hellquakeAnim.color,textShadow:`-3px 0 rgba(255,0,0,0.8), 3px 0 rgba(0,80,255,0.7), 0 0 60px ${hellquakeAnim.color},0 0 120px ${hellquakeAnim.color}`,animation:'fadeIn 0.3s ease'}}>{hellquakeAnim.text}</div>
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:26,color:'rgba(255,255,255,0.9)',textAlign:'center',maxWidth:600,fontStyle:'italic',textShadow:'0 0 20px rgba(0,0,0,0.9)',animation:'fadeIn 0.5s ease',padding:'0 40px',lineHeight:1.5}}>{hellquakeAnim.desc}</div>
+      </div>}
+      {/* TRIP EFFECT OVERLAY */}
+      {activeTripEffect&&<div style={{position:'fixed',inset:0,zIndex:9600,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:16,background:'rgba(0,0,0,0.88)',animation:'fadeIn 0.15s ease'}}>
+        <div style={{fontSize:100,animation:'throb 0.4s ease-in-out infinite',filter:`drop-shadow(0 0 40px ${activeTripEffect.color})`}}>{activeTripEffect.type==='shrooms'?'🍄':'🧪'}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,color:activeTripEffect.color,textShadow:`0 0 40px ${activeTripEffect.color},0 0 80px ${activeTripEffect.color}`,animation:'fadeIn 0.3s ease'}}>{activeTripEffect.name}</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:24,color:'rgba(255,255,255,0.9)',textAlign:'center',maxWidth:600,fontStyle:'italic',textShadow:'0 0 20px rgba(0,0,0,0.9)',animation:'fadeIn 0.5s ease',padding:'0 40px',lineHeight:1.5}}>{activeTripEffect.desc}</div>
       </div>}
       {remasterOpen&&<RemasterModal cards={remasterCards} onConfirm={(delUids,copyUid)=>{
         setDeck(prev=>{
@@ -3296,6 +3441,23 @@ export default function App(){
         <div style={{position:'absolute',left:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:10,alignItems:'center',justifyContent:'center',background:'rgba(20,12,4,0.7)',borderRadius:'0 6px 6px 0',padding:'12px 14px',border:'1px solid rgba(100,65,15,0.3)',borderLeft:'none',minWidth:90}}>
           <DeckPile count={deck.length} label="Deck"/>
           <DeckPile count={discardPile.length} label="Discard"/>
+          {/* DEALER ITEMS */}
+          {heldShrooms&&<button onClick={()=>{if(strikesLeft===MAX_STRIKES&&!tripUsedThisFight)activateTrip('shrooms')}}
+            style={{width:80,padding:'6px 4px',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,
+              background:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'rgba(80,40,10,0.7)':'rgba(30,20,10,0.4)',
+              border:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'2px solid #cc8800':'1px solid #4a3018',
+              borderRadius:4,color:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'#ffcc44':'#554428',
+              cursor:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'pointer':'not-allowed',
+              textShadow:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'0 0 8px rgba(200,150,0,0.6)':'none',
+              transition:'all 0.15s'}}>🍄 USE</button>}
+          {heldAcid&&<button onClick={()=>{if(strikesLeft===MAX_STRIKES&&!tripUsedThisFight)activateTrip('acid')}}
+            style={{width:80,padding:'6px 4px',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,
+              background:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'rgba(40,10,80,0.7)':'rgba(20,10,30,0.4)',
+              border:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'2px solid #aa44ff':'1px solid #3a1a5a',
+              borderRadius:4,color:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'#cc88ff':'#4a2a6a',
+              cursor:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'pointer':'not-allowed',
+              textShadow:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'0 0 8px rgba(160,60,240,0.6)':'none',
+              transition:'all 0.15s'}}>🧪 USE</button>}
         </div>
 
         {/* ACTIVE PASSIVES/ARTIFACTS PANEL — toggleable */}
