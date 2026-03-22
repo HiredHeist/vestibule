@@ -64,6 +64,10 @@ Developer = "player" in dev sessions. Music producer, doom metal, lives in rural
 11. ✅ **Signal Decay reworked** — "Discard 1, draw 2" at 1 ember
 12. ✅ **Groupie buffed** — 1 ember, Uncommon
 13. ✅ **Sim v10.0 rebuilt** — all changes synced, ready to run 20k
+14. ✅ **Seance buffed** — 1 ember, corruption ÷ 4 (was 2 embers, ÷ 8)
+15. ✅ **Herb Money reworked** — stash ÷ 2 damage, keep stash (was 10% + lose stash)
+16. ✅ **Wake Up Call free** — 0 embers (was 2)
+17. ✅ **Roadie 2-strike shield** — stoneShield counter (was 1 strike boolean)
 
 ---
 

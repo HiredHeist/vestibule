@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 10:30 PM (JST) — Session 13*
+*Last updated: Sunday, March 22, 2026 at 11:00 PM (JST) — Session 13*
 
 ---
 
@@ -78,9 +78,10 @@ This is happening.
 
 - [x] Signal Decay reworked — "Discard 1, draw 2" at 1 ember
 - [x] Groupie buffed — 1 ember, Uncommon
-- [ ] Wake Up Call: 2 embers → 0
-- [ ] Roadie: immune 1 strike → immune 2 strikes
-- [ ] Seance: 2 embers → 1 ember
+- [x] Wake Up Call: 2 embers → 0 (free revival)
+- [x] Roadie: immune 1 strike → immune 2 strikes (stoneShield counter)
+- [x] Seance: 2 embers → 1, corruption ÷ 8 → corruption ÷ 4 (rewards high corruption)
+- [x] Herb Money: deal stash ÷ 2 as damage, keep stash (was 10% + lose stash)
 
 ---
 
@@ -174,6 +175,12 @@ C9 Treachery: Traitor 9000 → Betrayer 11400 → LUCIFER 420,666 [damageScaleAt
 - [x] Signal Decay reworked: "Discard 1, draw 2" at 1 ember
 - [x] Groupie buffed: 1 ember, Uncommon
 - [x] Sim v10.0 rebuilt with all changes
+
+### Push 12: Card balance batch — 4 cards
+- [x] Seance: 2 embers → 1, corruption ÷ 8 → corruption ÷ 4
+- [x] Herb Money: stash ÷ 2 damage, keep stash (was 10% + lose stash)
+- [x] Wake Up Call: 2 embers → 0
+- [x] Roadie: immune 2 strikes (stoneShield counter, was boolean)
 
 ---
 

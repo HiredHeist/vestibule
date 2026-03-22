@@ -180,12 +180,15 @@ Rare: `stagedive` `overdrive` `infencore` `remaster` `sabbathsigil` `possessedpe
 
 ### Key card notes (Session 13 updates):
 - `distortion` — +15% corruption (was +10%), embers: 1 (Session 12)
-- `wakeup` — embers: 2
+- `wakeup` — embers: 0 (was 2). Free revival.
 - `groupie` — embers: 1, rarity: Uncommon (was 2 embers, Common)
 - `ampoverload` — embers: 0, costs 1 discard (unplayable at 0 discards)
 - `controlfeedback` — set corruption to 50% AND heal target member 50% maxHP
 - `remaster` — select 1 card in hand, delete it, draw 3 (handled in handleDropOnStage)
 - `sigdecay` — REWORKED: discard 1 random card from hand, draw 2 cards, 1 ember (handled in handleDropOnStage)
+- `seance` — 1 ember, heals corruption ÷ 4 to all (was 2 embers, ÷ 8). Rewards high corruption.
+- `herbmoney` — deal stash ÷ 2 as damage, keep stash (was 10% of stash, lose it)
+- `roadie` — stoneShield: 2 strikes immunity + heal 2 HP (was 1 strike). Shield decrements per lethal hit.
 
 ---
 
