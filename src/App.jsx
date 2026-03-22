@@ -1231,9 +1231,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
                     color:shroomsInStock?'#e8a820':'#554428',marginTop:4}}>
                     {heldShrooms?'HOLDING':shroomsInStock?'Magic Mushrooms':'DRY'}</div>
-                  {heldShrooms&&<div style={{position:'absolute',top:4,right:4,background:'rgba(40,180,40,0.9)',
-                    borderRadius:4,padding:'2px 8px',fontFamily:"'MBScribblesFont',serif",fontSize:12,
-                    fontWeight:900,color:'#fff'}}>HELD</div>}
+                  {heldShrooms&&<SoldOverlay/>}
                 </div>
                 {/* Acid */}
                 <div onClick={()=>{if(acidInStock&&!heldAcid&&can(18)){onSpend(18,'dealer',null);onBuyAcid()}}}
@@ -1254,9 +1252,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
                     color:acidInStock?'#cc44ff':'#4a2a6a',marginTop:4}}>
                     {heldAcid?'HOLDING':acidInStock?'Blotter Acid':'DRY'}</div>
-                  {heldAcid&&<div style={{position:'absolute',top:4,right:4,background:'rgba(160,40,220,0.9)',
-                    borderRadius:4,padding:'2px 8px',fontFamily:"'MBScribblesFont',serif",fontSize:12,
-                    fontWeight:900,color:'#fff'}}>HELD</div>}
+                  {heldAcid&&<SoldOverlay/>}
                 </div>
               </div>
             </div>
@@ -1326,16 +1322,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         </div>
 
         {/* RIGHT COLUMN — fixed width, never cut off */}
-        <div style={{width:150,flexShrink:0,display:'flex',flexDirection:'column',gap:20,alignItems:'center',justifyContent:'center'}}>
-          <div style={{width:130,height:130,
-            display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
-            background:'rgba(5,15,5,0.92)',
-            border:'2px solid rgba(50,140,50,0.6)',
-            borderRadius:8}}>
-            <span style={{fontSize:22}}>🌿</span>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:30,fontWeight:900,color:stashColor,lineHeight:1}}>{stash}</span>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#2a5a2a',letterSpacing:2,textTransform:'uppercase'}}>Stash</span>
-          </div>
+        <div style={{width:150,flexShrink:0,display:'flex',flexDirection:'column',gap:20,alignItems:'center',justifyContent:'space-between',paddingTop:10,paddingBottom:10}}>
           <div style={{width:130,height:130,
             display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
             background:'rgba(25,18,4,0.92)',
@@ -1349,6 +1336,15 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             <span style={{fontSize:22}}>🔄</span>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#c8a030',letterSpacing:1,textTransform:'uppercase'}}>Re-Roll</span>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:'#55ee55'}}>🌿 {rerollCost}</span>
+          </div>
+          <div style={{width:130,height:130,
+            display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
+            background:'rgba(5,15,5,0.92)',
+            border:'2px solid rgba(50,140,50,0.6)',
+            borderRadius:8}}>
+            <span style={{fontSize:22}}>🌿</span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:30,fontWeight:900,color:stashColor,lineHeight:1}}>{stash}</span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#2a5a2a',letterSpacing:2,textTransform:'uppercase'}}>Stash</span>
           </div>
         </div>
 
