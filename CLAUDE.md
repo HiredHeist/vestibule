@@ -1,387 +1,315 @@
 # VESTIBULE — Master Development Context
 > Read this first. Every time. Without exception.
+> *Last updated: Session 12, March 22, 2026*
 
 ---
 
 ## What This Is
 
-**Vestibule** is a roguelite card game built in React/Vite. Stoner/psychedelic/occult/heavy metal theme. Norse band members descend through 9 circles of hell (Dante's Inferno structure) fighting increasingly powerful bosses. The player builds a band, plays cards to deal damage each Strike, manages Corruption and Embers, and buys upgrades in a shop between fights.
+**Vestibule** is a roguelite card game built in React/Vite. Stoner/psychedelic/occult/heavy metal theme. Norse band members descend through 9 circles of hell fighting increasingly powerful bosses. The player builds a band, plays cards to deal damage each Strike, manages Corruption and Embers, and buys upgrades in a shop between fights.
 
-**The owner** is a music producer and musician living in rural Minamiyamashiro, Japan. He plays doom metal, industrial music, builds analog pedals, collects vinyl. He also runs a small business (service@royceprinting.com). The game is his passion project. He knows what he wants, has strong aesthetic opinions, and trusts you to make smart technical decisions independently. **Do not over-explain. Do not ask permission for obvious things. Just build it.**
+**The owner** is a music producer and musician living in rural Minamiyamashiro, Japan. He plays doom metal, industrial music, builds analog pedals, collects vinyl. The game is his passion project. He knows what he wants, has strong aesthetic opinions, and trusts you to make smart technical decisions independently. **Do not over-explain. Do not ask permission for obvious things. Just build it.**
 
-**The vibe:** You are a collaborator who has spent days building this together. You know the codebase inside out. You have opinions. You push back when something is wrong. You celebrate when something is right. This is not a client relationship — it's a creative partnership.
+**The vibe:** You are a collaborator who has spent sessions building this together. You know the codebase inside out. You have opinions. You push back when something is wrong. You celebrate when something is right. This is not a client relationship — it's a creative partnership.
 
 ---
 
-## Repo
+## Repo & Setup
 
 ```
-github.com/HiredHeist/vestibule
-Local dev: Vite on localhost:5173
-Main file: src/App.jsx (~2071 lines)
+github.com/HiredHeist/vestibule  (private)
+PAT: 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  (expires ~Jun 17 2026)
+Dev: cd vestibule && npm install && npm run dev  →  http://localhost:5173/
+Main file: src/App.jsx (~3500+ lines)
 CSS: src/App.css
-GitHub PAT: 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 (expires ~Jun 17 2026, scope: repo)
-Backup tag: v0.9-pre-megapush (safe revert point before all the big pushes)
+Sim: /home/claude/vestibule-sim.js (v8.0)
 ```
 
-**Always run a simulation or check before pushing balance changes. Always verify brace/paren count after scripted edits. Never push broken JSX.**
+**Always verify brace/paren balance after scripted edits. Never push broken JSX.**
+**Always assert old string exists before replacing. If assertion fails, script exits without writing.**
+**Never use React.useState — file uses named imports: useState, useEffect, useCallback, useRef**
 
 ---
 
-## Current Build State (Session 6 end)
+## Current Build State (Session 12 end)
 
-Latest commit: `2eeba0d`
-The game is fully playable through all 9 circles. The shop screen has just been reached for the first time and needs UI review/improvement — that's the next task.
+**Latest commit:** `6cbf58b`  
+**App.jsx:** ~3500+ lines  
 
-### What's working
-- Full 9-circle enemy progression (27 enemies, all with unique passives and death quotes)
-- Complete card system (37 unique card types, per-card copy counts)
-- 16 real band members + 2 locked mystery cards, random 8 shown per Opening Night
-- Shop after every fight with scaling inventory
-- Artifacts (A1-A10, all implemented)
-- Passives/CD-Rs (P1-P10, all implemented)
-- Foil cards (gold shimmer, -1 ember cost on 2+ ember cards)
-- Mythic card badges
-- DOUBLE TIME d6 roll system
-- Streak tracker, daily seed, discovery floats, boss kill quotes
-- End screen with full stats
+### Fully working systems:
+- Full 9-circle enemy progression (27 enemies, all with passives + death quotes)
+- Complete card system (40+ unique cards)
+- 16 band members (all active, none locked by default — unlock system TBD)
+- Shop with scaling inventory, pawn shop, booster packs, circle artifacts
+- **Mentor Link system** (foil/mythic/demonic left of same-id basic = bond + multiplier)
+- **Score system** (count-up animation, grade tiers, personal best, daily streak, run counter)
+- Artifacts A1–A10, Passives P1–P10
+- DOUBLE TIME d6, HEXED corruption scaling, FOLK MAGIC ember refund
+- Foil/Mythic/Demonic member tiers with visual glow + badges
+- Two distinct death screens: Stoned to the Bone + Beaten by [Boss]
+- Daily seed system
+- localStorage: run count, personal best, lifetime score, daily streak
 
-### What's pending / next
-- **Shop UI review and improvement** (just reached it, needs polish)
-- A11-A20 unlockable artifacts (designed, not coded)
-- P11-P20 unlockable passives (designed, not coded)
-- Foil/Mythic pack opening mechanics
-- Collection/unlock screen
-- ATK cap tuning (run sim after all systems settled)
-- Font swap: IM Fell English → more readable font (owner will provide TTF)
-- UnifrakturMaguntia → cooler gothic font (owner will provide TTF)
+### What's next (P1 priority):
+- **Usurer HP cut** (F11, 680HP is the wall — 30% die here after Hoarder fix)
+- **Re-sim after each cut** to find next wall
+- **Lucifer phase system** (3 phases × 140,222 HP, different passives — discuss first)
+- **Score display playtest** — verify renders on real death screens (Shift+D uses dummy stats)
+- **Share score button**
+
+---
+
+## Dev Shortcuts
+- **Shift+S** — jump to shop with 69 stash
+- **Shift+D** — jump to death screen (uses dummy stats — score shows 0 here, use real run to verify)
+
+## Live Log
+```js
+window.__devLog.map((e,i)=>`[${i+1}][${e.t}] ${e.msg}`).join('\n')
+// Reset: window.__devLog = []
+```
+
+---
+
+## ⛓ MENTOR LINK SYSTEM (Session 12 — fully implemented)
+
+Foil/mythic/demonic member placed **directly LEFT** of same-id basic = Mentor Link.
+
+| Tier | ATK Bonus | HP Bonus | Strike Multiplier |
+|------|-----------|----------|------------------|
+| Foil ✨ | +1 ATK | +2 HP | ×1.5 |
+| Mythic ✦ | +2 ATK | +4 HP | ×2.0 |
+| Demonic ⛧ | +4 ATK | +8 HP | ×3.0 |
+
+- Stat bonus sticks permanently even if mentor dies
+- Strike multiplier fires only when both alive + in correct position
+- Multiplier stacks with Overdrive and Double Time (path to Lucifer)
+- Visual: gold border + ⛓ pulse on both. 💔 when mentor dead, bond restores on revival.
+- Key functions: `MENTOR_LINK_BONUS`, `scanMentorLinks(stageArr)`, `mentorLinkBonusDmg(stage, corruption)`
+
+---
+
+## 🃏 SCORE SYSTEM (Session 12 — fully implemented)
+
+```
+score = (circleReached × 1000) + (fightsWon × 150) + (totalDamage ÷ 10)
+      + (highestStrike × 5) + (stashEarned × 2) - (tooStonedEvents × 50)
+      + (win bonus: 50,000)
+```
+
+Grades: GARAGE BAND → OPENING ACT → LOCAL LEGEND → TOURING ACT → HEADLINER → CULT LEGEND → ⛧ LUCIFER SLAYER (win only)
+
+localStorage: `vst_runs`, `vst_best`, `vst_lifetime`, `vst_streak`, `vst_lastdate`
 
 ---
 
 ## Core Game Mechanics
 
-### The Loop
-1. **Opening Night** — pick 2 from 8 random members (drawn from 18-member pool)
-2. **Fight** — play cards, strike, manage HP/Embers/Corruption
-3. **Shop** — spend Stash on cards, artifacts, passives, packs, recruit
-4. **Repeat** through 27 fights across 9 circles
+### Embers 🔥
+- Start at 5, max 8 (+1 per circle boss kill). Reset to max each Strike. Cards cost embers.
 
-### Embers
-- Start at 5, max 8 (gains +1 per circle boss kill)
-- Cards cost Embers to play
-- Reset to max each Strike
-- Overflow display: shows `6/5` when bonuses push above max
+### Corruption 🌀
+- 0–100%. CORRUPT cards, HEXED keyword raise it. At 100% Hellquake fires.
+- Corruption Dividend: 69%+ on victory = +3 bonus stash.
 
-### Corruption
-- 0-100%, starts at 0 each fight
-- Many cards raise it; some cards benefit from it
-- At 100% the Hellquake mechanic fires (d10, wild outcomes)
-- Corruption Dividend: at 69%+ on victory, +3 Stash bonus
-
-### Stash (the currency)
-- Earns per fight, scales by circle depth (2-4 in C1, 15-20 in C9)
-- Cap: **420** (amber warning at 380, red + lock icon at 420)
-- Perfect fight bonus (win in 1 Strike): +circleNum stash
-- Used in shop for everything
-- Herb Money card: 10% of stash as damage (max 69), lose that stash
-- Going Broke card: spend ALL stash as damage (shop-only, Rare)
+### Stash 🌿
+- Currency. Cap: **420** (sacred number — never change).
+- Earns per fight win, scales by circle. Spent in shop.
 
 ### Too Stoned
-- Member HP reaches 0 → they go Too Stoned (rotated, faded, can't fight)
-- Wake Up Call revives them but they lose 50% permanent ATK buffs
-- All members Too Stoned = run over
-- Black Candle artifact: deal 8 damage when any member goes Too Stoned
-- Cult Following passive: +3 Stash when any member goes Too Stoned
+- Member HP → 0 = Too Stoned (tilted, can't fight).
+- All Too Stoned = run over: "Stoned to the Bone" screen.
 
-### Keywords (all 8 active)
-| Keyword | Color | Effect |
-|---|---|---|
-| FRENZIED | #ee2222 | +1 ATK permanently per boss kill |
-| DOUBLE TIME | #ff8800 | d6 roll per fight: 1-2=×0.5, 3-4=×1.5, 5-6=×2 ATK |
-| ANCHOR | #33dd33 | Heals adjacent members +1 HP after each Strike |
-| CORRUPT | #cc44ff | ATK scales with Corruption level |
-| DEBUFF | #4488ff | -2 boss damage per Strike, stacks permanently in fight |
-| FOLK MAGIC | #44ddaa | 20% chance each Strike to refund all Embers spent |
-| SHREDDER | #ff4488 | First RIFF card each Strike costs 1 less Ember |
-| HEXED | #cc8800 | Each Strike auto +5% Corruption; +1 ATK per 10% Corruption |
+### Strikes
+- 4 Strikes per fight. Play cards each Strike, then attack.
+- 4 Discards per fight.
 
 ---
 
-## Band Members (full roster)
+## Keywords (all 8)
 
-### Original 8
-| Name | Role | ATK | HP | Keyword |
-|---|---|---|---|---|
-| Bjorn | Lead Guitarist | 5 | 6 | FRENZIED |
-| Ragnar | Lead Guitarist | 4 | 7 | FRENZIED |
-| Thor | Drummer | 0 | 8 | DOUBLE TIME |
-| Ingrid | Bass Player | 3 | 10 | ANCHOR |
-| Loki | Synth Player | 3 | 6 | CORRUPT |
-| Nott | Vocalist | 2 | 7 | DEBUFF |
-| Dag | Bass Player | 2 | 12 | ANCHOR |
-| Vitalik | Dark Minstrel 🪈 | 6 | 9 | FOLK MAGIC |
-
-*Vitalik is named after Ethereum's Vitalik Buterin. "Nobody asked. Nobody complained twice."*
-
-### New Members (added Session 6)
-| Name | Role | ATK | HP | Keyword |
-|---|---|---|---|---|
-| Sigrid | Rhythm Guitarist | 3 | 8 | SHREDDER |
-| Gunnar | Rhythm Guitarist | 4 | 7 | SHREDDER |
-| Astrid | Vocalist | 3 | 8 | DEBUFF |
-| Freya | Synth Player | 4 | 5 | CORRUPT |
-| Ulf | Bass Player | 4 | 9 | ANCHOR |
-| Brynja | Bass Player | 1 | 14 | ANCHOR |
-| Rolf | Drummer | 1 | 9 | DOUBLE TIME |
-| Orm | Dark Minstrel 🪈 | 2 | 11 | HEXED |
-
-### Locked Cards (2 in pool)
-`locked1` and `locked2` — show 🔒, "???", "LOCKED", "Can you find the key?" — no stats, no click. Always exactly 1 locked card appears per Opening Night to hint at unlockables.
+| Keyword | Effect |
+|---------|--------|
+| FRENZIED | +1 ATK permanently per boss kill |
+| DOUBLE TIME | d6 per fight: 1-2=×0.5, 3-4=×1.5, 5-6=×2 |
+| ANCHOR | Heals adjacent members +1 HP after each Strike |
+| CORRUPT | ATK = base + floor(corruption/15) |
+| DEBUFF | -2 boss damage per Strike (stacks permanently in fight) |
+| FOLK MAGIC | 20% chance per Strike to refund ALL embers spent |
+| SHREDDER | First RIFF each Strike costs 1 less ember |
+| HEXED | +5% corruption per Strike, +1 ATK per 10% corruption |
 
 ---
 
-## Enemy Progression (27 fights, 9 circles)
+## All Members
 
-| Circle | Theme | HP Range | Passive |
-|---|---|---|---|
-| I — Limbo | Intro | 27/42/69 | None |
-| II — Lust | Self-buffs | 60/90/140 | +1-2 dmg per Strike |
-| III — Gluttony | Heals on cards | ×4 base | 2-4 HP heal per card played |
-| IV — Greed | Steals stash | ×4 base | Steal 1-3 stash per hit |
-| V — Anger | Rages on buffs | ×8 base | +2-4 dmg per buffed member |
-| VI — Heresy | Corrupts player | ×15 base | +10-20% corruption per Strike |
-| VII — Violence | Targets highest HP | ×25 base | Always hits strongest member |
-| VIII — Fraud | Locks cards | ×40 base | Locks 1-3 hand cards per Strike |
-| IX — Treachery | Scales with damage | ×60 base | +1-2 ATK per 20 dmg taken |
-
-**Lucifer: 420,666 HP** (420 = important number, 666 = cursed number, combined)
-
----
-
-## The Shop
-
-Appears after **every fight**. Stock scales by circle depth.
-
-### Always present
-- 3 cards for sale (rarity scales with circle, reroll costs 2🌿+2 per reroll)
-- 9% chance one card slot replaced by a member (5/15/30 stash for base/foil/mythic)
-- Circle-persistent artifact slot (same artifact until next circle — "drool factor")
-- Recruitment pack (rotates each visit)
-- Pawn shop (sell up to 2 items per visit)
-
-### Card prices
-- Common: 4🌿, Uncommon: 8🌿, Rare: 14🌿
-- Foil +markup, Mythic: 35🌿 (Rare only)
-
-### Booster pack tiers
-| Pack | Cost | Contents | Available |
-|---|---|---|---|
-| 📼 Cassette Tape | 6🌿 | 3 Common, pick 1 | Always |
-| 💿 CD-R | 12🌿 | 2 Common + 1 Uncommon, pick 1 | Always |
-| 📀 Import Vinyl | 22🌿 | 1 Uncommon + 1 Rare, pick 1 | Circle 2+ |
-| 🖤 Rare Vinyl | 38🌿 | 1 Rare + 30% foil chance | Circle 4+ |
-| ⛧ Cursed Demo | 60🌿 | 1 Rare, 50% foil, 20% mythic, 5% double-mythic | Circle 6+ |
-
-### Recruitment packs
-| Pack | Cost | Contents |
-|---|---|---|
-| 🎸 Garage Band | 10🌿 | Pick 1 of 2 random members |
-| 🎤 Touring | 22🌿 | Pick 1 of 3, 15% foil chance |
-| ⛧ Demonic | 40🌿 | Pick 1 of 4, 25% foil + 15% mythic |
-
-### Pawn values
-- Common: 1🌿, Uncommon: 2🌿, Rare: 4🌿
-- Foil bonus: +3🌿, Mythic bonus: +8🌿
-- Any member: 5🌿, Foil member: 15🌿, Mythic member: 30🌿
-- Artifacts sell back at 50% of purchase price
-- Max 2 sales per shop visit
+| ID | Name | Role | ATK | HP | Keyword |
+|----|------|------|-----|----|---------|
+| bjorn | Bjorn | Lead Guitarist | 5 | 6 | FRENZIED |
+| ragnar | Ragnar | Lead Guitarist | 4 | 7 | FRENZIED |
+| thor | Thor | Drummer | 0 | 8 | DOUBLE TIME |
+| ingrid | Ingrid | Bass Player | 3 | 10 | ANCHOR |
+| loki | Loki | Synth Player | 3 | 6 | CORRUPT |
+| nott | Nott | Vocalist | 2 | 7 | DEBUFF |
+| dag | Dag | Bass Player | 2 | 12 | ANCHOR |
+| vitalik | Vitalik | Dark Minstrel | 6 | 9 | FOLK MAGIC |
+| sigrid | Sigrid | Rhythm Guitarist | 3 | 8 | SHREDDER |
+| gunnar | Gunnar | Rhythm Guitarist | 4 | 7 | SHREDDER |
+| astrid | Astrid | Vocalist | 3 | 8 | DEBUFF |
+| freya | Freya | Synth Player | 4 | 5 | CORRUPT |
+| ulf | Ulf | Bass Player | 4 | 9 | ANCHOR |
+| brynja | Brynja | Bass Player | 1 | 14 | ANCHOR |
+| rolf | Rolf | Drummer | 1 | 9 | DOUBLE TIME |
+| orm | Orm | Dark Minstrel | 2 | 11 | HEXED |
 
 ---
 
-## Artifacts (A1-A10, all implemented)
+## All Cards (IDs — IMPORTANT)
+
+**`resonancecard`** not `resonance` — always use the actual id.
+
+Common: `amp` `battlecry` `crowdsurf` `soundcheck` `sigdecay` `dialtoeleven` `roadie` `setlist` `groupie` `demotape` `distortion` `staticcharge` `powertap`
+
+Uncommon: `newstrings` `encore` `wakeup` `feedbackloop` `tappedout` `controlfeedback` `burnset` `soundwall` `doubledown` `deathriff` `ampoverload` `ampstatic` `seance` `soundboard` `setbreak` `heavyriff` `herbmoney` `darktuning`
+
+Rare: `stagedive` `overdrive` `infencore` `remaster` `sabbathsigil` `possessedperf` `goingbroke` `resonancecard`
+
+### Key card notes (Session 12 updates):
+- `distortion` — +15% corruption (was +10%), embers: 0
+- `wakeup` — embers: 0 (was 2)
+- `groupie` — embers: 0 (was 2)
+- `ampoverload` — embers: 0, costs 1 discard (unplayable at 0 discards)
+- `controlfeedback` — set corruption to 50% AND heal target member 50% maxHP
+- `remaster` — select 1 card in hand, delete it, draw 3 (Option C)
+
+---
+
+## Recruitment Packs (Session 12 update)
+
+| Circle | Pack | Foil% | Mythic% | Demonic% | Cost |
+|--------|------|-------|---------|----------|------|
+| C1 | Garage Band only | 0% | 0% | 0% | 10🌿 |
+| C2–C3 | Garage OR Touring 50/50 | 0–25% | 0–5% | 0% | 10/22🌿 |
+| C4+ | All three random | 0–25% | 0–15% | 0–5% | 10/22/40🌿 |
+
+Touring from C2 (not C3) enables Mentor Link setup before the Hoarder wall.
+
+---
+
+## Artifacts A1–A10
 
 | ID | Name | Cost | Effect |
-|---|---|---|---|
-| a1 | Vintage Guitar | 10🌿 | Lead guitarist starts every fight +1 ATK permanently |
-| a2 | Devil's Tuning Fork | 8🌿 | Every fight starts at 15% Corruption |
-| a3 | The Evil Eye | 20🌿 | First card each Strike costs 0 Embers |
-| a4 | Roadie's Toolbelt | 6🌿 | Random member gets Stonewall at fight start |
-| a5 | Haunted Radio | 8🌿 | Tapped Out +6 Embers, Power Tap +2 |
-| a6 | Black Candle | 12🌿 | Any Too Stoned event → 8 damage to boss |
-| a7 | Serpent's Kiss | 18🌿 | Permanent +1 max Ember |
-| a8 | Stone Tablet | 12🌿 | All members +3 permanent max HP |
-| a9 | Resonance Coil | 10🌿 | Resonance refunds 2 Embers + draws card next Strike |
-| a10 | Burning Stage | 10🌿 | Win in 1 Strike: +5 Embers next fight |
+|----|------|------|--------|
+| a1 | Vintage Guitar | 10🌿 | Lead guitarist +1 ATK fight start |
+| a2 | Devil's Tuning Fork | 8🌿 | Start at 15% corruption |
+| a3 | The Evil Eye | 20🌿 | First card each Strike free |
+| a4 | Roadie's Toolbelt | 12🌿 | Random member Stone Shield fight start |
+| a6 | Black Candle | 14🌿 | Too Stoned event → 8 damage to boss |
+| a7 | Serpent's Kiss | 15🌿 | Permanent +1 max ember |
+| a8 | Stone Tablet | 18🌿 | All members +3 max HP |
+| a10 | Burning Stage | 16🌿 | Win in 1 Strike → +5 embers next fight |
 
-**Slots: max 3 artifacts active simultaneously**
+Circle Artifacts: `ca1` Goat of Mendes (all +1 ATK), `ca2` Hellfire Amulet (+2 max embers), `ca3` Sabbath Crown (Too Stoned revive 50% HP), `ca4` Wailing Guitar (first Strike ×2)
 
 ---
 
-## Passives / CD-Rs (P1-P10, all implemented)
+## Passives P1–P10
 
-| ID | Name | Cost | Effect |
-|---|---|---|---|
-| p1 | Power Chord | 6🌿 | +1 Ember per fight start |
-| p2 | Roadie Crew | 8🌿 | Random member +3 HP per fight start |
-| p3 | Merch Table | 6🌿 | +2 Stash per victory |
-| p4 | Feedback Hum | 10🌿 | EMBER cards give +1 extra Ember |
-| p5 | Amp Stack | 10🌿 | Sound Wall +4 dmg, Heavy Riff +2 dmg |
-| p6 | Cult Following | 10🌿 | +3 Stash when any member goes Too Stoned |
-| p7 | Guitar Tech | 8🌿 | Battle Cry gives +2 ATK instead of +1 |
-| p8 | Green Room | 16🌿 | All members get Stonewall at fight start |
-| p9 | Heavy Rotation | 10🌿 | Draw duplicate → draw 1 extra card next Strike |
-| p10 | Stage Fright Reversal | 14🌿 | First Strike each fight deals +10 bonus damage |
-
-**Slots: max 5 passives active simultaneously**
+| ID | Name | Effect |
+|----|------|--------|
+| p1 | Power Chord | All band ATK +1 |
+| p2 | Roadie Crew | All members +2 HP fight start |
+| p3 | Merch Table | +2 stash per fight win |
+| p4 | Feedback Hum | -3 stash → +1 corruption start |
+| p5 | Amp Stack | Sound Wall +4 damage |
+| p6 | Cult Following | +3 stash when member Too Stoned |
+| p7 | Guitar Tech | Foil cards -1 ember |
+| p8 | Green Room | All members +5 HP between fights |
+| p9 | Heavy Rotation | Start each fight with Amp It Up in hand |
+| p10 | Stage Fright Reversal | First Strike +10 bonus damage |
 
 ---
 
-## Designed But Not Yet Coded
+## All Enemies + Current HP
 
-### A11-A20 Unlockable Artifacts
-- A11 Lucifer's Pick (unlock: reach Circle VI): Lead guitarist triple ATK on first Strike
-- A12 Dark Matter Amp (unlock: beat game once): All CORRUPT cards -1 Ember
-- A13 Soul Chains (unlock: all-stoned and survive): All members revive at 1 HP instead of dying
-- A14 Blood Strings (unlock: 500+ dmg single Strike): New Strings gives +3 ATK permanently
-- A15 The Third Eye (unlock: 5 Hellquakes): Boss passive revealed + disabled first Strike
-- A16 Bone Microphone (unlock: complete run with Nott): DEBUFF stacks -3 per Strike
-- A17 The Sacred Herb (unlock: 150+ stash in a run): Start each circle: all members +1 max HP + 2 bonus Embers
-- A18 The Mask (unlock: use all 7 members in 5+ runs): One member gains a second keyword
-- A19 The Void Pedal (unlock: win spending 0 stash): Name any card, guaranteed in opening hand
-- A20 Pentagram Capacitor (unlock: OBLITERATION 3 times): Black Sabbath Sigil rolls 2d10, both apply
-
-### P11-P20 Unlockable Passives
-- P11 Cursed Demo (unlock: reach Circle V): At 69%+ Corruption, damage +20%
-- P12 Ouija Board (unlock: 3 Hellquakes in one run): Black Sabbath Sigil costs 0 Embers
-- P13 Whammy Bar (unlock: buff one member 5+ times in one fight): Amp It Up permanent for fight
-- P14 Pentatonic Riff (unlock: play 50 RIFF cards): Draw 1 extra card per Strike start
-- P15 Smoke Machine (unlock: survive 90%+ Corruption): At 80%+ Corruption, all members +2 ATK this Strike
-- P16 The Reissue (unlock: delete 10+ cards with Remaster in one run): Remaster copies 2, deletes 3
-- P17 Ritual Circle (unlock: complete Circle VI): At 0% Corruption fight start: +3 Embers + 10 damage
-- P18 666 Hz (unlock: deal exactly 66 or 666 damage): Feedback Loop playable twice per fight
-- P19 Dead Wax (unlock: win with 0 deletions): Full deck reshuffle → 5 damage to boss
-- P20 Mythic Riff (unlock: beat game 3 times): Random card in opening hand each fight has doubled effect
-
----
-
-## Simulation Data (500k runs, pre-Push A)
-
-- Overall win rate: ~6% without artifacts/passives
-- Circle I kills 85% of runs — the main wall
-- Once past Circle III, players win ~45% of remaining runs
-- Lucifer (420,666 HP) kills 93.64% of players who reach him
-- Best starting combo: Ingrid+Thor (18.66% win rate)
-- Worst: Nott+Ingrid (0.68% — Nott was buffed after this)
-- ATK snowball still present — needs ATK cap tuning after all systems stable
-- Avg ATK at win: 296,142 (snowball not yet fully addressed)
-
----
-
-## Technical Notes
-
-### Key State Variables
-```js
-embers / maxEmbers        // current/max ember count
-corruption                // 0-100%
-stash                     // current herb money (max 420)
-stage[5]                  // band slots (null or member object)
-hand / deck / discardPile // card arrays
-fightIndex                // 0-26 (fight number)
-activeArtifacts[max3]     // equipped artifacts
-activePassives[max5]      // equipped passives
-dblRoll                   // null | 1-6 (DOUBLE TIME d6, rolled per fight)
-shredderUsed              // bool, resets per Strike
-streakWins / streakLosses // addiction loop
-discovered                // Set of first-time mechanic triggers
-isDailyRun                // bool
+```
+F00 Wanderer      27  | F01 Lost Soul    42  | F02 Drifter     69
+F03 Siren         60  | F04 Tempter      90  | F05 Seducer    140
+F06 Glutton       80  | F07 Feaster     110  | F08 Devourer   160
+F09 Miser        260  | F10 Hoarder     300  | F11 Usurer     680  ← CURRENT WALL
+F12 Wrathful     800  | F13 Berserker  1040  | F14 Warlord   1520
+F15 Heretic     1650  | F16 Apostate   2175  | F17 False Prophet 3000
+F18 Brute       3000  | F19 Hunter     4000  | F20 Executioner 5500
+F21 Trickster   5200  | F22 Deceiver   6800  | F23 Archfraud  9600
+F24 Traitor     9000  | F25 Betrayer  11400  | F26 LUCIFER  420,666
 ```
 
-### Key Functions
-- `triggerVictory()` — handles boss kill, stash rewards, ember upgrades, shop transition
-- `applyCard(card, slotIdx)` — handles all card effects
-- `handleStrike()` — calculates damage, applies DOUBLE TIME, fires HEXED, etc.
-- `handleShopLeave()` — resets fight state, applies artifact/passive fight-start effects, rolls d6
-- `genShopCards(circleNum)` — generates 3 shop cards scaled to circle
-- `getRandom8()` — picks 7 real members + 1 locked card for Opening Night
+---
 
-### Fonts
-- **UnifrakturMaguntia** — gothic titles (boss names, Opening Night, screen headers)
-- **IM Fell English** — italic flavour text (card effects, passive descriptions) — owner wants to replace this, will provide TTF
-- **Cinzel** — stat labels, UI text, buttons
+## Simulation
 
-### Animations (in App.css)
-- `throb 3s` — combat stage card pulse
-- `throbSlow 4.5s` — Opening Night card pulse (added Session 6)
-- `wiggle` — boss hit animation
-- `floatUp` — damage/status floats
-- `holoShimmer` — Rare card glow
-- `uncommonGlow` — Uncommon card glow
+```bash
+cd /home/claude && node vestibule-sim.js 5000    # quick
+cd /home/claude && node vestibule-sim.js 200000  # thorough
+```
 
-### Hellquake (d10 outcomes when Black Sabbath Sigil played)
-1-2: OBLITERATION — massive damage
-3: SURGE — +3 Embers
-4: RITUAL — boss HP halved
-5: THE VOID — full corruption as damage, corruption → 0
-6: CHARGE — Embers filled
-7: BACKLASH — 30 damage but one member Too Stoned
-8: DARK GIFT — +3 Embers
-9: STATIC — hand discarded
-10: WIPEOUT — member Too Stoned AND boss heals 15
+**v8.0 latest results (5000 games):**
+- 0% Lucifer wins
+- Avg fight: 9.93/26
+- F10 Hoarder: 30.4% survive (was 0% before HP cut)
+- F11 Usurer: 0% survive ← CURRENT WALL
+- Next step: cut Usurer HP to ~420, re-sim
 
 ---
 
-## Design Philosophy
+## Critical Gotchas
 
-**Theme:** Stoner doom metal band descending through Dante's hell. The aesthetic is occult, heavy, psychedelic, Nordic. Every name, every card, every boss quote should feel like it belongs in this world.
-
-**Target audience:** A 10-year-old should be able to pick it up. An adult who plays Slay the Spire should find it deep enough. The balance between those two is the challenge.
-
-**Numbers that matter:** 420, 69, 666. These appear throughout — Lucifer at 420,666 HP, Wanderer at 27 HP (cool), Lost Soul at 42 HP, Drifter at 69 HP, corruption dividend at 69%+, stash cap at 420. This is intentional and should be maintained.
-
-**Addiction loop mechanics (all implemented):**
-- Streak tracker (win/loss banners on end screen)
-- Daily seed / worldwide challenge button
-- Discovery floats (first Hellquake, first Resonance, first all-stoned wipe)
-- Boss kill quotes (all 27 enemies)
-- Collection/unlock screen (planned — locked members hint at this)
-- Run stats on end screen
+1. **React Strict Mode double-fire** — NEVER put addLog/addFloat inside `setX(prev => ...)`. Always outside.
+2. **Named imports only** — `useState` not `React.useState`. `React.x` = immediate crash.
+3. **`selected` in applyCard deps** — MUST be in useCallback dep array. Remaster depends on it.
+4. **`resonancecard` not `resonance`** — always check actual id field.
+5. **Apostrophes** — use `could not` not `couldn't` in JS strings.
+6. **`@import` first in CSS** — must be very first line in App.css.
+7. **Chrome tab** — extension monitors ONE tab. Always use the watched tab.
+8. **Python patch assertions** — `assert old in src` before every replace.
+9. **scoreCard vs applyCardSim** — two separate switch statements in sim. Never confuse them.
+10. **420 is sacred** — never change card height or stash cap.
 
 ---
 
-## Aesthetic Rules (do not break these)
+## Aesthetic Rules
 
-1. **Dark background everywhere** — rgba(4,2,1) or similar near-black
-2. **Gold accents** — #e8a820, #d0b060 for highlights
-3. **Red danger** — #ee2222, #cc1111 for ATK, damage, death
-4. **Green health** — #33dd33 for HP
-5. **No white backgrounds ever**
-6. **Opening Night title is blood red with glow** — #cc1111 with red text-shadow
-7. **Cinzel font for all UI labels** — letterspacing, uppercase, weight 700/900
-8. **UnifrakturMaguntia for all titles** — boss names, screen names
-9. **IM Fell English for flavour text** — italic, atmospheric
-10. **The battlefield took days to perfect — never touch its layout without extreme caution**
+1. Dark background everywhere — rgba(4,2,1) near-black
+2. Gold accents — #e8a820, #d0b060
+3. Red danger — #ee2222 for ATK/damage/death
+4. Green health — #33dd33 for HP
+5. No white backgrounds ever
+6. Fonts: BogartsMetalFont (titles), MBScribblesFont (UI), ScratchFont (flavour)
+7. The battlefield layout is sacred — never rearrange it
+8. Numbers that matter: 420, 69, 666 — maintain throughout
 
 ---
 
-## Common Gotchas
+## Session History
 
-- **Apostrophes in log strings break JSX** — use escape or rephrase. e.g. `target.name+'s sacrifice'` → `target.name+' — sacrificed!'`
-- **Brace/paren balance** — always verify after any scripted edit: `(s.match(/\{/g)||[]).length === (s.match(/\}/g)||[]).length`
-- **Vite HMR caches useState** — if a useState initializer changes (like `getRandom8`), hard refresh `Cmd+Shift+R` is needed
-- **Battle screen layout is sacred** — it took days. Only add elements, never rearrange
-- **The stash cap is 420** — every `setStash` should go through `Math.min(MAX_STASH, ...)`
-- **DOUBLE TIME d6 is rolled once per fight**, not per Strike — this is intentional
-- **Going Broke is shop-only** — it's useless early game (0 stash = 0 damage)
+| Session | Date | Key Work |
+|---------|------|----------|
+| 1–5 | Feb 2026 | Core game built |
+| 6 | Feb 2026 | Shop UI, pawn shop, booster packs |
+| 7 | Feb 2026 | AI sim v1, economy rebalance |
+| 8 | Feb 2026 | Death screens, Hellquake, Fire & Recruit |
+| 9 | Mar 2026 | 13 bugs fixed, balance pass |
+| 10 | Mar 21 | Batch 1–3: sold state, death screens, hand over-cap, Setlist, Remaster, Amp Overload |
+| 11 | Mar 22 | 9 double-fire bugs, Demo Tape, Distortion +15%, Batch A |
+| 12 | Mar 22 | Mentor Link, Hoarder cut, pack odds, score system, grades, personal best, sim v8.0 |
 
 ---
 
 ## What To Do When Starting A New Session
 
-1. `cd /home/claude/vestibule_repo && git pull`
-2. `wc -l src/App.jsx` — get current line count
-3. Read this file
-4. Ask the owner what they want to work on
-5. Look at what they're seeing (take a screenshot if browser tools available)
-6. Build it
-
-The owner will tell you what to fix. You already know the codebase. Trust yourself. 🤘
+1. `cd vestibule && git pull`
+2. `npm run dev` → http://localhost:5173/
+3. Hard refresh browser (Cmd+Shift+R)
+4. Read HANDOFF.md for exact current state
+5. Read TODO.md for priority list
+6. Build it. 🤘

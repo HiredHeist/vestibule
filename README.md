@@ -1,16 +1,19 @@
-# React + Vite
+# Vestibule
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A roguelite card game. Build a doom metal band. Descend through 9 circles of Hell. Fight Lucifer.
 
-Currently, two official plugins are available:
+**Stack:** React 18 + Vite, single-file (`src/App.jsx`)  
+**Dev:** `npm install && npm run dev` → http://localhost:5173/  
+**Repo:** github.com/HiredHeist/vestibule (private)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## For AI Dev Agents
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Read `CLAUDE.md` first. Then `HANDOFF.md`. Then `TODO.md`. In that order.
 
-## Expanding the ESLint configuration
+`CLAUDE.md` = everything about the codebase, mechanics, gotchas  
+`HANDOFF.md` = exact current state, what was just shipped, what's next  
+`TODO.md` = prioritised task list  
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Do not start working until you've read all three.
