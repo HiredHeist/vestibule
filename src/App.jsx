@@ -1213,20 +1213,20 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                   color:'#44cc44',textAlign:'center',marginTop:8,
                   textShadow:'0 0 18px rgba(60,200,60,0.8)'}}>🌿 The Dealer</div>
                 {/* Mushrooms */}
-                <div onClick={()=>{if(shroomsInStock&&!heldShrooms&&can(8)){onSpend(8,'dealer',null);onBuyShrooms()}}}
+                <div onClick={()=>{if(shroomsInStock&&!heldShrooms&&can(6)){onSpend(6,'dealer',null);onBuyShrooms()}}}
                   style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
                     background:shroomsInStock&&!heldShrooms?'rgba(80,40,10,0.4)':'rgba(20,15,10,0.4)',
                     border:shroomsInStock&&!heldShrooms?'1px solid rgba(200,150,50,0.5)':'1px solid rgba(60,40,20,0.3)',
-                    borderRadius:8,cursor:shroomsInStock&&!heldShrooms&&can(8)?'pointer':'default',
+                    borderRadius:8,cursor:shroomsInStock&&!heldShrooms&&can(6)?'pointer':'default',
                     margin:'8px 0 4px',transition:'all 0.15s',position:'relative',
                     opacity:shroomsInStock?1:0.5}}>
                   {/* Cost oval */}
                   <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',
-                    background:shroomsInStock&&!heldShrooms&&can(8)?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
-                    border:'2px solid '+(shroomsInStock&&!heldShrooms&&can(8)?'#44bb44':'#4a3318'),borderRadius:20,
+                    background:shroomsInStock&&!heldShrooms&&can(6)?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
+                    border:'2px solid '+(shroomsInStock&&!heldShrooms&&can(6)?'#44bb44':'#4a3318'),borderRadius:20,
                     padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
                     fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-                    color:shroomsInStock&&!heldShrooms&&can(8)?'#55ee55':'#554428'}}>🌿 8</div>
+                    color:shroomsInStock&&!heldShrooms&&can(6)?'#55ee55':'#554428'}}>🌿 6</div>
                   <div style={{fontSize:72}}>🍄</div>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
                     color:shroomsInStock?'#e8a820':'#554428',marginTop:4}}>
@@ -1234,20 +1234,20 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                   {heldShrooms&&<SoldOverlay/>}
                 </div>
                 {/* Acid */}
-                <div onClick={()=>{if(acidInStock&&!heldAcid&&can(18)){onSpend(18,'dealer',null);onBuyAcid()}}}
+                <div onClick={()=>{if(acidInStock&&!heldAcid&&can(12)){onSpend(12,'dealer',null);onBuyAcid()}}}
                   style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
                     background:acidInStock&&!heldAcid?'rgba(40,10,80,0.4)':'rgba(15,10,20,0.4)',
                     border:acidInStock&&!heldAcid?'1px solid rgba(150,50,220,0.5)':'1px solid rgba(40,20,60,0.3)',
-                    borderRadius:8,cursor:acidInStock&&!heldAcid&&can(18)?'pointer':'default',
+                    borderRadius:8,cursor:acidInStock&&!heldAcid&&can(12)?'pointer':'default',
                     margin:'4px 0 8px',transition:'all 0.15s',position:'relative',
                     opacity:acidInStock?1:0.5}}>
                   {/* Cost oval */}
                   <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',
-                    background:acidInStock&&!heldAcid&&can(18)?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
-                    border:'2px solid '+(acidInStock&&!heldAcid&&can(18)?'#44bb44':'#4a3318'),borderRadius:20,
+                    background:acidInStock&&!heldAcid&&can(12)?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
+                    border:'2px solid '+(acidInStock&&!heldAcid&&can(12)?'#44bb44':'#4a3318'),borderRadius:20,
                     padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
                     fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-                    color:acidInStock&&!heldAcid&&can(18)?'#55ee55':'#554428'}}>🌿 18</div>
+                    color:acidInStock&&!heldAcid&&can(12)?'#55ee55':'#554428'}}>🌿 12</div>
                   <div style={{fontSize:72}}>🧪</div>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
                     color:acidInStock?'#cc44ff':'#4a2a6a',marginTop:4}}>
@@ -2005,8 +2005,8 @@ export default function App(){
   // ── DEALER: Mushrooms & Acid ──────────────────────────────────
   const [heldShrooms,setHeldShrooms]=useState(false) // player is holding shrooms
   const [heldAcid,setHeldAcid]=useState(false) // player is holding acid
-  const [shroomsInStock,setShroomsInStock]=useState(()=>Math.random()<0.69)
-  const [acidInStock,setAcidInStock]=useState(()=>Math.random()<0.69)
+  const [shroomsInStock,setShroomsInStock]=useState(()=>Math.random()<0.50)
+  const [acidInStock,setAcidInStock]=useState(()=>Math.random()<0.50)
   const [activeTripEffect,setActiveTripEffect]=useState(null) // {type,name,desc,color} — shown as dramatic reveal
   const [fightTripBuff,setFightTripBuff]=useState(null) // persists for entire fight — combat checks read this
   const [luciferPhase,setLuciferPhase]=useState(0) // 0=not lucifer, 1=phase1 ice, 2=phase2 satan
@@ -2679,8 +2679,8 @@ export default function App(){
         setShopCards(genShopCards(nextCn))
         setBoosterPacks(genBoosterPacks(nextCn))
         setRecruitPack(genRecruitPack(fightIndex))
-        setShroomsInStock(Math.random()<0.69)
-        setAcidInStock(Math.random()<0.69)
+        setShroomsInStock(Math.random()<0.50)
+        setAcidInStock(Math.random()<0.50)
         setShopSoldIds([]) // clear sold state when shop rotates
         // Rotate circle artifact + passive at each new circle (every 3rd fight)
         const isCircleBoss=(fightIndex+1)%3===0
@@ -2706,8 +2706,8 @@ export default function App(){
         setRecruitPack(genRecruitPack(fightIndex))
         setRerollCost(2)
         setStash(69)
-        setShroomsInStock(Math.random()<0.69)
-        setAcidInStock(Math.random()<0.69)
+        setShroomsInStock(Math.random()<0.50)
+        setAcidInStock(Math.random()<0.50)
         setGameState('shop')
       }
       if(e.shiftKey&&(e.key==='D'||e.key==='d')){
@@ -3417,8 +3417,8 @@ export default function App(){
     setStash(p=>Math.min(MAX_STASH,p-rerollCost));setRerollCost(p=>p+2)
     const cn=Math.floor(fightIndex/3)+1
     setShopCards(genShopCards(cn))
-    setShroomsInStock(Math.random()<0.69)
-    setAcidInStock(Math.random()<0.69)
+    setShroomsInStock(Math.random()<0.50)
+    setAcidInStock(Math.random()<0.50)
     addLog('🔄 Shop rerolled for '+rerollCost+' 🌿')
   },[stash,rerollCost,fightIndex])
 
