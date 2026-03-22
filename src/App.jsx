@@ -54,13 +54,14 @@ function getScoreGrade(score, won){
 }
 
 // ── UNLOCK SYSTEM ──────────────────────────────────────────────
-function isUnlocked(id,lifetimeScore){
+function isUnlocked(id,lt){
   const milestone=UNLOCK_MILESTONES.find(m=>m.id===id)
-  if(!milestone)return true // not in milestone list = always available
-  return(lifetimeScore||0)>=milestone.score
+  if(!milestone)return true
+  const score=lt!==undefined?lt:parseInt(localStorage.getItem('vst_lifetime')||'0')
+  return score>=milestone.score
 }
-function getUnlockedCards(lifetimeScore){return ALL_CARDS.filter(c=>!c.locked||isUnlocked(c.id,lifetimeScore))}
-function getUnlockedMusicians(lifetimeScore){return ALL_MUSICIANS.filter(m=>!m.locked||isUnlocked(m.id,lifetimeScore))}
+function getUnlockedCards(){const lt=parseInt(localStorage.getItem('vst_lifetime')||'0');return ALL_CARDS.filter(c=>!c.locked||isUnlocked(c.id,lt))}
+function getUnlockedMusicians(){const lt=parseInt(localStorage.getItem('vst_lifetime')||'0');return ALL_MUSICIANS.filter(m=>!m.locked||isUnlocked(m.id,lt))}
 
 const ENEMIES=[
   // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
@@ -194,7 +195,7 @@ function seededRng(seed){let s=seed;return function(){s=Math.imul(48271,s)|0;ret
 function buildDeck(seed){
   const rng=seededRng(seed)
   const deck=[]
-  ALL_CARDS.forEach(function(c){
+  getUnlockedCards().filter(c=>!c.shopOnly).forEach(function(c){
     const n=c.copies||2
     for(let i=0;i<n;i++){deck.push(Object.assign({},c,{uid:Math.random().toString(36).slice(2)}))}
   })
@@ -290,18 +291,18 @@ function genShopCards(circleNum){
   const memberChance=Math.random()
   let memberSlot=null
   if(memberChance<0.05){
-    const _sm=ALL_MUSICIANS.filter(m=>!m.locked)[Math.floor(Math.random()*ALL_MUSICIANS.filter(m=>!m.locked).length)]
+    const _sm=getUnlockedMusicians()[Math.floor(Math.random()*getUnlockedMusicians().length)]
     memberSlot={..._sm,isMember:true,cost:5,rarity:'Common',type:'RECRUIT',effect:_sm.keyword+' · '+_sm.role,foil:false,mythic:false,demonic:false,uid:Math.random().toString(36).slice(2)}
   } else if(memberChance<0.08){
-    const _sm=ALL_MUSICIANS.filter(m=>!m.locked)[Math.floor(Math.random()*ALL_MUSICIANS.filter(m=>!m.locked).length)]
+    const _sm=getUnlockedMusicians()[Math.floor(Math.random()*getUnlockedMusicians().length)]
     memberSlot={..._sm,isMember:true,name:'✨ Foil '+_sm.name,cost:15,rarity:'Uncommon',type:'RECRUIT',effect:'FOIL · '+_sm.keyword+' · '+_sm.role,foil:true,mythic:false,demonic:false,uid:Math.random().toString(36).slice(2)}
   } else if(memberChance<0.09){
-    const _sm=ALL_MUSICIANS.filter(m=>!m.locked)[Math.floor(Math.random()*ALL_MUSICIANS.filter(m=>!m.locked).length)]
+    const _sm=getUnlockedMusicians()[Math.floor(Math.random()*getUnlockedMusicians().length)]
     memberSlot={..._sm,isMember:true,name:'✦ Mythic '+_sm.name,cost:30,rarity:'Rare',type:'RECRUIT',effect:'MYTHIC · '+_sm.keyword+' · '+_sm.role,foil:false,mythic:true,demonic:false,uid:Math.random().toString(36).slice(2)}
   }
 
   // Filter cards by circle depth
-  const pool=[...ALL_CARDS].filter(c=>{
+  const pool=[...getUnlockedCards()].filter(c=>{
     if(cn<=2)return c.rarity==='Common'||c.rarity==='Uncommon'
     if(cn<=4)return true
     return true
@@ -486,7 +487,7 @@ function EmberDisplay({current,max}){
 function BoosterScreen({onComplete,seed}){
   const [sel,setSel]=useState([])
   const getRandom8=()=>{
-    const real=ALL_MUSICIANS.filter(m=>!m.locked)
+    const real=getUnlockedMusicians()
     const locked=ALL_MUSICIANS.filter(m=>m.locked)
     const shuffled=[...real].sort(()=>Math.random()-0.5)
     // Always exactly 1 locked card, 7 random real members
@@ -771,9 +772,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
       if(foilChance&&r<foilChance)return {...c,foil:true,uid:Math.random().toString(36).slice(2)}
       return {...c,uid:Math.random().toString(36).slice(2)}
     })
-    const commons=ALL_CARDS.filter(c=>c.rarity==='Common'&&!c.shopOnly)
-    const uncommons=ALL_CARDS.filter(c=>c.rarity==='Uncommon')
-    const rares=ALL_CARDS.filter(c=>c.rarity==='Rare'&&!c.shopOnly)
+    const _uc=getUnlockedCards()
+    const commons=_uc.filter(c=>c.rarity==='Common'&&!c.shopOnly)
+    const uncommons=_uc.filter(c=>c.rarity==='Uncommon')
+    const rares=_uc.filter(c=>c.rarity==='Rare'&&!c.shopOnly)
 
     if(pack.id==='cassette')return{cards:applyFoilMythic(pickRandom(commons,3),0,0),picks:1}
     if(pack.id==='cdr')return{cards:applyFoilMythic([...pickRandom(commons,3),...pickRandom(uncommons,2)],0.03,0),picks:1}
@@ -799,15 +801,15 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
       return{cards:pickRandom(arts,Math.min(2,arts.length)).map(a=>({...a,_isPack:true,uid:Math.random().toString(36).slice(2)})),picks:1}
     }
     if(pack.id==='garage'){
-      const members=ALL_MUSICIANS.filter(m=>!m.locked).map(m=>({...m,isMember:true,uid:Math.random().toString(36).slice(2)}))
+      const members=getUnlockedMusicians().map(m=>({...m,isMember:true,uid:Math.random().toString(36).slice(2)}))
       return{cards:pickRandom(members,2),picks:1}
     }
     if(pack.id==='touring'){
-      const members=ALL_MUSICIANS.filter(m=>!m.locked).map(m=>({...m,isMember:true}))
+      const members=getUnlockedMusicians().map(m=>({...m,isMember:true}))
       return{cards:applyFoilMythic(pickRandom(members,3),0.15,0),picks:1}
     }
     if(pack.id==='demonic'){
-      const members=ALL_MUSICIANS.filter(m=>!m.locked).map(m=>({...m,isMember:true}))
+      const members=getUnlockedMusicians().map(m=>({...m,isMember:true}))
       return{cards:applyFoilMythic(pickRandom(members,4),0.25,0.15),picks:1}
     }
     return{cards:[],picks:1}
@@ -2453,6 +2455,29 @@ export default function App(){
       if(gbHp<=0)setTimeout(triggerVictory,500)
       msg='💸 Going Broke! '+brokeDmg+' damage. All Stash spent.'
     }
+    // ── UNLOCKABLE CARDS ─────────────────────────────────────────
+    else if(card.id==='moshpit'){
+      const alive=ns.filter(m=>m&&!m.tooStoned).length
+      const mpDmg=alive*3
+      const bc=getCenter(bossRef)
+      const mpHp=Math.max(0,enemyHp-mpDmg);setEnemyHp(mpHp)
+      addFloat(mpDmg,bc.x,bc.y-60,'#cc44ff',mpDmg>=10);playHit();updStat('totalDamage',mpDmg)
+      if(mpHp<=0)setTimeout(triggerVictory,500)
+      msg='🤘 Mosh Pit! '+alive+' members × 3 = '+mpDmg+' damage!'
+    }
+    else if(card.id==='bloodritual'){
+      if(!m)return false
+      const sacrifice=Math.floor(m.hp*0.25)
+      if(sacrifice<=0){addLog('🩸 Not enough HP to sacrifice!');return false}
+      ns[slotIdx]=Object.assign({},m,{hp:m.hp-sacrifice})
+      const bc=getCenter(bossRef)
+      const brHp=Math.max(0,enemyHp-sacrifice);setEnemyHp(brHp)
+      setCorruption(p=>Math.min(100,p+15));updStat('maxCorruption',Math.min(100,corruption+15),true)
+      addFloat(sacrifice,bc.x,bc.y-60,'#cc0000',true);playHit();updStat('totalDamage',sacrifice)
+      addFloat('-'+sacrifice+' HP',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4444',false)
+      if(brHp<=0)setTimeout(triggerVictory,500)
+      msg='🩸 Blood Ritual! '+m.name+' sacrifices '+sacrifice+' HP → '+sacrifice+' damage! Corruption +15%'
+    }
     else if(card.id==='resonancecard'){
       if(!m)return false
       const maxAtk=Math.max(...ns.filter(mb=>mb&&!mb.tooStoned).map(mb=>mb.atk))
@@ -3199,6 +3224,22 @@ export default function App(){
                 return ns
               })
             }
+            // FALLEN keyword: Lucifer loses 1 HP per strike, game over if dead
+            setStage(prev=>{
+              const ns=prev.map(m=>{
+                if(m&&!m.tooStoned&&m.keyword==='FALLEN'){
+                  const newHp=m.hp-1
+                  if(newHp<=0){
+                    addLog('😈 Lucifer has fallen! The Devil is dead. GAME OVER.')
+                    setTimeout(()=>{setDeathCause('fallen');setGameState('end')},800)
+                    return Object.assign({},m,{hp:0,tooStoned:true})
+                  }
+                  return Object.assign({},m,{hp:newHp})
+                }
+                return m
+              })
+              return ns
+            })
             // C8 FRAUD: discard N random cards from hand, draw N replacements
             if(enemy.passiveId==='fraudShuffle'||enemy.passiveId==='fraudShuffle2'||enemy.passiveId==='fraudShuffle3'){
               const shuffleCount=enemy.passiveId==='fraudShuffle'?1:enemy.passiveId==='fraudShuffle2'?2:3
@@ -3350,6 +3391,8 @@ export default function App(){
     } else {
       setDblRoll(null)
     }
+    // War Drums: +1 Strike
+    if(activeArtifacts.some(a=>a.id==='wardrums')){setStrikesLeft(p=>p+1);addLog('🪘 War Drums! +1 Strike this fight.')}
     setGameState('playing')
   },[fightIndex,maxEmbers,stage])
 
@@ -3383,7 +3426,7 @@ export default function App(){
         candidates=[{...base,foil:m.foil||false,mythic:m.mythic||false,demonic:m.demonic||false,uid:Math.random().toString(36).slice(2)}]
       } else {
         const count=item.members||2
-        const real=ALL_MUSICIANS.filter(m=>!m.locked)
+        const real=getUnlockedMusicians()
         const shuffled=[...real].sort(()=>Math.random()-.5).slice(0,count)
         const fc=item.foilChance||0,mc=item.mythicChance||0,dc=item.demonicChance||0
         candidates=shuffled.map(m=>{
