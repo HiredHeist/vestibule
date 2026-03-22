@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Monday, March 23, 2026 at 04:00 AM (JST) — Session 13*
+*Last updated: Monday, March 23, 2026 at 05:00 AM (JST) — Session 13*
 
 ---
 
@@ -80,6 +80,27 @@ This is happening.
 ---
 
 ## ✅ COMPLETED TONIGHT
+
+### Addiction Stack (ALL 9 LAYERS COMPLETE)
+- [x] Layer 1: Death Screen Overhaul (BestGap, UnlockBar, Discoveries, Share, huge Play Again)
+- [x] Layer 2: Share Score Button (clipboard, formatted for Discord/Twitter)
+- [x] Layer 3: Unlock System (8 milestones + Double Dealer at 50k + Tanuki + Lucifer member)
+- [x] Layer 4: Daily Seed + Streak Bonuses (banner, +5/10/20% score)
+- [x] Layer 5: Run History (last 20 runs, collapsible on death screen)
+- [x] Layer 6: Achievement Badges (16 achievements, gold pulsing NEW badges)
+- [x] Layer 7: Almost Mechanics (near-miss messages)
+- [x] Layer 8: Main Menu (logo, Unlocks gallery, Rules, Options, deck placeholder)
+- [x] Layer 9: Difficulty Stakes (6 tiers Bronze→Demonic, all modifiers wired)
+
+### Bug Fixes
+- [x] Card multi-select on overlapping cards (stopPropagation + unique z-index)
+- [x] Combined Attack display rounding (Math.round→Math.floor to match combat)
+- [x] MAX_STRIKES hardcoded in 14 places → activeStake.maxStrikes (Demonic stake compatible)
+- [x] FALLEN healing exclusion on ANCHOR + P2 Roadie Crew
+- [x] Drug prices: shrooms 8→6, acid 18→12, stock 69%→50%
+- [x] Wake Up Call 0→1 ember, Herb Money 2→1 ember
+
+### Sim + Balance
 - [x] Sim v10.0 + v11.0 run (100k + 20k games)
 - [x] Lucifer 2-phase boss (420,666 → 6,666 HP) — 5.01% win rate
 - [x] C9 rework (Paranoia + Soul Thief)

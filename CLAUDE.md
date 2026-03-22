@@ -314,7 +314,7 @@ cd /home/claude && node vestibule-sim.js 20000   # thorough
 | 10 | Mar 21 | Batch 1–3: sold state, death screens, hand over-cap, Setlist, Remaster, Amp Overload |
 | 11 | Mar 22 | 9 double-fire bugs, Demo Tape, Distortion +15%, Batch A |
 | 12 | Mar 22 | Mentor Link, Hoarder cut, pack odds, score system, grades, personal best, sim v8.0 |
-| 13 | Mar 22-23 | 26+ pushes: C4/C5/C8/C9 rework, Lucifer 2-phase, The Dealer, card balance, Addiction Stack (death screen, unlocks, achievements, run history, daily streak, share score) |
+| 13 | Mar 22-23 | 30+ pushes: C4/C5/C8/C9 rework, Lucifer 2-phase, The Dealer, card balance, Addiction Stack (death screen, unlocks, achievements, run history, daily streak, share score) |
 
 ---
 
