@@ -49,6 +49,24 @@ This is happening.
 - [ ] "Bjorn was 2 HP from surviving"
 - [ ] Near-miss messages on death screen
 
+### Layer 8: Main Menu / Intro Screen (Balatro-style)
+- [ ] **Deck selection** — "Demo Deck" (only option initially), more decks unlock later
+- [ ] **Unlocks gallery** — shows all 8 milestones: unlocked (glowing) + locked (silhouette + score needed)
+- [ ] **Rules screen** — basic game rules, card types, keywords, how strikes/discards work
+- [ ] **Options** — scanlines on/off, screen shake, volume (future), reset progress (with confirm)
+- [ ] **Visual:** dark metal aesthetic, Vestibule logo, pulsing pentagram, "Press to Enter the Vestibule"
+
+### Layer 9: Difficulty Stakes (Balatro chip system)
+- [ ] **Stake 1: Bronze** — default difficulty, white border on deck. Beat Lucifer to unlock Silver.
+- [ ] **Stake 2: Silver** — bosses +15% HP, enemies +1 base damage. Silver border.
+- [ ] **Stake 3: Gold** — bosses +30% HP, enemies +2 base damage, shop prices +25%. Gold border.
+- [ ] **Stake 4: Obsidian** — bosses +50% HP, no free heal after fights, drugs 50% more expensive. Dark border.
+- [ ] **Stake 5: Blood** — bosses +75% HP, start with 4 max embers (not 5), corruption starts at 15%. Red border.
+- [ ] **Stake 6: Demonic ⛧** — bosses +100% HP, max 3 strikes (not 4), drugs can bad-trip at 15% (not 5%). Demonic border.
+- [ ] Each stake shows on death screen + share score
+- [ ] Lifetime score multiplier per stake (Bronze 1x, Silver 1.5x, Gold 2x, etc.)
+- [ ] Deck selection screen shows stake badges earned per deck
+
 ---
 
 ## ✅ COMPLETED TONIGHT

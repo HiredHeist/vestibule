@@ -353,8 +353,11 @@ function genRecruitPack(fightIndex=0){
   // Circle 1: only Garage Band
   // Circle 2-3: Garage Band or Touring (Foil/Mythic available early for Mentor Link)
   // Circle 4+: all packs (Demonic available before Hoarder wall)
+  // UNLOCK: 25k lifetime — Demonic available from C3
+  const demonicFromC3=isUnlocked('demonic_c3')
   if(circle<=1) return packs[0]
-  if(circle<=3) return packs[Math.floor(Math.random()*2)]
+  if(circle<=2) return packs[Math.floor(Math.random()*2)]
+  if(circle<=3) return demonicFromC3?packs[Math.floor(Math.random()*packs.length)]:packs[Math.floor(Math.random()*2)]
   return packs[Math.floor(Math.random()*packs.length)]
 }
 
@@ -3440,6 +3443,8 @@ export default function App(){
           if(fc&&r<fc)return{...m,foil:true,mythic:false,demonic:false}
           return{...m,foil:false,mythic:false,demonic:false}
         })
+        // UNLOCK: Foil Vitalik — 30% chance Vitalik becomes Foil if base tier
+        if(isUnlocked('vitalik_foil')){candidates=candidates.map(c=>c.id==='vitalik'&&!c.foil&&!c.mythic&&!c.demonic&&Math.random()<0.30?{...c,foil:true}:c)}
       }
       recruitPickFiredRef.current=false
       setRecruitCandidates(candidates)
@@ -3491,6 +3496,10 @@ export default function App(){
   const recruitPickFiredRef=useRef(false)
   const handleRecruitPick=useCallback((member)=>{
     if(recruitPickFiredRef.current)return
+    // Band cap: max 3 when Lucifer (FALLEN) is in band
+    const hasLucifer=stage.some(m=>m&&m.keyword==='FALLEN')
+    const currentSize=stage.filter(m=>m).length
+    if(hasLucifer&&currentSize>=3){addLog('😈 Lucifer limits your band to 3 members!');setGameState('shop');setRecruitCandidates([]);return}
     recruitPickFiredRef.current=true
     const tier=memberTier(member)
     if(member.demonic){
@@ -3537,14 +3546,16 @@ export default function App(){
   const handlePawnSellMember=useCallback((member,slotIdx)=>{
     const bandSize=stage.filter(m=>m).length
     if(bandSize<=2){addLog('⚠ Cannot sell — need at least 2 members!');return}
-    const price=member.demonic?69:5+(member.foil?3:0)+(member.mythic?8:0)
+    // Lucifer sells for 69 herb
+    const price=member.keyword==='FALLEN'?69:member.demonic?69:5+(member.foil?3:0)+(member.mythic?8:0)
     setStage(prev=>{
       const ns=breakMentorLink(member,[...prev])
       ns[slotIdx]=null
       return ns
     })
     setStash(p=>Math.min(420,p+price))
-    addLog('💰 Sold '+member.name+' for '+price+' stash.'+(member.roleBondBonus>0?' 🔗 Bond broken.':''))
+    if(member.keyword==='FALLEN'){addLog('😈 Sold Lucifer for 69🌿! Band cap restored to 5.')}
+    else{addLog('💰 Sold '+member.name+' for '+price+' stash.'+(member.roleBondBonus>0?' 🔗 Bond broken.':''))}
   },[stage])
 
   const handlePawnSellCard=useCallback((card)=>{
