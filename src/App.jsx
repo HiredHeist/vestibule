@@ -86,10 +86,10 @@ const ENEMIES=[
   {id:'trickster',tagline:'You played right into its hands.',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:5200,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle'},
   {id:'deceiver',tagline:'Nothing was what it seemed.',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:6800,baseDmg:7,emoji:'🎭',passive:'Manipulative. After each Strike, 2 cards in hand are discarded and replaced.',passiveId:'fraudShuffle2'},
   {id:'fraud_boss',tagline:'The greatest con: you thought you could win.',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:9600,baseDmg:8,emoji:'🪞',passive:'Master of lies. After each Strike, 3 cards in hand are discarded and replaced.',passiveId:'fraudShuffle3'},
-  // ── CIRCLE IX: TREACHERY — Gets stronger as it takes damage ──
-  {id:'traitor',tagline:'Every hit made it stronger. You knew that.',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:9000,baseDmg:6,emoji:'🗝️',passive:'Vindictive. Gains +1 ATK permanently for each 20 damage taken.',passiveId:'damageScaleAtk'},
-  {id:'betrayer',tagline:'Betrayal is its native language.',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:11400,baseDmg:7,emoji:'🔒',passive:'Vengeful. Gains +2 ATK per 20 damage taken. Kill it fast.',passiveId:'damageScaleAtk2'},
-  {id:'lucifer',tagline:'He has seen better challengers. A lot of them.',name:'Lucifer',circle:'Circle IX — Treachery',subtitle:'⛧ The Final Circle — Fight 3 of 3',maxHp:420666,baseDmg:9,emoji:'😈',passive:'The Lord of Hell. Gains +2 ATK per 20 HP lost. Immune to debuff. The ultimate test.',passiveId:'damageScaleAtk3'},
+  // ── CIRCLE IX: TREACHERY ──────────────────────────────────────
+  {id:'traitor',tagline:'Your own band turned on you.',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:9000,baseDmg:6,emoji:'🗝️',passive:'Paranoia. Each Strike, 1 random member refuses to attack and deals 3 damage to an ally.',passiveId:'paranoia'},
+  {id:'betrayer',tagline:'It stole everything you built.',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:11400,baseDmg:7,emoji:'🔒',passive:'Soul Thief. Each Strike, steals 1 permanent ATK from a random member. Returned on victory.',passiveId:'soulThief'},
+  {id:'lucifer',tagline:'He has seen better challengers. A lot of them.',name:'Lucifer',circle:'Circle IX — Treachery',subtitle:'⛧ The Final Circle — Fight 3 of 3',maxHp:420666,baseDmg:9,emoji:'😈',passive:'The Lord of Hell. Your victories weaken him. Two phases. The ultimate test.',passiveId:'luciferBoss'},
 ]
 
 const ALL_MUSICIANS=[
@@ -2009,6 +2009,9 @@ export default function App(){
   const [acidInStock,setAcidInStock]=useState(()=>Math.random()<0.69)
   const [activeTripEffect,setActiveTripEffect]=useState(null) // {type,name,desc,color} — shown as dramatic reveal
   const [fightTripBuff,setFightTripBuff]=useState(null) // persists for entire fight — combat checks read this
+  const [luciferPhase,setLuciferPhase]=useState(0) // 0=not lucifer, 1=phase1 ice, 2=phase2 satan
+  const [luciferCinematic,setLuciferCinematic]=useState(null) // {text,hpSteps} for HP melt animation
+  const [stolenAtkPool,setStolenAtkPool]=useState(0) // soulThief: total ATK stolen, returned on win
   const [tripUsedThisFight,setTripUsedThisFight]=useState(false)
   const [stats,setStats]=useState({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
 
@@ -2637,6 +2640,14 @@ export default function App(){
     if(activePassives.some(p=>p.id==='p3')){setStash(p=>Math.min(MAX_STASH,p+2));addLog('💿 Merch Table! +2 Stash.')}
     if(corruption>=69){setStash(p=>Math.min(MAX_STASH,p+3));addLog('🌀 Corruption Dividend! +3 Stash (69%+ corruption!)')}
     if(stashStolenThisFight>0){setStash(p=>Math.min(MAX_STASH,p+stashStolenThisFight));addLog('💰 Reclaimed '+stashStolenThisFight+'🌿 stolen by '+enemy.name+'!');setStashStolenThisFight(0)}
+    // soulThief: return stolen ATK on victory
+    if(stolenAtkPool>0){
+      setStage(p=>{const alive=p.filter(m=>m&&!m.tooStoned);if(alive.length===0)return p;
+        const perMember=Math.floor(stolenAtkPool/alive.length),remainder=stolenAtkPool%alive.length;let ri=0
+        return p.map(m=>{if(!m||m.tooStoned)return m;const bonus=perMember+(ri<remainder?1:0);ri++;return Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus})})})
+      addLog('🔓 '+stolenAtkPool+' stolen ATK returned to your band!')
+      setStolenAtkPool(0)
+    }
     if(perfectBonus>0)addFloat('PERFECT! +'+perfectBonus,getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
     addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.'))
     const bq=BOSS_QUOTES[enemy&&enemy.id];if(bq)setTimeout(()=>addLog('💀 "'+bq+'"'),600)
@@ -2682,7 +2693,7 @@ export default function App(){
         setGameState('shop')
       }
     },1000)
-  },[strikesLeft,corruption,fightIndex])
+  },[strikesLeft,corruption,fightIndex,stolenAtkPool])
 
 
 
@@ -2813,8 +2824,17 @@ export default function App(){
     if(bandBonus>1)addLog('🎸 Band synergy! '+buffed.length+' buffed: +'+Math.round((bandBonus-1)*100)+'% damage!')
 
     const hasDbl=actives.some(m=>m.role==='Drummer')
+    // PARANOIA: 1 random member refuses to attack, deals 3 to ally
+    let paranoiaVictim=null
+    if(enemy.passiveId==='paranoia'&&actives.length>1){
+      paranoiaVictim=actives[Math.floor(Math.random()*actives.length)]
+      const allies=actives.filter(m=>m.uid!==paranoiaVictim.uid)
+      if(allies.length>0){const target=allies[Math.floor(Math.random()*allies.length)]
+        setStage(p=>p.map(m=>m&&m.uid===target.uid?Object.assign({},m,{hp:Math.max(0,m.hp-3)}):m))
+        addLog('🗝 '+paranoiaVictim.name+' turns paranoid! Attacks '+target.name+' for 3 damage!')}
+    }
     const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===MAX_STRIKES?10:0
-    let dmg=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
+    let dmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
       const effectiveAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
       return s+effectiveAtk
     },0)+p10Bonus
@@ -2885,10 +2905,10 @@ export default function App(){
       const newEHp=Math.max(0,enemyHp-(dmg*(fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION'?2:1)))
       setEnemyHp(newEHp)
       // damageScaleAtk: boss gains ATK per 20 damage taken
-      if(enemy.passiveId&&enemy.passiveId.startsWith('damageScaleAtk')){
-        const atkGain=enemy.passiveId==='damageScaleAtk'?1:enemy.passiveId==='damageScaleAtk2'?2:2
-        const rageStacks=Math.floor((enemy.maxHp-newEHp)/20)
-        setBossRageAtk(rageStacks*atkGain)
+      if(enemy.passiveId==='luciferBoss'){
+        const atkGain=luciferPhase===1?1:2
+        const phaseTotalDmg=luciferPhase===1?(3333-newEHp):(3333-newEHp)
+        setBossRageAtk(Math.floor(Math.max(0,phaseTotalDmg)/20)*atkGain)
       }
       addFloat(dmg,bc.x,bc.y-60,dmg>=15?'#ff4400':'#dd2222',dmg>=15)
       if(folkMagicFired){
@@ -2906,7 +2926,31 @@ export default function App(){
         return nm
       })})
 
-      if(newEHp<=0){triggerVictory();return}
+      if(newEHp<=0){
+        // LUCIFER PHASE TRANSITION: Phase 1 → Phase 2
+        if(enemy.passiveId==='luciferBoss'&&luciferPhase===1){
+          setLuciferPhase(2)
+          setEnemyHp(3333)
+          setBossRageAtk(0)
+          // Full band reset
+          setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,stoneShield:false,tempBuff:false,encoreReady:false,ampedThisStrike:false}):null))
+          setEmbers(maxEmbers)
+          setStrikesLeft(MAX_STRIKES)
+          setDiscardsLeft(MAX_DISCARDS)
+          setTripUsedThisFight(false)
+          setFightTripBuff(null)
+          setActiveTripEffect(null)
+          // Dramatic transition
+          setLuciferCinematic({text:'THE ICE SHATTERS',hp:3333,phase:2})
+          setTimeout(()=>setLuciferCinematic(null),4000)
+          addLog('⛧ THE ICE SHATTERS ⛧')
+          addLog('😈 Phase 2: Satan, Lord of the Flies — 3,333 HP')
+          addLog('⛧ Band revived! Full HP, Embers, Strikes, Discards reset!')
+          setAnimPhase('idle')
+          return
+        }
+        triggerVictory();return
+      }
 
       setTimeout(function(){
         setAnimPhase('boss')
@@ -2919,6 +2963,8 @@ export default function App(){
         } else {
           target=activeM[Math.floor(Math.random()*activeM.length)]
         }
+        // Lucifer Phase 2: AoE — hits ALL members (damage split)
+        const luciferAoE=enemy.passiveId==='luciferBoss'&&luciferPhase===2
         setDiceTarget(target);setShowDice(true);playDice()
         setTimeout(function(){
           setShowDice(false)
@@ -2939,9 +2985,50 @@ export default function App(){
         else if(enemy.passiveId==='stashSteal'){if(stash>0){const stolen=Math.min(stash,1);setStash(p=>Math.max(0,p-stolen));setStashStolenThisFight(p=>p+stolen);addLog('💰 The Miser steals '+stolen+'🌿!')}}
         else if(enemy.passiveId==='stashSteal2'){if(stash>0){const stolen=Math.min(stash,2);setStash(p=>Math.max(0,p-stolen));setStashStolenThisFight(p=>p+stolen);addLog('🪙 The Hoarder steals '+stolen+'🌿!')}}
         else if(enemy.passiveId==='stashSteal3'){if(stash>0){const stolen=Math.min(stash,3);setStash(p=>Math.max(0,p-stolen));setStashStolenThisFight(p=>p+stolen);addLog('🏦 The Usurer steals '+stolen+'🌿!')}}
+        // soulThief: steal 1 permanent ATK from random member
+        else if(enemy.passiveId==='soulThief'){
+          scaledBaseDmg=enemy.baseDmg+stolenAtkPool
+          const stealTargets=stage.filter(m=>m&&!m.tooStoned&&(m.permAtkBonus||0)>0)
+          if(stealTargets.length>0){const victim=stealTargets[Math.floor(Math.random()*stealTargets.length)]
+            setStage(p=>p.map(m=>m&&m.uid===victim.uid?Object.assign({},m,{atk:m.atk-1,permAtkBonus:(m.permAtkBonus||0)-1}):m))
+            setStolenAtkPool(p=>p+1)
+            addLog('🔒 The Betrayer steals 1 ATK from '+victim.name+'!')}
+        }
+        // luciferBoss: phase-specific passives
+        else if(enemy.passiveId==='luciferBoss'){
+          if(luciferPhase===1){
+            // Frozen Wrath: frostbite 3 to all + damageScale +1
+            scaledBaseDmg=enemy.baseDmg+bossRageAtk
+            setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:Math.max(0,m.hp-3)}):m))
+            addLog('🧊 Frostbite! All members take 3 cold damage.')
+          } else if(luciferPhase===2){
+            // Infernal: AoE + damageScale +2
+            scaledBaseDmg=enemy.baseDmg+bossRageAtk
+          }
+        }
         else{scaledBaseDmg=enemy.baseDmg}
         const actualDmg=(fightTripBuff==='ASTRAL PROJECTION')?0:Math.max(1,Math.round(scaledBaseDmg)-bossDebuff)
           const ti=stage.indexOf(target)
+          if(luciferAoE&&actualDmg>0){
+            // Phase 2: AoE — split damage across ALL alive members
+            const splitDmg=Math.ceil(actualDmg/activeM.length)
+            addLog('😈 Satan strikes ALL members for '+splitDmg+' each! ('+actualDmg+' total)')
+            setStage(function(prev){
+              const ns2=[...prev]
+              for(let ai=0;ai<ns2.length;ai++){
+                if(!ns2[ai]||ns2[ai].tooStoned)continue
+                const newHp=ns2[ai].hp-splitDmg
+                if(newHp<=0&&!ns2[ai].stoneShield){ns2[ai]=Object.assign({},ns2[ai],{hp:0,tooStoned:true});updStat('tooStonedCount',1)}
+                else if(newHp<=0&&ns2[ai].stoneShield){const nsh=typeof ns2[ai].stoneShield==='number'?ns2[ai].stoneShield-1:0;ns2[ai]=Object.assign({},ns2[ai],{hp:1,stoneShield:nsh>0?nsh:false})}
+                else{ns2[ai]=Object.assign({},ns2[ai],{hp:Math.max(0,newHp)})}
+              }
+              const allStoned=ns2.filter(m=>m).every(m=>m.tooStoned)
+              if(allStoned){discover('allstoned','TOTAL WIPEOUT');setDeathCause('stoned');setTimeout(()=>setGameState('end'),800)}
+              return ns2
+            })
+            setDamageFlash(true);setTimeout(()=>setDamageFlash(false),400)
+            setDiceTarget(null)
+          } else {
           setStage(function(prev){
             const ns2=[...prev]
             if(ns2[ti]){
@@ -2980,6 +3067,7 @@ export default function App(){
           setDamageFlash(true);setTimeout(function(){setDamageFlash(false)},400)
           addLog('👁 '+enemy.name+' hits '+target.name+' for '+actualDmg)
           setDiceTarget(null)
+          } // end single-target else
           setTimeout(function(){
             let nh=[...handRef.current],nd=[...deckRef.current],ndisc=[...discRef.current];
             const refillTarget=Math.max(HAND_SIZE,nh.length);
@@ -3052,7 +3140,7 @@ export default function App(){
         },1200)
       },delay+400)
     },delay+200)
-  },[animPhase,strikesLeft,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,bossRef,stageRefs,drawUpTo,triggerVictory,bossRageAtk,bossDebuff,fightTripBuff])
+  },[animPhase,strikesLeft,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,bossRef,stageRefs,drawUpTo,triggerVictory,bossRageAtk,bossDebuff,fightTripBuff,luciferPhase,stolenAtkPool,maxEmbers])
 
   const handleShopLeave=useCallback(()=>{
     const nextIdx=Math.min(fightIndex+1, 26)
@@ -3060,7 +3148,23 @@ export default function App(){
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(nextEnemy.maxHp)
     setEmbers(function(){return maxEmbers});setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null)
+    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0)
+    // ── LUCIFER PHASE SETUP ─────────────────────────────────────
+    if(fightIndex===26){
+      // 8 circle bosses killed = 8 × 51,750 = 414,000 reduction → 6,666 HP
+      const bossKillReduction=8*51750
+      const luciferActualHp=Math.max(666,420666-bossKillReduction) // 6,666
+      setEnemyHp(luciferActualHp)
+      setLuciferPhase(1)
+      addLog('⛧ YOUR VICTORIES ECHO THROUGH HELL ⛧')
+      addLog('⛧ 8 Circle Bosses defeated — Lucifer weakened to '+luciferActualHp+' HP!')
+      addLog('🧊 Phase 1: Lucifer, Frozen in Cocytus')
+      // Show cinematic overlay
+      setLuciferCinematic({text:'YOUR VICTORIES ECHO THROUGH HELL',hp:luciferActualHp})
+      setTimeout(()=>setLuciferCinematic(null),5000)
+    } else {
+      setLuciferPhase(0)
+    }
     // Re-roll DOUBLE TIME for next fight
     const nd=stage.some(m=>m&&m.role==='Drummer')
     const ndCount=stage.filter(m=>m&&m.role==='Drummer').length
@@ -3323,7 +3427,7 @@ export default function App(){
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(5);setMaxEmbers(5);setStash(3);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0);setDeathCause('fallen')
-    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(false);setHeldAcid(false);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null)
+    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(false);setHeldAcid(false);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0)
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -3367,6 +3471,18 @@ export default function App(){
         <div style={{fontSize:100,animation:'throb 0.4s ease-in-out infinite',filter:`drop-shadow(0 0 40px ${activeTripEffect.color})`}}>{activeTripEffect.type==='shrooms'?'🍄':'🧪'}</div>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,color:activeTripEffect.color,textShadow:`0 0 40px ${activeTripEffect.color},0 0 80px ${activeTripEffect.color}`,animation:'fadeIn 0.3s ease'}}>{activeTripEffect.name}</div>
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:24,color:'rgba(255,255,255,0.9)',textAlign:'center',maxWidth:600,fontStyle:'italic',textShadow:'0 0 20px rgba(0,0,0,0.9)',animation:'fadeIn 0.5s ease',padding:'0 40px',lineHeight:1.5}}>{activeTripEffect.desc}</div>
+      </div>}
+      {/* LUCIFER CINEMATIC OVERLAY */}
+      {luciferCinematic&&<div style={{position:'fixed',inset:0,zIndex:9700,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.92)',animation:'fadeIn 0.2s ease'}}>
+        <div style={{fontSize:120,animation:'throb 0.4s ease-in-out infinite',filter:'drop-shadow(0 0 40px rgba(0,100,255,0.8))'}}>
+          {luciferCinematic.phase===2?'😈':'🧊'}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:luciferCinematic.phase===2?'#ff3300':'#44ccff',
+          textShadow:luciferCinematic.phase===2?'0 0 40px rgba(255,0,0,0.8),0 0 80px rgba(200,0,0,0.5)':'0 0 40px rgba(60,180,255,0.8),0 0 80px rgba(0,100,200,0.5)',
+          animation:'fadeIn 0.3s ease'}}>⛧ {luciferCinematic.text} ⛧</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,color:'#fff',textShadow:'0 0 20px rgba(0,0,0,0.9)',animation:'fadeIn 0.6s ease'}}>
+          {luciferCinematic.phase===2?'Phase 2: Satan, Lord of the Flies':'420,666 → '+luciferCinematic.hp+' HP'}</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'rgba(255,255,255,0.7)',fontStyle:'italic',animation:'fadeIn 0.8s ease'}}>
+          {luciferCinematic.phase===2?'Band fully restored. All strikes reset. Finish this.':'8 Circle Bosses defeated. Their echoes weaken the Devil.'}</div>
       </div>}
       {remasterOpen&&<RemasterModal cards={remasterCards} onConfirm={(delUids,copyUid)=>{
         setDeck(prev=>{
