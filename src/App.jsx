@@ -69,7 +69,7 @@ const ENEMIES=[
   // ── CIRCLE IV: GREED — Steals stash on hit ───────────────────
   {id:'miser',tagline:'You could not afford to win.',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:260,baseDmg:4,emoji:'💰',passive:'Greedy. Hits harder the more Stash you carry — each 10🌿 = +1 damage.',passiveId:'stashScale'},
   {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:300,baseDmg:5,emoji:'🪙',passive:'Avaricious. Hits harder the more Stash you carry — each 8🌿 = +1 damage.',passiveId:'stashScale2'},
-  {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:680,baseDmg:6,emoji:'🏦',passive:'Extracting. Hits harder the more Stash you carry — each 5🌿 = +1 damage. Spend wisely.',passiveId:'stashScale3'},
+  {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:420,baseDmg:6,emoji:'🏦',passive:'Extracting. Hits harder the more Stash you carry — each 5🌿 = +1 damage. Spend wisely.',passiveId:'stashScale3'},
   // ── CIRCLE V: ANGER — Hits harder the more you buff ─────────
   {id:'wrathful',tagline:'Your buffs fed its rage.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:800,baseDmg:5,emoji:'🔥',passive:'Enraged. +2 damage for each buffed member on your stage.',passiveId:'rageScale'},
   {id:'berserker',tagline:'Fury without limit.',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:1040,baseDmg:6,emoji:'⚔️',passive:'Furious. +3 damage per buffed member. Keep your band clean.',passiveId:'rageScale3'},
@@ -2047,17 +2047,8 @@ export default function App(){
     else if(card.id==='dialtoeleven'){const nc=Math.min(100,corruption+20);setCorruption(nc);updStat('maxCorruption',nc,true);msg='📻 Corruption +20% → '+nc+'%'}
     else if(card.id==='sigdecay'){const nc=Math.max(0,corruption-30);setCorruption(nc);msg='📡 Corruption -30% → '+nc+'%'}
     else if(card.id==='remaster'){
-      // Must have exactly 1 non-remaster card selected to delete
-      const toDeleteUid=selected.find(uid=>uid!==card.uid&&hand.some(c=>c.uid===uid))
-      if(!toDeleteUid){addLog('🎙 Select 1 card in hand first, then play The Remaster.');return false}
-      const toDelete=hand.find(c=>c.uid===toDeleteUid)
-      const handAfterDelete=hand.filter(c=>c.uid!==toDeleteUid&&c.uid!==card.uid)
-      const res=drawUpTo(handAfterDelete,deck,[...discardPile,toDelete],handAfterDelete.length+3)
-      setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
-      setSelected([])
-      spent=0
-      msg='🎙 Remastered! Deleted '+toDelete.name+', drew 3.'
-      addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
+      // Handled in handleDropOnStage to avoid stale selected closure (same fix as setlist/burnset)
+      return false
     }
     else if(card.id==='setlist'){
       // Handled in handleDropOnStage to avoid double state update (same fix as burnset)
@@ -2423,6 +2414,30 @@ export default function App(){
       addLog('🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+drawCount+'.'+(discardCount===0?' (Tip: select cards before playing)':''))
       updStat('cardsPlayed',1)
       setLastRiffPlayed(card)
+      setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
+      return
+    }
+
+    // ── REMASTER: handle here for fresh selected state (same fix as setlist/burnset) ──
+    if(card.id==='remaster'){
+      const toDeleteUid=selected.find(uid=>uid!==card.uid&&hand.some(c=>c.uid===uid))
+      if(!toDeleteUid){addLog('🎙 Select 1 card in hand first, then play The Remaster.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
+      const effectiveEmbers=nextCardFree?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
+      if(nextCardFree)setNextCardFree(false)
+      const toDelete=hand.find(c=>c.uid===toDeleteUid)
+      const handAfterDelete=hand.filter(c=>c.uid!==toDeleteUid&&c.uid!==card.uid)
+      const res=drawUpTo(handAfterDelete,deck,[...discardPile,toDelete],handAfterDelete.length+3)
+      setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
+      setSelected([])
+      if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
+      addLog('🎙 Remastered! Deleted '+toDelete.name+', drew 3.')
+      addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
+      updStat('cardsPlayed',1)
+      // cardHeal enemy passive
+      if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
+      else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
+      else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>Math.min(enemy.maxHp,p+4))
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
     }
