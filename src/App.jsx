@@ -36,7 +36,7 @@ const ENEMIES=[
   {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:160,baseDmg:6,emoji:'🕳',passive:'Endless hunger. Heals 4 HP per card played. Strike fast.',passiveId:'cardHeal4'},
   // ── CIRCLE IV: GREED — Steals stash on hit ───────────────────
   {id:'miser',tagline:'You could not afford to win.',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:260,baseDmg:4,emoji:'💰',passive:'Greedy. Hits harder the more Stash you carry — each 10🌿 = +1 damage.',passiveId:'stashScale'},
-  {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:480,baseDmg:5,emoji:'🪙',passive:'Avaricious. Hits harder the more Stash you carry — each 8🌿 = +1 damage.',passiveId:'stashScale2'},
+  {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:300,baseDmg:5,emoji:'🪙',passive:'Avaricious. Hits harder the more Stash you carry — each 8🌿 = +1 damage.',passiveId:'stashScale2'},
   {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:680,baseDmg:6,emoji:'🏦',passive:'Extracting. Hits harder the more Stash you carry — each 5🌿 = +1 damage. Spend wisely.',passiveId:'stashScale3'},
   // ── CIRCLE V: ANGER — Hits harder the more you buff ─────────
   {id:'wrathful',tagline:'Your buffs fed its rage.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:800,baseDmg:5,emoji:'🔥',passive:'Enraged. +2 damage for each buffed member on your stage.',passiveId:'rageScale'},
@@ -291,9 +291,41 @@ function genRecruitPack(fightIndex=0){
 // ── MENTOR LINK SYSTEM ────────────────────────────────────────────
 const KW_BOND_COLOR={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
 function memberTier(m){return m&&m.demonic?'demonic':m&&m.mythic?'mythic':m&&m.foil?'foil':'base'}
-function tierAtkBonus(m){return m.demonic?5:m.mythic?3:m.foil?1:0}
-function tierHpBonus(m){return m.demonic?5:m.mythic?3:m.foil?1:0}
+function tierAtkBonus(m){return m.demonic?4:m.mythic?2:m.foil?1:0}
+function tierHpBonus(m){return m.demonic?8:m.mythic?4:m.foil?2:0}
 function roleBondBonus(tier){return tier==='demonic'?3:tier==='mythic'?2:tier==='foil'?1:0}
+// ── MENTOR LINK ────────────────────────────────────────────────────
+// foil/mythic/demonic placed directly LEFT of same-id basic = Mentor Link
+// Stat bonus transfers once and sticks even if mentor dies
+// Strike multiplier fires only when both alive + in position
+const MENTOR_LINK_BONUS={foil:{atk:1,hp:2,mult:1.5},mythic:{atk:2,hp:4,mult:2.0},demonic:{atk:4,hp:8,mult:3.0}}
+function scanMentorLinks(stageArr){
+  const ns=stageArr.map(m=>m?{...m}:null)
+  for(let i=0;i<ns.length-1;i++){
+    const mentor=ns[i],basic=ns[i+1]
+    if(!mentor||!basic)continue
+    if(!(mentor.foil||mentor.mythic||mentor.demonic))continue
+    if(basic.foil||basic.mythic||basic.demonic)continue
+    if(mentor.id!==basic.id)continue
+    const tier=mentor.demonic?'demonic':mentor.mythic?'mythic':'foil'
+    const bonus=MENTOR_LINK_BONUS[tier]
+    ns[i]={...mentor,isMentor:true}
+    if(basic.mentorLinkedToUid!==mentor.uid){
+      ns[i+1]={...basic,atk:basic.atk+bonus.atk,hp:basic.hp+bonus.hp,maxHp:(basic.maxHp||basic.hp)+bonus.hp,mentorLinkedToUid:mentor.uid,mentorMult:bonus.mult,mentorTier:tier,mentorAlive:!mentor.tooStoned}
+    } else {
+      ns[i+1]={...basic,mentorAlive:!mentor.tooStoned,mentorMult:bonus.mult,mentorTier:tier}
+    }
+  }
+  // Deactivate links where mentor is no longer left-adjacent
+  for(let i=0;i<ns.length;i++){
+    const m=ns[i]
+    if(!m||!m.mentorLinkedToUid)continue
+    const left=i>0?ns[i-1]:null
+    const linked=left&&left.uid===m.mentorLinkedToUid&&!left.tooStoned
+    if(!linked)ns[i]={...m,mentorAlive:false}
+  }
+  return ns
+}
 function getBondColor(member,stage){
   if(!member||!member.roleBondWith||member.roleBondWith.length===0)return null
   if(!stage.some(m=>m&&member.roleBondWith.includes(m.uid)))return null
@@ -1209,7 +1241,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   )
 }
 
-function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor}){
+function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState}){
   const [over,setOver]=useState(false)
   const [showTip,setShowTip]=useState(false)
   if(!member){
@@ -1224,9 +1256,9 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   return(
     <div ref={innerRef} draggable onDragStart={onDragStart} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}} onMouseEnter={()=>setShowTip(true)} onMouseLeave={()=>setShowTip(false)}
       style={{width:230,height:345,display:'flex',flexDirection:'column',background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
-        border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':bondColor?'2px solid '+bondColor:over?'2px solid #e8a820':st?'1px solid #333':member.demonic?'2px solid #ffd700':member.mythic?'2px solid #cc44ff':member.foil?'2px solid #88ccff':'2px solid rgba(190,120,25,0.85)',
+        border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':mentorState==='active'?'3px solid #ffd700':mentorState==='broken'?'2px solid #555':mentorState==='mentor'?'2px solid #ffd700':bondColor?'2px solid '+bondColor:over?'2px solid #e8a820':st?'1px solid #333':member.demonic?'2px solid #ffd700':member.mythic?'2px solid #cc44ff':member.foil?'2px solid #88ccff':'2px solid rgba(190,120,25,0.85)',
         borderRadius:6,
-        boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':!st&&member.demonic?'0 0 25px rgba(255,200,0,0.5),0 6px 24px rgba(0,0,0,0.85)':!st&&member.mythic?'0 0 25px rgba(200,0,255,0.4),0 6px 24px rgba(0,0,0,0.85)':!st&&member.foil?'0 0 20px rgba(100,180,255,0.35),0 6px 24px rgba(0,0,0,0.85)':'0 6px 24px rgba(0,0,0,0.85)',
+        boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':mentorState==='active'&&!st?'0 0 40px rgba(255,215,0,0.9),0 6px 24px rgba(0,0,0,0.85)':mentorState==='mentor'&&!st?'0 0 22px rgba(255,215,0,0.5),0 6px 24px rgba(0,0,0,0.85)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':!st&&member.demonic?'0 0 25px rgba(255,200,0,0.5),0 6px 24px rgba(0,0,0,0.85)':!st&&member.mythic?'0 0 25px rgba(200,0,255,0.4),0 6px 24px rgba(0,0,0,0.85)':!st&&member.foil?'0 0 20px rgba(100,180,255,0.35),0 6px 24px rgba(0,0,0,0.85)':'0 6px 24px rgba(0,0,0,0.85)',
         transform:st?'rotate(15deg) scale(0.95)':'none',
         opacity:st?0.5:1,
         animation:(!st&&!isAttacking&&!isDiceTarget)?'throb 3s ease-in-out infinite':'none',
@@ -1236,6 +1268,9 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
       {showTip&&member&&KEYWORD_DESC[member.keyword]&&<div style={{position:'absolute',bottom:'105%',left:'50%',transform:'translateX(-50%)',background:'rgba(8,4,2,0.97)',border:'1px solid rgba(160,100,25,0.6)',borderRadius:6,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:200,maxWidth:260,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'#e8a820',letterSpacing:2,textTransform:'uppercase',marginBottom:5}}>{member.keyword}</div><div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#c8b080',lineHeight:1.5,fontStyle:'italic'}}>{KEYWORD_DESC[member.keyword]}</div></div>}
       {buffCount>0&&<div style={{position:'absolute',top:6,left:6,background:buffCount>=3?'#aa1111':'#9933cc',borderRadius:10,padding:'1px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#fff',zIndex:10,boxShadow:'0 0 8px rgba(0,0,0,0.6)'}}>+{buffCount}</div>}
       {isDiceTarget&&<div style={{position:'absolute',top:-16,left:'50%',transform:'translateX(-50%)',fontSize:20}}>🎯</div>}
+      {mentorState==='active'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:18,textShadow:'0 0 12px #ffd700',zIndex:12,animation:'mentorPulse 1.5s ease-in-out infinite'}}>⛓</div>}
+      {mentorState==='broken'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:16,opacity:0.45,zIndex:12}}>💔</div>}
+      {mentorState==='mentor'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:18,textShadow:'0 0 8px rgba(255,215,0,0.6)',zIndex:12}}>⛓</div>}
       <div style={{height:5,borderRadius:'6px 6px 0 0',
         background:st?'#333':member.demonic?'linear-gradient(90deg,#e8a820,#ffd700,#e8a820)':member.mythic?'linear-gradient(90deg,#cc44ff,#ff88ff,#cc44ff)':member.foil?'linear-gradient(90deg,#88ccff,#ffffff,#88ccff)':'linear-gradient(90deg,#dd2222,#ff7700)',
         boxShadow:st?'none':member.demonic?'0 0 14px rgba(255,200,0,0.8)':member.mythic?'0 0 14px rgba(200,0,255,0.7)':member.foil?'0 0 14px rgba(100,180,255,0.7)':'0 0 14px rgba(220,50,0,0.5)'}}/>
@@ -1758,7 +1793,7 @@ export default function App(){
   const [pendingEmbers,setPendingEmbers]=useState(0)
   const [pendingDraw,setPendingDraw]=useState(0)
   const [lastRiffPlayed,setLastRiffPlayed]=useState(null)
-  const discoveredRef=React.useRef(new Set())
+  const discoveredRef=useRef(new Set())
   const [bossDebuff,setBossDebuff]=useState(0)
   const [bossRageAtk,setBossRageAtk]=useState(0)
   const [dblRoll,setDblRoll]=useState(null) // null=not rolled, 1-2=half, 3-4=offbeat, 5-6=double
@@ -1891,6 +1926,7 @@ export default function App(){
         const newAtk=startAtk+Math.floor(permGain*0.5)
         ns[stonedIdx]=Object.assign({},sm,{tooStoned:false,hp:sm.maxHp,atk:Math.max(startAtk,newAtk),_origAtk:undefined,tempBuff:false,buffCount:Math.floor((sm.buffCount||0)*0.5)})
         msg='☕ '+sm.name+' revived! (lost 50% ATK buffs) All members +2 HP.'
+        if(sm.isMentor){const _rs=scanMentorLinks(ns);_rs.forEach((rm,ri)=>{if(rm)ns[ri]=rm})}
         addFloat('REVIVED',getCenter(stageRefs.current[stonedIdx]).x,getCenter(stageRefs.current[stonedIdx]).y-70,'#22aa44')
       } else {
         msg='☕ Wake Up Call! All members +2 HP.'
@@ -2308,7 +2344,7 @@ export default function App(){
     if(dragCardUid){handleDropOnStage(toIdx);return}
     if(dragStageIdx===null||dragStageIdx===toIdx)return
     const ns=[...stage];var tmp=ns[dragStageIdx];ns[dragStageIdx]=ns[toIdx];ns[toIdx]=tmp
-    setStage(ns);setDragStageIdx(null)
+    setStage(scanMentorLinks(ns));setDragStageIdx(null)
   },[dragCardUid,dragStageIdx,stage,handleDropOnStage])
 
   const handleHandReorder=useCallback((fromIdx,toIdx)=>{
@@ -2462,6 +2498,21 @@ export default function App(){
     const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer').reduce((s,m)=>s+m.atk,0)
     dmg+=encDmg
     dmg=Math.round(dmg*bandBonus)
+    // ── MENTOR LINK strike multiplier ──────────────────────────────
+    {let _mlb=0
+    for(let _i=0;_i<stage.length-1;_i++){
+      const _mn=stage[_i],_bs=stage[_i+1]
+      if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue
+      if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){
+        const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/15):_mn.atk
+        const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/15):_bs.atk
+        const _b=Math.round((_ma+_ba)*(_bs.mentorMult-1))
+        _mlb+=_b
+        addLog('⛓ Mentor Link! '+_mn.name+'+'+_bs.name+' ×'+_bs.mentorMult+' (+'+_b+'!)')
+        addFloat('⛓ ×'+_bs.mentorMult,getCenter(stageRefs.current[_i]).x,getCenter(stageRefs.current[_i]).y-80,'#ffd700',true)
+      }
+    }
+    if(_mlb>0)dmg+=_mlb}
     // HEXED: auto-raise corruption +5%, member gains +1 ATK per 10% corruption
     const hexedMembers=actives.filter(m=>m.keyword==='HEXED')
     if(hexedMembers.length>0){
@@ -2566,6 +2617,7 @@ export default function App(){
               const newHp=ns2[ti].hp-actualDmg
               if(newHp<=0&&!ns2[ti].stoneShield){
                 ns2[ti]=Object.assign({},ns2[ti],{hp:0,tooStoned:true})
+                if(ns2[ti].isMentor){for(let _bi=0;_bi<ns2.length;_bi++){if(ns2[_bi]&&ns2[_bi].mentorLinkedToUid===ns2[ti].uid)ns2[_bi]={...ns2[_bi],mentorAlive:false}}}
                 updStat('tooStonedCount',1)
                 // A6: Black Candle — deal 8 damage
                 if(activeArtifacts.some(a=>a.id==='a6')){
@@ -2646,7 +2698,10 @@ export default function App(){
     const nd=stage.some(m=>m&&m.role==='Drummer')
     const ndCount=stage.filter(m=>m&&m.role==='Drummer').length
     if(nd){let r=Math.floor(Math.random()*6)+1;if(ndCount>=2&&r<=2)r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
-    setStage(p=>p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined}):null))
+    setStage(p=>{
+      const reset=p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined}):null)
+      return scanMentorLinks(reset)
+    })
     // Redeal hand from current deck+discard
     setDeck(function(curDeck){
       setDiscardPile(function(curDisc){
@@ -2801,7 +2856,7 @@ export default function App(){
     } else {addLog('📦 Purchased: '+item.name+'!')}
   },[stash])
 
-  const recruitPickFiredRef=React.useRef(false)
+  const recruitPickFiredRef=useRef(false)
   const handleRecruitPick=useCallback((member)=>{
     if(recruitPickFiredRef.current)return
     recruitPickFiredRef.current=true
@@ -2821,7 +2876,7 @@ export default function App(){
         const tl=tier!=='base'?' ['+tier.toUpperCase()+']':''
         joinMsg='🎸 '+member.name+tl+' joins!'+(bonded.roleBondBonus>0?' 🔗 Bond +'+bonded.roleBondBonus+' ATK!':'')
       }
-      return ns
+      return scanMentorLinks(ns)
     })
     if(joinMsg)addLog(joinMsg)
     setGameState('shop')
@@ -2972,6 +3027,7 @@ export default function App(){
                 onDragOver={function(){}}
                 onDrop={function(){handleStageDrop(i)}}
                 bondColor={m?getBondColor(m,stage):null}
+                mentorState={m&&m.mentorLinkedToUid?(m.mentorAlive?'active':'broken'):m&&m.isMentor&&stage[i+1]&&stage[i+1].mentorLinkedToUid===m.uid&&!m.tooStoned?'mentor':null}
               />
             ))}
           </div>
@@ -2983,6 +3039,7 @@ export default function App(){
               const effAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
               return s+effAtk
             },0)
+            for(let _mi=0;_mi<stage.length-1;_mi++){const _mn=stage[_mi],_bs=stage[_mi+1];if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue;if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/15):_mn.atk;const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/15):_bs.atk;dmg+=Math.round((_ma+_ba)*(_bs.mentorMult-1))}}
             const dbl=act.some(m=>m.role==='Drummer')
             if(dbl)dmg*=2
             const buf=act.filter(m=>(m.buffCount||0)>0).length

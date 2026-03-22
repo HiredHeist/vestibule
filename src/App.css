@@ -169,3 +169,8 @@ body {
   94% { transform: rotate(-3deg); box-shadow: 0 0 24px rgba(220,170,30,0.6), inset 0 0 20px rgba(100,70,0,0.1); }
   97% { transform: rotate(2deg); box-shadow: 0 0 20px rgba(220,170,30,0.5), inset 0 0 20px rgba(100,70,0,0.1); }
 }
+
+@keyframes mentorPulse {
+  0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.5; transform: translateX(-50%) scale(1.5); }
+}
