@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 02:43 PM (JST)*
+*Last updated: Sunday, March 22, 2026 at 03:00 PM (JST)*
 
 ---
 
@@ -47,6 +47,15 @@ We need all three.
 - ~~**Touring Pack odds: 25% Foil, 5% Mythic** (was 15% Foil, 0% Mythic)~~
 - ~~**Demonic Pack odds: 5% Demonic** (was 3%)~~
 
+### ✅ Score System — Pushed
+- ~~**Score formula** — circleReached×1000 + fights×150 + damage÷10 + highestStrike×5 + stash×2 - tooStoned×50~~
+- ~~**Grade tiers** — GARAGE BAND / OPENING ACT / LOCAL LEGEND / TOURING ACT / HEADLINER / CULT LEGEND / LUCIFER SLAYER (win only)~~
+- ~~**Count-up animation** — score ticks up over 1.8s on death screen~~
+- ~~**Personal best** — localStorage, shows "NEW BEST!" or "X pts away"~~
+- ~~**Daily streak** — consecutive days tracked, shows 🔥 N DAY STREAK~~
+- ~~**Run counter** — RUN #N shown on death screen~~
+- ~~**TODO: LUCIFER SLAYER unlocks Lucifer as a playable member (broken/TBD stats)**~~
+
 ## 🔴 P1 — UNBLOCK THE GAME (do first, everything else depends on this)
 
 - [x] **Hoarder HP 480→300** — sim confirms 67% of all runs end here, 0% get past. Cut to 300.
@@ -59,12 +68,12 @@ We need all three.
 
 ## 🏆 P1 — SCORE SYSTEM (biggest retention feature)
 
-- [ ] **Score formula** — `(circleReached × 1000) + (fightsWon × 150) + (totalDamage ÷ 10) + (highestStrike × 5) + (stashEarned × 2) - (tooStonedEvents × 50)`
-- [ ] **Score displayed on death screen** — large, prominent, always shown
-- [ ] **Score counter tick-up animation** — numbers count up to final score on death screen
-- [ ] **Grade/tier label** — F → D → C → B → A → S → ⛧ LUCIFER SLAYER (hardcoded brackets from sim data)
-- [ ] **Personal best in localStorage** — "YOU BEAT YOUR BEST BY 420 🌿" — miss: "YOUR BEST: 6,100 — 1,680 short"
-- [ ] **Run number displayed** — small "RUN #47" corner counter, persists in localStorage
+- [x] **Score formula** — `(circleReached × 1000) + (fightsWon × 150) + (totalDamage ÷ 10) + (highestStrike × 5) + (stashEarned × 2) - (tooStonedEvents × 50)`
+- [x] **Score displayed on death screen** — large, prominent, always shown
+- [x] **Score counter tick-up animation** — numbers count up to final score on death screen
+- [x] **Grade/tier label** — F → D → C → B → A → S → ⛧ LUCIFER SLAYER (hardcoded brackets from sim data)
+- [x] **Personal best in localStorage** — "YOU BEAT YOUR BEST BY 420 🌿" — miss: "YOUR BEST: 6,100 — 1,680 short"
+- [x] **Run number displayed** — small "RUN #47" corner counter, persists in localStorage
 
 ---
 
@@ -72,7 +81,7 @@ We need all three.
 
 - [ ] **Daily seed banner on Opening Night** — prominent "TODAY'S SEED: 4F2A — March 22", not buried
 - [ ] **Daily attempt locked** — first daily play locks score, no re-runs for daily category
-- [ ] **Daily streak counter** — 🔥 7 DAY STREAK shown on death screen. Resets on miss. Daily habit engine.
+- [x] **Daily streak counter** — 🔥 7 DAY STREAK shown on death screen. Resets on miss. Daily habit engine.
 - [ ] **Share score button** — copies "Vestibule — RUN #47 — SCORE: 12,420 ⛧ CONDEMNED — Fell to The Hoarder at C4 — SEED: 67D60A" — free viral marketing
 
 ---
