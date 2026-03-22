@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Monday, March 23, 2026 at 05:00 AM (JST) — Session 13*
+*Last updated: Monday, March 23, 2026 at 06:30 AM (JST) — Session 13*
 
 ---
 
@@ -91,6 +91,14 @@ This is happening.
 - [x] Layer 7: Almost Mechanics (near-miss messages)
 - [x] Layer 8: Main Menu (logo, Unlocks gallery, Rules, Options, deck placeholder)
 - [x] Layer 9: Difficulty Stakes (6 tiers Bronze→Demonic, all modifiers wired)
+
+### Additional Features
+- [x] ESC pause overlay — options accessible anytime during gameplay
+- [x] Music system — 5 tracks (menu, select, battle, shop, death) with crossfade + volume slider
+- [x] Circle cleared flash — victory overlay after every fight win, boss kills get full celebration
+- [x] Playtester feedback form (.docx, 44 questions, 9 sections)
+- [x] Base path /vestibule/ for royceprinting.com deployment
+- [x] Dev shortcut Shift+W for win screen
 
 ### Bug Fixes
 - [x] Card multi-select on overlapping cards (stopPropagation + unique z-index)

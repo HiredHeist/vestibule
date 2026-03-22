@@ -1,5 +1,5 @@
 # VESTIBULE — AI Development Handoff Document
-*Last updated: Monday, March 23, 2026 at 05:00 AM (JST) — Session 13 end state*
+*Last updated: Monday, March 23, 2026 at 06:30 AM (JST) — Session 13 end state*
 *This is a living document. Update it at the end of every session.*
 
 ---
@@ -78,7 +78,12 @@ Developer = "player" in dev sessions. Music producer, doom metal, lives in rural
 27. ✅ **Near-Miss Mechanics** — almost-killed boss, almost-survived member, almost-cleared circle
 28. ✅ **Main Menu** — logo, title, Play/Unlocks/Rules/Options, deck selection placeholder
 29. ✅ **Difficulty Stakes** — 6 stakes (Bronze→Demonic), all modifiers wired
-30. ✅ **Bug Fixes** — card multi-select, Combined Attack rounding, MAX_STRIKES→activeStake, FALLEN heals — 6 stakes (Bronze→Demonic), all modifiers wired, selector on menu, badge on death screen — logo, title, Play/Unlocks/Rules/Options, deck selection placeholder — almost-killed boss, almost-survived member, almost-cleared circle, almost-beat-best
+30. ✅ **Bug Fixes** — card multi-select, Combined Attack rounding, MAX_STRIKES→activeStake, FALLEN heals
+31. ✅ **Circle Cleared Flash** — victory overlay every fight, boss kills get full circle cleared celebration
+32. ✅ **Music System** — 5 tracks (menu/select/battle/shop/death) with crossfade, volume slider in options
+33. ✅ **ESC Pause Overlay** — options accessible anytime mid-game without disrupting state
+34. ✅ **Base Path** — /vestibule/ for royceprinting.com/vestibule deployment
+35. ✅ **Sim v11.1** — Wake Up Call 1 ember, Herb Money 1 ember, Mosh Pit + Blood Ritual added — 6 stakes (Bronze→Demonic), all modifiers wired, selector on menu, badge on death screen — logo, title, Play/Unlocks/Rules/Options, deck selection placeholder — almost-killed boss, almost-survived member, almost-cleared circle, almost-beat-best
 14. ✅ **Seance buffed** — 1 ember, corruption ÷ 4 (was 2 embers, ÷ 8)
 15. ✅ **Herb Money reworked** — stash ÷ 2 damage, keep stash (was 10% + lose stash)
 16. ✅ **Wake Up Call free** — 0 embers (was 2)
