@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 12:03 AM*
+*Last updated: Sunday, March 22, 2026 at 12:04 AM*
 
 ---
 
@@ -18,7 +18,7 @@ This is happening.
 
 3. ~~**Artifacts/passives re-appear after purchase** — FIXED: App-level shopSoldIds persists sold state across visits, clears only on shop rotation~~ — bought Sabbath Crown, left shop, came back and it was available again. `boughtIds` resets when `shopCards` changes. Need persistent sold tracking in App state, not ShopScreen state.
 
-4. **Stage Dive selected state gets stuck** — after using Stage Dive (once per fight), second copy in hand stays selected with no way to deselect/play. Selection state needs to clear when a card becomes unplayable.
+4. ~~**Stage Dive stuck selected** — FIXED: clears from selected on use, onClick blocked when isUsed~~ — after using Stage Dive (once per fight), second copy in hand stays selected with no way to deselect/play. Selection state needs to clear when a card becomes unplayable.
 
 5. **8 cards in hand (over-cap)** — Groupie's new "draw 1" can push hand over HAND_SIZE mid-strike. Hard cap needs to be enforced at the point of draw, not just at end-of-strike.
 
