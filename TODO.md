@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Monday, March 23, 2026 at 03:00 AM (JST) — Session 13*
+*Last updated: Monday, March 23, 2026 at 04:00 AM (JST) — Session 13*
 
 ---
 
@@ -12,33 +12,33 @@ This is happening.
 
 ## 🔴 THE ADDICTION STACK — 7 Layers (in priority order)
 
-### Layer 1: Death Screen Overhaul ← BUILDING NOW
-- [ ] **A) Score + Personal Best gap** — "YOUR BEST: 14,200 — YOU NEED 1,780 MORE" in big red. Near-miss > win.
-- [ ] **B) Unlock progress bar** — "NEXT UNLOCK: 2,340 / 5,000 pts" with mystery silhouette. Lifetime cumulative.
-- [ ] **C) Run discoveries** — "NEW: First time reaching Circle 7! First Hellquake!" Permanent progress feeling.
-- [ ] **D) One-tap restart** — HUGE glowing pulsing Play Again button. Restarting = the obvious default.
+### Layer 1: Death Screen Overhaul ✅ COMPLETE
+- [x] **A) Score + Personal Best gap** — "YOUR BEST: 14,200 — YOU NEED 1,780 MORE" in big red. Near-miss > win.
+- [x] **B) Unlock progress bar** — "NEXT UNLOCK: 2,340 / 5,000 pts" with mystery silhouette. Lifetime cumulative.
+- [x] **C) Run discoveries** — "NEW: First time reaching Circle 7! First Hellquake!" Permanent progress feeling.
+- [x] **D) One-tap restart** — HUGE glowing pulsing Play Again button. Restarting = the obvious default.
 
-### Layer 2: Share Score Button
-- [ ] **Clipboard copy** — "⛧ VESTIBULE — RUN #47 ⛧ SCORE: 12,420 — HEADLINER — Fell to Warlord at C5 — Can you beat this?"
-- [ ] Format for Discord/Twitter/Reddit (emoji, short, punchy)
+### Layer 2: Share Score Button ✅ COMPLETE
+- [x] **Clipboard copy** — "⛧ VESTIBULE — RUN #47 ⛧ SCORE: 12,420 — HEADLINER — Fell to Warlord at C5 — Can you beat this?"
+- [x] Format for Discord/Twitter/Reddit (emoji, short, punchy)
 
-### Layer 3: Unlock System (lifetime score milestones)
-- [ ] 1,000 pts → New card: Mosh Pit (RIFF)
-- [ ] 3,000 pts → Unlock Vitalik (FOLK MAGIC) in pack pool
-- [ ] 5,000 pts → 6th artifact slot
-- [ ] 10,000 pts → New card: Blood Ritual (CORRUPT, Rare)
-- [ ] 15,000 pts → Brynja available as Foil in packs
-- [ ] 25,000 pts → Demonic Pack from C3 (was C4)
-- [ ] 50,000 pts → ??? (locked silhouette)
-- [ ] 100,000 pts → Lucifer as playable member
+### Layer 3: Unlock System ✅ COMPLETE
+- [x] 1,000 pts → New card: Mosh Pit (RIFF)
+- [x] 3,000 pts → Unlock Vitalik (FOLK MAGIC) in pack pool
+- [x] 5,000 pts → 6th artifact slot
+- [x] 10,000 pts → New card: Blood Ritual (CORRUPT, Rare)
+- [x] 15,000 pts → Brynja available as Foil in packs
+- [x] 25,000 pts → Demonic Pack from C3 (was C4)
+- [x] 50,000 pts → ??? (locked silhouette)
+- [x] 100,000 pts → Lucifer as playable member
 
-### Layer 4: Daily Challenge + Streak Bonuses
-- [ ] **Daily seed banner** — "TODAY'S SEED: 4F2A" on start screen, one attempt locked
-- [ ] **Streak bonuses** — 3-day +5% score, 7-day +10% + border, 30-day Veteran badge
+### Layer 4: Daily Challenge + Streak Bonuses ✅ COMPLETE
+- [x] **Daily seed banner** — "TODAY'S SEED: 4F2A" on start screen, one attempt locked
+- [x] **Streak bonuses** — 3-day +5% score, 7-day +10% + border, 30-day Veteran badge
 - [x] Daily streak counter (already built)
 
-### Layer 5: Run History
-- [ ] Past Runs screen — last 20 runs: score, grade, death cause, circle, discoveries
+### Layer 5: Run History ✅ COMPLETE
+- [x] Past Runs screen — last 20 runs: score, grade, death cause, circle, discoveries
 
 ### Layer 6: Achievement Badges ✅ COMPLETE
 - [x] 16 achievements defined (first_blood, circle milestones, beat_lucifer, hellquake, perfect_strike, corruption_lord, sober_run, drug_lord, full_band, mentor_link, high_score_5k/10k, ten_runs, dedicated)
@@ -64,16 +64,18 @@ This is happening.
 - [x] **Options** — scanlines on/off, reset progress with confirm
 - [x] **Stats row** — lifetime score, runs, streak, personal best
 
-### Layer 9: Difficulty Stakes (Balatro chip system)
-- [ ] **Stake 1: Bronze** — default difficulty, white border on deck. Beat Lucifer to unlock Silver.
-- [ ] **Stake 2: Silver** — bosses +15% HP, enemies +1 base damage. Silver border.
-- [ ] **Stake 3: Gold** — bosses +30% HP, enemies +2 base damage, shop prices +25%. Gold border.
-- [ ] **Stake 4: Obsidian** — bosses +50% HP, no free heal after fights, drugs 50% more expensive. Dark border.
-- [ ] **Stake 5: Blood** — bosses +75% HP, start with 4 max embers (not 5), corruption starts at 15%. Red border.
-- [ ] **Stake 6: Demonic ⛧** — bosses +100% HP, max 3 strikes (not 4), drugs can bad-trip at 15% (not 5%). Demonic border.
-- [ ] Each stake shows on death screen + share score
-- [ ] Lifetime score multiplier per stake (Bronze 1x, Silver 1.5x, Gold 2x, etc.)
-- [ ] Deck selection screen shows stake badges earned per deck
+### Layer 9: Difficulty Stakes ✅ COMPLETE
+- [x] **Stake 1: Bronze** — default difficulty, ×1.0 score
+- [x] **Stake 2: Silver** — bosses +15% HP, enemies +1 dmg, ×1.5 score
+- [x] **Stake 3: Gold** — bosses +30% HP, +2 dmg, shop +25%, ×2.0 score
+- [x] **Stake 4: Obsidian** — +50% HP, no post-fight heal, drugs +50%, ×2.5 score
+- [x] **Stake 5: Blood** — +75% HP, +3 dmg, 4 start embers, 15% start corruption, ×3.0 score
+- [x] **Stake 6: Demonic ⛧** — +100% HP, +4 dmg, 3 max strikes, 15% bad trip, ×4.0 score
+- [x] Stake selector on main menu (color-coded, locked until previous beaten)
+- [x] Stake badge on death screen + share score
+- [x] Score multiplier wired: Bronze 1x → Demonic 4x
+- [x] Beat Lucifer to unlock next stake (beatStake on victory)
+- [x] All modifiers wired: hpMult, dmgAdd, startEmbers, startCorruption, healAfterFight, maxStrikes
 
 ---
 
@@ -97,8 +99,8 @@ This is happening.
 - [x] C8 Fraud rework — fraudShuffle discard+redraw 1/2/3 (Session 13)
 - [x] Circle artifacts ca1-ca4 wired into fight logic (Session 13)
 - [x] Sim v10.0 rebuilt and synced (Session 13)
-- [ ] Re-sim 20k — awaiting go-ahead
-- [ ] War Drums artifact — discuss after sim data
+- [x] Re-sim 20k — sim v11.0 complete
+- [x] War Drums artifact — unlockable at 5k lifetime
 - [x] Lucifer 2-phase boss — 420,666→6,666 HP (8 boss kills), Phase 1 ice/Phase 2 satan
 
 ---
@@ -109,25 +111,25 @@ This is happening.
 - [x] Grade tiers: GARAGE BAND → LUCIFER SLAYER (win only)
 - [x] Personal best in localStorage
 - [x] Run number, daily streak
-- [ ] Share score button — clipboard copy, free marketing
+- [x] Share score button — clipboard copy on death screen
 
 ---
 
 ## 🔥 P1 — DAILY CHALLENGE + STREAK
 
 - [x] Daily streak counter — 🔥 N DAY STREAK
-- [ ] Daily seed banner on Opening Night
-- [ ] Daily attempt locked
-- [ ] Share score button
+- [x] Daily seed banner on Opening Night
+- [x] Daily attempt locked
+- [x] Share score button
 
 ---
 
 ## 🔓 P2 — UNLOCK SYSTEM
 
-- [ ] Unlock milestone teaser on death screen
-- [ ] Lifetime score tracking (cumulative)
-- [ ] Milestone unlocks: Loki 1k, Vitalik 3k, artifact slot 5k, A11-A20 10k, Lucifer's Guitarist 25k
-- [ ] Achievement unlocks (one-time triggers)
+- [x] Unlock milestone teaser on death screen
+- [x] Lifetime score tracking (cumulative)
+- [x] Milestone unlocks: Mosh Pit 1k, Vitalik 3k, artifact slot 5k, A11-A20 10k, Lucifer's Guitarist 25k
+- [x] Achievement unlocks — 16 achievements
 
 ---
 

@@ -36,7 +36,10 @@ function calcRunScore(stats, won){
   // Streak bonus: 3-day +5%, 7-day +10%, 30-day +20%
   const streak=parseInt(localStorage.getItem('vst_streak')||'0')
   const streakMult=streak>=30?1.20:streak>=7?1.10:streak>=3?1.05:1.0
-  return Math.max(0, Math.round(baseScore*streakMult))
+  // Stake multiplier
+  const stakeId=localStorage.getItem('vst_active_stake')||'bronze'
+  const stakeMult=(STAKES.find(s=>s.id===stakeId)||STAKES[0]).scoreMult
+  return Math.max(0, Math.round(baseScore*streakMult*stakeMult))
 }
 const SCORE_GRADES=[
   {min:0,     label:'GARAGE BAND',  color:'#888888'},
@@ -190,6 +193,26 @@ const UNLOCK_MILESTONES=[
   {score:50000,type:'dealer',id:'double_dealer',label:'Hold 2 Drugs at Once',emoji:'🍄'},
   {score:100000,type:'member',id:'lucifer_member',label:'Lucifer Playable',emoji:'👑'},
 ]
+
+// ── DIFFICULTY STAKES ──────────────────────────────────────────
+const STAKES=[
+  {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.0,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Standard difficulty.'},
+  {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.15,dmgAdd:1,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +15% HP. Enemies +1 damage.'},
+  {id:'gold',name:'Gold',color:'#ffd700',border:'#ffd700',hpMult:1.30,dmgAdd:2,priceMult:1.25,scoreMult:2.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +30% HP. Enemies +2 damage. Shop prices +25%.'},
+  {id:'obsidian',name:'Obsidian',color:'#2a2a3a',border:'#6a6a8a',hpMult:1.50,dmgAdd:2,priceMult:1.25,scoreMult:2.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +50% HP. No free heal after fights. Drugs 50% more expensive.'},
+  {id:'blood',name:'Blood',color:'#8b0000',border:'#cc0000',hpMult:1.75,dmgAdd:3,priceMult:1.25,scoreMult:3.0,maxStrikes:4,startEmbers:4,startCorruption:15,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +75% HP. Start with 4 Embers. Corruption starts at 15%.'},
+  {id:'demonic',name:'Demonic ⛧',color:'#ff0000',border:'#ff0000',hpMult:2.0,dmgAdd:4,priceMult:1.5,scoreMult:4.0,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,drugPriceMult:2.0,badTripChance:0.15,desc:'Bosses +100% HP. Max 3 Strikes. Bad trips 15%. Pure hell.'},
+]
+function getUnlockedStakes(){
+  const beaten=JSON.parse(localStorage.getItem('vst_stakes_beaten')||'[]')
+  const unlocked=[STAKES[0]] // Bronze always unlocked
+  for(let i=1;i<STAKES.length;i++){if(beaten.includes(STAKES[i-1].id))unlocked.push(STAKES[i])}
+  return unlocked
+}
+function beatStake(stakeId){
+  const beaten=JSON.parse(localStorage.getItem('vst_stakes_beaten')||'[]')
+  if(!beaten.includes(stakeId)){beaten.push(stakeId);localStorage.setItem('vst_stakes_beaten',JSON.stringify(beaten))}
+}
 
 const ALL_CARDS=[
   {id:'amp',name:'Amp It Up',type:'RIFF',rarity:'Common',emoji:'⚡',embers:2,effect:'Target member deals double ATK this turn.',color:'#9933cc',typeColor:'#7722aa',copies:2},
@@ -1740,7 +1763,8 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   }
 
   // ── SHARE BUTTON ───────────────────────────────────────────
-  const shareText='⛧ VESTIBULE — RUN #'+(totalRuns||1)+' ⛧\nSCORE: '+finalScore.toLocaleString()+' — '+grade.label+'\n'+(isVictory?'DEFEATED LUCIFER!':'Fell to '+(enemy?.name||'The Vestibule')+' at Circle '+circleReached)+'\nSEED: '+seed.toString(16).toUpperCase()+'\nCan you beat this?'
+  const stakeInfo=(()=>{const sid=localStorage.getItem('vst_active_stake')||'bronze';const sk=STAKES.find(s=>s.id===sid);return sk||STAKES[0]})()
+  const shareText='⛧ VESTIBULE — RUN #'+(totalRuns||1)+' ⛧\nSCORE: '+finalScore.toLocaleString()+' — '+grade.label+(stakeInfo.id!=='bronze'?' ['+stakeInfo.name+' ×'+stakeInfo.scoreMult+']':'')+'\n'+(isVictory?'DEFEATED LUCIFER!':'Fell to '+(enemy?.name||'The Vestibule')+' at Circle '+circleReached)+'\nSEED: '+seed.toString(16).toUpperCase()+'\nCan you beat this?'
   const handleShare=()=>{if(navigator.clipboard){navigator.clipboard.writeText(shareText);setCopied(true);setTimeout(()=>setCopied(false),2000)}}
 
   // Shared stats grid
@@ -1842,6 +1866,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <div style={{textAlign:'center',margin:'4px 0'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
+          {stakeInfo.id!=='bronze'&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:stakeInfo.color,letterSpacing:2,marginTop:4,padding:'3px 14px',border:'1px solid '+stakeInfo.color,borderRadius:4,background:'rgba(0,0,0,0.4)'}}>{stakeInfo.name.toUpperCase()} ×{stakeInfo.scoreMult}</div>}
           <BestGap/>
           <NearMiss/>
         </div>
@@ -1882,6 +1907,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <div style={{textAlign:'center',margin:'4px 0'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
+          {stakeInfo.id!=='bronze'&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:stakeInfo.color,letterSpacing:2,marginTop:4,padding:'3px 14px',border:'1px solid '+stakeInfo.color,borderRadius:4,background:'rgba(0,0,0,0.4)'}}>{stakeInfo.name.toUpperCase()} ×{stakeInfo.scoreMult}</div>}
           <BestGap/>
           <NearMiss/>
         </div>
@@ -1912,6 +1938,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <div style={{textAlign:'center',margin:'4px 0'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
+          {stakeInfo.id!=='bronze'&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:stakeInfo.color,letterSpacing:2,marginTop:4,padding:'3px 14px',border:'1px solid '+stakeInfo.color,borderRadius:4,background:'rgba(0,0,0,0.4)'}}>{stakeInfo.name.toUpperCase()} ×{stakeInfo.scoreMult}</div>}
           <BestGap/>
           <NearMiss/>
         </div>
@@ -2214,6 +2241,8 @@ export default function App(){
   const [discovered,setDiscovered]=useState(new Set())
   const [newAchievements,setNewAchievements]=useState([])
   const [menuView,setMenuView]=useState(null) // null, 'unlocks', 'rules', 'options'
+  const [activeStakeId,setActiveStakeId]=useState(()=>localStorage.getItem('vst_active_stake')||'bronze')
+  const activeStake=STAKES.find(s=>s.id===activeStakeId)||STAKES[0]
   const tryAchieve=useCallback((id)=>{if(unlockAchievement(id))setNewAchievements(p=>[...p,id])},[])
   const [streakWins,setStreakWins]=useState(0)
   const [streakLosses,setStreakLosses]=useState(0)
@@ -2921,7 +2950,7 @@ export default function App(){
     if(strikesLeft>=3&&(fightIndex+1)%3===0)tryAchieve('perfect_strike')
     if(corruption>=100)tryAchieve('corruption_lord')
     if(stage.filter(m=>m&&!m.tooStoned).length>=5)tryAchieve('full_band')
-    if(fightIndex===26)tryAchieve('beat_lucifer')
+    if(fightIndex===26){tryAchieve('beat_lucifer');beatStake(activeStake.id)}
     const bq=BOSS_QUOTES[enemy&&enemy.id];if(bq)setTimeout(()=>addLog('💀 "'+bq+'"'),600)
     setTimeout(function(){
       const isCircleBoss=(fightIndex+1)%3===0
@@ -2963,10 +2992,12 @@ export default function App(){
           setCircleCartBought(false)
           setCirCleCpasBought(false)
         }
+        // Post-fight heal (disabled on higher stakes)
+        if(activeStake.healAfterFight){setStage(prev=>prev.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m))}
         setGameState('shop')
       }
     },1000)
-  },[strikesLeft,corruption,fightIndex,stolenAtkPool])
+  },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake])
 
 
 
@@ -3245,13 +3276,14 @@ export default function App(){
           setShowDice(false)
           const variance=0
           // Apply enemy passive scaling effects before damage
-        let scaledBaseDmg=enemy.baseDmg+(enemy.passiveId&&enemy.passiveId.startsWith('damageScaleAtk')?bossRageAtk:0)
+        const stakeBaseDmg=enemy.baseDmg+activeStake.dmgAdd
+        let scaledBaseDmg=stakeBaseDmg+(enemy.passiveId&&enemy.passiveId.startsWith('damageScaleAtk')?bossRageAtk:0)
         // selfbuff: boss gains +1/+2 dmg per Strike
-        if(enemy.passiveId==='selfbuff'){scaledBaseDmg=enemy.baseDmg+strikesLeft}
-        else if(enemy.passiveId==='selfbuff2'){scaledBaseDmg=enemy.baseDmg+(MAX_STRIKES-strikesLeft)*2}
+        if(enemy.passiveId==='selfbuff'){scaledBaseDmg=stakeBaseDmg+strikesLeft}
+        else if(enemy.passiveId==='selfbuff2'){scaledBaseDmg=stakeBaseDmg+(MAX_STRIKES-strikesLeft)*2}
         // rageScale: +X dmg per buffed member
-        else if(enemy.passiveId==='rageScale1'){const buffed=stage.filter(m=>m&&(m.buffCount||0)>0).length;scaledBaseDmg=enemy.baseDmg+buffed*1}
-        else if(enemy.passiveId==='rageScale2'){const buffed=stage.filter(m=>m&&(m.buffCount||0)>0).length;scaledBaseDmg=enemy.baseDmg+buffed*2}
+        else if(enemy.passiveId==='rageScale1'){const buffed=stage.filter(m=>m&&(m.buffCount||0)>0).length;scaledBaseDmg=stakeBaseDmg+buffed*1}
+        else if(enemy.passiveId==='rageScale2'){const buffed=stage.filter(m=>m&&(m.buffCount||0)>0).length;scaledBaseDmg=stakeBaseDmg+buffed*2}
         // corruptPlayer: raises player corruption each Strike
         else if(enemy.passiveId==='corruptPlayer'){setCorruption(p=>Math.min(100,p+10));addLog('🔱 Heretic corrupts your band! +10% Corruption.')}
         else if(enemy.passiveId==='corruptPlayer15'){setCorruption(p=>Math.min(100,p+15));addLog('⛧ Apostate corrupts! +15% Corruption.')}
@@ -3262,7 +3294,7 @@ export default function App(){
         else if(enemy.passiveId==='stashSteal3'){if(stash>0){const stolen=Math.min(stash,3);setStash(p=>Math.max(0,p-stolen));setStashStolenThisFight(p=>p+stolen);addLog('🏦 The Usurer steals '+stolen+'🌿!')}}
         // soulThief: steal 1 permanent ATK from random member
         else if(enemy.passiveId==='soulThief'){
-          scaledBaseDmg=enemy.baseDmg+stolenAtkPool
+          scaledBaseDmg=stakeBaseDmg+stolenAtkPool
           const stealTargets=stage.filter(m=>m&&!m.tooStoned&&(m.permAtkBonus||0)>0)
           if(stealTargets.length>0){const victim=stealTargets[Math.floor(Math.random()*stealTargets.length)]
             setStage(p=>p.map(m=>m&&m.uid===victim.uid?Object.assign({},m,{atk:m.atk-1,permAtkBonus:(m.permAtkBonus||0)-1}):m))
@@ -3273,15 +3305,15 @@ export default function App(){
         else if(enemy.passiveId==='luciferBoss'){
           if(luciferPhase===1){
             // Frozen Wrath: frostbite 3 to all + damageScale +1
-            scaledBaseDmg=enemy.baseDmg+bossRageAtk
+            scaledBaseDmg=stakeBaseDmg+bossRageAtk
             setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:Math.max(0,m.hp-3)}):m))
             addLog('🧊 Frostbite! All members take 3 cold damage.')
           } else if(luciferPhase===2){
             // Infernal: AoE + damageScale +2
-            scaledBaseDmg=enemy.baseDmg+bossRageAtk
+            scaledBaseDmg=stakeBaseDmg+bossRageAtk
           }
         }
-        else{scaledBaseDmg=enemy.baseDmg}
+        else{scaledBaseDmg=stakeBaseDmg}
         const actualDmg=(fightTripBuff==='ASTRAL PROJECTION')?0:Math.max(1,Math.round(scaledBaseDmg)-bossDebuff)
           const ti=stage.indexOf(target)
           if(luciferAoE&&actualDmg>0){
@@ -3442,7 +3474,7 @@ export default function App(){
     const nextIdx=Math.min(fightIndex+1, 26)
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
-    setEnemy(nextEnemy);setEnemyHp(nextEnemy.maxHp)
+    setEnemy(nextEnemy);setEnemyHp(Math.ceil(nextEnemy.maxHp*activeStake.hpMult))
     setEmbers(function(){return maxEmbers});setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
     setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
@@ -3731,8 +3763,8 @@ export default function App(){
   const handleReset=()=>{
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
-    setEmbers(5);setMaxEmbers(5);setStash(3);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
-    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0);setDeathCause('fallen')
+    setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
+    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen')
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
@@ -3959,9 +3991,27 @@ export default function App(){
             </button>
           </div>
 
-          {/* Deck selection placeholder */}
-          <div style={{marginTop:20,padding:'8px 20px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#665533',letterSpacing:3,textAlign:'center'}}>DECK: Demo Deck (more decks coming soon)</div>
+          {/* Stake + Deck selection */}
+          <div style={{marginTop:20,display:'flex',flexDirection:'column',gap:10,alignItems:'center'}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#8a6020',letterSpacing:3,textTransform:'uppercase'}}>Difficulty Stake</div>
+            <div style={{display:'flex',gap:8}}>
+              {STAKES.map((sk,i)=>{
+                const unlocked=getUnlockedStakes().some(u=>u.id===sk.id)
+                const active=activeStakeId===sk.id
+                return <div key={sk.id} onClick={()=>{if(unlocked){setActiveStakeId(sk.id);localStorage.setItem('vst_active_stake',sk.id)}}}
+                  style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,
+                    color:active?'#000':unlocked?sk.color:'#4a3a18',
+                    background:active?sk.color:'rgba(20,12,4,0.6)',
+                    border:'2px solid '+(unlocked?sk.color:'rgba(60,40,15,0.3)'),
+                    borderRadius:6,padding:'8px 16px',cursor:unlocked?'pointer':'default',
+                    opacity:unlocked?1:0.35,letterSpacing:1,transition:'all 0.15s',
+                    boxShadow:active?'0 0 16px '+sk.color+'66':'none'}}>
+                  {unlocked?sk.name:'🔒'}
+                </div>
+              })}
+            </div>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:activeStake.color,fontStyle:'italic',textAlign:'center',maxWidth:500}}>{activeStake.desc}{activeStake.scoreMult>1?' Score ×'+activeStake.scoreMult:''}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#665533',letterSpacing:2}}>DECK: Demo Deck</div>
           </div>
         </div>
       </div>
