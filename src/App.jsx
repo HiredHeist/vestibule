@@ -693,7 +693,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   const [pawnOpen,setPawnOpen]=useState(false)
   const [boughtIds,setBoughtIds]=useState([])
   const [leftBought,setLeftBought]=useState({cart:false,cpas:false,rec:false})
-  useEffect(()=>{setBoughtIds([])},[shopCards])
+  const [boughtPackIds,setBoughtPackIds]=useState([])
+  useEffect(()=>{setBoughtIds([]);setBoughtPackIds([])},[shopCards])
   const [openPackModal,setOpenPackModal]=useState(null) // {pack, cards, picksLeft, picked}
   const circleNum=Math.floor(fightIndex/3)+1
   const can=p=>stash>=p
@@ -798,6 +799,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     if(newPicked.length>=openPackModal.picksLeft){
       // Finalize — add picked cards and pay
       onSpend(openPackModal.pack.cost,'pack',{...openPackModal.pack,pickedCards:newPicked})
+      setBoughtPackIds(p=>[...p,openPackModal.pack.id])
       setOpenPackModal(null)
     } else {
       setOpenPackModal(p=>({...p,picked:newPicked}))
@@ -1093,7 +1095,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   function BoosterPack({pack,idx}){
     const id='bp'+idx
     const hov=hovId===id
-    const canBuy=can(pack.cost)
+    const bought=boughtPackIds.includes(pack.id)
+    const canBuy=can(pack.cost)&&!bought
     const packAc={cassette:'#c87820',cdr:'#6688cc',vinyl:'#cc44ff',rarevinyl:'#ffdd44',cursed:'#cc2222',ritual:'#8844cc',hellforged:'#ff6600',garage:'#44aa44',touring:'#44aacc',demonic:'#cc44ff'}
     const ac=packAc[pack.id]||'#c87820'
     return(
@@ -1107,7 +1110,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
           transition:'transform 0.12s'}}>🌿 {pack.cost}</div>
-        <div onClick={()=>handleOpenPack(pack)}
+        <div onClick={()=>canBuy&&handleOpenPack(pack)}
           style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',alignItems:'center',
             background:'linear-gradient(160deg,#12100a 0%,#1e1a0e 40%,#120e08 100%)',
             border:hov&&canBuy?'2px solid '+ac:'1px solid '+ac+'66',
@@ -1117,7 +1120,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             transition:'transform 0.18s,box-shadow 0.15s,border-color 0.15s',
             boxShadow:hov&&canBuy?'0 16px 48px rgba(0,0,0,0.95),0 0 32px '+ac+'55':'2px 6px 20px rgba(0,0,0,0.7)',
             position:'relative',padding:'0 14px 18px',
-            animation:'throbShop 4.5s ease-in-out infinite'}}>
+            animation:bought?'':'throbShop 4.5s ease-in-out infinite'}}>
+          {bought&&<SoldOverlay/>}
           <div style={{width:'100%',height:8,flexShrink:0,
             background:'linear-gradient(90deg,'+ac+'44,'+ac+'ee,'+ac+'44)',
             boxShadow:'0 0 16px '+ac+'99'}}/>
