@@ -1322,7 +1322,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         </div>
 
         {/* RIGHT COLUMN — mirrors center layout for alignment */}
-        <div style={{width:150,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center'}}>
+        <div style={{width:150,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',paddingTop:150}}>
           {/* Matches cards row — reroll at bottom */}
           <div style={{flexShrink:0,display:'flex',alignItems:'flex-end',paddingTop:4}}>
             <div style={{width:130,height:130,
