@@ -3768,10 +3768,10 @@ export default function App(){
         <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:10,maxWidth:750,width:'100%'}}>
           {UNLOCK_MILESTONES.map(u=>{const done=lt>=u.score;const pct=Math.min(100,Math.round(lt/u.score*100));return(
             <div key={u.id} style={{background:done?'rgba(40,25,5,0.8)':'rgba(10,6,2,0.8)',border:done?'2px solid #e8a820':'1px solid rgba(60,40,15,0.4)',borderRadius:8,padding:'12px 16px',display:'flex',gap:12,alignItems:'center'}}>
-              <div style={{fontSize:32,filter:done?'none':'grayscale(1) brightness(0.3)',minWidth:40,textAlign:'center'}}>{done?u.emoji:'\ud83d\udd12'}</div>
+              <div style={{fontSize:32,filter:done?'none':'grayscale(1) brightness(0.3)',minWidth:40,textAlign:'center'}}>{done?u.emoji:'🔒'}</div>
               <div style={{flex:1}}>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:done?'#e8a820':'#4a3a18',letterSpacing:1}}>{done?u.label:'???'}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:done?'#aa8030':'#3a2a10'}}>{u.score.toLocaleString()} pts {done?'\u2713 UNLOCKED':' \u2014 '+pct+'%'}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:done?'#aa8030':'#3a2a10'}}>{u.score.toLocaleString()} pts {done?'✓ UNLOCKED':' — '+pct+'%'}</div>
                 {!done&&<div style={{height:4,background:'rgba(20,12,4,0.8)',borderRadius:2,marginTop:3,overflow:'hidden'}}><div style={{height:'100%',width:pct+'%',background:'linear-gradient(90deg,#8a2200,#e8a820)',borderRadius:2}}/></div>}
               </div>
             </div>
@@ -3779,69 +3779,69 @@ export default function App(){
         </div>
         {/* MEMBERS */}
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#cc44ff',letterSpacing:4,marginTop:12}}>Band Members</div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:8,maxWidth:750,width:'100%'}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,maxWidth:900,width:'100%'}}>
           {ALL_MUSICIANS.filter(m=>!m.locked).map(m=>(
-            <div key={m.id} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(160,100,25,0.4)',borderRadius:6,padding:'8px',textAlign:'center'}}>
-              <div style={{fontSize:28}}>{m.emoji}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#e8a820'}}>{m.name}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#8a7040'}}>{m.keyword}</div>
+            <div key={m.id} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(160,100,25,0.4)',borderRadius:6,padding:'14px 10px',textAlign:'center'}}>
+              <div style={{fontSize:48}}>{m.emoji}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#e8a820'}}>{m.name}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#8a7040'}}>{m.keyword}</div>
             </div>
           ))}
           {ALL_MUSICIANS.filter(m=>m.locked).map(m=>{const done=!m.unlockAt||lt>=m.unlockAt;return(
-            <div key={m.id} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'8px',textAlign:'center',opacity:done?1:0.4}}>
-              <div style={{fontSize:28,filter:done?'none':'grayscale(1)'}}>{done?m.emoji:'\ud83d\udd12'}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:done?'#e8a820':'#4a3a18'}}>{done?m.name:'???'}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#3a2a10'}}>{done?m.keyword:'LOCKED'}</div>
+            <div key={m.id} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:done?1:0.4}}>
+              <div style={{fontSize:48,filter:done?'none':'grayscale(1)'}}>{done?m.emoji:'🔒'}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:done?'#e8a820':'#4a3a18'}}>{done?m.name:'???'}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#3a2a10'}}>{done?m.keyword:'LOCKED'}</div>
             </div>
           )})}
           {[1,2,3,4,5,6,7,8,9,10].map(i=>(
-            <div key={'future_m'+i} style={{background:'rgba(10,6,2,0.4)',border:'1px dashed rgba(40,25,10,0.3)',borderRadius:6,padding:'8px',textAlign:'center',opacity:0.25}}>
-              <div style={{fontSize:28}}>\ud83d\udd12</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#3a2a10'}}>???</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#2a1a08'}}>COMING SOON</div>
+            <div key={'future_m'+i} style={{background:'rgba(10,6,2,0.4)',border:'1px dashed rgba(40,25,10,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.25}}>
+              <div style={{fontSize:48}}>🔒</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#3a2a10'}}>???</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#2a1a08'}}>COMING SOON</div>
             </div>
           ))}
         </div>
         {/* ARTIFACTS */}
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#c87820',letterSpacing:4,marginTop:12}}>Artifacts</div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:8,maxWidth:750,width:'100%'}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,maxWidth:900,width:'100%'}}>
           {STARTER_ARTIFACTS.filter(a=>!a.locked).map(a=>(
-            <div key={a.id} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(160,100,25,0.4)',borderRadius:6,padding:'8px',textAlign:'center'}}>
-              <div style={{fontSize:24}}>{a.emoji}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:'#c8a040',lineHeight:1.2}}>{a.name}</div>
+            <div key={a.id} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(160,100,25,0.4)',borderRadius:6,padding:'14px 10px',textAlign:'center'}}>
+              <div style={{fontSize:48}}>{a.emoji}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#c8a040',lineHeight:1.2}}>{a.name}</div>
             </div>
           ))}
           {STARTER_ARTIFACTS.filter(a=>a.locked).map(a=>{const done=lt>=(a.unlockAt||999999);return(
-            <div key={a.id} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'8px',textAlign:'center',opacity:done?1:0.4}}>
-              <div style={{fontSize:24,filter:done?'none':'grayscale(1)'}}>{done?a.emoji:'\ud83d\udd12'}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:done?'#c8a040':'#4a3a18'}}>{done?a.name:'???'}</div>
+            <div key={a.id} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:done?1:0.4}}>
+              <div style={{fontSize:48,filter:done?'none':'grayscale(1)'}}>{done?a.emoji:'🔒'}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:done?'#c8a040':'#4a3a18'}}>{done?a.name:'???'}</div>
             </div>
           )})}
           {[1,2,3,4,5,6,7,8,9,10].map(i=>(
-            <div key={'future_a'+i} style={{background:'rgba(10,6,2,0.4)',border:'1px dashed rgba(40,25,10,0.3)',borderRadius:6,padding:'8px',textAlign:'center',opacity:0.25}}>
-              <div style={{fontSize:24}}>\ud83d\udd12</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#3a2a10'}}>???</div>
+            <div key={'future_a'+i} style={{background:'rgba(10,6,2,0.4)',border:'1px dashed rgba(40,25,10,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.25}}>
+              <div style={{fontSize:48}}>🔒</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#3a2a10'}}>???</div>
             </div>
           ))}
         </div>
         {/* PASSIVES */}
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#9933cc',letterSpacing:4,marginTop:12}}>Effect Pedals</div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:8,maxWidth:750,width:'100%'}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,maxWidth:900,width:'100%'}}>
           {STARTER_PASSIVES.map(p=>(
-            <div key={p.id} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(120,60,180,0.4)',borderRadius:6,padding:'8px',textAlign:'center'}}>
-              <div style={{fontSize:24}}>{p.emoji}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:'#aa88cc',lineHeight:1.2}}>{p.name}</div>
+            <div key={p.id} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(120,60,180,0.4)',borderRadius:6,padding:'14px 10px',textAlign:'center'}}>
+              <div style={{fontSize:48}}>{p.emoji}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#aa88cc',lineHeight:1.2}}>{p.name}</div>
             </div>
           ))}
           {[1,2,3,4,5,6,7,8,9,10].map(i=>(
-            <div key={'future_p'+i} style={{background:'rgba(10,6,2,0.4)',border:'1px dashed rgba(40,20,60,0.3)',borderRadius:6,padding:'8px',textAlign:'center',opacity:0.25}}>
-              <div style={{fontSize:24}}>\ud83d\udd12</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#3a2a10'}}>???</div>
+            <div key={'future_p'+i} style={{background:'rgba(10,6,2,0.4)',border:'1px dashed rgba(40,20,60,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.25}}>
+              <div style={{fontSize:48}}>🔒</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#3a2a10'}}>???</div>
             </div>
           ))}
         </div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#665533',marginTop:12}}>{earned.length} / {UNLOCK_MILESTONES.length} milestones \u00b7 {achs.length} / {ACHIEVEMENTS.length} achievements</div>
-        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:8}}>\u2190 Back</button>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#665533',marginTop:12}}>{earned.length} / {UNLOCK_MILESTONES.length} milestones · {achs.length} / {ACHIEVEMENTS.length} achievements</div>
+        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:8}}>← Back</button>
       </div>
     )
 
@@ -3851,22 +3851,22 @@ export default function App(){
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Rules</div>
         <div style={{maxWidth:800,width:'100%',display:'flex',flexDirection:'column',gap:12}}>
           {[
-            ['\ud83c\udfb8 The Goal','Build a metal band and fight through 9 Circles of Hell. Defeat Lucifer to win.'],
-            ['\u2694 Strikes','You get 4 Strikes per fight. Play cards from your hand, then Strike to deal damage.'],
-            ['\u2193 Discards','You get 4 Discards per fight. Select cards and discard to cycle for better ones.'],
-            ['\ud83d\udd25 Embers','Cards cost Embers to play. You refill Embers each Strike. Manage them wisely.'],
-            ['\ud83c\udf3f Stash','Your currency. Earned from victories, spent in the shop on packs, cards, artifacts, and drugs.'],
-            ['\ud83d\udc80 Too Stoned','When a member hits 0 HP, they go Too Stoned and cannot attack. Lose all members = game over.'],
-            ['\ud83c\udf00 Corruption','A risk/reward axis. Some cards raise it for power. Overdrive needs 60%+. Seance heals more at high corruption.'],
-            ['\u26d3 Mentor Link','Place a Foil/Mythic/Demonic member LEFT of the same basic member for a damage multiplier.'],
-            ['\ud83c\udf44 The Dealer','Buy shrooms or acid in the shop. Use before your first Strike for powerful (or disastrous) effects.'],
-            ['\ud83c\udfc6 Score','Every run earns score. Lifetime score unlocks new cards, members, and artifacts permanently.'],
+            ['🎸 The Goal','Build a metal band and fight through 9 Circles of Hell. Defeat Lucifer to win.'],
+            ['⚔ Strikes','You get 4 Strikes per fight. Play cards from your hand, then Strike to deal damage.'],
+            ['↓ Discards','You get 4 Discards per fight. Select cards and discard to cycle for better ones.'],
+            ['🔥 Embers','Cards cost Embers to play. You refill Embers each Strike. Manage them wisely.'],
+            ['🌿 Stash','Your currency. Earned from victories, spent in the shop on packs, cards, artifacts, and drugs.'],
+            ['💀 Too Stoned','When a member hits 0 HP, they go Too Stoned and cannot attack. Lose all members = game over.'],
+            ['🌀 Corruption','A risk/reward axis. Some cards raise it for power. Overdrive needs 60%+. Seance heals more at high corruption.'],
+            ['⛓ Mentor Link','Place a Foil/Mythic/Demonic member LEFT of the same basic member for a damage multiplier.'],
+            ['🍄 The Dealer','Buy shrooms or acid in the shop. Use before your first Strike for powerful (or disastrous) effects.'],
+            ['🏆 Score','Every run earns score. Lifetime score unlocks new cards, members, and artifacts permanently.'],
           ].map(([title,desc],i)=><div key={i} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:8,padding:'14px 20px'}}>
             <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#e8a820',marginBottom:6}}>{title}</div>
             <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:'#c8b080',lineHeight:1.5}}>{desc}</div>
           </div>)}
         </div>
-        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:8}}>\u2190 Back</button>
+        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:8}}>← Back</button>
       </div>
     )
 
@@ -3898,7 +3898,7 @@ export default function App(){
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#cc4444',background:'rgba(80,0,0,0.2)',border:'1px solid #cc4444',borderRadius:4,padding:'8px 24px',cursor:'pointer'}}>RESET</button>
           </div>
         </div>
-        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:16}}>\u2190 Back</button>
+        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:16}}>← Back</button>
       </div>
     )
 
@@ -3943,7 +3943,7 @@ export default function App(){
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'#e8a820',
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(200,140,30,0.5)',borderRadius:6,
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
-              🔓 Unlocks ({earned.length}/{UNLOCK_MILESTONES.length})
+              🔓 Unlocks ({earned.length}/77)
             </button>
             <button onClick={()=>setMenuView('rules')}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'#c8a060',
