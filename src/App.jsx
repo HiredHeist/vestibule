@@ -1100,11 +1100,11 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             onBuy={()=>{if(can(recruitPack.cost)){onSpend(recruitPack.cost,'recruit',recruitPack);setLeftBought(p=>({...p,rec:true}))}}} />
           {circleArtifact&&<LeftCard item={circleArtifact} price={circleArtifact.cost}
             label={'Vintage Amp · C'+circleNum} accent='#c87820' id='cart'
-            sold={leftBought.cart||!!circleCartBought}
+            sold={leftBought.cart||!!circleCartBought||(soldIds||[]).includes(circleArtifact?.id)}
             onBuy={()=>buyLeft('cart',circleArtifact.cost,'artifact',circleArtifact)} />}
           {circlePassive&&<LeftCard item={circlePassive} price={circlePassive.cost}
             label={'Effect Pedal · C'+circleNum} accent='#9933cc' id='cpas'
-            sold={leftBought.cpas||!!circleCpasBought}
+            sold={leftBought.cpas||!!circleCpasBought||(soldIds||[]).includes(circlePassive?.id)}
             onBuy={()=>buyLeft('cpas',circlePassive.cost,'passive',circlePassive)} />}
         </div>
 
@@ -1300,7 +1300,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       {card.embers>0?(
         <div style={{position:'absolute',top:8,right:8,display:'flex',flexDirection:'column',alignItems:'center',gap:1}}>
           <div style={{width:28,height:28,borderRadius:'50%',background:canAfford?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',border:`2px solid ${canAfford?'#ff6600':'#4a2a10'}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:canAfford?'#fff':'#5a3a10',boxShadow:canAfford?'0 0 10px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
-          {!canAfford&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,fontWeight:900,color:'#cc4400',letterSpacing:0.5,whiteSpace:'nowrap',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>NEED {card.embers}🔥</div>}
+          {!canAfford&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#ff4400',letterSpacing:0.5,whiteSpace:'nowrap',textShadow:'0 0 8px rgba(255,60,0,0.9)',background:'rgba(0,0,0,0.8)',borderRadius:3,padding:'1px 4px',marginTop:2}}>NEED {card.embers}🔥</div>}
         </div>
       ):(
         <div style={{position:'absolute',top:8,right:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>
@@ -1758,6 +1758,7 @@ export default function App(){
   const [pendingEmbers,setPendingEmbers]=useState(0)
   const [pendingDraw,setPendingDraw]=useState(0)
   const [lastRiffPlayed,setLastRiffPlayed]=useState(null)
+  const discoveredRef=React.useRef(new Set())
   const [bossDebuff,setBossDebuff]=useState(0)
   const [bossRageAtk,setBossRageAtk]=useState(0)
   const [dblRoll,setDblRoll]=useState(null) // null=not rolled, 1-2=half, 3-4=offbeat, 5-6=double
@@ -1815,14 +1816,11 @@ export default function App(){
   const remFloat=id=>setFloats(p=>p.filter(f=>f.id!==id))
   const updStat=(key,val,isMax)=>{isMax=isMax||false;setStats(p=>Object.assign({},p,{[key]:isMax?Math.max(p[key],val):p[key]+val}))}
   const discover=(mechanic,label)=>{
-    setDiscovered(prev=>{
-      if(prev.has(mechanic))return prev
-      const next=new Set(prev)
-      next.add(mechanic)
-      addFloat('⛧ DISCOVERED: '+label,getCenter(bossRef).x,getCenter(bossRef).y-160,'#ffdd00',true)
-      addLog('⛧ DISCOVERED: '+label+' — first time!')
-      return next
-    })
+    if(discoveredRef.current.has(mechanic))return
+    discoveredRef.current.add(mechanic)
+    setDiscovered(prev=>{const next=new Set(prev);next.add(mechanic);return next})
+    addFloat('⛧ DISCOVERED: '+label,getCenter(bossRef).x,getCenter(bossRef).y-160,'#ffdd00',true)
+    addLog('⛧ DISCOVERED: '+label+' — first time!')
   }
 
   const drawUpTo=useCallback((h,d,disc,target)=>{
@@ -1989,6 +1987,13 @@ export default function App(){
         addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)
       } else if(lr.id==='infencore'){
         ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{encoreReady:true,buffCount:(s.buffCount||0)+1}):s)
+      } else if(lr.id==='resonancecard'){
+        if(lrTarget&&!lrTarget.tooStoned){const maxAtk=Math.max(...ns.filter(m=>m&&!m.tooStoned).map(m=>m.atk));ns[slotIdx]=Object.assign({},lrTarget,{atk:maxAtk,tempBuff:true,_origAtk:lrTarget._origAtk||lrTarget.atk,buffCount:(lrTarget.buffCount||0)+1})}
+      } else if(lr.id==='distortion'){
+        const nc2=Math.min(100,corruption+15);setCorruption(nc2);updStat('maxCorruption',nc2,true)
+        ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+1,tempBuff:true,_origAtk:s._origAtk||s.atk,buffCount:(s.buffCount||0)+1}):s)
+      } else if(lr.id==='doubledown'){
+        setNextCardFree(true)
       }
       msg='📼 Demo Tape! Replays: '+lr.name
       addFloat('📼 '+lr.name,getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
@@ -2038,9 +2043,9 @@ export default function App(){
       addFloat('+'+bonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#cc4400',bonus>=4)
     }
     else if(card.id==='distortion'){
-      const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true)
+      const nc=Math.min(100,corruption+15);setCorruption(nc);updStat('maxCorruption',nc,true)
       ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,tempBuff:true,_origAtk:m._origAtk||m.atk,buffCount:(m.buffCount||0)+1}):m)
-      msg='🎸 Distortion! Corruption +10%. All members +1 ATK.'
+      msg='🎸 Distortion! Corruption +15%. All members +1 ATK.'
       addFloat('+1 ATK',getCenter(bossRef).x,getCenter(bossRef).y-70,'#cc4400')
     }
     else if(card.id==='seance'){
@@ -2232,6 +2237,7 @@ export default function App(){
 
     // ── SETLIST: handle entirely here to avoid double state updates ──
     if(card.id==='setlist'){
+      if(setlistOpen){setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
       const effectiveEmbers=nextCardFree?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
       if(nextCardFree)setNextCardFree(false)
@@ -2419,13 +2425,14 @@ export default function App(){
 
     if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
     if(pendingDraw>0){
+      const _pd=pendingDraw
       setDeck(function(curDeck){
-        const nd=[...curDeck]
-        const drawn=[]
-        for(let i=0;i<pendingDraw&&nd.length>0;i++){drawn.push(nd.shift())}
-        if(drawn.length>0){setHand(function(h){return [...h,...drawn]});addLog('🎛 Soundboard draw! +'+drawn.length+' card'+(drawn.length>1?'s':'')+'.')}
+        const nd=[...curDeck],drawn=[]
+        for(let i=0;i<_pd&&nd.length>0;i++){drawn.push(nd.shift())}
+        if(drawn.length>0)setHand(function(h){return [...h,...drawn]})
         return nd
       })
+      addLog('🎛 Soundboard draw! +'+_pd+' card'+(_pd>1?'s':'')+'.')
       setPendingDraw(0)
     }
 
@@ -2559,7 +2566,6 @@ export default function App(){
               const newHp=ns2[ti].hp-actualDmg
               if(newHp<=0&&!ns2[ti].stoneShield){
                 ns2[ti]=Object.assign({},ns2[ti],{hp:0,tooStoned:true})
-                const _stonedName=target.name;setTimeout(()=>addLog('💨 '+_stonedName+' is TOO STONED!'),0)
                 updStat('tooStonedCount',1)
                 // A6: Black Candle — deal 8 damage
                 if(activeArtifacts.some(a=>a.id==='a6')){
@@ -2586,6 +2592,7 @@ export default function App(){
             if(allStoned){discover('allstoned','TOTAL WIPEOUT');setDeathCause('stoned');setTimeout(function(){setGameState('end')},800)}
             return ns2
           })
+          if(stage[stage.indexOf(target)]&&!stage[stage.indexOf(target)].tooStoned&&(stage[stage.indexOf(target)].hp-actualDmg)<=0&&!stage[stage.indexOf(target)].stoneShield)addLog('💨 '+target.name+' is TOO STONED!')
           setDamageFlash(true);setTimeout(function(){setDamageFlash(false)},400)
           addLog('👁 '+enemy.name+' hits '+target.name+' for '+actualDmg+varLabel)
           setDiceTarget(null)
@@ -2750,6 +2757,7 @@ export default function App(){
         if(fc&&r<fc)return{...m,foil:true,mythic:false,demonic:false}
         return{...m,foil:false,mythic:false,demonic:false}
       })
+      recruitPickFiredRef.current=false
       setRecruitCandidates(candidates)
       setGameState('recruit')
     } else if(type==='pack'){
@@ -2786,13 +2794,17 @@ export default function App(){
         const enriched = members.map(m=>{
           return {...m, foil:m.foil||false, mythic:m.mythic||false, demonic:m.demonic||false}
         })
+        recruitPickFiredRef.current=false
         setRecruitCandidates(enriched)
         setGameState('recruit')
       }
     } else {addLog('📦 Purchased: '+item.name+'!')}
   },[stash])
 
+  const recruitPickFiredRef=React.useRef(false)
   const handleRecruitPick=useCallback((member)=>{
+    if(recruitPickFiredRef.current)return
+    recruitPickFiredRef.current=true
     const tier=memberTier(member)
     if(member.demonic){
       const existing=stage.find(m=>m&&m.demonic)
@@ -2817,6 +2829,7 @@ export default function App(){
   },[stage])
 
   const handleRecruitPass=useCallback(()=>{
+    recruitPickFiredRef.current=false
     addLog('👋 No new members recruited.')
     setGameState('shop')
     setRecruitCandidates([])
