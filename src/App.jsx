@@ -616,7 +616,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
   )
 }
 
-function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard}){
+function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,soldIds,onMarkSold}){
   const [hovId,setHovId]=useState(null)
   const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
   const [pawnOpen,setPawnOpen]=useState(false)
@@ -635,11 +635,13 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     if(!can(cardPrice(card)))return
     onSpend(cardPrice(card),'card',card)
     setBoughtIds(p=>[...p,card.uid||card.id])
+    onMarkSold&&onMarkSold(card.uid||card.id)
   }
   function buyLeft(key,cost,type,item){
     if(!can(cost))return
     onSpend(cost,type,item)
     setLeftBought(p=>({...p,[key]:true}))
+    onMarkSold&&onMarkSold(item.id||item.uid)
   }
 
   // ── PACK CARD GENERATOR ──
@@ -885,7 +887,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     const gl=card.isMember?'rgba(232,168,32,0.5)':typeGlow(card.type||'RIFF')
     const price=cardPrice(card)
     const canBuy=can(price)
-    const bought=boughtIds.includes(card.uid||card.id)
+    const bought=boughtIds.includes(card.uid||card.id)||(soldIds||[]).includes(card.uid||card.id)
     return(
       <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',position:'relative',paddingTop:24}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
@@ -1723,8 +1725,8 @@ export default function App(){
   const [remasterCards,setRemasterCards]=useState([])
   const [deathCause,setDeathCause]=useState('fallen')
   const [hellquakeAnim,setHellquakeAnim]=useState(null)
-  const [circleArtifact]=useState(()=>CIRCLE_ARTIFACTS[Math.floor(Math.random()*CIRCLE_ARTIFACTS.length)])
-  const [circlePassive]=useState(()=>STARTER_PASSIVES[Math.floor(Math.random()*STARTER_PASSIVES.length)])
+  const [circleArtifact,setCircleArtifact]=useState(()=>CIRCLE_ARTIFACTS[Math.floor(Math.random()*CIRCLE_ARTIFACTS.length)])
+  const [circlePassive,setCirclePassive]=useState(()=>STARTER_PASSIVES[Math.floor(Math.random()*STARTER_PASSIVES.length)])
   const [activeArtifacts,setActiveArtifacts]=useState([]) // max 3
   const [discovered,setDiscovered]=useState(new Set())
   const [streakWins,setStreakWins]=useState(0)
@@ -1742,6 +1744,7 @@ export default function App(){
   const [demonicConflict,setDemonicConflict]=useState(null)
   const [rerollCost,setRerollCost]=useState(2)
   const [shopBoughtIds,setShopBoughtIds]=useState([])
+  const [shopSoldIds,setShopSoldIds]=useState([])
   const [stats,setStats]=useState({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
 
   
@@ -2758,7 +2761,7 @@ export default function App(){
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(5);setMaxEmbers(5);setStash(3);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0);setDeathCause('fallen')
-    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([])
+    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setShopSoldIds([])
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -2778,7 +2781,7 @@ export default function App(){
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])}/>
   if(gameState==='end')return <EndScreen won={won} cause={deathCause} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}}/>
 
   return(
