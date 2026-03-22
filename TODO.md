@@ -47,10 +47,12 @@ This is happening.
 - [x] Gold pulsing NEW badges on death screen
 - [x] Achievement count shown (X / 16)
 
-### Layer 7: "Almost" Mechanics
-- [ ] "127 more damage would have won that fight"
-- [ ] "Bjorn was 2 HP from surviving"
-- [ ] Near-miss messages on death screen
+### Layer 7: "Almost" Mechanics ✅ COMPLETE
+- [x] "X more damage would have killed [boss]!" — when boss HP < 30% of highest strike or < 200
+- [x] "[Member] was just X HP from surviving!" — for members who died within 10% maxHP
+- [x] "One more fight would have cleared Circle X!" — when died on fight 2 of 3
+- [x] "Just X pts from your personal best!" — when within 500 pts
+- [x] Shows up to 3 near-miss messages, italic orange, emotional
 
 ### Layer 8: Main Menu / Intro Screen (Balatro-style)
 - [ ] **Deck selection** — "Demo Deck" (only option initially), more decks unlock later
