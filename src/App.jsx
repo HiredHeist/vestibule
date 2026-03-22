@@ -66,6 +66,29 @@ function isUnlocked(id,lt){
 function getUnlockedCards(){const lt=parseInt(localStorage.getItem('vst_lifetime')||'0');return ALL_CARDS.filter(c=>!c.locked||isUnlocked(c.id,lt))}
 function getUnlockedMusicians(){const lt=parseInt(localStorage.getItem('vst_lifetime')||'0');return ALL_MUSICIANS.filter(m=>!m.locked||isUnlocked(m.id,lt))}
 
+// ── RUN HISTORY ──────────────────────────────────────────────
+function saveRunHistory(stats,won,enemy,seed){
+  try{
+    const history=JSON.parse(localStorage.getItem('vst_history')||'[]')
+    const circleReached=Math.floor((stats.fightsSurvived)/3)+1
+    const entry={
+      date:new Date().toISOString().slice(0,16).replace('T',' '),
+      score:calcRunScore(stats,won),
+      grade:getScoreGrade(calcRunScore(stats,won),won).label,
+      circle:won?'WIN':circleReached,
+      enemy:won?'Lucifer':(enemy?.name||'Unknown'),
+      cause:won?'victory':'defeated',
+      fights:stats.fightsSurvived,
+      damage:stats.totalDamage,
+      seed:seed?.toString(16).toUpperCase()||'???',
+    }
+    history.unshift(entry)
+    if(history.length>20)history.length=20
+    localStorage.setItem('vst_history',JSON.stringify(history))
+  }catch(e){/* localStorage full or unavailable */}
+}
+function getRunHistory(){try{return JSON.parse(localStorage.getItem('vst_history')||'[]')}catch(e){return[]}}
+
 const ENEMIES=[
   // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
   {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:27,baseDmg:2,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
@@ -1679,6 +1702,22 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   )
 
   // Shared bottom row
+  // ── RUN HISTORY ─────────────────────────────────────────────
+  const [showHistory,setShowHistory]=useState(false)
+  const runHistory=getRunHistory()
+  const RunHistory=()=>runHistory.length>1?(<div style={{width:'100%',maxWidth:780,margin:'4px 0'}}>
+    <div onClick={()=>setShowHistory(p=>!p)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#8a6020',letterSpacing:2,textTransform:'uppercase',cursor:'pointer',textAlign:'center',padding:'4px 0'}}>
+      {showHistory?'▼ Hide Past Runs':'▶ Past Runs ('+runHistory.length+')'}</div>
+    {showHistory&&<div style={{background:'rgba(20,12,4,0.88)',border:'1px solid rgba(100,65,15,0.35)',borderRadius:6,padding:'10px 16px',maxHeight:200,overflowY:'auto'}}>
+      {runHistory.slice(0,20).map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'3px 0',borderBottom:'1px solid rgba(80,50,10,0.12)',fontFamily:"'MBScribblesFont',serif",fontSize:13}}>
+        <span style={{color:'#8a7040'}}>{r.date}</span>
+        <span style={{color:r.cause==='victory'?'#ffd700':'#c8a060',fontWeight:900}}>{r.score?.toLocaleString()}</span>
+        <span style={{color:'#aa8040',fontSize:11}}>{r.grade}</span>
+        <span style={{color:r.cause==='victory'?'#44cc44':'#cc4444',fontSize:11}}>{r.cause==='victory'?'WIN ⛧':'C'+r.circle+' '+r.enemy}</span>
+      </div>)}
+    </div>}
+  </div>):null
+
   const BottomRow=()=>(
     <div style={{display:'flex',gap:20,alignItems:'center'}}>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#5a4a20',letterSpacing:2}}>SEED: {seed.toString(16).toUpperCase()}</div>
@@ -1740,6 +1779,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
                 {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #aa4444',borderRadius:4}}>{streakMsg}</div>}
         <StatsGrid/>
+        <RunHistory/>
         <BottomRow/>
                 {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#443322',letterSpacing:3}}>RUN #{totalRuns}</div>}
         <Buttons victory={false}/>
@@ -1777,6 +1817,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
                 {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:streakWins>1?'#ff6600':'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:`1px solid ${streakWins>1?'#ff6600':'#aa4444'}`,borderRadius:4}}>{streakMsg}</div>}
         <StatsGrid/>
+        <RunHistory/>
         <BottomRow/>
                 {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#443322',letterSpacing:3}}>RUN #{totalRuns}</div>}
         <Buttons victory={false}/>
@@ -1804,6 +1845,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
                 {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>{streakMsg}</div>}
         <StatsGrid/>
+        <RunHistory/>
         <BottomRow/>
                 {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#443322',letterSpacing:3}}>RUN #{totalRuns}</div>}
         <Buttons victory={true}/>
@@ -2802,6 +2844,7 @@ export default function App(){
       setTotalRunsPlayed(newRuns)
       localStorage.setItem('vst_runs', newRuns)
       const runScore=calcRunScore(stats, true)
+      saveRunHistory(stats,true,enemy,runSeed)
       if(runScore>personalBest){setPersonalBest(runScore);localStorage.setItem('vst_best',runScore)}
       const newLifetime=lifetimeScore+runScore
       setLifetimeScore(newLifetime);localStorage.setItem('vst_lifetime',newLifetime)
@@ -3285,7 +3328,7 @@ export default function App(){
             setStrikesLeft(function(cur){
               if(cur<=0){
                 setDeathCause('beaten');
-                {const _rs=calcRunScore(stats,false);const _nr=totalRunsPlayed+1;setTotalRunsPlayed(_nr);localStorage.setItem('vst_runs',_nr);if(_rs>personalBest){setPersonalBest(_rs);localStorage.setItem('vst_best',_rs)}const _nl=lifetimeScore+_rs;setLifetimeScore(_nl);localStorage.setItem('vst_lifetime',_nl);setStreakLosses(p=>p+1);setStreakWins(0);const _td=new Date().toISOString().slice(0,10);const _yd=new Date(Date.now()-86400000).toISOString().slice(0,10);const _ns=lastPlayedDate===_yd||lastPlayedDate===_td?dailyStreak+1:1;setDailyStreak(_ns);localStorage.setItem('vst_streak',_ns);setLastPlayedDate(_td);localStorage.setItem('vst_lastdate',_td)}
+                {const _rs=calcRunScore(stats,false);saveRunHistory(stats,false,enemy,runSeed);const _nr=totalRunsPlayed+1;setTotalRunsPlayed(_nr);localStorage.setItem('vst_runs',_nr);if(_rs>personalBest){setPersonalBest(_rs);localStorage.setItem('vst_best',_rs)}const _nl=lifetimeScore+_rs;setLifetimeScore(_nl);localStorage.setItem('vst_lifetime',_nl);setStreakLosses(p=>p+1);setStreakWins(0);const _td=new Date().toISOString().slice(0,10);const _yd=new Date(Date.now()-86400000).toISOString().slice(0,10);const _ns=lastPlayedDate===_yd||lastPlayedDate===_td?dailyStreak+1:1;setDailyStreak(_ns);localStorage.setItem('vst_streak',_ns);setLastPlayedDate(_td);localStorage.setItem('vst_lastdate',_td)}
                 setTimeout(function(){setGameState('end')},800);
               }
               return cur;
