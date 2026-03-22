@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 09:36 AM (JST)*
+*Last updated: Sunday, March 22, 2026 at 11:20 AM (JST)*
 
 ---
 
@@ -34,10 +34,16 @@ This is happening.
 
 ---
 
+### ✅ Batch 1 — Pushed 26c51f9
+- ~~**Circle artifact/passive SOLD persists** — circleCartBought/circleCpasBought moved to App state, reset only on circle rotation~~
+- ~~**deathCause triggers fixed** — allStoned→'stoned', out of strikes→'beaten' (was backwards)~~
+- ~~**Amp Overload reworked** — now costs 1 discard (sacrifices a yellow block), unplayable at 0 discards~~
+- ~~**Remaster Option C** — delete 1 selected card from hand, draw 3. No more self-copy exploit~~
+
 ## P1 — DO NEXT
 
-- [ ] **Full playthrough stress test** — all 13 bugs fixed, needs a clean run start to finish
-- [ ] **Run 200k sim** — `node vestibule-sim.js 200000` — economy and card changes need fresh balance data
+- [ ] **Full playthrough stress test** — Batch 1 pushed, needs retest — all 13 bugs fixed, needs a clean run start to finish
+- [ ] **Run 200k sim** — after Batch 2+3 complete — `node vestibule-sim.js 200000` — economy and card changes need fresh balance data
 - [ ] **ANCHOR+ANCHOR starting pair** — unwinnable combination, design consideration
 
 ---
