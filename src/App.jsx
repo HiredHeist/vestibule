@@ -104,13 +104,13 @@ const ALL_CARDS=[
   {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:4,effect:'Damage = target HP to boss. Once per round.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'If Corruption >=60%, double ALL ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'infencore',name:'Infernal Encore',type:'RIFF',rarity:'Rare',emoji:'👿',embers:3,effect:'ALL members attack again simultaneously.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'remaster',name:'The Remaster',type:'UTILITY',rarity:'Rare',emoji:'🎙',embers:0,effect:'View 10 deck cards. Delete 2. Copy 1.',color:'#22aa44',typeColor:'#118833',copies:1},
+  {id:'remaster',name:'The Remaster',type:'UTILITY',rarity:'Rare',emoji:'🎙',embers:0,effect:'Select 1 card in hand, then play this to delete it and draw 3 cards.',color:'#22aa44',typeColor:'#118833',copies:1},
   {id:'sabbathsigil',name:'Black Sabbath Sigil',type:'CORRUPT',rarity:'Rare',emoji:'⛧',embers:2,effect:'Corruption → 100%. Roll d10. Hellquake fires — anything can happen.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:4,effect:'All members deal triple ATK this Strike only.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'crowdsurf',name:'Crowd Surf',type:'RIFF',rarity:'Common',emoji:'🏄',embers:2,effect:'Deal damage equal to cards in hand × 2.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'doubledown',name:'Double Down',type:'RIFF',rarity:'Uncommon',emoji:'🎰',embers:3,effect:'The next card played this Strike costs 0 Embers.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'deathriff',name:'Death Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'💀',embers:1,effect:'Deal up to 60 damage, reduced by your Corruption%. Best at 0%, weakest at 100%. Corruption +10%.',color:'#aa1111',typeColor:'#880000',copies:2},
-  {id:'ampoverload',name:'Amp Overload',type:'EMBER',rarity:'Uncommon',emoji:'🔋',embers:0,effect:'Gain 3 Embers. Skip your next Discard this fight.',color:'#c87820',typeColor:'#a06010',copies:2},
+  {id:'ampoverload',name:'Amp Overload',type:'EMBER',rarity:'Uncommon',emoji:'🔋',embers:0,effect:'Gain 3 Embers. Costs 1 Discard. Unplayable with 0 discards remaining.',color:'#c87820',typeColor:'#a06010',copies:2},
   {id:'ampstatic',name:'Amp the Static',type:'CORRUPT',rarity:'Uncommon',emoji:'📶',embers:3,effect:'Target member gains ATK = Corruption ÷ 15 this Strike. Requires Corruption > 0.',color:'#aa1111',typeColor:'#880000',copies:2},
   // ── NEW CARDS ──────────────────────────────────────────────────
   {id:'distortion',name:'Distortion',type:'CORRUPT',rarity:'Common',emoji:'🎸',embers:1,effect:'Corruption +15%. All members +1 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:2},
@@ -616,7 +616,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
   )
 }
 
-function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,soldIds,onMarkSold}){
+function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas}){
   const [hovId,setHovId]=useState(null)
   const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
   const [pawnOpen,setPawnOpen]=useState(false)
@@ -642,6 +642,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     onSpend(cost,type,item)
     setLeftBought(p=>({...p,[key]:true}))
     onMarkSold&&onMarkSold(item.id||item.uid)
+    if(key==='cart')onBuyCart&&onBuyCart()
+    if(key==='cpas')onBuyCpas&&onBuyCpas()
   }
 
   // ── PACK CARD GENERATOR ──
@@ -1098,11 +1100,11 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             onBuy={()=>{if(can(recruitPack.cost)){onSpend(recruitPack.cost,'recruit',recruitPack);setLeftBought(p=>({...p,rec:true}))}}} />
           {circleArtifact&&<LeftCard item={circleArtifact} price={circleArtifact.cost}
             label={'Vintage Amp · C'+circleNum} accent='#c87820' id='cart'
-            sold={leftBought.cart}
+            sold={leftBought.cart||!!circleCartBought}
             onBuy={()=>buyLeft('cart',circleArtifact.cost,'artifact',circleArtifact)} />}
           {circlePassive&&<LeftCard item={circlePassive} price={circlePassive.cost}
             label={'Effect Pedal · C'+circleNum} accent='#9933cc' id='cpas'
-            sold={leftBought.cpas}
+            sold={leftBought.cpas||!!circleCpasBought}
             onBuy={()=>buyLeft('cpas',circlePassive.cost,'passive',circlePassive)} />}
         </div>
 
@@ -1745,6 +1747,8 @@ export default function App(){
   const [rerollCost,setRerollCost]=useState(2)
   const [shopBoughtIds,setShopBoughtIds]=useState([])
   const [shopSoldIds,setShopSoldIds]=useState([])
+  const [circleCartBought,setCircleCartBought]=useState(false)
+  const [circleCpasBought,setCirCleCpasBought]=useState(false)
   const [stats,setStats]=useState({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
 
   
@@ -1854,12 +1858,17 @@ export default function App(){
     else if(card.id==='dialtoeleven'){const nc=Math.min(100,corruption+20);setCorruption(nc);updStat('maxCorruption',nc,true);msg='📻 Corruption +20% → '+nc+'%'}
     else if(card.id==='sigdecay'){const nc=Math.max(0,corruption-30);setCorruption(nc);msg='📡 Corruption -30% → '+nc+'%'}
     else if(card.id==='remaster'){
-      const pool=deck.length>=10?[...deck].sort(()=>Math.random()-.5).slice(0,10):[...deck]
-      if(pool.length===0){addLog('🎙 Deck is empty!');return false}
-      setRemasterCards(pool)
-      setRemasterOpen(true)
+      // Must have exactly 1 non-remaster card selected to delete
+      const toDeleteUid=selected.find(uid=>uid!==card.uid&&hand.some(c=>c.uid===uid))
+      if(!toDeleteUid){addLog('🎙 Select 1 card in hand first, then play The Remaster.');return false}
+      const toDelete=hand.find(c=>c.uid===toDeleteUid)
+      const handAfterDelete=hand.filter(c=>c.uid!==toDeleteUid&&c.uid!==card.uid)
+      const res=drawUpTo(handAfterDelete,deck,[...discardPile,toDelete],handAfterDelete.length+3)
+      setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
+      setSelected([])
       spent=0
-      msg='🎙 The Remaster — choose wisely.'
+      msg='🎙 Remastered! Deleted '+toDelete.name+', drew 3.'
+      addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
     }
     else if(card.id==='setlist'){
       // Show top 4 deck cards in a reorder modal
@@ -1968,9 +1977,12 @@ export default function App(){
       msg='💀 Death Riff! '+ddmg+' damage. Corruption +10%.'+(ddmg===0?' (maxed corruption)':'')
     }
     else if(card.id==='ampoverload'){
-      setEmbers(p=>Math.min(maxEmbers,p+3));setSkipNextDiscard(true);playEmber()
-      msg='🔋 Amp Overload! +3 Embers. Next Discard skipped.'
-      addFloat('+3 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#ff6600')
+      if(discardsLeft<=0){addLog('⚠ No discards left to sacrifice!');return false}
+      setEmbers(p=>Math.min(maxEmbers,p+3))
+      setDiscardsLeft(p=>Math.max(0,p-1))
+      playEmber()
+      msg='🔋 Amp Overload! +3 Embers. -1 Discard.'
+      addFloat('+3 🔥 -1 DISCARD',getCenter(bossRef).x,getCenter(bossRef).y-70,'#ff6600')
     }
     else if(card.id==='ampstatic'){
       if(!m)return false
@@ -2244,7 +2256,7 @@ export default function App(){
 
   const handleDiscard=useCallback(()=>{
     if(selected.length===0||discardsLeft<=0||animPhase!=='idle')return
-    if(skipNextDiscard){setSkipNextDiscard(false);addLog('🔋 Discard skipped (Amp Overload).');return}
+    // (Amp Overload no longer skips discards — it costs one instead)
     const toDisc=hand.filter(c=>selected.includes(c.uid))
     const rem=hand.filter(c=>!selected.includes(c.uid))
     const res=drawUpTo(rem,deck,[...discardPile,...toDisc],HAND_SIZE)
@@ -2306,6 +2318,8 @@ export default function App(){
         if(isCircleBoss){
           setCircleArtifact(CIRCLE_ARTIFACTS[Math.floor(Math.random()*CIRCLE_ARTIFACTS.length)])
           setCirclePassive(STARTER_PASSIVES[Math.floor(Math.random()*STARTER_PASSIVES.length)])
+          setCircleCartBought(false)
+          setCirCleCpasBought(false)
         }
         setGameState('shop')
       }
@@ -2496,7 +2510,7 @@ export default function App(){
               addFloat(actualDmg,getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-50,'#ff3300',false)
             }
             const allStoned=ns2.filter(function(m){return m}).every(function(m){return m.tooStoned})
-            if(allStoned){discover('allstoned','TOTAL WIPEOUT');setDeathCause('fallen');setTimeout(function(){setGameState('end')},800)}
+            if(allStoned){discover('allstoned','TOTAL WIPEOUT');setDeathCause('stoned');setTimeout(function(){setGameState('end')},800)}
             return ns2
           })
           setDamageFlash(true);setTimeout(function(){setDamageFlash(false)},400)
@@ -2529,7 +2543,7 @@ export default function App(){
             // Check out-of-strikes death AFTER this strike resolves
             setStrikesLeft(function(cur){
               if(cur<=0){
-                setDeathCause('stoned');
+                setDeathCause('beaten');
                 setTimeout(function(){setGameState('end')},800);
               }
               return cur;
@@ -2776,7 +2790,7 @@ export default function App(){
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(5);setMaxEmbers(5);setStash(3);setStrikesLeft(MAX_STRIKES);setDiscardsLeft(MAX_DISCARDS)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(0);setDeathCause('fallen')
-    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setShopSoldIds([])
+    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([])
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -2796,7 +2810,7 @@ export default function App(){
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)}/>
   if(gameState==='end')return <EndScreen won={won} cause={deathCause} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}}/>
 
   return(
