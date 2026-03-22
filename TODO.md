@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 12:08 AM*
+*Last updated: Sunday, March 22, 2026 at 12:13 AM*
 
 ---
 
@@ -11,6 +11,8 @@ This is happening.
 ---
 
 ## 🔴 PLAYTEST BUGS — Fix before demo (Session 10, March 21)
+
+**✅ CODE VERIFIED: 26/26 checks passed — all 13 bugs confirmed fixed in source**
 
 1. ~~**Amp the Static silently unplayable** — FIXED: effect text says requires corruption, shows Need Corruption! float~~ — card greys out with no explanation when corruption = 0. Need a clear "Requires Corruption" label on the card when it can't fire.
 
