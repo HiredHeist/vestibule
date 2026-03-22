@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 12:24 PM (JST)*
+*Last updated: Sunday, March 22, 2026 at 12:38 PM (JST)*
 
 ---
 
@@ -58,18 +58,29 @@ This is happening.
 
 ## 🔴 STRESS TEST BUGS — Session 11 (March 22, found during live play)
 
+### ✅ Batch A — Pushed (double-fire + card bugs)
+- ~~**discover() fires twice** — ref guard outside setter~~
+- ~~**Too Stoned fires twice** — addLog moved outside setStage~~
+- ~~**Soundboard draws twice** — addLog moved outside setDeck~~
+- ~~**Recruit joins twice** — recruitPickFiredRef guard~~
+- ~~**Setlist opens twice** — guard in handleDropOnStage~~
+- ~~**Demo Tape no effect on Resonance** — Resonance+Distortion+DoubleDown cases added~~
+- ~~**Distortion +10%→+15%** — impl and msg synced~~
+- ~~**Circle sold triple-safety** — now checks soldIds too~~
+- ~~**NEED X🔥 too small** — bigger font, red glow, dark bg~~
+
 ### Batch A — Double-log / React double-fire (all same root cause)
-- [ ] **Recruit joins twice** — Ingrid, Sigrid, Dag all logged `🎸 X joins!` twice at same timestamp
-- [ ] **Too Stoned fires twice** — `💨 TOO STONED` same timestamp x2 in damage handler
-- [ ] **Hellquake DISCOVERED fires twice** — discover() called twice on same event
-- [ ] **Setlist modal opens twice** — `Drew 2 cards` logged twice in same fight
-- [ ] **Soundboard draws twice** — `pendingDraw` fires twice from one play
+- [x] **Recruit joins twice** — Ingrid, Sigrid, Dag all logged `🎸 X joins!` twice at same timestamp
+- [x] **Too Stoned fires twice** — `💨 TOO STONED` same timestamp x2 in damage handler
+- [x] **Hellquake DISCOVERED fires twice** — discover() called twice on same event
+- [x] **Setlist modal opens twice** — `Drew 2 cards` logged twice in same fight
+- [x] **Soundboard draws twice** — `pendingDraw` fires twice from one play
 
 ### Batch B — Card behaviour bugs
-- [ ] **Demo Tape no effect on Dag** — logged as replayed but target effect didn't apply
-- [ ] **Distortion impl still +10% not +15%** — def updated but impl never synced
-- [ ] **Circle artifact/passive re-appears after buying** — Batch 1 fix not working in practice
-- [ ] **NEED X🔥 label not prominent enough** — players think Feedback Loop/Distortion are broken, not unaffordable
+- [x] **Demo Tape no effect on Dag** — logged as replayed but target effect didn't apply
+- [x] **Distortion impl still +10% not +15%** — def updated but impl never synced
+- [x] **Circle artifact/passive re-appears after buying** — Batch 1 fix not working in practice
+- [x] **NEED X🔥 label not prominent enough** — players think Feedback Loop/Distortion are broken, not unaffordable
 
 ## P1 — DO NEXT
 
