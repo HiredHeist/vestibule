@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 11:29 AM (JST)*
+*Last updated: Sunday, March 22, 2026 at 11:33 AM (JST)*
 
 ---
 
@@ -37,6 +37,7 @@ This is happening.
 ### ✅ Batch 3 — Pushed
 - ~~**Two distinct death screens** — "Stoned to the Bone" only when all members Too Stoned. "Beaten" screen when strikes run out~~
 - ~~**Beaten screen shows boss** — large boss emoji, boss name, circle, subtitle, sassy tagline~~
+- ~~**27 boss taglines** (apostrophes fixed — Couldn't→Could not etc)~~
 - ~~**27 boss taglines** — every enemy from Wanderer to Lucifer has a unique line~~
 - ~~**deathCause wired correctly** — allStoned→'stoned', out of strikes→'beaten', win→'victory'~~
 
