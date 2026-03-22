@@ -2263,7 +2263,7 @@ export default function App(){
     }
     // Start new track
     if(!audioRef.current[trackName]){
-      const a=new Audio('/music/'+trackName+'.mp3')
+      const a=new Audio(import.meta.env.BASE_URL+'music/'+trackName+'.mp3')
       a.loop=true
       a.volume=0
       audioRef.current[trackName]=a
@@ -4017,7 +4017,7 @@ export default function App(){
       <div style={{position:'fixed',inset:0,zIndex:9900,background:'rgba(2,1,0,0.99)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:0,overflow:'hidden'}}>
         {/* Background logo — large, subtle */}
         <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',opacity:0.08}}>
-          <img src="/vestibule_logo.png" alt="" style={{width:'90vmin',height:'90vmin',objectFit:'contain'}}/>
+          <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:'90vmin',height:'90vmin',objectFit:'contain'}}/>
         </div>
         {/* Scanlines */}
         <div style={{position:'absolute',inset:0,pointerEvents:'none',backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.015) 2px,rgba(255,255,255,0.015) 4px)',zIndex:1}}/>
@@ -4139,7 +4139,7 @@ export default function App(){
       {/* CIRCLE CLEARED FLASH */}
       {circleClearedData&&<div style={{position:'fixed',inset:0,zIndex:9750,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:0,background:'rgba(0,0,0,0.94)',animation:'fadeIn 0.3s ease'}}>
         <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',opacity:0.06}}>
-          <img src="/vestibule_logo.png" alt="" style={{width:'80vmin',height:'80vmin',objectFit:'contain'}}/>
+          <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:'80vmin',height:'80vmin',objectFit:'contain'}}/>
         </div>
         <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:12}}>
           <div style={{fontSize:100,filter:'drop-shadow(0 0 30px rgba(200,0,0,0.6))',animation:'throb 0.6s ease-in-out infinite'}}>{circleClearedData.bossEmoji}</div>
