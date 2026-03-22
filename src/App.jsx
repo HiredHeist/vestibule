@@ -2460,6 +2460,11 @@ export default function App(){
                   addLog('🎭 Cult Following! +3 Stash.')
                 }
                 addFloat('TOO STONED',getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-60,'#888',false)
+              } else if(newHp<=0&&ns2[ti].stoneShield){
+                // StoneShield absorbs lethal hit — survives at 1 HP, shield consumed
+                ns2[ti]=Object.assign({},ns2[ti],{hp:1,stoneShield:false})
+                addLog('🛡 '+target.name+' shielded from death! 1 HP remaining.')
+                addFloat('SHIELDED!',getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-60,'#44ccff',true)
               } else {
                 ns2[ti]=Object.assign({},ns2[ti],{hp:Math.max(0,newHp),stoneShield:false})
               }
