@@ -1,5 +1,5 @@
 # VESTIBULE — AI Development Handoff Document
-*Last updated: Sunday, March 22, 2026 at 10:30 PM (JST) — Session 13 end state*
+*Last updated: Monday, March 23, 2026 at 12:15 AM (JST) — Session 13 end state*
 *This is a living document. Update it at the end of every session.*
 
 ---
@@ -64,6 +64,10 @@ Developer = "player" in dev sessions. Music producer, doom metal, lives in rural
 11. ✅ **Signal Decay reworked** — "Discard 1, draw 2" at 1 ember
 12. ✅ **Groupie buffed** — 1 ember, Uncommon
 13. ✅ **Sim v10.0 rebuilt** — all changes synced, ready to run 20k
+14-16. ✅ **The Dealer** — Mushrooms (8🌿) & Acid (18🌿) shop items with 10 trip effects
+17. ✅ **Card balance** — Seance ÷4, Herb Money keep stash, Wake Up free, Roadie 2 strikes
+18. ✅ **C9 rework** — Traitor (Paranoia), Betrayer (Soul Thief), new unique passives
+19. ✅ **Lucifer 2-phase** — 420,666→6,666 HP, Phase 1 ice + Phase 2 satan with full reset
 14. ✅ **Seance buffed** — 1 ember, corruption ÷ 4 (was 2 embers, ÷ 8)
 15. ✅ **Herb Money reworked** — stash ÷ 2 damage, keep stash (was 10% + lose stash)
 16. ✅ **Wake Up Call free** — 0 embers (was 2)

@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 11:00 PM (JST) — Session 13*
+*Last updated: Monday, March 23, 2026 at 12:15 AM (JST) — Session 13*
 
 ---
 
@@ -33,7 +33,7 @@ This is happening.
 - [x] Sim v10.0 rebuilt and synced (Session 13)
 - [ ] Re-sim 20k — awaiting go-ahead
 - [ ] War Drums artifact — discuss after sim data
-- [ ] Lucifer phase system (P2) — 3 phases × 140,222 HP. DISCUSS before implementing.
+- [x] Lucifer 2-phase boss — 420,666→6,666 HP (8 boss kills), Phase 1 ice/Phase 2 satan
 
 ---
 
@@ -181,6 +181,28 @@ C9 Treachery: Traitor 9000 → Betrayer 11400 → LUCIFER 420,666 [damageScaleAt
 - [x] Herb Money: stash ÷ 2 damage, keep stash (was 10% + lose stash)
 - [x] Wake Up Call: 2 embers → 0
 - [x] Roadie: immune 2 strikes (stoneShield counter, was boolean)
+
+### Push 13-16: The Dealer — Mushrooms & Acid
+- [x] Dealer section in shop (top row, first card position)
+- [x] Magic Mushrooms: 8 herb, 69% stock, hold 1 at a time
+- [x] Blotter Acid: 18 herb, 69% stock, hold 1 at a time
+- [x] USE buttons on battle screen (always visible, greyed when empty)
+- [x] Hover tooltips explaining effects
+- [x] SOLD overlay after purchase
+- [x] Trip effects: 4 shroom (Ego Death/Time Dilation/Synesthesia/Cosmic Unity)
+- [x] Trip effects: 4 acid (Fractal Vision/Dimensional Rift/Ego Dissolution/Astral Projection)
+- [x] fightTripBuff persists entire fight (critical bug fix — was expiring after 4s overlay)
+- [x] Reroll button rerolls dealer stock
+- [x] Shop UI: dealer first, cost ovals, right column fixed, stash/reroll aligned
+
+### Push 17: C9 rework + Lucifer 2-phase boss
+- [x] Traitor: Paranoia — 1 member refuses to attack, deals 3 to ally
+- [x] Betrayer: Soul Thief — steals 1 ATK/strike, returned on victory
+- [x] Lucifer: 420,666 HP displayed, reduced by 8 boss kills (8×51,750 = -414,000 → 6,666)
+- [x] Phase 1: Frozen in Cocytus (3,333 HP) — frostbite 3 all + ATK scales +1/20dmg
+- [x] Phase transition: full band reset (HP, embers, strikes, discards, trip)
+- [x] Phase 2: Satan (3,333 HP) — AoE split + ATK scales +2/20dmg + immune to debuff
+- [x] Cinematic overlays for both phases
 
 ---
 

@@ -249,7 +249,7 @@ C5 Anger:    F12 Wrathful 900  | F13 Berserker 1000 | F14 Warlord 1111     [rage
 C6 Heresy:   F15 Heretic 1650  | F16 Apostate 2175  | F17 False Prophet 3000 [corruptPlayer +10/15/20%]
 C7 Violence: F18 Brute 3000    | F19 Hunter 4000    | F20 Executioner 5500  [targetHighestHp 1x/1.5x/2x]
 C8 Fraud:    F21 Trickster 5200| F22 Deceiver 6800  | F23 Archfraud 9600   [fraudShuffle 1/2/3]
-C9 Treachery:F24 Traitor 9000  | F25 Betrayer 11400 | F26 LUCIFER 420,666  [damageScaleAtk]
+C9 Treachery:F24 Traitor 9000  | F25 Betrayer 11400 | F26 LUCIFER 420,666→6,666 [paranoia/soulThief/2-phase]
 ```
 
 ---
@@ -269,6 +269,7 @@ cd /home/claude && node vestibule-sim.js 20000   # thorough
 - Deterministic boss damage (no variance)
 - Smoke test (100 games): avg fight 17.10 (up from 14.99 in v9.0)
 - **Awaiting full 20k run for definitive data**
+- Sim needs update for: dealer (shrooms/acid), C9 passives, Lucifer phases, card buffs
 
 ---
 
@@ -313,7 +314,7 @@ cd /home/claude && node vestibule-sim.js 20000   # thorough
 | 10 | Mar 21 | Batch 1–3: sold state, death screens, hand over-cap, Setlist, Remaster, Amp Overload |
 | 11 | Mar 22 | 9 double-fire bugs, Demo Tape, Distortion +15%, Batch A |
 | 12 | Mar 22 | Mentor Link, Hoarder cut, pack odds, score system, grades, personal best, sim v8.0 |
-| 13 | Mar 22 | 11 pushes: Usurer cut, Remaster fix, C4/C5/C8 rework, circle artifacts wired, shop SOLD bugs ×3, boss UI, Signal Decay rework, Groupie buff, sim v10.0 |
+| 13 | Mar 22-23 | 17 pushes: Usurer cut, C4/C5/C8 rework, circle artifacts, shop bugs, card balance ×6, The Dealer (shrooms+acid), C9 rework (Paranoia/Soul Thief), Lucifer 2-phase boss |
 
 ---
 
