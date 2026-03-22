@@ -277,14 +277,14 @@ function genRecruitPack(fightIndex=0){
   const circle=Math.floor(fightIndex/3)+1
   const packs=[
     {name:'Garage Band Pack',emoji:'🎸',cost:10,desc:'Pick 1 of 2 musicians.',members:2,foilChance:0,mythicChance:0,demonicChance:0},
-    {name:'Touring Pack',emoji:'🎤',cost:22,desc:'Pick 1 of 3. 15% Foil chance.',members:3,foilChance:0.15,mythicChance:0,demonicChance:0},
-    {name:'Demonic Pack',emoji:'⛧',cost:40,desc:'Pick 1 of 4. 25% Foil, 15% Mythic, 3% DEMONIC.',members:4,foilChance:0.25,mythicChance:0.15,demonicChance:0.03},
+    {name:'Touring Pack',emoji:'🎤',cost:22,desc:'Pick 1 of 3. 25% Foil, 5% Mythic chance.',members:3,foilChance:0.25,mythicChance:0.05,demonicChance:0},
+    {name:'Demonic Pack',emoji:'⛧',cost:40,desc:'Pick 1 of 4. 25% Foil, 15% Mythic, 5% DEMONIC.',members:4,foilChance:0.25,mythicChance:0.15,demonicChance:0.05},
   ]
-  // Circles 1 & 2: only Garage Band (affordable for new players)
-  // Circle 3+: Garage Band or Touring
-  // Circle 5+: all packs available
-  if(circle<=2) return packs[0]
-  if(circle<=4) return packs[Math.floor(Math.random()*2)]
+  // Circle 1: only Garage Band
+  // Circle 2-3: Garage Band or Touring (Foil/Mythic available early for Mentor Link)
+  // Circle 4+: all packs (Demonic available before Hoarder wall)
+  if(circle<=1) return packs[0]
+  if(circle<=3) return packs[Math.floor(Math.random()*2)]
   return packs[Math.floor(Math.random()*packs.length)]
 }
 
@@ -665,9 +665,22 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
 
   function buyCard(card){
     if(!can(cardPrice(card)))return
+    if(card.isMember){
+      // Member cards in center shop → recruit flow, NOT card flow
+      onSpend(cardPrice(card),'recruit',{
+        members:1,
+        foilChance: card.foil?1:0,
+        mythicChance: card.mythic?1:0,
+        demonicChance: card.demonic?1:0,
+        _memberOverride: card, // pass the specific member
+      })
+      setBoughtIds(p=>[...p,card.uid])
+      onMarkSold&&onMarkSold(card.uid) // uid only — never card.id for members
+      return
+    }
     onSpend(cardPrice(card),'card',card)
-    setBoughtIds(p=>[...p,card.uid||card.id])
-    onMarkSold&&onMarkSold(card.uid||card.id)
+    setBoughtIds(p=>[...p,card.uid])
+    onMarkSold&&onMarkSold(card.uid) // uid only, not card.id
   }
   function buyLeft(key,cost,type,item){
     if(!can(cost))return
@@ -2801,17 +2814,27 @@ export default function App(){
       setActivePassives(p=>[...p,item])
       addLog('💿 Passive equipped: '+item.name+'!')
     } else if(type==='recruit'){
-      const count=item.members||2
-      const real=ALL_MUSICIANS.filter(m=>!m.locked)
-      const shuffled=[...real].sort(()=>Math.random()-.5).slice(0,count)
-      const fc=item.foilChance||0,mc=item.mythicChance||0,dc=item.demonicChance||0
-      const candidates=shuffled.map(m=>{
-        const r=Math.random()
-        if(dc&&r<dc)return{...m,demonic:true,mythic:false,foil:false}
-        if(mc&&r<mc)return{...m,mythic:true,foil:false,demonic:false}
-        if(fc&&r<fc)return{...m,foil:true,mythic:false,demonic:false}
-        return{...m,foil:false,mythic:false,demonic:false}
-      })
+      let candidates
+      if(item._memberOverride){
+        // Center shop member card — one specific member, already tiered
+        const m=item._memberOverride
+        const real=ALL_MUSICIANS.filter(mu=>!mu.locked)
+        // Pick a random member to be this tiered card's identity
+        const base=real[Math.floor(Math.random()*real.length)]
+        candidates=[{...base,foil:m.foil||false,mythic:m.mythic||false,demonic:m.demonic||false,uid:Math.random().toString(36).slice(2)}]
+      } else {
+        const count=item.members||2
+        const real=ALL_MUSICIANS.filter(m=>!m.locked)
+        const shuffled=[...real].sort(()=>Math.random()-.5).slice(0,count)
+        const fc=item.foilChance||0,mc=item.mythicChance||0,dc=item.demonicChance||0
+        candidates=shuffled.map(m=>{
+          const r=Math.random()
+          if(dc&&r<dc)return{...m,demonic:true,mythic:false,foil:false}
+          if(mc&&r<mc)return{...m,mythic:true,foil:false,demonic:false}
+          if(fc&&r<fc)return{...m,foil:true,mythic:false,demonic:false}
+          return{...m,foil:false,mythic:false,demonic:false}
+        })
+      }
       recruitPickFiredRef.current=false
       setRecruitCandidates(candidates)
       setGameState('recruit')
