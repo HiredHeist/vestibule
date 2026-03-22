@@ -31,10 +31,10 @@ Sim: /home/claude/vestibule-sim.js (v8.0)
 
 ---
 
-## Current Build State (Session 12 end)
+## Current Build State (Session 13 end)
 
-**Latest commit:** `6cbf58b`  
-**App.jsx:** ~3500+ lines  
+**Latest commit:** `ea8001e`  
+**App.jsx:** ~3700+ lines  
 
 ### Fully working systems:
 - Full 9-circle enemy progression (27 enemies, all with passives + death quotes)
@@ -43,19 +43,23 @@ Sim: /home/claude/vestibule-sim.js (v8.0)
 - Shop with scaling inventory, pawn shop, booster packs, circle artifacts
 - **Mentor Link system** (foil/mythic/demonic left of same-id basic = bond + multiplier)
 - **Score system** (count-up animation, grade tiers, personal best, daily streak, run counter)
-- Artifacts A1–A10, Passives P1–P10
+- Artifacts A1–A10 (shop rotation), Circle Artifacts CA1–CA4 (boss shops, all functional)
+- Passives P1–P10
 - DOUBLE TIME d6, HEXED corruption scaling, FOLK MAGIC ember refund
 - Foil/Mythic/Demonic member tiers with visual glow + badges
 - Two distinct death screens: Stoned to the Bone + Beaten by [Boss]
 - Daily seed system
 - localStorage: run count, personal best, lifetime score, daily streak
+- C4 stashSteal mechanic (steals herb, refunds on win)
+- C5 softened rageScale (+1/+1/+2)
+- C8 fraudShuffle (discard+redraw cards after each strike)
+- Deterministic boss damage (no variance)
 
 ### What's next (P1 priority):
-- **Usurer HP cut** (F11, 680HP is the wall — 30% die here after Hoarder fix)
-- **Re-sim after each cut** to find next wall
-- **Lucifer phase system** (3 phases × 140,222 HP, different passives — discuss first)
-- **Score display playtest** — verify renders on real death screens (Shift+D uses dummy stats)
+- **Run sim v10.0 at 20k** — get the real survival curve
+- **War Drums artifact** (+1 Strike) — if sim says we need it
 - **Share score button**
+- **Lucifer phase system** (3 phases × 140,222 HP — discuss first)
 
 ---
 
@@ -174,13 +178,14 @@ Uncommon: `newstrings` `encore` `wakeup` `feedbackloop` `tappedout` `controlfeed
 
 Rare: `stagedive` `overdrive` `infencore` `remaster` `sabbathsigil` `possessedperf` `goingbroke` `resonancecard`
 
-### Key card notes (Session 12 updates):
-- `distortion` — +15% corruption (was +10%), embers: 0
-- `wakeup` — embers: 0 (was 2)
-- `groupie` — embers: 0 (was 2)
+### Key card notes (Session 13 updates):
+- `distortion` — +15% corruption (was +10%), embers: 1 (Session 12)
+- `wakeup` — embers: 2
+- `groupie` — embers: 1, rarity: Uncommon (was 2 embers, Common)
 - `ampoverload` — embers: 0, costs 1 discard (unplayable at 0 discards)
 - `controlfeedback` — set corruption to 50% AND heal target member 50% maxHP
-- `remaster` — select 1 card in hand, delete it, draw 3 (Option C)
+- `remaster` — select 1 card in hand, delete it, draw 3 (handled in handleDropOnStage)
+- `sigdecay` — REWORKED: discard 1 random card from hand, draw 2 cards, 1 ember (handled in handleDropOnStage)
 
 ---
 
@@ -230,18 +235,18 @@ Circle Artifacts: `ca1` Goat of Mendes (all +1 ATK), `ca2` Hellfire Amulet (+2 m
 
 ---
 
-## All Enemies + Current HP
+## All Enemies + Current HP + Passives
 
 ```
-F00 Wanderer      27  | F01 Lost Soul    42  | F02 Drifter     69
-F03 Siren         60  | F04 Tempter      90  | F05 Seducer    140
-F06 Glutton       80  | F07 Feaster     110  | F08 Devourer   160
-F09 Miser        260  | F10 Hoarder     300  | F11 Usurer     680  ← CURRENT WALL
-F12 Wrathful     800  | F13 Berserker  1040  | F14 Warlord   1520
-F15 Heretic     1650  | F16 Apostate   2175  | F17 False Prophet 3000
-F18 Brute       3000  | F19 Hunter     4000  | F20 Executioner 5500
-F21 Trickster   5200  | F22 Deceiver   6800  | F23 Archfraud  9600
-F24 Traitor     9000  | F25 Betrayer  11400  | F26 LUCIFER  420,666
+C1 Limbo:    F00 Wanderer 27   | F01 Lost Soul 42   | F02 Drifter 69       [no passive]
+C2 Lust:     F03 Siren 60      | F04 Tempter 90     | F05 Seducer 140      [selfbuff +1/+1/+2]
+C3 Gluttony: F06 Glutton 80    | F07 Feaster 110    | F08 Devourer 160     [cardHeal 2/3/4]
+C4 Greed:    F09 Miser 260     | F10 Hoarder 300    | F11 Usurer 420       [stashSteal 1/2/3]
+C5 Anger:    F12 Wrathful 900  | F13 Berserker 1000 | F14 Warlord 1111     [rageScale +1/+1/+2]
+C6 Heresy:   F15 Heretic 1650  | F16 Apostate 2175  | F17 False Prophet 3000 [corruptPlayer +10/15/20%]
+C7 Violence: F18 Brute 3000    | F19 Hunter 4000    | F20 Executioner 5500  [targetHighestHp 1x/1.5x/2x]
+C8 Fraud:    F21 Trickster 5200| F22 Deceiver 6800  | F23 Archfraud 9600   [fraudShuffle 1/2/3]
+C9 Treachery:F24 Traitor 9000  | F25 Betrayer 11400 | F26 LUCIFER 420,666  [damageScaleAtk]
 ```
 
 ---
@@ -250,15 +255,17 @@ F24 Traitor     9000  | F25 Betrayer  11400  | F26 LUCIFER  420,666
 
 ```bash
 cd /home/claude && node vestibule-sim.js 5000    # quick
-cd /home/claude && node vestibule-sim.js 200000  # thorough
+cd /home/claude && node vestibule-sim.js 20000   # thorough
 ```
 
-**v8.0 latest results (5000 games):**
-- 0% Lucifer wins
-- Avg fight: 9.93/26
-- F10 Hoarder: 30.4% survive (was 0% before HP cut)
-- F11 Usurer: 0% survive ← CURRENT WALL
-- Next step: cut Usurer HP to ~420, re-sim
+**v10.0 (Session 13) — synced with all changes:**
+- C4 stashSteal (no damage scaling), C5 rageScale +1/+1/+2, C8 fraudShuffle
+- Circle artifacts ca1-ca4 functional
+- Signal Decay reworked, Groupie buffed
+- Mentor Link aware, smart shop AI, pawn shop selling
+- Deterministic boss damage (no variance)
+- Smoke test (100 games): avg fight 17.10 (up from 14.99 in v9.0)
+- **Awaiting full 20k run for definitive data**
 
 ---
 
@@ -274,6 +281,7 @@ cd /home/claude && node vestibule-sim.js 200000  # thorough
 8. **Python patch assertions** — `assert old in src` before every replace.
 9. **scoreCard vs applyCardSim** — two separate switch statements in sim. Never confuse them.
 10. **420 is sacred** — never change card height or stash cap.
+11. **UPDATE DOCS ON EVERY PUSH** — TODO.md, HANDOFF.md, CLAUDE.md are the bible. No exceptions.
 
 ---
 
@@ -302,6 +310,7 @@ cd /home/claude && node vestibule-sim.js 200000  # thorough
 | 10 | Mar 21 | Batch 1–3: sold state, death screens, hand over-cap, Setlist, Remaster, Amp Overload |
 | 11 | Mar 22 | 9 double-fire bugs, Demo Tape, Distortion +15%, Batch A |
 | 12 | Mar 22 | Mentor Link, Hoarder cut, pack odds, score system, grades, personal best, sim v8.0 |
+| 13 | Mar 22 | 11 pushes: Usurer cut, Remaster fix, C4/C5/C8 rework, circle artifacts wired, shop SOLD bugs ×3, boss UI, Signal Decay rework, Groupie buff, sim v10.0 |
 
 ---
 
