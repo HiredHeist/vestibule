@@ -3023,6 +3023,11 @@ export default function App(){
         setAcidInStock(Math.random()<0.50)
         setGameState('shop')
       }
+      if(e.shiftKey&&(e.key==='W'||e.key==='w')){
+        setDeathCause('victory')
+        setStats({fightsSurvived:27,strikesThrown:108,totalDamage:666666,highestStrike:42069,tooStonedCount:3,maxCorruption:100,stashEarned:420,cardsPlayed:420})
+        setGameState('end')
+      }
       if(e.shiftKey&&(e.key==='D'||e.key==='d')){
         setDeathCause('stoned')
         setStats({fightsSurvived:6,strikesThrown:24,totalDamage:420,highestStrike:69,tooStonedCount:2,maxCorruption:66,stashEarned:42,cardsPlayed:99})
