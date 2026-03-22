@@ -3312,7 +3312,10 @@ export default function App(){
     if(stash<rerollCost)return
     setStash(p=>Math.min(MAX_STASH,p-rerollCost));setRerollCost(p=>p+2)
     const cn=Math.floor(fightIndex/3)+1
-    setShopCards(genShopCards(cn));addLog('🔄 Shop rerolled for '+rerollCost+' 🌿')
+    setShopCards(genShopCards(cn))
+    setShroomsInStock(Math.random()<0.69)
+    setAcidInStock(Math.random()<0.69)
+    addLog('🔄 Shop rerolled for '+rerollCost+' 🌿')
   },[stash,rerollCost,fightIndex])
 
   const handleReset=()=>{
