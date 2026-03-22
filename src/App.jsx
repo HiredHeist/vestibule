@@ -3455,23 +3455,6 @@ export default function App(){
         <div style={{position:'absolute',left:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:10,alignItems:'center',justifyContent:'center',background:'rgba(20,12,4,0.7)',borderRadius:'0 6px 6px 0',padding:'12px 14px',border:'1px solid rgba(100,65,15,0.3)',borderLeft:'none',minWidth:90}}>
           <DeckPile count={deck.length} label="Deck"/>
           <DeckPile count={discardPile.length} label="Discard"/>
-          {/* DEALER ITEMS */}
-          {heldShrooms&&<button onClick={()=>{if(strikesLeft===MAX_STRIKES&&!tripUsedThisFight)activateTrip('shrooms')}}
-            style={{width:80,padding:'6px 4px',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,
-              background:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'rgba(80,40,10,0.7)':'rgba(30,20,10,0.4)',
-              border:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'2px solid #cc8800':'1px solid #4a3018',
-              borderRadius:4,color:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'#ffcc44':'#554428',
-              cursor:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'pointer':'not-allowed',
-              textShadow:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'0 0 8px rgba(200,150,0,0.6)':'none',
-              transition:'all 0.15s'}}>🍄 USE</button>}
-          {heldAcid&&<button onClick={()=>{if(strikesLeft===MAX_STRIKES&&!tripUsedThisFight)activateTrip('acid')}}
-            style={{width:80,padding:'6px 4px',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,
-              background:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'rgba(40,10,80,0.7)':'rgba(20,10,30,0.4)',
-              border:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'2px solid #aa44ff':'1px solid #3a1a5a',
-              borderRadius:4,color:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'#cc88ff':'#4a2a6a',
-              cursor:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'pointer':'not-allowed',
-              textShadow:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'0 0 8px rgba(160,60,240,0.6)':'none',
-              transition:'all 0.15s'}}>🧪 USE</button>}
         </div>
 
         {/* ACTIVE PASSIVES/ARTIFACTS PANEL — toggleable */}
@@ -3524,6 +3507,41 @@ export default function App(){
             style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'8px 12px',width:100,background:handSort==='embers'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='embers'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='embers'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>🔥 COST</button>
           <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
             style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'8px 12px',width:100,background:handSort==='rarity'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='rarity'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='rarity'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>⭐ RARITY</button>
+        </div>
+        {/* DEALER USE BUTTONS — top of black area, same column as sort buttons */}
+        <div style={{position:'absolute',left:119,top:10,zIndex:60,display:'flex',flexDirection:'column',gap:4}}>
+          {heldShrooms&&<div style={{position:'relative'}}
+            onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='block'}}
+            onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='none'}}>
+            <button onClick={()=>{if(strikesLeft===MAX_STRIKES&&!tripUsedThisFight)activateTrip('shrooms')}}
+              style={{width:100,padding:'8px 12px',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase',
+                background:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'rgba(80,40,10,0.7)':'rgba(30,20,10,0.4)',
+                border:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'2px solid #cc8800':'1px solid #4a3018',
+                borderRadius:3,color:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'#ffcc44':'#554428',
+                cursor:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'pointer':'not-allowed',
+                textShadow:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'0 0 8px rgba(200,150,0,0.6)':'none',
+                textAlign:'center',transition:'all 0.15s'}}>🍄 USE</button>
+            <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(200,150,50,0.6)',borderRadius:6,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#e8a820',marginBottom:6}}>🍄 Magic Mushrooms</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#c8b080',lineHeight:1.5}}>Use before your first Strike. 90% chance of a powerful buff — +2 ATK all, bonus Strike, cheaper cards, or full heal. 5% chance of nothing. 5% chance of a bad trip.</div>
+            </div>
+          </div>}
+          {heldAcid&&<div style={{position:'relative'}}
+            onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='block'}}
+            onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='none'}}>
+            <button onClick={()=>{if(strikesLeft===MAX_STRIKES&&!tripUsedThisFight)activateTrip('acid')}}
+              style={{width:100,padding:'8px 12px',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase',
+                background:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'rgba(40,10,80,0.7)':'rgba(20,10,30,0.4)',
+                border:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'2px solid #aa44ff':'1px solid #3a1a5a',
+                borderRadius:3,color:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'#cc88ff':'#4a2a6a',
+                cursor:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'pointer':'not-allowed',
+                textShadow:strikesLeft===MAX_STRIKES&&!tripUsedThisFight?'0 0 8px rgba(160,60,240,0.6)':'none',
+                textAlign:'center',transition:'all 0.15s'}}>🧪 USE</button>
+            <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(150,50,220,0.6)',borderRadius:6,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#cc44ff',marginBottom:6}}>🧪 Blotter Acid</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#c8b080',lineHeight:1.5}}>Use before your first Strike. 90% chance of a game-changing effect — double damage, cards fire twice, +3 ATK all, or total immunity. 5% nothing. 5% Hellquake.</div>
+            </div>
+          </div>}
         </div>
         <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:50,paddingLeft:110,paddingRight:220,overflow:'visible',minHeight:0,position:'relative',zIndex:50}}>
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).map((card,i)=>(
