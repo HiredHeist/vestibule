@@ -3765,14 +3765,14 @@ export default function App(){
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#8a6020',letterSpacing:2}}>Lifetime Score: {lt.toLocaleString()}</div>
         {/* SCORE MILESTONES */}
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#e8a820',letterSpacing:4,marginTop:8}}>Score Milestones</div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:10,maxWidth:750,width:'100%'}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:14,maxWidth:900,width:'100%'}}>
           {UNLOCK_MILESTONES.map(u=>{const done=lt>=u.score;const pct=Math.min(100,Math.round(lt/u.score*100));return(
-            <div key={u.id} style={{background:done?'rgba(40,25,5,0.8)':'rgba(10,6,2,0.8)',border:done?'2px solid #e8a820':'1px solid rgba(60,40,15,0.4)',borderRadius:8,padding:'12px 16px',display:'flex',gap:12,alignItems:'center'}}>
-              <div style={{fontSize:32,filter:done?'none':'grayscale(1) brightness(0.3)',minWidth:40,textAlign:'center'}}>{done?u.emoji:'🔒'}</div>
+            <div key={u.id} style={{background:done?'rgba(40,25,5,0.8)':'rgba(10,6,2,0.8)',border:done?'2px solid #e8a820':'1px solid rgba(120,80,20,0.5)',borderRadius:10,padding:'24px 28px',display:'flex',gap:20,alignItems:'center'}}>
+              <div style={{fontSize:56,filter:done?'none':'grayscale(1) brightness(0.5)',minWidth:64,textAlign:'center'}}>{done?u.emoji:'🔒'}</div>
               <div style={{flex:1}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:done?'#e8a820':'#4a3a18',letterSpacing:1}}>{done?u.label:'???'}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:done?'#aa8030':'#3a2a10'}}>{u.score.toLocaleString()} pts {done?'✓ UNLOCKED':' — '+pct+'%'}</div>
-                {!done&&<div style={{height:4,background:'rgba(20,12,4,0.8)',borderRadius:2,marginTop:3,overflow:'hidden'}}><div style={{height:'100%',width:pct+'%',background:'linear-gradient(90deg,#8a2200,#e8a820)',borderRadius:2}}/></div>}
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,fontWeight:900,color:done?'#e8a820':'#c8a040',letterSpacing:1}}>{done?u.label:'???'}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:done?'#e8a820':'#c8a040'}}>{u.score.toLocaleString()} pts {done?'✓ UNLOCKED':' — '+pct+'%'}</div>
+                {!done&&<div style={{height:8,background:'rgba(20,12,4,0.8)',borderRadius:4,marginTop:6,overflow:'hidden'}}><div style={{height:'100%',width:pct+'%',background:'linear-gradient(90deg,#8a2200,#e8a820)',borderRadius:4}}/></div>}
               </div>
             </div>
           )})}
