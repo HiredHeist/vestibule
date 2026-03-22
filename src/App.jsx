@@ -2276,6 +2276,12 @@ export default function App(){
         setBoosterPacks(genBoosterPacks(nextCn))
         setRecruitPack(genRecruitPack(fightIndex))
         setShopSoldIds([]) // clear sold state when shop rotates
+        // Rotate circle artifact + passive at each new circle (every 3rd fight)
+        const isCircleBoss=(fightIndex+1)%3===0
+        if(isCircleBoss){
+          setCircleArtifact(CIRCLE_ARTIFACTS[Math.floor(Math.random()*CIRCLE_ARTIFACTS.length)])
+          setCirclePassive(STARTER_PASSIVES[Math.floor(Math.random()*STARTER_PASSIVES.length)])
+        }
         setGameState('shop')
       }
     },1000)
