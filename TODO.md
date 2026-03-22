@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Sunday, March 22, 2026 at 12:38 PM (JST)*
+*Last updated: Sunday, March 22, 2026 at 01:34 PM (JST)*
 
 ---
 
@@ -7,6 +7,95 @@
 1,000,000 copies at $6.66 on Steam — Week 1.
 YouTubers and streamers will push it because it is genuinely unique.
 This is happening.
+
+---
+
+---
+
+## 🎯 ADDICTION LAYER — Design Decisions (Session 11, March 22)
+
+### Core Philosophy
+The loop is currently: play → die → play again. That is habit, not addiction.
+Addiction requires: play → die → see score → see tier → see next unlock → play again IMMEDIATELY.
+Slay the Spire has 1000+ hour players because every run has a score to beat, something unlocking, and a daily challenge.
+We need all three.
+
+---
+
+## 🔴 P1 — UNBLOCK THE GAME (do first, everything else depends on this)
+
+- [ ] **Hoarder HP 480→300** — sim confirms 67% of all runs end here, 0% get past. Cut to 300.
+- [ ] **Re-sim 5k after Hoarder cut** — find the new wall before touching other balance
+- [ ] **Implement Mentor Link** — currently unimplemented stub. Bonded member pairs deal 1.5x→3x damage multiplier when they both attack same strike. Required for late-game damage scaling.
+- [ ] **Re-sim after Mentor Link** — validate C5+ survival rate. Target: ~6.66% Lucifer win rate.
+- [ ] **Lucifer phase system (consider)** — instead of raw 420,666 HP, consider 3 phases of 140,222 HP with different passives each phase. Same total HP, more achievable, more epic. Discussion needed.
+
+---
+
+## 🏆 P1 — SCORE SYSTEM (biggest retention feature)
+
+- [ ] **Score formula** — `(circleReached × 1000) + (fightsWon × 150) + (totalDamage ÷ 10) + (highestStrike × 5) + (stashEarned × 2) - (tooStonedEvents × 50)`
+- [ ] **Score displayed on death screen** — large, prominent, always shown
+- [ ] **Score counter tick-up animation** — numbers count up to final score on death screen
+- [ ] **Grade/tier label** — F → D → C → B → A → S → ⛧ LUCIFER SLAYER (hardcoded brackets from sim data)
+- [ ] **Personal best in localStorage** — "YOU BEAT YOUR BEST BY 420 🌿" — miss: "YOUR BEST: 6,100 — 1,680 short"
+- [ ] **Run number displayed** — small "RUN #47" corner counter, persists in localStorage
+
+---
+
+## 🔥 P1 — DAILY CHALLENGE + STREAK
+
+- [ ] **Daily seed banner on Opening Night** — prominent "TODAY'S SEED: 4F2A — March 22", not buried
+- [ ] **Daily attempt locked** — first daily play locks score, no re-runs for daily category
+- [ ] **Daily streak counter** — 🔥 7 DAY STREAK shown on death screen. Resets on miss. Daily habit engine.
+- [ ] **Share score button** — copies "Vestibule — RUN #47 — SCORE: 12,420 ⛧ CONDEMNED — Fell to The Hoarder at C4 — SEED: 67D60A" — free viral marketing
+
+---
+
+## 🔓 P2 — UNLOCK SYSTEM
+
+- [ ] **Unlock milestone teaser on death screen** — "NEXT UNLOCK AT: 5,000 pts — ??? Member" even before real unlocks exist
+- [ ] **Lifetime score tracking** — cumulative across all runs, stored localStorage
+- [ ] **Milestone unlocks (lifetime score):**
+  - 1,000 pts → Loki (CORRUPT Synth Player) unlocked
+  - 3,000 pts → Vitalik (FOLK MAGIC, ATK 6) unlocked  
+  - 5,000 pts → Bonus artifact slot unlocked
+  - 10,000 pts → A11–A20 artifact set unlocked
+  - 25,000 pts → Lucifer's Guitarist (demonic tier, absurd stats)
+- [ ] **Achievement unlocks (one-time triggers):**
+  - First boss defeated → Foil card variants appear in shop
+  - 100% corruption + survived → Distortion Foil unlocked
+  - Folk Magic fired 5× in one run → Vitalik Mythic variant
+  - Beat The Miser without spending stash → Going Broke card unlocked
+
+---
+
+## ✨ P2 — POLISH + ANIMATIONS
+
+- [ ] **Circle complete flash** — 2 second "⛧ CIRCLE I CLEARED ⛧" screen with stash earned before shop. Circle number fills with visual effect progressing toward apocalyptic by C7+.
+- [ ] **Score tick-up animation on death screen** — counter counts up to final score
+- [ ] **Lucifer boss intro cinematic** — brief screen before fight 27, builds dread
+- [ ] **Death screen boss slam-in** — boss emoji animates in dramatically on beaten screen
+
+---
+
+## 🃏 P2 — CARD BALANCE PASS (after sim confirms wall is gone)
+
+- [ ] **Signal Decay rework** — 0.02 plays/game, AI avoids it. Change to: "Discard 1 card from hand. Draw 2 cards." Cycle card, keeps theme.
+- [ ] **Wake Up Call: 2 embers → 0** — revival should feel free in emergencies
+- [ ] **Roadie: immune 1 strike → immune 2 strikes** — not worth a deck slot at 1 strike
+- [ ] **Séance: 2 embers → 1 ember** — corruption-scaling heal needs to be cheaper to pick early
+- [ ] **Double Down: update sim AI** — AI not chaining it correctly. Fix expertStrike to play it before most expensive card in hand.
+
+---
+
+## 🌐 P3 — ONLINE LEADERBOARD (after offline loop is proven addicting)
+
+- [ ] **Weekly leaderboard** — top 100 scores, resets Sunday midnight
+- [ ] **Two categories** — Best Seeded Run (verifiable, anyone can replay) + Best Random Run
+- [ ] **Seed replay** — clicking a leaderboard seed loads that exact run
+- [ ] **No account required** — name typed once, stored locally
+
 
 ---
 
@@ -82,7 +171,7 @@ This is happening.
 - [x] **Circle artifact/passive re-appears after buying** — Batch 1 fix not working in practice
 - [x] **NEED X🔥 label not prominent enough** — players think Feedback Loop/Distortion are broken, not unaffordable
 
-## P1 — DO NEXT
+## P1 — IMMEDIATE (see addiction layer above for full list)
 
 - [ ] **Full playthrough stress test** — Batch 1 pushed, needs retest — all 13 bugs fixed, needs a clean run start to finish
 - [ ] **Run 200k sim** — after Batch 2+3 complete — `node vestibule-sim.js 200000` — economy and card changes need fresh balance data
