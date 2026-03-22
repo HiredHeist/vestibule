@@ -12,7 +12,7 @@ This is happening.
 
 ## 🔴 PLAYTEST BUGS — Fix before demo (Session 10, March 21)
 
-1. **Amp the Static silently unplayable** — card greys out with no explanation when corruption = 0. Need a clear "Requires Corruption" label on the card when it can't fire.
+1. ~~**Amp the Static silently unplayable** — FIXED: effect text says requires corruption, shows Need Corruption! float~~ — card greys out with no explanation when corruption = 0. Need a clear "Requires Corruption" label on the card when it can't fire.
 
 2. **Burn the Set — no selection UI** — player must select cards BEFORE playing it but there is zero indication of this. Need hint text on the card and a visual cue when playing with nothing selected.
 
