@@ -119,11 +119,11 @@ const ALL_CARDS=[
   {id:'amp',name:'Amp It Up',type:'RIFF',rarity:'Common',emoji:'⚡',embers:2,effect:'Target member deals double ATK this turn.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:1,effect:'+20% Corruption immediately.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'soundcheck',name:'Sound Check',type:'UTILITY',rarity:'Common',emoji:'🔊',embers:2,effect:'All members +4 HP. Injured members also gain +1 ATK this Strike.',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'sigdecay',name:'Signal Decay',type:'CORRUPT',rarity:'Common',emoji:'📡',embers:2,effect:'-30% Corruption. Heal 5 HP.',color:'#aa1111',typeColor:'#880000',copies:1},
+  {id:'sigdecay',name:'Signal Decay',type:'CORRUPT',rarity:'Common',emoji:'📡',embers:1,effect:'Discard 1 card from hand. Draw 2 cards.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'battlecry',name:'Battle Cry',type:'RIFF',rarity:'Common',emoji:'🤘',embers:1,effect:'Target member +1 ATK permanently.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'roadie',name:'Roadie',type:'UTILITY',rarity:'Common',emoji:'🛡',embers:1,effect:'Target cannot go Too Stoned this Strike. Heals 2 HP.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'setlist',name:'Setlist',type:'UTILITY',rarity:'Common',emoji:'📋',embers:1,effect:'Draw 2 cards (above hand cap). Then discard 1 card of your choice.',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'groupie',name:'Groupie',type:'EMBER',rarity:'Common',emoji:'🍯',embers:2,effect:'Gain 2 Embers. Draw 1 card immediately.',color:'#c87820',typeColor:'#a05a10',copies:2},
+  {id:'groupie',name:'Groupie',type:'EMBER',rarity:'Uncommon',emoji:'🍯',embers:1,effect:'Gain 2 Embers. Draw 1 card immediately.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'demotape',name:'Demo Tape',type:'RIFF',rarity:'Common',emoji:'📼',embers:2,effect:'Copy the last Riff played, cast it free.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'newstrings',name:'New Strings',type:'RIFF',rarity:'Uncommon',emoji:'🎸',embers:3,effect:'+2 ATK permanently to target member.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'encore',name:'Encore',type:'RIFF',rarity:'Uncommon',emoji:'🔁',embers:2,effect:'Target member attacks again this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:2},
@@ -1910,7 +1910,7 @@ export default function App(){
   const [remasterCards,setRemasterCards]=useState([])
   const [deathCause,setDeathCause]=useState('fallen')
   const [hellquakeAnim,setHellquakeAnim]=useState(null)
-  const [circleArtifact,setCircleArtifact]=useState(()=>CIRCLE_ARTIFACTS[Math.floor(Math.random()*CIRCLE_ARTIFACTS.length)])
+  const [circleArtifact,setCircleArtifact]=useState(()=>STARTER_ARTIFACTS[Math.floor(Math.random()*STARTER_ARTIFACTS.length)])
   const [circlePassive,setCirclePassive]=useState(()=>STARTER_PASSIVES[Math.floor(Math.random()*STARTER_PASSIVES.length)])
   const [activeArtifacts,setActiveArtifacts]=useState([]) // max 3
   const [discovered,setDiscovered]=useState(new Set())
@@ -2049,7 +2049,10 @@ export default function App(){
       addFloat('+4 HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')
     }
     else if(card.id==='dialtoeleven'){const nc=Math.min(100,corruption+20);setCorruption(nc);updStat('maxCorruption',nc,true);msg='📻 Corruption +20% → '+nc+'%'}
-    else if(card.id==='sigdecay'){const nc=Math.max(0,corruption-30);setCorruption(nc);msg='📡 Corruption -30% → '+nc+'%'}
+    else if(card.id==='sigdecay'){
+      // Handled in handleDropOnStage (modifies hand/deck like setlist)
+      return false
+    }
     else if(card.id==='remaster'){
       // Handled in handleDropOnStage to avoid stale selected closure (same fix as setlist/burnset)
       return false
@@ -2446,6 +2449,36 @@ export default function App(){
       return
     }
 
+    // ── SIGNAL DECAY: discard 1 random from hand, draw 2 ──
+    if(card.id==='sigdecay'){
+      const effectiveEmbers=nextCardFree?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
+      if(nextCardFree)setNextCardFree(false)
+      const handWithout=hand.filter(c=>c.uid!==card.uid)
+      if(handWithout.length===0){
+        // No cards to discard, just draw 2
+        const res=drawUpTo(handWithout,deck,discardPile,handWithout.length+2)
+        setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
+        addLog('📡 Signal Decay! Drew 2 cards.')
+      } else {
+        // Discard 1 random, draw 2
+        const victimIdx=Math.floor(Math.random()*handWithout.length)
+        const victim=handWithout[victimIdx]
+        const remaining=handWithout.filter((_,i)=>i!==victimIdx)
+        const res=drawUpTo(remaining,deck,[...discardPile,victim],remaining.length+2)
+        setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
+        addLog('📡 Signal Decay! Discarded '+victim.name+', drew 2 cards.')
+      }
+      setSelected([])
+      if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
+      updStat('cardsPlayed',1)
+      if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
+      else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
+      else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>Math.min(enemy.maxHp,p+4))
+      setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
+      return
+    }
+
     const ok=applyCard(card,slotIdx)
     if(ok){
       const playedId=card.id
@@ -2568,7 +2601,7 @@ export default function App(){
         // Rotate circle artifact + passive at each new circle (every 3rd fight)
         const isCircleBoss=(fightIndex+1)%3===0
         if(isCircleBoss){
-          setCircleArtifact(CIRCLE_ARTIFACTS[Math.floor(Math.random()*CIRCLE_ARTIFACTS.length)])
+          setCircleArtifact(STARTER_ARTIFACTS[Math.floor(Math.random()*STARTER_ARTIFACTS.length)])
           setCirclePassive(STARTER_PASSIVES[Math.floor(Math.random()*STARTER_PASSIVES.length)])
           setCircleCartBought(false)
           setCirCleCpasBought(false)
