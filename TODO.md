@@ -117,11 +117,11 @@ This is happening.
 - [x] Descent triggers for ALL circles including C1 (after Opening Night)
 
 ### Feature 4: BUILD IDENTITY — "Genre Bonus"
-- [ ] Track RIFF/CORRUPT/UTILITY/EMBER play percentages per run
-- [ ] Genre display (bar or indicator) on right panel
-- [ ] 50%+ threshold activates Genre Bonus:
-      RIFF METAL (+15% RIFF damage), BLACK METAL (+25% corruption damage),
-      PROG ROCK (+1 card draw/strike), DOOM METAL (+2 ATK if no discards used)
+- [x] Track RIFF/CORRUPT/UTILITY/EMBER play percentages per run
+- [x] Genre display (color bar + name) on right panel
+- [x] 50%+ threshold activates Genre Bonus:
+      RIFF METAL (+15% strike dmg), BLACK METAL (+25% corruption dmg),
+      PROG ROCK (+1 card draw/strike), DOOM METAL (+2 ATK/member no discards)
 - [x] Fix hand size: no cap, draws never shrink hand, Burn the Set uncapped
 - [x] Soundboard +1 draw: refill now uses strikeHandSizeRef (tracks hand size at strike start)
 - [x] Remove hand size text above hand (clean layout)
@@ -136,7 +136,7 @@ This is happening.
 - [x] Smoke Break victim counts toward refill draw (2 cards removed = 2 drawn back)
 - [x] Fix Sound Wall: scales by circle (C1-3=5, C4-6=8, C7-9=12)
 - [x] CORRUPT keyword ATK bonus shown on member cards (3+6 format)
-- [ ] Deck thinning: "Burn" at Pawn Shop — delete card permanently for free
+- [x] Deck thinning: "Burn" at Pawn Shop — delete card permanently for free
 - [ ] Shop leans toward current genre (1 extra card of dominant type in rotation)
 - [ ] Opening Night: show "Synergizes with: X BUILD" under member keywords
 - [ ] Further design discussion needed on thresholds and feel

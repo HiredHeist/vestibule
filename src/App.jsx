@@ -735,7 +735,7 @@ function BoosterScreen({onComplete,seed}){
 }
 
 
-function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, onSellCard, onClose}){
+function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, onSellCard, onBurnCard, onClose}){
   const [tab, setTab] = useState('cards')
   // Show ALL copies individually so player can sell as many as they want
   // Sort deck+discard by sell price descending, then by name
@@ -851,6 +851,15 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
                     textTransform:'uppercase'}}>
                   Sell for {price} 🌿
                 </button>
+                <button
+                  onClick={()=>{onBurnCard(c)}}
+                  style={{width:'100%',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,letterSpacing:1,padding:'4px',marginTop:3,
+                    background:'rgba(140,30,30,0.2)',
+                    border:'1px solid rgba(200,60,60,0.4)',
+                    borderRadius:3,color:'#cc4444',cursor:'pointer',
+                    textTransform:'uppercase'}}>
+                  🔥 Burn (delete)
+                </button>
               </div>
             </div>
           )
@@ -866,7 +875,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
   )
 }
 
-function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,shroomsInStock,acidInStock,onBuyShrooms,onBuyAcid}){
+function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,shroomsInStock,acidInStock,onBuyShrooms,onBuyAcid}){
   const drugMax=isUnlocked('double_dealer')?2:1
   const [hovId,setHovId]=useState(null)
   const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
@@ -1495,6 +1504,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                   onPawnSellCard&&onPawnSellCard(c)
                   setPawnSalesLeft(p=>Math.max(0,p-1))
                 }}
+                onBurnCard={(c)=>{onPawnBurnCard&&onPawnBurnCard(c)}}
                 onClose={()=>setPawnOpen(false)}
               />}
             </div>
@@ -2299,6 +2309,7 @@ function App(){
   const combosFiredRef=useRef([])
   const [comboFlash,setComboFlash]=useState(null) // {name,color,emoji}
   const [combosDiscoveredThisRun,setCombosDiscoveredThisRun]=useState([])
+  const [genreCounts,setGenreCounts]=useState({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
   const discoveredRef=useRef(new Set())
   const [bossDebuff,setBossDebuff]=useState(0)
   const [bossRageAtk,setBossRageAtk]=useState(0)
@@ -2558,7 +2569,7 @@ function App(){
         msg='🎚 Corruption set to 50%.'
       }
     }
-    else if(card.id==='feedbackloop'){const dmg=Math.floor(corruption/2);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'}
+    else if(card.id==='feedbackloop'){let dmg=Math.floor(corruption/2);if(activeGenre==='BLACK_METAL')dmg=Math.round(dmg*1.25);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'+(activeGenre==='BLACK_METAL'?' [Black Metal +25%]':'')}
     else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?4:0;const circleNum=Math.floor(fightIndex/3)+1;const swDmg=(circleNum<=3?5:circleNum<=6?8:12)+p5Bonus;const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(triggerVictory,500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
     else if(card.id==='groupie'){
       // Handled entirely in handleDropOnStage to avoid double setHand
@@ -2650,7 +2661,8 @@ function App(){
     }
     else if(card.id==='ampstatic'){
       if(!m)return false
-      const bonus=Math.floor(corruption/10)
+      let bonus=Math.floor(corruption/10)
+      if(activeGenre==='BLACK_METAL')bonus=Math.round(bonus*1.25)
       if(bonus===0){addLog('📶 Amp the Static needs Corruption > 0 to deal bonus ATK!');addFloat('Need Corruption!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#cc4400',false);return false}
       ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,tempBuff:true,_origAtk:m._origAtk||m.atk,buffCount:(m.buffCount||0)+1})
       msg='📶 Amp the Static! '+m.name+' +'+bonus+' ATK this Strike!'
@@ -2843,7 +2855,7 @@ function App(){
     setStage(ns)
     if(spent>0)setEmbers(function(p){return p-spent})
     if(msg)addLog(msg)
-    updStat('cardsPlayed',1)
+    updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
     if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
     if(card.type==='RIFF')setLastRiffPlayed(card)
     // ── RIFF CHAIN COMBO DETECTION ──
@@ -2899,7 +2911,7 @@ function App(){
       setEmbers(p=>Math.min(maxEmbers,p+2-effectiveEmbers))
       addLog('🎼 Smoke Break! '+victim.name+' discarded. +2 Embers.'+(preSelected.length===0?' (tip: select a card first)':''))
       addFloat('+2 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
-      updStat('cardsPlayed',1)
+      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard'] // count victim too for refill
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -2919,7 +2931,7 @@ function App(){
       setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus-effectiveEmbers))
       addLog('🍯 Groupie! +2 Embers, drew 1 card.')
       addFloat('+2 🔥 +1 card',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')
-      updStat('cardsPlayed',1)
+      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -2939,7 +2951,7 @@ function App(){
       setSetlistOpen(true)
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       addLog('📋 Setlist! Drew 2 cards — now pick 1 to discard.')
-      updStat('cardsPlayed',1)
+      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -2960,7 +2972,7 @@ function App(){
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       addLog('🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+drawCount+'.'+(discardCount===0?' (Tip: select cards before playing)':''))
-      updStat('cardsPlayed',1)
+      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
       setLastRiffPlayed(card)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
@@ -2982,7 +2994,7 @@ function App(){
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       addLog('🎙 Remastered! Deleted '+toDelete.name+', drew 3.')
       addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
-      updStat('cardsPlayed',1)
+      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       // cardHeal enemy passive
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
@@ -3014,7 +3026,7 @@ function App(){
       }
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
-      updStat('cardsPlayed',1)
+      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
       else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
@@ -3319,7 +3331,7 @@ function App(){
     // DEBUFF keyword: Nott reduces boss damage each Strike
     const debuffCount=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='DEBUFF').length
     if(debuffCount>0){setBossDebuff(p=>p+debuffCount*2);addLog('🎤 Nott debuffs the boss! (-'+(debuffCount*2)+' damage)')}
-    cardsToDrawRef.current=cardsPlayedRef.current.length
+    cardsToDrawRef.current=cardsPlayedRef.current.length+(activeGenre==='PROG_ROCK'?1:0)
     setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
 
     const buffed=actives.filter(m=>(m.buffCount||0)>0)
@@ -3370,6 +3382,9 @@ function App(){
     if(_mlb>0)dmg+=_mlb}
     // CA4: Wailing Guitar — first Strike deals double damage
     if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===activeStake.maxStrikes){dmg*=2;addLog('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')}
+    // GENRE BONUSES
+    if(activeGenre==='RIFF_METAL'){dmg=Math.round(dmg*1.15);addLog('🎸 Riff Metal genre! +15% strike damage!')}
+    if(activeGenre==='DOOM_METAL'&&discardsLeft>=MAX_DISCARDS){dmg+=actives.length*2;addLog('🎵 Doom Metal genre! +'+actives.length*2+' ATK (no discards used)')}
     // HEXED: auto-raise corruption +5%, member gains +1 ATK per 10% corruption
     const hexedMembers=actives.filter(m=>m.keyword==='HEXED')
     if(hexedMembers.length>0){
@@ -3961,6 +3976,12 @@ function App(){
     addLog('💰 Sold '+card.name+' for '+price+' stash.')
   },[])
 
+  const handlePawnBurnCard=useCallback((card)=>{
+    setDeck(p=>{const idx=p.findIndex(c=>c.uid===card.uid);if(idx!==-1){const n=[...p];n.splice(idx,1);return n}return p})
+    setDiscardPile(p=>{const idx=p.findIndex(c=>c.uid===card.uid);if(idx!==-1){const n=[...p];n.splice(idx,1);return n}return p})
+    addLog('🔥 Burned '+card.name+' — permanently deleted from deck.')
+  },[])
+
   const handleReroll=useCallback(()=>{
     if(stash<rerollCost)return
     setStash(p=>Math.min(MAX_STASH,p-rerollCost));setRerollCost(p=>p+2)
@@ -3975,13 +3996,15 @@ function App(){
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
-    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false
+    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
   }
 
+  const genreTotal=genreCounts.RIFF+genreCounts.CORRUPT+genreCounts.UTILITY+genreCounts.EMBER
+  const activeGenre=genreTotal>=4?(genreCounts.RIFF/genreTotal>=0.5?'RIFF_METAL':genreCounts.CORRUPT/genreTotal>=0.5?'BLACK_METAL':genreCounts.UTILITY/genreTotal>=0.5?'PROG_ROCK':genreCounts.EMBER/genreTotal>=0.5?'DOOM_METAL':null):null
   const canStrike=animPhase==='idle'&&strikesLeft>0&&enemyHp>0&&stage.some(m=>m&&!m.tooStoned)
   const canDiscard=animPhase==='idle'&&discardsLeft>0&&selected.length>0
   const won=fightIndex>=26&&enemyHp<=0
@@ -4351,7 +4374,7 @@ function App(){
   )
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
   if(gameState==='end')return <EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/>
 
   return(
@@ -4583,6 +4606,28 @@ function App(){
               </div>
             )})}
           </div>
+          {(()=>{
+            const total=genreCounts.RIFF+genreCounts.CORRUPT+genreCounts.UTILITY+genreCounts.EMBER
+            if(total<4)return null
+            const pcts={RIFF:genreCounts.RIFF/total,CORRUPT:genreCounts.CORRUPT/total,UTILITY:genreCounts.UTILITY/total,EMBER:genreCounts.EMBER/total}
+            const genres=[
+              {type:'RIFF',name:'RIFF METAL',pct:pcts.RIFF,color:'#9933cc',bonus:'+15% RIFF damage'},
+              {type:'CORRUPT',name:'BLACK METAL',pct:pcts.CORRUPT,color:'#cc44ff',bonus:'+25% corruption damage'},
+              {type:'UTILITY',name:'PROG ROCK',pct:pcts.UTILITY,color:'#22aa44',bonus:'+1 card draw'},
+              {type:'EMBER',name:'DOOM METAL',pct:pcts.EMBER,color:'#c87820',bonus:'+2 ATK (no discards)'},
+            ]
+            const active=genres.find(g=>g.pct>=0.5)
+            const top=genres.reduce((a,b)=>a.pct>b.pct?a:b)
+            return <div style={{width:'100%',borderTop:'1px solid rgba(100,65,15,0.3)',paddingTop:4,marginTop:2}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:active?active.color:'#6a5a30',letterSpacing:1,textAlign:'center',fontWeight:active?900:400}}>
+                {active?active.name+' ⚡':top.name+' '+Math.round(top.pct*100)+'%'}
+              </div>
+              {active&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:active.color,textAlign:'center',opacity:0.8}}>{active.bonus}</div>}
+              <div style={{display:'flex',gap:1,marginTop:3,height:4,borderRadius:2,overflow:'hidden'}}>
+                {genres.map(g=><div key={g.type} style={{flex:g.pct||0.01,background:g.color,opacity:g.pct>=0.5?1:0.4,transition:'all 0.3s'}}/>)}
+              </div>
+            </div>
+          })()}
           {activePassives.length>0&&<div style={{width:'100%',borderTop:'1px solid rgba(80,60,160,0.3)',paddingTop:3}}>
             {activePassives.map((p,i)=><div key={i} style={{fontSize:10,color:'#8090c0',fontFamily:"'MBScribblesFont',serif"}}>{p.emoji} {p.name}</div>)}
           </div>}
