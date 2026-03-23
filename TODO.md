@@ -122,7 +122,8 @@ This is happening.
       RIFF METAL (+15% RIFF damage), BLACK METAL (+25% corruption damage),
       PROG ROCK (+1 card draw/strike), DOOM METAL (+2 ATK if no discards used)
 - [x] Fix hand size: no cap, draws never shrink hand, Burn the Set uncapped
-- [x] Remove hand size counter (now shows card count only)
+- [x] Soundboard +1 draw: refill now uses strikeHandSizeRef (tracks hand size at strike start)
+- [x] Remove hand size text above hand (clean layout)
 - [x] CORRUPT keyword ATK bonus shown on member cards (3+6 format)
 - [ ] Deck thinning: "Burn" at Pawn Shop — delete card permanently for free
 - [ ] Shop leans toward current genre (1 extra card of dominant type in rotation)

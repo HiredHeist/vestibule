@@ -2231,6 +2231,7 @@ function App(){
   const [stage,setStage]=useState([null,null,null,null,null])
   const [deck,setDeck]=useState([]);const deckRef=useRef([]);
   const [hand,setHand]=useState([]);const handRef=useRef([]);
+  const strikeHandSizeRef=useRef(HAND_SIZE)
   const [discardPile,setDiscardPile]=useState([]);const discRef=useRef([]);
   const [maxEmbers,setMaxEmbers]=useState(5)
   const [embers,setEmbers]=useState(5)
@@ -3266,6 +3267,7 @@ function App(){
     // DEBUFF keyword: Nott reduces boss damage each Strike
     const debuffCount=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='DEBUFF').length
     if(debuffCount>0){setBossDebuff(p=>p+debuffCount*2);addLog('🎤 Nott debuffs the boss! (-'+(debuffCount*2)+' damage)')}
+    strikeHandSizeRef.current=hand.length+(pendingDraw>0?pendingDraw:0)
     setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
 
     const buffed=actives.filter(m=>(m.buffCount||0)>0)
@@ -3521,7 +3523,7 @@ function App(){
           } // end single-target else
           setTimeout(function(){
             let nh=[...handRef.current],nd=[...deckRef.current],ndisc=[...discRef.current];
-            const refillTarget=Math.max(HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0),nh.length);
+            const refillTarget=Math.max(strikeHandSizeRef.current,nh.length);
             while(nh.length<refillTarget){
               if(nd.length===0){
                 if(ndisc.length===0)break;
@@ -4368,9 +4370,8 @@ function App(){
       {/* HAND AREA */}
       <div style={{flex:'0 0 340px',width:1920,maxWidth:1920,background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',position:'relative',zIndex:30}}>
         {/* Header */}
-        <div style={{textAlign:'center',padding:'3px 0 0',position:'relative',zIndex:1}}>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length} cards</span>
-          {pendingEmbers>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff6600',marginLeft:12}}>+{pendingEmbers} 🔥 pending</span>}
+        <div style={{textAlign:'center',padding:'3px 0 0',position:'relative',zIndex:1,minHeight:16}}>
+          {pendingEmbers>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff6600'}}>+{pendingEmbers} 🔥 pending</span>}
         </div>
 
         {/* LEFT COLUMN: Deck/Discard — absolute */}
