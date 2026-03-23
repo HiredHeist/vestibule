@@ -84,28 +84,28 @@ This is happening.
 ## 🔥 THE BIG 5 — Session 14 Priority Features
 
 ### Feature 1: COMBO SYSTEM — "Riff Chains" (16 combos)
-- [ ] Define 16 two-card synergy combos in RIFF_CHAINS constant
-- [ ] Track cardsPlayedThisStrike[] array
-- [ ] Detect combo in applyCard when 2nd synergy card played same strike
-- [ ] "⛧ RIFF CHAIN ⛧" 80px gold center flash (0.8s) + combo name 40px
-- [ ] +10% bonus damage on 2nd card of combo
-- [ ] Gold screen border flash 0.5s
-- [ ] Combat log shows combo in gold text
-- [ ] Achievement: "Discover 5 different combos" + "Trigger 50 combos"
+- [x] Define 16 two-card synergy combos in RIFF_CHAINS constant
+- [x] Track cardsPlayedThisStrike[] array
+- [x] Detect combo in applyCard when 2nd synergy card played same strike
+- [x] "⛧ RIFF CHAIN ⛧" 64px gold center flash (2.7s) + combo name 36px
+- [x] Bonus damage = total stage ATK on combo trigger
+- [x] Gold screen border flash + combo color glow
+- [x] Combat log shows combo in gold text
+- [x] Lifetime combo discovery tracking in localStorage
 - [ ] Combos: SHRED STORM, HELLFIRE, BLOOD PACT, TRIPLE THREAT, SOUL HARVEST,
       DEATH WISH, ETERNAL ENCORE, CLEAN MACHINE, WALL OF SOUND, FEEDBACK HELL,
       MOSH MADNESS, DARK SACRIFICE, NOISE GATE, POWER SURGE, DEMON CORE, LAST STAND
 
 ### Feature 2: CIRCLE BOSS REWARDS — "The Pact"
-- [ ] Pact screen after each boss kill (before shop)
-- [ ] 12 possible pact rewards, 2 random offered per circle, never repeat
-- [ ] Choose one → other shatters/fades animation
-- [ ] "⛧ Skip — Keep What You Have ⛧" button to decline both
-- [ ] Pact indicator on stage (bottom-right): small icons with hover tooltip
-- [ ] Max 9 pacts per run (one per circle boss)
-- [ ] Pact choices: Ember Surge, Iron Strings, Thick Skin, Dark Bargain, Speed Demon,
+- [x] Pact screen after each boss kill (before shop)
+- [x] 12 possible pact rewards, 2 random offered per circle, never repeat
+- [x] Choose one → hover animations + shop transition
+- [x] "⛧ Skip — Keep What You Have ⛧" button to decline both
+- [x] Pact indicator on stage with emoji icons + hover tooltips
+- [x] Max 9 pacts per run (one per circle boss)
+- [x] All 12 pact effects wired: Ember Surge, Iron Strings, Thick Skin, Dark Bargain, Speed Demon,
       Blood Price, Clean Living, Corruption Engine, Merchant Eye, Stone Wall, Sixth Slot, War Drums
-- [ ] Stash tightening: 15% off mid/late circle rewards (NOT early — players must afford Garage Band Pack)
+- [ ] Stash tightening: 15% off mid/late circle rewards (deferred to balance pass)
 
 ### Feature 3: CIRCLE MAP — "The Descent"
 - [ ] Map screen before each circle showing 3 fights
