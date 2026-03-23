@@ -4231,12 +4231,12 @@ function App(){
       </div>
 
       {/* HAND AREA — flex row: left | cards | right */}
-      <div style={{flex:'0 0 340px',background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',display:'flex',flexDirection:'column',zIndex:30,minHeight:0,overflow:'visible'}}>
+      <div style={{flex:'0 0 340px',background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',display:'flex',flexDirection:'column',zIndex:30,minHeight:0,overflowX:'hidden',overflowY:'visible'}}>
         <div style={{textAlign:'center',padding:'4px 0 0',flexShrink:0}}>
           <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length}{hand.length>HAND_SIZE?' of '+HAND_SIZE+' ⚡':' of '+HAND_SIZE}</span>
           {pendingEmbers>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff6600',marginLeft:12}}>+{pendingEmbers} 🔥 pending</span>}
         </div>
-        <div style={{flex:1,display:'flex',minHeight:0,overflow:'visible'}}>
+        <div style={{flex:1,display:'flex',minHeight:0,overflowX:'hidden',overflowY:'visible'}}>
           {/* LEFT COLUMN */}
           <div style={{width:110,flexShrink:0,display:'flex',flexDirection:'column',gap:6,alignItems:'center',justifyContent:'center',background:'rgba(20,12,4,0.7)',padding:'6px 8px',borderRight:'1px solid rgba(100,65,15,0.3)'}}>
             <DeckPile count={deck.length} label="Deck"/>
