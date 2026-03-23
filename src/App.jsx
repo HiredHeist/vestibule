@@ -2444,8 +2444,9 @@ function App(){
   }
 
   const drawUpTo=useCallback((h,d,disc,target)=>{
+    const cappedTarget=Math.min(target,10)
     let nh=[...h],nd=[...d],ndisc=[...disc]
-    while(nh.length<target){
+    while(nh.length<cappedTarget){
       if(nd.length===0){if(ndisc.length===0)break;nd=[...ndisc].sort(()=>Math.random()-.5);ndisc=[];addLog('🔄 Deck reshuffled.')}
       nh=[...nh,nd[0]];nd=nd.slice(1);playCard()
     }
@@ -3574,7 +3575,7 @@ function App(){
           } // end single-target else
           setTimeout(function(){
             let nh=[...handRef.current],nd=[...deckRef.current],ndisc=[...discRef.current];
-            const cardsToReplace=cardsToDrawRef.current;
+            const cardsToReplace=Math.min(cardsToDrawRef.current,10-nh.length);
             for(let _r=0;_r<cardsToReplace;_r++){
               if(nd.length===0){
                 if(ndisc.length===0)break;

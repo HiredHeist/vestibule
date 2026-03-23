@@ -132,6 +132,7 @@ This is happening.
 - [x] Fix all nested setState bugs: Groupie, Smoke Break, Soundboard, Fraud shuffle, Lucifer reset
 - [x] ZERO nested setDeck→setHand patterns remaining in codebase
 - [x] Fix strike refill: draw back exactly N cards for N cards played (cardsToDrawRef)
+- [x] Hard cap hand size at 10 cards (drawUpTo + strike refill)
 - [x] Smoke Break victim counts toward refill draw (2 cards removed = 2 drawn back)
 - [x] Fix Sound Wall: scales by circle (C1-3=5, C4-6=8, C7-9=12)
 - [x] CORRUPT keyword ATK bonus shown on member cards (3+6 format)
