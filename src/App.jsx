@@ -4237,7 +4237,7 @@ function App(){
   if(gameState==='descent'&&descentData)return(
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>⛧ The Descent ⛧</div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:24,color:'#e8d090',fontStyle:'italic'}}>Circle {descentData.circleName} {descentData.circleEmoji}</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:39,color:'#e8d090',fontStyle:'italic'}}>Circle {descentData.circleName} {descentData.circleEmoji}</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#e8d090',letterSpacing:2,fontWeight:900}}>Choose your path. Skipping a fight forfeits its shop.</div>
       <div style={{display:'flex',gap:30,marginTop:10}}>
         {descentData.fights.map((enemy,i)=>{
@@ -4278,36 +4278,33 @@ function App(){
                 </div>
               )}
               {isBoss&&(
-                <div style={{background:'rgba(80,0,0,0.2)',border:'2px solid #cc1111',borderTop:'none',borderRadius:'0 0 10px 10px',padding:'8px 16px',textAlign:'center'}}>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#cc4444',letterSpacing:2,fontStyle:'italic'}}>MUST BE FOUGHT</div>
+                <div onClick={()=>{
+                  const addToDeck=(card)=>{setDeck(p=>[...p,card])}
+                  const deleteRandomCommon=()=>{setDeck(p=>{const commons=p.filter(c=>c.rarity==='Common');if(commons.length===0){addLog('🗑 No common cards in deck to delete.');return p};const victim=commons[Math.floor(Math.random()*commons.length)];addLog('🗑 Skipped fight: Deleted '+victim.name+' from deck');return p.filter(c=>c.uid!==victim.uid)})}
+                  const gs={setStash,setStage,setCorruption,setMaxEmbers,setPendingDraw,setBonusDiscards,setBonusEmbers,setNextCardFree,addToDeck,deleteRandomCommon,addLog}
+                  if(descentData.skips.includes(0))descentData.reward1.apply(gs)
+                  if(descentData.skips.includes(1))descentData.reward2.apply(gs)
+                  const skips=descentData.skips
+                  const baseIdx=descentData.fightIndices[0]
+                  let startFight=baseIdx
+                  if(skips.includes(0)&&skips.includes(1))startFight=baseIdx+2
+                  else if(skips.includes(0))startFight=baseIdx+1
+                  overrideFightIdxRef.current=startFight
+                  setDescentData(null)
+                  setGameState('playing')
+                  skipDescentRef.current=true
+                  setTimeout(()=>{handleShopLeave();skipDescentRef.current=false},50)
+                }}
+                  style={{background:'rgba(130,0,0,0.35)',border:'2px solid #cc1111',borderTop:'none',borderRadius:'0 0 10px 10px',padding:'12px 16px',textAlign:'center',cursor:'pointer',transition:'all 0.2s',boxShadow:'0 0 15px rgba(180,0,0,0.3)'}}
+                  onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,0,0,0.5)';e.currentTarget.style.boxShadow='0 0 30px rgba(200,0,0,0.6)'}}
+                  onMouseLeave={e=>{e.currentTarget.style.background='rgba(130,0,0,0.35)';e.currentTarget.style.boxShadow='0 0 15px rgba(180,0,0,0.3)'}}>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#ee2222',letterSpacing:4,textShadow:'0 0 14px rgba(200,0,0,0.6)'}}>⛧ DESCEND ⛧</div>
                 </div>
               )}
             </div>
           )
         })}
       </div>
-      <button onClick={()=>{
-        const addToDeck=(card)=>{setDeck(p=>[...p,card])}
-        const deleteRandomCommon=()=>{setDeck(p=>{const commons=p.filter(c=>c.rarity==='Common');if(commons.length===0){addLog('🗑 No common cards in deck to delete.');return p};const victim=commons[Math.floor(Math.random()*commons.length)];addLog('🗑 Skipped fight: Deleted '+victim.name+' from deck');return p.filter(c=>c.uid!==victim.uid)})}
-        const gs={setStash,setStage,setCorruption,setMaxEmbers,setPendingDraw,setBonusDiscards,setBonusEmbers,setNextCardFree,addToDeck,deleteRandomCommon,addLog}
-        // Apply skip rewards
-        if(descentData.skips.includes(0))descentData.reward1.apply(gs)
-        if(descentData.skips.includes(1))descentData.reward2.apply(gs)
-        // Calculate which fight to start (first unskipped)
-        const skips=descentData.skips
-        const baseIdx=descentData.fightIndices[0]
-        let startFight=baseIdx // default: fight 1
-        if(skips.includes(0)&&skips.includes(1))startFight=baseIdx+2 // skip both → boss
-        else if(skips.includes(0))startFight=baseIdx+1 // skip first → fight 2
-        overrideFightIdxRef.current=startFight
-        setDescentData(null)
-        setGameState('playing')
-        skipDescentRef.current=true
-        setTimeout(()=>{handleShopLeave();skipDescentRef.current=false},50)
-      }}
-        style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:6,textTransform:'uppercase',padding:'14px 60px',background:'rgba(130,0,0,0.35)',border:'2px solid #cc1111',borderRadius:3,color:'#ee2222',cursor:'pointer',transition:'all 0.2s',marginTop:12,boxShadow:'0 0 22px rgba(180,0,0,0.5)',textShadow:'0 0 14px rgba(200,0,0,0.6)'}}>
-        ⛧ Descend ⛧
-      </button>
     </div>
   )
   if(gameState==='pact')return(

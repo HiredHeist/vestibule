@@ -141,6 +141,7 @@ This is happening.
 - [x] Opening Night synergy text: deferred — players learn naturally, avoid card clutter
 - [x] Genre thresholds: 50% for all types, revisit after playtester feedback
 - [x] Unlock gallery rewrite: 6 tabbed sections, 5x5 grid, arrow pagination, Riff Chains combos section
+- [x] Descent UI: circle text +15pt, descend button moved to boss card click
 
 ### Feature 5: VICTORY EXPERIENCE — "The Encore" + "Welcome to Hell"
 - [ ] Lucifer kill cinematic: screen freeze → crack SVG → shatter → text reveal
