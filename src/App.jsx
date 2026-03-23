@@ -2862,7 +2862,7 @@ function App(){
       addLog('🎼 Smoke Break! '+victim.name+' discarded. +2 Embers.'+(preSelected.length===0?' (tip: select a card first)':''))
       addFloat('+2 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
       updStat('cardsPlayed',1)
-      cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
+      cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard'] // count victim too for refill
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
     }

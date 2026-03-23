@@ -133,6 +133,7 @@ This is happening.
 - [x] Fix Sound Wall: damage now scales by circle (C1-3=5, C4-6=8, C7-9=12), was broken at fightIndex
 - [x] Fix Soundboard duplicate card bug (nested setDeck→setHand → drawUpTo)
 - [x] Fix Smoke Break: moved to handleDropOnStage (nested setState race)
+- [x] Smoke Break victim counts toward refill draw (2 cards removed = 2 drawn back)
 - [x] Fix Fraud boss shuffle: rewritten with refs (nested setState race)
 - [x] Fix Lucifer phase reset: rewritten with refs (nested setState race)
 - [x] Fix strike refill: handTargetRef tracks base+Soundboard target, not depleted hand.length
