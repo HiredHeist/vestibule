@@ -4284,38 +4284,39 @@ function App(){
         </div>
 
         {/* RIGHT COLUMN: Strike/Discard/Embers/Stats — absolute, clamped to right edge */}
-        <div style={{position:'absolute',right:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:2,alignItems:'center',justifyContent:'center',padding:'4px 12px',background:'rgba(10,5,2,0.75)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none',width:200}}>
-          <button onClick={handleStrike} disabled={!canStrike}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'6px 14px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:'100%'}}>⚔ Strike</button>
-          <div style={{display:'flex',alignItems:'center',gap:4,justifyContent:'center',width:'100%'}}>
-            <PhaseDots left={strikesLeft} total={activeStake.maxStrikes} color='#dd2222' wide={true}/>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555'}}>{strikesLeft}/{activeStake.maxStrikes}</span>
+        <div style={{position:'absolute',right:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-evenly',padding:'8px 14px',background:'rgba(10,5,2,0.75)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none',width:210}}>
+          <div style={{width:'100%'}}>
+            <button onClick={handleStrike} disabled={!canStrike}
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'10px 14px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:4,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:'100%'}}>⚔ Strike</button>
+            <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center',width:'100%',marginTop:4}}>
+              <PhaseDots left={strikesLeft} total={activeStake.maxStrikes} color='#dd2222' wide={true}/>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555'}}>{strikesLeft}/{activeStake.maxStrikes}</span>
+            </div>
           </div>
-          <div style={{height:2}}/>
-          <button onClick={handleDiscard} disabled={!canDiscard}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'6px 14px',background:canDiscard?'rgba(100,70,0,0.4)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:'100%'}}>↓ Discard</button>
-          <div style={{display:'flex',alignItems:'center',gap:4,justifyContent:'center',width:'100%'}}>
-            <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555'}}>{discardsLeft}/{MAX_DISCARDS}</span>
+          <div style={{width:'100%'}}>
+            <button onClick={handleDiscard} disabled={!canDiscard}
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'10px 14px',background:canDiscard?'rgba(100,70,0,0.4)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:4,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:'100%'}}>↓ Discard</button>
+            <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center',width:'100%',marginTop:4}}>
+              <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555'}}>{discardsLeft}/{MAX_DISCARDS}</span>
+            </div>
           </div>
-          <div style={{height:2}}/>
           <EmberDisplayLarge current={embers} max={maxEmbers}/>
-          <div style={{height:1}}/>
-          <div style={{display:'flex',gap:10,justifyContent:'center',padding:'2px 0'}}>
+          <div style={{display:'flex',gap:14,justifyContent:'center',width:'100%'}}>
             {[['Fight',(fightIndex%3+1)+'/3','#dd2222'],['Corrupt',corruption+'%',corruption>60?'#ff3300':'#aa5500'],['Stash',stash+(stash>=420?' 🔒':stash>=380?' ⚠':''),(stash>=420?'#ff3300':stash>=380?'#ff9900':'#44cc44')]].map(function(item){return(
               <div key={item[0]} style={{textAlign:'center'}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#9a7a40',letterSpacing:1,textTransform:'uppercase',marginBottom:1}}>{item[0]}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#9a7a40',letterSpacing:2,textTransform:'uppercase',marginBottom:2}}>{item[0]}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
               </div>
             )})}
           </div>
-          {activePassives.length>0&&<div style={{width:'100%',borderTop:'1px solid rgba(80,60,160,0.3)',paddingTop:2,marginTop:1}}>
-            {activePassives.map((p,i)=><div key={i} style={{fontSize:9,color:'#8090c0',fontFamily:"'MBScribblesFont',serif"}}>{p.emoji} {p.name}</div>)}
+          {activePassives.length>0&&<div style={{width:'100%',borderTop:'1px solid rgba(80,60,160,0.3)',paddingTop:3}}>
+            {activePassives.map((p,i)=><div key={i} style={{fontSize:10,color:'#8090c0',fontFamily:"'MBScribblesFont',serif"}}>{p.emoji} {p.name}</div>)}
           </div>}
         </div>
 
         {/* CARD FAN — centered, padded to avoid columns */}
-        <div style={{position:'absolute',left:200,right:200,top:18,bottom:0,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:10,overflow:'visible',zIndex:50}}>
+        <div style={{position:'absolute',left:200,right:210,top:18,bottom:0,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:10,overflow:'visible',zIndex:50}}>
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
               isHovered={hovered===i} isSelected={selected.includes(card.uid)}
