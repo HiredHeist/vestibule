@@ -4242,7 +4242,7 @@ function App(){
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>⛧ The Descent ⛧</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:24,color:'#e8d090',fontStyle:'italic'}}>Circle {descentData.circleName} {descentData.circleEmoji}</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#8a6020',letterSpacing:2}}>Choose your path. Skipping a fight forfeits its shop.</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#e8d090',letterSpacing:2,fontWeight:900}}>Choose your path. Skipping a fight forfeits its shop.</div>
       <div style={{display:'flex',gap:30,marginTop:10}}>
         {descentData.fights.map((enemy,i)=>{
           const isBoss=i===2
@@ -4250,29 +4250,42 @@ function App(){
           const reward=i===0?descentData.reward1:i===1?descentData.reward2:null
           const canSkip=!isBoss
           return(
-            <div key={i} style={{width:300,background:isBoss?'linear-gradient(180deg,#2a0a0a,#140404)':'linear-gradient(180deg,#1a1008,#0a0604)',
-              border:isSkipped?'2px solid #44aa44':isBoss?'2px solid #cc1111':'1px solid rgba(160,100,25,0.5)',
-              borderRadius:10,padding:'20px 20px',display:'flex',flexDirection:'column',alignItems:'center',gap:8,
-              opacity:isSkipped?0.5:1,transition:'all 0.25s'}}>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:isBoss?'#cc1111':'#8a6020',letterSpacing:3,textTransform:'uppercase'}}>{isBoss?'★ CIRCLE BOSS':'FIGHT '+(i+1)+' OF 3'}</div>
-              <div style={{fontSize:48}}>{enemy.emoji}</div>
-              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:isBoss?'#ee2222':'#e8d090',textShadow:isBoss?'0 0 20px rgba(200,0,0,0.5)':'none',letterSpacing:2}}>{enemy.name}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#aa8040'}}>{Math.ceil(enemy.maxHp*activeStake.hpMult)} HP</div>
+            <div key={i} style={{width:300,display:'flex',flexDirection:'column',gap:0,transition:'all 0.25s',opacity:isSkipped?0.5:1}}>
+              {/* FIGHT label */}
+              <div style={{background:isSkipped?'rgba(40,80,20,0.3)':isBoss?'rgba(160,0,0,0.4)':'rgba(130,0,0,0.3)',border:isSkipped?'2px solid #44aa44':isBoss?'2px solid #cc1111':'2px solid rgba(200,80,80,0.5)',borderBottom:'none',borderRadius:'10px 10px 0 0',padding:'10px 16px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',color:isSkipped?'#44aa44':isBoss?'#ff4444':'#ee4444',textShadow:isBoss?'0 0 14px rgba(200,0,0,0.6)':'none'}}>{isSkipped?'✓ SKIPPED':isBoss?'★ BOSS FIGHT':'⚔ FIGHT'}</div>
+              {/* Enemy card */}
+              <div style={{background:isBoss?'linear-gradient(180deg,#2a0a0a,#140404)':'linear-gradient(180deg,#1a1008,#0a0604)',
+                border:isSkipped?'2px solid #44aa44':isBoss?'2px solid #cc1111':'2px solid rgba(200,80,80,0.5)',borderTop:'1px solid rgba(255,255,255,0.05)',borderBottom:canSkip?'none':'2px solid rgba(200,80,80,0.5)',
+                borderRadius:canSkip?0:'0 0 10px 10px',padding:'16px 20px',display:'flex',flexDirection:'column',alignItems:'center',gap:6}}>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:isBoss?'#cc1111':'#8a6020',letterSpacing:3,textTransform:'uppercase'}}>{isBoss?'CIRCLE BOSS':'FIGHT '+(i+1)+' OF 3'}</div>
+                <div style={{fontSize:48}}>{enemy.emoji}</div>
+                <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:isBoss?'#ee2222':'#e8d090',textShadow:isBoss?'0 0 20px rgba(200,0,0,0.5)':'none',letterSpacing:2}}>{enemy.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#aa8040'}}>{Math.ceil(enemy.maxHp*activeStake.hpMult)} HP</div>
+                {isSkipped&&reward&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#88dd88',marginTop:4}}>{reward.emoji} {reward.name}</div>}
+              </div>
+              {/* SKIP button */}
               {canSkip&&!isSkipped&&reward&&(
                 <div onClick={()=>setDescentData(p=>({...p,skips:[...p.skips,i]}))}
-                  style={{marginTop:8,padding:'10px 20px',background:'rgba(40,80,20,0.3)',border:'1px solid #44aa44',borderRadius:6,cursor:'pointer',textAlign:'center',transition:'all 0.2s',width:'100%'}}
-                  onMouseEnter={e=>{e.currentTarget.style.background='rgba(60,120,30,0.5)';e.currentTarget.style.transform='scale(1.03)'}}
+                  style={{background:'rgba(40,80,20,0.3)',border:'2px solid #44aa44',borderTop:'none',borderRadius:'0 0 10px 10px',padding:'12px 16px',cursor:'pointer',textAlign:'center',transition:'all 0.2s'}}
+                  onMouseEnter={e=>{e.currentTarget.style.background='rgba(60,120,30,0.5)';e.currentTarget.style.transform='scale(1.02)'}}
                   onMouseLeave={e=>{e.currentTarget.style.background='rgba(40,80,20,0.3)';e.currentTarget.style.transform='none'}}>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#44aa44',letterSpacing:2,textTransform:'uppercase'}}>SKIP FOR:</div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#88dd88',marginTop:4}}>{reward.emoji} {reward.name}</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#44aa44',letterSpacing:3,textTransform:'uppercase'}}>SKIP AND TAKE REWARD</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#88dd88',marginTop:4}}>{reward.emoji} {reward.name}</div>
                 </div>
               )}
-              {isSkipped&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#44aa44',marginTop:8}}>✓ SKIPPED — {reward.emoji} {reward.name}</div>}
               {canSkip&&isSkipped&&(
                 <div onClick={()=>setDescentData(p=>({...p,skips:p.skips.filter(s=>s!==i)}))}
-                  style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#886644',cursor:'pointer',textDecoration:'underline'}}>Undo</div>
+                  style={{background:'rgba(40,80,20,0.15)',border:'2px solid #44aa44',borderTop:'none',borderRadius:'0 0 10px 10px',padding:'8px 16px',cursor:'pointer',textAlign:'center'}}
+                  onMouseEnter={e=>{e.currentTarget.style.background='rgba(80,40,20,0.3)'}}
+                  onMouseLeave={e=>{e.currentTarget.style.background='rgba(40,80,20,0.15)'}}>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#886644',letterSpacing:2}}>UNDO SKIP</div>
+                </div>
               )}
-              {isBoss&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#cc4444',marginTop:6,fontStyle:'italic'}}>Must be fought</div>}
+              {isBoss&&(
+                <div style={{background:'rgba(80,0,0,0.2)',border:'2px solid #cc1111',borderTop:'none',borderRadius:'0 0 10px 10px',padding:'8px 16px',textAlign:'center'}}>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#cc4444',letterSpacing:2,fontStyle:'italic'}}>MUST BE FOUGHT</div>
+                </div>
+              )}
             </div>
           )
         })}
