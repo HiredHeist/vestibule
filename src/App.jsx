@@ -2835,7 +2835,7 @@ function App(){
         const comboBonus=ns.filter(m=>m&&!m.tooStoned).reduce((s,m)=>s+m.atk,0)
         setEnemyHp(p=>Math.max(0,p-comboBonus))
         updStat('totalDamage',comboBonus)
-        setTimeout(()=>setComboFlash(null),1200)
+        setTimeout(()=>setComboFlash(null),1800)
         break
       }
     }
