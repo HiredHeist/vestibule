@@ -142,6 +142,7 @@ This is happening.
 - [x] Genre thresholds: 50% for all types, revisit after playtester feedback
 - [x] Unlock gallery rewrite: 6 tabbed sections, 5x5 grid, arrow pagination, Riff Chains combos section
 - [x] Descent UI: circle text +15pt, descend button moved to boss card click
+- [x] Unlock gallery: 4x2 grid, 50%+ larger icons/text, locked items in gold
 
 ### Feature 5: VICTORY EXPERIENCE — "The Encore" + "Welcome to Hell"
 - [ ] Lucifer kill cinematic: screen freeze → crack SVG → shatter → text reveal

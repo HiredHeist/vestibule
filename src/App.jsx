@@ -4038,7 +4038,7 @@ function App(){
       {id:'pedals',name:'Pedals',emoji:'🎛',color:'#9933cc'},
       {id:'combos',name:'Riff Chains',emoji:'⛧',color:'#ffdd00'},
     ]
-    const PAGE=25
+    const PAGE=8
     let items=[]
     if(unlockTab==='milestones')items=UNLOCK_MILESTONES.map(u=>({id:u.id,emoji:lt>=u.score?u.emoji:'🔒',name:lt>=u.score?u.label:'???',sub:u.score.toLocaleString()+' pts',done:lt>=u.score,pct:Math.min(100,Math.round(lt/u.score*100))}))
     else if(unlockTab==='members')items=[...ALL_MUSICIANS.filter(m=>!m.locked).map(m=>({id:m.id,emoji:m.emoji,name:m.name,sub:m.keyword,done:true})),...ALL_MUSICIANS.filter(m=>m.locked).map(m=>{const done=!m.unlockAt||lt>=m.unlockAt;return{id:m.id,emoji:done?m.emoji:'🔒',name:done?m.name:'???',sub:done?m.keyword:'LOCKED',done}}),...Array(7).fill(null).map((_,i)=>({id:'fm'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
@@ -4063,13 +4063,13 @@ function App(){
         <div style={{display:'flex',alignItems:'center',gap:16,flex:1,width:'100%',maxWidth:1200,justifyContent:'center'}}>
           <button onClick={()=>setUnlockPage_(p=>Math.max(0,p-1))} disabled={unlockPage===0}
             style={{fontSize:36,color:unlockPage>0?'#e8a820':'#333',background:'none',border:'none',cursor:unlockPage>0?'pointer':'default',padding:'10px',flexShrink:0}}>◀</button>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,flex:1,maxWidth:1000,alignContent:'start'}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14,flex:1,maxWidth:1200,alignContent:'start'}}>
             {pageItems.map(item=>(
-              <div key={item.id} style={{background:item.done?'rgba(20,12,4,0.7)':'rgba(10,6,2,0.5)',border:item.done?'1px solid '+(item.color||'rgba(160,100,25,0.5)'):'1px solid rgba(60,40,15,0.3)',borderRadius:8,padding:'12px 8px',textAlign:'center',opacity:item.done?1:0.4,transition:'all 0.2s'}}>
-                <div style={{fontSize:40,filter:item.done?'none':'grayscale(1) brightness(0.4)',marginBottom:4}}>{item.emoji}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:item.done?(item.color||'#e8a820'):'#6a5a30',lineHeight:1.2,marginBottom:2}}>{item.name}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:item.done?'#aa8a50':'#4a3a20',lineHeight:1.3}}>{item.sub}</div>
-                {item.pct!==undefined&&!item.done&&<div style={{height:4,background:'rgba(20,12,4,0.8)',borderRadius:3,marginTop:4,overflow:'hidden'}}><div style={{height:'100%',width:item.pct+'%',background:'linear-gradient(90deg,#8a2200,#e8a820)',borderRadius:3}}/></div>}
+              <div key={item.id} style={{background:item.done?'rgba(20,12,4,0.7)':'rgba(10,6,2,0.5)',border:item.done?'1px solid '+(item.color||'rgba(160,100,25,0.5)'):'1px solid rgba(160,120,40,0.3)',borderRadius:10,padding:'20px 14px',textAlign:'center',opacity:item.done?1:0.7,transition:'all 0.2s'}}>
+                <div style={{fontSize:64,filter:item.done?'none':'brightness(0.6)',marginBottom:6}}>{item.emoji}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:item.done?(item.color||'#e8a820'):'#c8a040',lineHeight:1.2,marginBottom:4}}>{item.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:item.done?'#c0a060':'#aa8a50',lineHeight:1.3}}>{item.sub}</div>
+                {item.pct!==undefined&&!item.done&&<div style={{height:6,background:'rgba(20,12,4,0.8)',borderRadius:3,marginTop:6,overflow:'hidden'}}><div style={{height:'100%',width:item.pct+'%',background:'linear-gradient(90deg,#8a2200,#e8a820)',borderRadius:3}}/></div>}
               </div>
             ))}
           </div>
