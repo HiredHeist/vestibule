@@ -522,19 +522,19 @@ function Projectile({from,to,emoji,onDone}){
     fr.current=requestAnimationFrame(go)
     return ()=>cancelAnimationFrame(fr.current)
   },[])
-  return <div style={{position:'fixed',left:p.x,top:p.y,transform:`translate(-50%,-50%) scale(${p.s})`,fontSize:52,opacity:p.o,pointerEvents:'none',zIndex:8000,filter:'drop-shadow(0 0 20px rgba(255,80,0,0.95))'}}>{emoji}</div>
+  return <div style={{position:'absolute',left:p.x,top:p.y,transform:`translate(-50%,-50%) scale(${p.s})`,fontSize:52,opacity:p.o,pointerEvents:'none',zIndex:8000,filter:'drop-shadow(0 0 20px rgba(255,80,0,0.95))'}}>{emoji}</div>
 }
 
 function Float({v,x,y,color,big,onDone}){
   color=color||'#dd2222';big=big||false
   useEffect(()=>{const t=setTimeout(onDone,1400);return ()=>clearTimeout(t)},[])
-  return <div style={{position:'fixed',left:x,top:y,transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:big?'4.5rem':'2.8rem',fontWeight:900,color:color,textShadow:`0 0 24px ${color}`,pointerEvents:'none',zIndex:9000,animation:'floatUp 1.4s ease-out forwards'}}>{typeof v==='number'&&v>0?'-'+v:v}</div>
+  return <div style={{position:'absolute',left:x,top:y,transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:big?'4.5rem':'2.8rem',fontWeight:900,color:color,textShadow:`0 0 24px ${color}`,pointerEvents:'none',zIndex:9000,animation:'floatUp 1.4s ease-out forwards'}}>{typeof v==='number'&&v>0?'-'+v:v}</div>
 }
 
 function DiceRoll({target,onDone}){
   useEffect(()=>{const t=setTimeout(onDone,1200);return ()=>clearTimeout(t)},[])
   return(
-    <div style={{position:'fixed',left:'50%',top:'40%',transform:'translate(-50%,-50%)',zIndex:9100,pointerEvents:'none',display:'flex',flexDirection:'column',alignItems:'center',gap:8,animation:'fadeIn 0.2s ease'}}>
+    <div style={{position:'absolute',left:'50%',top:'40%',transform:'translate(-50%,-50%)',zIndex:9100,pointerEvents:'none',display:'flex',flexDirection:'column',alignItems:'center',gap:8,animation:'fadeIn 0.2s ease'}}>
       <div style={{fontSize:56,animation:'wiggle 0.4s ease infinite'}}>🎲</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#e8a820',letterSpacing:2,textShadow:'0 0 12px rgba(232,168,32,0.8)',background:'rgba(0,0,0,0.8)',padding:'6px 16px',borderRadius:4,border:'1px solid rgba(232,168,32,0.4)'}}>TARGET: {target&&target.name}</div>
     </div>
@@ -583,7 +583,7 @@ function BoosterScreen({onComplete,seed}){
   const toggle=id=>setSel(p=>p.includes(id)?p.filter(x=>x!==id):p.length<2?[...p,id]:p)
   const kwColor={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
   return(
-    <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,padding:'60px 20px 24px 20px',overflowY:'auto'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,padding:'60px 20px 24px 20px',overflowY:'auto'}}>
       <div style={{fontFamily:"'BreakGothicFont',cursive",fontSize:88,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.8),0 0 80px rgba(140,0,0,0.5),3px 3px 0 #000',flexShrink:0,letterSpacing:20}}>Opening Night</div>
       {/* DAILY SEED BANNER */}
       <div style={{display:'flex',gap:16,alignItems:'center',flexShrink:0}}>
@@ -703,9 +703,9 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
     transition:'all 0.2s'
   })
   return(
-    <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(2,1,4,0.96)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',padding:'40px 20px',overflowY:'auto'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(2,1,4,0.96)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',padding:'40px 20px',overflowY:'auto'}}>
       {/* Stash counter — top right, ticks up on each sale */}
-      <div style={{position:'fixed',top:24,right:32,display:'flex',flexDirection:'column',alignItems:'center',gap:4,
+      <div style={{position:'absolute',top:24,right:32,display:'flex',flexDirection:'column',alignItems:'center',gap:4,
         background:'rgba(20,10,5,0.95)',border:'2px solid #55ee66',borderRadius:10,padding:'12px 20px',
         boxShadow:'0 0 24px rgba(60,220,80,0.4)',minWidth:100}}>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#33aa44',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Stash</div>
@@ -1044,7 +1044,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     const packAc={cassette:'#c87820',cdr:'#6688cc',vinyl:'#cc44ff',rarevinyl:'#ffdd44',cursed:'#cc2222',ritual:'#8844cc',hellforged:'#ff6600',garage:'#44aa44',touring:'#44aacc',demonic:'#cc44ff'}
     const ac=packAc[pack.id]||'#c87820'
     return(
-      <div style={{position:'fixed',inset:0,zIndex:9600,
+      <div style={{position:'absolute',inset:0,zIndex:9600,
         background:'rgba(3,1,0,0.92)',
         display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:24,
         backdropFilter:'blur(4px)'}}>
@@ -1264,11 +1264,11 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   return(
     <>
     <PackModal/>
-    <div style={{position:'fixed',inset:0,zIndex:9500,
+    <div style={{position:'absolute',inset:0,zIndex:9500,
       background:'radial-gradient(ellipse at 50% 0%,rgba(28,18,4,1) 0%,rgba(6,4,1,1) 100%)',
       display:'flex',flexDirection:'column',gap:10,padding:12,
       fontFamily:"'MBScribblesFont',serif",overflow:'hidden',
-      boxSizing:'border-box',height:'100vh'}}>
+      boxSizing:'border-box',height:1080}}>
 
       {/* TOP BAR */}
       <div style={{flexShrink:0,height:72,display:'flex',gap:10,alignItems:'stretch'}}>
@@ -1853,7 +1853,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
 
   // ── STONED TO THE BONE ─────────────────────────────────────
   if(isStoned) return(
-    <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(2,0,0,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(2,0,0,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
       <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,180,0,0.04) 2px,rgba(0,180,0,0.04) 4px)',animation:'interlaceFlicker 0.1s steps(1) infinite',pointerEvents:'none',zIndex:0}}/>
       <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 20%,rgba(0,80,0,0.4) 100%)',pointerEvents:'none',zIndex:0,animation:'bgPulse 2s ease-in-out infinite'}}/>
       <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
@@ -1886,7 +1886,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
 
   // ── BEATEN BY BOSS ─────────────────────────────────────────
   if(isBeaten) return(
-    <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(6,0,0,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:14,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(6,0,0,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:14,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
       <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(180,0,0,0.035) 2px,rgba(180,0,0,0.035) 4px)',pointerEvents:'none',zIndex:0}}/>
       <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 30%,rgba(80,0,0,0.5) 100%)',pointerEvents:'none',zIndex:0}}/>
       <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
@@ -1927,7 +1927,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
 
   // ── VICTORY ────────────────────────────────────────────────
   return(
-    <div style={{position:'fixed',inset:0,zIndex:9800,background:'rgba(4,3,1,0.96)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(4,3,1,0.96)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
       <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:280,color:'rgba(180,180,180,0.06)',userSelect:'none',lineHeight:1}}>Vestibule</div>
       </div>
@@ -1987,7 +1987,7 @@ function DemonicConflictScreen({conflict,onChoice}){
     )
   }
   return(
-    <div style={{position:'fixed',inset:0,zIndex:9900,background:'rgba(2,1,0,0.98)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:32,padding:'40px 20px'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(2,1,0,0.98)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:32,padding:'40px 20px'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,color:'#cc1111',textShadow:'0 0 40px rgba(200,0,0,0.9),0 0 80px rgba(150,0,0,0.6)',textAlign:'center'}}>Only One May Remain</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic',textAlign:'center'}}>Two demonic powers cannot share the same stage.<br/>Choose who stays — the other is gone forever.</div>
       <div style={{display:'flex',gap:60,alignItems:'center',flexWrap:'wrap',justifyContent:'center'}}>
@@ -2005,7 +2005,7 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
   const activeMembers=stage.map((m,i)=>m?{m,i}:null).filter(Boolean).filter(x=>!x.m.tooStoned)
   function fireSellPrice(m){return m.demonic?69:5+(m.foil?3:0)+(m.mythic?8:0)}
   return(
-    <div style={{position:'fixed',inset:0,zIndex:9600,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:24,padding:'40px 20px'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9600,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:24,padding:'40px 20px'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#d0b060',textShadow:'0 0 30px rgba(200,150,20,0.4)'}}>Recruit a Member</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic'}}>{isFull?'🔥 Stage is full — fire a member to make room, or pass':'Choose one musician to join your band — or pass'}</div>
       <div style={{display:'flex',gap:20,flexWrap:'wrap',justifyContent:'center',maxWidth:1000}}>
@@ -2060,7 +2060,7 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
 
       {/* FIRE PANEL — only shown when stage is full */}
       {isFull&&onFireMember&&(
-        <div style={{position:'fixed',bottom:24,right:24,width:520,background:'linear-gradient(160deg,#0e0a16,#080510)',border:'2px solid rgba(220,60,20,0.7)',borderRadius:12,padding:'20px 24px',boxShadow:'0 0 40px rgba(200,40,0,0.35)',zIndex:9700}}>
+        <div style={{position:'absolute',bottom:24,right:24,width:520,background:'linear-gradient(160deg,#0e0a16,#080510)',border:'2px solid rgba(220,60,20,0.7)',borderRadius:12,padding:'20px 24px',boxShadow:'0 0 40px rgba(200,40,0,0.35)',zIndex:9700}}>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:38,color:'#ff4422',textAlign:'center',marginBottom:6,textShadow:'0 0 20px rgba(255,60,20,0.8)'}}>🔥 Fire a Member</div>
           <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#aa5533',textAlign:'center',fontStyle:'italic',marginBottom:16}}>Fire one to open a slot</div>
           {activeMembers.map(({m,i})=>(
@@ -2098,7 +2098,7 @@ function RemasterModal({cards,onConfirm,onClose}){
   }
   const ready=toDelete.length===2&&toCopy!==null
   return(
-    <div style={{position:'fixed',inset:0,zIndex:9700,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,padding:'20px'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9700,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,padding:'20px'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#d0b060'}}>The Remaster</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'#a09060',fontStyle:'italic',textAlign:'center'}}>
         Click <span style={{color:'#ee2222',fontWeight:900}}>2 cards to delete</span> · Click <span style={{color:'#22aa44',fontWeight:900}}>1 card to copy</span>
@@ -2150,7 +2150,7 @@ function SetlistModal({hand,onConfirm}){
   // Draw 2 already happened — player must pick 1 card to discard before continuing
   const [picked,setPicked]=useState(null)
   return(
-    <div style={{position:'fixed',inset:0,zIndex:9700,background:'rgba(4,2,1,0.95)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,padding:'40px 20px'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9700,background:'rgba(4,2,1,0.95)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,padding:'40px 20px'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#44dd44',textShadow:'0 0 30px rgba(40,200,60,0.5)'}}>Setlist</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#88bb88',fontStyle:'italic'}}>You drew 2 cards. Now discard 1 to continue.</div>
       <div style={{display:'flex',gap:14,flexWrap:'wrap',justifyContent:'center',maxWidth:1100}}>
@@ -2185,7 +2185,7 @@ function SetlistModal({hand,onConfirm}){
   )
 }
 
-export default function App(){
+function App(){
   const [gameState,setGameState]=useState('menu')
   const getDailySeed=()=>{const d=new Date();return parseInt(d.getFullYear().toString()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'))}
   const [runSeed,setRunSeed]=useState(()=>Math.floor(Math.random()*0xFFFFFF))
@@ -3861,7 +3861,7 @@ export default function App(){
 
     // Unlocks gallery
     if(menuView==='unlocks')return(
-      <div style={{position:'fixed',inset:0,zIndex:9900,background:'rgba(4,2,1,0.98)',display:'flex',flexDirection:'column',alignItems:'center',gap:14,padding:'40px 20px',overflowY:'auto'}}>
+      <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.98)',display:'flex',flexDirection:'column',alignItems:'center',gap:14,padding:'40px 20px',overflowY:'auto'}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Unlocks</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#8a6020',letterSpacing:2}}>Lifetime Score: {lt.toLocaleString()}</div>
         {/* SCORE MILESTONES */}
@@ -3948,7 +3948,7 @@ export default function App(){
 
     // Rules screen
     if(menuView==='rules')return(
-      <div style={{position:'fixed',inset:0,zIndex:9900,background:'rgba(4,2,1,0.98)',display:'flex',flexDirection:'column',alignItems:'center',gap:12,padding:'40px 20px',overflowY:'auto'}}>
+      <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.98)',display:'flex',flexDirection:'column',alignItems:'center',gap:12,padding:'40px 20px',overflowY:'auto'}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Rules</div>
         <div style={{maxWidth:800,width:'100%',display:'flex',flexDirection:'column',gap:12}}>
           {[
@@ -3973,7 +3973,7 @@ export default function App(){
 
     // Options screen
     if(menuView==='options')return(
-      <div style={{position:'fixed',inset:0,zIndex:9900,background:'rgba(4,2,1,0.98)',display:'flex',flexDirection:'column',alignItems:'center',gap:16,padding:'60px 20px',overflowY:'auto'}}>
+      <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.98)',display:'flex',flexDirection:'column',alignItems:'center',gap:16,padding:'60px 20px',overflowY:'auto'}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Options</div>
         <div style={{display:'flex',flexDirection:'column',gap:12,maxWidth:500,width:'100%'}}>
           {[
@@ -4014,10 +4014,10 @@ export default function App(){
 
     // Main menu
     return(
-      <div style={{position:'fixed',inset:0,zIndex:9900,background:'rgba(2,1,0,0.99)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:0,overflow:'hidden'}}>
+      <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(2,1,0,0.99)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:0,overflow:'hidden'}}>
         {/* Background logo — large, subtle */}
         <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',opacity:0.08}}>
-          <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:'90vmin',height:'90vmin',objectFit:'contain'}}/>
+          <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:972,height:972,objectFit:'contain'}}/>
         </div>
         {/* Scanlines */}
         <div style={{position:'absolute',inset:0,pointerEvents:'none',backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.015) 2px,rgba(255,255,255,0.015) 4px)',zIndex:1}}/>
@@ -4103,29 +4103,29 @@ export default function App(){
   if(gameState==='end')return <EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/>
 
   return(
-    <div style={{width:'100vw',height:'100vh',display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none'}}>
-      <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:8000,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px,transparent 4px,transparent 7px,rgba(0,0,0,0.10) 7px,rgba(0,0,0,0.10) 8px,transparent 8px,transparent 14px,rgba(0,0,0,0.04) 14px,rgba(0,0,0,0.04) 15px)',animation:'vhsDrift 8s ease-in-out infinite',mixBlendMode:'overlay'}}/>
-      <div style={{position:'fixed',inset:0,pointerEvents:'none',zIndex:8001,animation:'vhsLine 12s linear infinite',background:'transparent'}}/>
-      {damageFlash&&<div style={{position:'fixed',inset:0,zIndex:8500,pointerEvents:'none',background:'radial-gradient(ellipse at center,rgba(200,0,0,0.25),rgba(100,0,0,0.4))',animation:'flashFade 0.4s ease-out forwards'}}/>}
-      {corruptHigh&&!corruptMax&&<div style={{position:'fixed',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 40%,rgba(100,0,0,0.15) 100%)',animation:bgPulseAnim}}/>}
-      {corruptMax&&<div style={{position:'fixed',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 20%,rgba(140,0,0,0.3) 100%)',animation:'bgPulse 1s ease-in-out infinite'}}/>}
+    <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none'}}>
+      <div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:8000,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px,transparent 4px,transparent 7px,rgba(0,0,0,0.10) 7px,rgba(0,0,0,0.10) 8px,transparent 8px,transparent 14px,rgba(0,0,0,0.04) 14px,rgba(0,0,0,0.04) 15px)',animation:'vhsDrift 8s ease-in-out infinite',mixBlendMode:'overlay'}}/>
+      <div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:8001,animation:'vhsLine 12s linear infinite',background:'transparent'}}/>
+      {damageFlash&&<div style={{position:'absolute',inset:0,zIndex:8500,pointerEvents:'none',background:'radial-gradient(ellipse at center,rgba(200,0,0,0.25),rgba(100,0,0,0.4))',animation:'flashFade 0.4s ease-out forwards'}}/>}
+      {corruptHigh&&!corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 40%,rgba(100,0,0,0.15) 100%)',animation:bgPulseAnim}}/>}
+      {corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 20%,rgba(140,0,0,0.3) 100%)',animation:'bgPulse 1s ease-in-out infinite'}}/>}
       {floats.map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
       {projectiles.map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
       {showDice&&diceTarget&&<DiceRoll target={diceTarget} onDone={()=>setShowDice(false)}/>}
-      {hellquakeAnim&&<div style={{position:'fixed',inset:0,zIndex:9500,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.85)',animation:'fadeIn 0.1s ease'}}>
+      {hellquakeAnim&&<div style={{position:'absolute',inset:0,zIndex:9500,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.85)',animation:'fadeIn 0.1s ease'}}>
         <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.04) 3px,rgba(255,255,255,0.04) 4px)',animation:'interlaceFlicker 0.08s steps(1) infinite',pointerEvents:'none'}}/>
         <div style={{fontSize:120,animation:'throb 0.3s ease-in-out infinite',filter:`drop-shadow(-4px 0 rgba(255,0,0,0.8)) drop-shadow(4px 0 rgba(0,80,255,0.8))`}}>⛧</div>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:hellquakeAnim.color,textShadow:`-3px 0 rgba(255,0,0,0.8), 3px 0 rgba(0,80,255,0.7), 0 0 60px ${hellquakeAnim.color},0 0 120px ${hellquakeAnim.color}`,animation:'fadeIn 0.3s ease'}}>{hellquakeAnim.text}</div>
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:26,color:'rgba(255,255,255,0.9)',textAlign:'center',maxWidth:600,fontStyle:'italic',textShadow:'0 0 20px rgba(0,0,0,0.9)',animation:'fadeIn 0.5s ease',padding:'0 40px',lineHeight:1.5}}>{hellquakeAnim.desc}</div>
       </div>}
       {/* TRIP EFFECT OVERLAY */}
-      {activeTripEffect&&<div style={{position:'fixed',inset:0,zIndex:9600,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:16,background:'rgba(0,0,0,0.88)',animation:'fadeIn 0.15s ease'}}>
+      {activeTripEffect&&<div style={{position:'absolute',inset:0,zIndex:9600,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:16,background:'rgba(0,0,0,0.88)',animation:'fadeIn 0.15s ease'}}>
         <div style={{fontSize:100,animation:'throb 0.4s ease-in-out infinite',filter:`drop-shadow(0 0 40px ${activeTripEffect.color})`}}>{activeTripEffect.type==='shrooms'?'🍄':'🧪'}</div>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,color:activeTripEffect.color,textShadow:`0 0 40px ${activeTripEffect.color},0 0 80px ${activeTripEffect.color}`,animation:'fadeIn 0.3s ease'}}>{activeTripEffect.name}</div>
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:24,color:'rgba(255,255,255,0.9)',textAlign:'center',maxWidth:600,fontStyle:'italic',textShadow:'0 0 20px rgba(0,0,0,0.9)',animation:'fadeIn 0.5s ease',padding:'0 40px',lineHeight:1.5}}>{activeTripEffect.desc}</div>
       </div>}
       {/* LUCIFER CINEMATIC OVERLAY */}
-      {luciferCinematic&&<div style={{position:'fixed',inset:0,zIndex:9700,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.92)',animation:'fadeIn 0.2s ease'}}>
+      {luciferCinematic&&<div style={{position:'absolute',inset:0,zIndex:9700,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.92)',animation:'fadeIn 0.2s ease'}}>
         <div style={{fontSize:120,animation:'throb 0.4s ease-in-out infinite',filter:'drop-shadow(0 0 40px rgba(0,100,255,0.8))'}}>
           {luciferCinematic.phase===2?'😈':'🧊'}</div>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:luciferCinematic.phase===2?'#ff3300':'#44ccff',
@@ -4137,9 +4137,9 @@ export default function App(){
           {luciferCinematic.phase===2?'Band fully restored. All strikes reset. Finish this.':'8 Circle Bosses defeated. Their echoes weaken the Devil.'}</div>
       </div>}
       {/* CIRCLE CLEARED FLASH */}
-      {circleClearedData&&<div style={{position:'fixed',inset:0,zIndex:9750,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:0,background:'rgba(0,0,0,0.94)',animation:'fadeIn 0.3s ease'}}>
+      {circleClearedData&&<div style={{position:'absolute',inset:0,zIndex:9750,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:0,background:'rgba(0,0,0,0.94)',animation:'fadeIn 0.3s ease'}}>
         <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',opacity:0.06}}>
-          <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:'80vmin',height:'80vmin',objectFit:'contain'}}/>
+          <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:864,height:864,objectFit:'contain'}}/>
         </div>
         <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:12}}>
           <div style={{fontSize:100,filter:'drop-shadow(0 0 30px rgba(200,0,0,0.6))',animation:'throb 0.6s ease-in-out infinite'}}>{circleClearedData.bossEmoji}</div>
@@ -4352,7 +4352,7 @@ export default function App(){
 
       </div>
       {/* PAUSE OPTIONS OVERLAY (ESC key) */}
-      {showPauseOptions&&<div style={{position:'fixed',inset:0,zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.85)'}} onClick={()=>setShowPauseOptions(false)}>
+      {showPauseOptions&&<div style={{position:'absolute',inset:0,zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.85)'}} onClick={()=>setShowPauseOptions(false)}>
         <div onClick={e=>e.stopPropagation()} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16,padding:'40px 60px',background:'rgba(10,6,2,0.98)',border:'2px solid rgba(100,65,15,0.5)',borderRadius:12,maxWidth:500,width:'90%'}}>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:6}}>Paused</div>
           <div style={{display:'flex',flexDirection:'column',gap:10,width:'100%'}}>
@@ -4391,3 +4391,29 @@ export default function App(){
     </div>
   )
 }
+
+// ── SCALE ROOT — fits game to any screen size ──────────────────
+const DESIGN_W=1920,DESIGN_H=1080
+function ScaleRoot(){
+  const [scale,setScale]=useState(1)
+  const [dims,setDims]=useState({w:DESIGN_W,h:DESIGN_H})
+  useEffect(()=>{
+    const calc=()=>{
+      const vw=window.innerWidth,vh=window.innerHeight
+      const s=Math.min(vw/DESIGN_W,vh/DESIGN_H)
+      setScale(s)
+      setDims({w:vw,h:vh})
+    }
+    calc()
+    window.addEventListener('resize',calc)
+    return()=>window.removeEventListener('resize',calc)
+  },[])
+  return(
+    <div style={{width:'100vw',height:'100vh',overflow:'hidden',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <div style={{width:DESIGN_W,height:DESIGN_H,transform:`scale(${scale})`,transformOrigin:'center center',overflow:'hidden',position:'relative'}}>
+        <App/>
+      </div>
+    </div>
+  )
+}
+export default ScaleRoot
