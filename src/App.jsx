@@ -1485,7 +1485,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   const [showTip,setShowTip]=useState(false)
   if(!member){
     return <div ref={innerRef} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}}
-      style={{width:230,height:290,border:`1px dashed ${over?'rgba(232,168,32,0.6)':'rgba(160,100,30,0.22)'}`,borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,background:over?'rgba(100,70,15,0.18)':'rgba(28,16,4,0.14)',transition:'all 0.2s'}}>
+      style={{width:270,height:340,border:`1px dashed ${over?'rgba(232,168,32,0.6)':'rgba(160,100,30,0.22)'}`,borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,background:over?'rgba(100,70,15,0.18)':'rgba(28,16,4,0.14)',transition:'all 0.2s'}}>
       <div style={{fontSize:28,opacity:.1}}>⛧</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'rgba(160,100,30,0.28)',fontStyle:'italic'}}>empty</div>
     </div>
@@ -1494,7 +1494,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   const buffCount=member.buffCount||0
   return(
     <div ref={innerRef} draggable onDragStart={onDragStart} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}} onMouseEnter={()=>setShowTip(true)} onMouseLeave={()=>setShowTip(false)}
-      style={{width:230,height:290,display:'flex',flexDirection:'column',background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
+      style={{width:270,height:340,display:'flex',flexDirection:'column',background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
         border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':mentorState==='active'?'3px solid #ffd700':mentorState==='broken'?'2px solid #555':mentorState==='mentor'?'2px solid #ffd700':bondColor?'2px solid '+bondColor:over?'2px solid #e8a820':st?'1px solid #333':member.demonic?'2px solid #ffd700':member.mythic?'2px solid #cc44ff':member.foil?'2px solid #88ccff':'2px solid rgba(190,120,25,0.85)',
         borderRadius:6,
         boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':mentorState==='active'&&!st?'0 0 40px rgba(255,215,0,0.9),0 6px 24px rgba(0,0,0,0.85)':mentorState==='mentor'&&!st?'0 0 22px rgba(255,215,0,0.5),0 6px 24px rgba(0,0,0,0.85)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':!st&&member.demonic?'0 0 25px rgba(255,200,0,0.5),0 6px 24px rgba(0,0,0,0.85)':!st&&member.mythic?'0 0 25px rgba(200,0,255,0.4),0 6px 24px rgba(0,0,0,0.85)':!st&&member.foil?'0 0 20px rgba(100,180,255,0.35),0 6px 24px rgba(0,0,0,0.85)':'0 6px 24px rgba(0,0,0,0.85)',
@@ -1520,17 +1520,17 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
         textShadow:member.demonic?'0 0 8px rgba(255,200,0,0.9)':member.mythic?'0 0 8px rgba(200,0,255,0.9)':'0 0 8px rgba(100,180,255,0.9)'}}>
         {member.demonic?'⛧ DEMONIC':member.mythic?'✦ MYTHIC':'✨ FOIL'}
       </div>}
-      <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:60,background:'rgba(0,0,0,0.3)',position:'relative',minHeight:70}}>
+      <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative',minHeight:90}}>
         {member.emoji}
         {st&&<div style={{position:'absolute',top:4,right:4,fontSize:22}}>💨</div>}
         {isAttacking&&<div style={{position:'absolute',inset:0,background:'rgba(255,50,0,0.12)',animation:'pulse 0.4s ease infinite alternate'}}/>}
       </div>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,color:st?'#555':'#e8d8a0',textAlign:'center',padding:'6px 4px 2px',lineHeight:1}}>{member.name}</div>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:st?'#555':'#e8d8a0',textAlign:'center',padding:'8px 6px 3px',lineHeight:1}}>{member.name}</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,letterSpacing:1.5,color:st?'#444':'#8a7a50',textAlign:'center',padding:'4px 4px 8px',textTransform:'uppercase'}}>{member.role}</div>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 20px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
         <div style={{textAlign:'center'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:st?'#555':'#ee2222',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>ATK</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:34,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.atk}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.atk}</div>
         </div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:st?'#555':'#e8a820',fontWeight:700,letterSpacing:1,textAlign:'center'}}>{member.keyword}</div>
         <div style={{textAlign:'center'}}>
@@ -4177,7 +4177,7 @@ function App(){
             <div style={{fontFamily:"'ScratchFont',serif",fontSize:10,color:'#8a6838',opacity:.4,fontStyle:'italic',letterSpacing:4}}>— stage —</div>
             <div style={{flex:1,height:1,background:'rgba(60,35,5,0.2)'}}/>
           </div>
-          <div style={{display:'flex',alignItems:'center',gap:8,padding:'12px 10px 12px 220px',justifyContent:'center',flex:1,position:'relative'}}>
+          <div style={{display:'flex',alignItems:'center',gap:16,padding:'12px 10px 12px 220px',justifyContent:'center',flex:1,position:'relative'}}>
             <div style={{display:'flex',flexDirection:'column',gap:8,alignSelf:'center',flexShrink:0,background:'rgba(0,0,0,0.22)',borderRadius:'0 6px 6px 0',padding:'8px 10px 8px 10px',borderRight:'1px solid rgba(140,90,20,0.35)',position:'absolute',left:0,top:'50%',transform:'translateY(-50%)'}}>
               {[0,1,2].map(i=>{const a=(activeArtifacts||[])[i];return(
                 <div key={i} style={{position:'relative'}}
