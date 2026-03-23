@@ -3149,7 +3149,7 @@ export default function App(){
         // 90% good trip — roll d4
         const d4=Math.floor(Math.random()*4)
         if(d4===0){
-          effectName='FRACTAL VISION';effectDesc='Every card played fires TWICE this fight!';effectColor='#ff44ff'
+          effectName='FRACTAL VISION';effectDesc='All damage DOUBLED this fight!';effectColor='#ff44ff'
           addLog('🧪 FRACTAL VISION! Every card effect fires twice!')
         } else if(d4===1){
           effectName='DIMENSIONAL RIFT';effectDesc='Boss takes DOUBLE damage this fight!';effectColor='#ff3300'
