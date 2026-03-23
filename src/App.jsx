@@ -200,17 +200,27 @@ const CIRCLE_NAMES=['','I — Limbo','II — Lust','III — Gluttony','IV — Gr
 const CIRCLE_EMOJIS=['','🌑','🌹','🍖','💰','⚔','⛪','🗡','🎭','❄']
 
 // Skip rewards for The Descent map (fight 1 = small, fight 2 = medium)
-const DESCENT_REWARDS_1=[ // Fight 1 skip rewards (small)
-  {id:'stash1',name:'+15 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>p+15);gs.addLog('🌿 Skipped fight: +15 Stash')}},
-  {id:'heal1',name:'All Members +3 HP',emoji:'💚',apply:(gs)=>{gs.setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+3)}):m));gs.addLog('💚 Skipped fight: All members +3 HP')}},
-  {id:'ember1',name:'+1 Max Ember',emoji:'🔥',apply:(gs)=>{gs.setMaxEmbers(p=>Math.min(8,p+1));gs.addLog('🔥 Skipped fight: +1 Max Ember')}},
-  {id:'corrupt1',name:'-15% Corruption',emoji:'✨',apply:(gs)=>{gs.setCorruption(p=>Math.max(0,p-15));gs.addLog('✨ Skipped fight: -15% Corruption')}},
+const DESCENT_REWARDS_1=[ // Fight 1 skip rewards (small) — 9 options
+  {id:'s_stash',name:'+15 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>p+15);gs.addLog('🌿 Skipped fight: +15 Stash')}},
+  {id:'s_ember',name:'+1 Max Ember',emoji:'🔥',apply:(gs)=>{gs.setMaxEmbers(p=>Math.min(8,p+1));gs.addLog('🔥 Skipped fight: +1 Max Ember')}},
+  {id:'s_corrupt',name:'-15% Corruption',emoji:'✨',apply:(gs)=>{gs.setCorruption(p=>Math.max(0,p-15));gs.addLog('✨ Skipped fight: -15% Corruption')}},
+  {id:'s_atk',name:'Random Member +1 ATK',emoji:'🎸',apply:(gs)=>{gs.setStage(p=>{const alive=p.map((m,i)=>m&&!m.tooStoned?i:null).filter(i=>i!==null);if(alive.length===0)return p;const idx=alive[Math.floor(Math.random()*alive.length)];const ns=[...p];ns[idx]=Object.assign({},ns[idx],{atk:ns[idx].atk+1,permAtkBonus:(ns[idx].permAtkBonus||0)+1});gs.addLog('🎸 Skipped fight: '+ns[idx].name+' +1 ATK');return ns})}},
+  {id:'s_draw1',name:'Draw +1 Next Fight',emoji:'📋',apply:(gs)=>{gs.setPendingDraw(p=>p+1);gs.addLog('📋 Skipped fight: +1 Card next fight')}},
+  {id:'s_discard',name:'+1 Discard Next Fight',emoji:'🗑',apply:(gs)=>{gs.setBonusDiscards(p=>p+1);gs.addLog('🗑 Skipped fight: +1 Discard next fight')}},
+  {id:'s_card',name:'Random Common Card',emoji:'🃏',apply:(gs)=>{const commons=ALL_CARDS.filter(c=>c.rarity==='Common');const pick=commons[Math.floor(Math.random()*commons.length)];gs.addToDeck({...pick,uid:Math.random().toString(36).slice(2)});gs.addLog('🃏 Skipped fight: Added '+pick.name+' to deck')}},
+  {id:'s_stashper',name:'+5 Stash Per Member',emoji:'💰',apply:(gs)=>{gs.setStage(p=>{const alive=p.filter(m=>m&&!m.tooStoned).length;gs.setStash(s=>s+alive*5);gs.addLog('💰 Skipped fight: +'+alive*5+' Stash ('+alive+' members x 5)');return p})}},
+  {id:'s_embers2',name:'+2 Bonus Embers',emoji:'⚡',apply:(gs)=>{gs.setBonusEmbers(p=>p+2);gs.addLog('⚡ Skipped fight: +2 Bonus Embers next fight')}},
 ]
-const DESCENT_REWARDS_2=[ // Fight 2 skip rewards (medium)
-  {id:'stash2',name:'+25 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>p+25);gs.addLog('🌿 Skipped fight: +25 Stash')}},
-  {id:'heal2',name:'Full Heal All Members',emoji:'💚',apply:(gs)=>{gs.setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false}):m));gs.addLog('💚 Skipped fight: All members fully healed')}},
-  {id:'corrupt2',name:'Corruption → 0%',emoji:'✨',apply:(gs)=>{gs.setCorruption(0);gs.addLog('✨ Skipped fight: Corruption reset to 0%')}},
-  {id:'draw2',name:'Draw +2 Cards Next Fight',emoji:'📋',apply:(gs)=>{gs.setPendingDraw(p=>p+2);gs.addLog('📋 Skipped fight: +2 Cards next fight')}},
+const DESCENT_REWARDS_2=[ // Fight 2 skip rewards (medium) — 9 options
+  {id:'m_stash',name:'+25 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>p+25);gs.addLog('🌿 Skipped fight: +25 Stash')}},
+  {id:'m_corrupt',name:'Corruption → 0%',emoji:'✨',apply:(gs)=>{gs.setCorruption(0);gs.addLog('✨ Skipped fight: Corruption reset to 0%')}},
+  {id:'m_draw2',name:'Draw +2 Next Fight',emoji:'📋',apply:(gs)=>{gs.setPendingDraw(p=>p+2);gs.addLog('📋 Skipped fight: +2 Cards next fight')}},
+  {id:'m_card',name:'Random Uncommon Card',emoji:'🃏',apply:(gs)=>{const uncommons=ALL_CARDS.filter(c=>c.rarity==='Uncommon');const pick=uncommons[Math.floor(Math.random()*uncommons.length)];gs.addToDeck({...pick,uid:Math.random().toString(36).slice(2)});gs.addLog('🃏 Skipped fight: Added '+pick.name+' to deck')}},
+  {id:'m_allatk',name:'All Members +1 ATK',emoji:'🎸',apply:(gs)=>{gs.setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1}):m));gs.addLog('🎸 Skipped fight: All members +1 ATK')}},
+  {id:'m_stash40',name:'+40 Stash',emoji:'💰',apply:(gs)=>{gs.setStash(p=>p+40);gs.addLog('💰 Skipped fight: +40 Stash')}},
+  {id:'m_delete',name:'Delete Random Common',emoji:'🗑',apply:(gs)=>{gs.deleteRandomCommon()}},
+  {id:'m_free',name:'First Card Free',emoji:'⚡',apply:(gs)=>{gs.setNextCardFree(true);gs.addLog('⚡ Skipped fight: First card next fight is free')}},
+  {id:'m_stonewall',name:'Stonewall All',emoji:'🛡',apply:(gs)=>{gs.setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{stoneShield:2}):m));gs.addLog('🛡 Skipped fight: All members shielded for 2 strikes')}},
 ]
 
 const PACT_REWARDS=[
@@ -2281,6 +2291,8 @@ function App(){
   const [showDice,setShowDice]=useState(false)
   const [pendingEmbers,setPendingEmbers]=useState(0)
   const [pendingDraw,setPendingDraw]=useState(0)
+  const [bonusDiscards,setBonusDiscards]=useState(0) // extra discards next fight from descent
+  const [bonusEmbers,setBonusEmbers]=useState(0) // extra embers next fight from descent
   const [lastRiffPlayed,setLastRiffPlayed]=useState(null)
   const [cardsPlayedThisStrike,setCardsPlayedThisStrike]=useState([])
   const cardsPlayedRef=useRef([])
@@ -2461,6 +2473,11 @@ function App(){
     if(hasDrummer){let r=Math.floor(Math.random()*6)+1;if(drumCount>=2&&r<=2)r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
     setGameState('playing')
     addLog('⛧ '+musicians[0].name+' and '+musicians[1].name+' take the stage!')
+    // Show Descent map for Circle 1
+    const r1=DESCENT_REWARDS_1[Math.floor(Math.random()*DESCENT_REWARDS_1.length)]
+    const r2=DESCENT_REWARDS_2[Math.floor(Math.random()*DESCENT_REWARDS_2.length)]
+    setDescentData({circleNum:1,circleName:CIRCLE_NAMES[1],circleEmoji:CIRCLE_EMOJIS[1],fights:[ENEMIES[0],ENEMIES[1],ENEMIES[2]],fightIndices:[0,1,2],reward1:r1,reward2:r2,skips:[]})
+    setGameState('descent')
   },[runSeed])
 
   const applyCard=useCallback((card,slotIdx)=>{
@@ -3671,7 +3688,8 @@ function App(){
     setEnemy(nextEnemy);setEnemyHp(Math.ceil(nextEnemy.maxHp*activeStake.hpMult))
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine'))setCorruption(p=>Math.min(100,p+5))
-    setEmbers(function(){return maxEmbers});setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
+    setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
+    if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
     setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
     if(fightIndex===26){
@@ -3955,7 +3973,7 @@ function App(){
   const handleReset=()=>{
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
-    setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
+    setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
@@ -4260,7 +4278,9 @@ function App(){
         })}
       </div>
       <button onClick={()=>{
-        const gs={setStash,setStage,setCorruption,setMaxEmbers,setPendingDraw,addLog}
+        const addToDeck=(card)=>{setDeck(p=>[...p,card])}
+        const deleteRandomCommon=()=>{setDeck(p=>{const commons=p.filter(c=>c.rarity==='Common');if(commons.length===0){addLog('🗑 No common cards in deck to delete.');return p};const victim=commons[Math.floor(Math.random()*commons.length)];addLog('🗑 Skipped fight: Deleted '+victim.name+' from deck');return p.filter(c=>c.uid!==victim.uid)})}
+        const gs={setStash,setStage,setCorruption,setMaxEmbers,setPendingDraw,setBonusDiscards,setBonusEmbers,setNextCardFree,addToDeck,deleteRandomCommon,addLog}
         // Apply skip rewards
         if(descentData.skips.includes(0))descentData.reward1.apply(gs)
         if(descentData.skips.includes(1))descentData.reward2.apply(gs)
@@ -4272,6 +4292,7 @@ function App(){
         else if(skips.includes(0))startFight=baseIdx+1 // skip first → fight 2
         overrideFightIdxRef.current=startFight
         setDescentData(null)
+        setGameState('playing')
         skipDescentRef.current=true
         setTimeout(()=>{handleShopLeave();skipDescentRef.current=false},50)
       }}

@@ -110,10 +110,11 @@ This is happening.
 ### Feature 3: CIRCLE MAP — "The Descent"
 - [x] Map screen before each circle showing 3 fights
 - [x] Skip option for fights 1 and 2 (boss always required)
-- [x] Skip rewards: stash, heal, ember, corruption, draw bonus (4 per tier)
+- [x] Skip rewards: 9 small + 9 medium options (stash, ATK, ember, corruption, cards, discards, deck thin)
 - [x] Skipping = no shop after that fight (trade shop visit for quick bonus)
 - [x] Balatro-style blind selection with circle theming + enemy preview
 - [x] Veterans skip early circles, new players fight everything
+- [x] Descent triggers for ALL circles including C1 (after Opening Night)
 
 ### Feature 4: BUILD IDENTITY — "Genre Bonus"
 - [ ] Track RIFF/CORRUPT/UTILITY/EMBER play percentages per run
