@@ -2434,6 +2434,7 @@ function App(){
     const _hs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
     setHand(d.slice(0,_hs))
     setDeck(d.slice(_hs))
+    handTargetRef.current=_hs
     const hasDrummer=musicians.some(m=>m.role==='Drummer')
     const drumCount=musicians.filter(m=>m.role==='Drummer').length
     if(hasDrummer){let r=Math.floor(Math.random()*6)+1;if(drumCount>=2&&r<=2)r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
@@ -3279,8 +3280,8 @@ function App(){
     // DEBUFF keyword: Nott reduces boss damage each Strike
     const debuffCount=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='DEBUFF').length
     if(debuffCount>0){setBossDebuff(p=>p+debuffCount*2);addLog('🎤 Nott debuffs the boss! (-'+(debuffCount*2)+' damage)')}
-    const baseTarget=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
-    handTargetRef.current=Math.max(baseTarget,handTargetRef.current)+(pendingDraw>0?pendingDraw:0)
+    // pendingDraw increases target for this turn
+    if(pendingDraw>0)handTargetRef.current=handTargetRef.current+(pendingDraw)
     setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
 
     const buffed=actives.filter(m=>(m.buffCount||0)>0)
@@ -3545,6 +3546,7 @@ function App(){
               }
               nh=[...nh,nd[0]];nd=nd.slice(1);
             }
+            handTargetRef.current=nh.length; // capture full hand size for next turn
             setHand(nh);setDeck(nd);setDiscardPile(ndisc);
             playDraw();
             // ANCHOR keyword: heal adjacent members after Strike
@@ -3664,6 +3666,7 @@ function App(){
     setHand(allCards.slice(0,_lhs))
     setDeck(allCards.slice(_lhs))
     setDiscardPile([])
+    handTargetRef.current=_lhs
     addLog('⛧ Fight '+(nextIdx+1)+': '+nextEnemy.name+' awaits!')
     // ── ARTIFACT FIGHT-START EFFECTS ───────────────────────
     // A1: Vintage Guitar — lead guitarist +1 ATK

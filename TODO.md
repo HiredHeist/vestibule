@@ -137,6 +137,7 @@ This is happening.
 - [x] Fix Lucifer phase reset: rewritten with refs (nested setState race)
 - [x] Fix strike refill: handTargetRef tracks base+Soundboard target, not depleted hand.length
 - [x] ZERO nested setDeck→setHand patterns remaining in codebase
+- [x] Fix strike refill: handTargetRef set AFTER refill (captures full hand), not at strike press (depleted)
 - [x] CORRUPT keyword ATK bonus shown on member cards (3+6 format)
 - [ ] Deck thinning: "Burn" at Pawn Shop — delete card permanently for free
 - [ ] Shop leans toward current genre (1 extra card of dominant type in rotation)
