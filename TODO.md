@@ -121,6 +121,7 @@ This is happening.
 - [ ] 50%+ threshold activates Genre Bonus:
       RIFF METAL (+15% RIFF damage), BLACK METAL (+25% corruption damage),
       PROG ROCK (+1 card draw/strike), DOOM METAL (+2 ATK if no discards used)
+- [x] CORRUPT keyword ATK bonus shown on member cards (3+6 format)
 - [ ] Deck thinning: "Burn" at Pawn Shop — delete card permanently for free
 - [ ] Shop leans toward current genre (1 extra card of dominant type in rotation)
 - [ ] Opening Night: show "Synergizes with: X BUILD" under member keywords
