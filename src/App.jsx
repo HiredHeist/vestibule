@@ -195,6 +195,22 @@ const UNLOCK_MILESTONES=[
 ]
 
 // ── DIFFICULTY STAKES ──────────────────────────────────────────
+// ── THE PACT: post-boss reward choices ──────────────────────────
+const PACT_REWARDS=[
+  {id:'ember_surge',name:'Ember Surge',emoji:'🔥',desc:'+1 max Embers permanently.',color:'#ff6600'},
+  {id:'iron_strings',name:'Iron Strings',emoji:'🎸',desc:'All members +1 ATK permanently.',color:'#ee2222'},
+  {id:'thick_skin',name:'Thick Skin',emoji:'🛡',desc:'All members +3 max HP permanently.',color:'#33dd33'},
+  {id:'dark_bargain',name:'Dark Bargain',emoji:'🌑',desc:'All CORRUPT cards cost 1 less Ember.',color:'#cc44ff'},
+  {id:'speed_demon',name:'Speed Demon',emoji:'⚡',desc:'Draw 1 extra card per Strike.',color:'#ffdd00'},
+  {id:'blood_price',name:'Blood Price',emoji:'🩸',desc:'Blood Ritual deals 9× instead of 6×.',color:'#cc0000'},
+  {id:'clean_living',name:'Clean Living',emoji:'✨',desc:'While Corruption is 0%, all members +2 ATK.',color:'#ffffff'},
+  {id:'corruption_engine',name:'Corruption Engine',emoji:'☠',desc:'+5% Corruption at start of each fight.',color:'#aa00ff'},
+  {id:'merchants_eye',name:'Merchants Eye',emoji:'💰',desc:'All shop items cost 20% less.',color:'#44cc44'},
+  {id:'stone_wall',name:'Stone Wall',emoji:'🧱',desc:'Members take 1 less damage per Strike (min 1).',color:'#8888aa'},
+  {id:'sixth_slot',name:'Sixth Slot',emoji:'👥',desc:'+1 band member slot. Recruit at next shop.',color:'#e8a820'},
+  {id:'war_drums',name:'War Drums',emoji:'🥁',desc:'+1 Strike per fight permanently.',color:'#dd2222'},
+]
+
 const STAKES=[
   {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.0,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Standard difficulty.'},
   {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.15,dmgAdd:1,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +15% HP. Enemies +1 damage.'},
@@ -2235,6 +2251,8 @@ function App(){
   const [damageFlash,setDamageFlash]=useState(false)
   const [animPhase,setAnimPhase]=useState('idle')
   const [circleClearedData,setCircleClearedData]=useState(null) // {circle, bossName, bossEmoji}
+  const [chosenPacts,setChosenPacts]=useState([]) // pact IDs chosen this run
+  const [pactChoices,setPactChoices]=useState([]) // 2 pact options for current choice
   const [corruption,setCorruption]=useState(0)
   const [stageDiveUsed,setStageDiveUsed]=useState(false)
   const [diceTarget,setDiceTarget]=useState(null)
@@ -2835,7 +2853,7 @@ function App(){
         const comboBonus=ns.filter(m=>m&&!m.tooStoned).reduce((s,m)=>s+m.atk,0)
         setEnemyHp(p=>Math.max(0,p-comboBonus))
         updStat('totalDamage',comboBonus)
-        setTimeout(()=>setComboFlash(null),1800)
+        setTimeout(()=>setComboFlash(null),2700)
         break
       }
     }
@@ -3102,7 +3120,15 @@ function App(){
         const cn=Math.floor(fightIndex/3)+1
         const circleNames=['','I — Limbo','II — Lust','III — Gluttony','IV — Greed','V — Anger','VI — Heresy','VII — Violence','VIII — Fraud','IX — Treachery']
         setCircleClearedData({circle:cn,circleName:circleNames[cn]||cn,bossName:enemy.name,bossEmoji:enemy.emoji,isBoss:isBossKill})
-        setTimeout(()=>{setCircleClearedData(null);setGameState('shop')},isBossKill?2800:1800)
+        if(isBossKill){
+          // Generate 2 pact choices (never repeat already chosen)
+          const available=PACT_REWARDS.filter(p=>!chosenPacts.includes(p.id))
+          const shuffled=[...available].sort(()=>Math.random()-0.5)
+          const picks=shuffled.slice(0,2)
+          setTimeout(()=>{setCircleClearedData(null);setPactChoices(picks);setGameState('pact')},2800)
+        } else {
+          setTimeout(()=>{setCircleClearedData(null);setGameState('shop')},1800)
+        }
       }
     },1000)
   },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake])
@@ -4142,6 +4168,39 @@ function App(){
   }
 
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
+  if(gameState==='pact')return(
+    <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,overflow:'hidden'}}>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,color:'#e8a820',textShadow:'0 0 40px rgba(200,140,0,0.6),0 0 80px rgba(150,100,0,0.3),3px 3px 0 #000',letterSpacing:8}}>⛧ The Pact ⛧</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#aa9060',fontStyle:'italic'}}>Choose your reward. The other is lost to the Void.</div>
+      <div style={{display:'flex',gap:40,marginTop:16}}>
+        {pactChoices.map(pact=>(
+          <div key={pact.id} onClick={()=>{
+            setChosenPacts(p=>[...p,pact.id])
+            // Apply immediate pact effects
+            if(pact.id==='ember_surge')setMaxEmbers(p=>{const n=Math.min(MAX_EMBERS_CAP,p+1);setEmbers(n);return n})
+            if(pact.id==='iron_strings')setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1}):m))
+            if(pact.id==='thick_skin')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):m))
+            if(pact.id==='war_drums')setStrikesLeft(p=>p)  // handled in strike reset via chosenPacts check
+            addLog('⛧ Pact chosen: '+pact.emoji+' '+pact.name)
+            setGameState('shop')
+          }}
+            style={{width:280,background:'linear-gradient(180deg,#1a1008,#0a0604)',border:'2px solid rgba(200,140,20,0.5)',borderRadius:10,padding:'30px 24px',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:12,
+              transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}
+            onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-8px) scale(1.05)';e.currentTarget.style.borderColor=pact.color;e.currentTarget.style.boxShadow='0 8px 40px '+pact.color+'44'}}
+            onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor='rgba(200,140,20,0.5)';e.currentTarget.style.boxShadow='0 4px 20px rgba(0,0,0,0.8)'}}>
+            <div style={{fontSize:64,filter:`drop-shadow(0 0 20px ${pact.color})`}}>{pact.emoji}</div>
+            <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:pact.color,textShadow:`0 0 20px ${pact.color}66`,textAlign:'center',letterSpacing:2}}>{pact.name}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#c8b080',textAlign:'center',lineHeight:1.5}}>{pact.desc}</div>
+          </div>
+        ))}
+      </div>
+      <button onClick={()=>setGameState('shop')}
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:4,color:'#666',background:'rgba(40,20,5,0.4)',border:'1px solid #444',borderRadius:6,padding:'10px 32px',cursor:'pointer',marginTop:16,transition:'all 0.15s'}}
+        onMouseEnter={e=>{e.currentTarget.style.color='#aa8040';e.currentTarget.style.borderColor='#aa8040'}}
+        onMouseLeave={e=>{e.currentTarget.style.color='#666';e.currentTarget.style.borderColor='#444'}}>
+        ⛧ Skip — Keep What You Have ⛧</button>
+    </div>
+  )
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
@@ -4280,6 +4339,17 @@ function App(){
               {bon>1&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#e8a820',letterSpacing:1}}>+{Math.round((bon-1)*100)}% SYNERGY</span>}
               <span style={{color:'#e8a820',fontSize:18,textShadow:'0 0 8px rgba(200,160,60,0.5)'}}>⟶</span>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:27,color:'#c8a060',fontWeight:700}}>{enemy.name}</span>
+              {chosenPacts.length>0&&<div style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',display:'flex',gap:4}}>
+                {chosenPacts.map(pid=>{const p=PACT_REWARDS.find(r=>r.id===pid);return p?<div key={pid} style={{position:'relative',cursor:'help'}}
+                  onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='block'}}
+                  onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='none'}}>
+                  <div style={{width:24,height:24,borderRadius:4,background:'rgba(0,0,0,0.6)',border:`1px solid ${p.color}66`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>{p.emoji}</div>
+                  <div data-pacttip="" style={{display:'none',position:'absolute',bottom:'120%',right:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 12px',zIndex:9999,pointerEvents:'none',minWidth:180,boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:p.color,marginBottom:3}}>{p.emoji} {p.name}</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8b080',lineHeight:1.4}}>{p.desc}</div>
+                  </div>
+                </div>:null})}
+              </div>}
             </>
           })()}
         </div>
