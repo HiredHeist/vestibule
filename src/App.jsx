@@ -267,7 +267,7 @@ const ALL_CARDS=[
   {id:'tappedout',name:'Tapped Out',type:'EMBER',rarity:'Uncommon',emoji:'🪙',embers:0,effect:'Gain 5 Embers at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'controlfeedback',name:'Controlled Feedback',type:'CORRUPT',rarity:'Uncommon',emoji:'🎚',embers:2,effect:'Set Corruption to 50%. Heal target member to full HP.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:1,effect:'Select up to 3 cards first, then play this to discard them and draw that many +1. (No selection = draw 1 card.)',color:'#9933cc',typeColor:'#7722aa',copies:1},
-  {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:2,effect:'Deal 5/8/12 damage (scales by fight). Boss passive skips.',color:'#9933cc',typeColor:'#7722aa',copies:1},
+  {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:2,effect:'Direct damage: 5 (C1-3), 8 (C4-6), 12 (C7-9). Bypasses boss passive.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:4,effect:'Damage = target HP to boss. Once per round.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'If Corruption >=60%, double ALL ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'infencore',name:'Infernal Encore',type:'RIFF',rarity:'Rare',emoji:'👿',embers:3,effect:'ALL members attack again simultaneously.',color:'#9933cc',typeColor:'#7722aa',copies:3},
@@ -2231,7 +2231,7 @@ function App(){
   const [stage,setStage]=useState([null,null,null,null,null])
   const [deck,setDeck]=useState([]);const deckRef=useRef([]);
   const [hand,setHand]=useState([]);const handRef=useRef([]);
-  const strikeHandSizeRef=useRef(HAND_SIZE)
+  const handTargetRef=useRef(HAND_SIZE) // target refill size, grows with Soundboard draws
   const [discardPile,setDiscardPile]=useState([]);const discRef=useRef([]);
   const [maxEmbers,setMaxEmbers]=useState(5)
   const [embers,setEmbers]=useState(5)
@@ -2519,7 +2519,7 @@ function App(){
       }
     }
     else if(card.id==='feedbackloop'){const dmg=Math.floor(corruption/2);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'}
-    else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?4:0;const swDmg=(fightIndex===0?5:fightIndex===1?8:12)+p5Bonus;const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(triggerVictory,500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
+    else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?4:0;const circleNum=Math.floor(fightIndex/3)+1;const swDmg=(circleNum<=3?5:circleNum<=6?8:12)+p5Bonus;const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(triggerVictory,500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
     else if(card.id==='groupie'){
       // Handled entirely in handleDropOnStage to avoid double setHand
       return false
@@ -2542,7 +2542,7 @@ function App(){
         ns[slotIdx]=Object.assign({},lrTarget,{encoreReady:true,buffCount:(lrTarget.buffCount||0)+1})
       } else if(lr.id==='soundwall'){
         const p5B=activePassives.some(p=>p.id==='p5')?4:0
-        const swD=(fightIndex<=0?5:fightIndex<=1?8:12)+p5B
+        const swCircle=Math.floor(fightIndex/3)+1;const swD=(swCircle<=3?5:swCircle<=6?8:12)+p5B
         const swHp=Math.max(0,enemyHp-swD);setEnemyHp(swHp);updStat('totalDamage',swD)
         addFloat(swD,getCenter(bossRef).x,getCenter(bossRef).y-60,'#dd2222',true);playHit()
         if(swHp<=0)setTimeout(triggerVictory,500)
@@ -2661,19 +2661,8 @@ function App(){
       addFloat('+2 🔥 +1 DRAW',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='setbreak'){
-      const candidates=hand.filter(c=>c.uid!==card.uid)
-      if(candidates.length===0){addLog('🎼 No cards to discard!');return false}
-      // Use a selected card if player pre-selected one, otherwise random
-      const preSelected=selected.filter(uid=>uid!==card.uid)
-      const victim=preSelected.length>0
-        ?(candidates.find(c=>c.uid===preSelected[0])||candidates[Math.floor(Math.random()*candidates.length)])
-        :candidates[Math.floor(Math.random()*candidates.length)]
-      setHand(p=>p.filter(c=>c.uid!==victim.uid))
-      setDiscardPile(p=>[...p,victim])
-      setSelected([])
-      setEmbers(p=>Math.min(maxEmbers,p+2));playEmber();spent=0
-      msg='🎼 Smoke Break! '+victim.name+' discarded. +2 Embers.'+(preSelected.length===0?' (tip: select a card first)':'')
-      addFloat('+2 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
+      // Handled entirely in handleDropOnStage to avoid double setHand race
+      return false
     }
     else if(card.id==='heavyriff'){
       const p5HeavyBonus=activePassives.some(p=>p.id==='p5')?2:0
@@ -2851,6 +2840,30 @@ function App(){
     if(!dragCardUid||animPhase!=='idle')return
     const card=hand.find(c=>c.uid===dragCardUid)
     if(!card)return
+
+    // ── SMOKE BREAK: handle entirely here to avoid double setHand race ──
+    if(card.id==='setbreak'){
+      const handWithout=hand.filter(c=>c.uid!==card.uid)
+      if(handWithout.length===0){addLog('🎼 No cards to discard!');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
+      const effectiveEmbers=nextCardFree?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
+      if(nextCardFree)setNextCardFree(false)
+      const preSelected=selected.filter(uid=>uid!==card.uid)
+      const victim=preSelected.length>0
+        ?(handWithout.find(c=>c.uid===preSelected[0])||handWithout[Math.floor(Math.random()*handWithout.length)])
+        :handWithout[Math.floor(Math.random()*handWithout.length)]
+      const remaining=handWithout.filter(c=>c.uid!==victim.uid)
+      setHand(remaining)
+      setDiscardPile(p=>[...p,card,victim])
+      setSelected([])
+      setEmbers(p=>Math.min(maxEmbers,p+2-effectiveEmbers))
+      addLog('🎼 Smoke Break! '+victim.name+' discarded. +2 Embers.'+(preSelected.length===0?' (tip: select a card first)':''))
+      addFloat('+2 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
+      updStat('cardsPlayed',1)
+      cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
+      setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
+      return
+    }
 
     // ── GROUPIE: handle entirely here to avoid double setHand race ──
     if(card.id==='groupie'){
@@ -3270,7 +3283,8 @@ function App(){
     // DEBUFF keyword: Nott reduces boss damage each Strike
     const debuffCount=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='DEBUFF').length
     if(debuffCount>0){setBossDebuff(p=>p+debuffCount*2);addLog('🎤 Nott debuffs the boss! (-'+(debuffCount*2)+' damage)')}
-    strikeHandSizeRef.current=hand.length+(pendingDraw>0?pendingDraw:0)
+    const baseTarget=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
+    handTargetRef.current=Math.max(baseTarget,handTargetRef.current)+(pendingDraw>0?pendingDraw:0)
     setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
 
     const buffed=actives.filter(m=>(m.buffCount||0)>0)
@@ -3526,7 +3540,7 @@ function App(){
           } // end single-target else
           setTimeout(function(){
             let nh=[...handRef.current],nd=[...deckRef.current],ndisc=[...discRef.current];
-            const refillTarget=Math.max(strikeHandSizeRef.current,nh.length);
+            const refillTarget=Math.max(handTargetRef.current,nh.length);
             while(nh.length<refillTarget){
               if(nd.length===0){
                 if(ndisc.length===0)break;
@@ -3627,7 +3641,7 @@ function App(){
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine'))setCorruption(p=>Math.min(100,p+5))
     setEmbers(function(){return maxEmbers});setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
+    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
     if(fightIndex===26){
       // 8 circle bosses killed = 8 × 51,750 = 414,000 reduction → 6,666 HP
@@ -3917,7 +3931,7 @@ function App(){
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
-    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setPactChoices([])
+    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setPactChoices([])
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())

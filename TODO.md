@@ -128,6 +128,9 @@ This is happening.
 - [x] Fix Crowd Surf damage ×2 → ×3 in both handlers
 - [x] Fix Herb Money and Smoke Break log messages
 - [x] Add combo tracking to all 6 handleDropOnStage special card handlers
+- [x] Fix strike refill: handTargetRef tracks intended hand size (not depleted hand.length)
+- [x] Fix Smoke Break: moved to handleDropOnStage (same nested setHand race as Groupie)
+- [x] Fix Sound Wall: damage now scales by circle (C1-3=5, C4-6=8, C7-9=12), was broken at fightIndex
 - [x] CORRUPT keyword ATK bonus shown on member cards (3+6 format)
 - [ ] Deck thinning: "Burn" at Pawn Shop — delete card permanently for free
 - [ ] Shop leans toward current genre (1 extra card of dominant type in rotation)
