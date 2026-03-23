@@ -4276,7 +4276,7 @@ function App(){
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#c8b080',lineHeight:1.5}}>{heldAcid?'Use before your first Strike. 90% chance of a game-changing effect — double damage, cards fire twice, +3 ATK all, or total immunity. 5% nothing. 5% Hellquake.':'Buy from The Dealer in the shop.'}</div>
             </div>
           </div>
-          <div style={{height:2}}/>
+          <div style={{flex:1,minHeight:20}}/>
           <button onClick={()=>setHandSort(p=>p==='embers'?'none':'embers')}
             style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'5px 8px',width:90,background:handSort==='embers'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='embers'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='embers'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>🔥 COST</button>
           <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
@@ -4392,7 +4392,7 @@ function ScaleRoot(){
   },[])
   return(
     <div style={{width:'100vw',height:'100vh',overflow:'hidden',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}>
-      <div style={{width:DESIGN_W,height:DESIGN_H,transform:`scale(${scale})`,transformOrigin:'center center',overflow:'hidden',position:'relative'}}>
+      <div style={{width:DESIGN_W,height:DESIGN_H,transform:`scale(${scale})`,transformOrigin:'center center',position:'relative'}}>
         <App/>
       </div>
     </div>
