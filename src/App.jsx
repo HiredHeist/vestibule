@@ -2426,11 +2426,13 @@ function App(){
   }
   const startGame=useCallback(selIds=>{
     const musicians=selIds.map(id=>ALL_MUSICIANS.find(m=>m.id===id))
-    const initStage=[null,...musicians.map(m=>({...m,maxHp:m.hp})),...Array(3).fill(null)].slice(0,5)
+    const maxStage=chosenPacts.includes('sixth_slot')?6:5
+    const initStage=[null,...musicians.map(m=>({...m,maxHp:m.hp})),...Array(4).fill(null)].slice(0,maxStage)
     setStage(initStage)
     const d=buildDeck(runSeed)
-    setHand(d.slice(0,HAND_SIZE))
-    setDeck(d.slice(HAND_SIZE))
+    const _hs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
+    setHand(d.slice(0,_hs))
+    setDeck(d.slice(_hs))
     const hasDrummer=musicians.some(m=>m.role==='Drummer')
     const drumCount=musicians.filter(m=>m.role==='Drummer').length
     if(hasDrummer){let r=Math.floor(Math.random()*6)+1;if(drumCount>=2&&r<=2)r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
@@ -2443,7 +2445,8 @@ function App(){
     const hasShredder=stage.some(m=>m&&!m.tooStoned&&m.keyword==='SHREDDER')
     const shredderDiscount=(hasShredder&&!shredderUsed&&card.type==='RIFF'&&card.embers>=1)?1:0
     const synesthesiaDiscount=(fightTripBuff==='SYNESTHESIA')?1:0
-    const effectiveEmbers=nextCardFree&&card.id!=='doubledown'?0:Math.max(0,card.embers-foilDiscount-shredderDiscount-synesthesiaDiscount)
+    const darkBargainDiscount=(chosenPacts.includes('dark_bargain')&&card.type==='CORRUPT'&&card.embers>=1)?1:0
+    const effectiveEmbers=nextCardFree&&card.id!=='doubledown'?0:Math.max(0,card.embers-foilDiscount-shredderDiscount-synesthesiaDiscount-darkBargainDiscount)
   if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers, have '+embers+'.');return false}
   if(nextCardFree&&card.id!=='doubledown'){setNextCardFree(false)}
     if(card.id==='stagedive'&&stageDiveUsed){addLog('⚠ Stage Dive once per round only.');return false}
@@ -2738,7 +2741,7 @@ function App(){
       if(sacrifice<=0){addLog('🩸 Not enough HP to sacrifice!');return false}
       ns[slotIdx]=Object.assign({},m,{hp:m.hp-sacrifice})
       const bc=getCenter(bossRef)
-      const brDmg=sacrifice*6;const brHp=Math.max(0,enemyHp-brDmg);setEnemyHp(brHp)
+      const brDmg=sacrifice*(chosenPacts.includes('blood_price')?9:6);const brHp=Math.max(0,enemyHp-brDmg);setEnemyHp(brHp)
       setCorruption(p=>Math.min(100,p+15));updStat('maxCorruption',Math.min(100,corruption+15),true)
       addFloat(brDmg,bc.x,bc.y-60,'#cc0000',true);playHit();updStat('totalDamage',brDmg)
       addFloat('-'+sacrifice+' HP',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4444',false)
@@ -3016,7 +3019,7 @@ function App(){
     // (Amp Overload no longer skips discards — it costs one instead)
     const toDisc=hand.filter(c=>selected.includes(c.uid))
     const rem=hand.filter(c=>!selected.includes(c.uid))
-    const res=drawUpTo(rem,deck,[...discardPile,...toDisc],HAND_SIZE)
+    const res=drawUpTo(rem,deck,[...discardPile,...toDisc],HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0))
     setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
     setDiscardsLeft(p=>p-1);setSelected([])
     addLog('🗑 '+toDisc.length+' discarded & replaced.')
@@ -3282,7 +3285,8 @@ function App(){
     const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===activeStake.maxStrikes?10:0
     let dmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
       const effectiveAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
-      return s+effectiveAtk
+      const cleanLivingBonus=(chosenPacts.includes('clean_living')&&corruption===0)?2:0
+      return s+effectiveAtk+cleanLivingBonus
     },0)+p10Bonus
     // DOUBLE TIME d6 multiplier
     let dblMode='', dblMult=1
@@ -3417,7 +3421,7 @@ function App(){
           const variance=0
           // Apply enemy passive scaling effects before damage
         const stakeBaseDmg=enemy.baseDmg+activeStake.dmgAdd
-        let scaledBaseDmg=stakeBaseDmg+(enemy.passiveId&&enemy.passiveId.startsWith('damageScaleAtk')?bossRageAtk:0)
+        let scaledBaseDmg=Math.max(1,stakeBaseDmg-(chosenPacts.includes('stone_wall')?1:0))+(enemy.passiveId&&enemy.passiveId.startsWith('damageScaleAtk')?bossRageAtk:0)
         // selfbuff: boss gains +1/+2 dmg per Strike
         if(enemy.passiveId==='selfbuff'){scaledBaseDmg=stakeBaseDmg+strikesLeft}
         else if(enemy.passiveId==='selfbuff2'){scaledBaseDmg=stakeBaseDmg+(activeStake.maxStrikes-strikesLeft)*2}
@@ -3517,7 +3521,7 @@ function App(){
           } // end single-target else
           setTimeout(function(){
             let nh=[...handRef.current],nd=[...deckRef.current],ndisc=[...discRef.current];
-            const refillTarget=Math.max(HAND_SIZE,nh.length);
+            const refillTarget=Math.max(HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0),nh.length);
             while(nh.length<refillTarget){
               if(nd.length===0){
                 if(ndisc.length===0)break;
@@ -3615,7 +3619,9 @@ function App(){
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(Math.ceil(nextEnemy.maxHp*activeStake.hpMult))
-    setEmbers(function(){return maxEmbers});setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
+    // Pact: Corruption Engine — +5% corruption at fight start
+    if(chosenPacts.includes('corruption_engine'))setCorruption(p=>Math.min(100,p+5))
+    setEmbers(function(){return maxEmbers});setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
     setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
     if(fightIndex===26){
@@ -3645,8 +3651,9 @@ function App(){
     setDeck(function(curDeck){
       setDiscardPile(function(curDisc){
         const allCards=[...curDeck,...curDisc].sort(()=>Math.random()-.5)
-        const newHand=allCards.slice(0,HAND_SIZE)
-        const newDeck=allCards.slice(HAND_SIZE)
+        const _lhs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
+        const newHand=allCards.slice(0,_lhs)
+        const newDeck=allCards.slice(_lhs)
         setHand(newHand)
         setTimeout(()=>setDiscardPile([]),0)
         return newDeck
@@ -3729,8 +3736,9 @@ function App(){
   },[fightIndex,maxEmbers,stage])
 
   const handleShopSpend=useCallback((cost,type,item)=>{
-    if(stash<cost)return
-    setStash(p=>p-cost)
+    const effectiveCost=chosenPacts.includes('merchants_eye')?Math.max(1,Math.floor(cost*0.8)):cost
+    if(stash<effectiveCost)return
+    setStash(p=>p-effectiveCost)
     if(type==='card'){
       const nc=Object.assign({},item,{uid:Math.random().toString(36).slice(2),shopBought:true})
       setDeck(p=>[...p,nc])
@@ -3904,7 +3912,7 @@ function App(){
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
-    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];setCombosDiscoveredThisRun([]);setComboFlash(null)
+    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setPactChoices([])
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
@@ -4181,6 +4189,7 @@ function App(){
             if(pact.id==='iron_strings')setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1}):m))
             if(pact.id==='thick_skin')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):m))
             if(pact.id==='war_drums')setStrikesLeft(p=>p)  // handled in strike reset via chosenPacts check
+            if(pact.id==='sixth_slot')setStage(prev=>prev.length<6?[...prev,null]:prev)
             addLog('⛧ Pact chosen: '+pact.emoji+' '+pact.name)
             setGameState('shop')
           }}
@@ -4291,7 +4300,7 @@ function App(){
             <div style={{fontFamily:"'ScratchFont',serif",fontSize:10,color:'#8a6838',opacity:.4,fontStyle:'italic',letterSpacing:4}}>— stage —</div>
             <div style={{flex:1,height:1,background:'rgba(60,35,5,0.2)'}}/>
           </div>
-          <div style={{display:'flex',alignItems:'center',gap:50,padding:'0px 10px 0px 130px',justifyContent:'center',flex:1,position:'relative'}}>
+          <div style={{display:'flex',alignItems:'center',gap:stage.length>5?16:50,padding:stage.length>5?'0px 10px 0px 100px':'0px 10px 0px 130px',justifyContent:'center',flex:1,position:'relative'}}>
             <div style={{display:'flex',flexDirection:'column',gap:8,alignSelf:'center',flexShrink:0,background:'rgba(0,0,0,0.22)',borderRadius:'0 6px 6px 0',padding:'8px 10px 8px 10px',borderRight:'1px solid rgba(140,90,20,0.35)',position:'absolute',left:0,top:'50%',transform:'translateY(-50%)'}}>
               {[0,1,2].map(i=>{const a=(activeArtifacts||[])[i];return(
                 <div key={i} style={{position:'relative'}}
