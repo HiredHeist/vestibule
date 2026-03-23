@@ -140,6 +140,7 @@ This is happening.
 - [x] Shop genre lean: SKIPPED by design — shop stays random, reroll is the answer
 - [x] Opening Night synergy text: deferred — players learn naturally, avoid card clutter
 - [x] Genre thresholds: 50% for all types, revisit after playtester feedback
+- [x] Unlock gallery rewrite: 6 tabbed sections, 5x5 grid, arrow pagination, Riff Chains combos section
 
 ### Feature 5: VICTORY EXPERIENCE — "The Encore" + "Welcome to Hell"
 - [ ] Lucifer kill cinematic: screen freeze → crack SVG → shatter → text reveal

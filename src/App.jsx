@@ -2329,6 +2329,9 @@ function App(){
   const [discovered,setDiscovered]=useState(new Set())
   const [newAchievements,setNewAchievements]=useState([])
   const [menuView,setMenuView]=useState(null) // null, 'unlocks', 'rules', 'options'
+  const [unlockTab,setUnlockTab_]=useState('milestones')
+  const [unlockPage,setUnlockPage_]=useState(0)
+  const setUnlockTab=(t)=>{setUnlockTab_(t);setUnlockPage_(0)}
   const [showPauseOptions,setShowPauseOptions]=useState(false)
   const [activeStakeId,setActiveStakeId]=useState(()=>localStorage.getItem('vst_active_stake')||'bronze')
   const activeStake=STAKES.find(s=>s.id===activeStakeId)||STAKES[0]
@@ -4024,93 +4027,62 @@ function App(){
     const streak=dailyStreak||0
     const scanlines=localStorage.getItem('vst_scanlines')!=='off'
 
-    // Unlocks gallery
-    if(menuView==='unlocks')return(
-      <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.98)',display:'flex',flexDirection:'column',alignItems:'center',gap:14,padding:'40px 20px',overflowY:'auto'}}>
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Unlocks</div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#8a6020',letterSpacing:2}}>Lifetime Score: {lt.toLocaleString()}</div>
-        {/* SCORE MILESTONES */}
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#e8a820',letterSpacing:4,marginTop:8}}>Score Milestones</div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:14,maxWidth:900,width:'100%'}}>
-          {UNLOCK_MILESTONES.map(u=>{const done=lt>=u.score;const pct=Math.min(100,Math.round(lt/u.score*100));return(
-            <div key={u.id} style={{background:done?'rgba(40,25,5,0.8)':'rgba(10,6,2,0.8)',border:done?'2px solid #e8a820':'1px solid rgba(120,80,20,0.5)',borderRadius:10,padding:'24px 28px',display:'flex',gap:20,alignItems:'center'}}>
-              <div style={{fontSize:56,filter:done?'none':'grayscale(1) brightness(0.5)',minWidth:64,textAlign:'center'}}>{done?u.emoji:'🔒'}</div>
-              <div style={{flex:1}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,fontWeight:900,color:done?'#e8a820':'#c8a040',letterSpacing:1}}>{done?u.label:'???'}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:done?'#e8a820':'#c8a040'}}>{u.score.toLocaleString()} pts {done?'✓ UNLOCKED':' — '+pct+'%'}</div>
-                {!done&&<div style={{height:8,background:'rgba(20,12,4,0.8)',borderRadius:4,marginTop:6,overflow:'hidden'}}><div style={{height:'100%',width:pct+'%',background:'linear-gradient(90deg,#8a2200,#e8a820)',borderRadius:4}}/></div>}
+// Unlocks gallery
+    if(menuView==='unlocks'){
+    const discoveredCombos=JSON.parse(localStorage.getItem('vst_combos_discovered')||'[]')
+    const tabs=[
+      {id:'milestones',name:'Milestones',emoji:'🏆',color:'#e8a820'},
+      {id:'members',name:'Members',emoji:'🎸',color:'#cc44ff'},
+      {id:'cards',name:'Cards',emoji:'🃏',color:'#9933cc'},
+      {id:'artifacts',name:'Artifacts',emoji:'⚙',color:'#c87820'},
+      {id:'pedals',name:'Pedals',emoji:'🎛',color:'#9933cc'},
+      {id:'combos',name:'Riff Chains',emoji:'⛧',color:'#ffdd00'},
+    ]
+    const PAGE=25
+    let items=[]
+    if(unlockTab==='milestones')items=UNLOCK_MILESTONES.map(u=>({id:u.id,emoji:lt>=u.score?u.emoji:'🔒',name:lt>=u.score?u.label:'???',sub:u.score.toLocaleString()+' pts',done:lt>=u.score,pct:Math.min(100,Math.round(lt/u.score*100))}))
+    else if(unlockTab==='members')items=[...ALL_MUSICIANS.filter(m=>!m.locked).map(m=>({id:m.id,emoji:m.emoji,name:m.name,sub:m.keyword,done:true})),...ALL_MUSICIANS.filter(m=>m.locked).map(m=>{const done=!m.unlockAt||lt>=m.unlockAt;return{id:m.id,emoji:done?m.emoji:'🔒',name:done?m.name:'???',sub:done?m.keyword:'LOCKED',done}}),...Array(7).fill(null).map((_,i)=>({id:'fm'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
+    else if(unlockTab==='cards')items=ALL_CARDS.map(c=>({id:c.id+c.uid,emoji:c.emoji,name:c.name,sub:c.type+' · '+c.rarity+(c.shopOnly?' · SHOP':''),done:true,color:c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'}))
+    else if(unlockTab==='artifacts')items=[...STARTER_ARTIFACTS.map(a=>{const done=!a.locked||(a.unlockAt&&lt>=a.unlockAt);return{id:a.id,emoji:done?a.emoji:'🔒',name:done?a.name:'???',sub:done?(a.effect||'').substring(0,50):'LOCKED',done}}),...Array(9).fill(null).map((_,i)=>({id:'fa'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
+    else if(unlockTab==='pedals')items=[...STARTER_PASSIVES.map(p=>({id:p.id,emoji:p.emoji,name:p.name,sub:(p.effect||'').substring(0,50),done:true})),...Array(10).fill(null).map((_,i)=>({id:'fp'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
+    else if(unlockTab==='combos')items=RIFF_CHAINS.map(ch=>{const found=discoveredCombos.includes(ch.id);const c1=ALL_CARDS.find(c=>c.id===ch.cards[0]);const c2=ALL_CARDS.find(c=>c.id===ch.cards[1]);return{id:ch.id,emoji:found?ch.emoji:'🔒',name:found?ch.name:'??? HIDDEN COMBO',sub:found?(c1?c1.name:'?')+' + '+(c2?c2.name:'?'):'Play two synergy cards in the same strike to discover',done:found,color:found?ch.color:'#444'}})
+    const totalPages=Math.ceil(items.length/PAGE)
+    const pageItems=items.slice(unlockPage*PAGE,(unlockPage+1)*PAGE)
+    return(
+      <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9900,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',gap:10,padding:'20px 40px',overflow:'hidden'}}>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Unlocks</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#8a6020',letterSpacing:2}}>Lifetime Score: {lt.toLocaleString()}</div>
+        {/* TABS */}
+        <div style={{display:'flex',gap:6,flexWrap:'wrap',justifyContent:'center'}}>
+          {tabs.map(t=><button key={t.id} onClick={()=>setUnlockTab(t.id)}
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:2,padding:'8px 18px',cursor:'pointer',border:unlockTab===t.id?'2px solid '+t.color:'1px solid rgba(100,65,15,0.4)',borderRadius:6,background:unlockTab===t.id?t.color+'22':'transparent',color:unlockTab===t.id?t.color:'#8a6a30',textTransform:'uppercase',transition:'all 0.15s'}}>
+            {t.emoji} {t.name}
+          </button>)}
+        </div>
+        {/* GRID 5x5 with arrows */}
+        <div style={{display:'flex',alignItems:'center',gap:16,flex:1,width:'100%',maxWidth:1200,justifyContent:'center'}}>
+          <button onClick={()=>setUnlockPage_(p=>Math.max(0,p-1))} disabled={unlockPage===0}
+            style={{fontSize:36,color:unlockPage>0?'#e8a820':'#333',background:'none',border:'none',cursor:unlockPage>0?'pointer':'default',padding:'10px',flexShrink:0}}>◀</button>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,flex:1,maxWidth:1000,alignContent:'start'}}>
+            {pageItems.map(item=>(
+              <div key={item.id} style={{background:item.done?'rgba(20,12,4,0.7)':'rgba(10,6,2,0.5)',border:item.done?'1px solid '+(item.color||'rgba(160,100,25,0.5)'):'1px solid rgba(60,40,15,0.3)',borderRadius:8,padding:'12px 8px',textAlign:'center',opacity:item.done?1:0.4,transition:'all 0.2s'}}>
+                <div style={{fontSize:40,filter:item.done?'none':'grayscale(1) brightness(0.4)',marginBottom:4}}>{item.emoji}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:item.done?(item.color||'#e8a820'):'#6a5a30',lineHeight:1.2,marginBottom:2}}>{item.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:item.done?'#aa8a50':'#4a3a20',lineHeight:1.3}}>{item.sub}</div>
+                {item.pct!==undefined&&!item.done&&<div style={{height:4,background:'rgba(20,12,4,0.8)',borderRadius:3,marginTop:4,overflow:'hidden'}}><div style={{height:'100%',width:item.pct+'%',background:'linear-gradient(90deg,#8a2200,#e8a820)',borderRadius:3}}/></div>}
               </div>
-            </div>
-          )})}
+            ))}
+          </div>
+          <button onClick={()=>setUnlockPage_(p=>Math.min(totalPages-1,p+1))} disabled={unlockPage>=totalPages-1}
+            style={{fontSize:36,color:unlockPage<totalPages-1?'#e8a820':'#333',background:'none',border:'none',cursor:unlockPage<totalPages-1?'pointer':'default',padding:'10px',flexShrink:0}}>▶</button>
         </div>
-        {/* MEMBERS */}
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#cc44ff',letterSpacing:4,marginTop:12}}>Band Members</div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,maxWidth:900,width:'100%'}}>
-          {ALL_MUSICIANS.filter(m=>!m.locked).map(m=>(
-            <div key={m.id} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(160,100,25,0.4)',borderRadius:6,padding:'14px 10px',textAlign:'center'}}>
-              <div style={{fontSize:48}}>{m.emoji}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#e8a820'}}>{m.name}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#c8a040'}}>{m.keyword}</div>
-            </div>
-          ))}
-          {ALL_MUSICIANS.filter(m=>m.locked).map(m=>{const done=!m.unlockAt||lt>=m.unlockAt;return(
-            <div key={m.id} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:done?1:0.4}}>
-              <div style={{fontSize:48,filter:done?'none':'grayscale(1)'}}>{done?m.emoji:'🔒'}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:done?'#e8a820':'#c8a040'}}>{done?m.name:'???'}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#c8a040'}}>{done?m.keyword:'LOCKED'}</div>
-            </div>
-          )})}
-          {[1,2,3,4,5,6,7,8,9,10].map(i=>(
-            <div key={'future_m'+i} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.35}}>
-              <div style={{fontSize:48,filter:'grayscale(1) brightness(0.4)'}}>🔒</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#c8a040'}}>???</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#c8a040'}}>COMING SOON</div>
-            </div>
-          ))}
+        {/* PAGE INDICATOR */}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#6a5a30',letterSpacing:2}}>
+          Page {unlockPage+1} of {totalPages} · {items.filter(i=>i.done).length} / {items.length} {unlockTab==='combos'?'discovered':'unlocked'}
         </div>
-        {/* ARTIFACTS */}
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#c87820',letterSpacing:4,marginTop:12}}>Artifacts</div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,maxWidth:900,width:'100%'}}>
-          {STARTER_ARTIFACTS.filter(a=>!a.locked).map(a=>(
-            <div key={a.id} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(160,100,25,0.4)',borderRadius:6,padding:'14px 10px',textAlign:'center'}}>
-              <div style={{fontSize:48}}>{a.emoji}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#c8a040',lineHeight:1.2}}>{a.name}</div>
-            </div>
-          ))}
-          {STARTER_ARTIFACTS.filter(a=>a.locked).map(a=>{const done=lt>=(a.unlockAt||999999);return(
-            <div key={a.id} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:done?1:0.4}}>
-              <div style={{fontSize:48,filter:done?'none':'grayscale(1)'}}>{done?a.emoji:'🔒'}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:done?'#c8a040':'#c8a040'}}>{done?a.name:'???'}</div>
-            </div>
-          )})}
-          {[1,2,3,4,5,6,7,8,9,10].map(i=>(
-            <div key={'future_a'+i} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.35}}>
-              <div style={{fontSize:48,filter:'grayscale(1) brightness(0.4)'}}>🔒</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8a040'}}>???</div>
-            </div>
-          ))}
-        </div>
-        {/* PASSIVES */}
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#9933cc',letterSpacing:4,marginTop:12}}>Effect Pedals</div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,maxWidth:900,width:'100%'}}>
-          {STARTER_PASSIVES.map(p=>(
-            <div key={p.id} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(120,60,180,0.4)',borderRadius:6,padding:'14px 10px',textAlign:'center'}}>
-              <div style={{fontSize:48}}>{p.emoji}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#aa88cc',lineHeight:1.2}}>{p.name}</div>
-            </div>
-          ))}
-          {[1,2,3,4,5,6,7,8,9,10].map(i=>(
-            <div key={'future_p'+i} style={{background:'rgba(10,6,2,0.6)',border:'1px solid rgba(60,40,15,0.3)',borderRadius:6,padding:'14px 10px',textAlign:'center',opacity:0.35}}>
-              <div style={{fontSize:48,filter:'grayscale(1) brightness(0.4)'}}>🔒</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8a040'}}>???</div>
-            </div>
-          ))}
-        </div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8a040',marginTop:12}}>{earned.length} / {UNLOCK_MILESTONES.length} milestones · {achs.length} / {ACHIEVEMENTS.length} achievements</div>
-        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:8}}>← Back</button>
+        <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'10px 40px',cursor:'pointer'}}>← Back</button>
       </div>
-    )
-
+    )}
     // Rules screen
     if(menuView==='rules')return(
       <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.98)',display:'flex',flexDirection:'column',alignItems:'center',gap:12,padding:'40px 20px',overflowY:'auto'}}>
