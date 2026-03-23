@@ -590,11 +590,11 @@ function BoosterScreen({onComplete,seed}){
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820',letterSpacing:3,padding:'6px 20px',background:'rgba(40,25,5,0.8)',border:'1px solid #c87820',borderRadius:4}}>🌍 TODAY'S SEED: {(()=>{const d=new Date();return parseInt(d.getFullYear().toString()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')).toString(16).toUpperCase()})()}</div>
         {parseInt(localStorage.getItem('vst_streak')||'0')>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#ff6600',letterSpacing:2,padding:'6px 16px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {localStorage.getItem('vst_streak')} DAY STREAK</div>}
       </div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'#e8d090',fontStyle:'italic',flexShrink:0}}>Select 2 musicians to start your band</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#e8d090',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:30,color:'#e8d090',fontStyle:'italic',flexShrink:0}}>Select 2 musicians to start your band</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#e8d090',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
 
       {/* MEMBER CARDS — 7 in a flexible row */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:14,width:'100%',maxWidth:1400,flexShrink:0,marginBottom:4}}>
+      <div style={{display:'flex',flexWrap:'wrap',gap:14,justifyContent:'center',width:'100%',maxWidth:1400,flexShrink:0,marginBottom:4}}>
         {pool.map(m=>{
           const isSel=sel.includes(m.id),dis=!isSel&&sel.length>=2
           const kw=m.keyword||''
@@ -603,7 +603,7 @@ function BoosterScreen({onComplete,seed}){
             <div key={m.id} onClick={()=>!m.locked&&!dis&&toggle(m.id)}
               style={{background:m.locked?'linear-gradient(180deg,#0e0e0e,#060606)':isSel?'linear-gradient(180deg,#2a1a0a,#160c04)':'linear-gradient(180deg,#1a1008,#0e0804)',
                 border:m.locked?'1px solid rgba(60,60,60,0.5)':isSel?'2px solid #e8a820':dis?'1px solid rgba(80,50,10,0.25)':'1px solid rgba(160,100,25,0.5)',
-                borderRadius:7,cursor:m.locked?'default':dis?'not-allowed':'pointer',minWidth:0,
+                borderRadius:7,cursor:m.locked?'default':dis?'not-allowed':'pointer',width:220,flexShrink:0,
                 boxShadow:isSel?'0 0 30px rgba(232,168,32,0.4),0 8px 24px rgba(0,0,0,0.8)':'0 4px 16px rgba(0,0,0,0.7)',
                 opacity:dis?0.4:1,transform:isSel?'translateY(-8px) scale(1.04)':'none',
                 transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',position:'relative',
@@ -611,8 +611,8 @@ function BoosterScreen({onComplete,seed}){
               <div style={{height:5,borderRadius:'7px 7px 0 0',background:isSel?'linear-gradient(90deg,#e8a820,#ffcc44)':kwc+'66'}}/>
               {isSel&&<div style={{position:'absolute',top:8,right:8,width:24,height:24,borderRadius:'50%',background:'#e8a820',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,color:'#000',fontWeight:900}}>✓</div>}
               <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:48,background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
-              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:isSel?'#e8d090':'#c8b878',textAlign:'center',padding:'3px 4px 1px',lineHeight:1,letterSpacing:2}}>{m.name}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,letterSpacing:2,color:'#7a6a40',textAlign:'center',padding:'3px 4px 8px',textTransform:'uppercase'}}>{m.role}</div>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:30,color:isSel?'#e8d090':'#c8b878',textAlign:'center',padding:'4px 4px 1px',lineHeight:1,letterSpacing:2}}>{m.name}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:2,color:'#c8b878',textAlign:'center',padding:'3px 4px 6px',textTransform:'uppercase'}}>{m.role}</div>
               {/* Stat bar — locked vs normal */}
               {m.locked?(
                 <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'18px 8px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)',gap:6}}>
@@ -625,7 +625,7 @@ function BoosterScreen({onComplete,seed}){
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#ee2222',textTransform:'uppercase',fontWeight:900}}>ATK</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,color:'#ee2222',lineHeight:1}}>{m.atk}</div>
                   </div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:kwc,fontWeight:700,textAlign:'center',letterSpacing:0.5,maxWidth:80}}>{kw}</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,color:kwc,fontWeight:900,textAlign:'center',letterSpacing:0.5,maxWidth:100}}>{kw}</div>
                   <div style={{textAlign:'center'}}>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
@@ -639,7 +639,7 @@ function BoosterScreen({onComplete,seed}){
 
       {/* ABILITY EXPLANATION BOX */}
       <div style={{background:'rgba(10,6,2,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,width:'100%',maxWidth:1700,flexShrink:0,marginTop:4,padding:'14px 24px'}}>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:10}}>⚗ Band Abilities — What Do They Mean?</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:23,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:10}}>⚗ Band Abilities — What Do They Mean?</div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
           {[
             ['FRENZIED','#ee2222','⚡','Each time the boss is defeated, this member gains +1 ATK permanently.'],
@@ -654,8 +654,8 @@ function BoosterScreen({onComplete,seed}){
             <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:10,background:'rgba(0,0,0,0.4)',borderRadius:6,padding:'12px 16px',border:`1px solid ${color}44`,flex:'1 1 180px'}}>
               <div style={{fontSize:26,flexShrink:0,marginTop:2}}>{icon}</div>
               <div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:color,letterSpacing:1,marginBottom:5}}>{kw}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#c0a870',lineHeight:1.45,fontStyle:'italic'}}>{desc}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:color,letterSpacing:1,marginBottom:5}}>{kw}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#c0a870',lineHeight:1.45,fontStyle:'italic'}}>{desc}</div>
               </div>
             </div>
           ))}
