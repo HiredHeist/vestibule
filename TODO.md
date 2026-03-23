@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Monday, March 23, 2026 at 10:00 AM (JST) — Session 13*
+*Last updated: Monday, March 23, 2026 at 12:00 PM (JST) — Session 13*
 
 ---
 
@@ -78,6 +78,54 @@ This is happening.
 - [x] All modifiers wired: hpMult, dmgAdd, startEmbers, startCorruption, healAfterFight, maxStrikes
 
 ---
+
+
+
+## 🔥 THE BIG 5 — Session 14 Priority Features
+
+### Feature 1: COMBO SYSTEM — "Riff Chains"
+- [ ] Define 8 two-card synergy combos with names
+- [ ] Detect combo in applyCard when 2nd synergy card played same strike
+- [ ] "⛧ RIFF CHAIN ⛧" 80px gold center flash + combo name 40px
+- [ ] +10% bonus damage on 2nd card of combo
+- [ ] Gold screen border flash 0.5s
+- [ ] Combat log shows combo in gold
+- [ ] Achievement: "Discover 5 different combos"
+
+### Feature 2: CIRCLE BOSS REWARDS — "The Pact"
+- [ ] Pact screen after each boss kill (before shop)
+- [ ] 12 possible pact rewards, 2 random offered per circle, never repeat
+- [ ] Choose one → other shatters/fades animation
+- [ ] Pact choices: Ember Surge, Iron Strings, Thick Skin, Dark Bargain, Speed Demon, Blood Price, Clean Living, Corruption Engine, Merchant Eye, Stone Wall, Sixth Slot, War Drums
+- [ ] Reduce base stash gain 15-20% to create tighter economy
+
+### Feature 3: CIRCLE MAP — "The Descent"
+- [ ] Map screen before each circle showing 3 fights
+- [ ] Skip option for fights 1 and 2 (not boss)
+- [ ] Skip rewards: stash, random card, heal, ember, corruption reset
+- [ ] Skipping = no shop after that fight
+- [ ] Boss always required
+
+### Feature 4: BUILD IDENTITY — "Genre Bonus"
+- [ ] Track RIFF/CORRUPT/UTILITY/EMBER play percentages
+- [ ] Genre display (bar or indicator) on right panel
+- [ ] 50%+ threshold activates Genre Bonus (RIFF METAL, BLACK METAL, PROG ROCK, DOOM METAL)
+- [ ] Deck thinning: "Burn" at Pawn Shop — delete card permanently for free
+- [ ] Shop leans toward current genre (1 extra card of dominant type)
+- [ ] Opening Night: show "Synergizes with: X BUILD" on members
+
+### Feature 5: VICTORY EXPERIENCE — "The Encore"
+- [ ] Lucifer kill cinematic (screen crack, shatter, text reveal, member rise)
+- [ ] Score counting animation (Balatro-style roll-up)
+- [ ] Victory music track (6th track)
+- [ ] Win-exclusive unlocks per stake (card, artifact, member, passive, cosmetic, title)
+- [ ] A&R Executive bonus boss (Circle 10, 100k HP, "contract" mechanic)
+- [ ] Share-ready victory screenshot layout
+
+### Balance Tweaks (after Big 5)
+- [ ] Demonic: +100% HP → +80% HP (target ~0.5% win rate)
+- [ ] Blood: starting corruption 15% → 10% (target ~1.5%)
+- [ ] Juice: screen shake, hit sounds, card play sounds, damage number bounce
 
 ## ✅ COMPLETED TONIGHT
 
