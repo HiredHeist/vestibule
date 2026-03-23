@@ -105,7 +105,7 @@ This is happening.
 - [x] Max 9 pacts per run (one per circle boss)
 - [x] All 12 pact effects wired: Ember Surge, Iron Strings, Thick Skin, Dark Bargain, Speed Demon,
       Blood Price, Clean Living, Corruption Engine, Merchant Eye, Stone Wall, Sixth Slot, War Drums
-- [ ] Stash tightening: 15% off mid/late circle rewards (deferred to balance pass)
+- [x] Stash tightening: ~15% off C4-C9 base stash rewards (C1-C3 unchanged)
 
 ### Feature 3: CIRCLE MAP — "The Descent"
 - [x] Map screen before each circle showing 3 fights
