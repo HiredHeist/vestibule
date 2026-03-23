@@ -131,6 +131,12 @@ This is happening.
 - [x] Fix strike refill: handTargetRef tracks intended hand size (not depleted hand.length)
 - [x] Fix Smoke Break: moved to handleDropOnStage (same nested setHand race as Groupie)
 - [x] Fix Sound Wall: damage now scales by circle (C1-3=5, C4-6=8, C7-9=12), was broken at fightIndex
+- [x] Fix Soundboard duplicate card bug (nested setDeck→setHand → drawUpTo)
+- [x] Fix Smoke Break: moved to handleDropOnStage (nested setState race)
+- [x] Fix Fraud boss shuffle: rewritten with refs (nested setState race)
+- [x] Fix Lucifer phase reset: rewritten with refs (nested setState race)
+- [x] Fix strike refill: handTargetRef tracks base+Soundboard target, not depleted hand.length
+- [x] ZERO nested setDeck→setHand patterns remaining in codebase
 - [x] CORRUPT keyword ATK bonus shown on member cards (3+6 format)
 - [ ] Deck thinning: "Burn" at Pawn Shop — delete card permanently for free
 - [ ] Shop leans toward current genre (1 extra card of dominant type in rotation)

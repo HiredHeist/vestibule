@@ -3270,12 +3270,8 @@ function App(){
     if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
     if(pendingDraw>0){
       const _pd=pendingDraw
-      setDeck(function(curDeck){
-        const nd=[...curDeck],drawn=[]
-        for(let i=0;i<_pd&&nd.length>0;i++){drawn.push(nd.shift())}
-        if(drawn.length>0)setHand(function(h){return [...h,...drawn]})
-        return nd
-      })
+      const pdRes=drawUpTo(hand,deck,discardPile,hand.length+_pd)
+      setHand(pdRes.h);setDeck(pdRes.d);setDiscardPile(pdRes.disc)
       addLog('🎛 Soundboard draw! +'+_pd+' card'+(_pd>1?'s':'')+'.')
       setPendingDraw(0)
     }
@@ -3593,24 +3589,20 @@ function App(){
             // C8 FRAUD: discard N random cards from hand, draw N replacements
             if(enemy.passiveId==='fraudShuffle'||enemy.passiveId==='fraudShuffle2'||enemy.passiveId==='fraudShuffle3'){
               const shuffleCount=enemy.passiveId==='fraudShuffle'?1:enemy.passiveId==='fraudShuffle2'?2:3
-              setHand(prev=>{
-                if(prev.length===0)return prev
-                const toDiscard=Math.min(shuffleCount,prev.length)
+              const curH=[...handRef.current],curD=[...deckRef.current],curDisc=[...discRef.current]
+              if(curH.length>0){
+                const toDiscard=Math.min(shuffleCount,curH.length)
                 const indices=[]
-                while(indices.length<toDiscard){const idx=Math.floor(Math.random()*prev.length);if(!indices.includes(idx))indices.push(idx)}
-                const discarded=indices.map(i=>prev[i])
-                const remaining=prev.filter((_,i)=>!indices.includes(i))
-                setDiscardPile(dp=>[...dp,...discarded])
-                // Draw replacements
-                setDeck(curDeck=>{
-                  const nd=[...curDeck],drawn=[]
-                  for(let i=0;i<toDiscard&&nd.length>0;i++)drawn.push(nd.shift())
-                  if(drawn.length>0)setHand(h=>[...remaining,...drawn])
-                  return nd
-                })
+                while(indices.length<toDiscard){const idx=Math.floor(Math.random()*curH.length);if(!indices.includes(idx))indices.push(idx)}
+                const discarded=indices.map(i=>curH[i])
+                const remaining=curH.filter((_,i)=>!indices.includes(i))
+                const newDisc=[...curDisc,...discarded]
+                let nd=[...curD],drawn=[]
+                for(let i=0;i<toDiscard&&nd.length>0;i++)drawn.push(nd.shift())
+                if(nd.length===0&&drawn.length<toDiscard&&newDisc.length>0){nd=[...newDisc].sort(()=>Math.random()-.5);const more=[];while(drawn.length<toDiscard&&nd.length>0)more.push(nd.shift());drawn=[...drawn,...more]}
+                setHand([...remaining,...drawn]);setDeck(nd);setDiscardPile(newDisc)
                 addLog('🃏 '+enemy.name+' shuffles your hand! '+toDiscard+' card'+(toDiscard>1?'s':'')+' swapped.')
-                return remaining
-              })
+              }
             }
             setAnimPhase('idle');setSelected([]);
             // Check out-of-strikes death AFTER this strike resolves
@@ -3667,18 +3659,11 @@ function App(){
       return scanMentorLinks(reset)
     })
     // Redeal hand from current deck+discard
-    setDeck(function(curDeck){
-      setDiscardPile(function(curDisc){
-        const allCards=[...curDeck,...curDisc].sort(()=>Math.random()-.5)
-        const _lhs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
-        const newHand=allCards.slice(0,_lhs)
-        const newDeck=allCards.slice(_lhs)
-        setHand(newHand)
-        setTimeout(()=>setDiscardPile([]),0)
-        return newDeck
-      })
-      return curDeck
-    })
+    const allCards=[...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
+    const _lhs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
+    setHand(allCards.slice(0,_lhs))
+    setDeck(allCards.slice(_lhs))
+    setDiscardPile([])
     addLog('⛧ Fight '+(nextIdx+1)+': '+nextEnemy.name+' awaits!')
     // ── ARTIFACT FIGHT-START EFFECTS ───────────────────────
     // A1: Vintage Guitar — lead guitarist +1 ATK
