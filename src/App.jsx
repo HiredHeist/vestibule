@@ -2232,6 +2232,7 @@ function App(){
   const [deck,setDeck]=useState([]);const deckRef=useRef([]);
   const [hand,setHand]=useState([]);const handRef=useRef([]);
   const handTargetRef=useRef(HAND_SIZE) // target refill size, grows with Soundboard draws
+  const cardsToDrawRef=useRef(0) // how many cards to draw after next strike
   const [discardPile,setDiscardPile]=useState([]);const discRef=useRef([]);
   const [maxEmbers,setMaxEmbers]=useState(5)
   const [embers,setEmbers]=useState(5)
@@ -3280,8 +3281,7 @@ function App(){
     // DEBUFF keyword: Nott reduces boss damage each Strike
     const debuffCount=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='DEBUFF').length
     if(debuffCount>0){setBossDebuff(p=>p+debuffCount*2);addLog('🎤 Nott debuffs the boss! (-'+(debuffCount*2)+' damage)')}
-    // pendingDraw increases target for this turn
-    if(pendingDraw>0)handTargetRef.current=handTargetRef.current+(pendingDraw)
+    cardsToDrawRef.current=cardsPlayedRef.current.length
     setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
 
     const buffed=actives.filter(m=>(m.buffCount||0)>0)
@@ -3537,8 +3537,8 @@ function App(){
           } // end single-target else
           setTimeout(function(){
             let nh=[...handRef.current],nd=[...deckRef.current],ndisc=[...discRef.current];
-            const refillTarget=Math.max(handTargetRef.current,nh.length);
-            while(nh.length<refillTarget){
+            const cardsToReplace=cardsToDrawRef.current;
+            for(let _r=0;_r<cardsToReplace;_r++){
               if(nd.length===0){
                 if(ndisc.length===0)break;
                 nd=[...ndisc].sort(()=>Math.random()-.5);
@@ -3546,7 +3546,6 @@ function App(){
               }
               nh=[...nh,nd[0]];nd=nd.slice(1);
             }
-            handTargetRef.current=nh.length; // capture full hand size for next turn
             setHand(nh);setDeck(nd);setDiscardPile(ndisc);
             playDraw();
             // ANCHOR keyword: heal adjacent members after Strike
