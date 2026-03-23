@@ -1129,7 +1129,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                   fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
                   color:canBuy?'#fff':'#8a5a30',
                   boxShadow:canBuy?'0 0 12px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
-              :<div style={{position:'absolute',top:7,right:10,padding:'2px 7px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>}
+              :<div style={{position:'absolute',top:7,right:10}}><div style={{width:24,height:24,borderRadius:'50%',background:'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)',border:'2px solid #ff6600',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'#fff',boxShadow:'0 0 8px rgba(255,100,0,0.6)'}}>0</div></div>}
           </div>
           <div style={{height:130,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',
             fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative'}}>
@@ -1577,7 +1577,9 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
           {!canAfford&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#ff4400',letterSpacing:0.5,whiteSpace:'nowrap',textShadow:'0 0 8px rgba(255,60,0,0.9)',background:'rgba(0,0,0,0.8)',borderRadius:3,padding:'1px 4px',marginTop:2}}>NEED {card.embers}🔥</div>}
         </div>
       ):(
-        <div style={{position:'absolute',top:8,right:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,120,20,0.22)',border:'1px solid #c87820',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#e8a820',letterSpacing:1}}>FREE</div>
+        <div style={{position:'absolute',top:8,right:8}}>
+          <div style={{width:28,height:28,borderRadius:'50%',background:'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)',border:'2px solid #ff6600',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#fff',boxShadow:'0 0 10px rgba(255,100,0,0.6)'}}>0</div>
+        </div>
       )}
       {card.foil&&<div style={{position:'absolute',top:8,left:28,padding:'2px 5px',borderRadius:3,background:'rgba(255,215,0,0.3)',border:'1px solid rgba(255,215,0,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#ffd700',letterSpacing:1}}>✨FOIL</div>}
       {card.mythic&&<div style={{position:'absolute',top:8,left:28,padding:'2px 5px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#cc44ff',letterSpacing:1}}>⛧MYTHIC</div>}
