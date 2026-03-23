@@ -2901,7 +2901,7 @@ function App(){
       const drawCount=discardCount+1
       const remainingHand=hand.filter(c=>c.uid!==card.uid&&!toDiscard.includes(c.uid))
       const discarded=hand.filter(c=>toDiscard.includes(c.uid))
-      const res=drawUpTo(remainingHand,deck,[...discardPile,...discarded],Math.min(remainingHand.length+drawCount,HAND_SIZE))
+      const res=drawUpTo(remainingHand,deck,[...discardPile,...discarded],remainingHand.length+drawCount)
       setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
@@ -3019,7 +3019,7 @@ function App(){
     // (Amp Overload no longer skips discards — it costs one instead)
     const toDisc=hand.filter(c=>selected.includes(c.uid))
     const rem=hand.filter(c=>!selected.includes(c.uid))
-    const res=drawUpTo(rem,deck,[...discardPile,...toDisc],HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0))
+    const res=drawUpTo(rem,deck,[...discardPile,...toDisc],Math.max(HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0),hand.length))
     setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
     setDiscardsLeft(p=>p-1);setSelected([])
     addLog('🗑 '+toDisc.length+' discarded & replaced.')
@@ -4369,7 +4369,7 @@ function App(){
       <div style={{flex:'0 0 340px',width:1920,maxWidth:1920,background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',position:'relative',zIndex:30}}>
         {/* Header */}
         <div style={{textAlign:'center',padding:'3px 0 0',position:'relative',zIndex:1}}>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length}{hand.length>HAND_SIZE?' of '+HAND_SIZE+' ⚡':' of '+HAND_SIZE}</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length} cards</span>
           {pendingEmbers>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff6600',marginLeft:12}}>+{pendingEmbers} 🔥 pending</span>}
         </div>
 
