@@ -2521,29 +2521,8 @@ function App(){
     else if(card.id==='feedbackloop'){const dmg=Math.floor(corruption/2);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'}
     else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?4:0;const swDmg=(fightIndex===0?5:fightIndex===1?8:12)+p5Bonus;const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(triggerVictory,500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
     else if(card.id==='groupie'){
-      const p4Bonus=activePassives.some(p=>p.id==='p4')?1:0
-      setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus));playEmber();spent=0
-      // Draw 1 card immediately — NO cap, bonus draws are playable all fight
-      setDeck(function(curDeck){
-        const nd=[...curDeck]
-        if(nd.length>0){
-          const drawn=nd.shift()
-          setHand(function(h){return [...h,drawn]})
-          return nd
-        }
-        setDiscardPile(function(curDisc){
-          if(curDisc.length>0){
-            const shuffled=[...curDisc].sort(()=>Math.random()-.5)
-            const drawn=shuffled[0]
-            setHand(function(h){return [...h,drawn]})
-            return shuffled.slice(1)
-          }
-          return curDisc
-        })
-        return nd
-      })
-      msg='🍯 Groupie! +2 Embers, drew 1 card.'
-      addFloat('+2 🔥 +1 card',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')
+      // Handled entirely in handleDropOnStage to avoid double setHand
+      return false
     }
     else if(card.id==='tappedout'){setPendingEmbers(function(p){return p+5});spent=0;playEmber();msg='🪙 Tapped Out! +5 Embers next Strike.'}
     else if(card.id==='demotape'){
@@ -2573,7 +2552,7 @@ function App(){
         addFloat(flD,getCenter(bossRef).x,getCenter(bossRef).y-60,'#aa1111',flD>=15);playHit()
         if(flHp<=0)setTimeout(triggerVictory,500)
       } else if(lr.id==='crowdsurf'){
-        const csDmg=hand.length*2
+        const csDmg=hand.length*3
         const csHp=Math.max(0,enemyHp-csDmg);setEnemyHp(csHp);updStat('totalDamage',csDmg)
         addFloat(csDmg,getCenter(bossRef).x,getCenter(bossRef).y-60,'#9933cc',csDmg>=10);playHit()
         if(csHp<=0)setTimeout(triggerVictory,500)
@@ -2600,12 +2579,12 @@ function App(){
     }
     else if(card.id==='overdrive'){if(corruption>=60){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{addLog('⚠ Need >=60% Corruption.');return false}}
     else if(card.id==='crowdsurf'){
-      const dmg=hand.length*2
+      const dmg=hand.length*3
       const bc=getCenter(bossRef)
       const csHp=Math.max(0,enemyHp-dmg);setEnemyHp(csHp)
       addFloat(dmg,bc.x,bc.y-60,'#9933cc',dmg>=10);playHit();updStat('totalDamage',dmg)
       if(csHp<=0)setTimeout(triggerVictory,500)
-      msg='🏄 Crowd Surf! '+hand.length+' cards × 2 = '+dmg+' damage!'
+      msg='🏄 Crowd Surf! '+hand.length+' cards × 3 = '+dmg+' damage!'
     }
     else if(card.id==='doubledown'){
       setNextCardFree(true)
@@ -2693,7 +2672,7 @@ function App(){
       setDiscardPile(p=>[...p,victim])
       setSelected([])
       setEmbers(p=>Math.min(maxEmbers,p+2));playEmber();spent=0
-      msg='🎼 Setbreak! '+victim.name+' discarded. +2 Embers.'+(preSelected.length===0?' (tip: select a card first)':'')
+      msg='🎼 Smoke Break! '+victim.name+' discarded. +2 Embers.'+(preSelected.length===0?' (tip: select a card first)':'')
       addFloat('+2 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='heavyriff'){
@@ -2713,7 +2692,7 @@ function App(){
       const hmHp=Math.max(0,enemyHp-herbDmg);setEnemyHp(hmHp)
       addFloat(herbDmg,bc.x,bc.y-60,'#22aa44',herbDmg>=20);playHit();updStat('totalDamage',herbDmg)
       if(hmHp<=0)setTimeout(triggerVictory,500)
-      msg='🌿 Herb Money! '+herbDmg+' damage ('+stash+'🌿 ÷ 2). Stash kept.'
+      msg='🌿 Herb Money! '+herbDmg+' damage ('+stash+'🌿 Stash). Stash kept.'
     }
     else if(card.id==='goingbroke'){
       if(stash<=0){addLog('💸 You are already broke!');return false}
@@ -2873,6 +2852,26 @@ function App(){
     const card=hand.find(c=>c.uid===dragCardUid)
     if(!card)return
 
+    // ── GROUPIE: handle entirely here to avoid double setHand race ──
+    if(card.id==='groupie'){
+      const foilDiscount=(card.foil&&card.embers>=2)?1:0
+      const synDiscount=(fightTripBuff==='SYNESTHESIA')?1:0
+      const effectiveEmbers=nextCardFree?0:Math.max(0,card.embers-foilDiscount-synDiscount)
+      if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
+      if(nextCardFree)setNextCardFree(false)
+      const p4Bonus=activePassives.some(p=>p.id==='p4')?1:0
+      const handWithout=hand.filter(c=>c.uid!==card.uid)
+      const res=drawUpTo(handWithout,deck,discardPile,handWithout.length+1)
+      setHand(res.h);setDeck(res.d);setDiscardPile([...res.disc,card])
+      setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus-effectiveEmbers))
+      addLog('🍯 Groupie! +2 Embers, drew 1 card.')
+      addFloat('+2 🔥 +1 card',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')
+      updStat('cardsPlayed',1)
+      cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
+      setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
+      return
+    }
+
     // ── SETLIST: handle entirely here to avoid double state updates ──
     if(card.id==='setlist'){
       if(setlistOpen){setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
@@ -2888,6 +2887,7 @@ function App(){
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       addLog('📋 Setlist! Drew 2 cards — now pick 1 to discard.')
       updStat('cardsPlayed',1)
+      cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
     }
@@ -2909,6 +2909,7 @@ function App(){
       addLog('🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+drawCount+'.'+(discardCount===0?' (Tip: select cards before playing)':''))
       updStat('cardsPlayed',1)
       setLastRiffPlayed(card)
+      cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
     }
@@ -2929,6 +2930,7 @@ function App(){
       addLog('🎙 Remastered! Deleted '+toDelete.name+', drew 3.')
       addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
       updStat('cardsPlayed',1)
+      cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       // cardHeal enemy passive
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
       else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
@@ -2960,6 +2962,7 @@ function App(){
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       updStat('cardsPlayed',1)
+      cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
       else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
       else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>Math.min(enemy.maxHp,p+4))

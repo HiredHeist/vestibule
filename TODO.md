@@ -124,6 +124,10 @@ This is happening.
 - [x] Fix hand size: no cap, draws never shrink hand, Burn the Set uncapped
 - [x] Soundboard +1 draw: refill now uses strikeHandSizeRef (tracks hand size at strike start)
 - [x] Remove hand size text above hand (clean layout)
+- [x] Fix Groupie duplicate card bug (moved to handleDropOnStage with drawUpTo)
+- [x] Fix Crowd Surf damage ×2 → ×3 in both handlers
+- [x] Fix Herb Money and Smoke Break log messages
+- [x] Add combo tracking to all 6 handleDropOnStage special card handlers
 - [x] CORRUPT keyword ATK bonus shown on member cards (3+6 format)
 - [ ] Deck thinning: "Burn" at Pawn Shop — delete card permanently for free
 - [ ] Shop leans toward current genre (1 extra card of dominant type in rotation)
