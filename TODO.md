@@ -143,6 +143,7 @@ This is happening.
 - [x] Unlock gallery rewrite: 6 tabbed sections, 5x5 grid, arrow pagination, Riff Chains combos section
 - [x] Descent UI: circle text +15pt, descend button moved to boss card click
 - [x] Unlock gallery: 4x2 grid, 50%+ larger icons/text, locked items in gold
+- [x] Descent: entire card body clickable to fight, reward tooltips with explanations
 
 ### Feature 5: VICTORY EXPERIENCE — "The Encore" + "Welcome to Hell"
 - [ ] Lucifer kill cinematic: screen freeze → crack SVG → shatter → text reveal

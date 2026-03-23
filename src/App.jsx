@@ -200,6 +200,27 @@ const CIRCLE_NAMES=['','I — Limbo','II — Lust','III — Gluttony','IV — Gr
 const CIRCLE_EMOJIS=['','🌑','🌹','🍖','💰','⚔','⛪','🗡','🎭','❄']
 
 // Skip rewards for The Descent map (fight 1 = small, fight 2 = medium)
+const REWARD_TIPS={
+  's_stash':'Adds 15 to your permanent stash balance.',
+  's_ember':'Permanently increases your max embers by 1 for the rest of the run.',
+  's_corrupt':'Reduces your current corruption by 15% immediately.',
+  's_atk':'One random alive band member gains +1 ATK permanently.',
+  's_draw1':'Draw 1 extra card at the start of your next fight.',
+  's_discard':'Start the next fight with 5 discards instead of 4.',
+  's_card':'A random Common rarity card is added to your deck permanently.',
+  's_stashper':'Gain 5 stash for each alive band member (2-6 members = 10-30 stash).',
+  's_embers2':'Start the next fight with 2 extra embers (one-time bonus).',
+  'm_stash':'Adds 25 to your permanent stash balance.',
+  'm_corrupt':'Resets your corruption to 0% immediately.',
+  'm_draw2':'Draw 2 extra cards at the start of your next fight.',
+  'm_card':'A random Uncommon rarity card is added to your deck permanently.',
+  'm_allatk':'Every alive band member gains +1 ATK permanently.',
+  'm_stash40':'Adds 40 to your permanent stash balance.',
+  'm_delete':'Permanently removes a random Common card from your deck. Thins your deck!',
+  'm_free':'The first card you play next fight costs 0 embers.',
+  'm_stonewall':'All members are shielded from Too Stoned for 2 strikes next fight.',
+}
+
 const DESCENT_REWARDS_1=[ // Fight 1 skip rewards (small) — 9 options
   {id:'s_stash',name:'+15 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>p+15);gs.addLog('🌿 Skipped fight: +15 Stash')}},
   {id:'s_ember',name:'+1 Max Ember',emoji:'🔥',apply:(gs)=>{gs.setMaxEmbers(p=>Math.min(8,p+1));gs.addLog('🔥 Skipped fight: +1 Max Ember')}},
@@ -4245,32 +4266,55 @@ function App(){
           const isSkipped=descentData.skips.includes(i)
           const reward=i===0?descentData.reward1:i===1?descentData.reward2:null
           const canSkip=!isBoss
+          const triggerDescend=()=>{
+            const addToDeck=(card)=>{setDeck(p=>[...p,card])}
+            const deleteRandomCommon=()=>{setDeck(p=>{const commons=p.filter(c=>c.rarity==='Common');if(commons.length===0){addLog('🗑 No common cards in deck to delete.');return p};const victim=commons[Math.floor(Math.random()*commons.length)];addLog('🗑 Skipped fight: Deleted '+victim.name+' from deck');return p.filter(c=>c.uid!==victim.uid)})}
+            const gs={setStash,setStage,setCorruption,setMaxEmbers,setPendingDraw,setBonusDiscards,setBonusEmbers,setNextCardFree,addToDeck,deleteRandomCommon,addLog}
+            if(descentData.skips.includes(0))descentData.reward1.apply(gs)
+            if(descentData.skips.includes(1))descentData.reward2.apply(gs)
+            const skips=descentData.skips
+            const baseIdx=descentData.fightIndices[0]
+            let startFight=baseIdx
+            if(skips.includes(0)&&skips.includes(1))startFight=baseIdx+2
+            else if(skips.includes(0))startFight=baseIdx+1
+            overrideFightIdxRef.current=startFight
+            setDescentData(null)
+            setGameState('playing')
+            skipDescentRef.current=true
+            setTimeout(()=>{handleShopLeave();skipDescentRef.current=false},50)
+          }
           return(
             <div key={i} style={{width:300,display:'flex',flexDirection:'column',gap:0,transition:'all 0.25s',opacity:isSkipped?0.5:1}}>
-              {/* FIGHT label */}
-              <div style={{background:isSkipped?'rgba(40,80,20,0.3)':isBoss?'rgba(160,0,0,0.4)':'rgba(130,0,0,0.3)',border:isSkipped?'2px solid #44aa44':isBoss?'2px solid #cc1111':'2px solid rgba(200,80,80,0.5)',borderBottom:'none',borderRadius:'10px 10px 0 0',padding:'10px 16px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',color:isSkipped?'#44aa44':isBoss?'#ff4444':'#ee4444',textShadow:isBoss?'0 0 14px rgba(200,0,0,0.6)':'none'}}>{isSkipped?'✓ SKIPPED':isBoss?'★ BOSS FIGHT':'⚔ FIGHT'}</div>
-              {/* Enemy card */}
-              <div style={{background:isBoss?'linear-gradient(180deg,#2a0a0a,#140404)':'linear-gradient(180deg,#1a1008,#0a0604)',
-                border:isSkipped?'2px solid #44aa44':isBoss?'2px solid #cc1111':'2px solid rgba(200,80,80,0.5)',borderTop:'1px solid rgba(255,255,255,0.05)',borderBottom:canSkip?'none':'2px solid rgba(200,80,80,0.5)',
-                borderRadius:canSkip?0:'0 0 10px 10px',padding:'16px 20px',display:'flex',flexDirection:'column',alignItems:'center',gap:6}}>
+              {/* FIGHT label — clickable to proceed */}
+              <div onClick={isSkipped?undefined:triggerDescend}
+                style={{background:isSkipped?'rgba(40,80,20,0.3)':isBoss?'rgba(160,0,0,0.4)':'rgba(130,0,0,0.3)',border:isSkipped?'2px solid #44aa44':isBoss?'2px solid #cc1111':'2px solid rgba(200,80,80,0.5)',borderBottom:'none',borderRadius:'10px 10px 0 0',padding:'10px 16px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',color:isSkipped?'#44aa44':isBoss?'#ff4444':'#ee4444',textShadow:isBoss?'0 0 14px rgba(200,0,0,0.6)':'none',cursor:isSkipped?'default':'pointer'}}>{isSkipped?'✓ SKIPPED':isBoss?'★ BOSS FIGHT':'⚔ FIGHT'}</div>
+              {/* Enemy card — clickable to proceed */}
+              <div onClick={isSkipped?undefined:triggerDescend}
+                style={{background:isBoss?'linear-gradient(180deg,#2a0a0a,#140404)':'linear-gradient(180deg,#1a1008,#0a0604)',
+                border:isSkipped?'2px solid #44aa44':isBoss?'2px solid #cc1111':'2px solid rgba(200,80,80,0.5)',borderTop:'1px solid rgba(255,255,255,0.05)',borderBottom:canSkip&&!isSkipped?'none':isBoss?'none':'2px solid rgba(200,80,80,0.5)',
+                borderRadius:(!canSkip&&!isBoss)||(isSkipped&&!canSkip)?'0 0 10px 10px':0,padding:'16px 20px',display:'flex',flexDirection:'column',alignItems:'center',gap:6,
+                cursor:isSkipped?'default':'pointer',transition:'all 0.15s'}}
+                onMouseEnter={e=>{if(!isSkipped)e.currentTarget.style.background=isBoss?'linear-gradient(180deg,#3a1010,#1a0808)':'linear-gradient(180deg,#2a1810,#140c08)'}}
+                onMouseLeave={e=>{e.currentTarget.style.background=isBoss?'linear-gradient(180deg,#2a0a0a,#140404)':'linear-gradient(180deg,#1a1008,#0a0604)'}}>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:isBoss?'#cc1111':'#8a6020',letterSpacing:3,textTransform:'uppercase'}}>{isBoss?'CIRCLE BOSS':'FIGHT '+(i+1)+' OF 3'}</div>
                 <div style={{fontSize:48}}>{enemy.emoji}</div>
                 <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:isBoss?'#ee2222':'#e8d090',textShadow:isBoss?'0 0 20px rgba(200,0,0,0.5)':'none',letterSpacing:2}}>{enemy.name}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#aa8040'}}>{Math.ceil(enemy.maxHp*activeStake.hpMult)} HP</div>
                 {isSkipped&&reward&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#88dd88',marginTop:4}}>{reward.emoji} {reward.name}</div>}
               </div>
-              {/* SKIP button */}
+              {/* SKIP button — stopPropagation so it doesn't trigger fight */}
               {canSkip&&!isSkipped&&reward&&(
-                <div onClick={()=>setDescentData(p=>({...p,skips:[...p.skips,i]}))}
-                  style={{background:'rgba(40,80,20,0.3)',border:'2px solid #44aa44',borderTop:'none',borderRadius:'0 0 10px 10px',padding:'12px 16px',cursor:'pointer',textAlign:'center',transition:'all 0.2s'}}
+                <div onClick={(e)=>{e.stopPropagation();setDescentData(p=>({...p,skips:[...p.skips,i]}))}}
+                  style={{background:'rgba(40,80,20,0.3)',border:'2px solid #44aa44',borderTop:'none',borderRadius:'0 0 10px 10px',padding:'12px 16px',cursor:'pointer',textAlign:'center',transition:'all 0.2s',position:'relative'}}
                   onMouseEnter={e=>{e.currentTarget.style.background='rgba(60,120,30,0.5)';e.currentTarget.style.transform='scale(1.02)'}}
                   onMouseLeave={e=>{e.currentTarget.style.background='rgba(40,80,20,0.3)';e.currentTarget.style.transform='none'}}>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#44aa44',letterSpacing:3,textTransform:'uppercase'}}>SKIP AND TAKE REWARD</div>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#88dd88',marginTop:4}}>{reward.emoji} {reward.name}</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#66aa66',marginTop:4,fontStyle:'italic',lineHeight:1.3}}>{REWARD_TIPS[reward.id]||''}</div>
                 </div>
               )}
               {canSkip&&isSkipped&&(
-                <div onClick={()=>setDescentData(p=>({...p,skips:p.skips.filter(s=>s!==i)}))}
+                <div onClick={(e)=>{e.stopPropagation();setDescentData(p=>({...p,skips:p.skips.filter(s=>s!==i)}))}}
                   style={{background:'rgba(40,80,20,0.15)',border:'2px solid #44aa44',borderTop:'none',borderRadius:'0 0 10px 10px',padding:'8px 16px',cursor:'pointer',textAlign:'center'}}
                   onMouseEnter={e=>{e.currentTarget.style.background='rgba(80,40,20,0.3)'}}
                   onMouseLeave={e=>{e.currentTarget.style.background='rgba(40,80,20,0.15)'}}>
@@ -4278,23 +4322,7 @@ function App(){
                 </div>
               )}
               {isBoss&&(
-                <div onClick={()=>{
-                  const addToDeck=(card)=>{setDeck(p=>[...p,card])}
-                  const deleteRandomCommon=()=>{setDeck(p=>{const commons=p.filter(c=>c.rarity==='Common');if(commons.length===0){addLog('🗑 No common cards in deck to delete.');return p};const victim=commons[Math.floor(Math.random()*commons.length)];addLog('🗑 Skipped fight: Deleted '+victim.name+' from deck');return p.filter(c=>c.uid!==victim.uid)})}
-                  const gs={setStash,setStage,setCorruption,setMaxEmbers,setPendingDraw,setBonusDiscards,setBonusEmbers,setNextCardFree,addToDeck,deleteRandomCommon,addLog}
-                  if(descentData.skips.includes(0))descentData.reward1.apply(gs)
-                  if(descentData.skips.includes(1))descentData.reward2.apply(gs)
-                  const skips=descentData.skips
-                  const baseIdx=descentData.fightIndices[0]
-                  let startFight=baseIdx
-                  if(skips.includes(0)&&skips.includes(1))startFight=baseIdx+2
-                  else if(skips.includes(0))startFight=baseIdx+1
-                  overrideFightIdxRef.current=startFight
-                  setDescentData(null)
-                  setGameState('playing')
-                  skipDescentRef.current=true
-                  setTimeout(()=>{handleShopLeave();skipDescentRef.current=false},50)
-                }}
+                <div onClick={triggerDescend}
                   style={{background:'rgba(130,0,0,0.35)',border:'2px solid #cc1111',borderTop:'none',borderRadius:'0 0 10px 10px',padding:'12px 16px',textAlign:'center',cursor:'pointer',transition:'all 0.2s',boxShadow:'0 0 15px rgba(180,0,0,0.3)'}}
                   onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,0,0,0.5)';e.currentTarget.style.boxShadow='0 0 30px rgba(200,0,0,0.6)'}}
                   onMouseLeave={e=>{e.currentTarget.style.background='rgba(130,0,0,0.35)';e.currentTarget.style.boxShadow='0 0 15px rgba(180,0,0,0.3)'}}>
