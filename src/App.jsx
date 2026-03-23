@@ -4164,7 +4164,7 @@ function App(){
         addLog('📋 Setlist locked in.')
       }} onClose={()=>setSetlistOpen(false)}/>}
       {/* PARCHMENT */}
-      <div style={{flex:1,margin:'0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'visible',background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:`2px solid ${corruptMax?'#660000':corruptHigh?'#7a2010':'#7a5820'}`,boxShadow:`inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)${corruptHigh?',0 0 60px rgba(120,0,0,0.3)':''}${corruptMax?',0 0 100px rgba(180,0,0,0.5)':''}`,filter:parchmentFilter,display:'flex',flexDirection:'column'}}>
+      <div style={{flex:1,margin:'0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'visible',zIndex:10,background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:`2px solid ${corruptMax?'#660000':corruptHigh?'#7a2010':'#7a5820'}`,boxShadow:`inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)${corruptHigh?',0 0 60px rgba(120,0,0,0.3)':''}${corruptMax?',0 0 100px rgba(180,0,0,0.5)':''}`,filter:parchmentFilter,display:'flex',flexDirection:'column'}}>
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
         <div style={{padding:'6px 16px 4px',position:'relative',zIndex:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0}}>
           <div style={{width:'100%',maxWidth:760,background:'rgba(8,0,0,0.55)',border:'2px solid rgba(160,20,0,0.8)',borderRadius:8,padding:'8px 18px 10px',animation:'bossGlow 2s ease-in-out infinite',boxShadow:'0 0 30px rgba(150,0,0,0.4),inset 0 0 40px rgba(80,0,0,0.3)'}}>
@@ -4230,44 +4230,92 @@ function App(){
         </div>
       </div>
 
-      {/* HAND AREA — flex row: left | cards | right */}
-      <div style={{flex:'0 0 340px',background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',display:'flex',flexDirection:'column',zIndex:30,minHeight:0,overflowX:'hidden',overflowY:'visible'}}>
-        <div style={{textAlign:'center',padding:'4px 0 0',flexShrink:0}}>
+      {/* HAND AREA */}
+      <div style={{flex:'0 0 340px',width:1920,maxWidth:1920,background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',position:'relative',zIndex:30}}>
+        {/* Header */}
+        <div style={{textAlign:'center',padding:'3px 0 0',position:'relative',zIndex:1}}>
           <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#8a0000',textTransform:'uppercase',textShadow:'0 0 10px rgba(120,0,0,0.4)'}}>Your Hand — {hand.length}{hand.length>HAND_SIZE?' of '+HAND_SIZE+' ⚡':' of '+HAND_SIZE}</span>
           {pendingEmbers>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff6600',marginLeft:12}}>+{pendingEmbers} 🔥 pending</span>}
         </div>
-        <div style={{flex:1,display:'flex',minHeight:0,overflowX:'hidden',overflowY:'visible'}}>
-          {/* LEFT COLUMN */}
-          <div style={{width:110,flexShrink:0,display:'flex',flexDirection:'column',gap:6,alignItems:'center',justifyContent:'center',background:'rgba(20,12,4,0.7)',padding:'6px 8px',borderRight:'1px solid rgba(100,65,15,0.3)'}}>
-            <DeckPile count={deck.length} label="Deck"/>
-            <DeckPile count={discardPile.length} label="Discard"/>
-            <div style={{display:'flex',flexDirection:'column',gap:4,marginTop:4}}>
-              <button onClick={()=>setHandSort(p=>p==='embers'?'none':'embers')}
-                style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'6px 10px',width:90,background:handSort==='embers'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='embers'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='embers'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>🔥 COST</button>
-              <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
-                style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'6px 10px',width:90,background:handSort==='rarity'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='rarity'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='rarity'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>⭐ RARITY</button>
-            </div>
-            {/* DEALER BUTTONS */}
-            <div style={{display:'flex',flexDirection:'column',gap:3,marginTop:2}}>
-              <button onClick={()=>{if(heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight)activateTrip('shrooms')}}
-                style={{width:90,padding:'5px 8px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',
-                  background:heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'rgba(80,40,10,0.7)':'rgba(10,6,2,0.85)',
-                  border:heldShrooms&&!tripUsedThisFight?'2px solid #cc8800':'1px solid rgba(100,65,15,0.3)',
-                  borderRadius:3,color:heldShrooms&&!tripUsedThisFight?'#ffcc44':'#4a3018',
-                  cursor:heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'pointer':'not-allowed',
-                  opacity:heldShrooms?1:0.4,textAlign:'center'}}>🍄 {heldShrooms?'USE':'—'}</button>
-              <button onClick={()=>{if(heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight)activateTrip('acid')}}
-                style={{width:90,padding:'5px 8px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',
-                  background:heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'rgba(40,10,80,0.7)':'rgba(10,6,2,0.85)',
-                  border:heldAcid&&!tripUsedThisFight?'2px solid #aa44ff':'1px solid rgba(100,65,15,0.3)',
-                  borderRadius:3,color:heldAcid&&!tripUsedThisFight?'#cc88ff':'#4a2a6a',
-                  cursor:heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'pointer':'not-allowed',
-                  opacity:heldAcid?1:0.4,textAlign:'center'}}>🧪 {heldAcid?'USE':'—'}</button>
+
+        {/* LEFT COLUMN: Deck/Discard — absolute */}
+        <div style={{position:'absolute',left:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:6,alignItems:'center',justifyContent:'center',background:'rgba(20,12,4,0.7)',borderRadius:'0 6px 6px 0',padding:'8px 10px',border:'1px solid rgba(100,65,15,0.3)',borderLeft:'none',width:100}}>
+          <DeckPile count={deck.length} label="Deck"/>
+          <DeckPile count={discardPile.length} label="Discard"/>
+        </div>
+
+        {/* SORT + DEALER — beside left column */}
+        <div style={{position:'absolute',left:108,top:8,bottom:8,zIndex:60,display:'flex',flexDirection:'column',gap:3,alignItems:'center',justifyContent:'center'}}>
+          <div style={{position:'relative'}}
+            onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='block'}}
+            onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='none'}}>
+            <button onClick={()=>{if(heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight)activateTrip('shrooms')}}
+              style={{width:90,padding:'5px 8px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',
+                background:heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'rgba(80,40,10,0.7)':'rgba(10,6,2,0.85)',
+                border:heldShrooms&&!tripUsedThisFight?'2px solid #cc8800':'1px solid rgba(100,65,15,0.3)',
+                borderRadius:3,color:heldShrooms&&!tripUsedThisFight?'#ffcc44':'#4a3018',
+                cursor:heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'pointer':'not-allowed',
+                opacity:heldShrooms?1:0.4,textAlign:'center'}}>🍄 {heldShrooms?'USE':'—'}</button>
+            <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(200,150,50,0.6)',borderRadius:6,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#e8a820',marginBottom:6}}>🍄 Magic Mushrooms</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#c8b080',lineHeight:1.5}}>{heldShrooms?'Use before your first Strike. 90% chance of a powerful buff — +2 ATK all, bonus Strike, cheaper cards, or full heal. 5% nothing. 5% bad trip.':'Buy from The Dealer in the shop.'}</div>
             </div>
           </div>
+          <div style={{position:'relative'}}
+            onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='block'}}
+            onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='none'}}>
+            <button onClick={()=>{if(heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight)activateTrip('acid')}}
+              style={{width:90,padding:'5px 8px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',
+                background:heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'rgba(40,10,80,0.7)':'rgba(10,6,2,0.85)',
+                border:heldAcid&&!tripUsedThisFight?'2px solid #aa44ff':'1px solid rgba(100,65,15,0.3)',
+                borderRadius:3,color:heldAcid&&!tripUsedThisFight?'#cc88ff':'#4a2a6a',
+                cursor:heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'pointer':'not-allowed',
+                opacity:heldAcid?1:0.4,textAlign:'center'}}>🧪 {heldAcid?'USE':'—'}</button>
+            <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(150,50,220,0.6)',borderRadius:6,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#cc44ff',marginBottom:6}}>🧪 Blotter Acid</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#c8b080',lineHeight:1.5}}>{heldAcid?'Use before your first Strike. 90% chance of a game-changing effect — double damage, cards fire twice, +3 ATK all, or total immunity. 5% nothing. 5% Hellquake.':'Buy from The Dealer in the shop.'}</div>
+            </div>
+          </div>
+          <div style={{height:2}}/>
+          <button onClick={()=>setHandSort(p=>p==='embers'?'none':'embers')}
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'5px 8px',width:90,background:handSort==='embers'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='embers'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='embers'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>🔥 COST</button>
+          <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'5px 8px',width:90,background:handSort==='rarity'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='rarity'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='rarity'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>⭐ RARITY</button>
+        </div>
 
-          {/* CARD FAN — center */}
-          <div style={{flex:1,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:15,overflow:'visible',minHeight:0,position:'relative',zIndex:50}}>
+        {/* RIGHT COLUMN: Strike/Discard/Embers/Stats — absolute, clamped to right edge */}
+        <div style={{position:'absolute',right:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:2,alignItems:'center',justifyContent:'center',padding:'4px 12px',background:'rgba(10,5,2,0.75)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none',width:200}}>
+          <button onClick={handleStrike} disabled={!canStrike}
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'6px 14px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:'100%'}}>⚔ Strike</button>
+          <div style={{display:'flex',alignItems:'center',gap:4,justifyContent:'center',width:'100%'}}>
+            <PhaseDots left={strikesLeft} total={activeStake.maxStrikes} color='#dd2222' wide={true}/>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555'}}>{strikesLeft}/{activeStake.maxStrikes}</span>
+          </div>
+          <div style={{height:2}}/>
+          <button onClick={handleDiscard} disabled={!canDiscard}
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'6px 14px',background:canDiscard?'rgba(100,70,0,0.4)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:'100%'}}>↓ Discard</button>
+          <div style={{display:'flex',alignItems:'center',gap:4,justifyContent:'center',width:'100%'}}>
+            <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555'}}>{discardsLeft}/{MAX_DISCARDS}</span>
+          </div>
+          <div style={{height:2}}/>
+          <EmberDisplayLarge current={embers} max={maxEmbers}/>
+          <div style={{height:1}}/>
+          <div style={{display:'flex',gap:10,justifyContent:'center',padding:'2px 0'}}>
+            {[['Fight',(fightIndex%3+1)+'/3','#dd2222'],['Corrupt',corruption+'%',corruption>60?'#ff3300':'#aa5500'],['Stash',stash+(stash>=420?' 🔒':stash>=380?' ⚠':''),(stash>=420?'#ff3300':stash>=380?'#ff9900':'#44cc44')]].map(function(item){return(
+              <div key={item[0]} style={{textAlign:'center'}}>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#9a7a40',letterSpacing:1,textTransform:'uppercase',marginBottom:1}}>{item[0]}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
+              </div>
+            )})}
+          </div>
+          {activePassives.length>0&&<div style={{width:'100%',borderTop:'1px solid rgba(80,60,160,0.3)',paddingTop:2,marginTop:1}}>
+            {activePassives.map((p,i)=><div key={i} style={{fontSize:9,color:'#8090c0',fontFamily:"'MBScribblesFont',serif"}}>{p.emoji} {p.name}</div>)}
+          </div>}
+        </div>
+
+        {/* CARD FAN — centered, padded to avoid columns */}
+        <div style={{position:'absolute',left:200,right:200,top:18,bottom:0,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:10,overflow:'visible',zIndex:50}}>
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
               isHovered={hovered===i} isSelected={selected.includes(card.uid)}
@@ -4283,41 +4331,8 @@ function App(){
               onHandDrop={()=>handleHandReorder(dragHandIdx,i)}
             />
           ))}
-          </div>
-
-          {/* RIGHT COLUMN — in-flow flex child */}
-          <div style={{width:210,flexShrink:0,display:'flex',flexDirection:'column',gap:2,alignItems:'center',justifyContent:'center',padding:'4px 12px',background:'rgba(10,5,2,0.6)',borderLeft:'1px solid rgba(100,65,15,0.3)'}}>
-            <button onClick={handleStrike} disabled={!canStrike}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'6px 14px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:3,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:'100%'}}>⚔ Strike</button>
-            <div style={{display:'flex',alignItems:'center',gap:4,justifyContent:'center',width:'100%'}}>
-              <PhaseDots left={strikesLeft} total={activeStake.maxStrikes} color='#dd2222' wide={true}/>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555'}}>{strikesLeft}/{activeStake.maxStrikes}</span>
-            </div>
-            <div style={{height:2}}/>
-            <button onClick={handleDiscard} disabled={!canDiscard}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'6px 14px',background:canDiscard?'rgba(100,70,0,0.4)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:3,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:'100%'}}>↓ Discard</button>
-            <div style={{display:'flex',alignItems:'center',gap:4,justifyContent:'center',width:'100%'}}>
-              <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555'}}>{discardsLeft}/{MAX_DISCARDS}</span>
-            </div>
-            <div style={{height:2}}/>
-            <EmberDisplayLarge current={embers} max={maxEmbers}/>
-            <div style={{height:1}}/>
-            <div style={{display:'flex',gap:10,justifyContent:'center',padding:'2px 0'}}>
-              {[['Fight',(fightIndex%3+1)+'/3','#dd2222'],['Corrupt',corruption+'%',corruption>60?'#ff3300':'#aa5500'],['Stash',stash+(stash>=420?' 🔒':stash>=380?' ⚠':''),(stash>=420?'#ff3300':stash>=380?'#ff9900':'#44cc44')]].map(function(item){return(
-                <div key={item[0]} style={{textAlign:'center'}}>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#9a7a40',letterSpacing:1,textTransform:'uppercase',marginBottom:1}}>{item[0]}</div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
-                </div>
-              )})}
-            </div>
-            {/* Passives indicator */}
-            {activePassives.length>0&&<div style={{width:'100%',borderTop:'1px solid rgba(80,60,160,0.3)',paddingTop:3,marginTop:2}}>
-              {activePassives.map((p,i)=><div key={i} style={{fontSize:9,color:'#8090c0',fontFamily:"'MBScribblesFont',serif"}}>{p.emoji} {p.name}</div>)}
-            </div>}
-          </div>
-        </div>{/* close flex row */}
-      </div>{/* close hand area */}
+        </div>
+      </div>
       {/* PAUSE OPTIONS OVERLAY (ESC key) */}
       {showPauseOptions&&<div style={{position:'absolute',inset:0,zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.85)'}} onClick={()=>setShowPauseOptions(false)}>
         <div onClick={e=>e.stopPropagation()} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16,padding:'40px 60px',background:'rgba(10,6,2,0.98)',border:'2px solid rgba(100,65,15,0.5)',borderRadius:12,maxWidth:500,width:'90%'}}>
