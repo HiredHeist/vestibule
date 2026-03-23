@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Monday, March 23, 2026 at 07:00 AM (JST) — Session 13*
+*Last updated: Monday, March 23, 2026 at 10:00 AM (JST) — Session 13*
 
 ---
 
@@ -98,6 +98,11 @@ This is happening.
 - [x] Circle cleared flash — victory overlay after every fight win, boss kills get full celebration
 - [x] Playtester feedback form (.docx, 44 questions, 9 sections)
 - [x] Base path /vestibule/ for royceprinting.com deployment
+- [x] Responsive ScaleRoot (1920×1080 design, scales to any screen)
+- [x] Battle layout rewrite (boss compact, stage 290×360 cards, hand 340px, right panel flex)
+- [x] Opening Night layout rewrite (4×2 grid, full-width abilities, uniform card heights)
+- [x] FREE badge → 0 ember circle on all cards
+- [x] Playtester feedback form (HTML, 44 questions, mailto vomitwizard@gmail.com)
 - [x] Dev shortcut Shift+W for win screen
 
 ### Bug Fixes

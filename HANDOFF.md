@@ -1,5 +1,5 @@
 # VESTIBULE — AI Development Handoff Document
-*Last updated: Monday, March 23, 2026 at 07:00 AM (JST) — Session 13 end state*
+*Last updated: Monday, March 23, 2026 at 10:00 AM (JST) — Session 13 end state*
 *This is a living document. Update it at the end of every session.*
 
 ---
@@ -83,7 +83,12 @@ Developer = "player" in dev sessions. Music producer, doom metal, lives in rural
 32. ✅ **Music System** — 5 tracks (menu/select/battle/shop/death) with crossfade, volume slider in options
 33. ✅ **ESC Pause Overlay** — options accessible anytime mid-game without disrupting state
 34. ✅ **Base Path** — /vestibule/ for royceprinting.com/vestibule deployment
-35. ✅ **Sim v11.1** — Wake Up Call 1 ember, Herb Money 1 ember, Mosh Pit + Blood Ritual added — 6 stakes (Bronze→Demonic), all modifiers wired, selector on menu, badge on death screen — logo, title, Play/Unlocks/Rules/Options, deck selection placeholder — almost-killed boss, almost-survived member, almost-cleared circle, almost-beat-best
+35. ✅ **Sim v11.1** — Wake Up 1 ember, Herb Money 1 ember, Mosh Pit, Blood Ritual
+36. ✅ **ScaleRoot** — 1920×1080 design canvas, transform:scale to any screen
+37. ✅ **Battle Layout** — boss compacted, stage 290×360 cards 50px gap, hand 340px, right panel visible at all scales
+38. ✅ **Opening Night Layout** — 4×2 grid 220px cards, full-width abilities, uniform heights, no clipping
+39. ✅ **FREE→0 Circle** — consistent ember cost display on all cards
+40. ✅ **Feedback Form** — HTML, 44 questions, mailto:vomitwizard@gmail.com — Wake Up Call 1 ember, Herb Money 1 ember, Mosh Pit + Blood Ritual added — 6 stakes (Bronze→Demonic), all modifiers wired, selector on menu, badge on death screen — logo, title, Play/Unlocks/Rules/Options, deck selection placeholder — almost-killed boss, almost-survived member, almost-cleared circle, almost-beat-best
 14. ✅ **Seance buffed** — 1 ember, corruption ÷ 4 (was 2 embers, ÷ 8)
 15. ✅ **Herb Money reworked** — stash ÷ 2 damage, keep stash (was 10% + lose stash)
 16. ✅ **Wake Up Call free** — 0 embers (was 2)
