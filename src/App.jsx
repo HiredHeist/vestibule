@@ -196,6 +196,23 @@ const UNLOCK_MILESTONES=[
 
 // ── DIFFICULTY STAKES ──────────────────────────────────────────
 // ── THE PACT: post-boss reward choices ──────────────────────────
+const CIRCLE_NAMES=['','I — Limbo','II — Lust','III — Gluttony','IV — Greed','V — Anger','VI — Heresy','VII — Violence','VIII — Fraud','IX — Treachery']
+const CIRCLE_EMOJIS=['','🌑','🌹','🍖','💰','⚔','⛪','🗡','🎭','❄']
+
+// Skip rewards for The Descent map (fight 1 = small, fight 2 = medium)
+const DESCENT_REWARDS_1=[ // Fight 1 skip rewards (small)
+  {id:'stash1',name:'+15 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>p+15);gs.addLog('🌿 Skipped fight: +15 Stash')}},
+  {id:'heal1',name:'All Members +3 HP',emoji:'💚',apply:(gs)=>{gs.setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+3)}):m));gs.addLog('💚 Skipped fight: All members +3 HP')}},
+  {id:'ember1',name:'+1 Max Ember',emoji:'🔥',apply:(gs)=>{gs.setMaxEmbers(p=>Math.min(8,p+1));gs.addLog('🔥 Skipped fight: +1 Max Ember')}},
+  {id:'corrupt1',name:'-15% Corruption',emoji:'✨',apply:(gs)=>{gs.setCorruption(p=>Math.max(0,p-15));gs.addLog('✨ Skipped fight: -15% Corruption')}},
+]
+const DESCENT_REWARDS_2=[ // Fight 2 skip rewards (medium)
+  {id:'stash2',name:'+25 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>p+25);gs.addLog('🌿 Skipped fight: +25 Stash')}},
+  {id:'heal2',name:'Full Heal All Members',emoji:'💚',apply:(gs)=>{gs.setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false}):m));gs.addLog('💚 Skipped fight: All members fully healed')}},
+  {id:'corrupt2',name:'Corruption → 0%',emoji:'✨',apply:(gs)=>{gs.setCorruption(0);gs.addLog('✨ Skipped fight: Corruption reset to 0%')}},
+  {id:'draw2',name:'Draw +2 Cards Next Fight',emoji:'📋',apply:(gs)=>{gs.setPendingDraw(p=>p+2);gs.addLog('📋 Skipped fight: +2 Cards next fight')}},
+]
+
 const PACT_REWARDS=[
   {id:'ember_surge',name:'Ember Surge',emoji:'🔥',desc:'+1 max Embers permanently.',color:'#ff6600'},
   {id:'iron_strings',name:'Iron Strings',emoji:'🎸',desc:'All members +1 ATK permanently.',color:'#ee2222'},
@@ -2255,6 +2272,9 @@ function App(){
   const [circleClearedData,setCircleClearedData]=useState(null) // {circle, bossName, bossEmoji}
   const [chosenPacts,setChosenPacts]=useState([]) // pact IDs chosen this run
   const [pactChoices,setPactChoices]=useState([]) // 2 pact options for current choice
+  const [descentData,setDescentData]=useState(null) // {circleNum, fights, reward1, reward2}
+  const skipDescentRef=useRef(false)
+  const overrideFightIdxRef=useRef(null) // set by descent to override next fight index
   const [corruption,setCorruption]=useState(0)
   const [stageDiveUsed,setStageDiveUsed]=useState(false)
   const [diceTarget,setDiceTarget]=useState(null)
@@ -3627,7 +3647,25 @@ function App(){
   },[animPhase,strikesLeft,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,bossRef,stageRefs,drawUpTo,triggerVictory,bossRageAtk,bossDebuff,fightTripBuff,luciferPhase,stolenAtkPool,maxEmbers])
 
   const handleShopLeave=useCallback(()=>{
-    const nextIdx=Math.min(fightIndex+1, 26)
+    const nextIdx=overrideFightIdxRef.current!==null?overrideFightIdxRef.current:Math.min(fightIndex+1, 26)
+    overrideFightIdxRef.current=null
+    // Show Descent map when entering a new circle (circles 2-9)
+    if(nextIdx%3===0&&nextIdx>=3&&nextIdx<26&&!skipDescentRef.current){
+      const circleNum=Math.floor(nextIdx/3)+1
+      const r1=DESCENT_REWARDS_1[Math.floor(Math.random()*DESCENT_REWARDS_1.length)]
+      const r2=DESCENT_REWARDS_2[Math.floor(Math.random()*DESCENT_REWARDS_2.length)]
+      setDescentData({
+        circleNum,
+        circleName:CIRCLE_NAMES[circleNum],
+        circleEmoji:CIRCLE_EMOJIS[circleNum],
+        fights:[ENEMIES[nextIdx],ENEMIES[nextIdx+1],ENEMIES[nextIdx+2]],
+        fightIndices:[nextIdx,nextIdx+1,nextIdx+2],
+        reward1:r1,reward2:r2,
+        skips:[]
+      })
+      setGameState('descent')
+      return
+    }
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(Math.ceil(nextEnemy.maxHp*activeStake.hpMult))
@@ -3918,7 +3956,7 @@ function App(){
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
-    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setPactChoices([])
+    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
@@ -4182,6 +4220,66 @@ function App(){
   }
 
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
+  if(gameState==='descent'&&descentData)return(
+    <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,overflow:'hidden'}}>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>⛧ The Descent ⛧</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:24,color:'#e8d090',fontStyle:'italic'}}>Circle {descentData.circleName} {descentData.circleEmoji}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#8a6020',letterSpacing:2}}>Choose your path. Skipping a fight forfeits its shop.</div>
+      <div style={{display:'flex',gap:30,marginTop:10}}>
+        {descentData.fights.map((enemy,i)=>{
+          const isBoss=i===2
+          const isSkipped=descentData.skips.includes(i)
+          const reward=i===0?descentData.reward1:i===1?descentData.reward2:null
+          const canSkip=!isBoss
+          return(
+            <div key={i} style={{width:300,background:isBoss?'linear-gradient(180deg,#2a0a0a,#140404)':'linear-gradient(180deg,#1a1008,#0a0604)',
+              border:isSkipped?'2px solid #44aa44':isBoss?'2px solid #cc1111':'1px solid rgba(160,100,25,0.5)',
+              borderRadius:10,padding:'20px 20px',display:'flex',flexDirection:'column',alignItems:'center',gap:8,
+              opacity:isSkipped?0.5:1,transition:'all 0.25s'}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:isBoss?'#cc1111':'#8a6020',letterSpacing:3,textTransform:'uppercase'}}>{isBoss?'★ CIRCLE BOSS':'FIGHT '+(i+1)+' OF 3'}</div>
+              <div style={{fontSize:48}}>{enemy.emoji}</div>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:isBoss?'#ee2222':'#e8d090',textShadow:isBoss?'0 0 20px rgba(200,0,0,0.5)':'none',letterSpacing:2}}>{enemy.name}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#aa8040'}}>{Math.ceil(enemy.maxHp*activeStake.hpMult)} HP</div>
+              {canSkip&&!isSkipped&&reward&&(
+                <div onClick={()=>setDescentData(p=>({...p,skips:[...p.skips,i]}))}
+                  style={{marginTop:8,padding:'10px 20px',background:'rgba(40,80,20,0.3)',border:'1px solid #44aa44',borderRadius:6,cursor:'pointer',textAlign:'center',transition:'all 0.2s',width:'100%'}}
+                  onMouseEnter={e=>{e.currentTarget.style.background='rgba(60,120,30,0.5)';e.currentTarget.style.transform='scale(1.03)'}}
+                  onMouseLeave={e=>{e.currentTarget.style.background='rgba(40,80,20,0.3)';e.currentTarget.style.transform='none'}}>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#44aa44',letterSpacing:2,textTransform:'uppercase'}}>SKIP FOR:</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#88dd88',marginTop:4}}>{reward.emoji} {reward.name}</div>
+                </div>
+              )}
+              {isSkipped&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#44aa44',marginTop:8}}>✓ SKIPPED — {reward.emoji} {reward.name}</div>}
+              {canSkip&&isSkipped&&(
+                <div onClick={()=>setDescentData(p=>({...p,skips:p.skips.filter(s=>s!==i)}))}
+                  style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#886644',cursor:'pointer',textDecoration:'underline'}}>Undo</div>
+              )}
+              {isBoss&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#cc4444',marginTop:6,fontStyle:'italic'}}>Must be fought</div>}
+            </div>
+          )
+        })}
+      </div>
+      <button onClick={()=>{
+        const gs={setStash,setStage,setCorruption,setMaxEmbers,setPendingDraw,addLog}
+        // Apply skip rewards
+        if(descentData.skips.includes(0))descentData.reward1.apply(gs)
+        if(descentData.skips.includes(1))descentData.reward2.apply(gs)
+        // Calculate which fight to start (first unskipped)
+        const skips=descentData.skips
+        const baseIdx=descentData.fightIndices[0]
+        let startFight=baseIdx // default: fight 1
+        if(skips.includes(0)&&skips.includes(1))startFight=baseIdx+2 // skip both → boss
+        else if(skips.includes(0))startFight=baseIdx+1 // skip first → fight 2
+        overrideFightIdxRef.current=startFight
+        setDescentData(null)
+        skipDescentRef.current=true
+        setTimeout(()=>{handleShopLeave();skipDescentRef.current=false},50)
+      }}
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:6,textTransform:'uppercase',padding:'14px 60px',background:'rgba(130,0,0,0.35)',border:'2px solid #cc1111',borderRadius:3,color:'#ee2222',cursor:'pointer',transition:'all 0.2s',marginTop:12,boxShadow:'0 0 22px rgba(180,0,0,0.5)',textShadow:'0 0 14px rgba(200,0,0,0.6)'}}>
+        ⛧ Descend ⛧
+      </button>
+    </div>
+  )
   if(gameState==='pact')return(
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,color:'#e8a820',textShadow:'0 0 40px rgba(200,140,0,0.6),0 0 80px rgba(150,100,0,0.3),3px 3px 0 #000',letterSpacing:8}}>⛧ The Pact ⛧</div>
