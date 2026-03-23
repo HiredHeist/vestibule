@@ -137,9 +137,9 @@ This is happening.
 - [x] Fix Sound Wall: scales by circle (C1-3=5, C4-6=8, C7-9=12)
 - [x] CORRUPT keyword ATK bonus shown on member cards (3+6 format)
 - [x] Deck thinning: "Burn" at Pawn Shop — delete card permanently for free
-- [ ] Shop leans toward current genre (1 extra card of dominant type in rotation)
-- [ ] Opening Night: show "Synergizes with: X BUILD" under member keywords
-- [ ] Further design discussion needed on thresholds and feel
+- [x] Shop genre lean: SKIPPED by design — shop stays random, reroll is the answer
+- [x] Opening Night synergy text: deferred — players learn naturally, avoid card clutter
+- [x] Genre thresholds: 50% for all types, revisit after playtester feedback
 
 ### Feature 5: VICTORY EXPERIENCE — "The Encore" + "Welcome to Hell"
 - [ ] Lucifer kill cinematic: screen freeze → crack SVG → shatter → text reveal
