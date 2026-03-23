@@ -1,5 +1,5 @@
 # Vestibule — Master TODO & Design Reference
-*Last updated: Monday, March 23, 2026 at 12:00 PM (JST) — Session 13*
+*Last updated: Tuesday, March 24, 2026 at 7:00 PM (JST) — Session 14*
 
 ---
 
@@ -92,7 +92,7 @@ This is happening.
 - [x] Gold screen border flash + combo color glow
 - [x] Combat log shows combo in gold text
 - [x] Lifetime combo discovery tracking in localStorage
-- [ ] Combos: SHRED STORM, HELLFIRE, BLOOD PACT, TRIPLE THREAT, SOUL HARVEST,
+- [x] All 16 combos implemented: SHRED STORM, HELLFIRE, BLOOD PACT, TRIPLE THREAT, SOUL HARVEST,
       DEATH WISH, ETERNAL ENCORE, CLEAN MACHINE, WALL OF SOUND, FEEDBACK HELL,
       MOSH MADNESS, DARK SACRIFICE, NOISE GATE, POWER SURGE, DEMON CORE, LAST STAND
 
@@ -129,17 +129,11 @@ This is happening.
 - [x] Fix Crowd Surf damage ×2 → ×3 in both handlers
 - [x] Fix Herb Money and Smoke Break log messages
 - [x] Add combo tracking to all 6 handleDropOnStage special card handlers
-- [x] Fix strike refill: handTargetRef tracks intended hand size (not depleted hand.length)
-- [x] Fix Smoke Break: moved to handleDropOnStage (same nested setHand race as Groupie)
-- [x] Fix Sound Wall: damage now scales by circle (C1-3=5, C4-6=8, C7-9=12), was broken at fightIndex
-- [x] Fix Soundboard duplicate card bug (nested setDeck→setHand → drawUpTo)
-- [x] Fix Smoke Break: moved to handleDropOnStage (nested setState race)
-- [x] Smoke Break victim counts toward refill draw (2 cards removed = 2 drawn back)
-- [x] Fix Fraud boss shuffle: rewritten with refs (nested setState race)
-- [x] Fix Lucifer phase reset: rewritten with refs (nested setState race)
-- [x] Fix strike refill: handTargetRef tracks base+Soundboard target, not depleted hand.length
+- [x] Fix all nested setState bugs: Groupie, Smoke Break, Soundboard, Fraud shuffle, Lucifer reset
 - [x] ZERO nested setDeck→setHand patterns remaining in codebase
 - [x] Fix strike refill: draw back exactly N cards for N cards played (cardsToDrawRef)
+- [x] Smoke Break victim counts toward refill draw (2 cards removed = 2 drawn back)
+- [x] Fix Sound Wall: scales by circle (C1-3=5, C4-6=8, C7-9=12)
 - [x] CORRUPT keyword ATK bonus shown on member cards (3+6 format)
 - [ ] Deck thinning: "Burn" at Pawn Shop — delete card permanently for free
 - [ ] Shop leans toward current genre (1 extra card of dominant type in rotation)
@@ -313,8 +307,52 @@ C9 Treachery: Traitor 9000 → Betrayer 11400 → LUCIFER 420,666 [damageScaleAt
 - Circle boss every 3rd fight → +1 max ember permanently
 - **420 is sacred. Never change card height.**
 
+
 ---
 
+## ✅ SESSION 14 — COMPLETE LOG (March 24, 2026)
+
+### Card Rebalance v12.0 (e2be53a)
+- [x] 28 card changes: copies, embers, effects
+- [x] 6 mechanic updates: Crowd Surf ×3, Herb Money full stash, Blood Ritual 6×,
+      Controlled Feedback full heal, Amp Static ÷10, Wake Up Call no ATK penalty
+- [x] Setbreak → Smoke Break rename
+- [x] Double Down → shop only
+- [x] Deck stays 69 cards, sim v12.0 synced
+
+### Sim v12.0 with Stakes
+- [x] Sim supports all 6 stakes: node vestibule-sim.js 50000 silver
+- [x] Bronze 12.78%, Silver 7.37%, Gold 4.03%, Obsidian 2.26%, Blood 0.86%, Demonic 0.01%
+
+### Opening Night Polish
+- [x] Boss area +20px, stage -22px, combined attack bar tighter
+- [x] FREE badge → 0 ember circle on all cards
+- [x] Full-width ability box (960→1700px), uniform member card heights
+- [x] 4×2 grid centered, fixed scaling, solid background (no border bleed)
+- [x] Text sizes increased: title, roles, abilities, member names
+
+### Feature 1: Riff Chains (97e7380)
+- [x] 16 two-card combos with visual feedback (2.7s flash)
+- [x] Bonus damage = total stage ATK
+- [x] Lifetime discovery tracking in localStorage
+
+### Feature 2: The Pact (d1e4387)
+- [x] 12 boss rewards, all effects wired
+- [x] Skip button, pact indicators on stage
+
+### Feature 3: The Descent (cc24ccf → a6ed30c)
+- [x] Circle map with FIGHT/SKIP layout
+- [x] 18 skip rewards (9 small + 9 medium)
+- [x] Triggers for all circles including C1
+- [x] bonusDiscards + bonusEmbers state wired
+
+### Bug Fixes
+- [x] Hand size: no cap, draws never shrink hand
+- [x] All nested setState eliminated (Groupie, Smoke Break, Soundboard, Fraud, Lucifer)
+- [x] Strike refill: draw back exactly N cards played (cardsToDrawRef)
+- [x] Crowd Surf ×2 → ×3, Herb Money log, Smoke Break log
+- [x] Sound Wall scales by circle not fightIndex
+- [x] CORRUPT keyword ATK bonus shown on member cards (3+6 format)
 ## ✅ SESSION 13 — COMPLETE LOG (March 22 evening)
 
 ### Push 1: Remaster fix + Usurer HP — 4ebb456
