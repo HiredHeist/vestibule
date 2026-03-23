@@ -583,15 +583,15 @@ function BoosterScreen({onComplete,seed}){
   const toggle=id=>setSel(p=>p.includes(id)?p.filter(x=>x!==id):p.length<2?[...p,id]:p)
   const kwColor={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
   return(
-    <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,padding:'22px 42px 18px 42px',overflow:'hidden'}}>
-      <div style={{fontFamily:"'BreakGothicFont',cursive",fontSize:72,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.8),0 0 80px rgba(140,0,0,0.5),3px 3px 0 #000',flexShrink:0,letterSpacing:16}}>Opening Night</div>
+    <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,padding:'12px 42px 10px 42px',overflow:'hidden'}}>
+      <div style={{fontFamily:"'BreakGothicFont',cursive",fontSize:60,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.8),0 0 80px rgba(140,0,0,0.5),3px 3px 0 #000',flexShrink:0,letterSpacing:14}}>Opening Night</div>
       {/* DAILY SEED BANNER */}
       <div style={{display:'flex',gap:16,alignItems:'center',flexShrink:0}}>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820',letterSpacing:3,padding:'6px 20px',background:'rgba(40,25,5,0.8)',border:'1px solid #c87820',borderRadius:4}}>🌍 TODAY'S SEED: {(()=>{const d=new Date();return parseInt(d.getFullYear().toString()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')).toString(16).toUpperCase()})()}</div>
         {parseInt(localStorage.getItem('vst_streak')||'0')>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#ff6600',letterSpacing:2,padding:'6px 16px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {localStorage.getItem('vst_streak')} DAY STREAK</div>}
       </div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:30,color:'#e8d090',fontStyle:'italic',flexShrink:0}}>Select 2 musicians to start your band</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#e8d090',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:24,color:'#e8d090',fontStyle:'italic',flexShrink:0}}>Select 2 musicians to start your band</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#e8d090',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
 
       {/* MEMBER CARDS — 7 in a flexible row */}
       <div style={{display:'grid',gridTemplateColumns:'repeat(4, 220px)',gap:14,justifyContent:'center',flexShrink:0,marginBottom:4}}>
@@ -603,15 +603,15 @@ function BoosterScreen({onComplete,seed}){
             <div key={m.id} onClick={()=>!m.locked&&!dis&&toggle(m.id)}
               style={{background:m.locked?'linear-gradient(180deg,#0e0e0e,#060606)':isSel?'linear-gradient(180deg,#2a1a0a,#160c04)':'linear-gradient(180deg,#1a1008,#0e0804)',
                 border:m.locked?'1px solid rgba(60,60,60,0.5)':isSel?'2px solid #e8a820':dis?'1px solid rgba(80,50,10,0.25)':'1px solid rgba(160,100,25,0.5)',
-                borderRadius:7,cursor:m.locked?'default':dis?'not-allowed':'pointer',
+                borderRadius:7,cursor:m.locked?'default':dis?'not-allowed':'pointer',height:200,
                 boxShadow:isSel?'0 0 30px rgba(232,168,32,0.4),0 8px 24px rgba(0,0,0,0.8)':'0 4px 16px rgba(0,0,0,0.7)',
                 opacity:dis?0.4:1,transform:isSel?'translateY(-8px) scale(1.04)':'none',
                 transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',position:'relative',
                 animation:(!isSel&&!dis&&!m.locked)?'throbSlow 4.5s ease-in-out infinite':'none'}}>
               <div style={{height:5,borderRadius:'7px 7px 0 0',background:isSel?'linear-gradient(90deg,#e8a820,#ffcc44)':kwc+'66'}}/>
               {isSel&&<div style={{position:'absolute',top:8,right:8,width:24,height:24,borderRadius:'50%',background:'#e8a820',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,color:'#000',fontWeight:900}}>✓</div>}
-              <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:48,background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
-              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:30,color:isSel?'#e8d090':'#c8b878',textAlign:'center',padding:'4px 4px 1px',lineHeight:1,letterSpacing:2}}>{m.name}</div>
+              <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:48,background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,color:isSel?'#e8d090':'#c8b878',textAlign:'center',padding:'2px 4px 0px',lineHeight:1,letterSpacing:2}}>{m.name}</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:2,color:'#c8b878',textAlign:'center',padding:'3px 4px 6px',textTransform:'uppercase'}}>{m.role}</div>
               {/* Stat bar — locked vs normal */}
               {m.locked?(
@@ -638,8 +638,8 @@ function BoosterScreen({onComplete,seed}){
       </div>
 
       {/* ABILITY EXPLANATION BOX */}
-      <div style={{background:'rgba(10,6,2,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,width:'100%',maxWidth:1700,flexShrink:0,marginTop:4,padding:'14px 24px'}}>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:23,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:10}}>⚗ Band Abilities — What Do They Mean?</div>
+      <div style={{background:'rgba(10,6,2,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,width:'100%',maxWidth:1700,flexShrink:0,marginTop:2,padding:'10px 24px'}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:6}}>⚗ Band Abilities — What Do They Mean?</div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
           {[
             ['FRENZIED','#ee2222','⚡','Each time the boss is defeated, this member gains +1 ATK permanently.'],
@@ -651,11 +651,11 @@ function BoosterScreen({onComplete,seed}){
             ['SHREDDER','#ff4488','🎸','The first RIFF card you play each Strike costs 1 less Ember. Play fast, hit hard.'],
             ['HEXED','#cc8800','🟠','Each Strike auto-raises Corruption +5%. Gains +1 ATK for every 10% Corruption. Gets scarier over time.'],
           ].map(([kw,color,icon,desc])=>(
-            <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:10,background:'rgba(0,0,0,0.4)',borderRadius:6,padding:'12px 16px',border:`1px solid ${color}44`,flex:'1 1 180px'}}>
-              <div style={{fontSize:26,flexShrink:0,marginTop:2}}>{icon}</div>
+            <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:10,background:'rgba(0,0,0,0.4)',borderRadius:6,padding:'8px 12px',border:`1px solid ${color}44`}}>
+              <div style={{fontSize:20,flexShrink:0,marginTop:1}}>{icon}</div>
               <div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:color,letterSpacing:1,marginBottom:5}}>{kw}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#c0a870',lineHeight:1.45,fontStyle:'italic'}}>{desc}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#c0a870',lineHeight:1.4,fontStyle:'italic'}}>{desc}</div>
               </div>
             </div>
           ))}
@@ -663,7 +663,7 @@ function BoosterScreen({onComplete,seed}){
       </div>
 
       <button onClick={()=>sel.length===2&&onComplete(sel)} disabled={sel.length<2}
-        style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'12px 48px',background:'rgba(130,0,0,0.35)',border:'2px solid #cc1111',borderRadius:3,color:'#ee2222',cursor:sel.length===2?'pointer':'default',transition:'all 0.2s',flexShrink:0,boxShadow:'0 0 22px rgba(180,0,0,0.5)',opacity:sel.length===2?1:0.45,textShadow:'0 0 14px rgba(200,0,0,0.6)'}}>
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'10px 48px',background:'rgba(130,0,0,0.35)',border:'2px solid #cc1111',borderRadius:3,color:'#ee2222',cursor:sel.length===2?'pointer':'default',transition:'all 0.2s',flexShrink:0,boxShadow:'0 0 22px rgba(180,0,0,0.5)',opacity:sel.length===2?1:0.45,textShadow:'0 0 14px rgba(200,0,0,0.6)'}}>
         {sel.length===2?'⛧  Take the Stage':'Select 2 Musicians'}
       </button>
     
