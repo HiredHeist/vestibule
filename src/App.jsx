@@ -583,7 +583,7 @@ function BoosterScreen({onComplete,seed}){
   const toggle=id=>setSel(p=>p.includes(id)?p.filter(x=>x!==id):p.length<2?[...p,id]:p)
   const kwColor={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
   return(
-    <div style={{position:'absolute',inset:0,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,padding:'20px 40px 16px 40px',overflowY:'auto'}}>
+    <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,padding:'22px 42px 18px 42px',overflow:'hidden'}}>
       <div style={{fontFamily:"'BreakGothicFont',cursive",fontSize:72,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.8),0 0 80px rgba(140,0,0,0.5),3px 3px 0 #000',flexShrink:0,letterSpacing:16}}>Opening Night</div>
       {/* DAILY SEED BANNER */}
       <div style={{display:'flex',gap:16,alignItems:'center',flexShrink:0}}>
@@ -594,7 +594,7 @@ function BoosterScreen({onComplete,seed}){
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#e8d090',letterSpacing:2,flexShrink:0}}>RUN SEED: {seed.toString(16).toUpperCase()}</div>
 
       {/* MEMBER CARDS — 7 in a flexible row */}
-      <div style={{display:'flex',flexWrap:'wrap',gap:14,justifyContent:'center',width:'100%',maxWidth:1400,flexShrink:0,marginBottom:4}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4, 220px)',gap:14,justifyContent:'center',flexShrink:0,marginBottom:4}}>
         {pool.map(m=>{
           const isSel=sel.includes(m.id),dis=!isSel&&sel.length>=2
           const kw=m.keyword||''
@@ -603,7 +603,7 @@ function BoosterScreen({onComplete,seed}){
             <div key={m.id} onClick={()=>!m.locked&&!dis&&toggle(m.id)}
               style={{background:m.locked?'linear-gradient(180deg,#0e0e0e,#060606)':isSel?'linear-gradient(180deg,#2a1a0a,#160c04)':'linear-gradient(180deg,#1a1008,#0e0804)',
                 border:m.locked?'1px solid rgba(60,60,60,0.5)':isSel?'2px solid #e8a820':dis?'1px solid rgba(80,50,10,0.25)':'1px solid rgba(160,100,25,0.5)',
-                borderRadius:7,cursor:m.locked?'default':dis?'not-allowed':'pointer',width:220,flexShrink:0,
+                borderRadius:7,cursor:m.locked?'default':dis?'not-allowed':'pointer',
                 boxShadow:isSel?'0 0 30px rgba(232,168,32,0.4),0 8px 24px rgba(0,0,0,0.8)':'0 4px 16px rgba(0,0,0,0.7)',
                 opacity:dis?0.4:1,transform:isSel?'translateY(-8px) scale(1.04)':'none',
                 transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',position:'relative',
