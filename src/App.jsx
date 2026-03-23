@@ -214,6 +214,26 @@ function beatStake(stakeId){
   if(!beaten.includes(stakeId)){beaten.push(stakeId);localStorage.setItem('vst_stakes_beaten',JSON.stringify(beaten))}
 }
 
+// ── RIFF CHAINS: 2-card combos that trigger bonus damage + visual feedback ──
+const RIFF_CHAINS=[
+  {id:'shred_storm',name:'SHRED STORM',cards:['resonancecard','infencore'],color:'#ffdd00',emoji:'⚡'},
+  {id:'hellfire',name:'HELLFIRE',cards:['darktuning','overdrive'],color:'#ff4400',emoji:'🔥'},
+  {id:'blood_pact',name:'BLOOD PACT',cards:['bloodritual','wakeup'],color:'#cc0000',emoji:'🩸'},
+  {id:'triple_threat',name:'TRIPLE THREAT',cards:['possessedperf','encore'],color:'#ff00ff',emoji:'👿'},
+  {id:'soul_harvest',name:'SOUL HARVEST',cards:['distortion','feedbackloop'],color:'#aa00ff',emoji:'💀'},
+  {id:'death_wish',name:'DEATH WISH',cards:['battlecry','stagedive'],color:'#ff2222',emoji:'☠'},
+  {id:'eternal_encore',name:'ETERNAL ENCORE',cards:['encore','infencore'],color:'#ff8800',emoji:'🔁'},
+  {id:'clean_machine',name:'CLEAN MACHINE',cards:['staticcharge','deathriff'],color:'#ffffff',emoji:'✨'},
+  {id:'wall_of_sound',name:'WALL OF SOUND',cards:['soundwall','amp'],color:'#4488ff',emoji:'🔊'},
+  {id:'feedback_hell',name:'FEEDBACK HELL',cards:['feedbackloop','ampstatic'],color:'#cc44ff',emoji:'🎛'},
+  {id:'mosh_madness',name:'MOSH MADNESS',cards:['moshpit','battlecry'],color:'#44ff44',emoji:'🤘'},
+  {id:'dark_sacrifice',name:'DARK SACRIFICE',cards:['bloodritual','seance'],color:'#880044',emoji:'🔮'},
+  {id:'noise_gate',name:'NOISE GATE',cards:['burnset','groupie'],color:'#ffaa00',emoji:'🎸'},
+  {id:'power_surge',name:'POWER SURGE',cards:['powertap','newstrings'],color:'#ff6600',emoji:'🔌'},
+  {id:'demon_core',name:'DEMON CORE',cards:['sabbathsigil','overdrive'],color:'#ff0044',emoji:'⛧'},
+  {id:'last_stand',name:'LAST STAND',cards:['stagedive','wakeup'],color:'#00ddff',emoji:'💪'},
+]
+
 const ALL_CARDS=[
   {id:'amp',name:'Amp It Up',type:'RIFF',rarity:'Common',emoji:'⚡',embers:2,effect:'Target member deals double ATK this turn.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:0,effect:'+20% Corruption immediately.',color:'#aa1111',typeColor:'#880000',copies:2},
@@ -2222,6 +2242,11 @@ function App(){
   const [pendingEmbers,setPendingEmbers]=useState(0)
   const [pendingDraw,setPendingDraw]=useState(0)
   const [lastRiffPlayed,setLastRiffPlayed]=useState(null)
+  const [cardsPlayedThisStrike,setCardsPlayedThisStrike]=useState([])
+  const cardsPlayedRef=useRef([])
+  const combosFiredRef=useRef([])
+  const [comboFlash,setComboFlash]=useState(null) // {name,color,emoji}
+  const [combosDiscoveredThisRun,setCombosDiscoveredThisRun]=useState([])
   const discoveredRef=useRef(new Set())
   const [bossDebuff,setBossDebuff]=useState(0)
   const [bossRageAtk,setBossRageAtk]=useState(0)
@@ -2791,6 +2816,29 @@ function App(){
     updStat('cardsPlayed',1)
     if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
     if(card.type==='RIFF')setLastRiffPlayed(card)
+    // ── RIFF CHAIN COMBO DETECTION ──
+    cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
+    const played=cardsPlayedRef.current
+    for(const chain of RIFF_CHAINS){
+      if(played.includes(chain.cards[0])&&played.includes(chain.cards[1])&&!combosFiredRef.current.includes(chain.id)){
+        if(!combosDiscoveredThisRun.includes(chain.id)){
+          setCombosDiscoveredThisRun(p=>[...p,chain.id])
+          // Track lifetime discoveries
+          const disc=JSON.parse(localStorage.getItem('vst_combos_discovered')||'[]')
+          if(!disc.includes(chain.id)){disc.push(chain.id);localStorage.setItem('vst_combos_discovered',JSON.stringify(disc))}
+        }
+        setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji})
+        addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! +10% bonus damage!')
+        combosFiredRef.current.push(chain.id)
+        addFloat('⛧ '+chain.name+' ⛧',getCenter(bossRef).x,getCenter(bossRef).y-140,chain.color,true)
+        // Apply combo bonus damage = total stage ATK
+        const comboBonus=ns.filter(m=>m&&!m.tooStoned).reduce((s,m)=>s+m.atk,0)
+        setEnemyHp(p=>Math.max(0,p-comboBonus))
+        updStat('totalDamage',comboBonus)
+        setTimeout(()=>setComboFlash(null),1200)
+        break
+      }
+    }
     // cardHeal enemy passive
     if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
     else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
@@ -3189,7 +3237,7 @@ function App(){
     // DEBUFF keyword: Nott reduces boss damage each Strike
     const debuffCount=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='DEBUFF').length
     if(debuffCount>0){setBossDebuff(p=>p+debuffCount*2);addLog('🎤 Nott debuffs the boss! (-'+(debuffCount*2)+' damage)')}
-    setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1)
+    setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
 
     const buffed=actives.filter(m=>(m.buffCount||0)>0)
     const bandBonus=buffed.length>=5?1.35:buffed.length>=4?1.20:buffed.length>=3?1.10:1.0
@@ -3542,7 +3590,7 @@ function App(){
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(Math.ceil(nextEnemy.maxHp*activeStake.hpMult))
     setEmbers(function(){return maxEmbers});setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0)
+    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
     if(fightIndex===26){
       // 8 circle bosses killed = 8 × 51,750 = 414,000 reduction → 6,666 HP
@@ -3830,7 +3878,7 @@ function App(){
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0)
-    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null)
+    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];setCombosDiscoveredThisRun([]);setComboFlash(null)
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
@@ -4132,6 +4180,13 @@ function App(){
           {luciferCinematic.phase===2?'Phase 2: Satan, Lord of the Flies':'420,666 → '+luciferCinematic.hp+' HP'}</div>
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'rgba(255,255,255,0.7)',fontStyle:'italic',animation:'fadeIn 0.8s ease'}}>
           {luciferCinematic.phase===2?'Band fully restored. All strikes reset. Finish this.':'8 Circle Bosses defeated. Their echoes weaken the Devil.'}</div>
+      </div>}
+      {/* RIFF CHAIN COMBO FLASH */}
+      {comboFlash&&<div style={{position:'absolute',inset:0,zIndex:9600,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:8}}>
+        <div style={{position:'absolute',inset:0,border:`3px solid ${comboFlash.color}`,animation:'fadeIn 0.1s ease',opacity:0.8,boxShadow:`inset 0 0 60px ${comboFlash.color}44,0 0 40px ${comboFlash.color}44`}}/>
+        <div style={{fontSize:80,filter:`drop-shadow(0 0 30px ${comboFlash.color})`,animation:'throb 0.3s ease-in-out infinite'}}>{comboFlash.emoji}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:comboFlash.color,textShadow:`0 0 40px ${comboFlash.color},0 0 80px ${comboFlash.color}66,3px 3px 0 #000`,letterSpacing:8,animation:'fadeIn 0.2s ease'}}>⛧ RIFF CHAIN ⛧</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:'#fff',textShadow:`0 0 20px ${comboFlash.color},3px 3px 0 #000`,letterSpacing:6,animation:'fadeIn 0.4s ease'}}>{comboFlash.name}</div>
       </div>}
       {/* CIRCLE CLEARED FLASH */}
       {circleClearedData&&<div style={{position:'absolute',inset:0,zIndex:9750,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:0,background:'rgba(0,0,0,0.94)',animation:'fadeIn 0.3s ease'}}>
