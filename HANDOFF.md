@@ -1,5 +1,5 @@
 # VESTIBULE — AI Development Handoff Document
-*Last updated: Monday, March 23, 2026 at 10:00 AM (JST) — Session 13 end state*
+*Last updated: Monday, March 23, 2026 at 12:00 PM (JST) — Session 13 end state*
 *This is a living document. Update it at the end of every session.*
 
 ---
@@ -188,3 +188,22 @@ Grades: GARAGE BAND → OPENING ACT → LOCAL LEGEND → TOURING ACT → HEADLIN
 ---
 
 *Update this at end of every session. Paste HANDOFF.md + TODO.md into new chat to continue seamlessly.*
+
+
+## Session 14 — The Big 5 Features
+
+### Planned Features (in build order):
+1. **Riff Chains** — 16 two-card combo system with visual/audio feedback + damage bonus
+2. **The Pact** — Post-boss reward choice (pick 1 of 2, or skip). 12 pact pool, indicator on stage
+3. **The Descent** — Circle map with fight skip option + rewards (Balatro blind-selection style)
+4. **Genre Bonus** — Build identity system (RIFF METAL/BLACK METAL/PROG ROCK/DOOM METAL) + deck thinning
+5. **The Encore** — Lucifer victory cinematic + win-exclusive unlocks + Welcome to Hell bonus boss
+
+### Design Decisions:
+- 16 combos cover every card in the deck (every card participates in at least 1 combo)
+- Pact choices include Skip option to preserve current state
+- Pact indicator shows on stage with hover tooltips
+- Stash tightening: 15% off mid/late rewards (NOT early circles)
+- Deck thinning at Pawn Shop is the single biggest replayability improvement
+- Welcome to Hell (not "Bonus Circle 10") — A&R Executive with contract mechanic
+- A&R cutscene: corporate office SVG, typewriter text, choice to enter or walk away

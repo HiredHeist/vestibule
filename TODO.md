@@ -83,43 +83,62 @@ This is happening.
 
 ## 🔥 THE BIG 5 — Session 14 Priority Features
 
-### Feature 1: COMBO SYSTEM — "Riff Chains"
-- [ ] Define 8 two-card synergy combos with names
+### Feature 1: COMBO SYSTEM — "Riff Chains" (16 combos)
+- [ ] Define 16 two-card synergy combos in RIFF_CHAINS constant
+- [ ] Track cardsPlayedThisStrike[] array
 - [ ] Detect combo in applyCard when 2nd synergy card played same strike
-- [ ] "⛧ RIFF CHAIN ⛧" 80px gold center flash + combo name 40px
+- [ ] "⛧ RIFF CHAIN ⛧" 80px gold center flash (0.8s) + combo name 40px
 - [ ] +10% bonus damage on 2nd card of combo
 - [ ] Gold screen border flash 0.5s
-- [ ] Combat log shows combo in gold
-- [ ] Achievement: "Discover 5 different combos"
+- [ ] Combat log shows combo in gold text
+- [ ] Achievement: "Discover 5 different combos" + "Trigger 50 combos"
+- [ ] Combos: SHRED STORM, HELLFIRE, BLOOD PACT, TRIPLE THREAT, SOUL HARVEST,
+      DEATH WISH, ETERNAL ENCORE, CLEAN MACHINE, WALL OF SOUND, FEEDBACK HELL,
+      MOSH MADNESS, DARK SACRIFICE, NOISE GATE, POWER SURGE, DEMON CORE, LAST STAND
 
 ### Feature 2: CIRCLE BOSS REWARDS — "The Pact"
 - [ ] Pact screen after each boss kill (before shop)
 - [ ] 12 possible pact rewards, 2 random offered per circle, never repeat
 - [ ] Choose one → other shatters/fades animation
-- [ ] Pact choices: Ember Surge, Iron Strings, Thick Skin, Dark Bargain, Speed Demon, Blood Price, Clean Living, Corruption Engine, Merchant Eye, Stone Wall, Sixth Slot, War Drums
-- [ ] Reduce base stash gain 15-20% to create tighter economy
+- [ ] "⛧ Skip — Keep What You Have ⛧" button to decline both
+- [ ] Pact indicator on stage (bottom-right): small icons with hover tooltip
+- [ ] Max 9 pacts per run (one per circle boss)
+- [ ] Pact choices: Ember Surge, Iron Strings, Thick Skin, Dark Bargain, Speed Demon,
+      Blood Price, Clean Living, Corruption Engine, Merchant Eye, Stone Wall, Sixth Slot, War Drums
+- [ ] Stash tightening: 15% off mid/late circle rewards (NOT early — players must afford Garage Band Pack)
 
 ### Feature 3: CIRCLE MAP — "The Descent"
 - [ ] Map screen before each circle showing 3 fights
-- [ ] Skip option for fights 1 and 2 (not boss)
-- [ ] Skip rewards: stash, random card, heal, ember, corruption reset
-- [ ] Skipping = no shop after that fight
-- [ ] Boss always required
+- [ ] Skip option for fights 1 and 2 (boss always required)
+- [ ] Skip rewards: stash, random card, heal, ember boost, corruption reset
+- [ ] Skipping = no shop after that fight (trade shop visit for quick bonus)
+- [ ] Balatro-style blind selection with circle theming
+- [ ] Veterans skip early circles, new players fight everything
 
 ### Feature 4: BUILD IDENTITY — "Genre Bonus"
-- [ ] Track RIFF/CORRUPT/UTILITY/EMBER play percentages
+- [ ] Track RIFF/CORRUPT/UTILITY/EMBER play percentages per run
 - [ ] Genre display (bar or indicator) on right panel
-- [ ] 50%+ threshold activates Genre Bonus (RIFF METAL, BLACK METAL, PROG ROCK, DOOM METAL)
+- [ ] 50%+ threshold activates Genre Bonus:
+      RIFF METAL (+15% RIFF damage), BLACK METAL (+25% corruption damage),
+      PROG ROCK (+1 card draw/strike), DOOM METAL (+2 ATK if no discards used)
 - [ ] Deck thinning: "Burn" at Pawn Shop — delete card permanently for free
-- [ ] Shop leans toward current genre (1 extra card of dominant type)
-- [ ] Opening Night: show "Synergizes with: X BUILD" on members
+- [ ] Shop leans toward current genre (1 extra card of dominant type in rotation)
+- [ ] Opening Night: show "Synergizes with: X BUILD" under member keywords
+- [ ] Further design discussion needed on thresholds and feel
 
-### Feature 5: VICTORY EXPERIENCE — "The Encore"
-- [ ] Lucifer kill cinematic (screen crack, shatter, text reveal, member rise)
-- [ ] Score counting animation (Balatro-style roll-up)
-- [ ] Victory music track (6th track)
-- [ ] Win-exclusive unlocks per stake (card, artifact, member, passive, cosmetic, title)
-- [ ] A&R Executive bonus boss (Circle 10, 100k HP, "contract" mechanic)
+### Feature 5: VICTORY EXPERIENCE — "The Encore" + "Welcome to Hell"
+- [ ] Lucifer kill cinematic: screen freeze → crack SVG → shatter → text reveal
+      "⛧ THE DEVIL IS DEAD ⛧" 120px → band members rise gold → score roll-up
+- [ ] Score counting animation (Balatro-style number roll-up with sound)
+- [ ] Victory music track (6th mp3)
+- [ ] Win-exclusive unlocks per stake:
+      Bronze → "Devil's Advocate" card, Silver → "Lucifer's Crown" artifact,
+      Gold → "Fallen Angel" member, Obsidian → "Soul of the Damned" passive,
+      Blood → "Bloodstained" card back, Demonic → "⛧ GOD KILLER ⛧" title
+- [ ] WELCOME TO HELL bonus fight (replaces "Bonus Circle 10" / "Second Album"):
+      Corporate A&R Executive office cutscene (SVG silhouette, typewriter text),
+      choice to enter or walk away, 100k HP boss, "contract" mechanic
+      (every 2 strikes: play contract = +50% score but lose strongest member)
 - [ ] Share-ready victory screenshot layout
 
 ### Balance Tweaks (after Big 5)
