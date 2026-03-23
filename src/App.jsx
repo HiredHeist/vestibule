@@ -4166,7 +4166,7 @@ function App(){
       {/* PARCHMENT */}
       <div style={{flex:1,margin:'0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'visible',zIndex:10,background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:`2px solid ${corruptMax?'#660000':corruptHigh?'#7a2010':'#7a5820'}`,boxShadow:`inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)${corruptHigh?',0 0 60px rgba(120,0,0,0.3)':''}${corruptMax?',0 0 100px rgba(180,0,0,0.5)':''}`,filter:parchmentFilter,display:'flex',flexDirection:'column'}}>
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
-        <div style={{padding:'6px 16px 4px',position:'relative',zIndex:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0}}>
+        <div style={{padding:'16px 16px 14px',position:'relative',zIndex:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0}}>
           <div style={{width:'100%',maxWidth:760,background:'rgba(8,0,0,0.55)',border:'2px solid rgba(160,20,0,0.8)',borderRadius:8,padding:'8px 18px 10px',animation:'bossGlow 2s ease-in-out infinite',boxShadow:'0 0 30px rgba(150,0,0,0.4),inset 0 0 40px rgba(80,0,0,0.3)'}}>
             <BossSection enemy={enemy} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll}/>
           </div>
@@ -4177,7 +4177,7 @@ function App(){
             <div style={{fontFamily:"'ScratchFont',serif",fontSize:10,color:'#8a6838',opacity:.4,fontStyle:'italic',letterSpacing:4}}>— stage —</div>
             <div style={{flex:1,height:1,background:'rgba(60,35,5,0.2)'}}/>
           </div>
-          <div style={{display:'flex',alignItems:'center',gap:50,padding:'12px 10px 12px 130px',justifyContent:'center',flex:1,position:'relative'}}>
+          <div style={{display:'flex',alignItems:'center',gap:50,padding:'0px 10px 0px 130px',justifyContent:'center',flex:1,position:'relative'}}>
             <div style={{display:'flex',flexDirection:'column',gap:8,alignSelf:'center',flexShrink:0,background:'rgba(0,0,0,0.22)',borderRadius:'0 6px 6px 0',padding:'8px 10px 8px 10px',borderRight:'1px solid rgba(140,90,20,0.35)',position:'absolute',left:0,top:'50%',transform:'translateY(-50%)'}}>
               {[0,1,2].map(i=>{const a=(activeArtifacts||[])[i];return(
                 <div key={i} style={{position:'relative'}}
@@ -4206,7 +4206,7 @@ function App(){
             ))}
           </div>
         </div>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,padding:'4px 20px 6px',position:'relative',zIndex:5,flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,padding:'1px 20px 2px',position:'relative',zIndex:5,flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)'}}>
           {(()=>{
             const act=stage.filter(m=>m&&!m.tooStoned)
             let dmg=act.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
@@ -4220,7 +4220,7 @@ function App(){
             const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1
             const fin=Math.floor(dmg*bon)
             return <>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:27,color:'#c8a060',fontWeight:700,textShadow:'0 0 10px rgba(200,160,60,0.6)'}}>Combined Attack</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:27,color:'#c8a060',fontWeight:900,textShadow:'0 0 10px rgba(200,160,60,0.6)'}}>Combined Attack</span>
               <span key={fin} style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block'}}>{fin}</span>
               {bon>1&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#e8a820',letterSpacing:1}}>+{Math.round((bon-1)*100)}% SYNERGY</span>}
               <span style={{color:'#e8a820',fontSize:18,textShadow:'0 0 8px rgba(200,160,60,0.5)'}}>⟶</span>
