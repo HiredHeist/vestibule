@@ -457,6 +457,39 @@ const KEYWORD_DESC={
   'HEXED':'Gains +Corruption each Strike, ATK scales with Corruption.',
   'FALLEN':'Cannot be healed. Loses 1 HP per Strike. If Lucifer dies, game over. Max 3 band members.',
 }
+
+// ═══════════════════════════════════════════════════════════
+// CARD MASTERY SYSTEM — persistent play tracking across runs
+// ═══════════════════════════════════════════════════════════
+const MASTERY_TIERS=[
+  {name:'Unplayed',min:0,color:null,border:null,glow:null},
+  {name:'Novice',min:10,color:'#cd7f32',border:'#cd7f32',glow:'rgba(205,127,50,0.3)'},
+  {name:'Adept',min:50,color:'#c0c0c0',border:'#c0c0c0',glow:'rgba(192,192,192,0.4)'},
+  {name:'Master',min:200,color:'#ffd700',border:'#ffd700',glow:'rgba(255,215,0,0.5)'},
+  {name:'Legendary',min:666,color:'#ff44ff',border:'#ff44ff',glow:'rgba(255,68,255,0.6)'},
+]
+function getMasteryData(){try{return JSON.parse(localStorage.getItem('vst_mastery')||'{}')}catch(e){return{}}}
+function saveMasteryData(d){localStorage.setItem('vst_mastery',JSON.stringify(d))}
+function getMasteryTier(cardId){
+  const d=getMasteryData()
+  const plays=d[cardId]||0
+  let tier=MASTERY_TIERS[0]
+  for(const t of MASTERY_TIERS){if(plays>=t.min)tier=t}
+  return{...tier,plays}
+}
+function addMasteryPlays(cardId,count){
+  const d=getMasteryData()
+  d[cardId]=(d[cardId]||0)+(count||1)
+  saveMasteryData(d)
+  return d[cardId]
+}
+function getTotalMastery(){
+  const d=getMasteryData()
+  let total=0,maxed=0
+  for(const k of Object.keys(d)){total+=d[k];if(d[k]>=666)maxed++}
+  return{total,maxed,cards:Object.keys(d).length}
+}
+
 function seededRng(seed){let s=seed;return function(){s=Math.imul(48271,s)|0;return(s&0x7fffffff)/0x7fffffff}}
 
 function buildDeck(seed){
@@ -1797,12 +1830,14 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
 }
 
 function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop,isUsed,lastRiffPlayed}){
+  const mastery=getMasteryTier(card.id)
   const spread=Math.min(4,20/total),mid=(total-1)/2
   const rot=(index-mid)*spread,yOff=Math.abs(index-mid)*2
   const bc=card.type==='CORRUPT'?'#aa1111':card.type==='UTILITY'?'#22aa44':card.type==='EMBER'?'#c87820':'#9933cc'
   const glow=card.type==='CORRUPT'?'rgba(170,0,0,0.5)':card.type==='UTILITY'?'rgba(30,160,50,0.5)':card.type==='EMBER'?'rgba(200,120,20,0.5)':'rgba(140,40,200,0.5)'
   const unaffordable=!canAfford&&card.embers>0
   const shimmerAnim=card.rarity==='Rare'?'holoShimmer 3s ease-in-out infinite':card.rarity==='Uncommon'?'uncommonGlow 2s ease-in-out infinite':''
+  const masteryBorder=mastery.border?{borderTop:'2px solid '+mastery.border,boxShadow:'inset 0 2px 8px '+mastery.glow}:{}
   return(
     <div draggable
       onDragStart={e=>{e.dataTransfer.effectAllowed='move';onDragStart(index)}}
@@ -1818,7 +1853,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         transform:isDragging?'scale(0.85) rotate(5deg)':isHovered?'translateY(-80px) scale(1.5) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
         zIndex:isDragging?0:isHovered?9999:isSelected?50+index:10+index,
-        boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
+        boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:(mastery.glow?'2px 4px 16px rgba(0,0,0,0.75),0 0 8px '+mastery.glow:'2px 4px 16px rgba(0,0,0,0.75)'),
         opacity:isDragging?0.4:1,
         animation:shimmerAnim,
         margin:total>HAND_SIZE?'0 -28px':'0 -22px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
@@ -1838,6 +1873,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       {card.mythic&&<div style={{position:'absolute',top:8,left:28,padding:'2px 5px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#cc44ff',letterSpacing:1}}>⛧MYTHIC</div>}
       {card.rarity==='Rare'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
       {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
+      {mastery.border&&<div style={{position:'absolute',bottom:4,left:4,padding:'1px 5px',borderRadius:2,background:'rgba(0,0,0,0.75)',border:'1px solid '+mastery.border+'88',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:900,color:mastery.color,letterSpacing:1,textTransform:'uppercase',zIndex:5}}>{mastery.name}</div>}
       <div style={{height:75,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:40,background:'rgba(0,0,0,0.35)',position:'relative'}}>
         <div style={{position:'absolute',inset:0,background:`radial-gradient(circle at center,${bc}18,transparent 70%)`}}/>
         {card.emoji}
@@ -1914,6 +1950,97 @@ function DamageBreakdown({data,onDone}){
 // ═══════════════════════════════════════════════════════════
 // EVENT SCREEN — Random encounters between non-boss fights
 // ═══════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
+// MASTERY GALLERY — persistent card mastery progress
+// ═══════════════════════════════════════════════════════════
+function MasteryGallery({onClose}){
+  const data=getMasteryData()
+  const cards=ALL_CARDS.filter(c=>!c.shopOnly&&c.id!=='contract')
+  const totals=getTotalMastery()
+  const holoAnim='@keyframes holoShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}'
+  const tierCounts=MASTERY_TIERS.map(t=>({name:t.name,count:cards.filter(c=>{const p=data[c.id]||0;let tier=MASTERY_TIERS[0];for(const tt of MASTERY_TIERS){if(p>=tt.min)tier=tt};return tier.name===t.name}).length}))
+
+  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.99)',display:'flex',flexDirection:'column',alignItems:'center',padding:'30px 40px',overflowY:'auto'}}>
+    <style>{holoAnim}</style>
+    <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#c8a040',textShadow:'0 0 30px rgba(200,160,40,0.4),2px 2px 0 #000',letterSpacing:6,marginBottom:4}}>Card Mastery</div>
+    <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic',marginBottom:8}}>Play cards across runs to unlock visual upgrades</div>
+
+    {/* Tier summary */}
+    <div style={{display:'flex',gap:16,marginBottom:16,flexWrap:'wrap',justifyContent:'center'}}>
+      {MASTERY_TIERS.slice(1).map(t=>(
+        <div key={t.name} style={{display:'flex',alignItems:'center',gap:6,padding:'4px 14px',background:'rgba(0,0,0,0.4)',border:'1px solid '+t.border+'66',borderRadius:4}}>
+          <div style={{width:10,height:10,borderRadius:'50%',background:t.color,boxShadow:'0 0 6px '+t.glow}}/>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:t.color,fontWeight:900}}>{t.name}</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#8a7050'}}>({t.min}+ plays)</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#c8a060',fontWeight:900}}>{tierCounts.find(tc=>tc.name===t.name)?.count||0}</span>
+        </div>
+      ))}
+      <div style={{padding:'4px 14px',background:'rgba(0,0,0,0.4)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:4}}>
+        <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#c8a060'}}>{totals.total.toLocaleString()} total plays · {totals.maxed} Legendary</span>
+      </div>
+    </div>
+
+    {/* Card grid */}
+    <div style={{display:'grid',gridTemplateColumns:'repeat(7,140px)',gap:10,justifyContent:'center',maxWidth:1100}}>
+      {cards.map(c=>{
+        const plays=data[c.id]||0
+        let tier=MASTERY_TIERS[0]
+        for(const t of MASTERY_TIERS){if(plays>=t.min)tier=t}
+        const nextTier=MASTERY_TIERS[MASTERY_TIERS.indexOf(tier)+1]
+        const progress=nextTier?Math.min(1,(plays-tier.min)/(nextTier.min-tier.min)):1
+        const bc=c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
+        const isLegendary=tier.name==='Legendary'
+        const borderColor=tier.border||bc+'66'
+
+        return(<div key={c.id} style={{
+          background:isLegendary?'linear-gradient(135deg,#1a0820,#0a0412,#1a0820)':'linear-gradient(180deg,#1a1008,#0c0604)',
+          border:'2px solid '+borderColor,
+          borderRadius:7,padding:0,position:'relative',overflow:'hidden',
+          boxShadow:tier.glow?'0 0 12px '+tier.glow+',inset 0 0 8px '+tier.glow:'0 2px 8px rgba(0,0,0,0.5)'
+        }}>
+          {/* Holo shimmer for Legendary */}
+          {isLegendary&&<div style={{position:'absolute',inset:0,background:'linear-gradient(45deg,transparent 30%,rgba(255,68,255,0.08) 50%,transparent 70%)',backgroundSize:'200% 200%',animation:'holoShift 3s ease infinite',pointerEvents:'none',zIndex:1}}/>}
+
+          {/* Type bar */}
+          <div style={{height:3,background:tier.border||bc}}/>
+
+          {/* Emoji */}
+          <div style={{fontSize:32,textAlign:'center',padding:'10px 0',background:'rgba(0,0,0,0.3)'}}>{c.emoji}</div>
+
+          {/* Name */}
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'2px 4px',lineHeight:1.2}}>{c.name}</div>
+
+          {/* Tier badge */}
+          <div style={{textAlign:'center',padding:'2px 0'}}>
+            {tier.name!=='Unplayed'?
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:tier.color,letterSpacing:1,textTransform:'uppercase'}}>{tier.name}</span>:
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#554433',letterSpacing:1}}>UNPLAYED</span>
+            }
+          </div>
+
+          {/* Progress bar */}
+          <div style={{margin:'0 6px 6px',height:6,background:'rgba(0,0,0,0.5)',borderRadius:3,overflow:'hidden',position:'relative'}}>
+            <div style={{height:'100%',width:(progress*100)+'%',
+              background:isLegendary?'linear-gradient(90deg,#ff44ff,#ff88ff,#ff44ff)':tier.border?'linear-gradient(90deg,'+tier.border+','+tier.color+')':'rgba(100,65,15,0.4)',
+              borderRadius:3,transition:'width 0.5s ease'}}/>
+          </div>
+
+          {/* Play count */}
+          <div style={{textAlign:'center',padding:'0 0 6px'}}>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:tier.color||'#665533'}}>{plays}</span>
+            {nextTier&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#554433'}}> / {nextTier.min}</span>}
+          </div>
+        </div>)
+      })}
+    </div>
+
+    <button onClick={onClose} style={{marginTop:20,fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:4,padding:'12px 48px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'#c8a040',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
+      Close
+    </button>
+  </div>)
+}
+
 function EventScreen({event,onChoose}){
   const [chosen,setChosen]=useState(null)
   const [resultText,setResultText]=useState(null)
@@ -2823,6 +2950,7 @@ function App(){
   const [unlockHover,setUnlockHover]=useState(null) // card data for tooltip
   const setUnlockTab=(t)=>{setUnlockTab_(t);setUnlockPage_(0);setUnlockHover(null)}
   const [showPauseOptions,setShowPauseOptions]=useState(false)
+  const [showMastery,setShowMastery]=useState(false)
   const [activeStakeId,setActiveStakeId]=useState(()=>localStorage.getItem('vst_active_stake')||'bronze')
   const activeStake=STAKES.find(s=>s.id===activeStakeId)||STAKES[0]
   const [musicVol,setMusicVol]=useState(()=>parseFloat(localStorage.getItem('vst_music_vol')||'0.3'))
@@ -3394,7 +3522,7 @@ function App(){
     setStage(ns)
     if(spent>0)setEmbers(function(p){return p-spent})
     if(msg)addLog(msg)
-    updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+    updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
     if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
     if(card.type==='RIFF')setLastRiffPlayed(card)
     // ── RIFF CHAIN COMBO DETECTION ──
@@ -3452,7 +3580,7 @@ function App(){
       setEmbers(p=>Math.min(maxEmbers,p+3-effectiveEmbers))
       addLog('🎼 Smoke Break! '+victim.name+' discarded. +3 Embers.'+(preSelected.length===0?' (tip: select a card first)':''))
       addFloat('+3 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
-      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard'] // count victim too for refill
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -3472,7 +3600,7 @@ function App(){
       setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus-effectiveEmbers))
       addLog('🍯 Groupie! +2 Embers, drew 1 card.')
       addFloat('+2 🔥 +1 card',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')
-      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -3492,7 +3620,7 @@ function App(){
       setSetlistOpen(true)
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       addLog('📋 Setlist! Drew 2 cards — now pick 1 to discard.')
-      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -3513,7 +3641,7 @@ function App(){
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       addLog('🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+drawCount+'.'+(discardCount===0?' (Tip: select cards before playing)':''))
-      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
       setLastRiffPlayed(card)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
@@ -3535,7 +3663,7 @@ function App(){
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       addLog('🎙 Remastered! Deleted '+toDelete.name+', drew 3.')
       addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
-      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       // cardHeal enemy passive
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
@@ -3569,7 +3697,7 @@ function App(){
       }
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
-      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
       else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
@@ -5056,6 +5184,12 @@ function App(){
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(120,100,50,0.3)',borderRadius:6,
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
               ⚙ Options
+            </button>
+            <button onClick={()=>setShowMastery(true)}
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'#c8a040',
+                background:'rgba(40,25,5,0.5)',border:'1px solid rgba(200,160,40,0.4)',borderRadius:6,
+                padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
+              🏆 Mastery ({getTotalMastery().maxed}/{ALL_CARDS.filter(c=>!c.shopOnly&&c.id!=='contract').length})
             </button>
           </div>
 

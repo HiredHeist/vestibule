@@ -15,7 +15,7 @@
 ### TIER 2 — Should Ship (retention / "one more run")
 - [x] **Post-Run Highlights** — "You were 2 strikes from beating the Archfraud. Try again?" + biggest strike, closest call, longest combo chain. Loss aversion is the most powerful Play Again trigger.
 - [x] **End Screen Stats Bigger** — Individual stat boxes, screenshot-worthy layout. Current stats are small and forgettable.
-- [ ] **Card Mastery System** — 41 cards × 4 tiers (Novice→Adept→Master→Legendary). Persistent progress bars across runs. Completionists play for weeks.
+- [x] **Card Mastery System** — 41 cards × 4 tiers (Novice→Adept→Master→Legendary). Persistent progress bars across runs. Completionists play for weeks.
 - [ ] **Boss Trophy Wall** — "Hall of Damnation" in main menu. 29 boss slots (27 + Lucifer + Executive). Empty "???" slots drive completionists. Demonic-stake frames glow red.
 
 ### TIER 3 — Nice to Have (depth / replayability)
