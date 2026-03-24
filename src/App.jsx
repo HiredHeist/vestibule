@@ -273,8 +273,8 @@ function getUnlockedStakes(){
   for(let i=1;i<STAKES.length;i++){if(beaten.includes(STAKES[i-1].id))unlocked.push(STAKES[i])}
   return unlocked
 }
-// ── WELCOME TO HELL: A&R Executive bonus boss ──────────────────────
-const AR_EXECUTIVE={id:'ar_exec',name:'The A&R Executive',emoji:'🕴',maxHp:100000,baseDmg:8,
+// ── WELCOME TO HELL: The Executive bonus boss ──────────────────────
+const AR_EXECUTIVE={id:'ar_exec',name:'The Executive',emoji:'🕴',maxHp:100000,baseDmg:8,
   passive:'Corporate Pressure. Every 2 strikes, a Record Deal contract appears in your hand.',
   passiveId:'corporate',tagline:'The real Devil wears a suit.'}
 
@@ -2375,6 +2375,15 @@ function App(){
   const [activeStakeId,setActiveStakeId]=useState(()=>localStorage.getItem('vst_active_stake')||'bronze')
   const activeStake=STAKES.find(s=>s.id===activeStakeId)||STAKES[0]
   const [musicVol,setMusicVol]=useState(()=>parseFloat(localStorage.getItem('vst_music_vol')||'0.3'))
+  const [sfxVol,setSfxVol]=useState(()=>parseFloat(localStorage.getItem('vst_sfx_vol')||'0.5'))
+  const playSfx=useCallback((name)=>{
+    if(sfxVol<=0)return
+    try{
+      const a=new Audio(import.meta.env.BASE_URL+'sfx/'+name+'.mp3')
+      a.volume=sfxVol
+      a.play().catch(()=>{})
+    }catch(e){}
+  },[sfxVol])
   const tryAchieve=useCallback((id)=>{if(unlockAchievement(id))setNewAchievements(p=>[...p,id])},[])
 
   // ── MUSIC SYSTEM ─────────────────────────────────────────────
@@ -3210,7 +3219,7 @@ function App(){
         addFloat('MAX EMBERS +1',getCenter(bossRef).x,getCenter(bossRef).y-130,'#ff6600',true)
       }
       if(welcomeToHell==='fighting'){
-        // A&R Executive defeated!
+        // The Executive defeated!
         playVictory()
         const contractBonus=1+contractsPlayed*0.5 // 1x base, +0.5x per contract
         const wthScore=Math.round(calcRunScore(stats,true)*3*contractBonus)
@@ -4248,6 +4257,15 @@ function App(){
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#aa8030',minWidth:36,textAlign:'right'}}>{Math.round(musicVol*100)}%</span>
             </div>
           </div>
+          <div style={{marginTop:12,display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#e8a820'}}>Sound Effects</span>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <input type="range" min="0" max="1" step="0.05" value={sfxVol}
+                onChange={e=>{const v=parseFloat(e.target.value);setSfxVol(v);localStorage.setItem('vst_sfx_vol',v)}}
+                style={{width:120,accentColor:'#e8a820',cursor:'pointer'}}/>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#aa8030',minWidth:36,textAlign:'right'}}>{Math.round(sfxVol*100)}%</span>
+            </div>
+          </div>
           <div style={{marginTop:12,display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(40,5,5,0.4)',border:'1px solid rgba(180,40,40,0.3)',borderRadius:6}}>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#cc4444'}}>Reset All Progress</span>
             <button onClick={()=>{if(confirm('This will erase ALL progress, scores, achievements, and unlocks. Are you sure?')){localStorage.clear();window.location.reload()}}}
@@ -4395,7 +4413,7 @@ function App(){
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#c8a060',textAlign:'center',maxWidth:700,lineHeight:1.6,fontStyle:'italic'}}>
         "Congratulations. Truly impressive. But per your contract, you owe us one more album. Care to... renegotiate?"
       </div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#6a5030',textAlign:'center',marginTop:4}}>— The A&R Executive</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#6a5030',textAlign:'center',marginTop:4}}>— The Executive</div>
       <div style={{display:'flex',gap:30,marginTop:24}}>
         <button onClick={()=>{
           setWelcomeToHell('cutscene')
@@ -4439,7 +4457,7 @@ function App(){
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:10}}>WELCOME TO HELL</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:28,color:'#e8d090',fontStyle:'italic'}}>The Second Album</div>
       <div style={{fontSize:100,marginTop:16}}>🕴</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#aa8a50',letterSpacing:2}}>A&R EXECUTIVE — 100,000 HP</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#aa8a50',letterSpacing:2}}>THE EXECUTIVE — 100,000 HP</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#6a5030',fontStyle:'italic'}}>The real Devil wears a suit.</div>
       <div style={{width:300,height:6,background:'rgba(200,0,0,0.3)',borderRadius:3,marginTop:12,overflow:'hidden'}}>
         <div style={{height:'100%',background:'#cc1111',animation:'loadBar 2.5s ease-in-out forwards',width:0}}/>
@@ -4872,6 +4890,15 @@ function App(){
                   onChange={e=>setMusicVolume(e.target.value)}
                   style={{width:100,accentColor:'#e8a820',cursor:'pointer'}}/>
                 <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#aa8030',minWidth:30,textAlign:'right'}}>{Math.round(musicVol*100)}%</span>
+              </div>
+            </div>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820'}}>SFX Volume</span>
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                <input type="range" min="0" max="1" step="0.05" value={sfxVol}
+                  onChange={e=>{const v=parseFloat(e.target.value);setSfxVol(v);localStorage.setItem('vst_sfx_vol',v)}}
+                  style={{width:100,accentColor:'#e8a820',cursor:'pointer'}}/>
+                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#aa8030',minWidth:30,textAlign:'right'}}>{Math.round(sfxVol*100)}%</span>
               </div>
             </div>
           </div>
