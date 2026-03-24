@@ -570,6 +570,61 @@ function recordTrophyKill(enemyId,stakeId,damage,strikes){
   return t
 }
 
+
+// ═══════════════════════════════════════════════════════════
+// BAND LEGACY — persistent member stats across runs
+// ═══════════════════════════════════════════════════════════
+function getLegacyData(){try{return JSON.parse(localStorage.getItem('vst_legacy')||'{}')}catch(e){return{}}}
+function saveLegacyData(d){localStorage.setItem('vst_legacy',JSON.stringify(d))}
+function recordLegacyRun(members,stats,won,circleReached){
+  const d=getLegacyData()
+  members.forEach(m=>{
+    if(!m)return
+    if(!d[m.id])d[m.id]={runs:0,wins:0,deaths:0,totalDmg:0,bestCircle:0,bestDmg:0,nickname:null}
+    const l=d[m.id]
+    l.runs++
+    if(won)l.wins++
+    if(m.tooStoned)l.deaths++
+    l.totalDmg+=(stats.totalDamage||0)
+    if(circleReached>l.bestCircle)l.bestCircle=circleReached
+    if((stats.highestStrike||0)>l.bestDmg)l.bestDmg=stats.highestStrike||0
+    // Generate nickname based on stats
+    if(l.runs>=20&&l.deaths===0)l.nickname='The Immortal'
+    else if(l.wins>=10)l.nickname='The Legendary'
+    else if(l.deaths>=10)l.nickname='The Cursed'
+    else if(l.runs>=15)l.nickname='The Veteran'
+    else if(l.wins>=5)l.nickname='The Proven'
+    else if(l.bestCircle>=9)l.nickname='Hell Walker'
+    else if(l.runs>=10)l.nickname='The Seasoned'
+    else if(l.runs>=5)l.nickname='The Familiar'
+    else if(l.bestDmg>=500)l.nickname='Bonecrusher'
+  })
+  saveLegacyData(d)
+}
+function getMemberLegacy(id){
+  const d=getLegacyData()
+  return d[id]||null
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// DAILY SEED — track daily best score
+// ═══════════════════════════════════════════════════════════
+function getDailySeed(){const d=new Date();return parseInt(d.getFullYear().toString()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'))}
+function getDailyBest(){
+  const today=new Date().toISOString().slice(0,10)
+  const stored=JSON.parse(localStorage.getItem('vst_daily_best')||'{}')
+  if(stored.date!==today)return null
+  return stored.score||null
+}
+function saveDailyBest(score){
+  const today=new Date().toISOString().slice(0,10)
+  const stored=JSON.parse(localStorage.getItem('vst_daily_best')||'{}')
+  if(stored.date!==today||score>(stored.score||0)){
+    localStorage.setItem('vst_daily_best',JSON.stringify({date:today,score,circle:stored.circle||0}))
+  }
+}
+
 function seededRng(seed){let s=seed;return function(){s=Math.imul(48271,s)|0;return(s&0x7fffffff)/0x7fffffff}}
 
 function buildDeck(seed){
@@ -623,6 +678,28 @@ const STARTER_PASSIVES=[
 // ═══════════════════════════════════════════════════════════
 // RANDOM EVENTS — Hell-themed encounters between non-boss fights
 // ═══════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
+// STARTER DECKS — achievement-gated alternate starting decks
+// ═══════════════════════════════════════════════════════════
+const STARTER_DECKS=[
+  {id:'standard',name:'Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles.',requirement:null,color:'#c8a060'},
+  {id:'purist',name:'Purist',emoji:'✨',desc:'Only Common cards. No Corrupt type. Pure skill.',requirement:'circle_5',color:'#44cc44',
+    filter:c=>c.rarity==='Common'&&c.type!=='CORRUPT'},
+  {id:'corrupted',name:'Corrupted',emoji:'🌀',desc:'Heavy Corrupt cards. Start at 25% corruption.',requirement:'corruption_lord',color:'#cc44ff',
+    filter:c=>c.type==='CORRUPT'||c.type==='EMBER',startCorruption:25},
+  {id:'speedrunner',name:'Speedrunner',emoji:'⚡',desc:'Fewer cards, more Riffs. Hit fast or die.',requirement:'perfect_strike',color:'#ff8800',
+    filter:c=>c.type==='RIFF'||c.embers===0,maxCards:45},
+  {id:'hoarder',name:'Hoarder',emoji:'💰',desc:'Extra Ember and Utility cards. Start with +20 Stash.',requirement:'circle_7',color:'#ffd700',
+    filter:c=>c.type==='EMBER'||c.type==='UTILITY',startStash:20},
+  {id:'sabbath',name:'Sabbath',emoji:'⛧',desc:'All Rare and Uncommon cards. No Commons. Brutal.',requirement:'circle_9',color:'#cc1111',
+    filter:c=>c.rarity==='Rare'||c.rarity==='Uncommon'},
+]
+function getUnlockedDecks(){
+  const achs=getAchievements()
+  return STARTER_DECKS.filter(d=>!d.requirement||achs.includes(d.requirement))
+}
+
 const HELL_EVENTS=[
   {id:'mosh_pit',name:'The Mosh Pit',emoji:'🤘',
     flavor:'A pit of tortured souls writhes before you. Your band could join the fray...',
@@ -961,7 +1038,7 @@ function BoosterScreen({onComplete,seed}){
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#ee2222',textTransform:'uppercase',fontWeight:900}}>ATK</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,color:'#ee2222',lineHeight:1}}>{m.atk}</div>
                   </div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,color:kwc,fontWeight:900,textAlign:'center',letterSpacing:0.5,maxWidth:100}}>{kw}</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,color:kwc,fontWeight:900,textAlign:'center',letterSpacing:0.5,maxWidth:100}}>{kw}{(()=>{const _l=getMemberLegacy(m.id);return _l&&_l.runs>0?<div style={{fontSize:8,color:'#887755',marginTop:2}}>{_l.nickname||(_l.runs+' runs')}</div>:null})()}</div>
                   <div style={{textAlign:'center'}}>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
@@ -2381,6 +2458,9 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   const grade=getScoreGrade(finalScore,isVictory)
   const streakBonus=dailyStreak>=30?20:dailyStreak>=7?10:dailyStreak>=3?5:0
   const isBest=finalScore>=(personalBest||0)&&finalScore>0
+  const dailyBest=getDailyBest()
+  const isDailyBest=isDailyRun&&(!dailyBest||finalScore>dailyBest)
+  if(isDailyRun&&finalScore>0)saveDailyBest(finalScore)
   const beatBy=isBest&&(personalBest||0)>0?finalScore-(personalBest||0):0
   const shortBy=!isBest&&(personalBest||0)>0?(personalBest||0)-finalScore:0
   const [displayScore,setDisplayScore]=useState(0)
@@ -2747,6 +2827,9 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 8px '+grade.color}}>{grade.label}</div>
             {stakeInfo.id!=='bronze'&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:stakeInfo.color,letterSpacing:2,marginTop:3,padding:'2px 12px',border:'1px solid '+stakeInfo.color,borderRadius:3,background:'rgba(0,0,0,0.4)',display:'inline-block'}}>{stakeInfo.name.toUpperCase()} ×{stakeInfo.scoreMult}</div>}
             <BestGap/>
+            {isDailyRun&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:isDailyBest?'#44ccff':'#668899',marginTop:4}}>
+              {isDailyBest?'🌍 NEW DAILY BEST!':'🌍 Daily Best: '+(dailyBest||0).toLocaleString()}
+            </div>}
           </div>
           {/* Play Again button — RIGHT NEXT TO score */}
           <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:8}}>
@@ -2761,6 +2844,20 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
                 animation:'throb 2s ease-in-out infinite',transition:'all 0.15s'}}>
               {isVictory?'⛧ Play Again ⛧':'↺ Play Again'}
             </button>
+            {isVictory&&<button onClick={()=>{/* Encore: restart with scaled enemies */
+              setEncoreMode(true);setEncoreCircle(p=>p+10)
+              setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(Math.round(ENEMIES[0].maxHp*2.0))
+              setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(4)
+              setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
+              setGameState('playing');setAnimPhase('idle');setDeathCause(null)
+              setVictoryFired(false);if(victoryFiredRef)victoryFiredRef.current=false
+              addLog('⛧ THE ENCORE BEGINS — All enemies ×2.0 HP! ⛧')
+            }}
+              style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,letterSpacing:4,
+                color:'#ff4400',background:'rgba(120,0,0,0.4)',
+                border:'2px solid #ff4400',borderRadius:8,padding:'10px 36px',cursor:'pointer',
+                textShadow:'0 0 20px rgba(255,68,0,0.7)',boxShadow:'0 0 25px rgba(255,68,0,0.3)',
+                animation:'throb 2s ease-in-out infinite'}}>⛧ The Encore ⛧</button>}
             <div style={{display:'flex',gap:8}}>
               <button onClick={handleShare}
                 style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:2,
@@ -3163,6 +3260,9 @@ function App(){
   const setUnlockTab=(t)=>{setUnlockTab_(t);setUnlockPage_(0);setUnlockHover(null)}
   const [showPauseOptions,setShowPauseOptions]=useState(false)
   const [showMastery,setShowMastery]=useState(false)
+  const [selectedDeck,setSelectedDeck]=useState('standard')
+  const [encoreMode,setEncoreMode]=useState(false)
+  const [encoreCircle,setEncoreCircle]=useState(0)
   const [showTrophies,setShowTrophies]=useState(false)
   const [activeStakeId,setActiveStakeId]=useState(()=>localStorage.getItem('vst_active_stake')||'bronze')
   const activeStake=STAKES.find(s=>s.id===activeStakeId)||STAKES[0]
@@ -4063,7 +4163,7 @@ function App(){
       }
       else if(fightIndex>=26){
       playVictory();setDeathCause('victory')
-      setStreakWins(p=>p+1);setStreakLosses(0)
+      setStreakWins(p=>p+1);setStreakLosses(0);recordLegacyRun(stage,stats,true,Math.floor(fightIndex/3)+1)
       const newRuns=totalRunsPlayed+1
       setTotalRunsPlayed(newRuns)
       localStorage.setItem('vst_runs', newRuns)
@@ -4593,7 +4693,7 @@ function App(){
               } // end blood oath else
             }
             const allStoned=ns2.filter(function(m){return m}).every(function(m){return m.tooStoned})
-            if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned');playSfx('defeat')};setTimeout(function(){setGameState('end')},800)}
+            if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned');playSfx('defeat')};recordLegacyRun(stage,stats,false,Math.floor(fightIndex/3)+1);setTimeout(function(){setGameState('end')},800)}
             return ns2
           })
           if(stage[stage.indexOf(target)]&&!stage[stage.indexOf(target)].tooStoned&&(stage[stage.indexOf(target)].hp-actualDmg)<=0&&!stage[stage.indexOf(target)].stoneShield)addLog('💨 '+target.name+' is TOO STONED!')
@@ -4749,7 +4849,7 @@ function App(){
     }
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
-    setEnemy(nextEnemy);setEnemyHp(Math.ceil(nextEnemy.maxHp*activeStake.hpMult))
+    setEnemy(nextEnemy);setEnemyHp(Math.ceil(nextEnemy.maxHp*activeStake.hpMult*(encoreMode?2.0:1.0)))
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
@@ -5148,13 +5248,17 @@ function App(){
   },[stash,rerollCost,fightIndex])
 
   const handleReset=()=>{
+    // Apply starter deck bonuses
+    const deckDef=STARTER_DECKS.find(d=>d.id===selectedDeck)
+    if(deckDef?.startCorruption)setCorruption(deckDef.startCorruption)
+    if(deckDef?.startStash)setStash(p=>p+(deckDef.startStash||0))
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
-    setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([])
+    setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setEncoreMode(false);setEncoreCircle(0)
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
   }
 
@@ -6126,6 +6230,21 @@ function App(){
                 style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:shakeEnabled?'#44cc44':'#cc4444',background:'rgba(0,0,0,0.4)',border:'1px solid '+(shakeEnabled?'#44cc44':'#cc4444'),borderRadius:4,padding:'6px 20px',cursor:'pointer',minWidth:60,textAlign:'center'}}>{shakeEnabled?'ON':'OFF'}</button>
             </div>
           </div>
+          {/* STARTER DECK PICKER */}
+          <div style={{display:'flex',gap:6,justifyContent:'center',flexWrap:'wrap',maxWidth:900}}>
+            {getUnlockedDecks().map(d=>(
+              <div key={d.id} onClick={()=>setSelectedDeck(d.id)}
+                style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,letterSpacing:1,
+                  padding:'6px 14px',cursor:'pointer',borderRadius:4,transition:'all 0.15s',
+                  background:selectedDeck===d.id?d.color+'33':'rgba(20,10,5,0.5)',
+                  border:selectedDeck===d.id?'2px solid '+d.color:'1px solid rgba(80,50,15,0.3)',
+                  color:selectedDeck===d.id?d.color:'#8a7050',
+                  boxShadow:selectedDeck===d.id?'0 0 12px '+d.color+'44':'none'}}>
+                {d.emoji} {d.name}
+              </div>
+            ))}
+          </div>
+
           <button onClick={()=>setShowPauseOptions(false)}
             style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,letterSpacing:4,color:'#ee2222',background:'rgba(120,0,0,0.25)',border:'2px solid #aa0000',borderRadius:8,padding:'12px 60px',cursor:'pointer',marginTop:8,animation:'throb 2s ease-in-out infinite'}}>Resume</button>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#555',letterSpacing:2,marginTop:4}}>Press ESC to close</div>

@@ -19,11 +19,11 @@
 - [x] **Boss Trophy Wall** — "Hall of Damnation" in main menu. 29 boss slots (27 + Lucifer + Executive). Empty "???" slots drive completionists. Demonic-stake frames glow red.
 
 ### TIER 3 — Nice to Have (depth / replayability)
-- [ ] **Achievement-Gated Starter Decks** — 6 alternate decks: Purist, Corrupted, Speedrunner, Hoarder, Minimalist, Sabbath. Each unlocked by specific achievements. Turns 1 game into 7.
-- [ ] **Daily Seed + Leaderboard** — Wordle-style daily habit. One shared seed, global comparison, streak badges. Requires simple backend or seed-encoded scoring.
+- [x] **Achievement-Gated Starter Decks** — 6 alternate decks: Purist, Corrupted, Speedrunner, Hoarder, Minimalist, Sabbath. Each unlocked by specific achievements. Turns 1 game into 7.
+- [x] **Daily Seed + Leaderboard** — Wordle-style daily habit. One shared seed, global comparison, streak badges. Requires simple backend or seed-encoded scoring.
 - [ ] **Corruption Gambling Mini-Game** — At 25/50/75% corruption thresholds, offer risk/reward gambles. The 50% coin flip is pure gambling psychology.
-- [ ] **Band Legacy System** — Musicians persist across runs, gain experience, earn nicknames. XCOM-style attachment. Death of a veteran member HURTS.
-- [ ] **The Encore (Endless Mode)** — Post-Lucifer infinite scaling. Circle 10+: random passives, x1.2 HP per circle. Remix Bosses. Escalating visual distortion.
+- [x] **Band Legacy System** — Musicians persist across runs, gain experience, earn nicknames. XCOM-style attachment. Death of a veteran member HURTS.
+- [x] **The Encore (Endless Mode)** — Post-Lucifer infinite scaling. Circle 10+: random passives, x1.2 HP per circle. Remix Bosses. Escalating visual distortion.
 
 ### TIER 4 — Art & Audio (player provides)
 - [ ] Replace all emoji placeholders with custom card art
