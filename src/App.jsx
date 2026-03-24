@@ -506,6 +506,37 @@ const STARTER_PASSIVES=[
   {id:'p10',name:'Stage Fright Reversal',emoji:'🎙',effect:'The first Strike of every fight deals +10 bonus damage.',cost:14},
 ]
 
+
+// ═══════════════════════════════════════════════════════════
+// RANDOM EVENTS — Hell-themed encounters between non-boss fights
+// ═══════════════════════════════════════════════════════════
+const HELL_EVENTS=[
+  {id:'mosh_pit',name:'The Mosh Pit',emoji:'🤘',
+    flavor:'A pit of tortured souls writhes before you. Your band could join the fray...',
+    choiceA:{label:'Jump In',desc:'All members take 4 damage. Survivors gain +1 ATK permanently.',emoji:'💥'},
+    choiceB:{label:'Walk Away',desc:'Lose 15 Stash. The crowd boos.',emoji:'🚶'}},
+  {id:'cursed_amp',name:'Cursed Amplifier',emoji:'🔊',
+    flavor:'A blood-red amp hums with infernal energy. Its knobs are set to 11...',
+    choiceA:{label:'Plug In',desc:'+2 Max Embers permanently. Corruption locks at current level forever.',emoji:'⚡'},
+    choiceB:{label:'Smash It',desc:'-15% Corruption. Sometimes silence is golden.',emoji:'🔨'}},
+  {id:'blood_oath',name:'Blood Oath',emoji:'🩸',
+    flavor:'A hooded figure offers a crimson contract. One name. One signature. One promise.',
+    choiceA:{label:'Sign It',desc:'Your strongest member gains +5 ATK. But if they take ANY boss damage, they die instantly.',emoji:'✍'},
+    choiceB:{label:'Refuse',desc:'Smart. The figure dissolves into smoke.',emoji:'🚫'}},
+  {id:'hellfire_baptism',name:'Hellfire Baptism',emoji:'🔥',
+    flavor:'A river of fire blocks your path. The flames whisper: "Let us in."',
+    choiceA:{label:'Walk Through',desc:'Corruption set to 69%. All members gain +2 ATK permanently.',emoji:'🌊'},
+    choiceB:{label:'Find Another Way',desc:'Nothing happens. You press on.',emoji:'↩'}},
+  {id:'sabbath_offering',name:'Sabbath Offering',emoji:'⛧',
+    flavor:'An altar of black stone demands sacrifice. Three cards, chosen by fate.',
+    choiceA:{label:'Make the Offering',desc:'3 random cards burned from your deck. All members healed to full HP.',emoji:'🪦'},
+    choiceB:{label:'Keep Your Cards',desc:'The altar crumbles. You keep your deck intact.',emoji:'🃏'}},
+  {id:'devils_wager',name:"The Devil\'s Wager",emoji:'🎲',
+    flavor:'Old Scratch himself appears, flipping a coin. "Feeling lucky, mortal?"',
+    choiceA:{label:'Take the Bet',desc:'Coin flip. HEADS: All members +3 ATK. TAILS: Your strongest member dies.',emoji:'🪙'},
+    choiceB:{label:'Walk Away',desc:'"Coward." He vanishes. But your band is intact.',emoji:'🚶'}},
+]
+
 const BOSS_QUOTES={
   'wanderer':'Finally... rest.',
   'lostsoul':'I was looking for something. I forgot what.',
@@ -1879,6 +1910,69 @@ function DamageBreakdown({data,onDone}){
   </div>)
 }
 
+
+// ═══════════════════════════════════════════════════════════
+// EVENT SCREEN — Random encounters between non-boss fights
+// ═══════════════════════════════════════════════════════════
+function EventScreen({event,onChoose}){
+  const [chosen,setChosen]=useState(null)
+  const [resultText,setResultText]=useState(null)
+  if(!event)return null
+
+  const handleChoice=(choice)=>{
+    if(chosen)return
+    setChosen(choice)
+    onChoose(choice)
+  }
+
+  const btnBase={fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:700,padding:'16px 28px',borderRadius:8,cursor:'pointer',transition:'all 0.2s',border:'2px solid',textAlign:'left',width:'100%',maxWidth:500}
+  const fadeIn='@keyframes evtFadeIn{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}'
+  const flicker='@keyframes evtFlicker{0%,100%{opacity:0.85}50%{opacity:1}}'
+
+  return(<div style={{width:1920,height:1080,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'radial-gradient(ellipse at center,#1a0a02 0%,#0a0400 70%,#000 100%)',position:'relative',overflow:'hidden'}}>
+    <style>{fadeIn+flicker}</style>
+    {/* Ambient particles */}
+    <div style={{position:'absolute',inset:0,background:'url("data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'4\' height=\'4\'><rect width=\'1\' height=\'1\' fill=\'rgba(200,100,0,0.03)\'/></svg>")',opacity:0.5,animation:'evtFlicker 3s ease-in-out infinite'}}/>
+
+    {/* Event card */}
+    <div style={{background:'linear-gradient(180deg,rgba(25,12,4,0.97),rgba(15,8,2,0.99))',border:'2px solid rgba(200,100,20,0.4)',borderRadius:16,padding:'40px 50px',maxWidth:620,width:'90%',boxShadow:'0 0 80px rgba(200,80,0,0.15),0 0 200px rgba(100,40,0,0.1),inset 0 1px 0 rgba(200,160,40,0.1)',animation:'evtFadeIn 0.8s ease-out',position:'relative'}}>
+
+      {/* Emoji + title */}
+      <div style={{textAlign:'center',marginBottom:20}}>
+        <div style={{fontSize:64,filter:'drop-shadow(0 0 20px rgba(200,100,0,0.4))',marginBottom:8}}>{event.emoji}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:'#c8a040',textShadow:'0 0 20px rgba(200,160,40,0.3),2px 2px 0 #000',letterSpacing:3}}>{event.name}</div>
+      </div>
+
+      {/* Flavor text */}
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:17,color:'#998866',fontStyle:'italic',textAlign:'center',lineHeight:1.6,marginBottom:28,padding:'0 10px'}}>{event.flavor}</div>
+
+      {/* Divider */}
+      <div style={{height:1,background:'linear-gradient(90deg,transparent,rgba(200,100,20,0.4),transparent)',margin:'0 0 24px'}}/>
+
+      {/* Choices */}
+      <div style={{display:'flex',flexDirection:'column',gap:14,alignItems:'center'}}>
+        <div onClick={()=>handleChoice('A')} style={{...btnBase,background:chosen==='A'?'rgba(200,80,0,0.25)':chosen?'rgba(20,10,4,0.5)':'rgba(30,15,5,0.8)',borderColor:chosen==='A'?'#cc6600':chosen?'rgba(60,30,10,0.3)':'rgba(200,100,20,0.35)',color:chosen&&chosen!=='A'?'#554433':'#ddc090',opacity:chosen&&chosen!=='A'?0.4:1,pointerEvents:chosen?'none':'auto'}}>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4}}>
+            <span style={{fontSize:22}}>{event.choiceA.emoji}</span>
+            <span style={{fontSize:20,fontWeight:900,color:chosen==='A'?'#ff8800':'#e8c080'}}>{event.choiceA.label}</span>
+          </div>
+          <div style={{fontSize:14,color:chosen==='A'?'#cc8844':'#887755',paddingLeft:32}}>{event.choiceA.desc}</div>
+        </div>
+
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#554433',letterSpacing:4}}>— OR —</div>
+
+        <div onClick={()=>handleChoice('B')} style={{...btnBase,background:chosen==='B'?'rgba(40,60,80,0.25)':chosen?'rgba(20,10,4,0.5)':'rgba(30,15,5,0.8)',borderColor:chosen==='B'?'#4488aa':chosen?'rgba(60,30,10,0.3)':'rgba(100,120,140,0.35)',color:chosen&&chosen!=='B'?'#554433':'#b0c0d0',opacity:chosen&&chosen!=='B'?0.4:1,pointerEvents:chosen?'none':'auto'}}>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4}}>
+            <span style={{fontSize:22}}>{event.choiceB.emoji}</span>
+            <span style={{fontSize:20,fontWeight:900,color:chosen==='B'?'#66aacc':'#a0b0c0'}}>{event.choiceB.label}</span>
+          </div>
+          <div style={{fontSize:14,color:chosen==='B'?'#6699aa':'#667788',paddingLeft:32}}>{event.choiceB.desc}</div>
+        </div>
+      </div>
+    </div>
+  </div>)
+}
+
 function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRoll}){
   const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35
   return(
@@ -2582,7 +2676,9 @@ function App(){
   const [clutchFlash,setClutchFlash]=useState(null) // {text,color} for clutch moments
   const [circlePreview,setCirclePreview]=useState(null) // next circle preview data
   const [collectedLoot,setCollectedLoot]=useState([]) // boss loot IDs collected this run
-  const [circleSplash,setCircleSplash]=useState(null) // {circleNum, circleName, circleEmoji} for 3s transition
+  const [circleSplash,setCircleSplash]=useState(null)
+  const [pendingEvent,setPendingEvent]=useState(null) // current HELL_EVENT or null
+  const [eventsSeenThisRun,setEventsSeenThisRun]=useState([]) // ids of events seen // {circleNum, circleName, circleEmoji} for 3s transition
   const milestonesFiredRef=useRef({half:false,quarter:false,tenth:false})
   const [phaseBanner,setPhaseBanner]=useState('play') // 'play','strike','boss'
   const [deckViewOpen,setDeckViewOpen]=useState(false)
@@ -2626,7 +2722,7 @@ function App(){
       else trackName='battle'
     }
     if(gameState==='end')trackName=(fightIndex>=26&&enemyHp<=0)?'victory':'death'
-    if(gameState==='circleSplash')return // no music during splash
+    if(gameState==='circleSplash'||gameState==='event')return // no music during splash/event
     if(trackName===currentTrackRef.current)return
     const vol=parseFloat(localStorage.getItem('vst_music_vol')||'0.3')
     // Fade out current
@@ -3563,11 +3659,23 @@ function App(){
           const picks=shuffled.slice(0,2)
           setTimeout(()=>{setCircleClearedData(null);setPactChoices(picks);setGameState('pact')},2800)
         } else {
-          setTimeout(()=>{setCircleClearedData(null);setGameState('shop')},1800)
+          setTimeout(()=>{
+            setCircleClearedData(null)
+            // 30% chance of random event between non-boss fights
+            const availEvents=HELL_EVENTS.filter(e=>!eventsSeenThisRun.includes(e.id))
+            if(availEvents.length>0&&Math.random()<0.30){
+              const evt=availEvents[Math.floor(Math.random()*availEvents.length)]
+              setPendingEvent(evt)
+              setEventsSeenThisRun(p=>[...p,evt.id])
+              setGameState('event')
+            } else {
+              setGameState('shop')
+            }
+          },1800)
         }
       }
     },1000)
-  },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake,stage,hand,enemy,enemyHp,embers,maxEmbers,activeArtifacts,activePassives,chosenPacts,activeGenre,animPhase,discardsLeft,deck,discardPile,fightTripBuff,luciferPhase,welcomeToHell])
+  },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake,stage,hand,enemy,enemyHp,embers,maxEmbers,activeArtifacts,activePassives,chosenPacts,activeGenre,animPhase,discardsLeft,deck,discardPile,fightTripBuff,luciferPhase,welcomeToHell,eventsSeenThisRun])
   triggerVictoryRef.current=triggerVictory
 
 
@@ -3969,6 +4077,15 @@ function App(){
           setStage(function(prev){
             const ns2=[...prev]
             if(ns2[ti]){
+              // BLOOD OATH: instant death on any boss damage
+              if(ns2[ti].bloodOath&&actualDmg>0){
+                ns2[ti]=Object.assign({},ns2[ti],{hp:0,tooStoned:true,bloodOath:false})
+                if(ns2[ti].isMentor){for(let _bi=0;_bi<ns2.length;_bi++){if(ns2[_bi]&&ns2[_bi].mentorLinkedToUid===ns2[ti].uid)ns2[_bi]={...ns2[_bi],mentorAlive:false}}}
+                updStat('tooStonedCount',1)
+                addLog('🩸 BLOOD OATH FULFILLED! '+ns2[ti].name+' is destroyed by a single blow!')
+                playSfx('member_down')
+                addFloat('BLOOD OATH!',getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-60,'#cc0000',true)
+              } else {
               const newHp=ns2[ti].hp-actualDmg
               if(newHp<=0&&!ns2[ti].stoneShield){
                 ns2[ti]=Object.assign({},ns2[ti],{hp:0,tooStoned:true})
@@ -3995,6 +4112,7 @@ function App(){
                 ns2[ti]=Object.assign({},ns2[ti],{hp:Math.max(0,newHp)})
               }
               addFloat(actualDmg,getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-50,'#ff3300',false)
+              } // end blood oath else
             }
             const allStoned=ns2.filter(function(m){return m}).every(function(m){return m.tooStoned})
             if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned');playSfx('defeat')};setTimeout(function(){setGameState('end')},800)}
@@ -4155,7 +4273,7 @@ function App(){
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(Math.ceil(nextEnemy.maxHp*activeStake.hpMult))
     // Pact: Corruption Engine — +5% corruption at fight start
-    if(chosenPacts.includes('corruption_engine'))setCorruption(p=>Math.min(100,p+5))
+    if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
     setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({});victoryFiredRef.current=false
@@ -4266,6 +4384,108 @@ function App(){
     if(activeArtifacts.some(a=>a.id==='wardrums')){setStrikesLeft(p=>p+1);addLog('🪘 War Drums! +1 Strike this fight.')}
     setGameState('playing')
   },[fightIndex,maxEmbers,stage])
+
+  // ═══════════════════════════════════════════════════════════
+  // HANDLE EVENT CHOICE — apply effects, then go to shop
+  // ═══════════════════════════════════════════════════════════
+  const handleEventChoice=useCallback((choice)=>{
+    if(!pendingEvent)return
+    const eid=pendingEvent.id
+    const alive=stage.filter(m=>m&&!m.tooStoned)
+
+    if(eid==='mosh_pit'){
+      if(choice==='A'){
+        // All members take 4 damage. Survivors gain +1 ATK permanently.
+        setStage(p=>p.map(m=>{
+          if(!m||m.tooStoned)return m
+          const newHp=m.hp-4
+          if(newHp<=0){
+            addLog('💀 '+m.name+' was crushed in the Mosh Pit!')
+            playSfx('member_down')
+            return Object.assign({},m,{hp:0,tooStoned:true})
+          }
+          addLog('🤘 '+m.name+' survives the pit! +1 ATK')
+          return Object.assign({},m,{hp:newHp,atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1})
+        }))
+      } else {
+        setStash(p=>Math.max(0,p-15))
+        addLog('🚶 You walk away. -15 Stash. The crowd boos.')
+      }
+    }
+    else if(eid==='cursed_amp'){
+      if(choice==='A'){
+        setMaxEmbers(p=>Math.min(MAX_EMBERS_CAP+2,p+2))
+        // Lock corruption by setting a flag (we use a simple approach: set corruption floor)
+        addLog('⚡ Cursed Amp! +2 Max Embers. Corruption is now LOCKED at '+corruption+'%.')
+        // We mark corruption locked via a pact-like mechanism
+        if(!chosenPacts.includes('corruption_locked'))setChosenPacts(p=>[...p,'corruption_locked'])
+      } else {
+        setCorruption(p=>Math.max(0,p-15))
+        addLog('🔨 You smash the amp. -15% Corruption.')
+      }
+    }
+    else if(eid==='blood_oath'){
+      if(choice==='A'){
+        // Strongest member gets +5 ATK but gains bloodOath flag
+        if(alive.length>0){
+          const strongest=alive.reduce((a,b)=>a.atk>b.atk?a:b)
+          setStage(p=>p.map(m=>m&&m.uid===strongest.uid?Object.assign({},m,{atk:m.atk+5,permAtkBonus:(m.permAtkBonus||0)+5,bloodOath:true}):m))
+          addLog('✍ '+strongest.name+' signs the Blood Oath! +5 ATK. But one hit from a boss and they die.')
+        }
+      } else {
+        addLog('🚫 You refuse. The figure dissolves.')
+      }
+    }
+    else if(eid==='hellfire_baptism'){
+      if(choice==='A'){
+        setCorruption(69)
+        setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2}):m))
+        addLog('🔥 Hellfire Baptism! Corruption → 69%. All members +2 ATK!')
+      } else {
+        addLog('↩ You find another way around. Nothing happens.')
+      }
+    }
+    else if(eid==='sabbath_offering'){
+      if(choice==='A'){
+        // Burn 3 random cards from deck
+        setDeck(p=>{
+          const shuffled=[...p].sort(()=>Math.random()-0.5)
+          const burned=shuffled.slice(0,Math.min(3,shuffled.length))
+          burned.forEach(c=>addLog('🪦 Burned: '+c.name))
+          return shuffled.slice(Math.min(3,shuffled.length))
+        })
+        setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
+        addLog('⛧ Sabbath Offering! 3 cards burned. All members healed to full.')
+      } else {
+        addLog('🃏 You keep your cards. The altar crumbles.')
+      }
+    }
+    else if(eid==='devils_wager'){
+      if(choice==='A'){
+        const flip=Math.random()<0.5
+        if(flip){
+          // HEADS — +3 ATK all
+          setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3,permAtkBonus:(m.permAtkBonus||0)+3}):m))
+          addLog('🪙 HEADS! The Devil grins. All members +3 ATK!')
+          playSfx('big_hit')
+        } else {
+          // TAILS — strongest member dies
+          if(alive.length>0){
+            const strongest=alive.reduce((a,b)=>a.atk>b.atk?a:b)
+            setStage(p=>p.map(m=>m&&m.uid===strongest.uid?Object.assign({},m,{hp:0,tooStoned:true}):m))
+            addLog('🪙 TAILS. '+strongest.name+' collapses. The Devil laughs.')
+            playSfx('member_down')
+          }
+        }
+      } else {
+        addLog('🚶 "Coward." The Devil vanishes.')
+      }
+    }
+
+    // Transition to shop after a delay
+    setTimeout(()=>{setPendingEvent(null);setGameState('shop')},1500)
+  },[pendingEvent,stage,corruption,chosenPacts,stash])
+
 
   const handleShopSpend=useCallback((cost,type,item)=>{
     const effectiveCost=chosenPacts.includes('merchants_eye')?Math.max(1,Math.floor(cost*0.8)):cost
@@ -4456,7 +4676,7 @@ function App(){
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
-    setDiscovered(new Set())
+    setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([])
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
   }
 
@@ -4842,6 +5062,12 @@ function App(){
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'#aa6644',fontStyle:'italic',animation:'fadeIn 1.5s ease'}}>Descend deeper into Hell...</div>
     </div>
   )
+  if(gameState==='event'&&pendingEvent)return(
+    <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800}}>
+      <EventScreen event={pendingEvent} onChoose={handleEventChoice}/>
+    </div>
+  )
+
   if(gameState==='descent'&&descentData)return(
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>⛧ The Descent ⛧</div>
