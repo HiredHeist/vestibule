@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// vestibule-sim.js v14.0 — Expert AI Simulator for Vestibule
-// Session 14 — FULL SYNC: pacts, descent, genre bonus, WTH, deck thin, stash tightening
+// vestibule-sim.js v15.0 — Expert AI Simulator for Vestibule
+// Session 14 final — FULL SYNC: pacts, descent, genre, WTH, doom forge, role links, stake mentor
 // Usage: node vestibule-sim.js [numGames] [stake]  (default 5000 bronze)
 
 const NUM_GAMES=parseInt(process.argv[2])||5000;
@@ -111,13 +111,32 @@ const ALL_CARDS=[
 // ── PACT REWARDS (12 options, sim picks best 1 of 2 offered) ──
 const PACT_IDS=['ember_surge','iron_strings','thick_skin','dark_bargain','speed_demon','blood_price','clean_living','corruption_engine','merchants_eye','stone_wall','sixth_slot','war_drums'];
 
+
+// ── DOOM FORGE: card upgrades after each boss ──
+const UPGRADE_PRIORITY={
+  possessedperf:95,infencore:90,amp:85,stagedive:80,overdrive:78,
+  encore:75,soundcheck:72,wakeup:70,battlecry:68,newstrings:66,
+  heavyriff:64,feedbackloop:62,crowdsurf:60,deathriff:58,moshpit:56,
+  bloodritual:54,soundwall:52,roadie:50,distortion:48,controlfeedback:46,
+  powertap:44,staticcharge:42,tappedout:40,ampoverload:38,groupie:36,
+  darktuning:34,ampstatic:32,resonancecard:30,herbmoney:28,goingbroke:26,
+  doubledown:24,demotape:22,soundboard:20,seance:18,sabbathsigil:16,
+  sigdecay:14,setlist:12,setbreak:10,burnset:8,remaster:6,dialtoeleven:4
+}
+const UPGRADE_HP={
+  battlecry:{hp:'target',amt:1},amp:{hp:'target',amt:2},newstrings:{hp:'target',amt:1},
+  encore:{hp:'target',amt:2},resonancecard:{hp:'target',amt:2},soundcheck:{hp:'all',amt:1},
+  roadie:{hp:'target',amt:2},wakeup:{hp:'all',amt:2},distortion:{hp:'all',amt:1},
+  controlfeedback:{hp:'all',amt:1},seance:{hp:'all',amt:1},infencore:{hp:'all',amt:1},
+  possessedperf:{hp:'all',amt:2},setbreak:{hp:'weakest',amt:1},soundboard:{hp:'random',amt:1}
+}
 const MAX_STRIKES=4,MAX_DISCARDS=4,HAND_SIZE=6,MAX_STASH=420,MAX_EMBERS_CAP=8;
 const circleBaseMin=[8,6,7,8,9,9,11,11,14],circleBaseRange=[3,4,4,3,4,4,5,5,7]; // v12 stash tightening
 const MENTOR_LINK_BONUS={foil:{atk:1,hp:2,mult:1.25},mythic:{atk:2,hp:4,mult:1.5},demonic:{atk:4,hp:8,mult:2.0}};
 let TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
-  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0};
+  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,forgeUpgrades:0};
 let CARD_PLAYS={};
 
 function rand(n){return Math.floor(Math.random()*n)}
@@ -275,25 +294,25 @@ function applyCardSim(card,gs,enemy){
   switch(card.id){
     case 'contract':{const strongest=alive.sort((a,b)=>(b.atk+(b.permAtkBonus||0))-(a.atk+(a.permAtkBonus||0)))[0];strongest.tooStoned=true;strongest.hp=0;gs._contractsPlayed++;TRACK.contractsSigned++;break}
     case 'amp':target.ampedThisStrike=true;break;
-    case 'battlecry':{const b=gs.passives.some(p=>p.id==='p7')?2:1;target.atk+=b;target.permAtkBonus=(target.permAtkBonus||0)+b;break}
+    case 'battlecry':{const b=(gs.passives.some(p=>p.id==='p7')?2:1)+(card.upgraded?1:0);target.atk+=b;target.permAtkBonus=(target.permAtkBonus||0)+b;break}
     case 'newstrings':target.atk+=2;target.permAtkBonus=(target.permAtkBonus||0)+2;break;
     case 'encore':target.encoreThisStrike=true;break;
-    case 'soundcheck':alive.forEach(m=>{const h=m.hp<m.maxHp;m.hp=Math.min(m.maxHp,m.hp+4);if(h)m.tempAtkBonus=(m.tempAtkBonus||0)+1});break;
-    case 'roadie':weakest.stoneShield=2;weakest.hp=Math.min(weakest.maxHp,weakest.hp+2);break;
+    case 'soundcheck':alive.forEach(m=>{const h=m.hp<m.maxHp;m.hp=Math.min(m.maxHp,m.hp+(card.upgraded?6:4));if(h)m.tempAtkBonus=(m.tempAtkBonus||0)+1});break;
+    case 'roadie':weakest.stoneShield=card.upgraded?3:2;weakest.hp=Math.min(weakest.maxHp,weakest.hp+(card.upgraded?4:2));break;
     case 'distortion':gs.corruption=Math.min(100,gs.corruption+15);alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+1);break;
     case 'dialtoeleven':gs.corruption=Math.min(100,gs.corruption+20);break;
     case 'controlfeedback':{gs.corruption=50;const ht=alive.reduce((a,b)=>a.hp/a.maxHp<b.hp/b.maxHp?a:b);ht.hp=ht.maxHp;break}
     case 'sigdecay':gs._drawExtra=(gs._drawExtra||0)+2;break;
-    case 'feedbackloop':{let d=Math.floor(gs.corruption/2);if(gs._activeGenre==='BLACK_METAL')d=Math.round(d*1.25);gs._directDmg=(gs._directDmg||0)+d;break}
-    case 'soundwall':{const cn=Math.floor(gs.fightIndex/3)+1;const sw=cn<=3?5:cn<=6?8:12;gs._directDmg=(gs._directDmg||0)+sw+(gs.passives.some(p=>p.id==='p5')?4:0);break}
-    case 'heavyriff':{const ta=alive.reduce((s,m)=>s+m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0),0);gs._directDmg=(gs._directDmg||0)+Math.floor(ta/2);break}
-    case 'crowdsurf':gs._directDmg=(gs._directDmg||0)+gs.hand.length*3;break;
-    case 'deathriff':gs._directDmg=(gs._directDmg||0)+Math.floor(60*(1-gs.corruption/100));gs.corruption=Math.min(100,gs.corruption+10);break;
+    case 'feedbackloop':{let d=Math.floor(gs.corruption/(card.upgraded?1.5:2));if(gs._activeGenre==='BLACK_METAL')d=Math.round(d*1.25);gs._directDmg=(gs._directDmg||0)+d;break}
+    case 'soundwall':{const cn=Math.floor(gs.fightIndex/3)+1;const sw=cn<=3?5:cn<=6?8:12;gs._directDmg=(gs._directDmg||0)+sw+(gs.passives.some(p=>p.id==='p5')?4:0)+(card.upgraded?4:0);break}
+    case 'heavyriff':{const ta=alive.reduce((s,m)=>s+m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0),0);gs._directDmg=(gs._directDmg||0)+Math.floor(ta*(card.upgraded?0.6:0.5));break}
+    case 'crowdsurf':gs._directDmg=(gs._directDmg||0)+gs.hand.length*(card.upgraded?4:3);break;
+    case 'deathriff':gs._directDmg=(gs._directDmg||0)+Math.floor((card.upgraded?80:60)*(1-gs.corruption/100));gs.corruption=Math.min(100,gs.corruption+10);break;
     case 'stagedive':gs._directDmg=(gs._directDmg||0)+target.hp;break;
-    case 'overdrive':if(gs.corruption>=60)gs._overdriveActive=true;break;
+    case 'overdrive':if(gs.corruption>=(card.upgraded?50:60))gs._overdriveActive=true;break;
     case 'infencore':gs._infencoreActive=true;break;
     case 'possessedperf':gs._possessedActive=true;break;
-    case 'powertap':{gs.embers+=2+(gs.passives.some(p=>p.id==='p4')?1:0);break}
+    case 'powertap':{gs.embers+=(card.upgraded?3:2)+(gs.passives.some(p=>p.id==='p4')?1:0);break}
     case 'staticcharge':gs.embers+=gs.corruption===0?4:2;break;
     case 'tappedout':gs._tappedOutNext=true;if(gs.passives.some(p=>p.id==='p4'))gs.embers+=1;break;
     case 'ampoverload':{gs.embers+=3+(gs.passives.some(p=>p.id==='p4')?1:0);gs._discardsLeft=Math.max(0,gs._discardsLeft-1);break}
@@ -312,8 +331,8 @@ function applyCardSim(card,gs,enemy){
     case 'burnset':gs._drawExtra=(gs._drawExtra||0)+1;break;
     case 'remaster':gs._drawExtra=(gs._drawExtra||0)+3;break;
     case 'seance':{const h=Math.max(1,Math.floor(gs.corruption/4));alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+h));break}
-    case 'moshpit':{gs._directDmg=(gs._directDmg||0)+alive.length*3;break}
-    case 'bloodritual':{const t=alive.reduce((a,b)=>a.hp>b.hp?a:b);const sac=Math.floor(t.hp*0.25);t.hp-=sac;gs._directDmg=(gs._directDmg||0)+sac*6;gs.corruption=Math.min(100,gs.corruption+15);break}
+    case 'moshpit':{gs._directDmg=(gs._directDmg||0)+alive.length*(card.upgraded?5:3);break}
+    case 'bloodritual':{const t=alive.reduce((a,b)=>a.hp>b.hp?a:b);const sac=Math.floor(t.hp*0.25);t.hp-=sac;gs._directDmg=(gs._directDmg||0)+sac*(card.upgraded?8:6);gs.corruption=Math.min(100,gs.corruption+15);break}
     case 'sabbathsigil':gs.corruption=100;alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));gs._directDmg=(gs._directDmg||0)+15;break;
   }
   if(enemy.passiveId==='cardHeal')enemy._hp=Math.min(enemy.maxHp,enemy._hp+2);
@@ -564,7 +583,7 @@ function simShop(gs){
 
 function newGame(){return{stage:pickStartingPair(),deck:buildDeck(),discard:[],hand:[],stash:3,embers:STAKE.startEmbers,maxEmbers:STAKE.startEmbers,corruption:STAKE.startCorruption,fightIndex:0,bossKills:0,artifacts:[],passives:[],fightsSurvived:0,totalDamage:0,highestStrike:0,stashEarned:0,tooStonedCount:0,won:false,mentorLinks:[],lastCircle:1,stashStolen:0,
   heldShrooms:false,heldAcid:false,stolenAtkPool:0,circleArtBought:false,circlePassBought:false,
-  _pacts:[],_speedDemon:false,_warDrums:false,_genreCounts:{RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0},_activeGenre:null,_wthFight:false,_contractsPlayed:0}}
+  _pacts:[],_speedDemon:false,_warDrums:false,_genreCounts:{RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0},_activeGenre:null,_wthFight:false,_contractsPlayed:0,_upgradedCards:[]}}
 
 function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
   for(let f=0;f<27;f++){gs.fightIndex=f;
@@ -610,6 +629,30 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
             gs._pacts.push(best);applyPact(best,gs);TRACK.pactsChosen++;
           }
         }
+        // DOOM FORGE: upgrade best card after boss
+        if(isBoss){
+          const allCards=[...gs.deck,...gs.discard]
+          const uniqueIds=[...new Set(allCards.map(c=>c.id))]
+          const upgradeable=uniqueIds.filter(id=>UPGRADE_PRIORITY[id]&&!gs._upgradedCards.includes(id))
+          if(upgradeable.length>0){
+            upgradeable.sort((a,b)=>(UPGRADE_PRIORITY[b]||0)-(UPGRADE_PRIORITY[a]||0))
+            const pick_id=upgradeable[0]
+            gs._upgradedCards.push(pick_id)
+            // Mark cards as upgraded
+            gs.deck.forEach(c=>{if(c.id===pick_id)c.upgraded=true})
+            gs.discard.forEach(c=>{if(c.id===pick_id)c.upgraded=true})
+            // Apply HP buffs
+            const hpDef=UPGRADE_HP[pick_id]
+            if(hpDef){
+              const alive=gs.stage.filter(m=>!m.tooStoned)
+              if(hpDef.hp==='all')gs.stage.forEach(m=>{if(m){m.maxHp+=hpDef.amt;m.hp+=hpDef.amt}})
+              else if(hpDef.hp==='target'&&alive.length>0){const t=alive.reduce((a,b)=>a.atk>b.atk?a:b);t.maxHp+=hpDef.amt;t.hp+=hpDef.amt}
+              else if(hpDef.hp==='weakest'&&alive.length>0){const w=alive.reduce((a,b)=>a.hp<b.hp?a:b);w.maxHp+=hpDef.amt;w.hp+=hpDef.amt}
+              else if(hpDef.hp==='random'&&alive.length>0){const r=pick(alive);r.maxHp+=hpDef.amt;r.hp+=hpDef.amt}
+            }
+            TRACK.forgeUpgrades++
+          }
+        }
         if(fightInCircle<2||isBoss)simShop(gs) // skip shop for skipped fights
       }else{deathFight=f;deathCause=result.allDead?'stoned':'beaten';break}
     }}
@@ -631,15 +674,15 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
       if(r.won){wthWon=true;TRACK.wthWins++}
     }
   }
-  return{won:gs.won,wthWon,deathFight,deathCause,fightsSurvived:gs.fightsSurvived,totalDamage:gs.totalDamage,highestStrike:gs.highestStrike,stageSize:gs.stage.length,mentorLinks:gs.mentorLinks.length,pacts:gs._pacts.length}}
+  return{won:gs.won,wthWon,deathFight,deathCause,fightsSurvived:gs.fightsSurvived,totalDamage:gs.totalDamage,highestStrike:gs.highestStrike,stageSize:gs.stage.length,mentorLinks:gs.mentorLinks.length,pacts:gs._pacts.length,upgrades:gs._upgradedCards.length}}
 
 // ── RUN SIMULATION ──
-console.log(`\n⛧ VESTIBULE SIM v14.0 [${STAKE.name}] — ${NUM_GAMES.toLocaleString()} games\n`);
+console.log(`\n⛧ VESTIBULE SIM v15.0 [${STAKE.name}] — ${NUM_GAMES.toLocaleString()} games\n`);
 const t0=Date.now();
 TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
-  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0};
+  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,forgeUpgrades:0};
 CARD_PLAYS={};
 const deathsByFight=new Array(27).fill(0),surviveByFight=new Array(27).fill(0);let wins=0,wthWins=0,totalFights=0,gamesWithLinks=0,totalPacts=0;
 for(let i=0;i<NUM_GAMES;i++){const r=simGame();totalFights+=r.fightsSurvived;totalPacts+=r.pacts;if(r.mentorLinks>0)gamesWithLinks++;
@@ -666,7 +709,8 @@ console.log(`  Fights skipped: ${TRACK.fightsSkipped.toLocaleString()} (${(TRACK
 console.log(`  Cards deleted (burn): ${TRACK.cardsDeleted.toLocaleString()} (${(TRACK.cardsDeleted/NUM_GAMES).toFixed(1)} avg/game)`);
 console.log(`  Genre activations: ${TRACK.genreActivations.toLocaleString()}`);
 console.log(`  WTH entered: ${TRACK.wthEntered} | WTH won: ${TRACK.wthWins}`);
-console.log(`  Contracts signed: ${TRACK.contractsSigned}`);
+console.log(`  Contracts signed: ${TRACK.contractsSigned}`)
+console.log(`  Doom Forge upgrades: ${TRACK.forgeUpgrades.toLocaleString()} (${(TRACK.forgeUpgrades/NUM_GAMES).toFixed(1)} avg/game)`);
 console.log(`\n⛓ MENTOR LINK STATS:`);
 console.log(`  Links formed: ${TRACK.linksFormed.toLocaleString()} (${(TRACK.linksFormed/NUM_GAMES).toFixed(2)} per game)`);
 console.log(`  Games with active link: ${gamesWithLinks} (${(gamesWithLinks/NUM_GAMES*100).toFixed(1)}%)`);
