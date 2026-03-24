@@ -1738,9 +1738,9 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
   )
 }
 
-function DeckPile({count,label}){
+function DeckPile({count,label,onClick}){
   return(
-    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,cursor:onClick?'pointer':'default'}} onClick={onClick}>
       <div style={{position:'relative',width:90,height:112}}>
         {[2,1,0].map(i=><div key={i} style={{position:'absolute',width:80,height:100,background:i===0?'linear-gradient(135deg,#1e1408,#0a0804)':`rgba(15,10,4,${.7-i*.2})`,border:'1px solid rgba(160,110,35,0.55)',borderRadius:4,top:i*3,left:i*3}}>
           {i===0&&<div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,opacity:.2,color:'#c8a060'}}>⛧</div>}
@@ -2385,6 +2385,11 @@ function App(){
   const [remasterCards,setRemasterCards]=useState([])
   const [deathCause,setDeathCause]=useState('fallen')
   const [hellquakeAnim,setHellquakeAnim]=useState(null)
+  const [milestoneFlash,setMilestoneFlash]=useState(null) // {text,color} for boss HP milestones
+  const milestonesFiredRef=useRef({half:false,quarter:false,tenth:false})
+  const [phaseBanner,setPhaseBanner]=useState('play') // 'play','strike','boss'
+  const [deckViewOpen,setDeckViewOpen]=useState(false)
+  const [discardViewOpen,setDiscardViewOpen]=useState(false)
   const [circleArtifact,setCircleArtifact]=useState(()=>STARTER_ARTIFACTS[Math.floor(Math.random()*STARTER_ARTIFACTS.length)])
   const [circlePassive,setCirclePassive]=useState(()=>STARTER_PASSIVES[Math.floor(Math.random()*STARTER_PASSIVES.length)])
   const [activeArtifacts,setActiveArtifacts]=useState([]) // max 3
@@ -3528,13 +3533,27 @@ function App(){
 
     const bc=getCenter(bossRef)
     let delay=0
+    // Compute per-member damage for cascade display
+    const memberDmgs=[]
+    actives.forEach(function(m){
+      if(m.role==='Drummer')return
+      if(paranoiaVictim&&m.uid===paranoiaVictim.uid)return
+      let mAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
+      if(chosenPacts.includes('clean_living')&&corruption===0)mAtk+=2
+      if(m.encoreReady)mAtk*=2
+      memberDmgs.push({m,atk:mAtk})
+    })
     actives.forEach(function(m){
       if(m.role==='Drummer')return
       const si=stage.indexOf(m)
       const from=getCenter(stageRefs.current[si])
       const ppid=prid.current++
+      const md=memberDmgs.find(d=>d.m.uid===m.uid)
+      const curDelay=delay
       setTimeout(function(){try{(ATK_SND[m.role]||ATK_SND['Lead Guitarist'])()}catch(e){}
-        setProjectiles(function(p){return[...p,{id:ppid,from:from,to:bc,emoji:m.emoji}]})},delay)
+        setProjectiles(function(p){return[...p,{id:ppid,from:from,to:bc,emoji:m.emoji}]})
+        if(md)addFloat(md.atk,from.x,from.y-40,'#cc8800',false)
+      },curDelay)
       delay+=260
     })
 
@@ -3549,7 +3568,7 @@ function App(){
         const phaseTotalDmg=luciferPhase===1?(3333-newEHp):(3333-newEHp)
         setBossRageAtk(Math.floor(Math.max(0,phaseTotalDmg)/20)*atkGain)
       }
-      addFloat(dmg,bc.x,bc.y-60,dmg>=15?'#ff4400':'#dd2222',dmg>=15)
+      addFloat('TOTAL: '+dmg,bc.x,bc.y-60,'#ff2200',true)
       if(folkMagicFired){
         setEmbers(maxEmbers)
         addFloat('🪈 FOLK MAGIC! Full Embers!',window.innerWidth/2,window.innerHeight*0.35,'#44ddaa',true)
@@ -3855,7 +3874,7 @@ function App(){
     if(chosenPacts.includes('corruption_engine'))setCorruption(p=>Math.min(100,p+5))
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
+    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};setPhaseBanner('play')
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
     if(fightIndex===26){
       // 8 circle bosses killed = 8 × 51,750 = 414,000 reduction → 6,666 HP
@@ -4157,6 +4176,23 @@ function App(){
 
   const genreTotal=genreCounts.RIFF+genreCounts.CORRUPT+genreCounts.UTILITY+genreCounts.EMBER
   const activeGenre=genreTotal>=4?(genreCounts.RIFF/genreTotal>=0.5?'RIFF_METAL':genreCounts.CORRUPT/genreTotal>=0.5?'BLACK_METAL':genreCounts.UTILITY/genreTotal>=0.5?'PROG_ROCK':genreCounts.EMBER/genreTotal>=0.5?'DOOM_METAL':null):null
+  // Boss HP milestone detection
+  useEffect(()=>{
+    if(!enemy||enemyHp<=0||enemyHp>=enemy.maxHp)return
+    const pct=enemyHp/enemy.maxHp
+    const mf=milestonesFiredRef.current
+    if(pct<=0.10&&!mf.tenth){mf.tenth=true;setMilestoneFlash({text:'DESTROY HIM!',color:'#ff2200'});triggerShake(6,300);playSfx('big_hit');setTimeout(()=>setMilestoneFlash(null),1800)}
+    else if(pct<=0.25&&!mf.quarter){mf.quarter=true;setMilestoneFlash({text:'ALMOST',color:'#ff8800'});triggerShake(4,200);setTimeout(()=>setMilestoneFlash(null),1500)}
+    else if(pct<=0.50&&!mf.half){mf.half=true;setMilestoneFlash({text:'HALFWAY',color:'#e8a820'});setTimeout(()=>setMilestoneFlash(null),1500)}
+  },[enemyHp,enemy])
+
+  // Phase banner sync
+  useEffect(()=>{
+    if(animPhase==='attacking')setPhaseBanner('strike')
+    else if(animPhase==='boss')setPhaseBanner('boss')
+    else if(animPhase==='idle')setPhaseBanner('play')
+  },[animPhase])
+
   const canStrike=animPhase==='idle'&&strikesLeft>0&&enemyHp>0&&stage.some(m=>m&&!m.tooStoned)
   const canDiscard=animPhase==='idle'&&discardsLeft>0&&selected.length>0
   const won=fightIndex>=26&&enemyHp<=0
@@ -4664,6 +4700,30 @@ function App(){
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'rgba(255,255,255,0.7)',fontStyle:'italic',animation:'fadeIn 0.8s ease'}}>
           {luciferCinematic.phase===2?'Band fully restored. All strikes reset. Finish this.':'8 Circle Bosses defeated. Their echoes weaken the Devil.'}</div>
       </div>}
+      {/* BOSS HP MILESTONE FLASH */}
+      {milestoneFlash&&<div style={{position:'absolute',top:'35%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9200,pointerEvents:'none',fontFamily:"'BogartsMetalFont',cursive",fontSize:90,color:milestoneFlash.color,textShadow:'0 0 40px '+milestoneFlash.color+',0 0 80px '+milestoneFlash.color+'66,4px 4px 0 #000',letterSpacing:10,animation:'popFloat 1.8s ease-out forwards'}}>{milestoneFlash.text}</div>}
+      {/* DECK / DISCARD VIEWER */}
+      {(deckViewOpen||discardViewOpen)&&<div style={{position:'absolute',inset:0,zIndex:9600,background:'rgba(2,1,4,0.95)',display:'flex',flexDirection:'column',alignItems:'center',padding:'30px 40px',overflowY:'auto'}} onClick={()=>{setDeckViewOpen(false);setDiscardViewOpen(false)}}>
+        <div onClick={e=>e.stopPropagation()} style={{maxWidth:1200,width:'100%'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+            <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:deckViewOpen?'#c8a040':'#cc4444',textShadow:'0 0 20px '+(deckViewOpen?'rgba(200,160,40,0.4)':'rgba(200,40,40,0.4)')}}>{deckViewOpen?'⛧ Deck — '+deck.length+' Cards':'⛧ Discard Pile — '+discardPile.length+' Cards'}</div>
+            <div onClick={()=>{setDeckViewOpen(false);setDiscardViewOpen(false)}} style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#cc4444',cursor:'pointer',padding:'6px 16px',border:'1px solid #aa2222',borderRadius:4}}>✕ Close</div>
+          </div>
+          <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
+            {(deckViewOpen?[...deck].sort((a,b)=>(a.name||'').localeCompare(b.name||'')):discardPile).map((c,i)=>{
+              const bc=c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
+              return <div key={c.uid||i} style={{width:120,background:'linear-gradient(180deg,#201408,#100804)',border:'1px solid '+bc+'88',borderRadius:5,padding:'0 0 8px'}}>
+                <div style={{height:3,background:bc,borderRadius:'5px 5px 0 0'}}/>
+                <div style={{fontSize:30,textAlign:'center',padding:'8px 0',background:'rgba(0,0,0,0.3)'}}>{c.emoji}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'0 4px'}}>{c.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:bc,textAlign:'center',letterSpacing:1,textTransform:'uppercase'}}>{c.type} · {c.rarity}</div>
+                {c.embers>0&&<div style={{display:'flex',justifyContent:'center',marginTop:2}}><div style={{width:18,height:18,borderRadius:'50%',background:'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)',border:'1px solid #ff6600',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:'#fff'}}>{c.embers}</div></div>}
+              </div>
+            })}
+            {(deckViewOpen?deck:discardPile).length===0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#886644',fontStyle:'italic',padding:40}}>{deckViewOpen?'Deck is empty — all cards in hand or discard.':'Discard pile is empty.'}</div>}
+          </div>
+        </div>
+      </div>}
       {/* RIFF CHAIN COMBO FLASH */}
       {comboFlash&&<div style={{position:'absolute',inset:0,zIndex:9600,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:8}}>
         <div style={{position:'absolute',inset:0,border:`3px solid ${comboFlash.color}`,animation:'fadeIn 0.1s ease',opacity:0.8,boxShadow:`inset 0 0 60px ${comboFlash.color}44,0 0 40px ${comboFlash.color}44`}}/>
@@ -4747,6 +4807,13 @@ function App(){
           </div>
         </div>
         <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,padding:'1px 20px 2px',position:'relative',zIndex:5,flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)'}}>
+          {/* PHASE BANNER — left side, absolute so it never shifts center content */}
+          <div style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:3,textTransform:'uppercase',
+            color:phaseBanner==='play'?'#c8a040':phaseBanner==='strike'?'#ee2222':'#ff4444',
+            textShadow:phaseBanner==='play'?'none':'0 0 12px '+(phaseBanner==='strike'?'rgba(220,0,0,0.6)':'rgba(255,60,60,0.6)'),
+            transition:'color 0.2s',opacity:0.9}}>
+            {phaseBanner==='play'?'⚔ PLAY CARDS':phaseBanner==='strike'?'💥 STRIKING!':'👿 BOSS ATTACKS'}
+          </div>
           {(()=>{
             const act=stage.filter(m=>m&&!m.tooStoned)
             let dmg=act.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
@@ -4790,8 +4857,8 @@ function App(){
 
         {/* LEFT COLUMN: Deck/Discard — absolute */}
         <div style={{position:'absolute',left:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:6,alignItems:'center',justifyContent:'center',background:'rgba(20,12,4,0.7)',borderRadius:'0 6px 6px 0',padding:'8px 10px',border:'1px solid rgba(100,65,15,0.3)',borderLeft:'none',width:100}}>
-          <DeckPile count={deck.length} label="Deck"/>
-          <DeckPile count={discardPile.length} label="Discard"/>
+          <DeckPile count={deck.length} label="Deck" onClick={()=>setDeckViewOpen(true)}/>
+          <DeckPile count={discardPile.length} label="Discard" onClick={()=>setDiscardViewOpen(true)}/>
         </div>
 
         {/* SORT + DEALER — beside left column */}
