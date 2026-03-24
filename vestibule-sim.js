@@ -101,7 +101,7 @@ const ALL_CARDS=[
   {id:'overdrive',type:'RIFF',rarity:'Rare',embers:3,copies:1},
   {id:'infencore',type:'RIFF',rarity:'Rare',embers:3,copies:3},
   {id:'remaster',type:'UTILITY',rarity:'Rare',embers:0,copies:1},
-  {id:'sabbathsigil',type:'CORRUPT',rarity:'Rare',embers:2,copies:1},
+  {id:'sabbathsigil',type:'CORRUPT',rarity:'Rare',embers:2,copies:0,consumable:true},
   {id:'possessedperf',type:'RIFF',rarity:'Rare',embers:4,copies:2},
   {id:'goingbroke',type:'RIFF',rarity:'Rare',embers:0,copies:1,shopOnly:true},
   {id:'moshpit',type:'RIFF',rarity:'Uncommon',embers:1,copies:2},
@@ -401,7 +401,7 @@ function applyCardSim(card,gs,enemy){
     case 'seance':{const h=Math.max(1,Math.floor(gs.corruption/4));alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+h));break}
     case 'moshpit':{gs._directDmg=(gs._directDmg||0)+alive.length*(card.upgraded?5:3);break}
     case 'bloodritual':{const t=alive.reduce((a,b)=>a.hp>b.hp?a:b);const sac=Math.floor(t.hp*0.25);t.hp-=sac;gs._directDmg=(gs._directDmg||0)+sac*(card.upgraded?8:6);gs.corruption=Math.min(100,gs.corruption+15);break}
-    case 'sabbathsigil':gs.corruption=100;if(!gs._hellquakeFired){gs._hellquakeFired=true;rollHellquake(gs);TRACK.hellquakesFired=(TRACK.hellquakesFired||0)+1};alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));gs._directDmg=(gs._directDmg||0)+15;break;
+    case 'sabbathsigil':gs.corruption=100;if(!gs._hellquakeFired){gs._hellquakeFired=true;rollHellquake(gs);TRACK.hellquakesFired=(TRACK.hellquakesFired||0)+1};alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));gs._directDmg=(gs._directDmg||0)+15;gs._consumeCard=true;break;
   }
   if(enemy.passiveId==='cardHeal')enemy._hp=Math.min(enemy.maxHp,enemy._hp+2);
   if(enemy.passiveId==='cardHeal3')enemy._hp=Math.min(enemy.maxHp,enemy._hp+3);
@@ -521,7 +521,7 @@ function simFight(gs,phaseHp,luciferPhase){
       else if(!shredderUsed&&card.type==='RIFF'&&alive.some(m=>m.keyword==='SHREDDER')){cost=Math.max(0,cost-1);shredderUsed=true}
       cost=Math.max(0,cost)
       gs.embers-=cost;gs.hand.splice(best.idx,1);
-      applyCardSim(card,gs,enemy);if(card.id!=='contract')gs.discard.push(card);cardsPlayed++;
+      applyCardSim(card,gs,enemy);if(gs._consumeCard){gs._consumeCard=false}else if(card.id!=='contract')gs.discard.push(card);cardsPlayed++;
       gs._strikeMult=Math.min(1.15,Math.round((gs._strikeMult+0.03)*100)/100)
       gs._cardsPlayedIds.push(card.id)
       if(card.type==='EMBER'&&gs.passives.some(p=>p.id==='p4'))gs.embers=Math.min(gs.maxEmbers,gs.embers+1)
@@ -676,6 +676,10 @@ function simShop(gs){
   if(!gs.heldShrooms&&Math.random()<0.50&&gs.stash>=6&&gs.stash>=16){gs.stash-=6;gs.heldShrooms=true;TRACK.shroomsBought++}
   if(!gs.heldAcid&&Math.random()<0.50&&gs.stash>=12&&gs.stash>=22){gs.stash-=12;gs.heldAcid=true;TRACK.acidBought++}
 
+  // 5% chance sigil appears in shop
+  if(Math.random()<0.05&&gs.stash>=42&&!gs.deck.some(c=>c.id==='sabbathsigil')&&!gs.discard.some(c=>c.id==='sabbathsigil')){
+    gs.deck.push({id:'sabbathsigil',type:'CORRUPT',rarity:'Rare',embers:2,consumable:true});gs.stash-=42;TRACK.sigilsBought=(TRACK.sigilsBought||0)+1
+  }
   // DECK THINNING
   burnWeakCards(gs);
 }

@@ -208,34 +208,34 @@ Track assignments (update TRACK_MAP):
 
 ### Sound Effects (all need creation)
 Card plays:
-- [ ] sfx_card_play.mp3 — generic card drop/play (short click/thud)
-- [ ] sfx_riff_play.mp3 — RIFF card play (guitar stab)
-- [ ] sfx_corrupt_play.mp3 — CORRUPT card play (dark whoosh)
-- [ ] sfx_utility_play.mp3 — UTILITY card play (gentle chime)
-- [ ] sfx_ember_play.mp3 — EMBER card play (fire crackle)
+- [x] sfx_card_play.mp3 — generic card drop/play (short click/thud)
+- [x] sfx_riff_play.mp3 — RIFF card play (guitar stab)
+- [x] sfx_corrupt_play.mp3 — CORRUPT card play (dark whoosh)
+- [x] sfx_utility_play.mp3 — UTILITY card play (gentle chime)
+- [x] sfx_ember_play.mp3 — EMBER card play (fire crackle)
 
 Combat:
-- [ ] sfx_strike.mp3 — Strike button press (heavy drum hit)
-- [ ] sfx_hit.mp3 — Damage dealt to boss (impact/crunch)
-- [ ] sfx_big_hit.mp3 — Large damage (500+) (explosive impact)
-- [ ] sfx_boss_attack.mp3 — Boss hits your band (dark thud)
-- [ ] sfx_member_down.mp3 — Member goes Too Stoned (sad guitar slide)
-- [ ] sfx_combo.mp3 — Riff Chain triggers (power chord + reverb)
+- [x] sfx_strike.mp3 — Strike button press (heavy drum hit)
+- [x] sfx_hit.mp3 — Damage dealt to boss (impact/crunch)
+- [x] sfx_big_hit.mp3 — Large damage (500+) (explosive impact)
+- [x] sfx_boss_attack.mp3 — Boss hits your band (dark thud)
+- [x] sfx_member_down.mp3 — Member goes Too Stoned (sad guitar slide)
+- [x] sfx_combo.mp3 — Riff Chain triggers (power chord + reverb)
 
 UI:
-- [ ] sfx_draw.mp3 — Draw card (paper shuffle)
-- [ ] sfx_discard.mp3 — Discard card (toss sound)
-- [ ] sfx_ember_gain.mp3 — Gain embers (fire whoosh)
-- [ ] sfx_select.mp3 — Card/member selection (click)
+- [x] sfx_draw.mp3 — Draw card (paper shuffle)
+- [x] sfx_discard.mp3 — Discard card (toss sound)
+- [x] sfx_ember_gain.mp3 — Gain embers (fire whoosh)
+- [x] sfx_select.mp3 — Card/member selection (click)
 - [ ] sfx_hover.mp3 — Hover over interactable (subtle tick) — OPTIONAL
-- [ ] sfx_button.mp3 — Button press (UI click)
+- [x] sfx_button.mp3 — Button press (UI click)
 
 Shop:
-- [ ] sfx_buy.mp3 — Purchase item (cash register/coin)
-- [ ] sfx_sell.mp3 — Sell at Pawn Shop (coin drop)
-- [ ] sfx_burn.mp3 — Burn card (fire woosh + paper burn)
-- [ ] sfx_pack_open.mp3 — Open booster pack (rip/reveal)
-- [ ] sfx_reroll.mp3 — Reroll shop (dice/shuffle)
+- [x] sfx_buy.mp3 — Purchase item (cash register/coin)
+- [x] sfx_sell.mp3 — Sell at Pawn Shop (coin drop)
+- [x] sfx_burn.mp3 — Burn card (fire woosh + paper burn)
+- [x] sfx_pack_open.mp3 — Open booster pack (rip/reveal)
+- [x] sfx_reroll.mp3 — Reroll shop (dice/shuffle)
 
 Special:
 - [ ] sfx_pact.mp3 — Choose a Pact reward (deep gong/bell)

@@ -420,7 +420,7 @@ const ALL_CARDS=[
   {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'If Corruption >=60%, double ALL ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'infencore',name:'Infernal Encore',type:'RIFF',rarity:'Rare',emoji:'👿',embers:3,effect:'ALL members attack again simultaneously.',color:'#9933cc',typeColor:'#7722aa',copies:3},
   {id:'remaster',name:'The Remaster',type:'UTILITY',rarity:'Rare',emoji:'🎙',embers:0,effect:'Select 1 card in hand, then play this to delete it and draw 3 cards.',color:'#22aa44',typeColor:'#118833',copies:1},
-  {id:'sabbathsigil',name:'Black Sabbath Sigil',type:'CORRUPT',rarity:'Rare',emoji:'⛧',embers:2,effect:'Corruption → 100%. Roll d10. Hellquake fires — anything can happen.',color:'#aa1111',typeColor:'#880000',copies:1},
+  {id:'sabbathsigil',name:'Black Sabbath Sigil',type:'CORRUPT',rarity:'Rare',emoji:'⛧',embers:2,effect:'CONSUMABLE. Corruption → 100%. Hellquake d10. Card is destroyed after use.',color:'#aa1111',typeColor:'#880000',copies:0,consumable:true,shopOnly:true,shopChance:0.05,shopCost:42},
   {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:4,effect:'All members deal triple ATK this Strike only.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'crowdsurf',name:'Crowd Surf',type:'RIFF',rarity:'Common',emoji:'🏄',embers:2,effect:'Deal damage equal to cards in hand × 3.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'doubledown',name:'Double Down',type:'RIFF',rarity:'Uncommon',emoji:'🎰',embers:3,effect:'The next card played this Strike costs 0 Embers.',color:'#9933cc',typeColor:'#7722aa',copies:2,shopOnly:true},
@@ -544,6 +544,7 @@ const CIRCLE_ARTIFACTS=[
 // Card prices by rarity
 function cardPrice(card){
   if(!card)return 0
+  if(card.shopCost)return card.shopCost
   if(card.isMember)return card.foil?15:card.mythic?30:5
   const base=card.rarity==='Rare'?14:card.rarity==='Uncommon'?8:4
   return base
@@ -587,6 +588,11 @@ function genShopCards(circleNum){
   }
   // Insert member if rolled
   if(memberSlot){cards[Math.floor(Math.random()*3)]=memberSlot}
+  // 5% chance: Black Sabbath Sigil appears (consumable, 42 cost)
+  if(Math.random()<0.05){
+    const sigil=ALL_CARDS.find(c=>c.id==='sabbathsigil')
+    if(sigil)cards.push({...sigil,shopCost:42,uid:Math.random().toString(36).slice(2)})
+  }
   return cards
 }
 
@@ -3306,7 +3312,12 @@ function App(){
         },100)
       } else {
         setHand(remaining)
-        setDiscardPile(p=>[...p,card])
+        if(card.consumable){
+          addLog('⛧ '+card.name+' shatters and vanishes from your deck!')
+          addFloat('CONSUMED!',getCenter(bossRef).x,getCenter(bossRef).y-110,'#ff4400',true)
+        } else {
+          setDiscardPile(p=>[...p,card])
+        }
       }
     }
     setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
