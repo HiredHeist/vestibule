@@ -3126,11 +3126,11 @@ function App(){
       }
     }
     // cardHeal enemy passive
-    if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
-    else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
-    else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>Math.min(enemy.maxHp,p+4))
-    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>Math.min(enemy.maxHp,p+6))
-    else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>Math.min(enemy.maxHp,p+5))
+    if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
+    else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
+    else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+4))
+    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+6))
+    else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+5))
     return true
   },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected,fightTripBuff,enemy,enemyHp,maxEmbers,activePassives,activeArtifacts,chosenPacts,activeGenre,fightIndex,shredderUsed,collectedLoot])
 
@@ -3243,11 +3243,11 @@ function App(){
       updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       // cardHeal enemy passive
-      if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
-      else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
-      else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>Math.min(enemy.maxHp,p+4))
-    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>Math.min(enemy.maxHp,p+6))
-    else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>Math.min(enemy.maxHp,p+5))
+      if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
+      else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
+      else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+4))
+    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+6))
+    else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+5))
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
     }
@@ -3276,11 +3276,11 @@ function App(){
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
-      if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
-      else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
-      else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>Math.min(enemy.maxHp,p+4))
-    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>Math.min(enemy.maxHp,p+6))
-    else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>Math.min(enemy.maxHp,p+5))
+      if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
+      else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
+      else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+4))
+    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+6))
+    else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+5))
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
     }
@@ -3497,8 +3497,7 @@ function App(){
   // SAFETY NET: catch ANY case where boss HP hits 0 without victory triggering
   useEffect(()=>{
     if(enemyHp<=0&&gameState==='playing'&&!victoryFiredRef.current&&enemy&&enemy.maxHp>0){
-      victoryFiredRef.current=true
-      setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
+      setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},300)
     }
   },[enemyHp,gameState])
 
@@ -3792,7 +3791,7 @@ function App(){
           setAnimPhase('idle')
           return
         }
-        triggerVictory();return
+        if(triggerVictoryRef.current)triggerVictoryRef.current();return
       }
 
       setTimeout(function(){
