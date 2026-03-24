@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+let _uidCounter=Date.now()
+function uid(){return(++_uidCounter).toString(36)}
 import './App.css'
 
 // ── Audio ─────────────────────────────────────────────────────────────────────
@@ -228,7 +230,7 @@ const DESCENT_REWARDS_1=[ // Fight 1 skip rewards (small) — 9 options
   {id:'s_atk',name:'Random Member +1 ATK',emoji:'🎸',apply:(gs)=>{gs.setStage(p=>{const alive=p.map((m,i)=>m&&!m.tooStoned?i:null).filter(i=>i!==null);if(alive.length===0)return p;const idx=alive[Math.floor(Math.random()*alive.length)];const ns=[...p];ns[idx]=Object.assign({},ns[idx],{atk:ns[idx].atk+1,permAtkBonus:(ns[idx].permAtkBonus||0)+1});gs.addLog('🎸 Skipped fight: '+ns[idx].name+' +1 ATK');return ns})}},
   {id:'s_draw1',name:'Draw +1 Next Fight',emoji:'📋',apply:(gs)=>{gs.setPendingDraw(p=>p+1);gs.addLog('📋 Skipped fight: +1 Card next fight')}},
   {id:'s_discard',name:'+1 Discard Next Fight',emoji:'🗑',apply:(gs)=>{gs.setBonusDiscards(p=>p+1);gs.addLog('🗑 Skipped fight: +1 Discard next fight')}},
-  {id:'s_card',name:'Random Common Card',emoji:'🃏',apply:(gs)=>{const commons=ALL_CARDS.filter(c=>c.rarity==='Common');const pick=commons[Math.floor(Math.random()*commons.length)];gs.addToDeck({...pick,uid:Math.random().toString(36).slice(2)});gs.addLog('🃏 Skipped fight: Added '+pick.name+' to deck')}},
+  {id:'s_card',name:'Random Common Card',emoji:'🃏',apply:(gs)=>{const commons=ALL_CARDS.filter(c=>c.rarity==='Common');const pick=commons[Math.floor(Math.random()*commons.length)];gs.addToDeck({...pick,uid:uid()});gs.addLog('🃏 Skipped fight: Added '+pick.name+' to deck')}},
   {id:'s_stashper',name:'+5 Stash Per Member',emoji:'💰',apply:(gs)=>{gs.setStage(p=>{const alive=p.filter(m=>m&&!m.tooStoned).length;gs.setStash(s=>s+alive*5);gs.addLog('💰 Skipped fight: +'+alive*5+' Stash ('+alive+' members x 5)');return p})}},
   {id:'s_embers2',name:'+2 Bonus Embers',emoji:'⚡',apply:(gs)=>{gs.setBonusEmbers(p=>p+2);gs.addLog('⚡ Skipped fight: +2 Bonus Embers next fight')}},
 ]
@@ -236,7 +238,7 @@ const DESCENT_REWARDS_2=[ // Fight 2 skip rewards (medium) — 9 options
   {id:'m_stash',name:'+25 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>p+25);gs.addLog('🌿 Skipped fight: +25 Stash')}},
   {id:'m_corrupt',name:'Corruption → 0%',emoji:'✨',apply:(gs)=>{gs.setCorruption(0);gs.addLog('✨ Skipped fight: Corruption reset to 0%')}},
   {id:'m_draw2',name:'Draw +2 Next Fight',emoji:'📋',apply:(gs)=>{gs.setPendingDraw(p=>p+2);gs.addLog('📋 Skipped fight: +2 Cards next fight')}},
-  {id:'m_card',name:'Random Uncommon Card',emoji:'🃏',apply:(gs)=>{const uncommons=ALL_CARDS.filter(c=>c.rarity==='Uncommon');const pick=uncommons[Math.floor(Math.random()*uncommons.length)];gs.addToDeck({...pick,uid:Math.random().toString(36).slice(2)});gs.addLog('🃏 Skipped fight: Added '+pick.name+' to deck')}},
+  {id:'m_card',name:'Random Uncommon Card',emoji:'🃏',apply:(gs)=>{const uncommons=ALL_CARDS.filter(c=>c.rarity==='Uncommon');const pick=uncommons[Math.floor(Math.random()*uncommons.length)];gs.addToDeck({...pick,uid:uid()});gs.addLog('🃏 Skipped fight: Added '+pick.name+' to deck')}},
   {id:'m_allatk',name:'All Members +1 ATK',emoji:'🎸',apply:(gs)=>{gs.setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1}):m));gs.addLog('🎸 Skipped fight: All members +1 ATK')}},
   {id:'m_stash40',name:'+40 Stash',emoji:'💰',apply:(gs)=>{gs.setStash(p=>p+40);gs.addLog('💰 Skipped fight: +40 Stash')}},
   {id:'m_delete',name:'Delete Random Common',emoji:'🗑',apply:(gs)=>{gs.deleteRandomCommon()}},
@@ -462,7 +464,7 @@ function buildDeck(seed){
   const deck=[]
   getUnlockedCards().filter(c=>!c.shopOnly).forEach(function(c){
     const n=c.copies||2
-    for(let i=0;i<n;i++){deck.push(Object.assign({},c,{uid:Math.random().toString(36).slice(2)}))}
+    for(let i=0;i<n;i++){deck.push(Object.assign({},c,{uid:uid()}))}
   })
   for(let i=deck.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
   return deck
@@ -558,13 +560,13 @@ function genShopCards(circleNum){
   let memberSlot=null
   if(memberChance<0.05){
     const _sm=getUnlockedMusicians()[Math.floor(Math.random()*getUnlockedMusicians().length)]
-    memberSlot={..._sm,isMember:true,cost:5,rarity:'Common',type:'RECRUIT',effect:_sm.keyword+' · '+_sm.role,foil:false,mythic:false,demonic:false,uid:Math.random().toString(36).slice(2)}
+    memberSlot={..._sm,isMember:true,cost:5,rarity:'Common',type:'RECRUIT',effect:_sm.keyword+' · '+_sm.role,foil:false,mythic:false,demonic:false,uid:uid()}
   } else if(memberChance<0.08){
     const _sm=getUnlockedMusicians()[Math.floor(Math.random()*getUnlockedMusicians().length)]
-    memberSlot={..._sm,isMember:true,name:'✨ Foil '+_sm.name,cost:15,rarity:'Uncommon',type:'RECRUIT',effect:'FOIL · '+_sm.keyword+' · '+_sm.role,foil:true,mythic:false,demonic:false,uid:Math.random().toString(36).slice(2)}
+    memberSlot={..._sm,isMember:true,name:'✨ Foil '+_sm.name,cost:15,rarity:'Uncommon',type:'RECRUIT',effect:'FOIL · '+_sm.keyword+' · '+_sm.role,foil:true,mythic:false,demonic:false,uid:uid()}
   } else if(memberChance<0.09){
     const _sm=getUnlockedMusicians()[Math.floor(Math.random()*getUnlockedMusicians().length)]
-    memberSlot={..._sm,isMember:true,name:'✦ Mythic '+_sm.name,cost:30,rarity:'Rare',type:'RECRUIT',effect:'MYTHIC · '+_sm.keyword+' · '+_sm.role,foil:false,mythic:true,demonic:false,uid:Math.random().toString(36).slice(2)}
+    memberSlot={..._sm,isMember:true,name:'✦ Mythic '+_sm.name,cost:30,rarity:'Rare',type:'RECRUIT',effect:'MYTHIC · '+_sm.keyword+' · '+_sm.role,foil:false,mythic:true,demonic:false,uid:uid()}
   }
 
   // Filter cards by circle depth
@@ -591,7 +593,7 @@ function genShopCards(circleNum){
   // 5% chance: Black Sabbath Sigil appears (consumable, 42 cost)
   if(Math.random()<0.05){
     const sigil=ALL_CARDS.find(c=>c.id==='sabbathsigil')
-    if(sigil)cards.push({...sigil,shopCost:42,uid:Math.random().toString(36).slice(2)})
+    if(sigil)cards.push({...sigil,shopCost:42,uid:uid()})
   }
   return cards
 }
@@ -1070,9 +1072,9 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     }
     const applyFoilMythic=(cards,foilChance,mythicChance)=>cards.map(c=>{
       const r=rng()
-      if(mythicChance&&r<mythicChance)return {...c,mythic:true,uid:Math.random().toString(36).slice(2)}
-      if(foilChance&&r<foilChance)return {...c,foil:true,uid:Math.random().toString(36).slice(2)}
-      return {...c,uid:Math.random().toString(36).slice(2)}
+      if(mythicChance&&r<mythicChance)return {...c,mythic:true,uid:uid()}
+      if(foilChance&&r<foilChance)return {...c,foil:true,uid:uid()}
+      return {...c,uid:uid()}
     })
     const _uc=getUnlockedCards()
     const commons=_uc.filter(c=>c.rarity==='Common'&&!c.shopOnly)
@@ -1088,7 +1090,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
       // 10% chance one is a passive
       if(rng()<0.1&&(starterPassives||[]).length){
         const pas=starterPassives[Math.floor(rng()*starterPassives.length)]
-        base.push({...pas,_isPack:true,uid:Math.random().toString(36).slice(2)})
+        base.push({...pas,_isPack:true,uid:uid()})
       } else {
         base.push(...pickRandom(rares,1))
       }
@@ -1096,14 +1098,14 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     }
     if(pack.id==='ritual'){
       const packs=(starterPassives||[]).filter(p=>!(activePassives||[]).some(e=>e.id===p.id))
-      return{cards:pickRandom(packs,Math.min(2,packs.length)).map(p=>({...p,_isPack:true,uid:Math.random().toString(36).slice(2)})),picks:1}
+      return{cards:pickRandom(packs,Math.min(2,packs.length)).map(p=>({...p,_isPack:true,uid:uid()})),picks:1}
     }
     if(pack.id==='hellforged'){
       const arts=(starterArtifacts||[]).filter(a=>!(activeArtifacts||[]).some(e=>e.id===a.id))
-      return{cards:pickRandom(arts,Math.min(2,arts.length)).map(a=>({...a,_isPack:true,uid:Math.random().toString(36).slice(2)})),picks:1}
+      return{cards:pickRandom(arts,Math.min(2,arts.length)).map(a=>({...a,_isPack:true,uid:uid()})),picks:1}
     }
     if(pack.id==='garage'){
-      const members=getUnlockedMusicians().map(m=>({...m,isMember:true,uid:Math.random().toString(36).slice(2)}))
+      const members=getUnlockedMusicians().map(m=>({...m,isMember:true,uid:uid()}))
       return{cards:pickRandom(members,2),picks:1}
     }
     if(pack.id==='touring'){
@@ -2684,10 +2686,10 @@ function App(){
     const cappedTarget=Math.min(target,10)
     let nh=[...h],nd=[...d],ndisc=[...disc]
     while(nh.length<cappedTarget){
-      if(nd.length===0){if(ndisc.length===0)break;nd=[...ndisc].sort(()=>Math.random()-.5);ndisc=[];addLog('🔄 Deck reshuffled.')}
-      nh=[...nh,nd[0]];nd=nd.slice(1);playCard()
+      if(nd.length===0){if(ndisc.length===0)break;nd=[...ndisc].filter(Boolean).sort(()=>Math.random()-.5);ndisc=[];addLog('🔄 Deck reshuffled.')}
+      if(nd[0])nh=[...nh,nd[0]];nd=nd.slice(1);playCard()
     }
-    return{h:nh,d:nd,disc:ndisc}
+    return{h:nh.filter(Boolean),d:nd.filter(Boolean),disc:ndisc.filter(Boolean)}
   },[])
 
   const rollDblForStage=(stg)=>{
@@ -3298,7 +3300,7 @@ function App(){
       const remaining=curHand.filter(c=>c.uid!==dragCardUid)
       const hasResonanceCoil=activeArtifacts.some(a=>a.id==='a9')
       const resonantIdx=hasResonanceCoil?remaining.findIndex(c=>c.id===playedId):-1
-      if(resonantIdx!==-1){
+      if(resonantIdx!==-1&&!card.consumable){
         const resonant=remaining[resonantIdx]
         const withoutResonant=remaining.filter((_,i)=>i!==resonantIdx)
         setHand(withoutResonant)
@@ -3333,10 +3335,12 @@ function App(){
   const handleHandReorder=useCallback((fromIdx,toIdx)=>{
     if(fromIdx===toIdx||fromIdx===null||toIdx===null)return
     setHand(prev=>{
+      if(fromIdx<0||fromIdx>=prev.length||toIdx<0||toIdx>=prev.length)return prev
       const next=[...prev]
       const [card]=next.splice(fromIdx,1)
+      if(!card)return prev
       next.splice(toIdx,0,card)
-      return next
+      return next.filter(Boolean)
     })
     setDragHandIdx(null)
     setDragOverHandIdx(null)
@@ -3930,18 +3934,18 @@ function App(){
             for(let _r=0;_r<cardsToReplace;_r++){
               if(nd.length===0){
                 if(ndisc.length===0)break;
-                nd=[...ndisc].sort(()=>Math.random()-.5);
+                nd=[...ndisc].filter(Boolean).sort(()=>Math.random()-.5);
                 ndisc=[];
               }
-              nh=[...nh,nd[0]];nd=nd.slice(1);
+              if(nd[0])nh=[...nh,nd[0]];nd=nd.slice(1);
             }
-            setHand(nh);setDeck(nd);setDiscardPile(ndisc);
+            setHand(nh.filter(Boolean));setDeck(nd.filter(Boolean));setDiscardPile(ndisc.filter(Boolean));
             playDraw();playSfx('draw');
             // WELCOME TO HELL: inject contract card every 2 strikes
             if(welcomeToHell==='fighting'){
               wthStrikesRef.current++
               if(wthStrikesRef.current%2===0){
-                const contractCard={id:'contract',name:'Record Deal',type:'CORRUPT',rarity:'Rare',emoji:'📝',embers:0,effect:'Sign the deal. +50% score. Lose your strongest member.',color:'#aa1111',typeColor:'#880000',uid:'contract_'+Math.random().toString(36).slice(2)}
+                const contractCard={id:'contract',name:'Record Deal',type:'CORRUPT',rarity:'Rare',emoji:'📝',embers:0,effect:'Sign the deal. +50% score. Lose your strongest member.',color:'#aa1111',typeColor:'#880000',uid:'contract_'+uid()}
                 setHand(h=>[...h,contractCard])
                 addLog('📝 The Executive slides a contract across the table...')
               }
@@ -3993,13 +3997,13 @@ function App(){
                 const toDiscard=Math.min(shuffleCount,curH.length)
                 const indices=[]
                 while(indices.length<toDiscard){const idx=Math.floor(Math.random()*curH.length);if(!indices.includes(idx))indices.push(idx)}
-                const discarded=indices.map(i=>curH[i])
-                const remaining=curH.filter((_,i)=>!indices.includes(i))
+                const discarded=indices.map(i=>curH[i]).filter(Boolean)
+                const remaining=curH.filter((_,i)=>!indices.includes(i)).filter(Boolean)
                 const newDisc=[...curDisc,...discarded]
-                let nd=[...curD],drawn=[]
+                let nd=[...curD].filter(Boolean),drawn=[]
                 for(let i=0;i<toDiscard&&nd.length>0;i++)drawn.push(nd.shift())
                 if(nd.length===0&&drawn.length<toDiscard&&newDisc.length>0){nd=[...newDisc].sort(()=>Math.random()-.5);const more=[];while(drawn.length<toDiscard&&nd.length>0)more.push(nd.shift());drawn=[...drawn,...more]}
-                setHand([...remaining,...drawn]);setDeck(nd);setDiscardPile(newDisc)
+                setHand([...remaining,...drawn].filter(Boolean));setDeck(nd.filter(Boolean));setDiscardPile(newDisc.filter(Boolean))
                 addLog('🃏 '+enemy.name+' shuffles your hand! '+toDiscard+' card'+(toDiscard>1?'s':'')+' swapped.')
               }
             }
@@ -4192,7 +4196,7 @@ function App(){
     setStash(p=>p-effectiveCost)
     playSfx('buy')
     if(type==='card'){
-      const nc=Object.assign({},item,{uid:Math.random().toString(36).slice(2),shopBought:true})
+      const nc=Object.assign({},item,{uid:uid(),shopBought:true})
       setDeck(p=>[...p,nc])
       setShopBoughtIds(p=>[...p,nc.uid])
       addLog('🛒 Bought '+item.name+'!')
@@ -4215,7 +4219,7 @@ function App(){
         const m=item._memberOverride
         // Use the member's actual identity (id, atk, hp, keyword etc)
         const base=ALL_MUSICIANS.find(mu=>mu.id===m.id)||m
-        candidates=[{...base,foil:m.foil||false,mythic:m.mythic||false,demonic:m.demonic||false,uid:Math.random().toString(36).slice(2)}]
+        candidates=[{...base,foil:m.foil||false,mythic:m.mythic||false,demonic:m.demonic||false,uid:uid()}]
       } else {
         const count=item.members||2
         const real=getUnlockedMusicians()
@@ -4246,7 +4250,7 @@ function App(){
 
       // Add regular cards to deck
       cards.forEach(c => {
-        const nc = Object.assign({},c,{uid:Math.random().toString(36).slice(2),shopBought:true})
+        const nc = Object.assign({},c,{uid:uid(),shopBought:true})
         setDeck(p=>[...p,nc])
         setShopBoughtIds(p=>[...p,nc.uid])
         addLog('🛒 Added '+c.name+' to deck!')
@@ -4298,7 +4302,7 @@ function App(){
       const ns=[...prev]
       const idx=ns.findIndex(m=>!m)
       if(idx!==-1){
-        const withUid={...member,uid:Math.random().toString(36).slice(2),roleBondWith:[],roleBondBonus:0}
+        const withUid={...member,uid:uid(),roleBondWith:[],roleBondBonus:0}
         const bonded=applyMentorLink(withUid,ns)
         ns[idx]=bonded
         const tl=tier!=='base'?' ['+tier.toUpperCase()+']':''
@@ -4973,7 +4977,7 @@ function App(){
             <div onClick={()=>{setDeckViewOpen(false);setDiscardViewOpen(false)}} style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#cc4444',cursor:'pointer',padding:'6px 16px',border:'1px solid #aa2222',borderRadius:4}}>✕ Close</div>
           </div>
           <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
-            {(deckViewOpen?[...deck].sort((a,b)=>(a.name||'').localeCompare(b.name||'')):discardPile).map((c,i)=>{
+            {(deckViewOpen?[...deck].sort((a,b)=>(a.name||'').localeCompare(b.name||'')):discardPile).filter(Boolean).map((c,i)=>{
               const bc=c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
               return <div key={c.uid||i} style={{width:120,background:'linear-gradient(180deg,#201408,#100804)',border:'1px solid '+bc+'88',borderRadius:5,padding:'0 0 8px'}}>
                 <div style={{height:3,background:bc,borderRadius:'5px 5px 0 0'}}/>
@@ -5032,7 +5036,7 @@ function App(){
         setDeck(prev=>{
           const copyCard=prev.find(c=>c.uid===copyUid)||remasterCards.find(c=>c.uid===copyUid)
           const filtered=prev.filter(c=>!delUids.includes(c.uid))
-          if(copyCard){const newCopy=Object.assign({},copyCard,{uid:Math.random().toString(36).slice(2)});filtered.push(newCopy)}
+          if(copyCard){const newCopy=Object.assign({},copyCard,{uid:uid()});filtered.push(newCopy)}
           return filtered
         })
         setRemasterOpen(false)
@@ -5260,7 +5264,7 @@ function App(){
 
         {/* CARD FAN — centered, padded to avoid columns */}
         <div style={{position:'absolute',left:200,right:210,top:18,bottom:0,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:10,overflow:'visible',zIndex:50}}>
-          {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).map((card,i)=>(
+          {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).filter(Boolean).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
               isHovered={hovered===i} isSelected={selected.includes(card.uid)}
               anyHovered={hovered!==null}
