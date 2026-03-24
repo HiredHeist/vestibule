@@ -2389,7 +2389,7 @@ function EventScreen({event,onChoose}){
   </div>)
 }
 
-function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRoll,corruption}){
+function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRoll}){
   const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35
   return(
     <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:180}}>
@@ -2410,33 +2410,7 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
             <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'rgba(255,230,180,1)',letterSpacing:3,textShadow:'0 0 8px rgba(0,0,0,0.99),0 1px 3px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)} HP REMAINING</div>
           </div>
         </div>
-        {/* CORRUPTION BAR with threshold markers */}
-        <div style={{width:'100%',marginTop:3}}>
-          <div style={{width:'100%',height:16,background:'rgba(30,10,20,0.8)',border:'1px solid rgba(100,30,60,0.5)',borderRadius:2,overflow:'hidden',position:'relative'}}>
-            {/* Threshold tick marks */}
-            {[25,50,75].map(t=><div key={t} style={{position:'absolute',top:0,bottom:0,left:t+'%',width:2,background:corruption>=t?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.08)',zIndex:3}}/>)}
-            {/* Fill bar */}
-            <div style={{height:'100%',width:Math.min(100,corruption)+'%',transition:'width 0.7s ease',
-              background:corruption>=100?'linear-gradient(90deg,#660044,#cc0066,#ff0088)':
-                corruption>=75?'linear-gradient(90deg,#550022,#aa0044,#dd0066)':
-                corruption>=50?'linear-gradient(90deg,#440011,#880033)':
-                corruption>=25?'linear-gradient(90deg,#330011,#660022)':
-                'linear-gradient(90deg,#220008,#440011)',
-              boxShadow:corruption>=75?'0 0 12px rgba(200,0,80,0.5)':'none'}}/>
-            {/* Label */}
-            <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,
-                color:corruption>=100?'#ff88aa':corruption>=75?'#ff6688':corruption>=50?'#dd4466':'#aa3344',
-                letterSpacing:2,textShadow:'0 0 6px rgba(0,0,0,0.95)'}}>
-                CORRUPTION {corruption}%
-              </span>
-              {corruption>=25&&corruption<50&&<span style={{fontSize:9,color:'#cc6677',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>⚠ Whispers</span>}
-              {corruption>=50&&corruption<75&&<span style={{fontSize:9,color:'#dd5566',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>⚠ Hunger</span>}
-              {corruption>=75&&corruption<100&&<span style={{fontSize:9,color:'#ee4455',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>⚠ Madness</span>}
-              {corruption>=100&&<span style={{fontSize:9,color:'#ff2244',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>☠ Possessed</span>}
-            </div>
-          </div>
-        </div>
+
       </div>
     </div>
   )
@@ -6038,7 +6012,7 @@ function App(){
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
         <div style={{padding:'8px 16px 6px',position:'relative',zIndex:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0}}>
           <div style={{width:'100%',maxWidth:950,background:'rgba(8,0,0,0.55)',border:'2px solid rgba(160,20,0,0.8)',borderRadius:8,padding:'0',overflow:'hidden',animation:'bossGlow 2s ease-in-out infinite',boxShadow:'0 0 30px rgba(150,0,0,0.4),inset 0 0 40px rgba(80,0,0,0.3)'}}>
-            <BossSection enemy={enemy} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll} corruption={corruption}/>
+            <BossSection enemy={enemy} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll}/>
           </div>
         </div>
         <div style={{position:'relative',zIndex:5,background:'rgba(20,11,3,0.42)',borderTop:'2px solid rgba(60,35,5,0.45)',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>
@@ -6113,6 +6087,20 @@ function App(){
               {bon>1&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#e8a820',letterSpacing:1}}>+{Math.round((bon-1)*100)}% SYNERGY</span>}
               <span style={{color:'#e8a820',fontSize:18,textShadow:'0 0 8px rgba(200,160,60,0.5)'}}>⟶</span>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:27,color:'#c8a060',fontWeight:700}}>{enemy.name}</span>
+              {/* CORRUPTION BAR — right side of attack bar */}
+              <div style={{position:'absolute',right:chosenPacts.length>0?12+chosenPacts.length*28+16:12,top:'50%',transform:'translateY(-50%)',width:280,height:18,background:'rgba(30,10,20,0.85)',border:'1px solid rgba(100,30,60,0.5)',borderRadius:3,overflow:'hidden'}}>
+                {[25,50,75].map(t=><div key={t} style={{position:'absolute',top:0,bottom:0,left:t+'%',width:1,background:corruption>=t?'rgba(255,255,255,0.2)':'rgba(255,255,255,0.06)',zIndex:3}}/>)}
+                <div style={{height:'100%',width:Math.min(100,corruption)+'%',transition:'width 0.7s ease',
+                  background:corruption>=100?'linear-gradient(90deg,#660044,#cc0066,#ff0088)':corruption>=75?'linear-gradient(90deg,#550022,#aa0044,#dd0066)':corruption>=50?'linear-gradient(90deg,#440011,#880033)':corruption>=25?'linear-gradient(90deg,#330011,#660022)':'linear-gradient(90deg,#220008,#440011)',
+                  boxShadow:corruption>=75?'0 0 10px rgba(200,0,80,0.4)':'none'}}/>
+                <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',gap:6}}>
+                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:corruption>=100?'#ff88aa':corruption>=75?'#ff6688':corruption>=50?'#dd4466':'#aa3344',letterSpacing:2,textShadow:'0 0 6px rgba(0,0,0,0.95)'}}>CORRUPTION {corruption}%</span>
+                  {corruption>=25&&corruption<50&&<span style={{fontSize:8,color:'#cc6677',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>⚠ Whispers</span>}
+                  {corruption>=50&&corruption<75&&<span style={{fontSize:8,color:'#dd5566',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>⚠ Hunger</span>}
+                  {corruption>=75&&corruption<100&&<span style={{fontSize:8,color:'#ee4455',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>⚠ Madness</span>}
+                  {corruption>=100&&<span style={{fontSize:8,color:'#ff2244',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>☠ Possessed</span>}
+                </div>
+              </div>
               {chosenPacts.length>0&&<div style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',display:'flex',gap:4}}>
                 {chosenPacts.filter(Boolean).map(pid=>{const p=PACT_REWARDS.find(r=>r.id===pid);return p?<div key={pid} style={{position:'relative',cursor:'help'}}
                   onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='block'}}
