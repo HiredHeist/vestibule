@@ -268,7 +268,7 @@ const CARD_UPGRADES={
   soundwall:{desc:'+4 base damage at all tiers.'},
   doubledown:{desc:'Next TWO cards cost 0 (was 1).'},
   distortion:{desc:'+2 temp ATK/member (was +1). +1 max HP to all.',hp:'all',hpAmt:1},
-  dialtoeleven:{desc:'+15% corruption. All members +2 ATK this Strike (was +1).'},
+  dialtoeleven:{desc:'+10% corruption. All members +3 ATK this Strike (was +2).'},
   deathriff:{desc:'80 base damage (was 60).'},
   feedbackloop:{desc:'Corruption / 1.5 damage (was / 2).'},
   ampstatic:{desc:'Corruption / 8 ATK (was / 10).'},
@@ -403,7 +403,7 @@ const RIFF_CHAINS=[
 
 const ALL_CARDS=[
   {id:'amp',name:'Amp It Up',type:'RIFF',rarity:'Common',emoji:'⚡',embers:2,effect:'Target member deals double ATK this turn.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:0,effect:'+15% Corruption. All members +1 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:2},
+  {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:0,effect:'+10% Corruption. All members +2 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'soundcheck',name:'Sound Check',type:'UTILITY',rarity:'Common',emoji:'🔊',embers:2,effect:'All members +4 HP. Injured members also gain +1 ATK this Strike.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'sigdecay',name:'Signal Decay',type:'CORRUPT',rarity:'Common',emoji:'📡',embers:1,effect:'Discard 1 card from hand. Draw 2 cards.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'battlecry',name:'Battle Cry',type:'RIFF',rarity:'Common',emoji:'🤘',embers:2,effect:'Target member +1 ATK permanently.',color:'#9933cc',typeColor:'#7722aa',copies:4},
@@ -426,7 +426,7 @@ const ALL_CARDS=[
   {id:'sabbathsigil',name:'Black Sabbath Sigil',type:'CORRUPT',rarity:'Rare',emoji:'⛧',embers:2,effect:'CONSUMABLE. Corruption → 100%. Hellquake d10. Card is destroyed after use.',color:'#aa1111',typeColor:'#880000',copies:1,consumable:true,shopCost:42},
   {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:4,effect:'All members deal triple ATK this Strike only.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'crowdsurf',name:'Crowd Surf',type:'RIFF',rarity:'Common',emoji:'🏄',embers:2,effect:'Deal damage equal to cards in hand × 3.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'doubledown',name:'Double Down',type:'RIFF',rarity:'Uncommon',emoji:'🎰',embers:3,effect:'The next card played this Strike costs 0 Embers.',color:'#9933cc',typeColor:'#7722aa',copies:2,shopOnly:true},
+  {id:'doubledown',name:'Double Down',type:'RIFF',rarity:'Uncommon',emoji:'🎰',embers:1,effect:'The next card played this Strike costs 0 Embers.',color:'#9933cc',typeColor:'#7722aa',copies:2,shopOnly:true},
   {id:'deathriff',name:'Death Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'💀',embers:1,effect:'Deal 60 damage, reduced by your Corruption%. Best at 0%, weakest at 100%. Corruption +10%.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'ampoverload',name:'Amp Overload',type:'EMBER',rarity:'Uncommon',emoji:'🔋',embers:0,effect:'Gain 3 Embers. Costs 1 Discard. Unplayable with 0 discards remaining.',color:'#c87820',typeColor:'#a06010',copies:1},
   {id:'ampstatic',name:'Amp the Static',type:'CORRUPT',rarity:'Uncommon',emoji:'📶',embers:3,effect:'Target member gains ATK = Corruption ÷ 10 this Strike. Requires Corruption > 0.',color:'#aa1111',typeColor:'#880000',copies:2},
@@ -3554,7 +3554,7 @@ function App(){
       msg='🔊 Sound Check! All +4 HP'+(injuredCount>0?' + '+injuredCount+' injured member(s) +1 ATK!':'!');stage.filter(x=>x&&!x.tooStoned).forEach(x=>addBuff(x.uid,'+HP','#33dd33'))
       addFloat('+4 HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')
     }
-    else if(card.id==='dialtoeleven'){const nc=Math.min(100,corruption+15);setCorruption(nc);updStat('maxCorruption',nc,true);ns=ns.map(function(m){return m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+(card.upgraded?2:1),tempAtkBonus:(m.tempAtkBonus||0)+(card.upgraded?2:1),buffCount:(m.buffCount||0)+1}):m});msg='📻 Dial to Eleven! Corruption +15% → '+nc+'%. All members +1 ATK!'}
+    else if(card.id==='dialtoeleven'){const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true);ns=ns.map(function(m){return m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+(card.upgraded?3:2),tempAtkBonus:(m.tempAtkBonus||0)+(card.upgraded?3:2),buffCount:(m.buffCount||0)+1}):m});msg='📻 Dial to Eleven! Corruption +10% → '+nc+'%. All members +2 ATK!'}
     else if(card.id==='sigdecay'){
       // Handled in handleDropOnStage (modifies hand/deck like setlist)
       return false
