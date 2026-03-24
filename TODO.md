@@ -261,9 +261,9 @@ Special:
 - Welcome to Hell: corporate horror, synth + metal fusion
 
 ### Balance Tweaks (after Big 5)
-- [ ] Demonic: +100% HP → +80% HP (target ~0.5% win rate)
-- [ ] Blood: starting corruption 15% → 10% (target ~1.5%)
-- [ ] Juice: screen shake, hit sounds, card play sounds, damage number bounce
+- [x] Demonic: +100% HP → +80% HP (hpMult 2.0→1.8, target ~0.5%)
+- [x] Blood: starting corruption 15% → 10% (target ~1.5%)
+- [x] Juice: 30 SFX wired (card plays, strikes, hits, combos, shop, drugs, etc)
 
 ## ✅ COMPLETED TONIGHT
 

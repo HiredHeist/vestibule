@@ -264,8 +264,8 @@ const STAKES=[
   {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.15,dmgAdd:1,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +15% HP. Enemies +1 damage.'},
   {id:'gold',name:'Gold',color:'#ffd700',border:'#ffd700',hpMult:1.30,dmgAdd:2,priceMult:1.25,scoreMult:2.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +30% HP. Enemies +2 damage. Shop prices +25%.'},
   {id:'obsidian',name:'Obsidian',color:'#2a2a3a',border:'#6a6a8a',hpMult:1.50,dmgAdd:2,priceMult:1.25,scoreMult:2.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +50% HP. No free heal after fights. Drugs 50% more expensive.'},
-  {id:'blood',name:'Blood',color:'#8b0000',border:'#cc0000',hpMult:1.75,dmgAdd:3,priceMult:1.25,scoreMult:3.0,maxStrikes:4,startEmbers:4,startCorruption:15,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +75% HP. Start with 4 Embers. Corruption starts at 15%.'},
-  {id:'demonic',name:'Demonic ⛧',color:'#ff0000',border:'#ff0000',hpMult:2.0,dmgAdd:4,priceMult:1.5,scoreMult:4.0,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,drugPriceMult:2.0,badTripChance:0.15,desc:'Bosses +100% HP. Max 3 Strikes. Bad trips 15%. Pure hell.'},
+  {id:'blood',name:'Blood',color:'#8b0000',border:'#cc0000',hpMult:1.75,dmgAdd:3,priceMult:1.25,scoreMult:3.0,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +75% HP. Start with 4 Embers. Corruption starts at 10%.'},
+  {id:'demonic',name:'Demonic ⛧',color:'#ff0000',border:'#ff0000',hpMult:1.8,dmgAdd:4,priceMult:1.5,scoreMult:4.0,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,drugPriceMult:2.0,badTripChance:0.15,desc:'Bosses +80% HP. Max 3 Strikes. Bad trips 15%. Pure hell.'},
 ]
 function getUnlockedStakes(){
   const beaten=JSON.parse(localStorage.getItem('vst_stakes_beaten')||'[]')
