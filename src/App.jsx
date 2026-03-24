@@ -1878,7 +1878,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
         {member.demonic?'⛧ DEMONIC':member.mythic?'✦ MYTHIC':'✨ FOIL'}
       </div>}
       <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative',minHeight:90,overflow:'hidden'}}>
-        {STAGE_PORTRAITS[member.id]?<img className="squiggle" src={STAGE_PORTRAITS[member.id]} alt={member.id} style={{width:72,height:108,objectFit:'cover',objectPosition:'top center'}}/>:member.emoji}
+        {STAGE_PORTRAITS[member.id]?<img className="squiggle" src={STAGE_PORTRAITS[member.id]} alt={member.id} style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'top center'}}/>:member.emoji}
         {st&&<div style={{position:'absolute',top:4,right:4,fontSize:22}}>💨</div>}
         {isAttacking&&<div style={{position:'absolute',inset:0,background:'rgba(255,50,0,0.12)',animation:'pulse 0.4s ease infinite alternate'}}/>}
       </div>
