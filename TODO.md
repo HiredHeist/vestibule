@@ -158,10 +158,11 @@ This is happening.
 - [ ] Victory music track (6th mp3)
 - [x] Win-exclusive unlocks per stake: STAKE_UNLOCKS constant, beatStake records to localStorage,
       cinematic shows REWARD UNLOCKED, Victories tab in unlock gallery, God Killer title on menu
-- [ ] WELCOME TO HELL bonus fight (replaces "Bonus Circle 10" / "Second Album"):
-      Corporate A&R Executive office cutscene (SVG silhouette, typewriter text),
-      choice to enter or walk away, 100k HP boss, "contract" mechanic
-      (every 2 strikes: play contract = +50% score but lose strongest member)
+- [x] WELCOME TO HELL bonus fight — complete:
+      Choice screen (enter/walk away), cutscene (title + loading bar),
+      A&R Executive (100k HP, 8 dmg), contract card every 2 strikes,
+      contract play = lose strongest + score mult, WTH victory = x3 score,
+      WTH death = no penalty (Lucifer win preserved), second_album unlock
 - [x] Share text enhanced: victory includes band names + ⛧ DEFEATED LUCIFER ⛧ + 🤘
 
 
@@ -382,7 +383,7 @@ Special:
 - [ ] P11-P20 unlockable passives
 - [ ] Collection/unlock screen, settings menu
 - [ ] Steam / mobile / PS release prep
-- [ ] A&R Rep bonus stage after beating Lucifer
+- [x] A&R Executive bonus stage (Welcome to Hell) — built in Feature 5
 
 ---
 

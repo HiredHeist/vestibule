@@ -273,6 +273,11 @@ function getUnlockedStakes(){
   for(let i=1;i<STAKES.length;i++){if(beaten.includes(STAKES[i-1].id))unlocked.push(STAKES[i])}
   return unlocked
 }
+// ── WELCOME TO HELL: A&R Executive bonus boss ──────────────────────
+const AR_EXECUTIVE={id:'ar_exec',name:'The A&R Executive',emoji:'🕴',maxHp:100000,baseDmg:8,
+  passive:'Corporate Pressure. Every 2 strikes, a Record Deal contract appears in your hand.',
+  passiveId:'corporate',tagline:'The real Devil wears a suit.'}
+
 const STAKE_UNLOCKS={
   bronze:{id:'su_bronze',name:'Devil\'s Advocate',type:'card',emoji:'😈',desc:'New card: All members +1 ATK per circle cleared this run.',color:'#cd7f32'},
   silver:{id:'su_silver',name:'Lucifer\'s Crown',type:'artifact',emoji:'👑',desc:'New artifact: +2 ATK all members at fight start.',color:'#c0c0c0'},
@@ -2460,6 +2465,9 @@ function App(){
   const [luciferPhase,setLuciferPhase]=useState(0) // 0=not lucifer, 1=phase1 ice, 2=phase2 satan
   const [luciferCinematic,setLuciferCinematic]=useState(null) // {text,hpSteps} for HP melt animation
   const [victoryCinematic,setVictoryCinematic]=useState(null) // {phase,stage} for kill cinematic
+  const [welcomeToHell,setWelcomeToHell]=useState(null) // 'choice','cutscene','fighting','won','lost'
+  const [contractsPlayed,setContractsPlayed]=useState(0)
+  const wthStrikesRef=useRef(0)
   const [stolenAtkPool,setStolenAtkPool]=useState(0) // soulThief: total ATK stolen, returned on win
   const [tripUsedThisFight,setTripUsedThisFight]=useState(false)
   const [stats,setStats]=useState({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -2543,7 +2551,19 @@ function App(){
     const m=stage[slotIdx]
     let ns=[...stage],spent=effectiveEmbers,msg=''
 
-    if(card.id==='amp'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk*2,_origAtk:m._origAtk||m.atk,tempBuff:true,buffCount:(m.buffCount||0)+1});msg='⚡ '+m.name+' doubled ATK!';addFloat('×2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#9933cc')}
+    // CONTRACT CARD (Welcome to Hell)
+    if(card.id==='contract'){
+      const alive=ns.filter(m=>m&&!m.tooStoned).sort((a,b)=>b.atk-a.atk)
+      if(alive.length<=1){addLog('📝 Cannot sign — need at least 2 members!');return false}
+      const strongest=alive[0]
+      const sIdx=ns.findIndex(m=>m&&m.uid===strongest.uid)
+      ns[sIdx]=Object.assign({},strongest,{tooStoned:true,hp:0})
+      setContractsPlayed(p=>p+1)
+      msg='📝 CONTRACT SIGNED! '+strongest.name+' leaves the band. Score multiplier increased!'
+      addFloat('📝 SIGNED!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ffd700',true)
+      addFloat(strongest.name+' GONE',getCenter(stageRefs.current[sIdx]).x,getCenter(stageRefs.current[sIdx]).y-70,'#cc0000',true)
+    }
+    else if(card.id==='amp'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk*2,_origAtk:m._origAtk||m.atk,tempBuff:true,buffCount:(m.buffCount||0)+1});msg='⚡ '+m.name+' doubled ATK!';addFloat('×2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#9933cc')}
     else if(card.id==='battlecry'){if(!m)return false;const bcBonus=activePassives.some(p=>p.id==='p7')?2:1;ns[slotIdx]=Object.assign({},m,{atk:m.atk+bcBonus,buffCount:(m.buffCount||0)+1});msg='🤘 '+m.name+' Battle Cry! +'+bcBonus+' ATK forever!';addFloat('+'+bcBonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4400')}
     else if(card.id==='newstrings'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,buffCount:(m.buffCount||0)+1});msg='🎸 '+m.name+' +2 ATK permanently!';addFloat('+2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#e8a820')}
     else if(card.id==='encore'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{encoreReady:true,buffCount:(m.buffCount||0)+1});msg='🔁 '+m.name+' encores!';addFloat('ENCORE!',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#dd2222')}
@@ -3189,7 +3209,18 @@ function App(){
         setMaxEmbers(function(p){const newMax=Math.min(MAX_EMBERS_CAP,p+1);setEmbers(newMax);return newMax})
         addFloat('MAX EMBERS +1',getCenter(bossRef).x,getCenter(bossRef).y-130,'#ff6600',true)
       }
-      if(fightIndex>=26){
+      if(welcomeToHell==='fighting'){
+        // A&R Executive defeated!
+        playVictory()
+        const contractBonus=1+contractsPlayed*0.5 // 1x base, +0.5x per contract
+        const wthScore=Math.round(calcRunScore(stats,true)*3*contractBonus)
+        addLog('⛧ THE SECOND ALBUM! Score ×3'+(contractsPlayed>0?' ×'+(1+contractsPlayed*0.5)+' (contracts)':'')+' = '+wthScore.toLocaleString())
+        // Save second album title
+        const stakeUn=getStakeUnlocks();if(!stakeUn.includes('second_album')){stakeUn.push('second_album');localStorage.setItem('vst_stake_unlocks',JSON.stringify(stakeUn))}
+        setWelcomeToHell('won')
+        setTimeout(()=>setGameState('end'),3000)
+      }
+      else if(fightIndex>=26){
       playVictory();setDeathCause('victory')
       setStreakWins(p=>p+1);setStreakLosses(0)
       const newRuns=totalRunsPlayed+1
@@ -3212,7 +3243,7 @@ function App(){
       setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:2}:null),2000) // THE DEVIL IS DEAD
       setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:3}:null),4500) // band members rise
       setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:4}:null),7000) // stake unlocked
-      setTimeout(()=>{setVictoryCinematic(null);setGameState('end')},10000) // end screen
+      setTimeout(()=>{setVictoryCinematic(null);setWelcomeToHell('choice')},10000) // WTH choice
     }
       else{
         const nextCn=Math.floor((fightIndex+1)/3)+1
@@ -3275,7 +3306,7 @@ function App(){
         setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:2}:null),2000)
         setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:3}:null),4500)
         setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:4}:null),7000)
-        setTimeout(()=>{setVictoryCinematic(null);setGameState('end')},10000)
+        setTimeout(()=>{setVictoryCinematic(null);setWelcomeToHell('choice')},10000)
       }
       if(e.shiftKey&&(e.key==='D'||e.key==='d')){
         setDeathCause('stoned')
@@ -3595,7 +3626,7 @@ function App(){
                 else{ns2[ai]=Object.assign({},ns2[ai],{hp:Math.max(0,newHp)})}
               }
               const allStoned=ns2.filter(m=>m).every(m=>m.tooStoned)
-              if(allStoned){discover('allstoned','TOTAL WIPEOUT');setDeathCause('stoned');setTimeout(()=>setGameState('end'),800)}
+              if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned')};setTimeout(()=>setGameState('end'),800)}
               return ns2
             })
             setDamageFlash(true);setTimeout(()=>setDamageFlash(false),400)
@@ -3632,7 +3663,7 @@ function App(){
               addFloat(actualDmg,getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-50,'#ff3300',false)
             }
             const allStoned=ns2.filter(function(m){return m}).every(function(m){return m.tooStoned})
-            if(allStoned){discover('allstoned','TOTAL WIPEOUT');setDeathCause('stoned');setTimeout(function(){setGameState('end')},800)}
+            if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned')};setTimeout(function(){setGameState('end')},800)}
             return ns2
           })
           if(stage[stage.indexOf(target)]&&!stage[stage.indexOf(target)].tooStoned&&(stage[stage.indexOf(target)].hp-actualDmg)<=0&&!stage[stage.indexOf(target)].stoneShield)addLog('💨 '+target.name+' is TOO STONED!')
@@ -3653,6 +3684,15 @@ function App(){
             }
             setHand(nh);setDeck(nd);setDiscardPile(ndisc);
             playDraw();
+            // WELCOME TO HELL: inject contract card every 2 strikes
+            if(welcomeToHell==='fighting'){
+              wthStrikesRef.current++
+              if(wthStrikesRef.current%2===0){
+                const contractCard={id:'contract',name:'Record Deal',type:'CORRUPT',rarity:'Rare',emoji:'📝',embers:0,effect:'Sign the deal. +50% score. Lose your strongest member.',color:'#aa1111',typeColor:'#880000',uid:'contract_'+Math.random().toString(36).slice(2)}
+                setHand(h=>[...h,contractCard])
+                addLog('📝 The Executive slides a contract across the table...')
+              }
+            }
             // ANCHOR keyword: heal adjacent members after Strike
             setStage(function(prev){
               const ns=[...prev];
@@ -3714,7 +3754,7 @@ function App(){
             // Check out-of-strikes death AFTER this strike resolves
             setStrikesLeft(function(cur){
               if(cur<=0){
-                setDeathCause('beaten');
+                if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins. But you already conquered Hell.')}else{setDeathCause('beaten')};
                 {const _rs=calcRunScore(stats,false);saveRunHistory(stats,false,enemy,runSeed);
                 // Achievement checks at game end
                 if(_rs>=5000)unlockAchievement('high_score_5k')
@@ -4049,7 +4089,7 @@ function App(){
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
-    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
+    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -4339,13 +4379,75 @@ function App(){
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:32,color:STAKE_UNLOCKS[victoryCinematic.stakeId].color,marginTop:4,textShadow:'0 0 20px '+STAKE_UNLOCKS[victoryCinematic.stakeId].color+'66'}}>{STAKE_UNLOCKS[victoryCinematic.stakeId].name}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#c8a060',marginTop:6,fontStyle:'italic'}}>{STAKE_UNLOCKS[victoryCinematic.stakeId].desc}</div>
         </div>}
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#c8a040',marginTop:16,fontStyle:'italic',cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setGameState('end')}}>Click anywhere to continue</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#c8a040',marginTop:16,fontStyle:'italic',cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setWelcomeToHell('choice')}}>Click anywhere to continue</div>
       </div>}
-      {victoryCinematic.phase>=4&&<div style={{position:'absolute',inset:0,cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setGameState('end')}}/>}
+      {victoryCinematic.phase>=4&&<div style={{position:'absolute',inset:0,cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setWelcomeToHell('choice')}}/>}
     </div>
   )
 
-    if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
+  // WELCOME TO HELL — choice, cutscene, fight
+  if(welcomeToHell==='choice')return(
+    <div style={{width:1920,height:1080,position:'relative',background:'#0a0604',overflow:'hidden',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16}}>
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 50% 80%,rgba(40,20,5,0.4),transparent)',pointerEvents:'none'}}/>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:26,color:'#aa8a50',fontStyle:'italic',textAlign:'center',maxWidth:700}}>Your band escaped Hell. But someone is waiting at the gate.</div>
+      <div style={{width:200,height:3,background:'linear-gradient(90deg,transparent,#8a6020,transparent)',margin:'8px 0'}}/>
+      <div style={{fontSize:80,marginBottom:8}}>🕴</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#c8a060',textAlign:'center',maxWidth:700,lineHeight:1.6,fontStyle:'italic'}}>
+        "Congratulations. Truly impressive. But per your contract, you owe us one more album. Care to... renegotiate?"
+      </div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#6a5030',textAlign:'center',marginTop:4}}>— The A&R Executive</div>
+      <div style={{display:'flex',gap:30,marginTop:24}}>
+        <button onClick={()=>{
+          setWelcomeToHell('cutscene')
+          setTimeout(()=>{
+            // Setup the fight
+            setEnemy(AR_EXECUTIVE)
+            setEnemyHp(AR_EXECUTIVE.maxHp)
+            setEmbers(maxEmbers);setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS)
+            setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setLastRiffPlayed(null)
+            setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
+            setContractsPlayed(0);setPendingDraw(0);wthStrikesRef.current=0
+            // Redeal hand
+            const allCards=[...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
+            const hs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
+            setHand(allCards.slice(0,hs));setDeck(allCards.slice(hs));setDiscardPile([])
+            handTargetRef.current=hs
+            // Restore band to full HP
+            setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined}):null))
+            setWelcomeToHell('fighting')
+            setGameState('playing')
+          },3000)
+        }}
+          style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,letterSpacing:4,padding:'16px 40px',background:'rgba(130,0,0,0.4)',border:'2px solid #cc1111',borderRadius:6,color:'#ee2222',cursor:'pointer',textShadow:'0 0 14px rgba(200,0,0,0.6)',boxShadow:'0 0 25px rgba(180,0,0,0.4)',transition:'all 0.2s'}}
+          onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,0,0,0.5)';e.currentTarget.style.boxShadow='0 0 40px rgba(200,0,0,0.6)'}}
+          onMouseLeave={e=>{e.currentTarget.style.background='rgba(130,0,0,0.4)';e.currentTarget.style.boxShadow='0 0 25px rgba(180,0,0,0.4)'}}>
+          ⛧ ENTER WELCOME TO HELL ⛧
+        </button>
+        <button onClick={()=>{setWelcomeToHell(null);setGameState('end')}}
+          style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:3,padding:'16px 32px',background:'transparent',border:'1px solid #554422',borderRadius:6,color:'#886644',cursor:'pointer',transition:'all 0.2s'}}
+          onMouseEnter={e=>{e.currentTarget.style.color='#c8a040';e.currentTarget.style.borderColor='#c8a040'}}
+          onMouseLeave={e=>{e.currentTarget.style.color='#886644';e.currentTarget.style.borderColor='#554422'}}>
+          Walk Away — End Run
+        </button>
+      </div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#4a3a20',marginTop:12,fontStyle:'italic'}}>Your Lucifer victory is already saved. No penalty for losing.</div>
+    </div>
+  )
+
+  if(welcomeToHell==='cutscene')return(
+    <div style={{width:1920,height:1080,position:'relative',background:'#050302',overflow:'hidden',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20}}>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:10}}>WELCOME TO HELL</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:28,color:'#e8d090',fontStyle:'italic'}}>The Second Album</div>
+      <div style={{fontSize:100,marginTop:16}}>🕴</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#aa8a50',letterSpacing:2}}>A&R EXECUTIVE — 100,000 HP</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#6a5030',fontStyle:'italic'}}>The real Devil wears a suit.</div>
+      <div style={{width:300,height:6,background:'rgba(200,0,0,0.3)',borderRadius:3,marginTop:12,overflow:'hidden'}}>
+        <div style={{height:'100%',background:'#cc1111',animation:'loadBar 2.5s ease-in-out forwards',width:0}}/>
+      </div>
+    </div>
+  )
+
+  if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(gameState==='descent'&&descentData)return(
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>⛧ The Descent ⛧</div>
