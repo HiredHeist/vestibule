@@ -1934,7 +1934,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   // ── HUGE PLAY AGAIN + SHARE ────────────────────────────────
   const Buttons=({victory})=>(
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:12,marginTop:8}}>
-      <button onClick={onReset}
+      <button onClick={()=>{playSfx('button');onReset()}}
         style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,letterSpacing:6,
           color:victory?'#ffd700':'#ee2222',
           background:victory?'rgba(60,40,0,0.4)':'rgba(120,0,0,0.3)',
@@ -3636,7 +3636,7 @@ function App(){
                 else{ns2[ai]=Object.assign({},ns2[ai],{hp:Math.max(0,newHp)})}
               }
               const allStoned=ns2.filter(m=>m).every(m=>m.tooStoned)
-              if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned')};setTimeout(()=>setGameState('end'),800)}
+              if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned');playSfx('defeat')};setTimeout(()=>setGameState('end'),800)}
               return ns2
             })
             setDamageFlash(true);setTimeout(()=>setDamageFlash(false),400)
@@ -3673,7 +3673,7 @@ function App(){
               addFloat(actualDmg,getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-50,'#ff3300',false)
             }
             const allStoned=ns2.filter(function(m){return m}).every(function(m){return m.tooStoned})
-            if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned')};setTimeout(function(){setGameState('end')},800)}
+            if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned');playSfx('defeat')};setTimeout(function(){setGameState('end')},800)}
             return ns2
           })
           if(stage[stage.indexOf(target)]&&!stage[stage.indexOf(target)].tooStoned&&(stage[stage.indexOf(target)].hp-actualDmg)<=0&&!stage[stage.indexOf(target)].stoneShield)addLog('💨 '+target.name+' is TOO STONED!')
@@ -3693,7 +3693,7 @@ function App(){
               nh=[...nh,nd[0]];nd=nd.slice(1);
             }
             setHand(nh);setDeck(nd);setDiscardPile(ndisc);
-            playDraw();
+            playDraw();playSfx('draw');
             // WELCOME TO HELL: inject contract card every 2 strikes
             if(welcomeToHell==='fighting'){
               wthStrikesRef.current++
@@ -3733,7 +3733,7 @@ function App(){
                   const newHp=m.hp-1
                   if(newHp<=0){
                     addLog('😈 Lucifer has fallen! The Devil is dead. GAME OVER.')
-                    setTimeout(()=>{setDeathCause('fallen');setGameState('end')},800)
+                    playSfx('defeat');setTimeout(()=>{setDeathCause('fallen');setGameState('end')},800)
                     return Object.assign({},m,{hp:0,tooStoned:true})
                   }
                   return Object.assign({},m,{hp:newHp})
@@ -3764,7 +3764,7 @@ function App(){
             // Check out-of-strikes death AFTER this strike resolves
             setStrikesLeft(function(cur){
               if(cur<=0){
-                if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins. But you already conquered Hell.')}else{setDeathCause('beaten')};
+                if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins. But you already conquered Hell.')}else{setDeathCause('beaten');playSfx('defeat')};
                 {const _rs=calcRunScore(stats,false);saveRunHistory(stats,false,enemy,runSeed);
                 // Achievement checks at game end
                 if(_rs>=5000)unlockAchievement('high_score_5k')
@@ -3826,7 +3826,7 @@ function App(){
     setEnemy(nextEnemy);setEnemyHp(Math.ceil(nextEnemy.maxHp*activeStake.hpMult))
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine'))setCorruption(p=>Math.min(100,p+5))
-    setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
+    setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
     setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
