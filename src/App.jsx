@@ -244,6 +244,51 @@ const DESCENT_REWARDS_2=[ // Fight 2 skip rewards (medium) — 9 options
   {id:'m_stonewall',name:'Stonewall All',emoji:'🛡',apply:(gs)=>{gs.setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{stoneShield:2}):m));gs.addLog('🛡 Skipped fight: All members shielded for 2 strikes')}},
 ]
 
+// -- CARD UPGRADES: campfire after each boss --
+const CARD_UPGRADES={
+  battlecry:{desc:'+2 ATK (was +1). +1 max HP to target.',hp:'target',hpAmt:1},
+  amp:{desc:'Doubles ATK AND +2 max HP to target.',hp:'target',hpAmt:2},
+  newstrings:{desc:'+3 ATK (was +2). +1 max HP to target.',hp:'target',hpAmt:1},
+  encore:{desc:'Attacks again + +1 perm ATK. +2 max HP to target.',hp:'target',hpAmt:2},
+  resonancecard:{desc:'Copies highest ATK. +2 max HP to target.',hp:'target',hpAmt:2},
+  crowdsurf:{desc:'4 damage per card (was 3).'},
+  heavyriff:{desc:'60% of total ATK (was 50%).'},
+  stagedive:{desc:'Damage = HP. Member heals back 50%.'},
+  infencore:{desc:'Doubles strike damage. +1 max HP to all.',hp:'all',hpAmt:1},
+  possessedperf:{desc:'Triples ATK. Stone shield all. +2 max HP to all.',hp:'all',hpAmt:2},
+  overdrive:{desc:'Doubles ATK at 50% corruption (was 60%).'},
+  moshpit:{desc:'5 damage per member (was 3).'},
+  demotape:{desc:'Copies 75% ATK (was 50%).'},
+  burnset:{desc:'Draw 2 cards (was 1).'},
+  herbmoney:{desc:'Full stash as damage. Keep half stash.'},
+  goingbroke:{desc:'Stash x1.5 as damage.'},
+  soundwall:{desc:'+4 base damage at all tiers.'},
+  doubledown:{desc:'Next TWO cards cost 0 (was 1).'},
+  distortion:{desc:'+2 temp ATK/member (was +1). +1 max HP to all.',hp:'all',hpAmt:1},
+  dialtoeleven:{desc:'+20% corruption. All members heal 1 HP.'},
+  deathriff:{desc:'80 base damage (was 60).'},
+  feedbackloop:{desc:'Corruption / 1.5 damage (was / 2).'},
+  ampstatic:{desc:'Corruption / 8 ATK (was / 10).'},
+  darktuning:{desc:'Corruption / 8 buffs (was / 10).'},
+  sigdecay:{desc:'Draw 3 (was 2).'},
+  controlfeedback:{desc:'Corruption to 50%. Heal ALL to full. +1 max HP to all.',hp:'all',hpAmt:1},
+  sabbathsigil:{desc:'Roll d10 twice, pick better result.'},
+  bloodritual:{desc:'8x sacrificed HP as damage (was 6x).'},
+  seance:{desc:'Heal corruption/3 per member (was /4). +1 max HP to all.',hp:'all',hpAmt:1},
+  soundcheck:{desc:'Heal 6 HP (was 4). +1 max HP to hurt members.',hp:'hurt',hpAmt:1},
+  roadie:{desc:'Shield 3 strikes (was 2). Heal 4 HP. +2 max HP.',hp:'target',hpAmt:2},
+  wakeup:{desc:'Revive + heal all to 75%. +2 max HP to ALL.',hp:'all',hpAmt:2},
+  setlist:{desc:'Draw 3 (was 2).'},
+  setbreak:{desc:'Gain 3 Embers (was 2). +1 max HP to weakest.',hp:'weakest',hpAmt:1},
+  remaster:{desc:'Draw 4 (was 3).'},
+  powertap:{desc:'Gain 3 Embers (was 2).'},
+  staticcharge:{desc:'Gain 5 Embers at 0% corruption (was 4).'},
+  tappedout:{desc:'Gain 6 Embers next strike (was 5).'},
+  ampoverload:{desc:'Gain 4 Embers (was 3).'},
+  groupie:{desc:'Gain 3 Embers. Draw 2 (was 1).'},
+  soundboard:{desc:'Gain 3 Embers. Draw 2 next strike (was 1). +1 max HP to random.',hp:'random',hpAmt:1},
+}
+
 const PACT_REWARDS=[
   {id:'ember_surge',name:'Ember Surge',emoji:'🔥',desc:'+1 max Embers permanently.',color:'#ff6600'},
   {id:'iron_strings',name:'Iron Strings',emoji:'🎸',desc:'All members +1 ATK permanently.',color:'#ee2222'},
@@ -1107,6 +1152,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             textShadow:'0 0 14px rgba(255,200,0,0.9)',
             background:'rgba(80,60,0,0.6)',padding:'4px 0'}}>✨ FOIL ✨</div>}
           {card.rarity==='Rare'&&!card.foil&&!card.mythic&&<div style={{position:'absolute',top:10,left:10,padding:'2px 7px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
+          {card.upgraded&&<div style={{position:'absolute',bottom:6,right:6,width:22,height:22,borderRadius:'50%',background:'radial-gradient(circle at 35% 35%,#ffd700,#cc8800)',border:'2px solid #ffd700',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#000',boxShadow:'0 0 10px rgba(255,200,0,0.6)'}}>+</div>}
           {/* ember cost */}
           {card.embers>0&&<div style={{position:'absolute',top:card.foil||card.mythic?38:8,right:10,width:32,height:32,borderRadius:'50%',
             background:'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)',
@@ -2350,6 +2396,7 @@ function App(){
   },[])
   const [circleClearedData,setCircleClearedData]=useState(null) // {circle, bossName, bossEmoji}
   const [chosenPacts,setChosenPacts]=useState([]) // pact IDs chosen this run
+  const [upgradedCards,setUpgradedCards]=useState([]) // card IDs upgraded at campfire this run
   const [pactChoices,setPactChoices]=useState([]) // 2 pact options for current choice
   const [descentData,setDescentData]=useState(null) // {circleNum, fights, reward1, reward2}
   const skipDescentRef=useRef(false)
@@ -2604,7 +2651,7 @@ function App(){
       addFloat(strongest.name+' GONE',getCenter(stageRefs.current[sIdx]).x,getCenter(stageRefs.current[sIdx]).y-70,'#cc0000',true)
     }
     else if(card.id==='amp'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk*2,_origAtk:m._origAtk||m.atk,tempBuff:true,buffCount:(m.buffCount||0)+1});msg='⚡ '+m.name+' doubled ATK!';addFloat('×2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#9933cc')}
-    else if(card.id==='battlecry'){if(!m)return false;const bcBonus=activePassives.some(p=>p.id==='p7')?2:1;ns[slotIdx]=Object.assign({},m,{atk:m.atk+bcBonus,buffCount:(m.buffCount||0)+1});msg='🤘 '+m.name+' Battle Cry! +'+bcBonus+' ATK forever!';addFloat('+'+bcBonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4400')}
+    else if(card.id==='battlecry'){if(!m)return false;const bcBonus=(activePassives.some(p=>p.id==='p7')?2:1)+(card.upgraded?1:0);ns[slotIdx]=Object.assign({},m,{atk:m.atk+bcBonus,buffCount:(m.buffCount||0)+1});msg='🤘 '+m.name+' Battle Cry! +'+bcBonus+' ATK forever!';addFloat('+'+bcBonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4400')}
     else if(card.id==='newstrings'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,buffCount:(m.buffCount||0)+1});msg='🎸 '+m.name+' +2 ATK permanently!';addFloat('+2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#e8a820')}
     else if(card.id==='encore'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{encoreReady:true,buffCount:(m.buffCount||0)+1});msg='🔁 '+m.name+' encores!';addFloat('ENCORE!',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#dd2222')}
     else if(card.id==='roadie'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{stoneShield:2,hp:m.keyword==='FALLEN'?m.hp:Math.min(m.maxHp,m.hp+2),buffCount:(m.buffCount||0)+1});msg='🛡 '+m.name+' shielded for 2 Strikes and healed 2 HP!'}
@@ -2667,8 +2714,8 @@ function App(){
         msg='🎚 Corruption set to 50%.'
       }
     }
-    else if(card.id==='feedbackloop'){let dmg=Math.floor(corruption/2);if(activeGenre==='BLACK_METAL')dmg=Math.round(dmg*1.25);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);if(flHp<=0)setTimeout(triggerVictory,500);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'+(activeGenre==='BLACK_METAL'?' [Black Metal +25%]':'')}
-    else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?4:0;const circleNum=Math.floor(fightIndex/3)+1;const swDmg=(circleNum<=3?5:circleNum<=6?8:12)+p5Bonus;const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);if(swHp<=0)setTimeout(triggerVictory,500);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(triggerVictory,500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
+    else if(card.id==='feedbackloop'){let dmg=Math.floor(corruption/(card.upgraded?1.5:2));if(activeGenre==='BLACK_METAL')dmg=Math.round(dmg*1.25);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);if(flHp<=0)setTimeout(triggerVictory,500);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'+(activeGenre==='BLACK_METAL'?' [Black Metal +25%]':'')}
+    else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?4:0;const circleNum=Math.floor(fightIndex/3)+1;const swDmg=(circleNum<=3?5:circleNum<=6?8:12)+p5Bonus+(card.upgraded?4:0);const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);if(swHp<=0)setTimeout(triggerVictory,500);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(triggerVictory,500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
     else if(card.id==='groupie'){
       // Handled entirely in handleDropOnStage to avoid double setHand
       return false
@@ -2726,9 +2773,9 @@ function App(){
       // applyCard returns false here so handleDropOnStage runs the burnset logic directly
       return false
     }
-    else if(card.id==='overdrive'){if(corruption>=60){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{addLog('⚠ Need >=60% Corruption.');return false}}
+    else if(card.id==='overdrive'){if(corruption>=(card.upgraded?50:60)){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{addLog('⚠ Need >=60% Corruption.');return false}}
     else if(card.id==='crowdsurf'){
-      const dmg=hand.length*3
+      const dmg=hand.length*(card.upgraded?4:3)
       const bc=getCenter(bossRef)
       const csHp=Math.max(0,enemyHp-dmg);setEnemyHp(csHp);if(csHp<=0)setTimeout(triggerVictory,500)
       addFloat(dmg,bc.x,bc.y-60,'#9933cc',dmg>=10);playHit();updStat('totalDamage',dmg)
@@ -2817,7 +2864,7 @@ function App(){
     else if(card.id==='heavyriff'){
       const p5HeavyBonus=activePassives.some(p=>p.id==='p5')?2:0
       const activeAtk=stage.filter(m=>m&&!m.tooStoned).reduce((sum,m)=>sum+m.atk,0)
-      const dmg=Math.floor(activeAtk/2)+p5HeavyBonus
+      const dmg=Math.floor(activeAtk*(card.upgraded?0.6:0.5))+p5HeavyBonus
       const bc=getCenter(bossRef)
       const hrHp=Math.max(0,enemyHp-dmg);setEnemyHp(hrHp);if(hrHp<=0)setTimeout(triggerVictory,500)
       addFloat(dmg,bc.x,bc.y-60,'#9933cc',dmg>=10);playHit();updStat('totalDamage',dmg)
@@ -2860,7 +2907,7 @@ function App(){
       if(sacrifice<=0){addLog('🩸 Not enough HP to sacrifice!');return false}
       ns[slotIdx]=Object.assign({},m,{hp:m.hp-sacrifice})
       const bc=getCenter(bossRef)
-      const brDmg=sacrifice*(chosenPacts.includes('blood_price')?9:6);const brHp=Math.max(0,enemyHp-brDmg);setEnemyHp(brHp);if(brHp<=0)setTimeout(triggerVictory,500)
+      const brDmg=sacrifice*(chosenPacts.includes('blood_price')?9:(card.upgraded?8:6));const brHp=Math.max(0,enemyHp-brDmg);setEnemyHp(brHp);if(brHp<=0)setTimeout(triggerVictory,500)
       setCorruption(p=>Math.min(100,p+15));updStat('maxCorruption',Math.min(100,corruption+15),true)
       addFloat(brDmg,bc.x,bc.y-60,'#cc0000',true);playHit();updStat('totalDamage',brDmg)
       addFloat('-'+sacrifice+' HP',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4444',false)
@@ -4167,7 +4214,7 @@ function App(){
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
-    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
+    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
@@ -4642,7 +4689,7 @@ function App(){
             if(pact.id==='war_drums')setStrikesLeft(p=>p)  // handled in strike reset via chosenPacts check
             if(pact.id==='sixth_slot')setStage(prev=>prev.length<6?[...prev,null]:prev)
             playSfx('pact');addLog('⛧ Pact chosen: '+pact.emoji+' '+pact.name)
-            setGameState('shop')
+            setGameState('campfire')
           }}
             style={{width:280,background:'linear-gradient(180deg,#1a1008,#0a0604)',border:'2px solid rgba(200,140,20,0.5)',borderRadius:10,padding:'30px 24px',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:12,
               transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}
@@ -4654,13 +4701,60 @@ function App(){
           </div>
         ))}
       </div>
-      <button onClick={()=>setGameState('shop')}
+      <button onClick={()=>setGameState('campfire')}
         style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:4,color:'#666',background:'rgba(40,20,5,0.4)',border:'1px solid #444',borderRadius:6,padding:'10px 32px',cursor:'pointer',marginTop:16,transition:'all 0.15s'}}
         onMouseEnter={e=>{e.currentTarget.style.color='#aa8040';e.currentTarget.style.borderColor='#aa8040'}}
         onMouseLeave={e=>{e.currentTarget.style.color='#666';e.currentTarget.style.borderColor='#444'}}>
         ⛧ Skip — Keep What You Have ⛧</button>
     </div>
   )
+  if(gameState==='campfire'){
+    const allDeckCards=[...deck,...discardPile]
+    const uniqueUpgradeable=allDeckCards.filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i).filter(c=>CARD_UPGRADES[c.id]&&!upgradedCards.includes(c.id))
+    return(
+    <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',gap:12,padding:'24px 40px',overflow:'hidden'}}>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:50,color:'#ff8800',textShadow:'0 0 40px rgba(255,120,0,0.6),0 0 80px rgba(200,80,0,0.3),3px 3px 0 #000',letterSpacing:6}}>The Campfire</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#cc9050',fontStyle:'italic'}}>Upgrade one card permanently. Choose wisely.</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#887040',letterSpacing:2}}>UPGRADES THIS RUN: {upgradedCards.length}</div>
+      <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center',maxWidth:1400,overflowY:'auto',flex:1,padding:'10px 0',alignContent:'flex-start'}}>
+        {uniqueUpgradeable.map(c=>{
+          const up=CARD_UPGRADES[c.id]
+          const bc=c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
+          const hasHp=up.hp&&up.hpAmt
+          return <div key={c.id} onClick={()=>{
+            setUpgradedCards(p=>[...p,c.id])
+            setDeck(p=>p.map(dc=>dc.id===c.id?Object.assign({},dc,{upgraded:true,name:(dc.name||'').replace(/\+$/,'')+'+'}):dc))
+            setDiscardPile(p=>p.map(dc=>dc.id===c.id?Object.assign({},dc,{upgraded:true,name:(dc.name||'').replace(/\+$/,'')+'+'}):dc))
+            if(hasHp){
+              const alive=stage.filter(m=>m&&!m.tooStoned)
+              if(up.hp==='all')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+up.hpAmt,hp:m.hp+up.hpAmt}):m))
+              else if(up.hp==='target'&&alive.length>0){const t=alive.reduce((a,b)=>a.atk>b.atk?a:b);setStage(prev=>prev.map(m=>m&&m.uid===t.uid?Object.assign({},m,{maxHp:m.maxHp+up.hpAmt,hp:m.hp+up.hpAmt}):m))}
+              else if(up.hp==='weakest'&&alive.length>0){const w=alive.reduce((a,b)=>a.hp<b.hp?a:b);setStage(prev=>prev.map(m=>m&&m.uid===w.uid?Object.assign({},m,{maxHp:m.maxHp+up.hpAmt,hp:m.hp+up.hpAmt}):m))}
+              else if(up.hp==='hurt'){setStage(prev=>prev.map(m=>m&&!m.tooStoned&&m.hp<m.maxHp?Object.assign({},m,{maxHp:m.maxHp+up.hpAmt,hp:m.hp+up.hpAmt}):m))}
+              else if(up.hp==='random'&&alive.length>0){const r=alive[Math.floor(Math.random()*alive.length)];setStage(prev=>prev.map(m=>m&&m.uid===r.uid?Object.assign({},m,{maxHp:m.maxHp+up.hpAmt,hp:m.hp+up.hpAmt}):m))}
+            }
+            playSfx('buy');addLog('Upgraded: '+c.name+'+')
+            setGameState('shop')
+          }} style={{width:160,background:'linear-gradient(180deg,#1a1008,#0a0604)',border:'2px solid '+bc+'88',borderRadius:8,padding:'0 0 10px',cursor:'pointer',transition:'all 0.2s',position:'relative'}}
+            onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-6px)';e.currentTarget.style.borderColor='#ffd700';e.currentTarget.style.boxShadow='0 6px 25px rgba(200,150,0,0.3)'}}
+            onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor=bc+'88';e.currentTarget.style.boxShadow='none'}}>
+            <div style={{height:4,background:bc,borderRadius:'8px 8px 0 0'}}/>
+            <div style={{fontSize:36,textAlign:'center',padding:'10px 0'}}>{c.emoji}</div>
+            <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:15,color:'#ffd700',textAlign:'center',letterSpacing:1}}>{c.name}+</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:bc,textAlign:'center',letterSpacing:1,textTransform:'uppercase',marginBottom:4}}>{c.type} {c.rarity}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8b080',textAlign:'center',lineHeight:1.4,padding:'0 8px'}}>{up.desc}</div>
+            {hasHp&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#44cc44',textAlign:'center',marginTop:4,fontWeight:900}}>+{up.hpAmt} MAX HP ({up.hp})</div>}
+          </div>
+        })}
+        {uniqueUpgradeable.length===0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#886644',fontStyle:'italic',padding:40}}>All cards already upgraded!</div>}
+      </div>
+      <button onClick={()=>setGameState('shop')}
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:4,color:'#666',background:'rgba(40,20,5,0.4)',border:'1px solid #444',borderRadius:6,padding:'10px 32px',cursor:'pointer',flexShrink:0,transition:'all 0.15s'}}
+        onMouseEnter={e=>{e.currentTarget.style.color='#cc8040';e.currentTarget.style.borderColor='#cc8040'}}
+        onMouseLeave={e=>{e.currentTarget.style.color='#666';e.currentTarget.style.borderColor='#444'}}>
+        Skip Upgrade</button>
+    </div>
+  )}
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
