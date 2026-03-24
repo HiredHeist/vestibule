@@ -368,7 +368,7 @@ function applyCardSim(card,gs,enemy){
     case 'soundcheck':alive.forEach(m=>{const h=m.hp<m.maxHp;m.hp=Math.min(m.maxHp,m.hp+(card.upgraded?6:4));if(h)m.tempAtkBonus=(m.tempAtkBonus||0)+1});break;
     case 'roadie':weakest.stoneShield=card.upgraded?3:2;weakest.hp=Math.min(weakest.maxHp,weakest.hp+(card.upgraded?4:2));break;
     case 'distortion':gs.corruption=Math.min(100,gs.corruption+15);alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+1);break;
-    case 'dialtoeleven':gs.corruption=Math.min(100,gs.corruption+20);break;
+    case 'dialtoeleven':gs.corruption=Math.min(100,gs.corruption+15);gs.stage.forEach(m=>{if(!m.tooStoned){m.atk+=1;m.tempAtkBonus=(m.tempAtkBonus||0)+1}});break;
     case 'controlfeedback':{gs.corruption=50;const ht=alive.reduce((a,b)=>a.hp/a.maxHp<b.hp/b.maxHp?a:b);ht.hp=ht.maxHp;break}
     case 'sigdecay':gs._drawExtra=(gs._drawExtra||0)+2;break;
     case 'feedbackloop':{let d=Math.floor(gs.corruption/(card.upgraded?1.5:2));if(gs._activeGenre==='BLACK_METAL')d=Math.round(d*1.25);gs._directDmg=(gs._directDmg||0)+d;break}
@@ -452,7 +452,7 @@ function simFight(gs,phaseHp,luciferPhase){
   if(gs._pendingBurnStage){gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+5);gs._pendingBurnStage=false}
   gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set();gs._allCardsFree=false;gs._hellquakeFired=false
   // Pact: clean_living bonus
-  if(gs._pacts.includes('clean_living')&&gs.corruption===0)gs.stage.filter(m=>!m.tooStoned).forEach(m=>{m.tempAtkBonus=(m.tempAtkBonus||0)+2});
+  if(gs._pacts.includes('clean_living')&&gs.corruption<15)gs.stage.filter(m=>!m.tooStoned).forEach(m=>{m.tempAtkBonus=(m.tempAtkBonus||0)+2});
   // Pact: stone_wall
   const stoneWallActive=gs._pacts.includes('stone_wall');
 

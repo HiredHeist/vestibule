@@ -267,7 +267,7 @@ const CARD_UPGRADES={
   soundwall:{desc:'+4 base damage at all tiers.'},
   doubledown:{desc:'Next TWO cards cost 0 (was 1).'},
   distortion:{desc:'+2 temp ATK/member (was +1). +1 max HP to all.',hp:'all',hpAmt:1},
-  dialtoeleven:{desc:'+20% corruption. All members heal 1 HP.'},
+  dialtoeleven:{desc:'+15% corruption. All members +2 ATK this Strike (was +1).'},
   deathriff:{desc:'80 base damage (was 60).'},
   feedbackloop:{desc:'Corruption / 1.5 damage (was / 2).'},
   ampstatic:{desc:'Corruption / 8 ATK (was / 10).'},
@@ -280,7 +280,7 @@ const CARD_UPGRADES={
   soundcheck:{desc:'Heal 6 HP (was 4). +1 max HP to hurt members.',hp:'hurt',hpAmt:1},
   roadie:{desc:'Shield 3 strikes (was 2). Heal 4 HP. +2 max HP.',hp:'target',hpAmt:2},
   wakeup:{desc:'Revive + heal all to 75%. +2 max HP to ALL.',hp:'all',hpAmt:2},
-  setlist:{desc:'Draw 3 (was 2).'},
+  setlist:{desc:'Draw 4 (was 3).'},
   setbreak:{desc:'Gain 3 Embers (was 2). +1 max HP to weakest.',hp:'weakest',hpAmt:1},
   remaster:{desc:'Draw 4 (was 3).'},
   powertap:{desc:'Gain 3 Embers (was 2).'},
@@ -337,7 +337,7 @@ const PACT_REWARDS=[
   {id:'dark_bargain',name:'Dark Bargain',emoji:'🌑',desc:'All CORRUPT cards cost 1 less Ember.',color:'#cc44ff'},
   {id:'speed_demon',name:'Speed Demon',emoji:'⚡',desc:'Draw 1 extra card per Strike.',color:'#ffdd00'},
   {id:'blood_price',name:'Blood Price',emoji:'🩸',desc:'Blood Ritual deals 9× instead of 6×.',color:'#cc0000'},
-  {id:'clean_living',name:'Clean Living',emoji:'✨',desc:'While Corruption is 0%, all members +2 ATK.',color:'#ffffff'},
+  {id:'clean_living',name:'Clean Living',emoji:'✨',desc:'While Corruption is below 15%, all members +3 ATK.',color:'#ffffff'},
   {id:'corruption_engine',name:'Corruption Engine',emoji:'☠',desc:'+5% Corruption at start of each fight.',color:'#aa00ff'},
   {id:'merchants_eye',name:'Merchants Eye',emoji:'💰',desc:'All shop items cost 20% less.',color:'#44cc44'},
   {id:'stone_wall',name:'Stone Wall',emoji:'🧱',desc:'Members take 1 less damage per Strike (min 1).',color:'#8888aa'},
@@ -402,12 +402,12 @@ const RIFF_CHAINS=[
 
 const ALL_CARDS=[
   {id:'amp',name:'Amp It Up',type:'RIFF',rarity:'Common',emoji:'⚡',embers:2,effect:'Target member deals double ATK this turn.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:0,effect:'+20% Corruption immediately.',color:'#aa1111',typeColor:'#880000',copies:2},
+  {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:0,effect:'+15% Corruption. All members +1 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'soundcheck',name:'Sound Check',type:'UTILITY',rarity:'Common',emoji:'🔊',embers:2,effect:'All members +4 HP. Injured members also gain +1 ATK this Strike.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'sigdecay',name:'Signal Decay',type:'CORRUPT',rarity:'Common',emoji:'📡',embers:1,effect:'Discard 1 card from hand. Draw 2 cards.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'battlecry',name:'Battle Cry',type:'RIFF',rarity:'Common',emoji:'🤘',embers:1,effect:'Target member +1 ATK permanently.',color:'#9933cc',typeColor:'#7722aa',copies:4},
   {id:'roadie',name:'Roadie',type:'UTILITY',rarity:'Common',emoji:'🛡',embers:1,effect:'Target cannot go Too Stoned for 2 Strikes. Heals 2 HP.',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'setlist',name:'Setlist',type:'UTILITY',rarity:'Common',emoji:'📋',embers:0,effect:'Draw 2 cards. Then discard 1 card of your choice.',color:'#22aa44',typeColor:'#118833',copies:1},
+  {id:'setlist',name:'Setlist',type:'UTILITY',rarity:'Common',emoji:'📋',embers:0,effect:'Draw 3 cards. Then discard 1 card of your choice.',color:'#22aa44',typeColor:'#118833',copies:1},
   {id:'groupie',name:'Groupie',type:'EMBER',rarity:'Uncommon',emoji:'🍯',embers:1,effect:'Gain 2 Embers. Draw 1 card immediately.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'demotape',name:'Demo Tape',type:'RIFF',rarity:'Common',emoji:'📼',embers:1,effect:'Copy the last Riff played, cast it free.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'newstrings',name:'New Strings',type:'RIFF',rarity:'Uncommon',emoji:'🎸',embers:2,effect:'+2 ATK permanently to target member.',color:'#9933cc',typeColor:'#7722aa',copies:2},
@@ -2796,7 +2796,7 @@ function App(){
       msg='🔊 Sound Check! All +4 HP'+(injuredCount>0?' + '+injuredCount+' injured member(s) +1 ATK!':'!');stage.filter(x=>x&&!x.tooStoned).forEach(x=>addBuff(x.uid,'+HP','#33dd33'))
       addFloat('+4 HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')
     }
-    else if(card.id==='dialtoeleven'){const nc=Math.min(100,corruption+20);setCorruption(nc);updStat('maxCorruption',nc,true);msg='📻 Corruption +20% → '+nc+'%'}
+    else if(card.id==='dialtoeleven'){const nc=Math.min(100,corruption+15);setCorruption(nc);updStat('maxCorruption',nc,true);ns=ns.map(function(m){return m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+(card.upgraded?2:1),tempAtkBonus:(m.tempAtkBonus||0)+(card.upgraded?2:1),buffCount:(m.buffCount||0)+1}):m});msg='📻 Dial to Eleven! Corruption +15% → '+nc+'%. All members +1 ATK!'}
     else if(card.id==='sigdecay'){
       // Handled in handleDropOnStage (modifies hand/deck like setlist)
       return false
@@ -3199,7 +3199,7 @@ function App(){
       if(nextCardFreeRef.current)setNextCardFree(false)
       // Draw 2 cards immediately (uncapped), then open force-discard modal
       const handWithout=hand.filter(c=>c.uid!==card.uid)
-      const drawRes=drawUpTo(handWithout,deckRef.current,[...discRef.current,card],handWithout.length+2)
+      const drawRes=drawUpTo(handWithout,deckRef.current,[...discRef.current,card],handWithout.length+(card.upgraded?4:3))
       setHand(drawRes.h);setDeck(drawRes.d);setDiscardPile(drawRes.disc)
       setSetlistCards(drawRes.h)
       setSetlistOpen(true)
@@ -3671,7 +3671,7 @@ function App(){
     const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===activeStake.maxStrikes?10:0
     let dmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
       const effectiveAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
-      const cleanLivingBonus=(chosenPacts.includes('clean_living')&&corruption===0)?2:0
+      const cleanLivingBonus=(chosenPacts.includes('clean_living')&&corruption<15)?3:0
       return s+effectiveAtk+cleanLivingBonus
     },0)+p10Bonus
     // DOUBLE TIME d6 multiplier
@@ -3738,7 +3738,7 @@ function App(){
       if(m.role==='Drummer')return
       if(paranoiaVictim&&m.uid===paranoiaVictim.uid)return
       let mAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
-      if(chosenPacts.includes('clean_living')&&corruption===0)mAtk+=2
+      if(chosenPacts.includes('clean_living')&&corruption<15)mAtk+=3
       if(m.encoreReady)mAtk*=2
       memberDmgs.push({m,atk:mAtk})
     })
@@ -5109,7 +5109,7 @@ function App(){
             const act=stage.filter(m=>m&&!m.tooStoned)
             let dmg=act.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
               let effAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
-              if(chosenPacts.includes('clean_living')&&corruption===0)effAtk+=2
+              if(chosenPacts.includes('clean_living')&&corruption<15)effAtk+=3
               if(m.encoreReady)effAtk*=2
               return s+effAtk
             },0)
