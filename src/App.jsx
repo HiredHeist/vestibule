@@ -1817,15 +1817,15 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
         </div>
         <div style={{flex:1}}>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'#120804',lineHeight:1,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 1px 1px 0 rgba(0,0,0,0.5)`:'1px 1px 0 rgba(0,0,0,0.5)',marginBottom:4}}>{enemy.name}</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:24,color:'#1a1008',fontStyle:'italic',lineHeight:1.3,fontWeight:700}}>{enemy.passive}</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#1a1008',marginTop:3,letterSpacing:1,fontWeight:700}}>Base damage: {enemy.baseDmg} per Strike</div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'#ff4444',fontStyle:'italic',lineHeight:1.3,fontWeight:900,textShadow:'0 0 10px rgba(255,40,40,0.5)'}}>{enemy.passive}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#cc2222',marginTop:2,letterSpacing:1,fontWeight:900}}>Base damage: {enemy.baseDmg} per Strike</div>
         </div>
       </div>
-      <div style={{width:'60%',margin:'0 auto'}}>
-        <div style={{width:'100%',height:22,background:'rgba(50,25,8,0.75)',border:'1px solid rgba(100,55,15,0.6)',borderRadius:2,overflow:'hidden',boxShadow:'inset 0 2px 6px rgba(0,0,0,0.7)',position:'relative'}}>
+      <div style={{width:'80%',margin:'0 auto'}}>
+        <div style={{width:'100%',height:30,background:'rgba(50,25,8,0.75)',border:'1px solid rgba(100,55,15,0.6)',borderRadius:2,overflow:'hidden',boxShadow:'inset 0 2px 6px rgba(0,0,0,0.7)',position:'relative'}}>
           {[25,50,75].map(pp=><div key={pp} style={{position:'absolute',top:0,bottom:0,left:`${pp}%`,width:1,background:'rgba(0,0,0,0.35)',zIndex:2}}/>)}
           <div style={{height:'100%',background:isLow?'linear-gradient(90deg,#660000,#cc0000,#ff2200)':'linear-gradient(90deg,#7a0000,#aa1100,#cc2200)',width:`${pct}%`,transition:'width 0.7s cubic-bezier(0.4,0,0.2,1)'}}/>
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'rgba(255,230,180,1)',letterSpacing:3,textShadow:'0 0 8px rgba(0,0,0,0.99),0 1px 3px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)} HP REMAINING</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'rgba(255,230,180,1)',letterSpacing:3,textShadow:'0 0 8px rgba(0,0,0,0.99),0 1px 3px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)} HP REMAINING</div>
         </div>
       </div>
     </div>
