@@ -2550,6 +2550,7 @@ function App(){
   const applyCard=useCallback((card,slotIdx)=>{
     const foilDiscount=(card.foil&&card.embers>=2)?1:0
     const hasShredder=stage.some(m=>m&&!m.tooStoned&&m.keyword==='SHREDDER')
+    const sfxMap={RIFF:'riff_play',CORRUPT:'corrupt_play',UTILITY:'utility_play',EMBER:'ember_play'};playSfx(sfxMap[card.type]||'card_play')
     const shredderDiscount=(hasShredder&&!shredderUsed&&card.type==='RIFF'&&card.embers>=1)?1:0
     const synesthesiaDiscount=(fightTripBuff==='SYNESTHESIA')?1:0
     const darkBargainDiscount=(chosenPacts.includes('dark_bargain')&&card.type==='CORRUPT'&&card.embers>=1)?1:0
@@ -2583,7 +2584,7 @@ function App(){
       const bc=getCenter(bossRef)
       const sdHp=Math.max(0,enemyHp-dmg);setEnemyHp(sdHp);addFloat(dmg,bc.x,bc.y-60,'#ff6600',true)
       playHit();setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
-      setStageDiveUsed(true);setSelected(p=>p.filter(uid=>!hand.some(c=>c.id==='stagedive'&&c.uid===uid)));updStat('totalDamage',dmg);updStat('highestStrike',dmg,true)
+      setStageDiveUsed(true);setSelected(p=>p.filter(uid=>!hand.some(c=>c.id==='stagedive'&&c.uid===uid)));updStat('totalDamage',dmg);updStat('highestStrike',dmg,true);if(dmg>=500)playSfx('big_hit')
       if(sdHp<=0)setTimeout(triggerVictory,500)
       msg='🤘 '+m.name+' Stage Dives for '+dmg+' damage!'
     }
@@ -2846,7 +2847,7 @@ function App(){
     }
     else if(card.id==='sabbathsigil'){
       setCorruption(100);updStat('maxCorruption',100,true)
-      discover('hellquake','HELLQUAKE');tryAchieve('hellquake')
+      playSfx('hellquake');discover('hellquake','HELLQUAKE');tryAchieve('hellquake')
       const roll=Math.floor(Math.random()*10)+1
       const bc=getCenter(bossRef)
       let hqMsg='',hqFloat='',hqColor='#aa1111',hqDesc=''
@@ -2937,7 +2938,7 @@ function App(){
           if(!disc.includes(chain.id)){disc.push(chain.id);localStorage.setItem('vst_combos_discovered',JSON.stringify(disc))}
         }
         setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji})
-        addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! +10% bonus damage!')
+        playSfx('combo');addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! +10% bonus damage!')
         combosFiredRef.current.push(chain.id)
         addFloat('⛧ '+chain.name+' ⛧',getCenter(bossRef).x,getCenter(bossRef).y-140,chain.color,true)
         // Apply combo bonus damage = total stage ATK
@@ -3157,7 +3158,7 @@ function App(){
     const rem=hand.filter(c=>!selected.includes(c.uid))
     const res=drawUpTo(rem,deck,[...discardPile,...toDisc],Math.max(HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0),hand.length))
     setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
-    setDiscardsLeft(p=>p-1);setSelected([])
+    playSfx('discard');setDiscardsLeft(p=>p-1);setSelected([])
     addLog('🗑 '+toDisc.length+' discarded & replaced.')
   },[selected,discardsLeft,animPhase,hand,deck,discardPile,drawUpTo])
 
@@ -3198,7 +3199,7 @@ function App(){
       setStolenAtkPool(0)
     }
     if(perfectBonus>0)addFloat('PERFECT! +'+perfectBonus,getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
-    addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.'))
+    playSfx('victory');addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.'))
     // ── ACHIEVEMENT TRIGGERS ─────────────────────────────────
     tryAchieve('first_blood')
     const cn=Math.floor(fightIndex/3)+1
@@ -3216,7 +3217,7 @@ function App(){
       const isCircleBoss=(fightIndex+1)%3===0
       if(isCircleBoss){
         setMaxEmbers(function(p){const newMax=Math.min(MAX_EMBERS_CAP,p+1);setEmbers(newMax);return newMax})
-        addFloat('MAX EMBERS +1',getCenter(bossRef).x,getCenter(bossRef).y-130,'#ff6600',true)
+        playSfx('level_up');addFloat('MAX EMBERS +1',getCenter(bossRef).x,getCenter(bossRef).y-130,'#ff6600',true)
       }
       if(welcomeToHell==='fighting'){
         // The Executive defeated!
@@ -3249,7 +3250,7 @@ function App(){
       const bandNames=stage.filter(m=>m&&!m.tooStoned).map(m=>m.name)
       setVictoryCinematic({phase:0,bandNames,stakeId:activeStake.id,stakeName:activeStake.name})
       setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:1}:null),800) // crack
-      setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:2}:null),2000) // THE DEVIL IS DEAD
+      setTimeout(()=>{setVictoryCinematic(p=>p?{...p,phase:2}:null);playSfx('devil_dead')},2000) // THE DEVIL IS DEAD
       setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:3}:null),4500) // band members rise
       setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:4}:null),7000) // stake unlocked
       setTimeout(()=>{setVictoryCinematic(null);setWelcomeToHell('choice')},10000) // WTH choice
@@ -3312,7 +3313,7 @@ function App(){
         const bandNames=stage.filter(m=>m&&!m.tooStoned).map(m=>m.name)
         setVictoryCinematic({phase:0,bandNames:bandNames.length>0?bandNames:['Ragnar','Bjorn'],stakeId:activeStake.id,stakeName:activeStake.name})
         setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:1}:null),800)
-        setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:2}:null),2000)
+        setTimeout(()=>{setVictoryCinematic(p=>p?{...p,phase:2}:null);playSfx('devil_dead')},2000)
         setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:3}:null),4500)
         setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:4}:null),7000)
         setTimeout(()=>{setVictoryCinematic(null);setWelcomeToHell('choice')},10000)
@@ -3401,12 +3402,12 @@ function App(){
       }
     }
 
-    setActiveTripEffect({type,name:effectName,desc:effectDesc,color:effectColor})
+    playSfx(type==='shrooms'?'shrooms':'acid');setActiveTripEffect({type,name:effectName,desc:effectDesc,color:effectColor})
     setFightTripBuff(effectName) // persists for entire fight — combat reads this
     setTimeout(()=>setActiveTripEffect(null),4000)
   },[tripUsedThisFight,strikesLeft])
 
-  const handleStrike=useCallback(()=>{
+  const handleStrike=useCallback(()=>{playSfx('strike');
     if(animPhase!=='idle'||strikesLeft<=0||enemyHp<=0)return
     const actives=stage.filter(m=>m&&!m.tooStoned)
     if(actives.length===0){addLog('⚠ No active members!');return}
@@ -3527,7 +3528,7 @@ function App(){
         addFloat('🪈 FOLK MAGIC! Full Embers!',window.innerWidth/2,window.innerHeight*0.35,'#44ddaa',true)
         addLog('🪈 Folk Magic proc! All Embers refunded.')
       }
-      updStat('totalDamage',dmg);updStat('highestStrike',dmg,true)
+      updStat('totalDamage',dmg);updStat('highestStrike',dmg,true);if(dmg>=500)playSfx('big_hit')
 
       setStage(function(p){return p.map(function(m){
         if(!m)return null
@@ -3611,7 +3612,7 @@ function App(){
           if(luciferPhase===1){
             // Frozen Wrath: frostbite 3 to all + damageScale +1
             scaledBaseDmg=stakeBaseDmg+bossRageAtk
-            setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:Math.max(0,m.hp-3)}):m))
+            playSfx('boss_attack');setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:Math.max(0,m.hp-3)}):m))
             addLog('🧊 Frostbite! All members take 3 cold damage.')
           } else if(luciferPhase===2){
             // Infernal: AoE + damageScale +2
@@ -3630,7 +3631,7 @@ function App(){
               for(let ai=0;ai<ns2.length;ai++){
                 if(!ns2[ai]||ns2[ai].tooStoned)continue
                 const newHp=ns2[ai].hp-splitDmg
-                if(newHp<=0&&!ns2[ai].stoneShield){ns2[ai]=Object.assign({},ns2[ai],{hp:0,tooStoned:true});updStat('tooStonedCount',1)}
+                if(newHp<=0&&!ns2[ai].stoneShield){ns2[ai]=Object.assign({},ns2[ai],{hp:0,tooStoned:true});updStat('tooStonedCount',1);playSfx('member_down')}
                 else if(newHp<=0&&ns2[ai].stoneShield){const nsh=typeof ns2[ai].stoneShield==='number'?ns2[ai].stoneShield-1:0;ns2[ai]=Object.assign({},ns2[ai],{hp:1,stoneShield:nsh>0?nsh:false})}
                 else{ns2[ai]=Object.assign({},ns2[ai],{hp:Math.max(0,newHp)})}
               }
@@ -3942,7 +3943,7 @@ function App(){
       const nc=Object.assign({},item,{uid:Math.random().toString(36).slice(2),shopBought:true})
       setDeck(p=>[...p,nc])
       setShopBoughtIds(p=>[...p,nc.uid])
-      addLog('🛒 Bought '+item.name+'!')
+      playSfx('buy');addLog('🛒 Bought '+item.name+'!')
     } else if(type==='artifact'){
       if(activeArtifacts.length>=3){addLog('⚠ Artifact slots full! Max 3.');return}
       setActiveArtifacts(p=>[...p,item])
@@ -4022,7 +4023,7 @@ function App(){
     } else if(type==='dealer'){
       // Dealer purchases handled by onBuyShrooms/onBuyAcid callbacks, just deduct stash
       addLog('🌿 Dealer transaction complete.')
-    } else {addLog('📦 Purchased: '+item.name+'!')}
+    } else {playSfx('pack_open');addLog('📦 Purchased: '+item.name+'!')}
   },[stash])
 
   const recruitPickFiredRef=useRef(false)
@@ -4087,20 +4088,20 @@ function App(){
     })
     setStash(p=>Math.min(420,p+price))
     if(member.keyword==='FALLEN'){addLog('😈 Sold Lucifer for 69🌿! Band cap restored to 5.')}
-    else{addLog('💰 Sold '+member.name+' for '+price+' stash.'+(member.roleBondBonus>0?' 🔗 Bond broken.':''))}
+    else{playSfx('sell');addLog('💰 Sold '+member.name+' for '+price+' stash.'+(member.roleBondBonus>0?' 🔗 Bond broken.':''))}
   },[stage])
 
   const handlePawnSellCard=useCallback((card)=>{
     const price=card.rarity==='Rare'?4:card.rarity==='Uncommon'?2:1
     setDeck(p=>{ const idx=p.findIndex(c=>c.uid===card.uid); if(idx===-1)return p; const n=[...p]; n.splice(idx,1); return n })
     setStash(p=>Math.min(420,p+price))
-    addLog('💰 Sold '+card.name+' for '+price+' stash.')
+    playSfx('sell');addLog('💰 Sold '+card.name+' for '+price+' stash.')
   },[])
 
   const handlePawnBurnCard=useCallback((card)=>{
     setDeck(p=>{const idx=p.findIndex(c=>c.uid===card.uid);if(idx!==-1){const n=[...p];n.splice(idx,1);return n}return p})
     setDiscardPile(p=>{const idx=p.findIndex(c=>c.uid===card.uid);if(idx!==-1){const n=[...p];n.splice(idx,1);return n}return p})
-    addLog('🔥 Burned '+card.name+' — permanently deleted from deck.')
+    playSfx('burn');addLog('🔥 Burned '+card.name+' — permanently deleted from deck.')
   },[])
 
   const handleReroll=useCallback(()=>{
@@ -4110,7 +4111,7 @@ function App(){
     setShopCards(genShopCards(cn))
     setShroomsInStock(Math.random()<0.50)
     setAcidInStock(Math.random()<0.50)
-    addLog('🔄 Shop rerolled for '+rerollCost+' 🌿')
+    playSfx('reroll');addLog('🔄 Shop rerolled for '+rerollCost+' 🌿')
   },[stash,rerollCost,fightIndex])
 
   const handleReset=()=>{
@@ -4486,7 +4487,7 @@ function App(){
           const isSkipped=descentData.skips.includes(i)
           const reward=i===0?descentData.reward1:i===1?descentData.reward2:null
           const canSkip=!isBoss
-          const triggerDescend=()=>{
+          const triggerDescend=()=>{playSfx('descent');
             const addToDeck=(card)=>{setDeck(p=>[...p,card])}
             const deleteRandomCommon=()=>{setDeck(p=>{const commons=p.filter(c=>c.rarity==='Common');if(commons.length===0){addLog('🗑 No common cards in deck to delete.');return p};const victim=commons[Math.floor(Math.random()*commons.length)];addLog('🗑 Skipped fight: Deleted '+victim.name+' from deck');return p.filter(c=>c.uid!==victim.uid)})}
             const gs={setStash,setStage,setCorruption,setMaxEmbers,setPendingDraw,setBonusDiscards,setBonusEmbers,setNextCardFree,addToDeck,deleteRandomCommon,addLog}
@@ -4569,7 +4570,7 @@ function App(){
             if(pact.id==='thick_skin')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):m))
             if(pact.id==='war_drums')setStrikesLeft(p=>p)  // handled in strike reset via chosenPacts check
             if(pact.id==='sixth_slot')setStage(prev=>prev.length<6?[...prev,null]:prev)
-            addLog('⛧ Pact chosen: '+pact.emoji+' '+pact.name)
+            playSfx('pact');addLog('⛧ Pact chosen: '+pact.emoji+' '+pact.name)
             setGameState('shop')
           }}
             style={{width:280,background:'linear-gradient(180deg,#1a1008,#0a0604)',border:'2px solid rgba(200,140,20,0.5)',borderRadius:10,padding:'30px 24px',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:12,
@@ -4860,7 +4861,7 @@ function App(){
               canAfford={card.embers===0||embers>=card.embers}
               isDragging={dragHandIdx===i} isShopBought={shopBoughtIds.includes(card.uid)}
               onHover={()=>setHovered(i)} onLeave={()=>setHovered(null)}
-              onClick={()=>{if(card.id==='stagedive'&&stageDiveUsed)return;setSelected(p=>p.includes(card.uid)?p.filter(x=>x!==card.uid):[...p,card.uid])}}
+              onClick={()=>{if(card.id==='stagedive'&&stageDiveUsed)return;playSfx('select');setSelected(p=>p.includes(card.uid)?p.filter(x=>x!==card.uid):[...p,card.uid])}}
               onDragStart={()=>{setDragHandIdx(i);setDragCardUid(card.uid)}}
               onDragEnd={()=>{setDragHandIdx(null);setDragOverHandIdx(null);setDragCardUid(null)}}
               isDragOver={dragOverHandIdx===i&&dragHandIdx!==null&&dragHandIdx!==i}
