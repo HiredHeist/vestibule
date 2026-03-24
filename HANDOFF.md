@@ -1,72 +1,85 @@
-# VESTIBULE — AI Development Handoff Document
-*Last updated: Tuesday, March 24, 2026 at 12:00 PM (JST) — Session 14 final*
-*This is a living document. Update it at the end of every session.*
-
----
+# VESTIBULE — Developer Handoff
+**Latest commit: 36e9b4d | March 24, 2026**
 
 ## Quick Start
 ```bash
-cd vestibule && npm run dev  # http://localhost:5173/vestibule/
-node vestibule-sim.js 10000 bronze  # Sim v14.0 with all features
+cd vestibule && npm run dev    # http://localhost:5173/vestibule/
+npm run build                  # Production build to dist/
+node vestibule-sim.js 5000 bronze  # Run simulator
 ```
 
-## Repo & Deploy
-- **GitHub:** github.com/HiredHeist/vestibule (private)
-- **PAT:** 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 (expires Jun 2026)
-- **Live:** royceprinting.com/vestibule/
-- **Latest commit:** 17fa42a
-
-## What Is This Game?
-Roguelite card game. Build a doom metal band, fight through 9 Circles of Hell, defeat Lucifer. React/Vite single-file app (App.jsx ~4900 lines). ScaleRoot scales 1920×1080 to any screen.
-
-## Current State — ALL BIG 5 FEATURES COMPLETE
-1. ✅ Riff Chains — 16 two-card combos with visual feedback
-2. ✅ The Pact — 12 boss rewards, 2 offered per boss
-3. ✅ The Descent — circle map, fight skip with rewards (18 rewards)
-4. ✅ Genre Bonus — RIFF/BLACK/PROG/DOOM bonuses at 50% threshold
-5. ✅ Victory Experience — cinematic, stake unlocks, Welcome to Hell bonus boss
-
-## Key Systems
-- **41 unique cards**, 69-card starting deck, 4 types (RIFF/CORRUPT/UTILITY/EMBER)
-- **18 musicians**, 8 keywords (FRENZIED/ANCHOR/CORRUPT/DEBUFF/DOUBLE TIME/FOLK MAGIC/SHREDDER/HEXED)
-- **6 difficulty stakes:** Bronze→Demonic (1×→4× score)
-- **Lucifer:** 2-phase boss (420,666 HP reduced by boss kills → 6,666)
-- **Welcome to Hell:** A&R Executive bonus boss (100k HP), contract mechanic
-- **30 sound effects** normalized and wired
-- **Sim v14.0** with pacts, descent, genre, WTH, deck thinning
-
-## Session 14 Balance (latest)
-```
-C1: 50/75/110 HP, 4/5/7 dmg (was 27/42/69)
-C2: 100/150/220 HP, 5/6/7 dmg (was 60/90/140)
-C3: 130/170/230 HP, 5/6/7 dmg (was 80/110/160)
-C4: 340/400/500 HP (was 260/300/420)
-C6 Apostate: 1900 HP (was 2175)
-```
-
-## Win Rates (Sim v14.0, 10k games)
-Bronze 20.72% | Silver 10.84% | Gold 4.40%
-Obsidian 3.00% | Blood 0.14% | Demonic 0.00%
+## Architecture
+Single-file React app: `src/App.jsx` (5359 lines, 405KB).
+No component splitting — everything in one file for rapid iteration.
+Vite dev server with HMR. Base path: /vestibule/
 
 ## Critical Gotchas
-1. NEVER put setHand inside setDeck — React Strict Mode double-fires
-2. All draw operations use drawUpTo() with cap at 10
-3. Strike refill = cardsToDrawRef (count of cards played)
-4. ALL setEnemyHp damage calls MUST check if hp<=0 → triggerVictory
-5. Top-level returns: victoryCinematic → welcomeToHell → gameState checks
-6. Apostrophes — use "could not" not "couldn't" in JS strings
-7. UPDATE DOCS ON EVERY PUSH — TODO.md, HANDOFF.md, CLAUDE.md
-8. Base path /vestibule/ — use import.meta.env.BASE_URL for assets
-9. 420 is sacred. Never change card height.
+1. **NEVER put setHand inside setDeck** — React Strict Mode double-fires
+2. **ALL setEnemyHp damage calls MUST check victory** — use triggerVictoryRef.current
+3. **Use REFS for values in useCallback closures:** nextCardFreeRef, allCardsFreeRef, strikeMultRef, triggerVictoryRef
+4. **applyCard/handleDropOnStage/handleStrike** all have comprehensive dependency arrays — verify any new deps are declared ABOVE the callback (temporal dead zone)
+5. **Top-level return order:** victoryCinematic -> welcomeToHell -> circleSplash -> descent -> campfire -> pact -> gameState checks
+6. **Apostrophes** — use "could not" not "couldn't" in JS strings
+7. **UPDATE DOCS ON EVERY PUSH**
+8. **Base path /vestibule/** — use import.meta.env.BASE_URL for assets
+9. **420 is sacred. 666 is the Usurer HP. 69 is the deck size.**
+10. **Mentor links match by ROLE not by name/id**
+11. **cardHeal passives guard with p<=0?p:** — prevents boss resurrection
+12. **Sabbath Sigil is CONSUMABLE** — destroyed after use, never goes to discard
+13. **victoryFiredRef** — only set inside triggerVictory itself, never externally
 
-## Dev Shortcuts
-- Shift+S — shop with 69 stash
-- Shift+D — death screen
-- Shift+W — full victory cinematic
-- ESC — pause menu
+## Key Code Locations
+| What | ~Line |
+|------|-------|
+| ENEMIES array | 125 |
+| ALL_MUSICIANS | 160 |
+| CARD_UPGRADES | 247 |
+| BOSS_LOOT | 292 |
+| STREAK_BONUSES | 330 |
+| RIFF_CHAINS | 340 |
+| PACT_REWARDS | 355 |
+| ALL_CARDS | 400 |
+| STARTER_ARTIFACTS | 477 |
+| STARTER_PASSIVES | 494 |
+| cardPrice() | 545 |
+| genShopCards() | 553 |
+| BossSection component | 1813 |
+| DeckPile component | 1841 |
+| EndScreen component | 1870 |
+| StageSlot component | 1697 |
+| HandCard component | 1769 |
+| Music system | 2546 |
+| applyCard | ~2716 |
+| handleDropOnStage | ~3137 |
+| triggerVictory | ~3338 |
+| Safety net useEffect | ~3497 |
+| handleStrike | ~3612 |
+| activateTrip (drugs) | ~3545 |
+| handleShopLeave | ~3970 |
+| handleReset | ~4316 |
+| Combined Attack display | ~5084 |
 
-## Next Priority: Addiction Features
-See TODO.md "TOP 10 ADDICTION IDEAS" section. Top 3:
-1. Screen shake + impact frames (cheapest, biggest feel improvement)
-2. Score multiplier chain (Balatro-style core loop)
-3. Card upgrade system (Slay the Spire campfire depth)
+## State Management
+All state lives in App() via useState. Key refs for closure stability:
+- nextCardFreeRef, allCardsFreeRef (ember cost calculations)
+- strikeMultRef (captured before reset in handleStrike)
+- triggerVictoryRef (all setTimeout victory calls go through this)
+- victoryFiredRef (prevents double-fire)
+- deckRef, discRef, handRef (stable deck/discard/hand access)
+
+## Simulator
+`vestibule-sim.js` v16.0 — models ALL game mechanics:
+Artifacts, passives, pacts, boss loot, combos, multiplier, hellquake, drugs, genre, mentor links, doom forge, deck thinning, shop AI.
+Usage: `node vestibule-sim.js [games] [stake]`
+
+## Dev Shortcuts (in combat)
+- Shift+S: Jump to shop
+- Shift+D: Trigger death screen
+- Shift+W: Trigger victory cinematic
+- Shift+C: Open Doom Forge
+
+## Audio
+- Music: public/music/*.mp3 (11 tracks, crossfade on switch)
+- SFX: public/sfx/*.mp3 (30 files)
+- playSfx(name, vol?) — volume defaults to 1.0
+- TRACK_MAP determines music per gameState + boss/lucifer/victory overrides
