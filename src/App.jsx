@@ -2485,6 +2485,8 @@ function App(){
   const [comboFlash,setComboFlash]=useState(null) // {name,color,emoji}
   const [combosDiscoveredThisRun,setCombosDiscoveredThisRun]=useState([])
   const [genreCounts,setGenreCounts]=useState({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
+  const genreTotal=genreCounts.RIFF+genreCounts.CORRUPT+genreCounts.UTILITY+genreCounts.EMBER
+  const activeGenre=genreTotal>=4?(genreCounts.RIFF/genreTotal>=0.5?'RIFF_METAL':genreCounts.CORRUPT/genreTotal>=0.5?'BLACK_METAL':genreCounts.UTILITY/genreTotal>=0.5?'PROG_ROCK':genreCounts.EMBER/genreTotal>=0.5?'DOOM_METAL':null):null
   const discoveredRef=useRef(new Set())
   const [bossDebuff,setBossDebuff]=useState(0)
   const [bossRageAtk,setBossRageAtk]=useState(0)
@@ -4359,8 +4361,6 @@ function App(){
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
   }
 
-  const genreTotal=genreCounts.RIFF+genreCounts.CORRUPT+genreCounts.UTILITY+genreCounts.EMBER
-  const activeGenre=genreTotal>=4?(genreCounts.RIFF/genreTotal>=0.5?'RIFF_METAL':genreCounts.CORRUPT/genreTotal>=0.5?'BLACK_METAL':genreCounts.UTILITY/genreTotal>=0.5?'PROG_ROCK':genreCounts.EMBER/genreTotal>=0.5?'DOOM_METAL':null):null
   // Boss HP milestone detection
   useEffect(()=>{
     if(!enemy||enemyHp<=0||enemyHp>=enemy.maxHp)return
