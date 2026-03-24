@@ -195,6 +195,15 @@ The escalating visual corruption is unsettling and memorable — players will sc
 
 ---
 
+## PLAY AGAIN BUGS — FIXED (found during edge case audit)
+- [x] handleReset missing setStrikeMult reset — multiplier carried over between runs!
+- [x] handleReset missing victoryFiredRef reset — bosses UNKILLABLE on second run!
+- [x] handleReset missing setAllCardsFree reset — POSSESSION hellquake persisted forever
+- [x] handleReset missing setNextCardFree/Ref — free card stuck on
+- [x] handleReset missing setMemberBuffs — stale buff badges
+- [x] handleReset missing milestonesFiredRef — boss HP milestones never re-fired
+- [x] Division by alive.length without ||1 guard (stolenAtkPool crash)
+
 ## BALANCE PASS v4 (from 300K sim data) — COMPLETED
 - [x] Clean Living pact: 0%→<15% threshold, +2→+3 ATK (was 3.8% WR, 26 picks)
 - [x] Setlist: draw 2→3 cards, upgraded draws 4 (was 1.0 plays/game)
