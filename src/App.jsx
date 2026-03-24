@@ -2442,6 +2442,9 @@ function App(){
   const [deathCause,setDeathCause]=useState('fallen')
   const [hellquakeAnim,setHellquakeAnim]=useState(null)
   const [milestoneFlash,setMilestoneFlash]=useState(null) // {text,color} for boss HP milestones
+  const [strikeMult,setStrikeMult]=useState(1.0) // score multiplier that builds per card played
+  const [clutchFlash,setClutchFlash]=useState(null) // {text,color} for clutch moments
+  const [circlePreview,setCirclePreview]=useState(null) // next circle preview data
   const milestonesFiredRef=useRef({half:false,quarter:false,tenth:false})
   const [phaseBanner,setPhaseBanner]=useState('play') // 'play','strike','boss'
   const [deckViewOpen,setDeckViewOpen]=useState(false)
@@ -3009,7 +3012,7 @@ function App(){
     setStage(ns)
     if(spent>0)setEmbers(function(p){return p-spent})
     if(msg)addLog(msg)
-    updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
+    updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+({'RIFF':0.15,'CORRUPT':0.20,'UTILITY':0.10,'EMBER':0.08}[card.type]||0.1))*100)/100)
     if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
     if(card.type==='RIFF')setLastRiffPlayed(card)
     // ── RIFF CHAIN COMBO DETECTION ──
@@ -3024,7 +3027,7 @@ function App(){
           if(!disc.includes(chain.id)){disc.push(chain.id);localStorage.setItem('vst_combos_discovered',JSON.stringify(disc))}
         }
         setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji})
-        playSfx('combo');triggerShake(10,350);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! +10% bonus damage!')
+        playSfx('combo');triggerShake(10,350);setStrikeMult(p=>Math.round((p+0.50)*100)/100);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! +10% bonus damage!')
         combosFiredRef.current.push(chain.id)
         addFloat('⛧ '+chain.name+' ⛧',getCenter(bossRef).x,getCenter(bossRef).y-140,chain.color,true)
         // Apply combo bonus damage = total stage ATK
@@ -3067,7 +3070,7 @@ function App(){
       setEmbers(p=>Math.min(maxEmbers,p+3-effectiveEmbers))
       addLog('🎼 Smoke Break! '+victim.name+' discarded. +3 Embers.'+(preSelected.length===0?' (tip: select a card first)':''))
       addFloat('+3 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
-      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
+      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+({'RIFF':0.15,'CORRUPT':0.20,'UTILITY':0.10,'EMBER':0.08}[card.type]||0.1))*100)/100)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard'] // count victim too for refill
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -3087,7 +3090,7 @@ function App(){
       setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus-effectiveEmbers))
       addLog('🍯 Groupie! +2 Embers, drew 1 card.')
       addFloat('+2 🔥 +1 card',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')
-      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
+      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+({'RIFF':0.15,'CORRUPT':0.20,'UTILITY':0.10,'EMBER':0.08}[card.type]||0.1))*100)/100)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -3107,7 +3110,7 @@ function App(){
       setSetlistOpen(true)
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       addLog('📋 Setlist! Drew 2 cards — now pick 1 to discard.')
-      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
+      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+({'RIFF':0.15,'CORRUPT':0.20,'UTILITY':0.10,'EMBER':0.08}[card.type]||0.1))*100)/100)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -3128,7 +3131,7 @@ function App(){
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       addLog('🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+drawCount+'.'+(discardCount===0?' (Tip: select cards before playing)':''))
-      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
+      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+({'RIFF':0.15,'CORRUPT':0.20,'UTILITY':0.10,'EMBER':0.08}[card.type]||0.1))*100)/100)
       setLastRiffPlayed(card)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
@@ -3150,7 +3153,7 @@ function App(){
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       addLog('🎙 Remastered! Deleted '+toDelete.name+', drew 3.')
       addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
-      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
+      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+({'RIFF':0.15,'CORRUPT':0.20,'UTILITY':0.10,'EMBER':0.08}[card.type]||0.1))*100)/100)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       // cardHeal enemy passive
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
@@ -3184,7 +3187,7 @@ function App(){
       }
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
-      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
+      updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+({'RIFF':0.15,'CORRUPT':0.20,'UTILITY':0.10,'EMBER':0.08}[card.type]||0.1))*100)/100)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
       else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
@@ -3253,6 +3256,10 @@ function App(){
   },[selected,discardsLeft,animPhase,hand,deck,discardPile,drawUpTo])
 
   const triggerVictory=useCallback(function(){
+    // CLUTCH DETECTION
+    const aliveCount=stage.filter(m=>m&&!m.tooStoned).length
+    if(aliveCount===1){setClutchFlash({text:'SOLO VICTORY!',color:'#ffd700'});playSfx('big_hit');triggerShake(8,300);setTimeout(()=>setClutchFlash(null),2500)}
+    else if(strikesLeft<=0){setClutchFlash({text:'BY THE SKIN OF YOUR TEETH!',color:'#ff4400'});playSfx('big_hit');triggerShake(6,250);setTimeout(()=>setClutchFlash(null),2500)}
     setStage(function(prev){
       return prev.map(function(m){
         if(m&&!m.tooStoned&&m.keyword==='FRENZIED'){
@@ -3500,7 +3507,7 @@ function App(){
     setTimeout(()=>setActiveTripEffect(null),4000)
   },[tripUsedThisFight,strikesLeft])
 
-  const handleStrike=useCallback(()=>{playSfx('strike');triggerShake(8,300);
+  const handleStrike=useCallback(()=>{playSfx('strike');triggerShake(8,300);setStrikeMult(1.0);
     if(animPhase!=='idle'||strikesLeft<=0||enemyHp<=0)return
     const actives=stage.filter(m=>m&&!m.tooStoned)
     if(actives.length===0){addLog('⚠ No active members!');return}
@@ -3743,7 +3750,7 @@ function App(){
                 if(!ns2[ai]||ns2[ai].tooStoned)continue
                 const newHp=ns2[ai].hp-splitDmg
                 if(newHp<=0&&!ns2[ai].stoneShield){ns2[ai]=Object.assign({},ns2[ai],{hp:0,tooStoned:true});updStat('tooStonedCount',1);playSfx('member_down');triggerShake(12,400)}
-                else if(newHp<=0&&ns2[ai].stoneShield){const nsh=typeof ns2[ai].stoneShield==='number'?ns2[ai].stoneShield-1:0;ns2[ai]=Object.assign({},ns2[ai],{hp:1,stoneShield:nsh>0?nsh:false})}
+                else if(newHp<=0&&ns2[ai].stoneShield){const nsh=typeof ns2[ai].stoneShield==='number'?ns2[ai].stoneShield-1:0;ns2[ai]=Object.assign({},ns2[ai],{hp:1,stoneShield:nsh>0?nsh:false});setClutchFlash({text:'CLUTCH!',color:'#ffd700'});setTimeout(()=>setClutchFlash(null),1500)}
                 else{ns2[ai]=Object.assign({},ns2[ai],{hp:Math.max(0,newHp)})}
               }
               const allStoned=ns2.filter(m=>m).every(m=>m.tooStoned)
@@ -3939,7 +3946,7 @@ function App(){
     if(chosenPacts.includes('corruption_engine'))setCorruption(p=>Math.min(100,p+5))
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};setPhaseBanner('play')
+    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};setPhaseBanner('play');setStrikeMult(1.0)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
     if(fightIndex===26){
       // 8 circle bosses killed = 8 × 51,750 = 414,000 reduction → 6,666 HP
@@ -4812,6 +4819,8 @@ function App(){
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'rgba(255,255,255,0.7)',fontStyle:'italic',animation:'fadeIn 0.8s ease'}}>
           {luciferCinematic.phase===2?'Band fully restored. All strikes reset. Finish this.':'8 Circle Bosses defeated. Their echoes weaken the Devil.'}</div>
       </div>}
+      {/* CLUTCH FLASH */}
+      {clutchFlash&&<div style={{position:'absolute',top:'40%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9250,pointerEvents:'none',fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:clutchFlash.color,textShadow:'0 0 40px '+clutchFlash.color+',0 0 80px '+clutchFlash.color+'66,4px 4px 0 #000',letterSpacing:8,animation:'popFloat 2.5s ease-out forwards',textAlign:'center'}}>{clutchFlash.text}</div>}
       {/* BOSS HP MILESTONE FLASH */}
       {milestoneFlash&&<div style={{position:'absolute',top:'35%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9200,pointerEvents:'none',fontFamily:"'BogartsMetalFont',cursive",fontSize:90,color:milestoneFlash.color,textShadow:'0 0 40px '+milestoneFlash.color+',0 0 80px '+milestoneFlash.color+'66,4px 4px 0 #000',letterSpacing:10,animation:'popFloat 1.8s ease-out forwards'}}>{milestoneFlash.text}</div>}
       {/* DECK / DISCARD VIEWER */}
@@ -5020,6 +5029,10 @@ function App(){
         {/* RIGHT COLUMN: Strike/Discard/Embers/Stats — absolute, clamped to right edge */}
         <div style={{position:'absolute',right:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-evenly',padding:'8px 14px',background:'rgba(10,5,2,0.75)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none',width:210}}>
           <div style={{width:'100%'}}>
+            {strikeMult>1.0&&<div style={{textAlign:'center',marginBottom:6,padding:'4px 0',background:'rgba(255,140,0,0.15)',border:'1px solid rgba(255,140,0,0.4)',borderRadius:4}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff8800',letterSpacing:2,fontWeight:900}}>MULTIPLIER</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#ffd700',textShadow:'0 0 16px rgba(255,200,0,0.6)',lineHeight:1}}>x{strikeMult.toFixed(2)}</div>
+            </div>}
             <button onClick={handleStrike} disabled={!canStrike}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'10px 14px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:4,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:'100%'}}>⚔ Strike</button>
             <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center',width:'100%',marginTop:4}}>
