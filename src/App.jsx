@@ -1820,9 +1820,9 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
         {debuff>0&&<div style={{position:'absolute',bottom:4,right:4,background:'rgba(0,80,160,0.9)',border:'1px solid #4488ff',borderRadius:4,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#88aaff'}}>-{debuff}dmg</div>}
       </div>
       <div style={{flex:1,padding:'10px 24px',display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',gap:2}}>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:4,color:'#ff4422',textTransform:'uppercase',fontWeight:900,textShadow:'0 0 18px rgba(255,60,20,0.9),0 0 40px rgba(200,30,0,0.6)',textAlign:'center'}}>{enemy.circle} · {enemy.subtitle}</div>
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#120804',lineHeight:1,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 1px 1px 0 rgba(0,0,0,0.5)`:'1px 1px 0 rgba(0,0,0,0.5)',textAlign:'center'}}>{enemy.name}</div>
-        <div style={{fontFamily:"'ScratchFont',serif",fontSize:27,color:'#4a0808',fontStyle:'italic',lineHeight:1.2,fontWeight:900,textAlign:'center',marginTop:2}}>{enemy.passive}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,letterSpacing:4,color:'#ff4422',textTransform:'uppercase',fontWeight:900,textShadow:'0 0 18px rgba(255,60,20,0.9),0 0 40px rgba(200,30,0,0.6)',textAlign:'center'}}>{enemy.circle} · {enemy.subtitle}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#120804',lineHeight:1,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 1px 1px 0 rgba(0,0,0,0.5)`:'1px 1px 0 rgba(0,0,0,0.5)',textAlign:'center',marginTop:10}}>{enemy.name}</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:35,color:'#4a0808',fontStyle:'italic',lineHeight:1.2,fontWeight:900,textAlign:'center',marginTop:2}}>{enemy.passive}</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#3a0606',letterSpacing:1,fontWeight:900,textAlign:'center'}}>Base damage: {enemy.baseDmg} per Strike</div>
         <div style={{width:'100%',marginTop:4}}>
           <div style={{width:'100%',height:26,background:'rgba(50,25,8,0.75)',border:'1px solid rgba(100,55,15,0.6)',borderRadius:2,overflow:'hidden',boxShadow:'inset 0 2px 6px rgba(0,0,0,0.7)',position:'relative'}}>
