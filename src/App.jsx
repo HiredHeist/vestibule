@@ -2059,7 +2059,7 @@ function TrophyWall({onClose}){
     const stakeColor=t?.bestStake?stakeColors[t.bestStake]:'#4a3010'
 
     return(<div style={{
-      width:120,background:defeated?'linear-gradient(180deg,rgba(25,15,5,0.95),rgba(12,6,2,0.98))':'linear-gradient(180deg,rgba(10,6,3,0.7),rgba(5,3,1,0.8))',
+      width:140,background:defeated?'linear-gradient(180deg,rgba(25,15,5,0.95),rgba(12,6,2,0.98))':'linear-gradient(180deg,rgba(10,6,3,0.7),rgba(5,3,1,0.8))',
       border:defeated?'2px solid '+(isBoss?'#e8a820':'#8a6020'):'1px solid rgba(60,30,10,0.3)',
       borderRadius:8,padding:0,position:'relative',overflow:'hidden',
       animation:defeated?'trophyReveal 0.4s ease '+(delay*0.05)+'s both':'none',
@@ -2072,61 +2072,61 @@ function TrophyWall({onClose}){
       {t?.bestStake&&<div style={{position:'absolute',top:4,right:4,width:8,height:8,borderRadius:'50%',background:stakeColor,boxShadow:'0 0 4px '+stakeColor}}/>}
 
       {/* Emoji / silhouette */}
-      <div style={{fontSize:defeated?36:28,textAlign:'center',padding:'12px 0 6px',filter:defeated?'none':'brightness(0) opacity(0.15)'}}>
+      <div style={{fontSize:defeated?40:28,textAlign:'center',padding:'6px 0 2px',filter:defeated?'none':'brightness(0) opacity(0.15)'}}>
         {defeated?enemy.emoji:'❓'}
       </div>
 
       {/* Name */}
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:defeated?900:400,color:defeated?(isBoss?'#e8a820':'#c8a060'):'#443322',textAlign:'center',padding:'0 4px 2px',lineHeight:1.2,minHeight:24}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:defeated?900:400,color:defeated?(isBoss?'#e8a820':'#c8a060'):'#443322',textAlign:'center',padding:'0 4px 1px',lineHeight:1.1,minHeight:16}}>
         {defeated?enemy.name:'???'}
       </div>
 
       {/* Kill count */}
       {defeated&&<div style={{textAlign:'center',padding:'2px 0 6px'}}>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#cc4444'}}>{t.kills}</div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:7,color:'#886644',letterSpacing:1,textTransform:'uppercase'}}>{t.kills===1?'KILL':'KILLS'}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:'#cc4444'}}>{t.kills}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#886644',letterSpacing:1,textTransform:'uppercase'}}>{t.kills===1?'KILL':'KILLS'}</div>
       </div>}
 
       {/* Best damage */}
       {defeated&&t.bestDamage>0&&<div style={{background:'rgba(0,0,0,0.5)',padding:'3px 6px',textAlign:'center',borderTop:'1px solid rgba(80,50,10,0.2)'}}>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#aa8844'}}>BEST HIT</div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'#e8a820'}}>{t.bestDamage.toLocaleString()}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#aa8844'}}>BEST HIT</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#e8a820'}}>{t.bestDamage.toLocaleString()}</div>
       </div>}
 
       {/* Stake badge at bottom */}
       {t?.bestStake&&<div style={{background:stakeColor+'22',padding:'2px',textAlign:'center',borderTop:'1px solid '+stakeColor+'44'}}>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:900,color:stakeColor,letterSpacing:1}}>{stakeNames[t.bestStake].toUpperCase()}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:stakeColor,letterSpacing:1}}>{stakeNames[t.bestStake].toUpperCase()}</div>
       </div>}
     </div>)
   }
 
-  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.99)',display:'flex',flexDirection:'column',alignItems:'center',padding:'24px 40px',overflowY:'auto'}}>
+  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.99)',display:'flex',flexDirection:'column',alignItems:'center',padding:'12px 40px',overflow:'hidden'}}>
     <style>{glowAnim+revealAnim}</style>
     <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),2px 2px 0 #000',letterSpacing:6}}>Hall of Damnation</div>
-    <div style={{fontFamily:"'ScratchFont',serif",fontSize:17,color:'#a09060',fontStyle:'italic',marginBottom:4}}>Every boss you have conquered earns a place on this wall</div>
-    <div style={{display:'flex',gap:16,marginBottom:12}}>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8a060',padding:'4px 14px',background:'rgba(0,0,0,0.4)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:4}}>
+    <div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#a09060',fontStyle:'italic',marginBottom:2}}>Every boss you have conquered earns a place on this wall</div>
+    <div style={{display:'flex',gap:16,marginBottom:6}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#c8a060',padding:'3px 14px',background:'rgba(0,0,0,0.4)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:4}}>
         {totalDefeated}/28 Defeated
       </div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#cc4444',padding:'4px 14px',background:'rgba(0,0,0,0.4)',border:'1px solid rgba(150,40,40,0.3)',borderRadius:4}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#cc4444',padding:'3px 14px',background:'rgba(0,0,0,0.4)',border:'1px solid rgba(150,40,40,0.3)',borderRadius:4}}>
         {totalKills} Total Kills
       </div>
     </div>
 
     {/* Circle rows */}
-    <div style={{display:'flex',flexDirection:'column',gap:10,width:'100%',maxWidth:1200,alignItems:'center'}}>
+    <div style={{display:'flex',flexDirection:'column',gap:2,width:'100%',maxWidth:1400,alignItems:'center'}}>
       {CIRCLES.map((circle,ci)=>{
         const allDefeated=circle.enemies.every(eid=>trophies[eid])
         return(<div key={ci} style={{display:'flex',alignItems:'center',gap:10,width:'100%'}}>
           {/* Circle label */}
           <div style={{width:140,flexShrink:0,textAlign:'right',paddingRight:10}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:allDefeated?'#e8a820':'#665533',letterSpacing:2,textTransform:'uppercase'}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:allDefeated?'#e8a820':'#665533',letterSpacing:2,textTransform:'uppercase'}}>
               {circle.emoji} Circle {circle.name.split(' — ')[0]}
             </div>
-            <div style={{fontFamily:"'ScratchFont',serif",fontSize:10,color:allDefeated?'#aa8844':'#443322',fontStyle:'italic'}}>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:allDefeated?'#aa8844':'#443322',fontStyle:'italic'}}>
               {circle.name.split(' — ')[1]}
             </div>
-            {allDefeated&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#44cc44',letterSpacing:1,marginTop:2}}>✓ CLEARED</div>}
+            {allDefeated&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#44cc44',letterSpacing:1,marginTop:1}}>✓ CLEARED</div>}
           </div>
           {/* 3 trophy slots */}
           <div style={{display:'flex',gap:8}}>
@@ -2136,7 +2136,7 @@ function TrophyWall({onClose}){
       })}
 
       {/* Special: The Executive */}
-      <div style={{display:'flex',alignItems:'center',gap:10,marginTop:8,paddingTop:10,borderTop:'1px solid rgba(100,65,15,0.2)',width:'100%'}}>
+      <div style={{display:'flex',alignItems:'center',gap:10,marginTop:4,paddingTop:6,borderTop:'1px solid rgba(100,65,15,0.2)',width:'100%'}}>
         <div style={{width:140,flexShrink:0,textAlign:'right',paddingRight:10}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:trophies['ar_exec']?'#ffd700':'#665533',letterSpacing:2}}>
             🕴 BONUS
@@ -2149,7 +2149,7 @@ function TrophyWall({onClose}){
       </div>
     </div>
 
-    <button onClick={onClose} style={{marginTop:16,fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:4,padding:'12px 48px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'#c8a040',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
+    <button onClick={onClose} style={{marginTop:8,fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:4,padding:'10px 48px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'#c8a040',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
       Close
     </button>
   </div>)
@@ -2162,13 +2162,13 @@ function MasteryGallery({onClose}){
   const holoAnim='@keyframes holoShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}'
   const tierCounts=MASTERY_TIERS.map(t=>({name:t.name,count:cards.filter(c=>{const p=data[c.id]||0;let tier=MASTERY_TIERS[0];for(const tt of MASTERY_TIERS){if(p>=tt.min)tier=tt};return tier.name===t.name}).length}))
 
-  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.99)',display:'flex',flexDirection:'column',alignItems:'center',padding:'30px 40px',overflowY:'auto'}}>
+  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.99)',display:'flex',flexDirection:'column',alignItems:'center',padding:'14px 30px',overflow:'hidden'}}>
     <style>{holoAnim}</style>
-    <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#c8a040',textShadow:'0 0 30px rgba(200,160,40,0.4),2px 2px 0 #000',letterSpacing:6,marginBottom:4}}>Card Mastery</div>
-    <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic',marginBottom:8}}>Play cards across runs to unlock visual upgrades</div>
+    <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:46,color:'#c8a040',textShadow:'0 0 30px rgba(200,160,40,0.4),2px 2px 0 #000',letterSpacing:6,marginBottom:2}}>Card Mastery</div>
+    <div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#a09060',fontStyle:'italic',marginBottom:4}}>Play cards across runs to unlock visual upgrades</div>
 
     {/* Tier summary */}
-    <div style={{display:'flex',gap:16,marginBottom:16,flexWrap:'wrap',justifyContent:'center'}}>
+    <div style={{display:'flex',gap:10,marginBottom:8,flexWrap:'wrap',justifyContent:'center'}}>
       {MASTERY_TIERS.slice(1).map(t=>(
         <div key={t.name} style={{display:'flex',alignItems:'center',gap:6,padding:'4px 14px',background:'rgba(0,0,0,0.4)',border:'1px solid '+t.border+'66',borderRadius:4}}>
           <div style={{width:10,height:10,borderRadius:'50%',background:t.color,boxShadow:'0 0 6px '+t.glow}}/>
@@ -2183,7 +2183,7 @@ function MasteryGallery({onClose}){
     </div>
 
     {/* Card grid */}
-    <div style={{display:'grid',gridTemplateColumns:'repeat(7,140px)',gap:10,justifyContent:'center',maxWidth:1100}}>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(9,120px)',gap:8,justifyContent:'center',maxWidth:1200}}>
       {cards.map(c=>{
         const plays=data[c.id]||0
         let tier=MASTERY_TIERS[0]
@@ -2207,10 +2207,10 @@ function MasteryGallery({onClose}){
           <div style={{height:3,background:tier.border||bc}}/>
 
           {/* Emoji */}
-          <div style={{fontSize:32,textAlign:'center',padding:'10px 0',background:'rgba(0,0,0,0.3)'}}>{c.emoji}</div>
+          <div style={{fontSize:28,textAlign:'center',padding:'6px 0',background:'rgba(0,0,0,0.3)'}}>{c.emoji}</div>
 
           {/* Name */}
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'2px 4px',lineHeight:1.2}}>{c.name}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'1px 3px',lineHeight:1.1}}>{c.name}</div>
 
           {/* Tier badge */}
           <div style={{textAlign:'center',padding:'2px 0'}}>
@@ -2221,14 +2221,14 @@ function MasteryGallery({onClose}){
           </div>
 
           {/* Progress bar */}
-          <div style={{margin:'0 6px 6px',height:6,background:'rgba(0,0,0,0.5)',borderRadius:3,overflow:'hidden',position:'relative'}}>
+          <div style={{margin:'0 4px 4px',height:5,background:'rgba(0,0,0,0.5)',borderRadius:3,overflow:'hidden',position:'relative'}}>
             <div style={{height:'100%',width:(progress*100)+'%',
               background:isLegendary?'linear-gradient(90deg,#ff44ff,#ff88ff,#ff44ff)':tier.border?'linear-gradient(90deg,'+tier.border+','+tier.color+')':'rgba(100,65,15,0.4)',
               borderRadius:3,transition:'width 0.5s ease'}}/>
           </div>
 
           {/* Play count */}
-          <div style={{textAlign:'center',padding:'0 0 6px'}}>
+          <div style={{textAlign:'center',padding:'0 0 3px'}}>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:tier.color||'#665533'}}>{plays}</span>
             {nextTier&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#554433'}}> / {nextTier.min}</span>}
           </div>
@@ -2236,7 +2236,7 @@ function MasteryGallery({onClose}){
       })}
     </div>
 
-    <button onClick={onClose} style={{marginTop:20,fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:4,padding:'12px 48px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'#c8a040',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
+    <button onClick={onClose} style={{marginTop:8,fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:4,padding:'10px 48px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'#c8a040',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
       Close
     </button>
   </div>)
