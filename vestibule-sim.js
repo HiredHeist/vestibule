@@ -16,23 +16,23 @@ const STAKES={
 const STAKE=STAKES[STAKE_ID]||STAKES.bronze;
 
 const ENEMIES=[
-  {id:'wanderer',name:'Wanderer',maxHp:27,baseDmg:2,passiveId:null},
-  {id:'lostsoul',name:'Lost Soul',maxHp:42,baseDmg:4,passiveId:null},
-  {id:'drifter',name:'Drifter',maxHp:69,baseDmg:5,passiveId:null},
-  {id:'siren',name:'Siren',maxHp:60,baseDmg:4,passiveId:'selfbuff'},
-  {id:'tempter',name:'Tempter',maxHp:90,baseDmg:5,passiveId:'selfbuff'},
-  {id:'lust_boss',name:'Seducer',maxHp:140,baseDmg:6,passiveId:'selfbuff2'},
-  {id:'glutton',name:'Glutton',maxHp:80,baseDmg:4,passiveId:'cardHeal'},
-  {id:'feaster',name:'Feaster',maxHp:110,baseDmg:5,passiveId:'cardHeal3'},
-  {id:'gluttony_boss',name:'Devourer',maxHp:160,baseDmg:6,passiveId:'cardHeal4'},
-  {id:'miser',name:'Miser',maxHp:260,baseDmg:4,passiveId:'stashSteal'},
-  {id:'hoarder',name:'Hoarder',maxHp:300,baseDmg:5,passiveId:'stashSteal2'},
-  {id:'greed_boss',name:'Usurer',maxHp:420,baseDmg:6,passiveId:'stashSteal3'},
+  {id:'wanderer',name:'Wanderer',maxHp:50,baseDmg:4,passiveId:null},
+  {id:'lostsoul',name:'Lost Soul',maxHp:75,baseDmg:5,passiveId:null},
+  {id:'drifter',name:'Drifter',maxHp:110,baseDmg:7,passiveId:null},
+  {id:'siren',name:'Siren',maxHp:100,baseDmg:5,passiveId:'selfbuff'},
+  {id:'tempter',name:'Tempter',maxHp:150,baseDmg:6,passiveId:'selfbuff'},
+  {id:'lust_boss',name:'Seducer',maxHp:220,baseDmg:7,passiveId:'selfbuff2'},
+  {id:'glutton',name:'Glutton',maxHp:130,baseDmg:5,passiveId:'cardHeal'},
+  {id:'feaster',name:'Feaster',maxHp:170,baseDmg:6,passiveId:'cardHeal3'},
+  {id:'gluttony_boss',name:'Devourer',maxHp:230,baseDmg:7,passiveId:'cardHeal5'},
+  {id:'miser',name:'Miser',maxHp:340,baseDmg:4,passiveId:'stashSteal'},
+  {id:'hoarder',name:'Hoarder',maxHp:400,baseDmg:5,passiveId:'stashSteal2'},
+  {id:'greed_boss',name:'Usurer',maxHp:500,baseDmg:6,passiveId:'stashSteal3'},
   {id:'wrathful',name:'Wrathful',maxHp:900,baseDmg:5,passiveId:'rageScale1'},
   {id:'berserker',name:'Berserker',maxHp:1000,baseDmg:6,passiveId:'rageScale1'},
   {id:'anger_boss',name:'Warlord',maxHp:1111,baseDmg:7,passiveId:'rageScale2'},
   {id:'heretic',name:'Heretic',maxHp:1650,baseDmg:5,passiveId:'corruptPlayer'},
-  {id:'apostate',name:'Apostate',maxHp:2175,baseDmg:6,passiveId:'corruptPlayer15'},
+  {id:'apostate',name:'Apostate',maxHp:1900,baseDmg:6,passiveId:'corruptPlayer15'},
   {id:'heresy_boss',name:'False Prophet',maxHp:3000,baseDmg:7,passiveId:'corruptPlayer20'},
   {id:'brute',name:'Brute',maxHp:3000,baseDmg:6,passiveId:'targetHighestHp'},
   {id:'hunter',name:'Hunter',maxHp:4000,baseDmg:7,passiveId:'targetHighestHp2'},
@@ -319,6 +319,7 @@ function applyCardSim(card,gs,enemy){
   if(enemy.passiveId==='cardHeal')enemy._hp=Math.min(enemy.maxHp,enemy._hp+2);
   if(enemy.passiveId==='cardHeal3')enemy._hp=Math.min(enemy.maxHp,enemy._hp+3);
   if(enemy.passiveId==='cardHeal4')enemy._hp=Math.min(enemy.maxHp,enemy._hp+4);
+  if(enemy.passiveId==='cardHeal5')enemy._hp=Math.min(enemy.maxHp,enemy._hp+5);
 }
 
 // ── GENRE BONUS COMPUTATION ──
