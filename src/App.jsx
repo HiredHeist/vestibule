@@ -796,15 +796,15 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
     return base + (c.foil?3:0) + (c.mythic?8:0)
   }
   const tabStyle = (active) => ({
-    fontFamily:"'MBScribblesFont',serif", fontSize:12, fontWeight:900, letterSpacing:2,
-    padding:'8px 20px', cursor:'pointer', border:'none', textTransform:'uppercase',
+    fontFamily:"'MBScribblesFont',serif", fontSize:16, fontWeight:900, letterSpacing:3,
+    padding:'10px 28px', cursor:'pointer', border:'none', textTransform:'uppercase',
     background: active?'rgba(160,80,240,0.3)':'transparent',
-    color: active?'#cc88ff':'#6a4a8a',
+    color: active?'#cc88ff':'#8a6aaa',
     borderBottom: active?'2px solid #cc88ff':'2px solid transparent',
     transition:'all 0.2s'
   })
   return(
-    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(2,1,4,0.96)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',padding:'40px 20px',overflowY:'auto'}}>
+    <div style={{position:'absolute',inset:-4,zIndex:9800,background:'rgba(2,1,4,0.98)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',padding:'30px 60px',overflowY:'auto'}}>
       {/* Stash counter — top right, ticks up on each sale */}
       <div style={{position:'absolute',top:24,right:32,display:'flex',flexDirection:'column',alignItems:'center',gap:4,
         background:'rgba(20,10,5,0.95)',border:'2px solid #55ee66',borderRadius:10,padding:'12px 20px',
@@ -815,10 +815,10 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'#33aa44',fontStyle:'italic'}}>🌿</div>
       </div>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#cc88ff',textShadow:'0 0 30px rgba(180,60,255,0.6)',marginBottom:6}}>🪙 Pawn Shop</div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'#8a6aaa',fontStyle:'italic',marginBottom:4}}>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:25,color:'#c8a0ee',fontStyle:'italic',marginBottom:6}}>
         {salesLeft} sale{salesLeft!==1?'s':''} remaining this visit
       </div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#5a3a7a',letterSpacing:1,marginBottom:20}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#8a6aaa',letterSpacing:1,marginBottom:20}}>
         Cannot sell last 2 members · Bonds break on member sale
       </div>
 
@@ -829,7 +829,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
       </div>
 
       {/* Members tab */}
-      {tab==='members'&&<div style={{display:'flex',gap:16,flexWrap:'wrap',justifyContent:'center',maxWidth:900}}>
+      {tab==='members'&&<div style={{display:'flex',gap:16,flexWrap:'wrap',justifyContent:'center',maxWidth:1200}}>
         {members.length===0&&<div style={{fontFamily:"'ScratchFont',serif",color:'#5a3a6a',fontStyle:'italic',fontSize:16}}>No members on stage.</div>}
         {members.map(({m,i})=>{
           const price = memberSellPrice(m)
@@ -853,10 +853,10 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
                   disabled={!canSell||cantSell}
                   onClick={()=>{if(canSell&&!cantSell){onSellMember(m,i);if(salesLeft<=1)onClose()}}
                   }
-                  style={{width:'100%',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,padding:'8px',
-                    background:canSell&&!cantSell?'rgba(160,80,240,0.2)':'rgba(40,20,60,0.2)',
-                    border:'1px solid '+(canSell&&!cantSell?'rgba(160,80,240,0.6)':'rgba(80,40,120,0.3)'),
-                    borderRadius:4,color:canSell&&!cantSell?'#cc88ff':'#4a2a6a',cursor:canSell&&!cantSell?'pointer':'not-allowed',
+                  style={{width:'100%',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:1,padding:'8px',
+                    background:canSell&&!cantSell?'rgba(30,80,20,0.3)':'rgba(20,30,15,0.2)',
+                    border:'1px solid '+(canSell&&!cantSell?'#44cc44':'rgba(60,100,30,0.3)'),
+                    borderRadius:4,color:canSell&&!cantSell?'#55ee55':'#3a5a2a',cursor:canSell&&!cantSell?'pointer':'not-allowed',boxShadow:canSell&&!cantSell?'0 0 8px rgba(60,200,60,0.3)':'none',
                     textTransform:'uppercase'}}>
                   {cantSell?'Need 2+ members':'Sell for '+price+' 🌿'}
                 </button>
@@ -867,40 +867,40 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
       </div>}
 
       {/* Cards tab */}
-      {tab==='cards'&&<div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',maxWidth:900}}>
+      {tab==='cards'&&<div style={{display:'flex',gap:14,flexWrap:'wrap',justifyContent:'center',maxWidth:1200}}>
         {allCards.length===0&&<div style={{fontFamily:"'ScratchFont',serif",color:'#5a3a6a',fontStyle:'italic',fontSize:16}}>Deck is empty.</div>}
         {allCards.map((c,ci)=>{
           const price = cardSellPrice(c)
           const bc = c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
           return(
-            <div key={c.uid||c.id} style={{width:140,background:'linear-gradient(180deg,#201408,#100804)',border:'1px solid '+bc+'88',borderRadius:6,overflow:'hidden',position:'relative'}}
+            <div key={c.uid||c.id} style={{width:180,background:'linear-gradient(180deg,#201408,#100804)',border:'1px solid '+bc+'88',borderRadius:6,position:'relative'}}
               onMouseEnter={()=>setHoverCard({c,ci})} onMouseLeave={()=>setHoverCard(null)}>
               <div style={{height:4,background:bc}}/>
-              <div style={{fontSize:36,textAlign:'center',padding:'10px 0',background:'rgba(0,0,0,0.3)'}}>{c.emoji}</div>
-              <div style={{padding:'0 8px 10px'}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:2}}>{c.name}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#6a5030',textAlign:'center',marginBottom:4}}>{c.rarity}</div>
+              <div style={{fontSize:44,textAlign:'center',padding:'12px 0',background:'rgba(0,0,0,0.3)',borderRadius:'6px 6px 0 0'}}>{c.emoji}</div>
+              <div style={{padding:'0 10px 12px'}}>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:2}}>{c.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#8a6a40',textAlign:'center',marginBottom:6}}>{c.rarity}</div>
                 <button
                   disabled={!canSell}
                   onClick={()=>{if(canSell){onSellCard(c);if(salesLeft<=1)onClose()}}}
-                  style={{width:'100%',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,padding:'6px',
-                    background:canSell?'rgba(80,30,140,0.2)':'rgba(30,15,60,0.2)',
-                    border:'1px solid '+(canSell?'rgba(140,60,220,0.5)':'rgba(60,30,100,0.3)'),
-                    borderRadius:3,color:canSell?'#aa66ee':'#4a2a6a',cursor:canSell?'pointer':'not-allowed',
-                    textTransform:'uppercase'}}>
+                  style={{width:'100%',fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,letterSpacing:1,padding:'8px',
+                    background:canSell?'rgba(30,80,20,0.3)':'rgba(20,30,15,0.2)',
+                    border:'1px solid '+(canSell?'#44cc44':'rgba(60,100,30,0.3)'),
+                    borderRadius:4,color:canSell?'#55ee55':'#3a5a2a',cursor:canSell?'pointer':'not-allowed',
+                    textTransform:'uppercase',boxShadow:canSell?'0 0 8px rgba(60,200,60,0.3)':'none'}}>
                   Sell for {price} 🌿
                 </button>
                 <button
                   onClick={()=>{onBurnCard(c)}}
-                  style={{width:'100%',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,letterSpacing:1,padding:'4px',marginTop:3,
-                    background:'rgba(140,30,30,0.2)',
-                    border:'1px solid rgba(200,60,60,0.4)',
-                    borderRadius:3,color:'#cc4444',cursor:'pointer',
-                    textTransform:'uppercase'}}>
+                  style={{width:'100%',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:1,padding:'6px',marginTop:4,
+                    background:'rgba(160,20,20,0.25)',
+                    border:'1px solid #ee3333',
+                    borderRadius:4,color:'#ff4444',cursor:'pointer',
+                    textTransform:'uppercase',boxShadow:'0 0 10px rgba(220,40,40,0.4)',textShadow:'0 0 8px rgba(255,60,60,0.5)'}}>
                   🔥 Burn (delete)
                 </button>
               </div>
-              {hoverCard&&hoverCard.ci===ci&&<div style={{position:'absolute',bottom:'105%',left:'50%',transform:'translateX(-50%)',width:260,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'2px solid '+bc,borderRadius:10,padding:'14px',zIndex:100,pointerEvents:'none',boxShadow:'0 8px 30px rgba(0,0,0,0.9)'}}>
+              {hoverCard&&hoverCard.ci===ci&&<div style={{position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',width:300,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'2px solid '+bc,borderRadius:10,padding:'14px',zIndex:9900,pointerEvents:'none',boxShadow:'0 8px 40px rgba(0,0,0,0.95),0 0 20px '+bc+'44'}}>
                 <div style={{height:4,background:bc,borderRadius:'4px 4px 0 0',marginBottom:8,marginTop:-14,marginLeft:-14,marginRight:-14}}/>
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:bc,fontWeight:900,letterSpacing:1,textTransform:'uppercase'}}>{c.type}</div>
@@ -916,7 +916,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
         })}
       </div>}
 
-      <button onClick={onClose} style={{marginTop:30,fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,padding:'12px 40px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:3,color:'#7a5020',cursor:'pointer',textTransform:'uppercase'}}
+      <button onClick={onClose} style={{marginTop:30,fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:4,padding:'14px 50px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'#aa7030',cursor:'pointer',textTransform:'uppercase'}}
         onMouseEnter={e=>{e.currentTarget.style.borderColor='#8a6030';e.currentTarget.style.color='#c8a040'}}
         onMouseLeave={e=>{e.currentTarget.style.borderColor='#4a3010';e.currentTarget.style.color='#7a5020'}}>
         Close Shop
