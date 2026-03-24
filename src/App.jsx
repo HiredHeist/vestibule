@@ -1818,6 +1818,67 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
   )
 }
 
+
+// ═══════════════════════════════════════════════════════════
+// DAMAGE BREAKDOWN — Balatro-style number-go-up animation
+// ═══════════════════════════════════════════════════════════
+function DamageBreakdown({data,onDone}){
+  const [visibleCount,setVisibleCount]=useState(0)
+  const [slamming,setSlamming]=useState(false)
+  const lines=data.lines||[]
+  const total=data.total||0
+  const LINE_DELAY=140
+  const SLAM_DELAY=lines.length*LINE_DELAY+200
+
+  useEffect(()=>{
+    let i=0
+    const timer=setInterval(()=>{
+      i++
+      setVisibleCount(i)
+      if(i>=lines.length){clearInterval(timer)}
+    },LINE_DELAY)
+    const slamTimer=setTimeout(()=>{setSlamming(true)
+      try{document.getElementById('root').style.animation='none';document.getElementById('root').offsetHeight;document.getElementById('root').style.animation='screenShake 0.3s ease'}catch(e){}
+    },SLAM_DELAY)
+    const doneTimer=setTimeout(()=>{if(onDone)onDone()},SLAM_DELAY+900)
+    return()=>{clearInterval(timer);clearTimeout(slamTimer);clearTimeout(doneTimer)}
+  },[lines.length])
+
+  const slamAnim=`@keyframes screenShake{0%,100%{transform:translate(0,0)}10%{transform:translate(-6px,4px)}20%{transform:translate(8px,-3px)}30%{transform:translate(-4px,6px)}40%{transform:translate(6px,-2px)}50%{transform:translate(-3px,3px)}60%{transform:translate(4px,-4px)}70%{transform:translate(-2px,2px)}80%{transform:translate(3px,-1px)}90%{transform:translate(-1px,1px)}} @keyframes dmgSlam{0%{transform:scale(2.5);opacity:0}30%{transform:scale(0.9);opacity:1}50%{transform:scale(1.15)}70%{transform:scale(0.95)}100%{transform:scale(1);opacity:1}}`
+  const lineAnim=`@keyframes dmgLineIn{0%{transform:translateX(30px);opacity:0}100%{transform:translateX(0);opacity:1}}`
+  const pulseAnim=`@keyframes dmgPulse{0%,100%{text-shadow:0 0 20px rgba(255,34,0,0.6)}50%{text-shadow:0 0 40px rgba(255,100,0,0.9)}}`
+  const countAnim=`@keyframes dmgCount{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}`
+
+  let runningTotal=0
+  return(<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9500,pointerEvents:'none',display:'flex',flexDirection:'column',alignItems:'center',gap:0,minWidth:380}}>
+    <style>{slamAnim+lineAnim+pulseAnim+countAnim}</style>
+    <div style={{background:'linear-gradient(180deg,rgba(15,8,2,0.95),rgba(10,5,0,0.98))',border:'2px solid rgba(200,160,40,0.5)',borderRadius:12,padding:'16px 28px 20px',boxShadow:'0 0 60px rgba(0,0,0,0.9),0 0 30px rgba(200,100,0,0.15),inset 0 1px 0 rgba(200,160,40,0.15)',minWidth:340,maxWidth:440}}>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:16,color:'#c8a040',textAlign:'center',letterSpacing:4,textTransform:'uppercase',marginBottom:10,opacity:0.7}}>STRIKE BREAKDOWN</div>
+      {lines.map((line,i)=>{
+        if(i>=visibleCount)return null
+        if(line.type==='member'){runningTotal+=line.value}
+        else if(line.type==='multiply'){runningTotal=line.runningAfter}
+        else if(line.type==='add'){runningTotal=line.runningAfter}
+        const isLast=i===visibleCount-1
+        return(<div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'3px 0',borderBottom:'1px solid rgba(80,50,10,0.15)',animation:'dmgLineIn 0.25s ease-out',opacity:1}}>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            {line.emoji&&<span style={{fontSize:18}}>{line.emoji}</span>}
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:line.type==='subtotal'?15:14,color:line.color||'#c8a060',fontWeight:line.type==='subtotal'?900:400,letterSpacing:line.type==='subtotal'?2:0,textTransform:line.type==='subtotal'?'uppercase':'none'}}>{line.label}</span>
+          </div>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:line.type==='subtotal'?20:line.type==='multiply'||line.type==='add'?17:16,fontWeight:900,color:line.type==='multiply'?'#ff8800':line.type==='add'?'#44cc44':line.type==='subtotal'?'#e8a820':line.color||'#c8a060',animation:isLast?'dmgCount 0.3s ease':'none',textShadow:line.type==='multiply'?'0 0 10px rgba(255,136,0,0.5)':line.type==='subtotal'?'0 0 8px rgba(200,160,40,0.3)':'none'}}>{line.type==='multiply'?line.label2:line.type==='add'?'+'+line.value:line.value}</span>
+        </div>)
+      })}
+      {visibleCount>=lines.length&&!slamming&&<div style={{textAlign:'center',marginTop:8}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#886644',letterSpacing:2}}>RUNNING: {runningTotal.toLocaleString()}</div>
+      </div>}
+    </div>
+    {slamming&&<div style={{marginTop:8,textAlign:'center',animation:'dmgSlam 0.5s ease-out forwards'}}>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,fontWeight:900,color:'#ff2200',textShadow:'0 0 30px rgba(255,34,0,0.8),0 0 60px rgba(255,100,0,0.4),0 4px 0 #440000',letterSpacing:3,animation:'dmgPulse 1s ease-in-out infinite'}}>{total.toLocaleString()}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#ff6644',letterSpacing:4,textTransform:'uppercase',marginTop:2}}>DAMAGE</div>
+    </div>}
+  </div>)
+}
+
 function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRoll}){
   const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35
   return(
@@ -2440,6 +2501,7 @@ function App(){
   const [strikesLeft,setStrikesLeft]=useState(MAX_STRIKES)
   const [discardsLeft,setDiscardsLeft]=useState(MAX_DISCARDS)
   const [isWiggling,setIsWiggling]=useState(false)
+  const [dmgBreakdown,setDmgBreakdown]=useState(null) // {lines:[], total:0, showing:true}
   const [projectiles,setProjectiles]=useState([])
   const [floats,setFloats]=useState([])
   const [hovered,setHovered]=useState(null)
@@ -3669,27 +3731,32 @@ function App(){
         addLog('🗝 '+paranoiaVictim.name+' turns paranoid! Attacks '+target.name+' for 3 damage!')}
     }
     const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===activeStake.maxStrikes?10:0
+    const _breakdownLines=[]
     let dmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
       const effectiveAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
       const cleanLivingBonus=(chosenPacts.includes('clean_living')&&corruption<15)?3:0
       return s+effectiveAtk+cleanLivingBonus
     },0)+p10Bonus
+    let _bkRunning=dmg
     // DOUBLE TIME d6 multiplier
     let dblMode='', dblMult=1
     if(hasDbl){
       if(dblRoll<=2){dblMult=1.0;dblMode='STANDARD'}
       else if(dblRoll<=4){dblMult=1.5;dblMode='OFF BEAT'}
       else{dblMult=2;dblMode='DOUBLE TIME'}
-      dmg=Math.round(dmg*dblMult)
+      dmg=Math.round(dmg*dblMult);_bkRunning=dmg
+      if(dblMult!==1)_breakdownLines.push({type:'multiply',label:dblMode+' ×'+dblMult,label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff8800'})
     }
     const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer').reduce((s,m)=>{
       const ea=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
       return s+ea
     },0)
     dmg+=encDmg
+    if(encDmg>0){_bkRunning=dmg;_breakdownLines.push({type:'add',label:'Encore',emoji:'🔁',value:encDmg,runningAfter:dmg,color:'#44cc44'})}
     dmg=Math.round(dmg*bandBonus)
+    if(bandBonus>1){_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Band Synergy ×'+bandBonus.toFixed(2),label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ffd700'})}
     // ── MENTOR LINK strike multiplier ──────────────────────────────
-    {let _mlb=0
+    let _mlb=0
     for(let _i=0;_i<stage.length-1;_i++){
       const _mn=stage[_i],_bs=stage[_i+1]
       if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue
@@ -3703,12 +3770,12 @@ function App(){
         addFloat('⛓ ×'+_effectiveMult.toFixed(2),getCenter(stageRefs.current[_i]).x,getCenter(stageRefs.current[_i]).y-80,'#ffd700',true)
       }
     }
-    if(_mlb>0)dmg+=_mlb}
+    if(_mlb>0){dmg+=_mlb;_bkRunning=dmg;_breakdownLines.push({type:'add',label:'Mentor Link',emoji:'⛓',value:_mlb,runningAfter:dmg,color:'#ffd700'})}
     // CA4: Wailing Guitar — first Strike deals double damage
-    if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===activeStake.maxStrikes){dmg*=2;addLog('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')}
+    if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===activeStake.maxStrikes){dmg*=2;_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Wailing Guitar ×2',label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff4488'});addLog('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')}
     // GENRE BONUSES
-    if(activeGenre==='RIFF_METAL'){dmg=Math.round(dmg*1.15);addLog('🎸 Riff Metal genre! +15% strike damage!')}
-    if(activeGenre==='DOOM_METAL'&&discardsLeft>=MAX_DISCARDS){dmg+=actives.length*2;addLog('🎵 Doom Metal genre! +'+actives.length*2+' ATK (no discards used)')}
+    if(activeGenre==='RIFF_METAL'){dmg=Math.round(dmg*1.15);_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Riff Metal ×1.15',label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#9933cc'});addLog('🎸 Riff Metal genre! +15% strike damage!')}
+    if(activeGenre==='DOOM_METAL'&&discardsLeft>=MAX_DISCARDS){dmg+=actives.length*2;_bkRunning=dmg;_breakdownLines.push({type:'add',label:'Doom Metal',emoji:'🎵',value:actives.length*2,runningAfter:dmg,color:'#666699'});addLog('🎵 Doom Metal genre! +'+actives.length*2+' ATK (no discards used)')}
     // HEXED: auto-raise corruption +5%, member gains +1 ATK per 10% corruption
     const hexedMembers=actives.filter(m=>m.keyword==='HEXED')
     if(hexedMembers.length>0){
@@ -3742,6 +3809,10 @@ function App(){
       if(m.encoreReady)mAtk*=2
       memberDmgs.push({m,atk:mAtk})
     })
+    // Build per-member breakdown lines (after memberDmgs is populated)
+    memberDmgs.forEach(d=>{_breakdownLines.push({type:'member',label:d.m.name,emoji:d.m.emoji,value:d.atk,color:'#c8a060'})})
+    _breakdownLines.push({type:'subtotal',label:'BASE ATK',value:dmg,color:'#e8a820'})
+    _bkRunning=dmg
     actives.forEach(function(m){
       if(m.role==='Drummer')return
       const si=stage.indexOf(m)
@@ -3759,7 +3830,9 @@ function App(){
     setTimeout(function(){
       playHit();setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
       setProjectiles([])
-      const tripMult=fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION'?2:1;const finalDmg=Math.round(dmg*tripMult*currentMult);const newEHp=Math.max(0,enemyHp-finalDmg)
+      const tripMult=fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION'?2:1;const finalDmg=Math.round(dmg*tripMult*currentMult)
+      if(tripMult>1){const _tr=Math.round(dmg*tripMult);_breakdownLines.push({type:'multiply',label:(fightTripBuff||'Trip')+' ×'+tripMult,label2:'= '+_tr.toLocaleString(),runningAfter:_tr,color:'#ff44ff'})}
+      if(currentMult>1.0){_breakdownLines.push({type:'multiply',label:'Strike ×'+currentMult.toFixed(2),label2:'= '+finalDmg.toLocaleString(),runningAfter:finalDmg,color:'#ff4400'})};const newEHp=Math.max(0,enemyHp-finalDmg)
       setEnemyHp(newEHp)
       // damageScaleAtk: boss gains ATK per 20 damage taken
       if(enemy.passiveId==='luciferBoss'){
@@ -3767,7 +3840,8 @@ function App(){
         const phaseTotalDmg=luciferPhase===1?(3333-newEHp):(3333-newEHp)
         setBossRageAtk(Math.floor(Math.max(0,phaseTotalDmg)/20)*atkGain)
       }
-      addFloat('TOTAL: '+finalDmg+(currentMult>1.0?' (x'+currentMult.toFixed(2)+')':''),bc.x,bc.y-60,'#ff2200',true)
+      if(_breakdownLines.length>1)setDmgBreakdown({lines:_breakdownLines,total:finalDmg})
+      addFloat(finalDmg.toLocaleString(),bc.x,bc.y-60,'#ff2200',true)
       if(folkMagicFired){
         setEmbers(maxEmbers)
         addFloat('🪈 FOLK MAGIC! Full Embers!',window.innerWidth/2,window.innerHeight*0.35,'#44ddaa',true)
@@ -3809,7 +3883,10 @@ function App(){
         if(triggerVictoryRef.current)triggerVictoryRef.current();return
       }
 
+      const _bossDelay=(_breakdownLines.length>1)?(_breakdownLines.length*140+200+1100):800
+      if(_breakdownLines.length>1){const _slamAt=_breakdownLines.length*140+200;setTimeout(()=>{try{playSfx('big_hit')}catch(e){}},_slamAt)}
       setTimeout(function(){
+        setDmgBreakdown(null) // dismiss breakdown before boss attacks
         setAnimPhase('boss')
         const activeM=stage.filter(function(m){return m&&!m.tooStoned})
         if(activeM.length===0){setAnimPhase('idle');return}
@@ -4024,7 +4101,7 @@ function App(){
             });
           },900)
         },1200)
-      },delay+400)
+      },_bossDelay)
     },delay+200)
   },[animPhase,strikesLeft,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,bossRef,stageRefs,drawUpTo,triggerVictory,bossRageAtk,bossDebuff,fightTripBuff,luciferPhase,stolenAtkPool,maxEmbers])
 
@@ -4941,6 +5018,7 @@ function App(){
       {corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 20%,rgba(140,0,0,0.3) 100%)',animation:'bgPulse 1s ease-in-out infinite'}}/>}
       {floats.filter(Boolean).map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
       {projectiles.filter(Boolean).map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
+      {dmgBreakdown&&<DamageBreakdown data={dmgBreakdown} onDone={()=>setDmgBreakdown(null)}/>}
       {showDice&&diceTarget&&<DiceRoll target={diceTarget} onDone={()=>setShowDice(false)}/>}
       {hellquakeAnim&&<div style={{position:'absolute',inset:0,zIndex:9500,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.85)',animation:'fadeIn 0.1s ease'}}>
         <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.04) 3px,rgba(255,255,255,0.04) 4px)',animation:'interlaceFlicker 0.08s steps(1) infinite',pointerEvents:'none'}}/>
