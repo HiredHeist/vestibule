@@ -2032,7 +2032,7 @@ function PhaseDots({left,total,color,wide}){
   const sz=wide?17:13;const start=total-left;return <div style={{display:'flex',gap:wide?4:4}}>{Array.from({length:total}).map((_,i)=>{const filled=i>=start;return <div key={i} style={{width:sz,height:sz,borderRadius:4,background:filled?color:'rgba(40,20,8,0.6)',border:`1px solid ${filled?color:'rgba(80,50,20,0.3)'}`,boxShadow:filled?`0 0 9px ${color}99`:'none',transition:'all 0.25s'}}/>})}</div>
 }
 
-function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered,newAchievements,enemyHp,stage}){
+function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered,newAchievements,enemyHp,stage,chosenPacts}){
   const isStoned=cause==='stoned'
   const isBeaten=cause==='beaten'
   const isVictory=cause==='victory'
@@ -2126,69 +2126,120 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   // ── NEAR MISS — the "one more run" trigger ─────────────────
   const NearMiss=()=>{
     if(isVictory)return null
-    // Find the single most compelling near-miss
-    let headline=null, headlineColor='#ff4422'
-    if(enemyHp>0&&enemyHp<=Math.max(80,stats.highestStrike*0.4)){
-      headline={text:enemyHp+' HP',sub:'away from killing '+(enemy?.name||'the boss'),emoji:'💀'}
+    const headlines=[]
+    // Boss HP remaining
+    if(enemyHp>0&&enemyHp<=Math.max(100,stats.highestStrike*0.5)){
+      headlines.push({text:enemyHp.toLocaleString()+' HP',sub:'from killing '+(enemy?.name||'the boss')+'!',emoji:'💀',priority:1})
+    } else if(enemyHp>0&&enemyHp<=500){
+      headlines.push({text:enemyHp.toLocaleString()+' HP',sub:'left on '+(enemy?.name||'the boss'),emoji:'💀',priority:2})
     }
+    // One fight from clearing circle
     const fightInCircle=stats.fightsSurvived%3
-    if(!headline&&fightInCircle===2){
-      headline={text:'1 FIGHT',sub:'from clearing Circle '+circleReached,emoji:'🔥'}
+    if(fightInCircle===2){headlines.push({text:'1 FIGHT',sub:'from clearing Circle '+circleReached,emoji:'🔥',priority:2})}
+    // Close to personal best
+    if(shortBy>0&&shortBy<=2000){headlines.push({text:shortBy.toLocaleString()+' PTS',sub:'from your personal best!',emoji:'⚡',priority:shortBy<=500?1:3})}
+    // Members who barely survived
+    if(stage){
+      const barelyAlive=stage.filter(m=>m&&!m.tooStoned&&m.hp<=2&&m.hp>0)
+      if(barelyAlive.length>0)headlines.push({text:barelyAlive[0].name,sub:'survived with just '+barelyAlive[0].hp+' HP!',emoji:'😰',priority:3})
     }
-    if(!headline&&shortBy>0&&shortBy<=1000){
-      headline={text:shortBy.toLocaleString()+' PTS',sub:'from your personal best',emoji:'⚡'}
-    }
-    if(!headline&&enemyHp>0&&enemyHp<=500){
-      headline={text:enemyHp+' HP',sub:'left on '+(enemy?.name||'the boss'),emoji:'💀'}
-    }
-    if(!headline)return null
-    const pulseKf='@keyframes nmPulse{0%,100%{transform:scale(1);opacity:0.9}50%{transform:scale(1.03);opacity:1}}'
-    return(<div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:2,margin:'12px 0 4px',animation:'nmPulse 2s ease-in-out infinite'}}>
-      <style>{pulseKf}</style>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:6,color:'#884433',textTransform:'uppercase'}}>YOU WERE</div>
-      <div style={{display:'flex',alignItems:'baseline',gap:12}}>
-        <span style={{fontSize:32}}>{headline.emoji}</span>
-        <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:headlineColor,textShadow:'0 0 30px rgba(255,50,20,0.6),0 0 60px rgba(200,30,0,0.3),2px 2px 0 #000',letterSpacing:3}}>{headline.text}</span>
+    // Sort by priority — show the MOST compelling one as the big headline, rest smaller
+    headlines.sort((a,b)=>a.priority-b.priority)
+    if(headlines.length===0)return null
+    const main=headlines[0]
+    const others=headlines.slice(1,3)
+    const pulseKf='@keyframes nmPulse{0%,100%{transform:scale(1);opacity:0.9}50%{transform:scale(1.04);opacity:1}}'
+    const glowKf='@keyframes nmGlow{0%,100%{text-shadow:0 0 30px rgba(255,50,20,0.6),0 0 60px rgba(200,30,0,0.3),2px 2px 0 #000}50%{text-shadow:0 0 50px rgba(255,80,20,0.9),0 0 100px rgba(200,40,0,0.5),2px 2px 0 #000}}'
+    return(<div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,margin:'16px 0 8px',padding:'20px 40px',background:'rgba(60,0,0,0.25)',border:'1px solid rgba(200,50,20,0.3)',borderRadius:12,maxWidth:600,width:'100%'}}>
+      <style>{pulseKf+glowKf}</style>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:8,color:'#993322',textTransform:'uppercase',fontWeight:900}}>SO CLOSE</div>
+      <div style={{display:'flex',alignItems:'baseline',gap:14,animation:'nmPulse 2.5s ease-in-out infinite'}}>
+        <span style={{fontSize:40}}>{main.emoji}</span>
+        <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:'#ff3311',letterSpacing:3,animation:'nmGlow 2s ease-in-out infinite'}}>{main.text}</span>
       </div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'#cc8866',fontStyle:'italic',textShadow:'0 0 15px rgba(200,100,60,0.4)'}}>{headline.sub}</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:24,color:'#dd8866',fontStyle:'italic',textShadow:'0 0 15px rgba(200,100,60,0.4)'}}>{main.sub}</div>
+      {others.length>0&&<div style={{display:'flex',gap:20,marginTop:8}}>
+        {others.map((o,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:6,padding:'4px 12px',background:'rgba(0,0,0,0.3)',borderRadius:6}}>
+          <span style={{fontSize:18}}>{o.emoji}</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#cc8866'}}>
+            <span style={{fontWeight:900,color:'#ee6644'}}>{o.text}</span> {o.sub}
+          </span>
+        </div>)}
+      </div>}
     </div>)
   }
 
   // ── RUN HIGHLIGHTS — best moments from this run ───────────
   const RunHighlights=()=>{
     const highlights=[]
-    // Always show: highest strike
-    if(stats.highestStrike>0){
-      highlights.push({emoji:'⚔',label:'Biggest Strike',value:stats.highestStrike.toLocaleString(),color:'#ff4422'})
+    const alive=stage?stage.filter(m=>m&&!m.tooStoned):[]
+    const dead=stage?stage.filter(m=>m&&m.tooStoned):[]
+
+    // MVP — member with most permanent ATK bonus (most buffed by cards)
+    if(stage){
+      const allMembers=stage.filter(Boolean)
+      const mvp=allMembers.reduce((best,m)=>(m.permAtkBonus||0)>(best.permAtkBonus||0)?m:best,allMembers[0])
+      if(mvp&&(mvp.permAtkBonus||0)>0){
+        highlights.push({emoji:mvp.emoji,label:'MVP — '+mvp.name,value:'+'+mvp.permAtkBonus+' ATK earned',color:'#ffd700',big:true})
+      }
     }
-    // Total damage
-    if(stats.totalDamage>0){
-      highlights.push({emoji:'💥',label:'Total Damage',value:stats.totalDamage.toLocaleString(),color:'#ff8844'})
+    // Biggest strike — the money stat
+    if(stats.highestStrike>=100){
+      highlights.push({emoji:'⚔',label:'Biggest Strike',value:stats.highestStrike.toLocaleString(),color:'#ff4422',big:true})
     }
-    // Cards played
-    if(stats.cardsPlayed>0){
-      highlights.push({emoji:'🃏',label:'Cards Played',value:stats.cardsPlayed.toString(),color:'#c8a040'})
+    // Fallen heroes
+    if(dead.length>0){
+      const names=dead.map(m=>m.name).join(', ')
+      highlights.push({emoji:'💀',label:'Fallen',value:dead.length===1?dead[0].name:dead.length+' members lost',color:'#aa3333'})
     }
-    // Max corruption reached
-    if(stats.maxCorruption>0){
-      highlights.push({emoji:'🌀',label:'Peak Corruption',value:stats.maxCorruption+'%',color:stats.maxCorruption>=69?'#cc44ff':'#aa6688'})
+    // Survivor with lowest HP
+    if(alive.length>0){
+      const lowestHp=alive.reduce((a,b)=>a.hp<b.hp?a:b)
+      if(lowestHp.hp<=3&&!isVictory){
+        highlights.push({emoji:'😰',label:lowestHp.name+' barely survived',value:lowestHp.hp+'/'+lowestHp.maxHp+' HP',color:'#ff8844'})
+      }
     }
-    // Fights survived
-    highlights.push({emoji:'⛧',label:isVictory?'Fights Won':'Fights Survived',value:stats.fightsSurvived+'/27',color:isVictory?'#ffd700':'#c8a060'})
-    // Stash earned
-    if(stats.stashEarned>0){
-      highlights.push({emoji:'🌿',label:'Stash Earned',value:stats.stashEarned.toString(),color:'#44cc44'})
+    // Corruption journey
+    if(stats.maxCorruption>=69){
+      highlights.push({emoji:'🌀',label:'Peak Corruption',value:stats.maxCorruption+'%',color:'#cc44ff'})
     }
+    // Pacts collected
+    if((chosenPacts||[]).length>0){
+      highlights.push({emoji:'📜',label:'Pacts Signed',value:chosenPacts.length.toString(),color:'#c8a040'})
+    }
+    // Economy
+    if(stats.stashEarned>=100){
+      highlights.push({emoji:'🌿',label:'Stash Earned',value:stats.stashEarned.toLocaleString(),color:'#44cc44'})
+    }
+    // Efficiency
+    if(stats.strikesThrown>0&&stats.totalDamage>0){
+      const avg=Math.round(stats.totalDamage/stats.strikesThrown)
+      highlights.push({emoji:'📊',label:'Avg Damage/Strike',value:avg.toLocaleString(),color:'#88aacc'})
+    }
+
     if(highlights.length===0)return null
-    return(<div style={{background:'rgba(15,8,2,0.9)',border:'1px solid rgba(120,70,15,0.4)',borderRadius:10,padding:'16px 24px',width:'100%',maxWidth:700,margin:'4px 0'}}>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:5,color:'#886644',textTransform:'uppercase',textAlign:'center',marginBottom:12}}>Run Highlights</div>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
-        {highlights.map((h,i)=>(<div key={i} style={{display:'flex',flexDirection:'column',alignItems:'center',padding:'8px 4px',background:'rgba(0,0,0,0.3)',borderRadius:6,border:'1px solid rgba(80,50,10,0.2)'}}>
-          <span style={{fontSize:22,marginBottom:2}}>{h.emoji}</span>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,fontWeight:900,color:h.color,lineHeight:1,textShadow:'0 0 10px '+h.color+'44'}}>{h.value}</span>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#887755',letterSpacing:2,textTransform:'uppercase',marginTop:2}}>{h.label}</span>
+    // Show top 2 as big cards, rest as small row
+    const topTwo=highlights.filter(h=>h.big).slice(0,2)
+    const rest=highlights.filter(h=>!topTwo.includes(h)).slice(0,4)
+
+    return(<div style={{background:'rgba(15,8,2,0.9)',border:'1px solid rgba(120,70,15,0.4)',borderRadius:10,padding:'18px 28px',width:'100%',maxWidth:700,margin:'6px 0'}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:6,color:'#886644',textTransform:'uppercase',textAlign:'center',marginBottom:14}}>⛧ Run Highlights ⛧</div>
+      {topTwo.length>0&&<div style={{display:'grid',gridTemplateColumns:topTwo.length===1?'1fr':'1fr 1fr',gap:12,marginBottom:rest.length>0?12:0}}>
+        {topTwo.map((h,i)=>(<div key={'t'+i} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 18px',background:'rgba(0,0,0,0.4)',borderRadius:8,border:'1px solid rgba(120,70,15,0.3)'}}>
+          <span style={{fontSize:36,flexShrink:0}}>{h.emoji}</span>
+          <div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:h.color,lineHeight:1,textShadow:'0 0 12px '+h.color+'44'}}>{h.value}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#998866',letterSpacing:2,textTransform:'uppercase',marginTop:3}}>{h.label}</div>
+          </div>
         </div>))}
-      </div>
+      </div>}
+      {rest.length>0&&<div style={{display:'grid',gridTemplateColumns:'repeat('+Math.min(rest.length,4)+',1fr)',gap:8}}>
+        {rest.map((h,i)=>(<div key={'r'+i} style={{display:'flex',flexDirection:'column',alignItems:'center',padding:'8px 6px',background:'rgba(0,0,0,0.25)',borderRadius:6}}>
+          <span style={{fontSize:18,marginBottom:2}}>{h.emoji}</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:h.color,lineHeight:1}}>{h.value}</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#776655',letterSpacing:1,textTransform:'uppercase',marginTop:2,textAlign:'center'}}>{h.label}</span>
+        </div>))}
+      </div>}
     </div>)
   }
 
@@ -2294,12 +2345,12 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:110,color:'#cc1111',textShadow:'-4px 0 rgba(255,0,0,0.9),4px 0 rgba(0,255,80,0.7),0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000'}}>Stoned to the Bone</div>
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:60,color:'#44ff44',fontStyle:'italic',textAlign:'center',textShadow:'0 0 20px rgba(60,255,60,0.9),0 0 50px rgba(30,200,30,0.6),0 0 100px rgba(0,150,0,0.4)'}}>The band ran out of herb.</div>
                 {/* Score */}
+        <NearMiss/>
         <div style={{textAlign:'center',margin:'4px 0'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
           {stakeInfo.id!=='bronze'&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:stakeInfo.color,letterSpacing:2,marginTop:4,padding:'3px 14px',border:'1px solid '+stakeInfo.color,borderRadius:4,background:'rgba(0,0,0,0.4)'}}>{stakeInfo.name.toUpperCase()} ×{stakeInfo.scoreMult}</div>}
           <BestGap/>
-          <NearMiss/>
         </div>
         <UnlockBar/>
         <Discoveries/>
@@ -2336,12 +2387,12 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         {/* Sassy tagline */}
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:28,color:'#cc6666',fontStyle:'italic',textAlign:'center',textShadow:'0 0 20px rgba(180,0,0,0.5)',maxWidth:700,marginTop:4}}>"{enemy?.tagline||'The Vestibule claims another soul.'}"</div>
                 {/* Score */}
+        <NearMiss/>
         <div style={{textAlign:'center',margin:'4px 0'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
           {stakeInfo.id!=='bronze'&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:stakeInfo.color,letterSpacing:2,marginTop:4,padding:'3px 14px',border:'1px solid '+stakeInfo.color,borderRadius:4,background:'rgba(0,0,0,0.4)'}}>{stakeInfo.name.toUpperCase()} ×{stakeInfo.scoreMult}</div>}
           <BestGap/>
-          <NearMiss/>
         </div>
         <UnlockBar/>
         <Discoveries/>
@@ -2368,12 +2419,12 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:90,color:'#d8c9a8',textShadow:'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000'}}>⛧ Victory ⛧</div>
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#a09060',fontStyle:'italic',textAlign:'center'}}>All 9 circles conquered. Lucifer has fallen.</div>
                 {/* Score */}
+        <NearMiss/>
         <div style={{textAlign:'center',margin:'4px 0'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
           {stakeInfo.id!=='bronze'&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:stakeInfo.color,letterSpacing:2,marginTop:4,padding:'3px 14px',border:'1px solid '+stakeInfo.color,borderRadius:4,background:'rgba(0,0,0,0.4)'}}>{stakeInfo.name.toUpperCase()} ×{stakeInfo.scoreMult}</div>}
           <BestGap/>
-          <NearMiss/>
         </div>
         <UnlockBar/>
         <Discoveries/>
@@ -5277,7 +5328,7 @@ function App(){
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
-  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative'}}><EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
+  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative'}}><EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
 
   return(
     <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
