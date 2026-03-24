@@ -166,6 +166,98 @@ This is happening.
       (every 2 strikes: play contract = +50% score but lose strongest member)
 - [ ] Share-ready victory screenshot layout
 
+
+
+---
+
+## 🎵 MUSIC & SOUND EFFECTS MASTER LIST
+
+### Music Tracks (replace all placeholders)
+Current files in public/music/:
+- menu.mp3 — Main menu, unlocks gallery, rules, options
+- select.mp3 — Opening Night band selection, The Descent map
+- battle.mp3 — All combat (C1-C9 fights)
+- shop.mp3 — Shop, recruit, Pawn Shop, The Pact screen
+- death.mp3 — Death/end screen (losses)
+
+Needed NEW tracks:
+- [ ] victory.mp3 — Victory cinematic ("THE DEVIL IS DEAD" sequence)
+- [ ] lucifer.mp3 — Lucifer fight only (replace battle.mp3 for fight 25-26)
+- [ ] boss.mp3 — Circle boss fights (every 3rd fight, replace battle.mp3)
+- [ ] descent.mp3 — The Descent map screen (currently uses select.mp3)
+- [ ] pact.mp3 — The Pact reward screen (currently uses shop.mp3)
+- [ ] welcome.mp3 — Welcome to Hell bonus fight (A&R Executive)
+
+Track assignments (update TRACK_MAP):
+  menu screen → menu.mp3
+  unlocks/rules/options → menu.mp3
+  Opening Night → select.mp3
+  The Descent → descent.mp3 (or select.mp3)
+  Regular fights (C1-C8) → battle.mp3
+  Circle boss fights → boss.mp3
+  C9 fights → battle.mp3 (tense variant?)
+  Lucifer fight → lucifer.mp3
+  The Pact → pact.mp3 (or shop.mp3)
+  Shop/Recruit → shop.mp3
+  Victory cinematic → victory.mp3
+  Welcome to Hell → welcome.mp3
+  Death screen (loss) → death.mp3
+  Death screen (victory) → victory.mp3 (continue from cinematic)
+
+### Sound Effects (all need creation)
+Card plays:
+- [ ] sfx_card_play.mp3 — generic card drop/play (short click/thud)
+- [ ] sfx_riff_play.mp3 — RIFF card play (guitar stab)
+- [ ] sfx_corrupt_play.mp3 — CORRUPT card play (dark whoosh)
+- [ ] sfx_utility_play.mp3 — UTILITY card play (gentle chime)
+- [ ] sfx_ember_play.mp3 — EMBER card play (fire crackle)
+
+Combat:
+- [ ] sfx_strike.mp3 — Strike button press (heavy drum hit)
+- [ ] sfx_hit.mp3 — Damage dealt to boss (impact/crunch)
+- [ ] sfx_big_hit.mp3 — Large damage (500+) (explosive impact)
+- [ ] sfx_boss_attack.mp3 — Boss hits your band (dark thud)
+- [ ] sfx_member_down.mp3 — Member goes Too Stoned (sad guitar slide)
+- [ ] sfx_combo.mp3 — Riff Chain triggers (power chord + reverb)
+
+UI:
+- [ ] sfx_draw.mp3 — Draw card (paper shuffle)
+- [ ] sfx_discard.mp3 — Discard card (toss sound)
+- [ ] sfx_ember_gain.mp3 — Gain embers (fire whoosh)
+- [ ] sfx_select.mp3 — Card/member selection (click)
+- [ ] sfx_hover.mp3 — Hover over interactable (subtle tick) — OPTIONAL
+- [ ] sfx_button.mp3 — Button press (UI click)
+
+Shop:
+- [ ] sfx_buy.mp3 — Purchase item (cash register/coin)
+- [ ] sfx_sell.mp3 — Sell at Pawn Shop (coin drop)
+- [ ] sfx_burn.mp3 — Burn card (fire woosh + paper burn)
+- [ ] sfx_pack_open.mp3 — Open booster pack (rip/reveal)
+- [ ] sfx_reroll.mp3 — Reroll shop (dice/shuffle)
+
+Special:
+- [ ] sfx_pact.mp3 — Choose a Pact reward (deep gong/bell)
+- [ ] sfx_level_up.mp3 — Max embers +1 after boss (power up)
+- [ ] sfx_victory.mp3 — Fight victory (short fanfare)
+- [ ] sfx_defeat.mp3 — Run over (low drone/sad chord)
+- [ ] sfx_descent.mp3 — Descend button press (gate opening)
+- [ ] sfx_shrooms.mp3 — Use mushrooms (psychedelic warble)
+- [ ] sfx_acid.mp3 — Use acid (electric zap + echo)
+- [ ] sfx_hellquake.mp3 — Black Sabbath Sigil Hellquake (earthquake rumble)
+- [ ] sfx_lucifer_intro.mp3 — Lucifer phase transition (demonic roar)
+- [ ] sfx_devil_dead.mp3 — "THE DEVIL IS DEAD" cinematic moment (massive chord)
+
+### Music Style Notes
+- All tracks should be doom metal / dark ambient / industrial
+- Menu: atmospheric, slow, foreboding
+- Battle: driving, heavy, rhythmic (120-140 BPM)
+- Boss: more intense version of battle, faster
+- Lucifer: unique, most epic track, builds tension
+- Victory: triumphant but still dark (doom metal victory lap)
+- Shop: relaxed, eerie, like being backstage
+- Death: melancholic, reflective, slow
+- Welcome to Hell: corporate horror, synth + metal fusion
+
 ### Balance Tweaks (after Big 5)
 - [ ] Demonic: +100% HP → +80% HP (target ~0.5% win rate)
 - [ ] Blood: starting corruption 15% → 10% (target ~1.5%)
