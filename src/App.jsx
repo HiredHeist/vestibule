@@ -1904,7 +1904,7 @@ function DamageBreakdown({data,onDone}){
       </div>}
     </div>
     {slamming&&<div style={{marginTop:8,textAlign:'center',animation:'dmgSlam 0.5s ease-out forwards'}}>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,fontWeight:900,color:'#ff2200',textShadow:'0 0 30px rgba(255,34,0,0.8),0 0 60px rgba(255,100,0,0.4),0 4px 0 #440000',letterSpacing:3,animation:'dmgPulse 1s ease-in-out infinite'}}>{total.toLocaleString()}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:56,fontWeight:900,color:'#ff2200',textShadow:'0 0 30px rgba(255,34,0,0.8),0 0 60px rgba(255,100,0,0.4),0 4px 0 #440000',letterSpacing:3,animation:'dmgPulse 1s ease-in-out infinite'}}>{total.toLocaleString()}</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#ff6644',letterSpacing:4,textTransform:'uppercase',marginTop:2}}>DAMAGE</div>
     </div>}
   </div>)
@@ -2155,7 +2155,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:8,color:'#993322',textTransform:'uppercase',fontWeight:900}}>SO CLOSE</div>
       <div style={{display:'flex',alignItems:'baseline',gap:14,animation:'nmPulse 2.5s ease-in-out infinite'}}>
         <span style={{fontSize:40}}>{main.emoji}</span>
-        <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:'#ff3311',letterSpacing:3,animation:'nmGlow 2s ease-in-out infinite'}}>{main.text}</span>
+        <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:64,fontWeight:900,color:'#ff3311',letterSpacing:3,animation:'nmGlow 2s ease-in-out infinite'}}>{main.text}</span>
       </div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:24,color:'#dd8866',fontStyle:'italic',textShadow:'0 0 15px rgba(200,100,60,0.4)'}}>{main.sub}</div>
       {others.length>0&&<div style={{display:'flex',gap:20,marginTop:8}}>
@@ -5373,7 +5373,7 @@ function App(){
       {(deckViewOpen||discardViewOpen)&&<div style={{position:'absolute',inset:0,zIndex:9600,background:'rgba(2,1,4,0.95)',display:'flex',flexDirection:'column',alignItems:'center',padding:'30px 40px',overflowY:'auto'}} onClick={()=>{setDeckViewOpen(false);setDiscardViewOpen(false)}}>
         <div onClick={e=>e.stopPropagation()} style={{maxWidth:1200,width:'100%'}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-            <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:deckViewOpen?'#c8a040':'#cc4444',textShadow:'0 0 20px '+(deckViewOpen?'rgba(200,160,40,0.4)':'rgba(200,40,40,0.4)')}}>{deckViewOpen?'⛧ Deck — '+deck.length+' Cards':'⛧ Discard Pile — '+discardPile.length+' Cards'}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:36,fontWeight:900,color:deckViewOpen?'#c8a040':'#cc4444',textShadow:'0 0 20px '+(deckViewOpen?'rgba(200,160,40,0.4)':'rgba(200,40,40,0.4)')}}>{deckViewOpen?'⛧ Deck — '+deck.length+' Cards':'⛧ Discard Pile — '+discardPile.length+' Cards'}</div>
             <div onClick={()=>{setDeckViewOpen(false);setDiscardViewOpen(false)}} style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#cc4444',cursor:'pointer',padding:'6px 16px',border:'1px solid #aa2222',borderRadius:4}}>✕ Close</div>
           </div>
           <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
