@@ -273,9 +273,20 @@ function getUnlockedStakes(){
   for(let i=1;i<STAKES.length;i++){if(beaten.includes(STAKES[i-1].id))unlocked.push(STAKES[i])}
   return unlocked
 }
+const STAKE_UNLOCKS={
+  bronze:{id:'su_bronze',name:'Devil\'s Advocate',type:'card',emoji:'😈',desc:'New card: All members +1 ATK per circle cleared this run.',color:'#cd7f32'},
+  silver:{id:'su_silver',name:'Lucifer\'s Crown',type:'artifact',emoji:'👑',desc:'New artifact: +2 ATK all members at fight start.',color:'#c0c0c0'},
+  gold:{id:'su_gold',name:'Fallen Angel',type:'member',emoji:'🕊',desc:'New member: 12 ATK, 4 HP. GLASS keyword — dies in one hit.',color:'#ffd700'},
+  obsidian:{id:'su_obsidian',name:'Soul of the Damned',type:'passive',emoji:'💀',desc:'New pedal: Start each fight at 50% corruption. Corruption cards cost 1 less.',color:'#2a2a3a'},
+  blood:{id:'su_blood',name:'Bloodstained',type:'cosmetic',emoji:'🩸',desc:'Cosmetic: Bloodstained card back. Marks you as elite.',color:'#8b0000'},
+  demonic:{id:'su_demonic',name:'⛧ GOD KILLER ⛧',type:'title',emoji:'⛧',desc:'Permanent title on main menu. You are a god.',color:'#ff0044'},
+}
+function getStakeUnlocks(){return JSON.parse(localStorage.getItem('vst_stake_unlocks')||'[]')}
 function beatStake(stakeId){
   const beaten=JSON.parse(localStorage.getItem('vst_stakes_beaten')||'[]')
   if(!beaten.includes(stakeId)){beaten.push(stakeId);localStorage.setItem('vst_stakes_beaten',JSON.stringify(beaten))}
+  const unlocks=getStakeUnlocks()
+  if(STAKE_UNLOCKS[stakeId]&&!unlocks.includes(stakeId)){unlocks.push(stakeId);localStorage.setItem('vst_stake_unlocks',JSON.stringify(unlocks))}
 }
 
 // ── RIFF CHAINS: 2-card combos that trigger bonus damage + visual feedback ──
@@ -1857,7 +1868,8 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
 
   // ── SHARE BUTTON ───────────────────────────────────────────
   const stakeInfo=(()=>{const sid=localStorage.getItem('vst_active_stake')||'bronze';const sk=STAKES.find(s=>s.id===sid);return sk||STAKES[0]})()
-  const shareText='⛧ VESTIBULE — RUN #'+(totalRuns||1)+' ⛧\nSCORE: '+finalScore.toLocaleString()+' — '+grade.label+(stakeInfo.id!=='bronze'?' ['+stakeInfo.name+' ×'+stakeInfo.scoreMult+']':'')+'\n'+(isVictory?'DEFEATED LUCIFER!':'Fell to '+(enemy?.name||'The Vestibule')+' at Circle '+circleReached)+'\nSEED: '+seed.toString(16).toUpperCase()+'\nCan you beat this?'
+  const bandStr=stage?stage.filter(m=>m&&!m.tooStoned).map(m=>m.name).join(', '):''
+  const shareText='⛧ VESTIBULE — RUN #'+(totalRuns||1)+' ⛧\nSCORE: '+finalScore.toLocaleString()+' — '+grade.label+(stakeInfo.id!=='bronze'?' ['+stakeInfo.name+' ×'+stakeInfo.scoreMult+']':'')+'\n'+(isVictory?'⛧ DEFEATED LUCIFER! ⛧':'Fell to '+(enemy?.name||'The Vestibule')+' at Circle '+circleReached)+(isVictory&&bandStr?'\nBand: '+bandStr:'')+'\nSEED: '+seed.toString(16).toUpperCase()+'\nCan you beat this? 🤘'
   const handleShare=()=>{if(navigator.clipboard){navigator.clipboard.writeText(shareText);setCopied(true);setTimeout(()=>setCopied(false),2000)}}
 
   // Shared stats grid
@@ -4074,6 +4086,7 @@ function App(){
       {id:'artifacts',name:'Artifacts',emoji:'⚙',color:'#c87820'},
       {id:'pedals',name:'Pedals',emoji:'🎛',color:'#9933cc'},
       {id:'combos',name:'Riff Chains',emoji:'⛧',color:'#ffdd00'},
+      {id:'victories',name:'Victories',emoji:'🏆',color:'#ffd700'},
     ]
     const PAGE=8
     let items=[]
@@ -4083,6 +4096,7 @@ function App(){
     else if(unlockTab==='artifacts')items=[...STARTER_ARTIFACTS.map(a=>{const done=!a.locked||(a.unlockAt&&lt>=a.unlockAt);return{id:a.id,emoji:done?a.emoji:'🔒',name:done?a.name:'???',sub:done?(a.effect||'').substring(0,50):'LOCKED',done}}),...Array(9).fill(null).map((_,i)=>({id:'fa'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
     else if(unlockTab==='pedals')items=[...STARTER_PASSIVES.map(p=>({id:p.id,emoji:p.emoji,name:p.name,sub:(p.effect||'').substring(0,50),done:true})),...Array(10).fill(null).map((_,i)=>({id:'fp'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
     else if(unlockTab==='combos')items=RIFF_CHAINS.map(ch=>{const found=discoveredCombos.includes(ch.id);const c1=ALL_CARDS.find(c=>c.id===ch.cards[0]);const c2=ALL_CARDS.find(c=>c.id===ch.cards[1]);return{id:ch.id,emoji:found?ch.emoji:'🔒',name:found?ch.name:'??? HIDDEN COMBO',sub:found?(c1?c1.name:'?')+' + '+(c2?c2.name:'?'):'Play two synergy cards in the same strike to discover',done:found,color:found?ch.color:'#444'}})
+    else if(unlockTab==='victories'){const stakeUnlocks=getStakeUnlocks();items=['bronze','silver','gold','obsidian','blood','demonic'].map(sid=>{const su=STAKE_UNLOCKS[sid];const done=stakeUnlocks.includes(sid);return{id:su.id,emoji:done?su.emoji:'🔒',name:done?su.name:'???',sub:done?su.desc:'Beat '+sid.charAt(0).toUpperCase()+sid.slice(1)+' stake to unlock',done,color:done?su.color:'#444'}})}
     const totalPages=Math.ceil(items.length/PAGE)
     const pageItems=items.slice(unlockPage*PAGE,(unlockPage+1)*PAGE)
     return(
@@ -4236,6 +4250,7 @@ function App(){
               textShadow:'0 0 30px rgba(220,0,0,0.7)',
               boxShadow:'0 0 50px rgba(180,0,0,0.3)',
               animation:'throb 2s ease-in-out infinite',transition:'all 0.2s',marginBottom:16}}>
+            {getStakeUnlocks().includes('demonic')&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#ff0044',textShadow:'0 0 20px rgba(255,0,68,0.6),0 0 40px rgba(255,0,68,0.3)',letterSpacing:6,marginBottom:8,animation:'throb 3s ease-in-out infinite'}}>⛧ GOD KILLER ⛧</div>}
             ⛧ Enter the Vestibule ⛧
           </button>
 
@@ -4318,7 +4333,13 @@ function App(){
       {/* Phase 4: Stake unlocked + click to continue */}
       {victoryCinematic.phase>=4&&<div style={{animation:'fadeIn 1s ease',textAlign:'center',marginTop:24}}>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#e8a820',letterSpacing:4,textShadow:'0 0 20px rgba(200,140,0,0.6)'}}>⛧ {victoryCinematic.stakeName.toUpperCase()} CONQUERED ⛧</div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#c8a040',marginTop:8,fontStyle:'italic',cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setGameState('end')}}>Click anywhere to continue</div>
+        {STAKE_UNLOCKS[victoryCinematic.stakeId]&&<div style={{marginTop:16,animation:'fadeIn 0.8s ease 0.3s both'}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#aa8040',letterSpacing:2}}>REWARD UNLOCKED</div>
+          <div style={{fontSize:56,marginTop:8,filter:'drop-shadow(0 0 20px '+STAKE_UNLOCKS[victoryCinematic.stakeId].color+')'}}>{STAKE_UNLOCKS[victoryCinematic.stakeId].emoji}</div>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:32,color:STAKE_UNLOCKS[victoryCinematic.stakeId].color,marginTop:4,textShadow:'0 0 20px '+STAKE_UNLOCKS[victoryCinematic.stakeId].color+'66'}}>{STAKE_UNLOCKS[victoryCinematic.stakeId].name}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#c8a060',marginTop:6,fontStyle:'italic'}}>{STAKE_UNLOCKS[victoryCinematic.stakeId].desc}</div>
+        </div>}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#c8a040',marginTop:16,fontStyle:'italic',cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setGameState('end')}}>Click anywhere to continue</div>
       </div>}
       {victoryCinematic.phase>=4&&<div style={{position:'absolute',inset:0,cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setGameState('end')}}/>}
     </div>

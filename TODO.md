@@ -154,17 +154,15 @@ This is happening.
       Phase 4 (7s): "STAKE CONQUERED" + click to continue.
       Phase 5 (10s): auto-transition to end screen.
       POLISH LATER: crack SVG is placeholder — needs animated canvas/WebGL crack effect
-- [ ] Score counting animation (Balatro-style number roll-up with sound)
+- [x] Score counting animation — already built (eased roll-up, 1800ms, requestAnimationFrame)
 - [ ] Victory music track (6th mp3)
-- [ ] Win-exclusive unlocks per stake:
-      Bronze → "Devil's Advocate" card, Silver → "Lucifer's Crown" artifact,
-      Gold → "Fallen Angel" member, Obsidian → "Soul of the Damned" passive,
-      Blood → "Bloodstained" card back, Demonic → "⛧ GOD KILLER ⛧" title
+- [x] Win-exclusive unlocks per stake: STAKE_UNLOCKS constant, beatStake records to localStorage,
+      cinematic shows REWARD UNLOCKED, Victories tab in unlock gallery, God Killer title on menu
 - [ ] WELCOME TO HELL bonus fight (replaces "Bonus Circle 10" / "Second Album"):
       Corporate A&R Executive office cutscene (SVG silhouette, typewriter text),
       choice to enter or walk away, 100k HP boss, "contract" mechanic
       (every 2 strikes: play contract = +50% score but lose strongest member)
-- [ ] Share-ready victory screenshot layout
+- [x] Share text enhanced: victory includes band names + ⛧ DEFEATED LUCIFER ⛧ + 🤘
 
 
 
