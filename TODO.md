@@ -269,27 +269,27 @@ Special:
 ## 🔧 MASTER IMPROVEMENT PLAN (Session 14 Final)
 
 ### CRITICAL
-- [ ] **1. Wire multiplier into damage** — x0.03/card rate, combos +0.50. Currently cosmetic.
-- [ ] **2. Persistent buff badges on members** — "+1 ATK", "ENCORE", "SHIELD" stay until Strike.
+- [x] **1. Wire multiplier into damage** — x0.03/card rate, combos +0.15. DONE.
+- [x] **2. Persistent buff badges on members** — "+1 ATK", "ENCORE", "SHIELD" stay until Strike. DONE.
 - [x] ~~3. Discard tutorial~~ — SKIPPED (rules section covers it)
 
 ### HIGH PRIORITY
-- [ ] **4. Shrink stage 17%, expand card area 25%** — cards 20% larger, ember cost 32→40px
-- [ ] **5. Boss passive red strip + HP bar 30% bigger** — glowing red text, impossible to miss
-- [ ] **6. Artifact/passive hover tooltips in combat** — emoji + name + effect on hover
+- [x] **4. Shrink stage 17%, expand card area 25%** — cards 20% larger, ember cost 32→40px. DONE.
+- [x] **5. Boss passive red strip + HP bar 30% bigger** — 35pt dark blood red, centered text. DONE.
+- [x] **6. Artifact/passive hover tooltips in combat** — emoji + name + effect on hover. DONE.
 - [x] ~~7. Ember cost scaling~~ — SOLVED BY #4
 
 ### MEDIUM PRIORITY
 - [x] ~~8. Strike tension on last strike~~ — SKIPPED (not priority)
 - [ ] **9. Opening Night redesign** — LATER (needs design work: 4-5 candidates, synergy hints)
-- [ ] **10. Shop section borders + labels** — gold borders, section headers
+- [x] **10. Shop section borders + labels** — gold borders, section headers. DONE.
 - [x] ~~11. Undo on card play~~ — SKIPPED (mistakes are part of roguelites)
 - [ ] **12. End screen stats bigger** — LATER (individual stat boxes, screenshot-worthy)
 
 ### LOW PRIORITY
-- [ ] **13. Circle transition splash** — 3-second "Entering Circle V — Anger" placeholder
+- [x] **13. Circle transition splash** — 3-second "Entering Circle V — Anger" placeholder. DONE.
 - [x] ~~14. Smarter card sort~~ — SKIPPED (players figure it out)
-- [ ] **15. Deck hover distribution tooltip** — RIFF/CORRUPT/UTILITY/EMBER counts on hover
+- [x] **15. Deck hover distribution tooltip** — RIFF/CORRUPT/UTILITY/EMBER counts on hover. DONE.
 
 ## 🎯 TOP 10 ADDICTION IDEAS (Priority Ranked)
 

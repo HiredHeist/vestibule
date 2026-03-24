@@ -2546,9 +2546,17 @@ function App(){
   // ── MUSIC SYSTEM ─────────────────────────────────────────────
   const audioRef=useRef({})
   const currentTrackRef=useRef(null)
-  const TRACK_MAP={menu:'menu',booster:'select',playing:'battle',shop:'shop',recruit:'shop',end:'death'}
+  const TRACK_MAP={menu:'menu',booster:'select',playing:'battle',shop:'shop',recruit:'shop',pact:'pact',campfire:'forge',descent:'descent',end:'death'}
   useEffect(()=>{
-    const trackName=TRACK_MAP[gameState]||'menu'
+    // Determine track — special cases for boss/lucifer/victory
+    let trackName=TRACK_MAP[gameState]||'menu'
+    if(gameState==='playing'){
+      if(fightIndex===26)trackName='lucifer'
+      else if((fightIndex+1)%3===0)trackName='boss'
+      else trackName='battle'
+    }
+    if(gameState==='end')trackName=(fightIndex>=26&&enemyHp<=0)?'victory':'death'
+    if(gameState==='circleSplash')return // no music during splash
     if(trackName===currentTrackRef.current)return
     const vol=parseFloat(localStorage.getItem('vst_music_vol')||'0.3')
     // Fade out current
@@ -2571,7 +2579,7 @@ function App(){
     const targetVol=vol
     const fadeIn=setInterval(()=>{if(next.volume<targetVol-0.02){next.volume=Math.min(targetVol,next.volume+0.05)}else{next.volume=targetVol;clearInterval(fadeIn)}},50)
     currentTrackRef.current=trackName
-  },[gameState])
+  },[gameState,fightIndex,enemyHp])
   // First interaction: retry music (browser autoplay policy blocks before click)
   useEffect(()=>{
     const unlock=()=>{
