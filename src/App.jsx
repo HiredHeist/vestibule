@@ -3131,28 +3131,26 @@ function App(){
     const ok=applyCard(card,slotIdx)
     if(ok){
       const playedId=card.id
-      setHand(function(curHand){
-        const remaining=curHand.filter(c=>c.uid!==dragCardUid)
-        // Resonance: ONLY auto-discard duplicate if player has Resonance Coil artifact (a9)
-        // Without a9, two copies of the same card can both be played independently
-        const hasResonanceCoil=activeArtifacts.some(a=>a.id==='a9')
-        const resonantIdx=hasResonanceCoil?remaining.findIndex(c=>c.id===playedId):-1
-        if(resonantIdx!==-1){
-          const resonant=remaining[resonantIdx]
-          const withoutResonant=remaining.filter((_,i)=>i!==resonantIdx)
-          setDiscardPile(p=>[...p,card,resonant])
-          setEmbers(p=>Math.min(maxEmbers,p+2))
-          setPendingEmbers(p=>p+1)
-          discover('resonance','RESONANCE')
-          setTimeout(()=>{
-            addFloat('RESONANCE +🔥',getCenter(bossRef).x,getCenter(bossRef).y-110,'#e8a820',false)
-            addLog('🎵 Resonance! Duplicate discarded for +2 Embers.')
-          },100)
-          return withoutResonant
-        }
+      const curHand=[...hand]
+      const remaining=curHand.filter(c=>c.uid!==dragCardUid)
+      const hasResonanceCoil=activeArtifacts.some(a=>a.id==='a9')
+      const resonantIdx=hasResonanceCoil?remaining.findIndex(c=>c.id===playedId):-1
+      if(resonantIdx!==-1){
+        const resonant=remaining[resonantIdx]
+        const withoutResonant=remaining.filter((_,i)=>i!==resonantIdx)
+        setHand(withoutResonant)
+        setDiscardPile(p=>[...p,card,resonant])
+        setEmbers(p=>Math.min(maxEmbers,p+2))
+        setPendingEmbers(p=>p+1)
+        discover('resonance','RESONANCE')
+        setTimeout(()=>{
+          addFloat('RESONANCE +🔥',getCenter(bossRef).x,getCenter(bossRef).y-110,'#e8a820',false)
+          addLog('🎵 Resonance! Duplicate discarded for +2 Embers.')
+        },100)
+      } else {
+        setHand(remaining)
         setDiscardPile(p=>[...p,card])
-        return remaining
-      })
+      }
     }
     setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
   },[dragCardUid,hand,animPhase,applyCard])
