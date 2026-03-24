@@ -3486,10 +3486,11 @@ function App(){
 
   // SAFETY NET: catch ANY case where boss HP hits 0 without victory triggering
   useEffect(()=>{
-    if(enemyHp<=0&&gameState==='playing'&&!victoryFiredRef.current){
-      setTimeout(triggerVictory,500)
+    if(enemyHp<=0&&gameState==='playing'&&!victoryFiredRef.current&&enemy&&enemy.maxHp>0){
+      victoryFiredRef.current=true
+      setTimeout(()=>triggerVictory(),500)
     }
-  },[enemyHp,gameState,triggerVictory])
+  },[enemyHp,gameState])
 
 
   // ── DEV SHORTCUT: Shift+S = jump to shop ─────────────────────────
