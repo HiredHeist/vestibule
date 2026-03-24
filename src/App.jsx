@@ -1525,7 +1525,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'visible',minHeight:0}}>
 
           {/* CARDS ROW */}
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:2,marginTop:2}}>🎸 Cards For Sale</div>
+          <div style={{border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>🎸 Cards For Sale</div>
           <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start',paddingTop:4}}>
             {/* THE DEALER — first card */}
             <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',paddingTop:24,position:'relative'}}>
@@ -1584,12 +1585,14 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             </div>
             {shopCards.map((card,i)=><SaleCard key={i} card={card} idx={i}/>)}
           </div>
+          </div>
 
           {/* GAP */}
-          <div style={{flex:1,minHeight:12,maxHeight:60}}/>
+          <div style={{flex:1,minHeight:8,maxHeight:30}}/>
 
           {/* PACKS + PAWN ROW */}
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:2,marginTop:6}}>📦 Booster Packs + Pawn Shop</div>
+          <div style={{border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>📦 Booster Packs + Pawn Shop</div>
           <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start'}}>
             {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
             <div style={{paddingTop:24,flexShrink:0}}>
@@ -1671,6 +1674,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#44cc44',letterSpacing:2,textTransform:'uppercase',fontWeight:900}}>Stash</span>
               </div>
             </div>
+          </div>
           </div>
 
         </div>
@@ -1834,9 +1838,12 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
   )
 }
 
-function DeckPile({count,label,onClick}){
+function DeckPile({count,label,onClick,cards}){
+  const [tipOpen,setTipOpen]=useState(false)
+  const dist=cards?{RIFF:cards.filter(c=>c.type==='RIFF').length,CORRUPT:cards.filter(c=>c.type==='CORRUPT').length,UTILITY:cards.filter(c=>c.type==='UTILITY').length,EMBER:cards.filter(c=>c.type==='EMBER').length}:null
   return(
-    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,cursor:onClick?'pointer':'default'}} onClick={onClick}>
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,cursor:onClick?'pointer':'default',position:'relative'}} onClick={onClick}
+      onMouseEnter={()=>setTipOpen(true)} onMouseLeave={()=>setTipOpen(false)}>
       <div style={{position:'relative',width:90,height:112}}>
         {[2,1,0].map(i=><div key={i} style={{position:'absolute',width:80,height:100,background:i===0?'linear-gradient(135deg,#1e1408,#0a0804)':`rgba(15,10,4,${.7-i*.2})`,border:'1px solid rgba(160,110,35,0.55)',borderRadius:4,top:i*3,left:i*3}}>
           {i===0&&<div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,opacity:.2,color:'#c8a060'}}>⛧</div>}
@@ -1844,6 +1851,18 @@ function DeckPile({count,label,onClick}){
       </div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:26,fontWeight:900,color:'#c8a060'}}>{count}</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,letterSpacing:2,color:'#c8a040',textTransform:'uppercase'}}>{label}</div>
+      {tipOpen&&dist&&count>0&&<div style={{position:'absolute',bottom:'105%',left:'50%',transform:'translateX(-50%)',zIndex:9999,background:'rgba(10,6,2,0.97)',border:'1px solid rgba(160,110,35,0.6)',borderRadius:6,padding:'8px 12px',pointerEvents:'none',minWidth:140,boxShadow:'0 4px 16px rgba(0,0,0,0.8)'}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#c8a040',letterSpacing:2,textAlign:'center',marginBottom:4}}>{label.toUpperCase()}</div>
+        {[['RIFF','#9933cc'],['CORRUPT','#aa1111'],['UTILITY','#22aa44'],['EMBER','#c87820']].map(([t,c])=>
+          <div key={t} style={{display:'flex',justifyContent:'space-between',gap:8,fontFamily:"'MBScribblesFont',serif",fontSize:11,color:c,fontWeight:700}}>
+            <span>{t}</span><span>{dist[t]}</span>
+          </div>
+        )}
+        <div style={{borderTop:'1px solid rgba(160,110,35,0.3)',marginTop:4,paddingTop:3,display:'flex',justifyContent:'space-between',fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a060',fontWeight:900}}>
+          <span>Total</span><span>{count}</span>
+        </div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#886644',textAlign:'center',marginTop:4}}>Click to view cards</div>
+      </div>}
     </div>
   )
 }
