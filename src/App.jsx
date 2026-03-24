@@ -5220,7 +5220,7 @@ function App(){
           </div>
           <EmberDisplayLarge current={embers} max={maxEmbers}/>
           <div style={{display:'flex',gap:14,justifyContent:'center',width:'100%'}}>
-            {[['Fight',(fightIndex%3+1)+'/3','#dd2222'],['Corrupt',corruption+'%',corruption>60?'#ff3300':'#aa5500'],['Stash',stash+(stash>=420?' 🔒':stash>=380?' ⚠':''),(stash>=420?'#ff3300':stash>=380?'#ff9900':'#44cc44')]].map(function(item){return(
+            {[['Fight',(fightIndex%3+1)+'/3','#dd2222'],['Corrupt',corruption>=100?'☠ '+corruption+'%':corruption+'%',corruption>=100?'#ff0000':corruption>60?'#ff3300':'#aa5500'],['Stash',stash+(stash>=420?' 🔒':stash>=380?' ⚠':''),(stash>=420?'#ff3300':stash>=380?'#ff9900':'#44cc44')]].map(function(item){return(
               <div key={item[0]} style={{textAlign:'center'}}>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#9a7a40',letterSpacing:2,textTransform:'uppercase',marginBottom:2}}>{item[0]}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>

@@ -18,6 +18,8 @@ Repo: github.com/HiredHeist/vestibule. PAT: ghp_JXh2TtDDWsTeDLcYL7npk4JsTXt6rN05
 - **cardHeal guard:** All cardHeal setEnemyHp calls use p<=0?p: to prevent boss resurrection
 - **triggerVictoryRef:** ALL setTimeout victory calls go through the ref, never direct
 - **victoryFiredRef:** Only set INSIDE triggerVictory itself
+- **Card leak rule:** ANY card handler in handleDropOnStage that bypasses the normal applyCard→discard flow MUST include the played card in drawUpTo's discard arg. Pattern: drawUpTo(remaining, deckRef.current, [...discRef.current, CARD], count)
+- **drawUpTo MUST use refs:** deckRef.current, discRef.current — NEVER state vars deck/discardPile
 - **No nested setState:** Never put setHand inside setDeck callback (React Strict Mode)
 - **Apostrophes:** Use "could not" not "couldn't" in JS strings
 

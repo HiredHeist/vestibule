@@ -66,11 +66,11 @@
   Sabbath Sigil (consumable) can appear in upgrade list. Wasted upgrade.
   FIX: Filter consumable cards from uniqueUpgradeable.
 
-- [ ] **BUG 14: 9 uncapped setEmbers calls**
+- [x] **BUG 14: setEmbers calls** ✅ Already capped (verified)
   Some ember additions don't respect maxEmbers or MAX_EMBERS_CAP.
   FIX: Audit all setEmbers calls and add Math.min caps.
 
-- [ ] **BUG 8: Corruption 100% is cosmetically misleading**
+- [x] **BUG 8: Corruption 100% visual feedback** ✅ FIXED (☠ prefix + bright red)
   False Prophet pushes to 100% but nothing happens without Sabbath Sigil.
   FIX: Add subtle visual warning or small gameplay effect at 100%.
 

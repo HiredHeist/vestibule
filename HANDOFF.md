@@ -26,6 +26,8 @@ Vite dev server with HMR. Base path: /vestibule/
 10. **Mentor links match by ROLE not by name/id**
 11. **cardHeal passives guard with p<=0?p:** — prevents boss resurrection
 12. **Sabbath Sigil is CONSUMABLE** — destroyed after use, never goes to discard
+14. **drawUpTo MUST use refs** — deckRef.current, discRef.current, NEVER state vars
+15. **Card handlers in handleDropOnStage** — must include played card in drawUpTo discard arg: drawUpTo(remaining, deckRef.current, [...discRef.current, card], count)
 13. **victoryFiredRef** — only set inside triggerVictory itself, never externally
 
 ## Key Code Locations
