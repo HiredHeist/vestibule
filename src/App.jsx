@@ -2586,7 +2586,7 @@ function App(){
       if(!m)return false
       const dmg=m.hp
       const bc=getCenter(bossRef)
-      const sdHp=Math.max(0,enemyHp-dmg);setEnemyHp(sdHp);addFloat(dmg,bc.x,bc.y-60,'#ff6600',true)
+      const sdHp=Math.max(0,enemyHp-dmg);setEnemyHp(sdHp);if(sdHp<=0)setTimeout(triggerVictory,500);addFloat(dmg,bc.x,bc.y-60,'#ff6600',true)
       playHit();setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
       setStageDiveUsed(true);setSelected(p=>p.filter(uid=>!hand.some(c=>c.id==='stagedive'&&c.uid===uid)));updStat('totalDamage',dmg);updStat('highestStrike',dmg,true);if(dmg>=500)playSfx('big_hit')
       if(sdHp<=0)setTimeout(triggerVictory,500)
@@ -2641,8 +2641,8 @@ function App(){
         msg='🎚 Corruption set to 50%.'
       }
     }
-    else if(card.id==='feedbackloop'){let dmg=Math.floor(corruption/2);if(activeGenre==='BLACK_METAL')dmg=Math.round(dmg*1.25);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'+(activeGenre==='BLACK_METAL'?' [Black Metal +25%]':'')}
-    else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?4:0;const circleNum=Math.floor(fightIndex/3)+1;const swDmg=(circleNum<=3?5:circleNum<=6?8:12)+p5Bonus;const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(triggerVictory,500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
+    else if(card.id==='feedbackloop'){let dmg=Math.floor(corruption/2);if(activeGenre==='BLACK_METAL')dmg=Math.round(dmg*1.25);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);if(flHp<=0)setTimeout(triggerVictory,500);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'+(activeGenre==='BLACK_METAL'?' [Black Metal +25%]':'')}
+    else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?4:0;const circleNum=Math.floor(fightIndex/3)+1;const swDmg=(circleNum<=3?5:circleNum<=6?8:12)+p5Bonus;const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);if(swHp<=0)setTimeout(triggerVictory,500);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(triggerVictory,500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
     else if(card.id==='groupie'){
       // Handled entirely in handleDropOnStage to avoid double setHand
       return false
@@ -2666,17 +2666,17 @@ function App(){
       } else if(lr.id==='soundwall'){
         const p5B=activePassives.some(p=>p.id==='p5')?4:0
         const swCircle=Math.floor(fightIndex/3)+1;const swD=(swCircle<=3?5:swCircle<=6?8:12)+p5B
-        const swHp=Math.max(0,enemyHp-swD);setEnemyHp(swHp);updStat('totalDamage',swD)
+        const swHp=Math.max(0,enemyHp-swD);setEnemyHp(swHp);if(swHp<=0)setTimeout(triggerVictory,500);updStat('totalDamage',swD)
         addFloat(swD,getCenter(bossRef).x,getCenter(bossRef).y-60,'#dd2222',true);playHit()
         if(swHp<=0)setTimeout(triggerVictory,500)
       } else if(lr.id==='feedbackloop'){
         const flD=Math.floor(corruption/2)
-        const flHp=Math.max(0,enemyHp-flD);setEnemyHp(flHp);updStat('totalDamage',flD)
+        const flHp=Math.max(0,enemyHp-flD);setEnemyHp(flHp);if(flHp<=0)setTimeout(triggerVictory,500);updStat('totalDamage',flD)
         addFloat(flD,getCenter(bossRef).x,getCenter(bossRef).y-60,'#aa1111',flD>=15);playHit()
         if(flHp<=0)setTimeout(triggerVictory,500)
       } else if(lr.id==='crowdsurf'){
         const csDmg=hand.length*3
-        const csHp=Math.max(0,enemyHp-csDmg);setEnemyHp(csHp);updStat('totalDamage',csDmg)
+        const csHp=Math.max(0,enemyHp-csDmg);setEnemyHp(csHp);if(csHp<=0)setTimeout(triggerVictory,500);updStat('totalDamage',csDmg)
         addFloat(csDmg,getCenter(bossRef).x,getCenter(bossRef).y-60,'#9933cc',csDmg>=10);playHit()
         if(csHp<=0)setTimeout(triggerVictory,500)
       } else if(lr.id==='overdrive'&&corruption>=60){
@@ -2704,7 +2704,7 @@ function App(){
     else if(card.id==='crowdsurf'){
       const dmg=hand.length*3
       const bc=getCenter(bossRef)
-      const csHp=Math.max(0,enemyHp-dmg);setEnemyHp(csHp)
+      const csHp=Math.max(0,enemyHp-dmg);setEnemyHp(csHp);if(csHp<=0)setTimeout(triggerVictory,500)
       addFloat(dmg,bc.x,bc.y-60,'#9933cc',dmg>=10);playHit();updStat('totalDamage',dmg)
       if(csHp<=0)setTimeout(triggerVictory,500)
       msg='🏄 Crowd Surf! '+hand.length+' cards × 3 = '+dmg+' damage!'
@@ -2717,7 +2717,7 @@ function App(){
     else if(card.id==='deathriff'){
       const ddmg=Math.min(60,Math.floor(100-corruption))
       const bc=getCenter(bossRef)
-      const drHp=Math.max(0,enemyHp-ddmg);setEnemyHp(drHp)
+      const drHp=Math.max(0,enemyHp-ddmg);setEnemyHp(drHp);if(drHp<=0)setTimeout(triggerVictory,500)
       const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true)
       addFloat(ddmg,bc.x,bc.y-60,'#880000',ddmg>=30);playHit();updStat('totalDamage',ddmg)
       if(drHp<=0)setTimeout(triggerVictory,500)
@@ -2793,7 +2793,7 @@ function App(){
       const activeAtk=stage.filter(m=>m&&!m.tooStoned).reduce((sum,m)=>sum+m.atk,0)
       const dmg=Math.floor(activeAtk/2)+p5HeavyBonus
       const bc=getCenter(bossRef)
-      const hrHp=Math.max(0,enemyHp-dmg);setEnemyHp(hrHp)
+      const hrHp=Math.max(0,enemyHp-dmg);setEnemyHp(hrHp);if(hrHp<=0)setTimeout(triggerVictory,500)
       addFloat(dmg,bc.x,bc.y-60,'#9933cc',dmg>=10);playHit();updStat('totalDamage',dmg)
       if(hrHp<=0)setTimeout(triggerVictory,500)
       msg='🥊 Heavy Riff! Stage ATK ÷ 2 = '+dmg+' direct damage!'
@@ -2802,7 +2802,7 @@ function App(){
       const herbDmg=stash
       if(herbDmg<=0){addLog('🌿 No Stash to power this!');return false}
       const bc=getCenter(bossRef)
-      const hmHp=Math.max(0,enemyHp-herbDmg);setEnemyHp(hmHp)
+      const hmHp=Math.max(0,enemyHp-herbDmg);setEnemyHp(hmHp);if(hmHp<=0)setTimeout(triggerVictory,500)
       addFloat(herbDmg,bc.x,bc.y-60,'#22aa44',herbDmg>=20);playHit();updStat('totalDamage',herbDmg)
       if(hmHp<=0)setTimeout(triggerVictory,500)
       msg='🌿 Herb Money! '+herbDmg+' damage ('+stash+'🌿 Stash). Stash kept.'
@@ -2812,7 +2812,7 @@ function App(){
       const brokeDmg=stash
       setStash(0)
       const bc=getCenter(bossRef)
-      const gbHp=Math.max(0,enemyHp-brokeDmg);setEnemyHp(gbHp)
+      const gbHp=Math.max(0,enemyHp-brokeDmg);setEnemyHp(gbHp);if(gbHp<=0)setTimeout(triggerVictory,500)
       addFloat(brokeDmg,bc.x,bc.y-60,'#ffcc00',true);playHit();updStat('totalDamage',brokeDmg)
       addFloat('BROKE!',bc.x,bc.y-110,'#ffcc00',true)
       if(gbHp<=0)setTimeout(triggerVictory,500)
@@ -2823,7 +2823,7 @@ function App(){
       const alive=ns.filter(m=>m&&!m.tooStoned).length
       const mpDmg=alive*3
       const bc=getCenter(bossRef)
-      const mpHp=Math.max(0,enemyHp-mpDmg);setEnemyHp(mpHp)
+      const mpHp=Math.max(0,enemyHp-mpDmg);setEnemyHp(mpHp);if(mpHp<=0)setTimeout(triggerVictory,500)
       addFloat(mpDmg,bc.x,bc.y-60,'#cc44ff',mpDmg>=10);playHit();updStat('totalDamage',mpDmg)
       if(mpHp<=0)setTimeout(triggerVictory,500)
       msg='🤘 Mosh Pit! '+alive+' members × 3 = '+mpDmg+' damage!'
@@ -2834,7 +2834,7 @@ function App(){
       if(sacrifice<=0){addLog('🩸 Not enough HP to sacrifice!');return false}
       ns[slotIdx]=Object.assign({},m,{hp:m.hp-sacrifice})
       const bc=getCenter(bossRef)
-      const brDmg=sacrifice*(chosenPacts.includes('blood_price')?9:6);const brHp=Math.max(0,enemyHp-brDmg);setEnemyHp(brHp)
+      const brDmg=sacrifice*(chosenPacts.includes('blood_price')?9:6);const brHp=Math.max(0,enemyHp-brDmg);setEnemyHp(brHp);if(brHp<=0)setTimeout(triggerVictory,500)
       setCorruption(p=>Math.min(100,p+15));updStat('maxCorruption',Math.min(100,corruption+15),true)
       addFloat(brDmg,bc.x,bc.y-60,'#cc0000',true);playHit();updStat('totalDamage',brDmg)
       addFloat('-'+sacrifice+' HP',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4444',false)
@@ -2860,7 +2860,7 @@ function App(){
         // 1-2: OBLITERATION — total band ATK × 4 (positive)
         const totalAtk=ns.filter(m=>m&&!m.tooStoned).reduce((sum,m)=>sum+m.atk,0)
         const hqDmg=totalAtk*4
-        const oblitHp=Math.max(0,enemyHp-hqDmg);setEnemyHp(oblitHp)
+        const oblitHp=Math.max(0,enemyHp-hqDmg);setEnemyHp(oblitHp);if(oblitHp<=0)setTimeout(triggerVictory,500)
         updStat('totalDamage',hqDmg)
         if(oblitHp<=0)setTimeout(triggerVictory,2100)
         hqMsg='⛧ HELLQUAKE: OBLITERATION! '+hqDmg+' damage!';hqFloat='OBLITERATION!';hqColor='#ff2200';hqDesc='Total band ATK × 4 — '+hqDmg+' damage dealt to the boss.'
@@ -2875,7 +2875,7 @@ function App(){
       } else if(roll===5){
         // 5: THE VOID — corruption → damage, reset to 0 (positive)
         const voidDmg=Math.floor(corruption)
-        const voidHp=Math.max(0,enemyHp-voidDmg);setEnemyHp(voidHp)
+        const voidHp=Math.max(0,enemyHp-voidDmg);setEnemyHp(voidHp);if(voidHp<=0)setTimeout(triggerVictory,500)
         updStat('totalDamage',voidDmg)
         setCorruption(0)
         if(voidHp<=0)setTimeout(triggerVictory,2100)
@@ -2886,7 +2886,7 @@ function App(){
         hqMsg='⛧ HELLQUAKE: POSSESSION! All cards free this Strike!';hqFloat='POSSESSED!';hqColor='#aa44ff';hqDesc='All cards cost 0 Embers this Strike and next.'
       } else if(roll===7){
         // 7: BACKLASH — 30 damage BUT one random member falls (mixed)
-        const backlashHp=Math.max(0,enemyHp-30);setEnemyHp(backlashHp)
+        const backlashHp=Math.max(0,enemyHp-30);setEnemyHp(backlashHp);if(backlashHp<=0)setTimeout(triggerVictory,500)
         updStat('totalDamage',30)
         if(backlashHp<=0)setTimeout(triggerVictory,2100)
         const alive=ns.filter(m=>m&&!m.tooStoned)
@@ -2947,7 +2947,7 @@ function App(){
         addFloat('⛧ '+chain.name+' ⛧',getCenter(bossRef).x,getCenter(bossRef).y-140,chain.color,true)
         // Apply combo bonus damage = total stage ATK
         const comboBonus=ns.filter(m=>m&&!m.tooStoned).reduce((s,m)=>s+m.atk,0)
-        setEnemyHp(p=>Math.max(0,p-comboBonus))
+        setEnemyHp(p=>{const nh=Math.max(0,p-comboBonus);if(nh<=0)setTimeout(triggerVictory,500);return nh})
         updStat('totalDamage',comboBonus)
         setTimeout(()=>setComboFlash(null),2700)
         break
