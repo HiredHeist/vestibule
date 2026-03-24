@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// vestibule-sim.js v15.0 — Expert AI Simulator for Vestibule
-// Session 14 final — FULL SYNC: pacts, descent, genre, WTH, doom forge, role links, stake mentor
+// vestibule-sim.js v16.0 — Expert AI Simulator for Vestibule
+// Session 15 — FULL SYNC: ALL mechanics (artifacts, passives, loot, combos, multiplier, hellquake)
 // Usage: node vestibule-sim.js [numGames] [stake]  (default 5000 bronze)
 
 const NUM_GAMES=parseInt(process.argv[2])||5000;
@@ -130,13 +130,81 @@ const UPGRADE_HP={
   controlfeedback:{hp:'all',amt:1},seance:{hp:'all',amt:1},infencore:{hp:'all',amt:1},
   possessedperf:{hp:'all',amt:2},setbreak:{hp:'weakest',amt:1},soundboard:{hp:'random',amt:1}
 }
+
+// ── ARTIFACTS (shop items, max 3 equipped) ──
+const ARTIFACTS=[
+  {id:'a1',name:'Vintage Guitar',cost:8,effect:'leadAtk1'},    // Lead guitarist +1 ATK per fight
+  {id:'a3',name:'Evil Eye',cost:20,effect:'firstCardFree'},     // First card each strike free
+  {id:'a5',name:'Haunted Radio',cost:10,effect:'tapBoost'},     // Tapped Out +6, Power Tap +2
+  {id:'a6',name:'Black Candle',cost:12,effect:'deathDmg8'},     // 8 dmg when member dies
+  {id:'a8',name:'Stone Tablet',cost:15,effect:'allHp3'},        // All members +3 max HP
+  {id:'a9',name:'Resonance Coil',cost:10,effect:'resonanceBoost'}, // Resonance refunds 2 + draw
+  {id:'a10',name:'Burning Stage',cost:14,effect:'perfectBonus'}, // 1-strike win = +5 embers next
+]
+const PASSIVES=[
+  {id:'p1',name:'Power Chord',cost:6,effect:'extraEmber'},      // +1 ember per fight
+  {id:'p2',name:'Roadie Crew',cost:6,effect:'healRandom3'},     // Random member +3 HP per fight
+  {id:'p3',name:'Merch Table',cost:8,effect:'stashBonus2'},     // +2 stash per victory
+  {id:'p4',name:'Feedback Hum',cost:8,effect:'emberCards'},     // EMBER cards +1 ember
+  {id:'p5',name:'Amp Stack',cost:10,effect:'soundwallBoost'},   // Sound Wall +4, Heavy Riff +2
+  {id:'p6',name:'Cult Following',cost:6,effect:'deathStash3'},  // +3 stash per member death
+  {id:'p7',name:'Guitar Tech',cost:10,effect:'battlecryBoost'}, // Battle Cry +2 instead of +1
+  {id:'p8',name:'Green Room',cost:14,effect:'stonewall'},       // All members start with Stonewall
+  {id:'p9',name:'Heavy Rotation',cost:8,effect:'dupDraw'},      // Duplicate draw = +1 card
+  {id:'p10',name:'Stage Fright',cost:8,effect:'firstStrike10'}, // First strike +10 bonus dmg
+]
+
+// ── BOSS LOOT (one drop per circle boss) ──
+const BOSS_LOOT_SIM=[
+  null,null,{effect:'atk1all'},  // C1: +1 ATK all
+  null,null,{effect:'freeFirst'}, // C2: first card free per fight
+  null,null,{effect:'hp3all'},    // C3: +3 HP all
+  null,null,{effect:'stashBoss'}, // C4: +5 stash per boss
+  null,null,{effect:'atk2strong'},// C5: +2 ATK strongest
+  null,null,{effect:'corrDmg'},   // C6: +25% corruption dmg
+  null,null,{effect:'atk3strong'},// C7: +3 ATK strongest
+  null,null,{effect:'hp4all'},    // C8: +4 HP all
+]
+
+// ── RIFF CHAINS (16 combos) ──
+const RIFF_CHAINS_SIM=[
+  ['resonancecard','infencore'],['darktuning','overdrive'],['bloodritual','wakeup'],
+  ['possessedperf','encore'],['distortion','feedbackloop'],['battlecry','stagedive'],
+  ['encore','infencore'],['staticcharge','deathriff'],['soundwall','amp'],
+  ['feedbackloop','ampstatic'],['moshpit','battlecry'],['bloodritual','seance'],
+  ['burnset','groupie'],['powertap','newstrings'],['sabbathsigil','overdrive'],
+  ['stagedive','wakeup']
+]
+
+// ── HELLQUAKE D10 EFFECTS ──
+function rollHellquake(gs){
+  const d10=Math.floor(Math.random()*10)+1
+  const alive=gs.stage.filter(m=>!m.tooStoned)
+  if(d10<=2){// OBLITERATE: 25% of boss HP as damage
+    const dmg=Math.floor(gs.enemyHp*0.25);gs.enemyHp=Math.max(0,gs.enemyHp-dmg)
+  } else if(d10<=4){// VOID RIFT: 200 direct damage
+    gs.enemyHp=Math.max(0,gs.enemyHp-200)
+  } else if(d10<=5){// BACKLASH: 30 dmg to boss, -50% corruption
+    gs.enemyHp=Math.max(0,gs.enemyHp-30);gs.corruption=Math.max(0,gs.corruption-50)
+  } else if(d10<=6){// DARK RITUAL: 30% of boss HP
+    gs.enemyHp=Math.max(1,Math.floor(gs.enemyHp*0.7))
+  } else if(d10<=7){// SOUL FRACTURE: all members -3 HP
+    alive.forEach(m=>{m.hp=Math.max(1,m.hp-3)})
+  } else if(d10<=8){// MADNESS: random member gets +10 ATK, another dies
+    if(alive.length>1){const buff=pick(alive);buff.atk+=10;const others=alive.filter(m=>m.uid!==buff.uid);const victim=pick(others);victim.tooStoned=true;victim.hp=0}
+  } else if(d10<=9){// POSSESSION: all cards free this fight
+    gs._allCardsFree=true
+  } else {// 10: REBIRTH: full heal all + double ATK this fight
+    gs.stage.forEach(m=>{if(m){m.hp=m.maxHp;m.tooStoned=false;m.atk*=2}})
+  }
+}
 const MAX_STRIKES=4,MAX_DISCARDS=4,HAND_SIZE=6,MAX_STASH=420,MAX_EMBERS_CAP=8;
 const circleBaseMin=[8,6,7,8,9,9,11,11,14],circleBaseRange=[3,4,4,3,4,4,5,5,7]; // v12 stash tightening
 const MENTOR_LINK_BONUS={foil:{atk:1,hp:2,mult:1.25},mythic:{atk:2,hp:4,mult:1.5},demonic:{atk:4,hp:8,mult:2.0}};
 let TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
-  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,forgeUpgrades:0};
+  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0};
 let CARD_PLAYS={};
 
 function rand(n){return Math.floor(Math.random()*n)}
@@ -333,7 +401,7 @@ function applyCardSim(card,gs,enemy){
     case 'seance':{const h=Math.max(1,Math.floor(gs.corruption/4));alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+h));break}
     case 'moshpit':{gs._directDmg=(gs._directDmg||0)+alive.length*(card.upgraded?5:3);break}
     case 'bloodritual':{const t=alive.reduce((a,b)=>a.hp>b.hp?a:b);const sac=Math.floor(t.hp*0.25);t.hp-=sac;gs._directDmg=(gs._directDmg||0)+sac*(card.upgraded?8:6);gs.corruption=Math.min(100,gs.corruption+15);break}
-    case 'sabbathsigil':gs.corruption=100;alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));gs._directDmg=(gs._directDmg||0)+15;break;
+    case 'sabbathsigil':gs.corruption=100;if(!gs._hellquakeFired){gs._hellquakeFired=true;rollHellquake(gs);TRACK.hellquakesFired=(TRACK.hellquakesFired||0)+1};alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));gs._directDmg=(gs._directDmg||0)+15;break;
   }
   if(enemy.passiveId==='cardHeal')enemy._hp=Math.min(enemy.maxHp,enemy._hp+2);
   if(enemy.passiveId==='cardHeal3')enemy._hp=Math.min(enemy.maxHp,enemy._hp+3);
@@ -355,7 +423,7 @@ function computeGenre(gs){
 
 function simFight(gs,phaseHp,luciferPhase){
   const fightIdx=gs.fightIndex
-  const baseEnemy=gs._wthFight?{id:'ar_exec',name:'The Executive',maxHp:100000,baseDmg:8,passiveId:'corporate'}:ENEMIES[fightIdx]
+  const baseEnemy=gs._wthFight?{id:'ar_exec',name:'The Executive',maxHp:69000,baseDmg:8,passiveId:'corporate'}:ENEMIES[fightIdx]
   const effectiveMaxHp=phaseHp||Math.ceil(baseEnemy.maxHp*STAKE.hpMult)
   const enemy={...baseEnemy,maxHp:effectiveMaxHp,_hp:effectiveMaxHp,_atkBuff:0}
   const circleNum=Math.floor(fightIdx/3)+1,isBoss=(fightIdx+1)%3===0
@@ -365,7 +433,7 @@ function simFight(gs,phaseHp,luciferPhase){
   gs.stage=arrangeStage(gs.stage)
 
   // Fight start artifacts
-  if(gs.artifacts.some(a=>a.id==='a1'))gs.stage.filter(m=>m.role==='Lead Guitarist'&&!m.tooStoned).forEach(m=>{m.atk+=1;m.permAtkBonus=(m.permAtkBonus||0)+1});
+  if(gs.artifacts.some(a=>a.id==='a1')){const lg=gs.stage.find(m=>m.role==='Lead Guitarist'&&!m.tooStoned);if(lg){lg.atk+=1;lg.permAtkBonus=(lg.permAtkBonus||0)+1}}
   if(gs.artifacts.some(a=>a.id==='a2'))gs.corruption=Math.max(gs.corruption,15);
   if(gs.artifacts.some(a=>a.id==='a4')){const al=gs.stage.filter(m=>!m.tooStoned);if(al.length)pick(al).stoneShield=2}
   if(gs.artifacts.some(a=>a.id==='a7'))gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+1);
@@ -378,6 +446,11 @@ function simFight(gs,phaseHp,luciferPhase){
   if(gs.passives.some(p=>p.id==='p2')){const al=gs.stage.filter(m=>!m.tooStoned);if(al.length){const t=pick(al);t.hp=Math.min(t.maxHp,t.hp+3)}}
   if(gs.passives.some(p=>p.id==='p8'))gs.stage.forEach(m=>{if(!m.tooStoned)m.stoneShield=2});
   let p10=gs.passives.some(p=>p.id==='p10');
+  // Boss loot fight-start effects
+  if(gs.loot.includes('freeFirst'))gs._nextCardFree=true
+  if(gs.artifacts.some(a=>a.id==='a3'))gs._nextCardFree=true
+  if(gs._pendingBurnStage){gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+5);gs._pendingBurnStage=false}
+  gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set();gs._allCardsFree=false;gs._hellquakeFired=false
   // Pact: clean_living bonus
   if(gs._pacts.includes('clean_living')&&gs.corruption===0)gs.stage.filter(m=>!m.tooStoned).forEach(m=>{m.tempAtkBonus=(m.tempAtkBonus||0)+2});
   // Pact: stone_wall
@@ -434,9 +507,9 @@ function simFight(gs,phaseHp,luciferPhase){
     if(enemy.passiveId==='paranoia'&&alive.length>1){const victim=pick(alive);paranoiaVictimUid=victim.uid;const allies=alive.filter(m=>m.uid!==victim.uid);if(allies.length>0){const t=pick(allies);t.hp=Math.max(0,t.hp-3)}}
 
     let cardsPlayed=0;
-    for(let att=0;att<14;att++){
+    for(let att=0;att<6;att++){
       const playable=gs.hand.map((c,idx)=>({c,idx})).filter(({c})=>{
-        let cost=c.embers-(gs._tripBuff==='SYNESTHESIA'?1:0);if(!evilEyeUsed)cost=0;else if(gs._nextCardFree)cost=0;
+        let cost=c.embers-(gs._tripBuff==='SYNESTHESIA'?1:0);if(gs._allCardsFree)cost=0;else if(!evilEyeUsed)cost=0;else if(gs._nextCardFree)cost=0;
         else if(!shredderUsed&&c.type==='RIFF'&&alive.some(m=>m.keyword==='SHREDDER'))cost=Math.max(0,cost-1);
         cost=Math.max(0,cost)
         if(c.id==='ampoverload'&&gs._discardsLeft<=0)return false;return gs.embers>=cost;
@@ -444,11 +517,27 @@ function simFight(gs,phaseHp,luciferPhase){
       playable.forEach(p=>{p.score=scoreCard(p.c,gs,enemy,strike,cardsPlayed)});playable.sort((a,b)=>b.score-a.score);
       const best=playable[0];if(best.score<=3)break;
       const card=best.c;let cost=card.embers-(gs._tripBuff==='SYNESTHESIA'?1:0);
-      if(!evilEyeUsed){cost=0;evilEyeUsed=true}else if(gs._nextCardFree){cost=0;gs._nextCardFree=false}
+      if(gs._allCardsFree){cost=0}else if(!evilEyeUsed){cost=0;evilEyeUsed=true}else if(gs._nextCardFree){cost=0;gs._nextCardFree=false}
       else if(!shredderUsed&&card.type==='RIFF'&&alive.some(m=>m.keyword==='SHREDDER')){cost=Math.max(0,cost-1);shredderUsed=true}
       cost=Math.max(0,cost)
       gs.embers-=cost;gs.hand.splice(best.idx,1);
       applyCardSim(card,gs,enemy);if(card.id!=='contract')gs.discard.push(card);cardsPlayed++;
+      gs._strikeMult=Math.min(1.15,Math.round((gs._strikeMult+0.03)*100)/100)
+      gs._cardsPlayedIds.push(card.id)
+      if(card.type==='EMBER'&&gs.passives.some(p=>p.id==='p4'))gs.embers=Math.min(gs.maxEmbers,gs.embers+1)
+      // Riff chain detection
+      for(const chain of RIFF_CHAINS_SIM){
+        if(gs._cardsPlayedIds.includes(chain[0])&&gs._cardsPlayedIds.includes(chain[1])){
+          if(!gs._firedChains)gs._firedChains=new Set()
+          const ck=chain[0]+'+'+chain[1]
+          if(!gs._firedChains.has(ck)){
+            gs._firedChains.add(ck);gs._strikeMult=Math.min(1.15,Math.round((gs._strikeMult+0.15)*100)/100)
+            gs._directDmg=(gs._directDmg||0)+Math.round(gs.stage.filter(m=>!m.tooStoned).reduce((s,m)=>s+m.atk,0)*0.10)
+            TRACK.combosTriggered=(TRACK.combosTriggered||0)+1
+          }
+        }
+      }
+      // Hellquake: only from sabbathsigil card (handled in applyCardSim)
       CARD_PLAYS[card.id]=(CARD_PLAYS[card.id]||0)+1;
       if(gs._drawExtra>0){drawCards(gs,gs._drawExtra);gs._drawExtra=0}
     }
@@ -474,8 +563,13 @@ function simFight(gs,phaseHp,luciferPhase){
     if(gs._activeGenre==='RIFF_METAL'){strikeDmg=Math.round(strikeDmg*1.15);TRACK.genreActivations++}
     if(gs._activeGenre==='DOOM_METAL'&&gs._discardsLeft>=MAX_DISCARDS){strikeDmg+=aliveNow.length*2;TRACK.genreActivations++}
     if(gs._tripBuff==='DIMENSIONAL_RIFT'||gs._tripBuff==='FRACTAL_VISION')strikeDmg*=2;
+    // Apply strike multiplier (0.03 per card played + 0.15 per combo)
+    if(gs._strikeMult>1.0)strikeDmg=Math.round(strikeDmg*gs._strikeMult)
     if(aliveNow.some(m=>m.keyword==='FOLK MAGIC')&&Math.random()<0.2)gs.embers=gs.maxEmbers;
     gs.highestStrike=Math.max(gs.highestStrike,strikeDmg);gs.totalDamage+=strikeDmg;
+    // Reset multiplier + combo tracking for next strike
+    gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set()
+    if(gs.artifacts.some(a=>a.id==='a3'))gs._nextCardFree=true
 
     if(enemy.passiveId==='soulThief'){const st=aliveNow.filter(m=>(m.permAtkBonus||0)>0);if(st.length>0){const v=pick(st);v.atk-=1;v.permAtkBonus=(v.permAtkBonus||0)-1;gs.stolenAtkPool++;enemy._atkBuff+=1}}
     if(enemy.passiveId==='luciferBoss'){const ag=luciferPhase===1?1:2;enemy._atkBuff=Math.floor(Math.max(0,(enemy.maxHp-Math.max(0,enemy._hp-strikeDmg)))/20)*ag}
@@ -526,6 +620,8 @@ function simFight(gs,phaseHp,luciferPhase){
       const ci=Math.min(circleNum-1,8),reward=circleBaseMin[ci]+rand(circleBaseRange[ci]+1);
       const merch=gs.passives.some(p=>p.id==='p3')?2:0,corrB=gs.corruption>=69?3:0;
       const total=reward+merch+corrB;gs.stash=Math.min(MAX_STASH,gs.stash+total);gs.stashEarned+=total;
+      if(isBoss&&gs.loot.includes('stashBoss')){gs.stash=Math.min(MAX_STASH,gs.stash+5);gs.stashEarned+=5}
+      if(gs._strikesLeft>=maxStrikes-1&&gs.artifacts.some(a=>a.id==='a10'))gs._pendingBurnStage=true
     }
     gs.stage.forEach(m=>{if(!m.tooStoned)m.hp=Math.min(m.maxHp,m.hp+2)});
   }
@@ -533,6 +629,8 @@ function simFight(gs,phaseHp,luciferPhase){
 }
 
 function simShop(gs){
+  const priceMult=gs._pacts.includes('merchants_eye')?0.8:1.0
+
   const circleNum=Math.floor(gs.fightIndex/3)+1;
   if(circleNum!==gs.lastCircle){gs.circleArtBought=false;gs.circlePassBought=false;gs.lastCircle=circleNum}
   const totalMembers=gs.stage.length,needsMembers=totalMembers<5||(gs._pacts.includes('sixth_slot')&&totalMembers<6);
@@ -584,7 +682,7 @@ function simShop(gs){
 
 function newGame(){return{stage:pickStartingPair(),deck:buildDeck(),discard:[],hand:[],stash:3,embers:STAKE.startEmbers,maxEmbers:STAKE.startEmbers,corruption:STAKE.startCorruption,fightIndex:0,bossKills:0,artifacts:[],passives:[],fightsSurvived:0,totalDamage:0,highestStrike:0,stashEarned:0,tooStonedCount:0,won:false,mentorLinks:[],lastCircle:1,stashStolen:0,
   heldShrooms:false,heldAcid:false,stolenAtkPool:0,circleArtBought:false,circlePassBought:false,
-  _pacts:[],_speedDemon:false,_warDrums:false,_genreCounts:{RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0},_activeGenre:null,_wthFight:false,_contractsPlayed:0,_upgradedCards:[]}}
+  _pacts:[],_speedDemon:false,_warDrums:false,_genreCounts:{RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0},_activeGenre:null,_wthFight:false,_contractsPlayed:0,_upgradedCards:[],artifacts:[],passives:[],loot:[],_strikeMult:1.0,_cardsPlayedIds:[],_firstStrike:true,_allCardsFree:false,_nextCardFree:false,_pendingBurnStage:false}}
 
 function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
   for(let f=0;f<27;f++){gs.fightIndex=f;
@@ -629,6 +727,18 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
             const best=scorePact(a,gs)>=scorePact(b,gs)?a:b;
             gs._pacts.push(best);applyPact(best,gs);TRACK.pactsChosen++;
           }
+        }
+        // BOSS LOOT
+        const loot=BOSS_LOOT_SIM[gs.fightIndex]
+        if(loot){
+          gs.loot.push(loot.effect)
+          const alive=gs.stage.filter(m=>!m.tooStoned)
+          if(loot.effect==='atk1all')gs.stage.forEach(m=>{if(m&&!m.tooStoned)m.atk+=1})
+          else if(loot.effect==='hp3all')gs.stage.forEach(m=>{if(m){m.maxHp+=3;m.hp+=3}})
+          else if(loot.effect==='hp4all')gs.stage.forEach(m=>{if(m){m.maxHp+=4;m.hp+=4}})
+          else if(loot.effect==='atk2strong'&&alive.length>0){const s2=alive.reduce((a,b)=>a.atk>b.atk?a:b);s2.atk+=2}
+          else if(loot.effect==='atk3strong'&&alive.length>0){const s3=alive.reduce((a,b)=>a.atk>b.atk?a:b);s3.atk+=3}
+          TRACK.bossLootCollected=(TRACK.bossLootCollected||0)+1
         }
         // DOOM FORGE: upgrade best card after boss
         if(isBoss){
@@ -678,12 +788,12 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
   return{won:gs.won,wthWon,deathFight,deathCause,fightsSurvived:gs.fightsSurvived,totalDamage:gs.totalDamage,highestStrike:gs.highestStrike,stageSize:gs.stage.length,mentorLinks:gs.mentorLinks.length,pacts:gs._pacts.length,upgrades:gs._upgradedCards.length}}
 
 // ── RUN SIMULATION ──
-console.log(`\n⛧ VESTIBULE SIM v15.0 [${STAKE.name}] — ${NUM_GAMES.toLocaleString()} games\n`);
+console.log(`\n⛧ VESTIBULE SIM v16.0 [${STAKE.name}] — ${NUM_GAMES.toLocaleString()} games\n`);
 const t0=Date.now();
 TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
-  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,forgeUpgrades:0};
+  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0};
 CARD_PLAYS={};
 const deathsByFight=new Array(27).fill(0),surviveByFight=new Array(27).fill(0);let wins=0,wthWins=0,totalFights=0,gamesWithLinks=0,totalPacts=0;
 for(let i=0;i<NUM_GAMES;i++){const r=simGame();totalFights+=r.fightsSurvived;totalPacts+=r.pacts;if(r.mentorLinks>0)gamesWithLinks++;
@@ -711,6 +821,9 @@ console.log(`  Cards deleted (burn): ${TRACK.cardsDeleted.toLocaleString()} (${(
 console.log(`  Genre activations: ${TRACK.genreActivations.toLocaleString()}`);
 console.log(`  WTH entered: ${TRACK.wthEntered} | WTH won: ${TRACK.wthWins}`);
 console.log(`  Contracts signed: ${TRACK.contractsSigned}`)
+console.log(`  Riff Chains triggered: ${(TRACK.combosTriggered||0).toLocaleString()}`)
+console.log(`  Hellquakes fired: ${(TRACK.hellquakesFired||0).toLocaleString()}`)
+console.log(`  Boss loot collected: ${(TRACK.bossLootCollected||0).toLocaleString()}`)
 console.log(`  Doom Forge upgrades: ${TRACK.forgeUpgrades.toLocaleString()} (${(TRACK.forgeUpgrades/NUM_GAMES).toFixed(1)} avg/game)`);
 console.log(`\n⛓ MENTOR LINK STATS:`);
 console.log(`  Links formed: ${TRACK.linksFormed.toLocaleString()} (${(TRACK.linksFormed/NUM_GAMES).toFixed(2)} per game)`);
