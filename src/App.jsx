@@ -2334,109 +2334,143 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   )
 
   // ── STONED TO THE BONE ─────────────────────────────────────
-  if(isStoned) return(
-    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(2,0,0,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',gap:16,animation:'fadeIn 0.8s ease',overflowY:'auto',padding:'40px 0 60px'}}>
-      <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,180,0,0.04) 2px,rgba(0,180,0,0.04) 4px)',animation:'interlaceFlicker 0.1s steps(1) infinite',pointerEvents:'none',zIndex:0}}/>
-      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 20%,rgba(0,80,0,0.4) 100%)',pointerEvents:'none',zIndex:0,animation:'bgPulse 2s ease-in-out infinite'}}/>
-      <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:280,color:'rgba(180,180,180,0.06)',userSelect:'none',lineHeight:1}}>Vestibule</div>
-      </div>
-      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:110,color:'#cc1111',textShadow:'-4px 0 rgba(255,0,0,0.9),4px 0 rgba(0,255,80,0.7),0 0 60px rgba(180,0,0,0.8),3px 3px 0 #000'}}>Stoned to the Bone</div>
-        <div style={{fontFamily:"'ScratchFont',serif",fontSize:60,color:'#44ff44',fontStyle:'italic',textAlign:'center',textShadow:'0 0 20px rgba(60,255,60,0.9),0 0 50px rgba(30,200,30,0.6),0 0 100px rgba(0,150,0,0.4)'}}>The band ran out of herb.</div>
-                {/* Score */}
-        <NearMiss/>
-        <div style={{textAlign:'center',margin:'4px 0'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
-          {stakeInfo.id!=='bronze'&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:stakeInfo.color,letterSpacing:2,marginTop:4,padding:'3px 14px',border:'1px solid '+stakeInfo.color,borderRadius:4,background:'rgba(0,0,0,0.4)'}}>{stakeInfo.name.toUpperCase()} ×{stakeInfo.scoreMult}</div>}
-          <BestGap/>
-        </div>
-        <UnlockBar/>
-        <Discoveries/>
-        <AchievementBadges/>
-                {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
-        {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #aa4444',borderRadius:4}}>{streakMsg}</div>}
-        <RunHighlights/>
-        <StatsGrid/>
-        <RunHistory/>
-        <BottomRow/>
-                {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#886644',letterSpacing:3}}>RUN #{totalRuns}</div>}
-        <Buttons victory={false}/>
-      </div>
-    </div>
-  )
+  // ═══════════════════════════════════════════════════════════
+  // UNIFIED END SCREEN — compact, no-scroll, professional
+  // ═══════════════════════════════════════════════════════════
+  const bgColor=isVictory?'rgba(4,3,1,0.97)':isStoned?'rgba(2,0,0,0.97)':'rgba(6,0,0,0.97)'
+  const scanlineColor=isVictory?'rgba(200,150,0,0.02)':isStoned?'rgba(0,180,0,0.04)':'rgba(180,0,0,0.035)'
+  const vignetteColor=isVictory?'rgba(60,40,0,0.5)':isStoned?'rgba(0,80,0,0.4)':'rgba(80,0,0,0.5)'
 
-  // ── BEATEN BY BOSS ─────────────────────────────────────────
-  if(isBeaten) return(
-    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(6,0,0,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',gap:14,animation:'fadeIn 0.8s ease',overflowY:'auto',padding:'40px 0 60px'}}>
-      <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(180,0,0,0.035) 2px,rgba(180,0,0,0.035) 4px)',pointerEvents:'none',zIndex:0}}/>
-      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 30%,rgba(80,0,0,0.5) 100%)',pointerEvents:'none',zIndex:0}}/>
-      <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:280,color:'rgba(180,180,180,0.05)',userSelect:'none',lineHeight:1}}>Vestibule</div>
-      </div>
-      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:12}}>
-        {/* Boss emoji large */}
-        <div style={{fontSize:100,filter:'drop-shadow(0 0 30px rgba(200,0,0,0.6))',animation:'throb 2s ease-in-out infinite'}}>{enemy?.emoji||'💀'}</div>
-        {/* Defeated by */}
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:6,color:'#662222',textTransform:'uppercase'}}>Defeated by</div>
-        {/* Boss name */}
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:88,color:'#cc2222',lineHeight:1,textShadow:'-3px 0 rgba(255,0,0,0.7),3px 0 rgba(180,0,0,0.5),0 0 50px rgba(160,0,0,0.7),3px 3px 0 #000',textAlign:'center'}}>{enemy?.name||'The Vestibule'}</div>
-        {/* Circle/subtitle */}
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:3,color:'#aa4444',textTransform:'uppercase'}}>{enemy?.circle||''} · {enemy?.subtitle||''}</div>
-        {/* Sassy tagline */}
-        <div style={{fontFamily:"'ScratchFont',serif",fontSize:28,color:'#cc6666',fontStyle:'italic',textAlign:'center',textShadow:'0 0 20px rgba(180,0,0,0.5)',maxWidth:700,marginTop:4}}>"{enemy?.tagline||'The Vestibule claims another soul.'}"</div>
-                {/* Score */}
-        <NearMiss/>
-        <div style={{textAlign:'center',margin:'4px 0'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
-          {stakeInfo.id!=='bronze'&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:stakeInfo.color,letterSpacing:2,marginTop:4,padding:'3px 14px',border:'1px solid '+stakeInfo.color,borderRadius:4,background:'rgba(0,0,0,0.4)'}}>{stakeInfo.name.toUpperCase()} ×{stakeInfo.scoreMult}</div>}
-          <BestGap/>
-        </div>
-        <UnlockBar/>
-        <Discoveries/>
-        <AchievementBadges/>
-                {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
-        {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:streakWins>1?'#ff6600':'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:`1px solid ${streakWins>1?'#ff6600':'#aa4444'}`,borderRadius:4}}>{streakMsg}</div>}
-        <RunHighlights/>
-        <StatsGrid/>
-        <RunHistory/>
-        <BottomRow/>
-                {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#886644',letterSpacing:3}}>RUN #{totalRuns}</div>}
-        <Buttons victory={false}/>
-      </div>
-    </div>
-  )
+  // Compact stats — 2 rows of 5
+  const compactStats=[
+    ['Circle',isVictory?'ALL 9 ⛧':circleReached+' / 9'],
+    ['Fights',stats.fightsSurvived],
+    ['Strikes',stats.strikesThrown],
+    ['Cards',stats.cardsPlayed],
+    ['Damage',stats.totalDamage.toLocaleString()],
+    ['Best Hit',stats.highestStrike.toLocaleString()],
+    ['Stoned',stats.tooStonedCount],
+    ['Corrupt',stats.maxCorruption+'%'],
+    ['Stash',stats.stashEarned+'🌿'],
+    ['Run #',totalRuns||1],
+  ]
 
-  // ── VICTORY ────────────────────────────────────────────────
+  // Title section varies by type
+  const TitleBlock=()=>{
+    if(isStoned)return(<>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#cc1111',textShadow:'-3px 0 rgba(255,0,0,0.9),3px 0 rgba(0,255,80,0.7),0 0 40px rgba(180,0,0,0.8),2px 2px 0 #000',lineHeight:1}}>Stoned to the Bone</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'#44ff44',fontStyle:'italic',textShadow:'0 0 15px rgba(60,255,60,0.7)'}}>The band ran out of herb.</div>
+    </>)
+    if(isBeaten)return(<>
+      <div style={{display:'flex',alignItems:'center',gap:20}}>
+        <div style={{fontSize:60,filter:'drop-shadow(0 0 20px rgba(200,0,0,0.5))'}}>{enemy?.emoji||'💀'}</div>
+        <div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:6,color:'#662222',textTransform:'uppercase'}}>Defeated by</div>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc2222',lineHeight:1,textShadow:'-2px 0 rgba(255,0,0,0.6),2px 0 rgba(180,0,0,0.4),0 0 30px rgba(160,0,0,0.5),2px 2px 0 #000'}}>{enemy?.name||'The Vestibule'}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:2,color:'#aa4444',textTransform:'uppercase'}}>{enemy?.circle||''}</div>
+        </div>
+      </div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#cc6666',fontStyle:'italic',textShadow:'0 0 12px rgba(180,0,0,0.3)',maxWidth:500,textAlign:'center'}}>"{enemy?.tagline||'The Vestibule claims another soul.'}"</div>
+    </>)
+    return(<>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:'#d8c9a8',textShadow:'0 0 40px rgba(210,160,20,0.5),2px 2px 0 #000'}}>⛧ Victory ⛧</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic'}}>All 9 circles conquered. Lucifer has fallen.</div>
+    </>)
+  }
+
   return(
-    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(4,3,1,0.96)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',gap:16,animation:'fadeIn 0.8s ease',overflowY:'auto',padding:'40px 0 60px'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9800,background:bgColor,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',animation:'fadeIn 0.8s ease',overflow:'hidden'}}>
+      {/* Scanlines */}
+      <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,'+scanlineColor+' 2px,'+scanlineColor+' 4px)',pointerEvents:'none',zIndex:0}}/>
+      {/* Vignette */}
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 20%,'+vignetteColor+' 100%)',pointerEvents:'none',zIndex:0}}/>
+      {/* Watermark */}
       <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:280,color:'rgba(180,180,180,0.06)',userSelect:'none',lineHeight:1}}>Vestibule</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:240,color:'rgba(180,180,180,0.04)',userSelect:'none',lineHeight:1}}>Vestibule</div>
       </div>
-      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:90,color:'#d8c9a8',textShadow:'0 0 60px rgba(210,160,20,0.5),3px 3px 0 #000'}}>⛧ Victory ⛧</div>
-        <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#a09060',fontStyle:'italic',textAlign:'center'}}>All 9 circles conquered. Lucifer has fallen.</div>
-                {/* Score */}
-        <NearMiss/>
-        <div style={{textAlign:'center',margin:'4px 0'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:60,fontWeight:900,color:grade.color,textShadow:'0 0 30px '+grade.color+',3px 3px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:4,textShadow:'0 0 10px '+grade.color}}>{grade.label}</div>
-          {stakeInfo.id!=='bronze'&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:stakeInfo.color,letterSpacing:2,marginTop:4,padding:'3px 14px',border:'1px solid '+stakeInfo.color,borderRadius:4,background:'rgba(0,0,0,0.4)'}}>{stakeInfo.name.toUpperCase()} ×{stakeInfo.scoreMult}</div>}
-          <BestGap/>
+
+      {/* MAIN CONTENT — vertically centered, horizontally structured */}
+      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:10,maxWidth:1100,width:'95%'}}>
+
+        {/* ROW 1: Title */}
+        <TitleBlock/>
+
+        {/* ROW 2: NearMiss (prominent) + Play Again side by side */}
+        <div style={{display:'flex',alignItems:'center',gap:20,marginTop:4,width:'100%',justifyContent:'center'}}>
+          <NearMiss/>
         </div>
-        <UnlockBar/>
-        <Discoveries/>
-        <AchievementBadges/>
-                {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
-        {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>{streakMsg}</div>}
-        <RunHighlights/>
-        <StatsGrid/>
-        <RunHistory/>
-        <BottomRow/>
-                {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#886644',letterSpacing:3}}>RUN #{totalRuns}</div>}
-        <Buttons victory={true}/>
+
+        {/* ROW 3: Score + Play Again */}
+        <div style={{display:'flex',alignItems:'center',gap:40,marginTop:4}}>
+          {/* Score block */}
+          <div style={{textAlign:'center'}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:56,fontWeight:900,color:grade.color,textShadow:'0 0 25px '+grade.color+',2px 2px 0 #000',letterSpacing:2,lineHeight:1}}>{displayScore.toLocaleString()}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:6,color:grade.color,textTransform:'uppercase',marginTop:2,textShadow:'0 0 8px '+grade.color}}>{grade.label}</div>
+            {stakeInfo.id!=='bronze'&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:stakeInfo.color,letterSpacing:2,marginTop:3,padding:'2px 12px',border:'1px solid '+stakeInfo.color,borderRadius:3,background:'rgba(0,0,0,0.4)',display:'inline-block'}}>{stakeInfo.name.toUpperCase()} ×{stakeInfo.scoreMult}</div>}
+            <BestGap/>
+          </div>
+          {/* Play Again button — RIGHT NEXT TO score */}
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:8}}>
+            <button onClick={()=>{onReset()}}
+              style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:30,letterSpacing:5,
+                color:isVictory?'#ffd700':'#ee2222',
+                background:isVictory?'rgba(60,40,0,0.4)':'rgba(120,0,0,0.3)',
+                border:isVictory?'3px solid #c8a020':'3px solid #aa0000',
+                borderRadius:8,padding:'14px 50px',cursor:'pointer',textTransform:'uppercase',
+                textShadow:isVictory?'0 0 25px rgba(200,150,0,0.6)':'0 0 25px rgba(200,0,0,0.6)',
+                boxShadow:isVictory?'0 0 35px rgba(200,150,0,0.3)':'0 0 35px rgba(200,0,0,0.3)',
+                animation:'throb 2s ease-in-out infinite',transition:'all 0.15s'}}>
+              {isVictory?'⛧ Play Again ⛧':'↺ Play Again'}
+            </button>
+            <div style={{display:'flex',gap:8}}>
+              <button onClick={handleShare}
+                style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:2,
+                  color:copied?'#44cc44':'#c8a040',background:'rgba(40,25,5,0.5)',
+                  border:'1px solid '+(copied?'#44cc44':'#8a6020'),borderRadius:3,
+                  padding:'6px 14px',cursor:'pointer',textTransform:'uppercase'}}>
+                {copied?'✓ Copied':'📋 Share'}
+              </button>
+              <button onClick={()=>onDailyChallenge&&onDailyChallenge()}
+                style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:2,color:'#c8a040',background:'rgba(40,25,5,0.5)',border:'1px solid #8a6020',borderRadius:3,padding:'6px 14px',cursor:'pointer',textTransform:'uppercase'}}>
+                🌍 Daily
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ROW 4: Unlock bar (compact) */}
+        <div style={{width:'100%',maxWidth:700}}>
+          <UnlockBar/>
+        </div>
+
+        {/* ROW 5: Stats grid — 2 rows of 5, compact */}
+        <div style={{background:'rgba(15,8,3,0.85)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:8,padding:'12px 24px',width:'100%',maxWidth:800}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:'4px 12px'}}>
+            {compactStats.map(function(row){
+              return(
+                <div key={row[0]} style={{textAlign:'center',padding:'4px 0'}}>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#8a7050',letterSpacing:2,textTransform:'uppercase'}}>{row[0]}</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:isVictory&&row[0]==='Circle'?'#ffdd44':'#c8a060'}}>{row[1]}</div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* ROW 6: Achievements + Discoveries + Streak — all inline */}
+        <div style={{display:'flex',gap:12,alignItems:'center',justifyContent:'center',flexWrap:'wrap'}}>
+          {newAchIds.length>0&&newAchIds.slice(0,4).map(id=>{const a=ACHIEVEMENTS.find(x=>x.id===id);if(!a)return null;return <div key={id} style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ffd700',background:'rgba(60,40,0,0.7)',border:'1px solid #ffd700',borderRadius:4,padding:'3px 10px',animation:'throb 1.5s ease-in-out infinite'}}>{a.emoji} {a.label}</div>})}
+          {discoveryList.slice(0,4).map((d,i)=><div key={i} style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#e8a820',background:'rgba(40,25,5,0.7)',border:'1px solid rgba(200,140,30,0.3)',borderRadius:3,padding:'2px 8px'}}>NEW: {d}</div>)}
+          {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:'#ff6600',padding:'3px 12px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:3}}>🔥 {dailyStreak} DAY STREAK</div>}
+          {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:streakWins>1?'#ff6600':'#aa4444',padding:'3px 12px',background:'rgba(0,0,0,0.5)',border:'1px solid '+(streakWins>1?'#ff6600':'#aa4444'),borderRadius:3}}>{streakMsg}</div>}
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#886644'}}>{allAchievements.length}/{ACHIEVEMENTS.length} achievements</div>
+        </div>
+
+        {/* ROW 7: Run History (collapsed) + Seed */}
+        <div style={{display:'flex',gap:16,alignItems:'center'}}>
+          <RunHistory/>
+          <BottomRow/>
+        </div>
       </div>
     </div>
   )
