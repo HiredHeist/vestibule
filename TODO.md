@@ -1,13 +1,13 @@
 # VESTIBULE — Master TODO
 **Living document — updated with every push**
-**Latest: ae99e12 | March 25, 2026 JST**
+**Latest: 211fcec | March 25, 2026 JST**
 
 ---
 
 ## 🎯 PRIORITY ROADMAP — Ship the Playtest Demo
 
 ### TIER 1 — Must Ship (gameplay feel)
-- [ ] **Damage Breakdown Animation** — Balatro-style number-go-up spectacle after every Strike. Base ATK ticks up per member → multiplier applies with shake → genre/mentor/combo bonuses flash → final number SLAMS. Currently damage just happens silently. This is THE #1 addiction hook.
+- [x] **Damage Breakdown Animation** — Balatro-style number-go-up spectacle after every Strike. Base ATK ticks up per member → multiplier applies with shake → genre/mentor/combo bonuses flash → final number SLAMS. Currently damage just happens silently. This is THE #1 addiction hook.
 - [ ] **Random Events Between Fights** — Slay the Spire events. 50% chance between non-boss fights. 8 Hell-themed choices: Ferryman, Crossroads Demon, Mosh Pit, Vinyl Collector, Cursed Amp, Blood Pact, Audience with Satan, The Groupie. Makes every run unique.
 - [ ] **Opening Night Redesign** — 4-5 candidates instead of full roster, synergy hints, flavor text. First impression matters.
 - [ ] **Deploy to royceprinting.com/vestibule/** — Nobody can play it until this ships. Production build + hosting.
