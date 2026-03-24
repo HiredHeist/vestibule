@@ -2489,6 +2489,7 @@ function App(){
   const [clutchFlash,setClutchFlash]=useState(null) // {text,color} for clutch moments
   const [circlePreview,setCirclePreview]=useState(null) // next circle preview data
   const [collectedLoot,setCollectedLoot]=useState([]) // boss loot IDs collected this run
+  const [circleSplash,setCircleSplash]=useState(null) // {circleNum, circleName, circleEmoji} for 3s transition
   const milestonesFiredRef=useRef({half:false,quarter:false,tenth:false})
   const [phaseBanner,setPhaseBanner]=useState('play') // 'play','strike','boss'
   const [deckViewOpen,setDeckViewOpen]=useState(false)
@@ -3993,18 +3994,24 @@ function App(){
     // Show Descent map when entering a new circle (circles 2-9)
     if(nextIdx%3===0&&nextIdx>=3&&nextIdx<26&&!skipDescentRef.current){
       const circleNum=Math.floor(nextIdx/3)+1
-      const r1=DESCENT_REWARDS_1[Math.floor(Math.random()*DESCENT_REWARDS_1.length)]
-      const r2=DESCENT_REWARDS_2[Math.floor(Math.random()*DESCENT_REWARDS_2.length)]
-      setDescentData({
-        circleNum,
-        circleName:CIRCLE_NAMES[circleNum],
-        circleEmoji:CIRCLE_EMOJIS[circleNum],
-        fights:[ENEMIES[nextIdx],ENEMIES[nextIdx+1],ENEMIES[nextIdx+2]],
-        fightIndices:[nextIdx,nextIdx+1,nextIdx+2],
-        reward1:r1,reward2:r2,
-        skips:[]
-      })
-      setGameState('descent')
+      // Show 3-second circle splash first
+      setCircleSplash({circleNum,circleName:CIRCLE_NAMES[circleNum],circleEmoji:CIRCLE_EMOJIS[circleNum]})
+      setGameState('circleSplash')
+      setTimeout(()=>{
+        setCircleSplash(null)
+        const r1=DESCENT_REWARDS_1[Math.floor(Math.random()*DESCENT_REWARDS_1.length)]
+        const r2=DESCENT_REWARDS_2[Math.floor(Math.random()*DESCENT_REWARDS_2.length)]
+        setDescentData({
+          circleNum,
+          circleName:CIRCLE_NAMES[circleNum],
+          circleEmoji:CIRCLE_EMOJIS[circleNum],
+          fights:[ENEMIES[nextIdx],ENEMIES[nextIdx+1],ENEMIES[nextIdx+2]],
+          fightIndices:[nextIdx,nextIdx+1,nextIdx+2],
+          reward1:r1,reward2:r2,
+          skips:[]
+        })
+        setGameState('descent')
+      },3000)
       return
     }
     setFightIndex(nextIdx)
@@ -4689,6 +4696,17 @@ function App(){
   )
 
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
+  if(gameState==='circleSplash'&&circleSplash)return(
+    <div style={{width:1920,height:1080,position:'relative',background:'#020100',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,overflow:'hidden'}}>
+      <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(180,0,0,0.03) 2px,rgba(180,0,0,0.03) 4px)',pointerEvents:'none'}}/>
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 30%,rgba(80,0,0,0.4) 100%)',pointerEvents:'none'}}/>
+      <div style={{fontSize:120,filter:'drop-shadow(0 0 40px rgba(200,0,0,0.6))',animation:'throb 1s ease-in-out infinite'}}>{circleSplash.circleEmoji}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#cc4444',letterSpacing:6,textTransform:'uppercase',animation:'fadeIn 0.5s ease'}}>Entering</div>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#cc1111',textShadow:'0 0 40px rgba(200,0,0,0.7),0 0 80px rgba(150,0,0,0.4),3px 3px 0 #000',letterSpacing:6,animation:'fadeIn 0.8s ease',textAlign:'center'}}>Circle {circleSplash.circleName}</div>
+      <div style={{width:200,height:2,background:'linear-gradient(90deg,transparent,#cc2222,transparent)',animation:'fadeIn 1.2s ease'}}/>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'#aa6644',fontStyle:'italic',animation:'fadeIn 1.5s ease'}}>Descend deeper into Hell...</div>
+    </div>
+  )
   if(gameState==='descent'&&descentData)return(
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>⛧ The Descent ⛧</div>
