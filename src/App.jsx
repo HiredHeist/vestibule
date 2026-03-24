@@ -289,6 +289,45 @@ const CARD_UPGRADES={
   soundboard:{desc:'Gain 3 Embers. Draw 2 next strike (was 1). +1 max HP to random.',hp:'random',hpAmt:1},
 }
 
+// -- BOSS LOOT: unique drops per circle boss --
+const BOSS_LOOT=[
+  null, // no boss at index 0
+  null,
+  {id:'limbos_echo',name:'Limbos Echo',emoji:'👁',desc:'+1 ATK to all members.',effect:'atk1all',circle:1},
+  null,
+  null,
+  {id:'love_letter',name:'Love Letter',emoji:'💋',desc:'First card each fight is free.',effect:'freeFirst',circle:2},
+  null,
+  null,
+  {id:'endless_hunger',name:'Endless Hunger',emoji:'🕳',desc:'+3 max HP to all members.',effect:'hp3all',circle:3},
+  null,
+  null,
+  {id:'golden_tooth',name:'Golden Tooth',emoji:'🪙',desc:'+5 Stash per boss kill.',effect:'stashBoss',circle:4},
+  null,
+  null,
+  {id:'berserker_rage',name:'Berserker Rage',emoji:'🔥',desc:'+2 ATK to strongest member.',effect:'atk2strong',circle:5},
+  null,
+  null,
+  {id:'heretics_brand',name:'Heretics Brand',emoji:'⛧',desc:'Corruption damage +25% permanently.',effect:'corrDmg',circle:6},
+  null,
+  null,
+  {id:'the_blade',name:'The Blade',emoji:'🗡',desc:'+3 ATK to strongest member.',effect:'atk3strong',circle:7},
+  null,
+  null,
+  {id:'mask_of_lies',name:'Mask of Lies',emoji:'🎭',desc:'+4 max HP to all members.',effect:'hp4all',circle:8},
+  null,
+  null,
+  null, // Lucifer - handled by victory cinematic
+]
+const STREAK_BONUSES=[
+  null, // 0 wins
+  null, // 1 win
+  {desc:'+1 starting Ember',effect:'ember1'},       // 2 wins
+  {desc:'Start with a free Foil member',effect:'foil'},  // 3 wins
+  {desc:'+1 free card upgrade',effect:'upgrade'},    // 4 wins
+  {desc:'Start with a Mythic member',effect:'mythic'}, // 5+ wins
+]
+
 const PACT_REWARDS=[
   {id:'ember_surge',name:'Ember Surge',emoji:'🔥',desc:'+1 max Embers permanently.',color:'#ff6600'},
   {id:'iron_strings',name:'Iron Strings',emoji:'🎸',desc:'All members +1 ATK permanently.',color:'#ee2222'},
@@ -2445,6 +2484,7 @@ function App(){
   const [strikeMult,setStrikeMult]=useState(1.0) // score multiplier that builds per card played
   const [clutchFlash,setClutchFlash]=useState(null) // {text,color} for clutch moments
   const [circlePreview,setCirclePreview]=useState(null) // next circle preview data
+  const [collectedLoot,setCollectedLoot]=useState([]) // boss loot IDs collected this run
   const milestonesFiredRef=useRef({half:false,quarter:false,tenth:false})
   const [phaseBanner,setPhaseBanner]=useState('play') // 'play','strike','boss'
   const [deckViewOpen,setDeckViewOpen]=useState(false)
@@ -2627,6 +2667,17 @@ function App(){
     const hasDrummer=musicians.some(m=>m.role==='Drummer')
     const drumCount=musicians.filter(m=>m.role==='Drummer').length
     if(hasDrummer){let r=Math.floor(Math.random()*6)+1;if(drumCount>=2&&r<=2)r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
+    // STREAK BONUSES
+    if(streakWins>=2)setMaxEmbers(p=>Math.min(MAX_EMBERS_CAP,p+1))
+    if(streakWins>=3){
+      // Free Foil member — upgrade first member to Foil
+      setStage(p=>{const idx=p.findIndex(m=>m&&!m.foil&&!m.mythic&&!m.demonic);if(idx===-1)return p;const ns=[...p];ns[idx]=Object.assign({},ns[idx],{foil:true,atk:ns[idx].atk+1,maxHp:ns[idx].maxHp+2,hp:ns[idx].hp+2});return ns})
+    }
+    if(streakWins>=5){
+      // Upgrade first member to Mythic
+      setStage(p=>{const idx=p.findIndex(m=>m&&!m.mythic&&!m.demonic);if(idx===-1)return p;const ns=[...p];ns[idx]=Object.assign({},ns[idx],{mythic:true,foil:false,atk:ns[idx].atk+2,maxHp:ns[idx].maxHp+4,hp:ns[idx].hp+4});return ns})
+    }
+    if(streakWins>=2)addLog('🔥 Win streak '+streakWins+'! '+STREAK_BONUSES[Math.min(streakWins,5)].desc)
     setGameState('playing')
     addLog('⛧ '+musicians[0].name+' and '+musicians[1].name+' take the stage!')
     // Show Descent map for Circle 1
@@ -2726,7 +2777,7 @@ function App(){
         msg='🎚 Corruption set to 50%.'
       }
     }
-    else if(card.id==='feedbackloop'){let dmg=Math.floor(corruption/(card.upgraded?1.5:2));if(activeGenre==='BLACK_METAL')dmg=Math.round(dmg*1.25);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);if(flHp<=0)setTimeout(triggerVictory,500);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'+(activeGenre==='BLACK_METAL'?' [Black Metal +25%]':'')}
+    else if(card.id==='feedbackloop'){let dmg=Math.floor(corruption/(card.upgraded?1.5:2));if(collectedLoot.includes('heretics_brand'))dmg=Math.round(dmg*1.25);if(activeGenre==='BLACK_METAL')dmg=Math.round(dmg*1.25);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);if(flHp<=0)setTimeout(triggerVictory,500);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(triggerVictory,500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'+(activeGenre==='BLACK_METAL'?' [Black Metal +25%]':'')}
     else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?4:0;const circleNum=Math.floor(fightIndex/3)+1;const swDmg=(circleNum<=3?5:circleNum<=6?8:12)+p5Bonus+(card.upgraded?4:0);const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);if(swHp<=0)setTimeout(triggerVictory,500);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(triggerVictory,500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
     else if(card.id==='groupie'){
       // Handled entirely in handleDropOnStage to avoid double setHand
@@ -3372,10 +3423,23 @@ function App(){
         if(activeStake.healAfterFight){setStage(prev=>prev.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m))}
         // Victory flash before shop (circle cleared extra for bosses)
         const isBossKill=(fightIndex+1)%3===0
+    if(isBossKill&&collectedLoot.includes('golden_tooth')){setStash(p=>Math.min(MAX_STASH,p+5));addLog('🪙 Golden Tooth! +5 bonus Stash.')}
         const cn=Math.floor(fightIndex/3)+1
         const circleNames=['','I — Limbo','II — Lust','III — Gluttony','IV — Greed','V — Anger','VI — Heresy','VII — Violence','VIII — Fraud','IX — Treachery']
         setCircleClearedData({circle:cn,circleName:circleNames[cn]||cn,bossName:enemy.name,bossEmoji:enemy.emoji,isBoss:isBossKill})
         if(isBossKill){
+          // BOSS LOOT
+          const loot=BOSS_LOOT[fightIndex]
+          if(loot){
+            if(loot.effect==='atk1all')setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1}):m))
+            else if(loot.effect==='hp3all')setStage(p=>p.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):m))
+            else if(loot.effect==='hp4all')setStage(p=>p.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+4,hp:m.hp+4}):m))
+            else if(loot.effect==='atk2strong'){const al=stage.filter(m=>m&&!m.tooStoned);if(al.length){const s=al.reduce((a,b)=>a.atk>b.atk?a:b);setStage(p=>p.map(m=>m&&m.uid===s.uid?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2}):m))}}
+            else if(loot.effect==='atk3strong'){const al=stage.filter(m=>m&&!m.tooStoned);if(al.length){const s=al.reduce((a,b)=>a.atk>b.atk?a:b);setStage(p=>p.map(m=>m&&m.uid===s.uid?Object.assign({},m,{atk:m.atk+3,permAtkBonus:(m.permAtkBonus||0)+3}):m))}}
+            addLog('🏆 Boss Loot: '+loot.emoji+' '+loot.name+' — '+loot.desc)
+            setCollectedLoot(p=>[...p,loot.id])
+            setCircleClearedData(p=>p?{...p,loot}:p)
+          }
           // Generate 2 pact choices (never repeat already chosen)
           const available=PACT_REWARDS.filter(p=>!chosenPacts.includes(p.id))
           const shuffled=[...available].sort(()=>Math.random()-0.5)
@@ -3947,6 +4011,8 @@ function App(){
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
     setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};setPhaseBanner('play');setStrikeMult(1.0)
+    // BOSS LOOT effects at fight start
+    if(collectedLoot.includes('love_letter'))setNextCardFree(true)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
     if(fightIndex===26){
       // 8 circle bosses killed = 8 × 51,750 = 414,000 reduction → 6,666 HP
@@ -4239,7 +4305,7 @@ function App(){
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
-    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
+    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
@@ -4865,6 +4931,25 @@ function App(){
           <div style={{width:200,height:2,background:'linear-gradient(90deg,transparent,#cc2222,transparent)',margin:'8px 0'}}/>
           {circleClearedData.isBoss&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#e8a820',textShadow:'0 0 30px rgba(200,150,0,0.6),0 0 60px rgba(150,100,0,0.3),3px 3px 0 #000',animation:'fadeIn 0.8s ease'}}>⛧ Circle {circleClearedData.circleName} Cleared ⛧</div>}
           {circleClearedData.isBoss&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#ff6600',letterSpacing:3,marginTop:8,animation:'fadeIn 1.2s ease'}}>+1 MAX EMBERS</div>}
+          {circleClearedData.loot&&<div style={{marginTop:12,padding:'12px 24px',background:'rgba(200,150,0,0.12)',border:'1px solid rgba(200,150,0,0.4)',borderRadius:8,animation:'fadeIn 1.6s ease',display:'flex',alignItems:'center',gap:12}}>
+            <div style={{fontSize:40}}>{circleClearedData.loot.emoji}</div>
+            <div>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:'#ffd700',letterSpacing:2}}>{circleClearedData.loot.name}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8b080'}}>{circleClearedData.loot.desc}</div>
+            </div>
+          </div>}
+          {circleClearedData.isBoss&&circleClearedData.circle<9&&(()=>{
+            const nc=circleClearedData.circle+1
+            const nextEnemies=[ENEMIES[nc*3-3],ENEMIES[nc*3-2],ENEMIES[nc*3-1]]
+            return <div style={{marginTop:16,animation:'fadeIn 2s ease',textAlign:'center'}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#cc4444',letterSpacing:3,textTransform:'uppercase'}}>Circle {CIRCLE_NAMES[nc]} Awaits</div>
+              <div style={{display:'flex',gap:16,justifyContent:'center',marginTop:6}}>
+                {nextEnemies.filter(Boolean).map(e=><div key={e.id} style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#886644'}}>
+                  {e.emoji} {Math.ceil(e.maxHp*activeStake.hpMult)} HP
+                </div>)}
+              </div>
+            </div>
+          })()}
         </div>
       </div>}
       {remasterOpen&&<RemasterModal cards={remasterCards} onConfirm={(delUids,copyUid)=>{
