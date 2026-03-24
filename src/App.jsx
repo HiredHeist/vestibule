@@ -1984,7 +1984,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   // ── HUGE PLAY AGAIN + SHARE ────────────────────────────────
   const Buttons=({victory})=>(
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:12,marginTop:8}}>
-      <button onClick={()=>{playSfx('button');onReset()}}
+      <button onClick={()=>{onReset()}}
         style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,letterSpacing:6,
           color:victory?'#ffd700':'#ee2222',
           background:victory?'rgba(60,40,0,0.4)':'rgba(120,0,0,0.3)',
@@ -2013,7 +2013,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
 
   // ── STONED TO THE BONE ─────────────────────────────────────
   if(isStoned) return(
-    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(2,0,0,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(2,0,0,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',gap:16,animation:'fadeIn 0.8s ease',overflowY:'auto',padding:'40px 0 60px'}}>
       <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,180,0,0.04) 2px,rgba(0,180,0,0.04) 4px)',animation:'interlaceFlicker 0.1s steps(1) infinite',pointerEvents:'none',zIndex:0}}/>
       <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 20%,rgba(0,80,0,0.4) 100%)',pointerEvents:'none',zIndex:0,animation:'bgPulse 2s ease-in-out infinite'}}/>
       <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
@@ -2046,7 +2046,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
 
   // ── BEATEN BY BOSS ─────────────────────────────────────────
   if(isBeaten) return(
-    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(6,0,0,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:14,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(6,0,0,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',gap:14,animation:'fadeIn 0.8s ease',overflowY:'auto',padding:'40px 0 60px'}}>
       <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(180,0,0,0.035) 2px,rgba(180,0,0,0.035) 4px)',pointerEvents:'none',zIndex:0}}/>
       <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 30%,rgba(80,0,0,0.5) 100%)',pointerEvents:'none',zIndex:0}}/>
       <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
@@ -2087,7 +2087,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
 
   // ── VICTORY ────────────────────────────────────────────────
   return(
-    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(4,3,1,0.96)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,animation:'fadeIn 0.8s ease',overflow:'auto',padding:'24px 0'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9800,background:'rgba(4,3,1,0.96)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',gap:16,animation:'fadeIn 0.8s ease',overflowY:'auto',padding:'40px 0 60px'}}>
       <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',zIndex:0}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:280,color:'rgba(180,180,180,0.06)',userSelect:'none',lineHeight:1}}>Vestibule</div>
       </div>
@@ -3533,7 +3533,10 @@ function App(){
       else{dblMult=2;dblMode='DOUBLE TIME'}
       dmg=Math.round(dmg*dblMult)
     }
-    const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer').reduce((s,m)=>s+m.atk,0)
+    const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer').reduce((s,m)=>{
+      const ea=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
+      return s+ea
+    },0)
     dmg+=encDmg
     dmg=Math.round(dmg*bandBonus)
     // ── MENTOR LINK strike multiplier ──────────────────────────────
@@ -4911,15 +4914,20 @@ function App(){
           {(()=>{
             const act=stage.filter(m=>m&&!m.tooStoned)
             let dmg=act.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
-              const effAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
+              let effAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
+              if(chosenPacts.includes('clean_living')&&corruption===0)effAtk+=2
+              if(m.encoreReady)effAtk*=2
               return s+effAtk
             },0)
-            for(let _mi=0;_mi<stage.length-1;_mi++){const _mn=stage[_mi],_bs=stage[_mi+1];if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue;if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/15):_mn.atk;const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/15):_bs.atk;dmg+=Math.round((_ma+_ba)*(_bs.mentorMult-1))}}
+            for(let _mi=0;_mi<stage.length-1;_mi++){const _mn=stage[_mi],_bs=stage[_mi+1];if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue;if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){const _em=_bs.mentorMult+(activeStake.mentorBonus||0);const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/15):_mn.atk;const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/15):_bs.atk;dmg+=Math.round((_ma+_ba)*(_em-1))}}
             const dbl=act.some(m=>m.role==='Drummer')
             if(dbl)dmg*=2
             const buf=act.filter(m=>(m.buffCount||0)>0).length
             const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1
-            const fin=Math.floor(dmg*bon)
+            dmg=Math.floor(dmg*bon)
+            if(activeGenre==='RIFF_METAL')dmg=Math.round(dmg*1.15)
+            if(activeGenre==='DOOM_METAL'&&discardsLeft>=MAX_DISCARDS)dmg+=act.length*2
+            const fin=dmg
             return <>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:27,color:'#c8a060',fontWeight:900,textShadow:'0 0 10px rgba(200,160,60,0.6)'}}>Combined Attack</span>
               <span key={fin} style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block'}}>{fin}</span>
