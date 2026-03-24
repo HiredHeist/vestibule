@@ -260,6 +260,74 @@ Special:
 - Death: melancholic, reflective, slow
 - Welcome to Hell: corporate horror, synth + metal fusion
 
+
+---
+
+## 🎯 TOP 10 ADDICTION IDEAS (Priority Ranked)
+
+### Tier 1 — Highest Impact
+- [ ] **1. Screen Shake + Impact Frames** — cheapest, biggest feel improvement
+      Strike: CSS transform jitter 200ms. Boss attack: red flash pulse.
+      Member down: screen darken 0.3s. Rare card play: gold particle burst.
+      Hit sounds already wired — just need visual juice to match.
+
+- [ ] **2. Score Multiplier Chain** — core Balatro-style addiction loop
+      Live multiplier during combat that builds as cards are played.
+      Each card: ×1.2 → ×1.5 → ×2.0 → ×3.5. Displayed HUGE on screen.
+      Strike applies multiplier to damage — number ERUPTS.
+      This is what makes players scream at their screen.
+
+- [ ] **3. Card Upgrade System** — deepest replayability (Slay the Spire campfire)
+      After each circle, upgrade ONE card permanently.
+      Battle Cry +1 ATK → +2 ATK. Encore 1 member → 2 members.
+      Creates "my version" of the deck unique to this run.
+      Players get attached to their upgraded cards.
+
+### Tier 2 — High Impact
+- [ ] **4. Run Modifiers / Daily Mutations** — streamer content gold
+      "Today: All CORRUPT cards cost 1 less. All bosses +20% HP."
+      Every day is a different puzzle. Layer on existing daily seed.
+      Forces new strategies, prevents solved-game feeling.
+
+- [ ] **5. Boss Loot Table** — unique drops per boss
+      Drifter → "Limbo's Echo" (start +1 ember forever).
+      Seducer → "Love Letter" (first card each fight free).
+      Players learn to look forward to specific boss drops.
+      Creates "one more boss" motivation.
+
+- [ ] **6. Risk/Reward Stash Gambling** — instant tension every fight
+      After each fight: "Take reward OR double-or-nothing."
+      Flip a card — succeed = double, fail = lose it all. Always optional.
+      Behind players gamble, ahead players play safe.
+
+### Tier 3 — Medium Impact
+- [ ] **7. Visible Deck Tracker** — click-to-expand from deck count
+      Shows remaining cards in deck (not just count).
+      "I have 2 Infernal Encores left" — informed decisions.
+      Slay the Spire players live in the deck viewer.
+
+- [ ] **8. Combo Discovery Screen** — dramatic reveal, not just flash
+      New Riff Chain: freeze screen 2s, dramatic card A + card B reveal.
+      Save permanently. Current 2.7s flash feels like a notification.
+      Should feel like an achievement.
+
+- [ ] **9. Meta-Progression Skill Tree** — visual tree replacing milestones
+      Lifetime score unlocks nodes: "+1 ATK start" → "Shop +1 card" → etc.
+      Visual tree is more compelling than list-based milestones.
+      Gives purpose to every run, even losses.
+
+- [ ] **10. Endless Mode After Lucifer** — infinite replayability
+      Instead of WTH being one fight, make it endless escalating floors.
+      Each floor: enemy HP ×1.5, contracts every floor.
+      Floor counter as leaderboard score. "I made it to Floor 47."
+
+### Critical Visual Gaps (not addiction features, but blockers)
+- [ ] Card art — emojis are placeholder-tier. Need illustrated card faces.
+- [ ] Animation juice — cards should fly, bounce, flip. Damage pops and fades.
+- [ ] Card hand readability — text too small, too much info crammed.
+- [ ] Turn flow clarity — visual guidance: PLAY CARDS → STRIKE → BOSS ATTACKS.
+- [ ] Dopamine spikes — no moment where numbers explode. Need Balatro chip cascade equivalent.
+
 ### Balance Tweaks (after Big 5)
 - [x] Demonic: +100% HP → +80% HP (hpMult 2.0→1.8, target ~0.5%)
 - [x] Blood: starting corruption 15% → 10% (target ~1.5%)

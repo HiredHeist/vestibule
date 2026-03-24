@@ -1,209 +1,72 @@
 # VESTIBULE — AI Development Handoff Document
-*Last updated: Tuesday, March 24, 2026 at 9:30 PM (JST) — Session 14 end state*
+*Last updated: Tuesday, March 24, 2026 at 12:00 PM (JST) — Session 14 final*
 *This is a living document. Update it at the end of every session.*
 
 ---
 
-## 🎯 WHAT IS THIS PROJECT
+## Quick Start
+```bash
+cd vestibule && npm run dev  # http://localhost:5173/vestibule/
+node vestibule-sim.js 10000 bronze  # Sim v14.0 with all features
+```
 
-**Vestibule** is a roguelite card game built in React/Vite. The player builds a metal band and fights through 9 circles of Hell (27 fights), playing RIFF/EMBER/CORRUPT/UTILITY cards to buff members and deal damage. Death is permanent. Target: Steam at $6.66.
-
-Developer = "player" in dev sessions. Music producer, doom metal, lives in rural Japan. It is his game.
-
-**Core loop:** Pick 2 members → Fight → Shop → Fight → Shop → Circle Boss → repeat × 9
-
----
-
-## 🔧 TECHNICAL SETUP
-
-### Repo
+## Repo & Deploy
 - **GitHub:** github.com/HiredHeist/vestibule (private)
-- **PAT:** `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` (expires ~Jun 17 2026)
-- **Dev server:** `cd vestibule && npm install && npm run dev` → http://localhost:5173/
+- **PAT:** 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 (expires Jun 2026)
+- **Live:** royceprinting.com/vestibule/
+- **Latest commit:** 17fa42a
 
-### Stack
-- React 18 + Vite (single file: `src/App.jsx` ~3700+ lines)
-- `src/App.css` — animations and global styles
-- No backend — pure client-side
-- Claude in Chrome extension → localhost:5173 tab for live monitoring
+## What Is This Game?
+Roguelite card game. Build a doom metal band, fight through 9 Circles of Hell, defeat Lucifer. React/Vite single-file app (App.jsx ~4900 lines). ScaleRoot scales 1920×1080 to any screen.
 
-### Dev Shortcuts
-- **Shift+S** — jump to shop with 69 stash
-- **Shift+D** — jump to death screen
+## Current State — ALL BIG 5 FEATURES COMPLETE
+1. ✅ Riff Chains — 16 two-card combos with visual feedback
+2. ✅ The Pact — 12 boss rewards, 2 offered per boss
+3. ✅ The Descent — circle map, fight skip with rewards (18 rewards)
+4. ✅ Genre Bonus — RIFF/BLACK/PROG/DOOM bonuses at 50% threshold
+5. ✅ Victory Experience — cinematic, stake unlocks, Welcome to Hell bonus boss
 
----
+## Key Systems
+- **41 unique cards**, 69-card starting deck, 4 types (RIFF/CORRUPT/UTILITY/EMBER)
+- **18 musicians**, 8 keywords (FRENZIED/ANCHOR/CORRUPT/DEBUFF/DOUBLE TIME/FOLK MAGIC/SHREDDER/HEXED)
+- **6 difficulty stakes:** Bronze→Demonic (1×→4× score)
+- **Lucifer:** 2-phase boss (420,666 HP reduced by boss kills → 6,666)
+- **Welcome to Hell:** A&R Executive bonus boss (100k HP), contract mechanic
+- **30 sound effects** normalized and wired
+- **Sim v14.0** with pacts, descent, genre, WTH, deck thinning
 
-## 📁 KEY FILES
-
-| File | Purpose |
-|------|---------|
-| `src/App.jsx` | Entire game ~3700+ lines |
-| `src/App.css` | Global styles + keyframes |
-| `TODO.md` | Master task list — update on every push |
-| `HANDOFF.md` | This file |
-| `CLAUDE.md` | Dev context, gotchas, mechanics |
-| `/home/claude/vestibule-sim.js` | Expert AI simulator v10.0 |
-
----
-
-## 🎮 LATEST COMMIT STATE
-
-**Latest commit:** `ea8001e` (Session 13, March 22 2026)
-
-### Shipped in Session 13 (11 pushes):
-1. ✅ **Usurer HP 680→420** — C4 wall solved
-2. ✅ **Remaster stale closure fix** — moved to handleDropOnStage
-3. ✅ **C4 Greed rework** — stashScale → stashSteal 1/2/3🌿 per strike, refund on win
-4. ✅ **C5 Anger rebalance** — rageScale +1/+1/+2, HP 900/1000/1111
-5. ✅ **C8 Fraud rework** — fraudShuffle: discard+redraw 1/2/3 after each strike
-6. ✅ **Circle artifacts functional** — ca1 Goat (+1 ATK), ca2 Hellfire (+2 ember), ca3 Crown (revive), ca4 Wailing (x2 first strike)
-7. ✅ **Boss damage variance removed** — deterministic, no ±2, no CRIT/miss
-8. ✅ **Shop SOLD bugs fixed** — center cards, booster packs, circle artifacts all show SOLD correctly
-9. ✅ **Boss UI cleanup** — removed redundant HP, fixed base damage text, styled Combined Attack
-10. ✅ **Vintage Amp shop pulls from a1-a10** — 10 artifacts rotate randomly (was only 4 circle artifacts)
-11. ✅ **Signal Decay reworked** — "Discard 1, draw 2" at 1 ember
-12. ✅ **Groupie buffed** — 1 ember, Uncommon
-13. ✅ **Sim v10.0 rebuilt** — all changes synced, ready to run 20k
-14-16. ✅ **The Dealer** — Mushrooms (8🌿) & Acid (18🌿) shop items with 10 trip effects
-17. ✅ **Card balance** — Seance ÷4, Herb Money keep stash, Wake Up free, Roadie 2 strikes
-18. ✅ **C9 rework** — Traitor (Paranoia), Betrayer (Soul Thief), new unique passives
-19. ✅ **Lucifer 2-phase** — 420,666→6,666 HP, Phase 1 ice + Phase 2 satan with full reset
-20. ✅ **Drug prices** — shrooms 6🌿, acid 12🌿, 50% stock chance
-21. ✅ **Death Screen Overhaul** — BestGap, UnlockBar, Discoveries, Share Score, huge Play Again
-22. ✅ **Unlock System** — 8 milestones, Tanuki, Lucifer member, Mosh Pit, Blood Ritual, War Drums
-23. ✅ **Double Dealer** — hold 2 drugs at 50k lifetime
-24. ✅ **Daily Seed + Streak Bonuses** — banner on Opening Night, +5/10/20% score
-25. ✅ **Run History** — last 20 runs saved, collapsible on death screen
-26. ✅ **Achievement Badges** — 16 achievements, gold NEW badges on death screen
-27. ✅ **Near-Miss Mechanics** — almost-killed boss, almost-survived member, almost-cleared circle
-28. ✅ **Main Menu** — logo, title, Play/Unlocks/Rules/Options, deck selection placeholder
-29. ✅ **Difficulty Stakes** — 6 stakes (Bronze→Demonic), all modifiers wired
-30. ✅ **Bug Fixes** — card multi-select, Combined Attack rounding, MAX_STRIKES→activeStake, FALLEN heals
-31. ✅ **Circle Cleared Flash** — victory overlay every fight, boss kills get full circle cleared celebration
-32. ✅ **Music System** — 5 tracks (menu/select/battle/shop/death) with crossfade, volume slider in options
-33. ✅ **ESC Pause Overlay** — options accessible anytime mid-game without disrupting state
-34. ✅ **Base Path** — /vestibule/ for royceprinting.com/vestibule deployment
-35. ✅ **Sim v11.1** — Wake Up 1 ember, Herb Money 1 ember, Mosh Pit, Blood Ritual
-36. ✅ **ScaleRoot** — 1920×1080 design canvas, transform:scale to any screen
-37. ✅ **Battle Layout** — boss compacted, stage 290×360 cards 50px gap, hand 340px, right panel visible at all scales
-38. ✅ **Opening Night Layout** — 4×2 grid 220px cards, full-width abilities, uniform heights, no clipping
-39. ✅ **FREE→0 Circle** — consistent ember cost display on all cards
-40. ✅ **Feedback Form** — HTML, 44 questions, mailto:vomitwizard@gmail.com — Wake Up Call 1 ember, Herb Money 1 ember, Mosh Pit + Blood Ritual added — 6 stakes (Bronze→Demonic), all modifiers wired, selector on menu, badge on death screen — logo, title, Play/Unlocks/Rules/Options, deck selection placeholder — almost-killed boss, almost-survived member, almost-cleared circle, almost-beat-best
-14. ✅ **Seance buffed** — 1 ember, corruption ÷ 4 (was 2 embers, ÷ 8)
-15. ✅ **Herb Money reworked** — stash ÷ 2 damage, keep stash (was 10% + lose stash)
-16. ✅ **Wake Up Call free** — 0 embers (was 2)
-17. ✅ **Roadie 2-strike shield** — stoneShield counter (was 1 strike boolean)
-
----
-
-## 📊 CURRENT ENEMY PASSIVES (Session 13)
-
-| Circle | Passive | Mechanic |
-|--------|---------|----------|
-| C1 Limbo | None | Tutorial |
-| C2 Lust | selfbuff +1/+2 | Boss gains damage each strike |
-| C3 Gluttony | cardHeal 2/3/4 | Boss heals per card played |
-| C4 Greed | stashSteal 1/2/3 | Steals herb per strike, refund on win |
-| C5 Anger | rageScale +1/+1/+2 | Extra damage per buffed member |
-| C6 Heresy | corruptPlayer +10/15/20% | Forces corruption each strike |
-| C7 Violence | targetHighestHp 1x/1.5x/2x | Targets highest HP member |
-| C8 Fraud | fraudShuffle 1/2/3 | Discards+redraws N cards after strike |
-| C9 Treachery | damageScaleAtk | Boss gains ATK per 20 damage taken |
-
----
-
-## ⛓ MENTOR LINK SYSTEM (fully implemented Session 12)
-
-Foil/mythic/demonic member placed **directly LEFT** of same-id basic = Mentor Link.
-
-| Tier | ATK Bonus | HP Bonus | Strike Multiplier |
-|------|-----------|----------|------------------|
-| Foil ✨ | +1 ATK | +2 HP | ×1.5 |
-| Mythic ✦ | +2 ATK | +4 HP | ×2.0 |
-| Demonic ⛧ | +4 ATK | +8 HP | ×3.0 |
-
----
-
-## 🃏 SCORE SYSTEM (fully implemented Session 12)
-
+## Session 14 Balance (latest)
 ```
-score = (circleReached × 1000) + (fightsWon × 150) + (totalDamage ÷ 10)
-      + (highestStrike × 5) + (stashEarned × 2) - (tooStonedEvents × 50)
-      + (win bonus: 50,000)
+C1: 50/75/110 HP, 4/5/7 dmg (was 27/42/69)
+C2: 100/150/220 HP, 5/6/7 dmg (was 60/90/140)
+C3: 130/170/230 HP, 5/6/7 dmg (was 80/110/160)
+C4: 340/400/500 HP (was 260/300/420)
+C6 Apostate: 1900 HP (was 2175)
 ```
 
-Grades: GARAGE BAND → OPENING ACT → LOCAL LEGEND → TOURING ACT → HEADLINER → CULT LEGEND → ⛧ LUCIFER SLAYER (win only)
+## Win Rates (Sim v14.0, 10k games)
+Bronze 20.72% | Silver 10.84% | Gold 4.40%
+Obsidian 3.00% | Blood 0.14% | Demonic 0.00%
 
----
+## Critical Gotchas
+1. NEVER put setHand inside setDeck — React Strict Mode double-fires
+2. All draw operations use drawUpTo() with cap at 10
+3. Strike refill = cardsToDrawRef (count of cards played)
+4. ALL setEnemyHp damage calls MUST check if hp<=0 → triggerVictory
+5. Top-level returns: victoryCinematic → welcomeToHell → gameState checks
+6. Apostrophes — use "could not" not "couldn't" in JS strings
+7. UPDATE DOCS ON EVERY PUSH — TODO.md, HANDOFF.md, CLAUDE.md
+8. Base path /vestibule/ — use import.meta.env.BASE_URL for assets
+9. 420 is sacred. Never change card height.
 
-## 🎴 SHOP SYSTEM
+## Dev Shortcuts
+- Shift+S — shop with 69 stash
+- Shift+D — death screen
+- Shift+W — full victory cinematic
+- ESC — pause menu
 
-- **Vintage Amp slot:** pulls from STARTER_ARTIFACTS (a1-a10), rotates each circle boss
-- **Effect Pedal slot:** pulls from STARTER_PASSIVES (p1-p10), rotates each circle boss
-- **Center cards:** 3 random cards, one purchase per card per shop visit
-- **Booster packs:** one purchase per pack type per shop visit
-- **Recruitment packs:** Garage C1+, Touring C2+, Demonic C4+
-- **Circle artifacts (ca1-ca4):** available in boss shops, powerful chase items
-
----
-
-## 🔴 CURRENT PRIORITIES
-
-1. **Run sim v10.0 at 20k** — get survival curve data
-2. **Evaluate War Drums artifact** (+1 Strike) based on sim
-3. **Share score button** — clipboard copy
-4. **Score display playtest**
-5. **Full stress test**
-
----
-
-## ⚠️ CRITICAL CODE GOTCHAS
-
-1. **React Strict Mode double-fire** — NEVER put addLog/addFloat inside `setX(prev => ...)`. Always outside.
-2. **Apostrophes in strings** — use `could not` not `couldn't` in JS strings.
-3. **`resonancecard` not `resonance`** — always check actual id field.
-4. **Named React imports** — `useState`/`useEffect` NOT `React.useState`.
-5. **`selected` in applyCard deps** — MUST be in dep array for Remaster.
-6. **`@import` first in CSS** — must be very first line in App.css.
-7. **Cards that modify hand/deck** — Setlist, Burnset, Remaster, Signal Decay all handled in `handleDropOnStage` not `applyCard`. This avoids stale closure bugs.
-8. **420 is sacred** — never change card height or stash cap.
-9. **Update docs on EVERY push** — TODO.md, HANDOFF.md, CLAUDE.md are the bible.
-
----
-
-## 📝 SESSION HISTORY
-
-| Session | Date | Key Achievements |
-|---------|------|-----------------|
-| 1–5 | Feb 2026 | Core game built |
-| 6 | Feb 2026 | Shop UI, pawn shop, booster packs |
-| 7 | Feb 2026 | AI sim, economy rebalance |
-| 8 | Feb 2026 | Death screens, Hellquake, Fire & Recruit |
-| 9 | Mar 2026 | 13 bugs fixed, balance pass |
-| 10 | Mar 21 | Batch 1–3: sold state, death screens, hand over-cap, Setlist, Remaster, Amp Overload |
-| 11 | Mar 22 | 9 double-fire bugs, Demo Tape, Distortion +15%, Batch A |
-| 12 | Mar 22 | Mentor Link, Hoarder cut, pack odds, score system, grades, personal best, sim v8.0 |
-| 13 | Mar 22 | 11 pushes: Usurer cut, Remaster fix, C4/C5/C8 rework, circle artifacts, shop bugs, UI cleanup, Signal Decay rework, Groupie buff, sim v10.0 |
-
----
-
-*Update this at end of every session. Paste HANDOFF.md + TODO.md into new chat to continue seamlessly.*
-
-
-## Session 14 — The Big 5 Features
-
-### Planned Features (in build order):
-1. **Riff Chains** — 16 two-card combo system with visual/audio feedback + damage bonus
-2. **The Pact** — Post-boss reward choice (pick 1 of 2, or skip). 12 pact pool, indicator on stage
-3. **The Descent** — Circle map with fight skip option + rewards (Balatro blind-selection style)
-4. **Genre Bonus** — Build identity system (RIFF METAL/BLACK METAL/PROG ROCK/DOOM METAL) + deck thinning
-5. **The Encore** — Lucifer victory cinematic + win-exclusive unlocks + Welcome to Hell bonus boss
-
-### Design Decisions:
-- 16 combos cover every card in the deck (every card participates in at least 1 combo)
-- Pact choices include Skip option to preserve current state
-- Pact indicator shows on stage with hover tooltips
-- Stash tightening: 15% off mid/late rewards (NOT early circles)
-- Deck thinning at Pawn Shop is the single biggest replayability improvement
-- Welcome to Hell (not "Bonus Circle 10") — A&R Executive with contract mechanic
-- A&R cutscene: corporate office SVG, typewriter text, choice to enter or walk away
+## Next Priority: Addiction Features
+See TODO.md "TOP 10 ADDICTION IDEAS" section. Top 3:
+1. Screen shake + impact frames (cheapest, biggest feel improvement)
+2. Score multiplier chain (Balatro-style core loop)
+3. Card upgrade system (Slay the Spire campfire depth)
