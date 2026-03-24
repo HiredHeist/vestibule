@@ -4040,7 +4040,7 @@ function App(){
         setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setLastRiffPlayed(null)
         setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
         setContractsPlayed(0);setPendingDraw(0);wthStrikesRef.current=0
-        const allCards=[...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
+        const allCards=[...handRef.current,...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
         const hs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
         setHand(allCards.slice(0,hs));setDeck(allCards.slice(hs));setDiscardPile([])
         handTargetRef.current=hs
@@ -4109,7 +4109,7 @@ function App(){
       return scanMentorLinks(reset)
     })
     // Redeal hand from current deck+discard
-    const allCards=[...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
+    const allCards=[...handRef.current,...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
     const _lhs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
     setHand(allCards.slice(0,_lhs))
     setDeck(allCards.slice(_lhs))
@@ -4880,7 +4880,7 @@ function App(){
     </div>
   )
   if(gameState==='campfire'){
-    const allDeckCards=[...deck,...discardPile]
+    const allDeckCards=[...deck,...hand,...discardPile]
     const uniqueUpgradeable=allDeckCards.filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i).filter(c=>!c.consumable&&CARD_UPGRADES[c.id]&&!upgradedCards.includes(c.id))
     return(
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',gap:12,padding:'24px 40px',overflow:'hidden'}}>
@@ -4895,6 +4895,7 @@ function App(){
           return <div key={c.id} onClick={()=>{
             setUpgradedCards(p=>[...p,c.id])
             setDeck(p=>p.map(dc=>dc.id===c.id?Object.assign({},dc,{upgraded:true,name:(dc.name||'').replace(/\+$/,'')+'+'}):dc))
+            setHand(p=>p.map(dc=>dc.id===c.id?Object.assign({},dc,{upgraded:true,name:(dc.name||'').replace(/\+$/,'')+'+'}):dc))
             setDiscardPile(p=>p.map(dc=>dc.id===c.id?Object.assign({},dc,{upgraded:true,name:(dc.name||'').replace(/\+$/,'')+'+'}):dc))
             if(hasHp){
               const alive=stage.filter(m=>m&&!m.tooStoned)
