@@ -1772,7 +1772,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         border:isSelected?`2px solid #cc0000`:isHovered?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
         borderRadius:7,cursor:'grab',position:'relative',
         transformOrigin:'bottom center',
-        transform:isDragging?'scale(0.85) rotate(5deg)':isHovered?'translateY(-52px) scale(1.18) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
+        transform:isDragging?'scale(0.85) rotate(5deg)':isHovered?'translateY(-80px) scale(1.5) rotate(0deg)':isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
         zIndex:isDragging?0:isHovered?9999:isSelected?50+index:10+index,
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:'2px 4px 16px rgba(0,0,0,0.75)',
@@ -2484,6 +2484,8 @@ function App(){
   const [hellquakeAnim,setHellquakeAnim]=useState(null)
   const [milestoneFlash,setMilestoneFlash]=useState(null) // {text,color} for boss HP milestones
   const [strikeMult,setStrikeMult]=useState(1.0) // score multiplier that builds per card played
+  const strikeMultRef=useRef(1.0)
+  useEffect(()=>{strikeMultRef.current=strikeMult},[strikeMult])
   const [memberBuffs,setMemberBuffs]=useState({}) // {uid: [{text,color},...]} persistent until strike
   const addBuff=useCallback((uid,text,color)=>{setMemberBuffs(p=>({...p,[uid]:[...(p[uid]||[]),{text,color}]}))},[])  
   const [clutchFlash,setClutchFlash]=useState(null) // {text,color} for clutch moments
@@ -3576,7 +3578,7 @@ function App(){
     setTimeout(()=>setActiveTripEffect(null),4000)
   },[tripUsedThisFight,strikesLeft])
 
-  const handleStrike=useCallback(()=>{playSfx('strike');triggerShake(8,300);setStrikeMult(1.0);setMemberBuffs({});
+  const handleStrike=useCallback(()=>{playSfx('strike');triggerShake(8,300);const currentMult=strikeMultRef.current;setStrikeMult(1.0);setMemberBuffs({});
     if(animPhase!=='idle'||strikesLeft<=0||enemyHp<=0)return
     const actives=stage.filter(m=>m&&!m.tooStoned)
     if(actives.length===0){addLog('⚠ No active members!');return}
@@ -3670,7 +3672,7 @@ function App(){
     }
     const hasFolkMagic=actives.some(m=>m.keyword==='FOLK MAGIC')
     const folkMagicFired=hasFolkMagic&&Math.random()<0.2
-    addLog('⚔ Band attacks for '+finalDmg+'!'+(strikeMult>1.0?' (x'+strikeMult.toFixed(2)+')':'')+(hasDbl?' ('+dblMode+' ×'+dblMult+'!)':'')+(folkMagicFired?' 🪈 FOLK MAGIC!':''))
+    addLog('⚔ Band attacks for '+dmg+'!'+(hasDbl?' ('+dblMode+' ×'+dblMult+'!)':'')+(folkMagicFired?' 🪈 FOLK MAGIC!':''))
 
     const bc=getCenter(bossRef)
     let delay=0
@@ -3701,7 +3703,7 @@ function App(){
     setTimeout(function(){
       playHit();setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
       setProjectiles([])
-      const tripMult=fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION'?2:1;const finalDmg=Math.round(dmg*tripMult*strikeMult);const newEHp=Math.max(0,enemyHp-finalDmg)
+      const tripMult=fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION'?2:1;const finalDmg=Math.round(dmg*tripMult*currentMult);const newEHp=Math.max(0,enemyHp-finalDmg)
       setEnemyHp(newEHp)
       // damageScaleAtk: boss gains ATK per 20 damage taken
       if(enemy.passiveId==='luciferBoss'){
@@ -3709,13 +3711,13 @@ function App(){
         const phaseTotalDmg=luciferPhase===1?(3333-newEHp):(3333-newEHp)
         setBossRageAtk(Math.floor(Math.max(0,phaseTotalDmg)/20)*atkGain)
       }
-      addFloat('TOTAL: '+finalDmg+(strikeMult>1.0?' (x'+strikeMult.toFixed(2)+')':''),bc.x,bc.y-60,'#ff2200',true)
+      addFloat('TOTAL: '+finalDmg+(currentMult>1.0?' (x'+currentMult.toFixed(2)+')':''),bc.x,bc.y-60,'#ff2200',true)
       if(folkMagicFired){
         setEmbers(maxEmbers)
         addFloat('🪈 FOLK MAGIC! Full Embers!',window.innerWidth/2,window.innerHeight*0.35,'#44ddaa',true)
         addLog('🪈 Folk Magic proc! All Embers refunded.')
       }
-      updStat('totalDamage',dmg);updStat('highestStrike',dmg,true);if(dmg>=500){playSfx('big_hit');triggerShake(8,250)}
+      updStat('totalDamage',finalDmg);updStat('highestStrike',finalDmg,true);if(finalDmg>=500){playSfx('big_hit');triggerShake(8,250)}
 
       setStage(function(p){return p.map(function(m){
         if(!m)return null
@@ -5095,8 +5097,8 @@ function App(){
 
         {/* LEFT COLUMN: Deck/Discard — absolute */}
         <div style={{position:'absolute',left:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:6,alignItems:'center',justifyContent:'center',background:'rgba(20,12,4,0.7)',borderRadius:'0 6px 6px 0',padding:'8px 10px',border:'1px solid rgba(100,65,15,0.3)',borderLeft:'none',width:100}}>
-          <DeckPile count={deck.length} label="Deck" onClick={()=>setDeckViewOpen(true)}/>
-          <DeckPile count={discardPile.length} label="Discard" onClick={()=>setDiscardViewOpen(true)}/>
+          <DeckPile count={deck.length} label="Deck" onClick={()=>setDeckViewOpen(true)} cards={deck}/>
+          <DeckPile count={discardPile.length} label="Discard" onClick={()=>setDiscardViewOpen(true)} cards={discardPile}/>
         </div>
 
         {/* SORT + DEALER — beside left column */}
@@ -5141,9 +5143,9 @@ function App(){
         {/* RIGHT COLUMN: Strike/Discard/Embers/Stats — absolute, clamped to right edge */}
         <div style={{position:'absolute',right:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-evenly',padding:'8px 14px',background:'rgba(10,5,2,0.75)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none',width:210}}>
           <div style={{width:'100%'}}>
-            {strikeMult>1.0&&<div style={{textAlign:'center',marginBottom:6,padding:'4px 0',background:'rgba(255,140,0,0.15)',border:'1px solid rgba(255,140,0,0.4)',borderRadius:4}}>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff8800',letterSpacing:2,fontWeight:900}}>MULTIPLIER</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#ffd700',textShadow:'0 0 16px rgba(255,200,0,0.6)',lineHeight:1}}>x{strikeMult.toFixed(2)}</div>
+            {strikeMult>1.0&&<div style={{textAlign:'center',marginBottom:6,padding:'4px 0',background:'rgba(255,100,0,0.15)',border:'1px solid rgba(255,100,0,0.5)',borderRadius:4}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff6600',letterSpacing:2,fontWeight:900}}>MULTIPLIER</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#ff8800',textShadow:'0 0 16px rgba(255,120,0,0.6)',lineHeight:1}}>x{strikeMult.toFixed(2)}</div>
             </div>}
             <button onClick={handleStrike} disabled={!canStrike}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'10px 14px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:4,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:'100%'}}>⚔ Strike</button>
