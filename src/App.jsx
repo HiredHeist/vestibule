@@ -4288,7 +4288,43 @@ function App(){
     )
   }
 
-  if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
+  // VICTORY CINEMATIC — renders above ALL screens
+  if(victoryCinematic)return(
+    <div style={{width:1920,height:1080,position:'relative',background:'#000',overflow:'hidden',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12}}>
+      {/* Phase 1: Screen cracks */}
+      {victoryCinematic.phase>=1&&<div style={{position:'absolute',inset:0,pointerEvents:'none',opacity:victoryCinematic.phase>=2?0.3:0.8,transition:'opacity 2s'}}>
+        <svg viewBox="0 0 1920 1080" style={{width:'100%',height:'100%'}}><g stroke="#cc1111" strokeWidth="2" fill="none" opacity="0.7">
+          <path d="M960 0 L940 200 L900 350 L850 500 L800 540 L700 600"/><path d="M960 0 L980 180 L1020 380 L1080 500 L1150 580"/>
+          <path d="M940 200 L800 250 L650 300"/><path d="M980 180 L1100 220 L1250 280"/>
+          <path d="M900 350 L750 400 L600 500"/><path d="M1020 380 L1200 420 L1350 500"/>
+          <path d="M850 500 L700 700 L600 900 L550 1080"/><path d="M1080 500 L1200 700 L1350 900 L1400 1080"/>
+          <path d="M800 540 L500 650 L300 800 L100 1080"/><path d="M1150 580 L1400 680 L1600 820 L1800 1080"/>
+        </g></svg>
+      </div>}
+      {/* Phase 2: THE DEVIL IS DEAD */}
+      {victoryCinematic.phase>=2&&<div style={{animation:'fadeIn 1.5s ease',textAlign:'center'}}>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:110,color:'#cc1111',textShadow:'0 0 60px rgba(200,0,0,0.8),0 0 120px rgba(150,0,0,0.5),0 0 200px rgba(100,0,0,0.3),4px 4px 0 #000',letterSpacing:12,lineHeight:1}}>⛧ THE DEVIL IS DEAD ⛧</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:32,color:'#e8d090',marginTop:16,animation:'fadeIn 2s ease 0.5s both',fontStyle:'italic',textShadow:'0 0 20px rgba(200,160,60,0.5)'}}>Your band survived the 9 Circles of Hell</div>
+      </div>}
+      {/* Phase 3: Band members rise */}
+      {victoryCinematic.phase>=3&&<div style={{display:'flex',gap:24,marginTop:20,animation:'fadeIn 1s ease'}}>
+        {victoryCinematic.bandNames.map((name,i)=>(
+          <div key={i} style={{textAlign:'center',animation:'fadeIn 0.5s ease '+(i*0.3)+'s both'}}>
+            <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,color:'#ffd700',textShadow:'0 0 20px rgba(255,215,0,0.6)',letterSpacing:2}}>{name}</div>
+            <div style={{fontSize:10,color:'#ffd700',marginTop:4}}>★</div>
+          </div>
+        ))}
+      </div>}
+      {/* Phase 4: Stake unlocked + click to continue */}
+      {victoryCinematic.phase>=4&&<div style={{animation:'fadeIn 1s ease',textAlign:'center',marginTop:24}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#e8a820',letterSpacing:4,textShadow:'0 0 20px rgba(200,140,0,0.6)'}}>⛧ {victoryCinematic.stakeName.toUpperCase()} CONQUERED ⛧</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#c8a040',marginTop:8,fontStyle:'italic',cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setGameState('end')}}>Click anywhere to continue</div>
+      </div>}
+      {victoryCinematic.phase>=4&&<div style={{position:'absolute',inset:0,cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setGameState('end')}}/>}
+    </div>
+  )
+
+    if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(gameState==='descent'&&descentData)return(
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>⛧ The Descent ⛧</div>
@@ -4451,39 +4487,6 @@ function App(){
       </div>}
       {/* CIRCLE CLEARED FLASH */}
 
-      {/* VICTORY CINEMATIC — Lucifer kill sequence */}
-      {victoryCinematic&&<div style={{position:'absolute',inset:0,zIndex:9999,pointerEvents:victoryCinematic.phase>=4?'auto':'none',background:victoryCinematic.phase>=1?'rgba(0,0,0,'+(Math.min(0.95,victoryCinematic.phase*0.25))+')':'transparent',transition:'background 1.5s ease',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,overflow:'hidden'}}>
-        {/* Phase 1: Screen cracks */}
-        {victoryCinematic.phase>=1&&<div style={{position:'absolute',inset:0,pointerEvents:'none',opacity:victoryCinematic.phase>=2?0.3:0.8,transition:'opacity 2s'}}>
-          <svg viewBox="0 0 1920 1080" style={{width:'100%',height:'100%'}}><g stroke="#cc1111" strokeWidth="2" fill="none" opacity="0.7">
-            <path d="M960 0 L940 200 L900 350 L850 500 L800 540 L700 600"/><path d="M960 0 L980 180 L1020 380 L1080 500 L1150 580"/>
-            <path d="M940 200 L800 250 L650 300"/><path d="M980 180 L1100 220 L1250 280"/>
-            <path d="M900 350 L750 400 L600 500"/><path d="M1020 380 L1200 420 L1350 500"/>
-            <path d="M850 500 L700 700 L600 900 L550 1080"/><path d="M1080 500 L1200 700 L1350 900 L1400 1080"/>
-            <path d="M800 540 L500 650 L300 800 L100 1080"/><path d="M1150 580 L1400 680 L1600 820 L1800 1080"/>
-          </g></svg>
-        </div>}
-        {/* Phase 2: THE DEVIL IS DEAD */}
-        {victoryCinematic.phase>=2&&<div style={{animation:'fadeIn 1.5s ease',textAlign:'center'}}>
-          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:110,color:'#cc1111',textShadow:'0 0 60px rgba(200,0,0,0.8),0 0 120px rgba(150,0,0,0.5),0 0 200px rgba(100,0,0,0.3),4px 4px 0 #000',letterSpacing:12,lineHeight:1}}>⛧ THE DEVIL IS DEAD ⛧</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:32,color:'#e8d090',marginTop:16,animation:'fadeIn 2s ease 0.5s both',fontStyle:'italic',textShadow:'0 0 20px rgba(200,160,60,0.5)'}}>Your band survived the 9 Circles of Hell</div>
-        </div>}
-        {/* Phase 3: Band members rise */}
-        {victoryCinematic.phase>=3&&<div style={{display:'flex',gap:24,marginTop:20,animation:'fadeIn 1s ease'}}>
-          {victoryCinematic.bandNames.map((name,i)=>(
-            <div key={i} style={{textAlign:'center',animation:'fadeIn 0.5s ease '+(i*0.3)+'s both'}}>
-              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,color:'#ffd700',textShadow:'0 0 20px rgba(255,215,0,0.6)',letterSpacing:2}}>{name}</div>
-              <div style={{fontSize:10,color:'#ffd700',marginTop:4}}>★</div>
-            </div>
-          ))}
-        </div>}
-        {/* Phase 4: Stake unlocked */}
-        {victoryCinematic.phase>=4&&<div style={{animation:'fadeIn 1s ease',textAlign:'center',marginTop:24}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#e8a820',letterSpacing:4,textShadow:'0 0 20px rgba(200,140,0,0.6)'}}>⛧ {victoryCinematic.stakeName.toUpperCase()} CONQUERED ⛧</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#c8a040',marginTop:8,fontStyle:'italic'}}>Click anywhere to continue</div>
-          <div style={{position:'absolute',inset:0,cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setGameState('end')}}/>
-        </div>}
-      </div>}
       {circleClearedData&&<div style={{position:'absolute',inset:0,zIndex:9750,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:0,background:'rgba(0,0,0,0.94)',animation:'fadeIn 0.3s ease'}}>
         <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',opacity:0.06}}>
           <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:864,height:864,objectFit:'contain'}}/>
