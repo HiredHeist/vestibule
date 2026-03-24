@@ -21,7 +21,7 @@
 ### TIER 3 — Nice to Have (depth / replayability)
 - [x] **Achievement-Gated Starter Decks** — 6 alternate decks: Purist, Corrupted, Speedrunner, Hoarder, Minimalist, Sabbath. Each unlocked by specific achievements. Turns 1 game into 7.
 - [x] **Daily Seed + Leaderboard** — Wordle-style daily habit. One shared seed, global comparison, streak badges. Requires simple backend or seed-encoded scoring.
-- [ ] **Corruption Gambling Mini-Game** — At 25/50/75% corruption thresholds, offer risk/reward gambles. The 50% coin flip is pure gambling psychology.
+- [x] **Corruption Threshold System** — At 25/50/75% corruption thresholds, offer risk/reward gambles. The 50% coin flip is pure gambling psychology.
 - [x] **Band Legacy System** — Musicians persist across runs, gain experience, earn nicknames. XCOM-style attachment. Death of a veteran member HURTS.
 - [x] **The Encore (Endless Mode)** — Post-Lucifer infinite scaling. Circle 10+: random passives, x1.2 HP per circle. Remix Bosses. Escalating visual distortion.
 

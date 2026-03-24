@@ -2389,7 +2389,7 @@ function EventScreen({event,onChoose}){
   </div>)
 }
 
-function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRoll}){
+function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRoll,corruption}){
   const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35
   return(
     <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:180}}>
@@ -2408,6 +2408,33 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
             {[25,50,75].map(pp=><div key={pp} style={{position:'absolute',top:0,bottom:0,left:`${pp}%`,width:1,background:'rgba(0,0,0,0.35)',zIndex:2}}/>)}
             <div style={{height:'100%',background:isLow?'linear-gradient(90deg,#660000,#cc0000,#ff2200)':'linear-gradient(90deg,#7a0000,#aa1100,#cc2200)',width:`${pct}%`,transition:'width 0.7s cubic-bezier(0.4,0,0.2,1)'}}/>
             <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'rgba(255,230,180,1)',letterSpacing:3,textShadow:'0 0 8px rgba(0,0,0,0.99),0 1px 3px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)} HP REMAINING</div>
+          </div>
+        </div>
+        {/* CORRUPTION BAR with threshold markers */}
+        <div style={{width:'100%',marginTop:3}}>
+          <div style={{width:'100%',height:16,background:'rgba(30,10,20,0.8)',border:'1px solid rgba(100,30,60,0.5)',borderRadius:2,overflow:'hidden',position:'relative'}}>
+            {/* Threshold tick marks */}
+            {[25,50,75].map(t=><div key={t} style={{position:'absolute',top:0,bottom:0,left:t+'%',width:2,background:corruption>=t?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.08)',zIndex:3}}/>)}
+            {/* Fill bar */}
+            <div style={{height:'100%',width:Math.min(100,corruption)+'%',transition:'width 0.7s ease',
+              background:corruption>=100?'linear-gradient(90deg,#660044,#cc0066,#ff0088)':
+                corruption>=75?'linear-gradient(90deg,#550022,#aa0044,#dd0066)':
+                corruption>=50?'linear-gradient(90deg,#440011,#880033)':
+                corruption>=25?'linear-gradient(90deg,#330011,#660022)':
+                'linear-gradient(90deg,#220008,#440011)',
+              boxShadow:corruption>=75?'0 0 12px rgba(200,0,80,0.5)':'none'}}/>
+            {/* Label */}
+            <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,
+                color:corruption>=100?'#ff88aa':corruption>=75?'#ff6688':corruption>=50?'#dd4466':'#aa3344',
+                letterSpacing:2,textShadow:'0 0 6px rgba(0,0,0,0.95)'}}>
+                CORRUPTION {corruption}%
+              </span>
+              {corruption>=25&&corruption<50&&<span style={{fontSize:9,color:'#cc6677',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>⚠ Whispers</span>}
+              {corruption>=50&&corruption<75&&<span style={{fontSize:9,color:'#dd5566',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>⚠ Hunger</span>}
+              {corruption>=75&&corruption<100&&<span style={{fontSize:9,color:'#ee4455',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>⚠ Madness</span>}
+              {corruption>=100&&<span style={{fontSize:9,color:'#ff2244',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>☠ Possessed</span>}
+            </div>
           </div>
         </div>
       </div>
@@ -3242,7 +3269,10 @@ function App(){
   const [circlePreview,setCirclePreview]=useState(null) // next circle preview data
   const [collectedLoot,setCollectedLoot]=useState([]) // boss loot IDs collected this run
   const [circleSplash,setCircleSplash]=useState(null)
-  const [pendingEvent,setPendingEvent]=useState(null) // current HELL_EVENT or null
+  const [pendingEvent,setPendingEvent]=useState(null)
+  const [possessionFired,setPossessionFired]=useState(false)
+  const [corruptionFlash,setCorruptionFlash]=useState(null)
+  const lastCorruptThreshold=useRef(0) // current HELL_EVENT or null
   const [eventsSeenThisRun,setEventsSeenThisRun]=useState([]) // ids of events seen // {circleNum, circleName, circleEmoji} for 3s transition
   const milestonesFiredRef=useRef({half:false,quarter:false,tenth:false})
   const [phaseBanner,setPhaseBanner]=useState('play') // 'play','strike','boss'
@@ -4265,6 +4295,38 @@ function App(){
     return()=>document.head.removeChild(el)
   },[])
 
+  // ── CORRUPTION THRESHOLD FLASH NOTIFICATIONS ──
+  useEffect(()=>{
+    if(gameState!=='playing')return
+    const thresholds=[
+      {at:25,name:'THE WHISPERS',desc:'Weakest member takes 1 damage each fight',color:'#cc6677'},
+      {at:50,name:'THE HUNGER',desc:'Shop prices increased by 25%',color:'#dd5566'},
+      {at:75,name:'THE MADNESS',desc:'15% chance to lose a card each Strike',color:'#ee4455'},
+      {at:100,name:'THE POSSESSION',desc:'Boss damage +3. CORRUPT members +3 ATK!',color:'#ff2244'},
+    ]
+    for(const t of thresholds){
+      if(corruption>=t.at&&lastCorruptThreshold.current<t.at){
+        setCorruptionFlash(t)
+        playSfx('big_hit')
+        setTimeout(()=>setCorruptionFlash(null),3000)
+        addLog('🔮 '+t.name+' — '+t.desc)
+      }
+    }
+    lastCorruptThreshold.current=Math.max(lastCorruptThreshold.current,...thresholds.filter(t=>corruption>=t.at).map(t=>t.at))
+  },[corruption,gameState])
+
+  // ── CORRUPTION 100% POSSESSION — one-time +3 ATK for CORRUPT members ──
+  useEffect(()=>{
+    if(corruption>=100&&!possessionFired&&gameState==='playing'){
+      setPossessionFired(true)
+      setStage(p=>p.map(m=>{
+        if(!m||m.tooStoned||m.keyword!=='CORRUPT')return m
+        addLog('☠ POSSESSION! '+m.name+' embraces the darkness! +3 ATK!')
+        return Object.assign({},m,{atk:m.atk+3,permAtkBonus:(m.permAtkBonus||0)+3})
+      }))
+    }
+  },[corruption,possessionFired,gameState])
+
   // ── DEV SHORTCUT: Shift+S = jump to shop ─────────────────────────
   useEffect(function(){
     function onKey(e){
@@ -4382,7 +4444,16 @@ function App(){
     setTimeout(()=>setActiveTripEffect(null),4000)
   },[tripUsedThisFight,strikesLeft])
 
-  const handleStrike=useCallback(()=>{playSfx('strike');triggerShake(8,300);const currentMult=strikeMultRef.current;setStrikeMult(1.0);setMemberBuffs({});
+  const handleStrike=useCallback(()=>{playSfx('strike');triggerShake(8,300)
+    // CORRUPTION THRESHOLD: 75% — The Madness (15% chance discard random card)
+    if(corruption>=75&&Math.random()<0.15&&handRef.current.length>1){
+      const idx=Math.floor(Math.random()*handRef.current.length)
+      const lost=handRef.current[idx]
+      const newHand=[...handRef.current];newHand.splice(idx,1)
+      setHand(newHand);handRef.current=newHand
+      setDiscardPile(p=>[...p,lost]);discRef.current=[...discRef.current,lost]
+      addLog('🌀 MADNESS! Corruption forces you to drop '+lost.name+'!')
+    };const currentMult=strikeMultRef.current;setStrikeMult(1.0);setMemberBuffs({});
     if(animPhase!=='idle'||strikesLeft<=0||enemyHp<=0)return
     const actives=stage.filter(m=>m&&!m.tooStoned)
     if(actives.length===0){addLog('⚠ No active members!');return}
@@ -4628,7 +4699,8 @@ function App(){
           }
         }
         else{scaledBaseDmg=stakeBaseDmg}
-        const actualDmg=(fightTripBuff==='ASTRAL PROJECTION')?0:Math.max(1,Math.round(scaledBaseDmg)-bossDebuff)
+        const possessionBonus=corruption>=100?3:0
+        const actualDmg=(fightTripBuff==='ASTRAL PROJECTION')?0:Math.max(1,Math.round(scaledBaseDmg)+possessionBonus-bossDebuff)
           const ti=stage.indexOf(target)
           if(luciferAoE&&actualDmg>0){
             // Phase 2: AoE — split damage across ALL alive members
@@ -4852,6 +4924,11 @@ function App(){
     setEnemy(nextEnemy);setEnemyHp(Math.ceil(nextEnemy.maxHp*activeStake.hpMult*(encoreMode?2.0:1.0)))
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
+    // CORRUPTION THRESHOLD: 25% — The Whispers (weakest takes 1 dmg)
+    if(corruption>=25){
+      setStage(p=>{const alive=p.filter(m=>m&&!m.tooStoned);if(alive.length===0)return p;const weakest=alive.reduce((a,b)=>a.hp<b.hp?a:b);return p.map(m=>m&&m.uid===weakest.uid?Object.assign({},m,{hp:Math.max(1,m.hp-1)}):m)})
+      addLog('🔮 The Whispers... '+corruption+'% corruption gnaws at your weakest.')
+    }
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
     setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({});victoryFiredRef.current=false
@@ -5066,7 +5143,8 @@ function App(){
 
 
   const handleShopSpend=useCallback((cost,type,item)=>{
-    const effectiveCost=chosenPacts.includes('merchants_eye')?Math.max(1,Math.floor(cost*0.8)):cost
+    const hungerMult=corruption>=50?1.25:1.0
+    const effectiveCost=Math.ceil((chosenPacts.includes('merchants_eye')?Math.max(1,Math.floor(cost*0.8)):cost)*hungerMult)
     if(stash<effectiveCost)return
     setStash(p=>p-effectiveCost)
     playSfx('buy')
@@ -5258,7 +5336,7 @@ function App(){
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
-    setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setEncoreMode(false);setEncoreCircle(0)
+    setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
   }
 
@@ -5869,6 +5947,10 @@ function App(){
           {luciferCinematic.phase===2?'Band fully restored. All strikes reset. Finish this.':'8 Circle Bosses defeated. Their echoes weaken the Devil.'}</div>
       </div>}
       {/* CLUTCH FLASH */}
+      {corruptionFlash&&<div style={{position:'absolute',top:'35%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9600,textAlign:'center',animation:'fadeIn 0.3s ease',pointerEvents:'none'}}>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:corruptionFlash.color,textShadow:'0 0 30px '+corruptionFlash.color+',0 0 60px rgba(200,0,60,0.5),2px 2px 0 #000',letterSpacing:4}}>⚠ {corruptionFlash.name} ⚠</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#cc8899',marginTop:6,textShadow:'0 0 10px rgba(0,0,0,0.9)'}}>{corruptionFlash.desc}</div>
+      </div>}
       {clutchFlash&&<div style={{position:'absolute',top:'40%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9250,pointerEvents:'none',fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:clutchFlash.color,textShadow:'0 0 40px '+clutchFlash.color+',0 0 80px '+clutchFlash.color+'66,4px 4px 0 #000',letterSpacing:8,animation:'popFloat 2.5s ease-out forwards',textAlign:'center'}}>{clutchFlash.text}</div>}
       {/* BOSS HP MILESTONE FLASH */}
       {milestoneFlash&&<div style={{position:'absolute',top:'35%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9200,pointerEvents:'none',fontFamily:"'BogartsMetalFont',cursive",fontSize:90,color:milestoneFlash.color,textShadow:'0 0 40px '+milestoneFlash.color+',0 0 80px '+milestoneFlash.color+'66,4px 4px 0 #000',letterSpacing:10,animation:'popFloat 1.8s ease-out forwards'}}>{milestoneFlash.text}</div>}
@@ -5956,7 +6038,7 @@ function App(){
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
         <div style={{padding:'8px 16px 6px',position:'relative',zIndex:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0}}>
           <div style={{width:'100%',maxWidth:950,background:'rgba(8,0,0,0.55)',border:'2px solid rgba(160,20,0,0.8)',borderRadius:8,padding:'0',overflow:'hidden',animation:'bossGlow 2s ease-in-out infinite',boxShadow:'0 0 30px rgba(150,0,0,0.4),inset 0 0 40px rgba(80,0,0,0.3)'}}>
-            <BossSection enemy={enemy} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll}/>
+            <BossSection enemy={enemy} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll} corruption={corruption}/>
           </div>
         </div>
         <div style={{position:'relative',zIndex:5,background:'rgba(20,11,3,0.42)',borderTop:'2px solid rgba(60,35,5,0.45)',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>
