@@ -263,7 +263,7 @@ const STAKES=[
   {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.0,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Standard difficulty.'},
   {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.15,dmgAdd:1,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +15% HP. Enemies +1 damage.'},
   {id:'gold',name:'Gold',color:'#ffd700',border:'#ffd700',hpMult:1.30,dmgAdd:2,priceMult:1.25,scoreMult:2.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +30% HP. Enemies +2 damage. Shop prices +25%.'},
-  {id:'obsidian',name:'Obsidian',color:'#2a2a3a',border:'#6a6a8a',hpMult:1.50,dmgAdd:2,priceMult:1.25,scoreMult:2.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +50% HP. No free heal after fights. Drugs 50% more expensive.'},
+  {id:'obsidian',name:'Obsidian',color:'#7a7a9a',border:'#6a6a8a',hpMult:1.50,dmgAdd:2,priceMult:1.25,scoreMult:2.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +50% HP. No free heal after fights. Drugs 50% more expensive.'},
   {id:'blood',name:'Blood',color:'#8b0000',border:'#cc0000',hpMult:1.75,dmgAdd:3,priceMult:1.25,scoreMult:3.0,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +75% HP. Start with 4 Embers. Corruption starts at 10%.'},
   {id:'demonic',name:'Demonic ⛧',color:'#ff0000',border:'#ff0000',hpMult:1.8,dmgAdd:4,priceMult:1.5,scoreMult:4.0,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,drugPriceMult:2.0,badTripChance:0.15,desc:'Bosses +80% HP. Max 3 Strikes. Bad trips 15%. Pure hell.'},
 ]
@@ -282,7 +282,7 @@ const STAKE_UNLOCKS={
   bronze:{id:'su_bronze',name:'Devil\'s Advocate',type:'card',emoji:'😈',desc:'New card: All members +1 ATK per circle cleared this run.',color:'#cd7f32'},
   silver:{id:'su_silver',name:'Lucifer\'s Crown',type:'artifact',emoji:'👑',desc:'New artifact: +2 ATK all members at fight start.',color:'#c0c0c0'},
   gold:{id:'su_gold',name:'Fallen Angel',type:'member',emoji:'🕊',desc:'New member: 12 ATK, 4 HP. GLASS keyword — dies in one hit.',color:'#ffd700'},
-  obsidian:{id:'su_obsidian',name:'Soul of the Damned',type:'passive',emoji:'💀',desc:'New pedal: Start each fight at 50% corruption. Corruption cards cost 1 less.',color:'#2a2a3a'},
+  obsidian:{id:'su_obsidian',name:'Soul of the Damned',type:'passive',emoji:'💀',desc:'New pedal: Start each fight at 50% corruption. Corruption cards cost 1 less.',color:'#7a7a9a'},
   blood:{id:'su_blood',name:'Bloodstained',type:'cosmetic',emoji:'🩸',desc:'Cosmetic: Bloodstained card back. Marks you as elite.',color:'#8b0000'},
   demonic:{id:'su_demonic',name:'⛧ GOD KILLER ⛧',type:'title',emoji:'⛧',desc:'Permanent title on main menu. You are a god.',color:'#ff0044'},
 }
@@ -717,7 +717,7 @@ function BoosterScreen({onComplete,seed}){
               {m.locked?(
                 <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'18px 8px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)',gap:6}}>
                   <div style={{fontSize:30,opacity:0.5}}>🔒</div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#5a4020',letterSpacing:2,textAlign:'center',textTransform:'uppercase'}}>Can you find the key?</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#9a7a40',letterSpacing:2,textAlign:'center',textTransform:'uppercase'}}>Can you find the key?</div>
                 </div>
               ):(
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 12px 8px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
@@ -739,7 +739,7 @@ function BoosterScreen({onComplete,seed}){
 
       {/* ABILITY EXPLANATION BOX */}
       <div style={{background:'rgba(10,6,2,0.85)',border:'1px solid rgba(100,65,15,0.4)',borderRadius:8,width:'100%',maxWidth:1700,flexShrink:0,marginTop:2,padding:'10px 24px'}}>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:6}}>⚗ Band Abilities — What Do They Mean?</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#c8a040',textTransform:'uppercase',textAlign:'center',marginBottom:6}}>⚗ Band Abilities — What Do They Mean?</div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
           {[
             ['FRENZIED','#ee2222','⚡','Each time the boss is defeated, this member gains +1 ATK permanently.'],
@@ -842,7 +842,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
               <div style={{fontSize:44,textAlign:'center',padding:'14px 0',background:'rgba(0,0,0,0.3)'}}>{m.emoji}</div>
               <div style={{padding:'0 10px 12px'}}>
                 <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:20,color:'#e8d090',textAlign:'center',marginBottom:2}}>{m.name}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#6a5030',textAlign:'center',letterSpacing:1,marginBottom:6}}>{m.role}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#c0a050',textAlign:'center',letterSpacing:1,marginBottom:6}}>{m.role}</div>
                 <div style={{display:'flex',justifyContent:'space-between',padding:'4px 6px',background:'rgba(0,0,0,0.4)',borderRadius:3,marginBottom:8}}>
                   <div style={{textAlign:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#ee2222',fontWeight:900}}>ATK</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,color:'#ee2222'}}>{m.atk}</div></div>
                   <div style={{alignSelf:'center',fontFamily:"'MBScribblesFont',serif",fontSize:9,color:bc,fontWeight:700}}>{m.keyword}</div>
@@ -918,7 +918,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
 
       <button onClick={onClose} style={{marginTop:30,fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:4,padding:'14px 50px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'#aa7030',cursor:'pointer',textTransform:'uppercase'}}
         onMouseEnter={e=>{e.currentTarget.style.borderColor='#8a6030';e.currentTarget.style.color='#c8a040'}}
-        onMouseLeave={e=>{e.currentTarget.style.borderColor='#4a3010';e.currentTarget.style.color='#7a5020'}}>
+        onMouseLeave={e=>{e.currentTarget.style.borderColor='#4a3010';e.currentTarget.style.color='#c8a040'}}>
         Close Shop
       </button>
     </div>
@@ -1191,7 +1191,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:700,letterSpacing:2,
               padding:'12px 32px',background:'rgba(40,25,8,0.6)',
               border:'1px solid rgba(120,80,20,0.4)',borderRadius:6,
-              color:'#6a5020',cursor:'pointer',textTransform:'uppercase'}}>
+              color:'#aa8a40',cursor:'pointer',textTransform:'uppercase'}}>
             Pass — Take Nothing
           </button>}
           {remaining===0&&<button onClick={()=>setOpenPackModal(null)}
@@ -1747,7 +1747,7 @@ function DeckPile({count,label}){
         </div>)}
       </div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:26,fontWeight:900,color:'#c8a060'}}>{count}</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,letterSpacing:2,color:'#6a5a30',textTransform:'uppercase'}}>{label}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,letterSpacing:2,color:'#c8a040',textTransform:'uppercase'}}>{label}</div>
     </div>
   )
 }
@@ -1815,7 +1815,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   // ── UNLOCK PROGRESS BAR ────────────────────────────────────
   const UnlockBar=()=>(<div style={{width:'100%',maxWidth:600,margin:'8px 0'}}>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
-      <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#8a6020',letterSpacing:2,textTransform:'uppercase'}}>Next Unlock</span>
+      <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#c8a040',letterSpacing:2,textTransform:'uppercase'}}>Next Unlock</span>
       <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#aa8030'}}>{newLifetime.toLocaleString()} / {nextUnlock.score.toLocaleString()}</span>
     </div>
     <div style={{height:24,background:'rgba(20,12,4,0.8)',border:'1px solid rgba(100,65,15,0.5)',borderRadius:12,overflow:'hidden',position:'relative'}}>
@@ -1824,7 +1824,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#fff',textShadow:'0 0 8px rgba(0,0,0,0.9)',letterSpacing:1}}>{nextUnlock.emoji} {nextUnlock.label}</span>
       </div>
     </div>
-    {unlocksEarned>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'#665533',fontStyle:'italic',textAlign:'center',marginTop:3}}>{unlocksEarned} unlock{unlocksEarned>1?'s':''} earned so far</div>}
+    {unlocksEarned>0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'#aa8a50',fontStyle:'italic',textAlign:'center',marginTop:3}}>{unlocksEarned} unlock{unlocksEarned>1?'s':''} earned so far</div>}
   </div>)
 
   // ── DISCOVERIES ────────────────────────────────────────────
@@ -1842,7 +1842,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
       {newAchIds.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'center',marginBottom:6}}>
         {newAchIds.map(id=>{const a=ACHIEVEMENTS.find(x=>x.id===id);if(!a)return null;return <div key={id} style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#ffd700',background:'rgba(60,40,0,0.8)',border:'2px solid #ffd700',borderRadius:6,padding:'4px 12px',letterSpacing:1,animation:'throb 1.5s ease-in-out infinite'}}>{a.emoji} NEW: {a.label}</div>})}
       </div>}
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#665533',textAlign:'center'}}>{allAchievements.length} / {ACHIEVEMENTS.length} achievements</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#aa8a50',textAlign:'center'}}>{allAchievements.length} / {ACHIEVEMENTS.length} achievements</div>
     </div>)
   }
 
@@ -1884,7 +1884,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   // Shared stats grid
   const StatsGrid=()=>(
     <div style={{background:'rgba(20,12,4,0.88)',border:'1px solid rgba(100,65,15,0.35)',borderRadius:8,padding:'28px 48px',minWidth:780}}>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#8a6020',textTransform:'uppercase',textAlign:'center',marginBottom:18}}>Run Statistics</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#c8a040',textTransform:'uppercase',textAlign:'center',marginBottom:18}}>Run Statistics</div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'5px 48px'}}>
         {[
           ['Circle Reached',isVictory?'ALL 9 ⛧':circleReached+' / 9'],
@@ -1914,7 +1914,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   const [showHistory,setShowHistory]=useState(false)
   const runHistory=getRunHistory()
   const RunHistory=()=>runHistory.length>1?(<div style={{width:'100%',maxWidth:780,margin:'4px 0'}}>
-    <div onClick={()=>setShowHistory(p=>!p)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#8a6020',letterSpacing:2,textTransform:'uppercase',cursor:'pointer',textAlign:'center',padding:'4px 0'}}>
+    <div onClick={()=>setShowHistory(p=>!p)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#c8a040',letterSpacing:2,textTransform:'uppercase',cursor:'pointer',textAlign:'center',padding:'4px 0'}}>
       {showHistory?'▼ Hide Past Runs':'▶ Past Runs ('+runHistory.length+')'}</div>
     {showHistory&&<div style={{background:'rgba(20,12,4,0.88)',border:'1px solid rgba(100,65,15,0.35)',borderRadius:6,padding:'10px 16px',maxHeight:200,overflowY:'auto'}}>
       {runHistory.slice(0,20).map((r,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'3px 0',borderBottom:'1px solid rgba(80,50,10,0.12)',fontFamily:"'MBScribblesFont',serif",fontSize:13}}>
@@ -1928,9 +1928,9 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
 
   const BottomRow=()=>(
     <div style={{display:'flex',gap:20,alignItems:'center'}}>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#5a4a20',letterSpacing:2}}>SEED: {seed.toString(16).toUpperCase()}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#9a8a40',letterSpacing:2}}>SEED: {seed.toString(16).toUpperCase()}</div>
       {isDailyRun&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#e8a820',letterSpacing:2,padding:'3px 12px',border:'1px solid #e8a820',borderRadius:3}}>🌍 DAILY CHALLENGE</div>}
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#4a3a18',cursor:'pointer',letterSpacing:1}}
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#8a7a40',cursor:'pointer',letterSpacing:1}}
         onClick={()=>navigator.clipboard&&navigator.clipboard.writeText(seed.toString(16).toUpperCase())}>📋 Copy Seed</div>
     </div>
   )
@@ -1992,7 +1992,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <StatsGrid/>
         <RunHistory/>
         <BottomRow/>
-                {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#443322',letterSpacing:3}}>RUN #{totalRuns}</div>}
+                {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#886644',letterSpacing:3}}>RUN #{totalRuns}</div>}
         <Buttons victory={false}/>
       </div>
     </div>
@@ -2014,7 +2014,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         {/* Boss name */}
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:88,color:'#cc2222',lineHeight:1,textShadow:'-3px 0 rgba(255,0,0,0.7),3px 0 rgba(180,0,0,0.5),0 0 50px rgba(160,0,0,0.7),3px 3px 0 #000',textAlign:'center'}}>{enemy?.name||'The Vestibule'}</div>
         {/* Circle/subtitle */}
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:3,color:'#552222',textTransform:'uppercase'}}>{enemy?.circle||''} · {enemy?.subtitle||''}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:3,color:'#aa4444',textTransform:'uppercase'}}>{enemy?.circle||''} · {enemy?.subtitle||''}</div>
         {/* Sassy tagline */}
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:28,color:'#cc6666',fontStyle:'italic',textAlign:'center',textShadow:'0 0 20px rgba(180,0,0,0.5)',maxWidth:700,marginTop:4}}>"{enemy?.tagline||'The Vestibule claims another soul.'}"</div>
                 {/* Score */}
@@ -2033,7 +2033,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <StatsGrid/>
         <RunHistory/>
         <BottomRow/>
-                {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#443322',letterSpacing:3}}>RUN #{totalRuns}</div>}
+                {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#886644',letterSpacing:3}}>RUN #{totalRuns}</div>}
         <Buttons victory={false}/>
       </div>
     </div>
@@ -2064,7 +2064,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <StatsGrid/>
         <RunHistory/>
         <BottomRow/>
-                {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#443322',letterSpacing:3}}>RUN #{totalRuns}</div>}
+                {(totalRuns||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#886644',letterSpacing:3}}>RUN #{totalRuns}</div>}
         <Buttons victory={true}/>
       </div>
     </div>
@@ -2109,7 +2109,7 @@ function DemonicConflictScreen({conflict,onChoice}){
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#660000',textShadow:'0 0 20px rgba(200,0,0,0.8)'}}>VS</div>
         <MemberCard m={incoming} onPick={()=>onChoice(incoming,existing)} label="NEWLY ARRIVED"/>
       </div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#4a3020',letterSpacing:2,textAlign:'center'}}>THE UNCHOSEN WILL BE PERMANENTLY REMOVED</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#8a6a40',letterSpacing:2,textAlign:'center'}}>THE UNCHOSEN WILL BE PERMANENTLY REMOVED</div>
     </div>
   )
 }
@@ -2166,9 +2166,9 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
         })}
       </div>
       <button onClick={onPass}
-        style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'12px 40px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:3,color:'#7a5020',cursor:'pointer',transition:'all 0.2s'}}
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'12px 40px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:3,color:'#c8a040',cursor:'pointer',transition:'all 0.2s'}}
         onMouseEnter={e=>{e.currentTarget.style.borderColor='#8a6030';e.currentTarget.style.color='#c8a040'}}
-        onMouseLeave={e=>{e.currentTarget.style.borderColor='#4a3010';e.currentTarget.style.color='#7a5020'}}>
+        onMouseLeave={e=>{e.currentTarget.style.borderColor='#4a3010';e.currentTarget.style.color='#c8a040'}}>
         Pass — No Recruitment
       </button>
 
@@ -2195,7 +2195,7 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
               </button>
             </div>
           ))}
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#664422',textAlign:'center',marginTop:10,letterSpacing:1}}>Stash: {stash}🌿 · Refund shown per member</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#aa7744',textAlign:'center',marginTop:10,letterSpacing:1}}>Stash: {stash}🌿 · Refund shown per member</div>
         </div>
       )}
     </div>
@@ -4198,7 +4198,7 @@ function App(){
     return(
       <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9900,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',gap:10,padding:'20px 40px',overflow:'hidden'}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Unlocks</div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#8a6020',letterSpacing:2}}>Lifetime Score: {lt.toLocaleString()}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#c8a040',letterSpacing:2}}>Lifetime Score: {lt.toLocaleString()}</div>
         {/* TABS */}
         <div style={{display:'flex',gap:6,flexWrap:'wrap',justifyContent:'center'}}>
           {tabs.map(t=><button key={t.id} onClick={()=>setUnlockTab(t.id)}
@@ -4242,7 +4242,7 @@ function App(){
             style={{fontSize:36,color:unlockPage<totalPages-1?'#e8a820':'#333',background:'none',border:'none',cursor:unlockPage<totalPages-1?'pointer':'default',padding:'10px',flexShrink:0}}>▶</button>
         </div>
         {/* PAGE INDICATOR */}
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#6a5a30',letterSpacing:2}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#c8a040',letterSpacing:2}}>
           Page {unlockPage+1} of {totalPages} · {items.filter(i=>i.done).length} / {items.length} {unlockTab==='combos'?'discovered':'unlocked'}
         </div>
         <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'10px 40px',cursor:'pointer'}}>← Back</button>
@@ -4341,8 +4341,8 @@ function App(){
 
           {/* Stats row */}
           <div style={{display:'flex',gap:20,marginBottom:16}}>
-            {lt>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#665533',letterSpacing:2}}>LIFETIME: {lt.toLocaleString()}</div>}
-            {(totalRunsPlayed||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#665533',letterSpacing:2}}>RUNS: {totalRunsPlayed}</div>}
+            {lt>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#aa8a50',letterSpacing:2}}>LIFETIME: {lt.toLocaleString()}</div>}
+            {(totalRunsPlayed||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#aa8a50',letterSpacing:2}}>RUNS: {totalRunsPlayed}</div>}
             {streak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#ff6600',letterSpacing:2}}>🔥 {streak} DAY STREAK</div>}
             {(personalBest||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#aa8030',letterSpacing:2}}>BEST: {personalBest.toLocaleString()}</div>}
           </div>
@@ -4383,14 +4383,14 @@ function App(){
 
           {/* Stake + Deck selection */}
           <div style={{marginTop:20,display:'flex',flexDirection:'column',gap:10,alignItems:'center'}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#8a6020',letterSpacing:3,textTransform:'uppercase'}}>Difficulty Stake</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8a040',letterSpacing:3,textTransform:'uppercase'}}>Difficulty Stake</div>
             <div style={{display:'flex',gap:8}}>
               {STAKES.map((sk,i)=>{
                 const unlocked=getUnlockedStakes().some(u=>u.id===sk.id)
                 const active=activeStakeId===sk.id
                 return <div key={sk.id} onClick={()=>{if(unlocked){setActiveStakeId(sk.id);localStorage.setItem('vst_active_stake',sk.id)}}}
                   style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,
-                    color:active?'#000':unlocked?sk.color:'#4a3a18',
+                    color:active?'#000':unlocked?sk.color:'#8a7a40',
                     background:active?sk.color:'rgba(20,12,4,0.6)',
                     border:'2px solid '+(unlocked?sk.color:'rgba(60,40,15,0.3)'),
                     borderRadius:6,padding:'8px 16px',cursor:unlocked?'pointer':'default',
@@ -4401,7 +4401,7 @@ function App(){
               })}
             </div>
             <div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:activeStake.color,fontStyle:'italic',textAlign:'center',maxWidth:500}}>{activeStake.desc}{activeStake.scoreMult>1?' Score ×'+activeStake.scoreMult:''}</div>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#665533',letterSpacing:2}}>DECK: Demo Deck</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#aa8a50',letterSpacing:2}}>DECK: Demo Deck</div>
           </div>
         </div>
       </div>
@@ -4455,12 +4455,12 @@ function App(){
     <div style={{width:1920,height:1080,position:'relative',background:'#0a0604',overflow:'hidden',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16}}>
       <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 50% 80%,rgba(40,20,5,0.4),transparent)',pointerEvents:'none'}}/>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:26,color:'#aa8a50',fontStyle:'italic',textAlign:'center',maxWidth:700}}>Your band escaped Hell. But someone is waiting at the gate.</div>
-      <div style={{width:200,height:3,background:'linear-gradient(90deg,transparent,#8a6020,transparent)',margin:'8px 0'}}/>
+      <div style={{width:200,height:3,background:'linear-gradient(90deg,transparent,#c8a040,transparent)',margin:'8px 0'}}/>
       <div style={{fontSize:80,marginBottom:8}}>🕴</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#c8a060',textAlign:'center',maxWidth:700,lineHeight:1.6,fontStyle:'italic'}}>
         "Congratulations. Truly impressive. But per your contract, you owe us one more album. Care to... renegotiate?"
       </div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#6a5030',textAlign:'center',marginTop:4}}>— The Executive</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c0a050',textAlign:'center',marginTop:4}}>— The Executive</div>
       <div style={{display:'flex',gap:30,marginTop:24}}>
         <button onClick={()=>{
           setWelcomeToHell('shopping')
@@ -4484,7 +4484,7 @@ function App(){
           Walk Away — End Run
         </button>
       </div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#4a3a20',marginTop:12,fontStyle:'italic'}}>Your Lucifer victory is already saved. No penalty for losing.</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#aa8a50',marginTop:12,fontStyle:'italic'}}>Your Lucifer victory is already saved. No penalty for losing.</div>
     </div>
   )
 
@@ -4494,7 +4494,7 @@ function App(){
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:28,color:'#e8d090',fontStyle:'italic'}}>The Second Album</div>
       <div style={{fontSize:100,marginTop:16}}>🕴</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#aa8a50',letterSpacing:2}}>THE EXECUTIVE — 100,000 HP</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#6a5030',fontStyle:'italic'}}>The real Devil wears a suit.</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c0a050',fontStyle:'italic'}}>The real Devil wears a suit.</div>
       <div style={{width:300,height:6,background:'rgba(200,0,0,0.3)',borderRadius:3,marginTop:12,overflow:'hidden'}}>
         <div style={{height:'100%',background:'#cc1111',animation:'loadBar 2.5s ease-in-out forwards',width:0}}/>
       </div>
@@ -4543,7 +4543,7 @@ function App(){
                 cursor:isSkipped?'default':'pointer',transition:'all 0.15s'}}
                 onMouseEnter={e=>{if(!isSkipped)e.currentTarget.style.background=isBoss?'linear-gradient(180deg,#3a1010,#1a0808)':'linear-gradient(180deg,#2a1810,#140c08)'}}
                 onMouseLeave={e=>{e.currentTarget.style.background=isBoss?'linear-gradient(180deg,#2a0a0a,#140404)':'linear-gradient(180deg,#1a1008,#0a0604)'}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:isBoss?'#cc1111':'#8a6020',letterSpacing:3,textTransform:'uppercase'}}>{isBoss?'CIRCLE BOSS':'FIGHT '+(i+1)+' OF 3'}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:isBoss?'#cc1111':'#c8a040',letterSpacing:3,textTransform:'uppercase'}}>{isBoss?'CIRCLE BOSS':'FIGHT '+(i+1)+' OF 3'}</div>
                 <div style={{fontSize:48}}>{enemy.emoji}</div>
                 <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:isBoss?'#ee2222':'#e8d090',textShadow:isBoss?'0 0 20px rgba(200,0,0,0.5)':'none',letterSpacing:2}}>{enemy.name}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#aa8040'}}>{Math.ceil(enemy.maxHp*activeStake.hpMult)} HP</div>
@@ -4619,7 +4619,7 @@ function App(){
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
-  if(gameState==='end')return <EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/>
+  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative'}}><EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
 
   return(
     <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
@@ -4864,7 +4864,7 @@ function App(){
             const active=genres.find(g=>g.pct>=0.5)
             const top=genres.reduce((a,b)=>a.pct>b.pct?a:b)
             return <div style={{width:'100%',borderTop:'1px solid rgba(100,65,15,0.3)',paddingTop:4,marginTop:2}}>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:active?active.color:'#6a5a30',letterSpacing:1,textAlign:'center',fontWeight:active?900:400}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:active?active.color:'#c8a040',letterSpacing:1,textAlign:'center',fontWeight:active?900:400}}>
                 {active?active.name+' ⚡':top.name+' '+Math.round(top.pct*100)+'%'}
               </div>
               {active&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:active.color,textAlign:'center',opacity:0.8}}>{active.bonus}</div>}
