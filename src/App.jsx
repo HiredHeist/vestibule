@@ -1815,19 +1815,19 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
   return(
     <div ref={innerRef} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:6,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%'}}>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#ff4422',textTransform:'uppercase',fontWeight:900,textShadow:'0 0 18px rgba(255,60,20,0.9),0 0 40px rgba(200,30,0,0.6),0 0 2px rgba(255,255,255,0.3)'}}>{enemy.circle} · {enemy.subtitle}</div>
-      <div style={{display:'flex',alignItems:'center',gap:14,width:'100%'}}>
-        <div style={{width:90,height:90,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:6,display:'flex',alignItems:'center',justifyContent:'center',fontSize:50,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:'hidden',transition:'all 0.5s'}}>
+      <div style={{display:'flex',alignItems:'center',gap:0,width:'100%'}}>
+        <div style={{width:120,height:120,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:6,display:'flex',alignItems:'center',justifyContent:'center',fontSize:65,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:'hidden',transition:'all 0.5s'}}>
           {enemy.emoji}
           {isLow&&<div style={{position:'absolute',inset:0,background:'rgba(120,0,0,0.2)',animation:'pulse 1.2s ease infinite alternate'}}/>}
           {debuff>0&&<div style={{position:'absolute',bottom:2,right:2,background:'rgba(0,80,160,0.9)',border:'1px solid #4488ff',borderRadius:4,padding:'1px 4px',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:'#88aaff'}}>-{debuff}dmg</div>}
         </div>
-        <div style={{flex:1}}>
-          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'#120804',lineHeight:1,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 1px 1px 0 rgba(0,0,0,0.5)`:'1px 1px 0 rgba(0,0,0,0.5)',marginBottom:4}}>{enemy.name}</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'#ff4444',fontStyle:'italic',lineHeight:1.3,fontWeight:900,textShadow:'0 0 10px rgba(255,40,40,0.5)'}}>{enemy.passive}</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#cc2222',marginTop:2,letterSpacing:1,fontWeight:900}}>Base damage: {enemy.baseDmg} per Strike</div>
+        <div style={{flex:1,paddingLeft:20}}>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'#120804',lineHeight:1,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 1px 1px 0 rgba(0,0,0,0.5)`:'1px 1px 0 rgba(0,0,0,0.5)',marginBottom:6}}>{enemy.name}</div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:26,color:'#ff4444',fontStyle:'italic',lineHeight:1.3,fontWeight:900,textShadow:'0 0 10px rgba(255,40,40,0.5)'}}>{enemy.passive}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#cc2222',marginTop:4,letterSpacing:1,fontWeight:900}}>Base damage: {enemy.baseDmg} per Strike</div>
         </div>
       </div>
-      <div style={{width:'80%',margin:'0 auto'}}>
+      <div style={{width:'calc(100% - 140px)',marginLeft:'auto',marginRight:0}}>
         <div style={{width:'100%',height:30,background:'rgba(50,25,8,0.75)',border:'1px solid rgba(100,55,15,0.6)',borderRadius:2,overflow:'hidden',boxShadow:'inset 0 2px 6px rgba(0,0,0,0.7)',position:'relative'}}>
           {[25,50,75].map(pp=><div key={pp} style={{position:'absolute',top:0,bottom:0,left:`${pp}%`,width:1,background:'rgba(0,0,0,0.35)',zIndex:2}}/>)}
           <div style={{height:'100%',background:isLow?'linear-gradient(90deg,#660000,#cc0000,#ff2200)':'linear-gradient(90deg,#7a0000,#aa1100,#cc2200)',width:`${pct}%`,transition:'width 0.7s cubic-bezier(0.4,0,0.2,1)'}}/>
