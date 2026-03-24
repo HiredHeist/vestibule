@@ -380,13 +380,13 @@ function applyCardSim(card,gs,enemy){
     case 'overdrive':if(gs.corruption>=(card.upgraded?50:60))gs._overdriveActive=true;break;
     case 'infencore':gs._infencoreActive=true;break;
     case 'possessedperf':gs._possessedActive=true;break;
-    case 'powertap':{gs.embers+=(card.upgraded?3:2)+(gs.passives.some(p=>p.id==='p4')?1:0);break}
-    case 'staticcharge':gs.embers+=gs.corruption===0?4:2;break;
-    case 'tappedout':gs._tappedOutNext=true;if(gs.passives.some(p=>p.id==='p4'))gs.embers+=1;break;
-    case 'ampoverload':{gs.embers+=3+(gs.passives.some(p=>p.id==='p4')?1:0);gs._discardsLeft=Math.max(0,gs._discardsLeft-1);break}
-    case 'groupie':{gs.embers+=2+(gs.passives.some(p=>p.id==='p4')?1:0);gs._drawExtra=(gs._drawExtra||0)+1;break}
-    case 'soundboard':{gs.embers+=2+(gs.passives.some(p=>p.id==='p4')?1:0);gs._drawNextStrike=(gs._drawNextStrike||0)+1;break}
-    case 'setbreak':gs.embers+=3;break;
+    case 'powertap':{gs.embers=Math.min(gs.maxEmbers,gs.embers+(card.upgraded?3:2))+(gs.passives.some(p=>p.id==='p4')?1:0);break}
+    case 'staticcharge':gs.embers=Math.min(gs.maxEmbers,gs.embers+(gs.corruption===0?4:2));break;
+    case 'tappedout':gs._tappedOutNext=true;if(gs.passives.some(p=>p.id==='p4'))gs.embers=Math.min(gs.maxEmbers,gs.embers+1);break;
+    case 'ampoverload':{gs.embers=Math.min(gs.maxEmbers,gs.embers+3+(gs.passives.some(p=>p.id==='p4')?1:0));gs._discardsLeft=Math.max(0,gs._discardsLeft-1);break}
+    case 'groupie':{gs.embers=Math.min(gs.maxEmbers,gs.embers+2+(gs.passives.some(p=>p.id==='p4')?1:0));gs._drawExtra=(gs._drawExtra||0)+1;break}
+    case 'soundboard':{gs.embers=Math.min(gs.maxEmbers,gs.embers+2+(gs.passives.some(p=>p.id==='p4')?1:0));gs._drawNextStrike=(gs._drawNextStrike||0)+1;break}
+    case 'setbreak':gs.embers=Math.min(gs.maxEmbers,gs.embers+3);break;
     case 'setlist':gs._drawExtra=(gs._drawExtra||0)+2;break;
     case 'doubledown':gs._nextCardFree=true;break;
     case 'wakeup':alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));stage.forEach(m=>{if(m.tooStoned){m.tooStoned=false;m.hp=m.maxHp}});break;
@@ -485,7 +485,7 @@ function simFight(gs,phaseHp,luciferPhase){
     gs._directDmg=0;gs._overdriveActive=false;gs._infencoreActive=false;gs._possessedActive=false;gs._nextCardFree=false;
     const handSize=HAND_SIZE+(gs._speedDemon?1:0)+(gs._drawNextStrike||0);
     drawCards(gs,Math.max(0,handSize-gs.hand.length));gs._drawNextStrike=0;
-    if(gs._tappedOutNext){gs.embers+=5;gs._tappedOutNext=false}
+    if(gs._tappedOutNext){gs.embers=Math.min(gs.maxEmbers,gs.embers+5);gs._tappedOutNext=false}
     gs.embers=gs.maxEmbers;
     // Genre bonus: PROG_ROCK +1 draw
     gs._activeGenre=computeGenre(gs);
