@@ -6,12 +6,12 @@
 const NUM_GAMES=parseInt(process.argv[2])||5000;
 const STAKE_ID=process.argv[3]||'bronze';
 const STAKES={
-  bronze:{id:'bronze',name:'Bronze',hpMult:1.0,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.0},
-  silver:{id:'silver',name:'Silver',hpMult:1.15,dmgAdd:1,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.5},
-  gold:{id:'gold',name:'Gold',hpMult:1.30,dmgAdd:2,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:2.0},
-  obsidian:{id:'obsidian',name:'Obsidian',hpMult:1.50,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,scoreMult:2.5},
-  blood:{id:'blood',name:'Blood',hpMult:1.75,dmgAdd:3,maxStrikes:4,startEmbers:4,startCorruption:15,healAfterFight:true,scoreMult:3.0},
-  demonic:{id:'demonic',name:'Demonic ⛧',hpMult:2.0,dmgAdd:4,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,scoreMult:4.0}
+  bronze:{id:'bronze',name:'Bronze',hpMult:1.0,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.0,mentorBonus:0},
+  silver:{id:'silver',name:'Silver',hpMult:1.15,dmgAdd:1,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.5,mentorBonus:0.05},
+  gold:{id:'gold',name:'Gold',hpMult:1.30,dmgAdd:2,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:2.0,mentorBonus:0.10},
+  obsidian:{id:'obsidian',name:'Obsidian',hpMult:1.50,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,scoreMult:2.5,mentorBonus:0.12},
+  blood:{id:'blood',name:'Blood',hpMult:1.75,dmgAdd:3,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:true,scoreMult:3.0,mentorBonus:0.35},
+  demonic:{id:'demonic',name:'Demonic ⛧',hpMult:1.8,dmgAdd:4,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,scoreMult:4.0,mentorBonus:0.75}
 };
 const STAKE=STAKES[STAKE_ID]||STAKES.bronze;
 
@@ -146,7 +146,7 @@ function scanMentorLinks(stage){
     const tier=left.demonic?'demonic':left.mythic?'mythic':left.foil?'foil':null;if(!tier)continue;
     if(left.role===right.role&&!right.foil&&!right.mythic&&!right.demonic){const bonus=MENTOR_LINK_BONUS[tier];
       if(!right.mentorBonusApplied){right.atk+=bonus.atk;right.permAtkBonus=(right.permAtkBonus||0)+bonus.atk;right.maxHp+=bonus.hp;right.hp=Math.min(right.hp+bonus.hp,right.maxHp);right.mentorBonusApplied=true;TRACK.linksFormed++}
-      links.push({mentorIdx:i,protegeIdx:i+1,tier,mult:bonus.mult})}}return links;
+      links.push({mentorIdx:i,protegeIdx:i+1,tier,mult:bonus.mult+STAKE.mentorBonus})}}return links;
 }
 function generateCandidates(pack){const pool=ALL_MUSICIANS.filter(m=>!m.locked),candidates=[],usedIds=new Set();
   for(let i=0;i<pack.numCandidates;i++){const available=pool.filter(m=>!usedIds.has(m.id));if(available.length===0)break;const base=pick(available);usedIds.add(base.id);
