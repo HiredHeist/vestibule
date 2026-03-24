@@ -16,7 +16,7 @@
 - [x] **Post-Run Highlights** — "You were 2 strikes from beating the Archfraud. Try again?" + biggest strike, closest call, longest combo chain. Loss aversion is the most powerful Play Again trigger.
 - [x] **End Screen Stats Bigger** — Individual stat boxes, screenshot-worthy layout. Current stats are small and forgettable.
 - [x] **Card Mastery System** — 41 cards × 4 tiers (Novice→Adept→Master→Legendary). Persistent progress bars across runs. Completionists play for weeks.
-- [ ] **Boss Trophy Wall** — "Hall of Damnation" in main menu. 29 boss slots (27 + Lucifer + Executive). Empty "???" slots drive completionists. Demonic-stake frames glow red.
+- [x] **Boss Trophy Wall** — "Hall of Damnation" in main menu. 29 boss slots (27 + Lucifer + Executive). Empty "???" slots drive completionists. Demonic-stake frames glow red.
 
 ### TIER 3 — Nice to Have (depth / replayability)
 - [ ] **Achievement-Gated Starter Decks** — 6 alternate decks: Purist, Corrupted, Speedrunner, Hoarder, Minimalist, Sabbath. Each unlocked by specific achievements. Turns 1 game into 7.

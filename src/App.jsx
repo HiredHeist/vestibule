@@ -539,6 +539,26 @@ function MemberPortrait({id,size,style}){
   return <img className="squiggle" src={src} alt={id} style={{width:s2,height:s2*1.4,objectFit:'contain',objectPosition:'top center',imageRendering:'auto',filter:'contrast(1.1) brightness(0.95)',...(style||{})}}/>
 }
 
+
+// ═══════════════════════════════════════════════════════════
+// BOSS TROPHY WALL — persistent kill tracking
+// ═══════════════════════════════════════════════════════════
+function getTrophyData(){try{return JSON.parse(localStorage.getItem('vst_trophies')||'{}')}catch(e){return{}}}
+function saveTrophyData(d){localStorage.setItem('vst_trophies',JSON.stringify(d))}
+function recordTrophyKill(enemyId,stakeId,damage,strikes){
+  const d=getTrophyData()
+  if(!d[enemyId])d[enemyId]={kills:0,bestStake:null,bestDamage:0,bestStrikes:99,firstKill:null}
+  const t=d[enemyId]
+  t.kills++
+  if(!t.firstKill)t.firstKill=new Date().toISOString().slice(0,10)
+  if(damage>t.bestDamage)t.bestDamage=damage
+  if(strikes<t.bestStrikes)t.bestStrikes=strikes
+  const stakeOrder=['bronze','silver','gold','obsidian','blood','demonic']
+  if(!t.bestStake||stakeOrder.indexOf(stakeId)>stakeOrder.indexOf(t.bestStake))t.bestStake=stakeId
+  saveTrophyData(d)
+  return t
+}
+
 function seededRng(seed){let s=seed;return function(){s=Math.imul(48271,s)|0;return(s&0x7fffffff)/0x7fffffff}}
 
 function buildDeck(seed){
@@ -2003,6 +2023,138 @@ function DamageBreakdown({data,onDone}){
 // ═══════════════════════════════════════════════════════════
 // MASTERY GALLERY — persistent card mastery progress
 // ═══════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
+// BOSS TROPHY WALL — "Hall of Damnation"
+// ═══════════════════════════════════════════════════════════
+function TrophyWall({onClose}){
+  const trophies=getTrophyData()
+  const totalKills=Object.values(trophies).reduce((s,t)=>s+t.kills,0)
+  const totalDefeated=Object.keys(trophies).length
+  const stakeColors={bronze:'#cd7f32',silver:'#c0c0c0',gold:'#ffd700',obsidian:'#6a0dad',blood:'#cc0000',demonic:'#ff0044'}
+  const stakeNames={bronze:'Bronze',silver:'Silver',gold:'Gold',obsidian:'Obsidian',blood:'Blood',demonic:'Demonic'}
+
+  const CIRCLES=[
+    {name:'I — Limbo',emoji:'👤',enemies:['wanderer','lostsoul','drifter']},
+    {name:'II — Lust',emoji:'💋',enemies:['siren','tempter','lust_boss']},
+    {name:'III — Gluttony',emoji:'🍖',enemies:['glutton','feaster','gluttony_boss']},
+    {name:'IV — Greed',emoji:'💰',enemies:['miser','hoarder','greed_boss']},
+    {name:'V — Anger',emoji:'🔥',enemies:['wrathful','berserker','anger_boss']},
+    {name:'VI — Heresy',emoji:'🔱',enemies:['heretic','apostate','heresy_boss']},
+    {name:'VII — Violence',emoji:'🗡️',enemies:['brute','hunter','violence_boss']},
+    {name:'VIII — Fraud',emoji:'🃏',enemies:['trickster','deceiver','fraud_boss']},
+    {name:'IX — Treachery',emoji:'🔒',enemies:['traitor','betrayer','lucifer']},
+  ]
+  const SPECIAL=[{id:'ar_exec',name:'The Executive',emoji:'🕴',circle:'Welcome to Hell'}]
+
+  const glowAnim='@keyframes trophyGlow{0%,100%{box-shadow:0 0 8px rgba(200,160,40,0.3)}50%{box-shadow:0 0 20px rgba(200,160,40,0.6)}}'
+  const revealAnim='@keyframes trophyReveal{0%{transform:scale(0.8);opacity:0}100%{transform:scale(1);opacity:1}}'
+
+  function TrophySlot({enemyId,delay}){
+    const enemy=ENEMIES.find(e=>e.id===enemyId)||(enemyId==='ar_exec'?{id:'ar_exec',name:'The Executive',emoji:'🕴'}:null)
+    if(!enemy)return null
+    const t=trophies[enemyId]
+    const defeated=!!t
+    const isBoss=enemyId.includes('boss')||enemyId==='lucifer'||enemyId==='ar_exec'||enemyId==='drifter'||enemyId==='lust_boss'
+    const stakeColor=t?.bestStake?stakeColors[t.bestStake]:'#4a3010'
+
+    return(<div style={{
+      width:120,background:defeated?'linear-gradient(180deg,rgba(25,15,5,0.95),rgba(12,6,2,0.98))':'linear-gradient(180deg,rgba(10,6,3,0.7),rgba(5,3,1,0.8))',
+      border:defeated?'2px solid '+(isBoss?'#e8a820':'#8a6020'):'1px solid rgba(60,30,10,0.3)',
+      borderRadius:8,padding:0,position:'relative',overflow:'hidden',
+      animation:defeated?'trophyReveal 0.4s ease '+(delay*0.05)+'s both':'none',
+      boxShadow:defeated&&isBoss?'0 0 15px rgba(200,160,40,0.3)':'none',
+      transition:'transform 0.2s',cursor:defeated?'default':'not-allowed',
+      opacity:defeated?1:0.4
+    }} onMouseEnter={e=>{if(defeated)e.currentTarget.style.transform='scale(1.08)'}}
+       onMouseLeave={e=>{e.currentTarget.style.transform='scale(1)'}}>
+      {/* Stake badge */}
+      {t?.bestStake&&<div style={{position:'absolute',top:4,right:4,width:8,height:8,borderRadius:'50%',background:stakeColor,boxShadow:'0 0 4px '+stakeColor}}/>}
+
+      {/* Emoji / silhouette */}
+      <div style={{fontSize:defeated?36:28,textAlign:'center',padding:'12px 0 6px',filter:defeated?'none':'brightness(0) opacity(0.15)'}}>
+        {defeated?enemy.emoji:'❓'}
+      </div>
+
+      {/* Name */}
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:defeated?900:400,color:defeated?(isBoss?'#e8a820':'#c8a060'):'#443322',textAlign:'center',padding:'0 4px 2px',lineHeight:1.2,minHeight:24}}>
+        {defeated?enemy.name:'???'}
+      </div>
+
+      {/* Kill count */}
+      {defeated&&<div style={{textAlign:'center',padding:'2px 0 6px'}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#cc4444'}}>{t.kills}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:7,color:'#886644',letterSpacing:1,textTransform:'uppercase'}}>{t.kills===1?'KILL':'KILLS'}</div>
+      </div>}
+
+      {/* Best damage */}
+      {defeated&&t.bestDamage>0&&<div style={{background:'rgba(0,0,0,0.5)',padding:'3px 6px',textAlign:'center',borderTop:'1px solid rgba(80,50,10,0.2)'}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#aa8844'}}>BEST HIT</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'#e8a820'}}>{t.bestDamage.toLocaleString()}</div>
+      </div>}
+
+      {/* Stake badge at bottom */}
+      {t?.bestStake&&<div style={{background:stakeColor+'22',padding:'2px',textAlign:'center',borderTop:'1px solid '+stakeColor+'44'}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:900,color:stakeColor,letterSpacing:1}}>{stakeNames[t.bestStake].toUpperCase()}</div>
+      </div>}
+    </div>)
+  }
+
+  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.99)',display:'flex',flexDirection:'column',alignItems:'center',padding:'24px 40px',overflowY:'auto'}}>
+    <style>{glowAnim+revealAnim}</style>
+    <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),2px 2px 0 #000',letterSpacing:6}}>Hall of Damnation</div>
+    <div style={{fontFamily:"'ScratchFont',serif",fontSize:17,color:'#a09060',fontStyle:'italic',marginBottom:4}}>Every boss you have conquered earns a place on this wall</div>
+    <div style={{display:'flex',gap:16,marginBottom:12}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8a060',padding:'4px 14px',background:'rgba(0,0,0,0.4)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:4}}>
+        {totalDefeated}/28 Defeated
+      </div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#cc4444',padding:'4px 14px',background:'rgba(0,0,0,0.4)',border:'1px solid rgba(150,40,40,0.3)',borderRadius:4}}>
+        {totalKills} Total Kills
+      </div>
+    </div>
+
+    {/* Circle rows */}
+    <div style={{display:'flex',flexDirection:'column',gap:10,width:'100%',maxWidth:1200,alignItems:'center'}}>
+      {CIRCLES.map((circle,ci)=>{
+        const allDefeated=circle.enemies.every(eid=>trophies[eid])
+        return(<div key={ci} style={{display:'flex',alignItems:'center',gap:10,width:'100%'}}>
+          {/* Circle label */}
+          <div style={{width:140,flexShrink:0,textAlign:'right',paddingRight:10}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:allDefeated?'#e8a820':'#665533',letterSpacing:2,textTransform:'uppercase'}}>
+              {circle.emoji} Circle {circle.name.split(' — ')[0]}
+            </div>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:10,color:allDefeated?'#aa8844':'#443322',fontStyle:'italic'}}>
+              {circle.name.split(' — ')[1]}
+            </div>
+            {allDefeated&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#44cc44',letterSpacing:1,marginTop:2}}>✓ CLEARED</div>}
+          </div>
+          {/* 3 trophy slots */}
+          <div style={{display:'flex',gap:8}}>
+            {circle.enemies.map((eid,ei)=><TrophySlot key={eid} enemyId={eid} delay={ci*3+ei}/>)}
+          </div>
+        </div>)
+      })}
+
+      {/* Special: The Executive */}
+      <div style={{display:'flex',alignItems:'center',gap:10,marginTop:8,paddingTop:10,borderTop:'1px solid rgba(100,65,15,0.2)',width:'100%'}}>
+        <div style={{width:140,flexShrink:0,textAlign:'right',paddingRight:10}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:trophies['ar_exec']?'#ffd700':'#665533',letterSpacing:2}}>
+            🕴 BONUS
+          </div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:10,color:'#aa8844',fontStyle:'italic'}}>
+            Welcome to Hell
+          </div>
+        </div>
+        <TrophySlot enemyId="ar_exec" delay={28}/>
+      </div>
+    </div>
+
+    <button onClick={onClose} style={{marginTop:16,fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:4,padding:'12px 48px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'#c8a040',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
+      Close
+    </button>
+  </div>)
+}
+
 function MasteryGallery({onClose}){
   const data=getMasteryData()
   const cards=ALL_CARDS.filter(c=>!c.shopOnly&&c.id!=='contract')
@@ -3000,6 +3152,7 @@ function App(){
   const setUnlockTab=(t)=>{setUnlockTab_(t);setUnlockPage_(0);setUnlockHover(null)}
   const [showPauseOptions,setShowPauseOptions]=useState(false)
   const [showMastery,setShowMastery]=useState(false)
+  const [showTrophies,setShowTrophies]=useState(false)
   const [activeStakeId,setActiveStakeId]=useState(()=>localStorage.getItem('vst_active_stake')||'bronze')
   const activeStake=STAKES.find(s=>s.id===activeStakeId)||STAKES[0]
   const [musicVol,setMusicVol]=useState(()=>parseFloat(localStorage.getItem('vst_music_vol')||'0.3'))
@@ -3866,7 +4019,7 @@ function App(){
       setStolenAtkPool(0)
     }
     if(perfectBonus>0)addFloat('PERFECT! +'+perfectBonus,getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
-    playSfx('victory');addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.'))
+    playSfx('victory');recordTrophyKill(enemy.id,activeStake.id,stats.highestStrike,activeStake.maxStrikes-strikesLeft);addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.'))
     // ── ACHIEVEMENT TRIGGERS ─────────────────────────────────
     tryAchieve('first_blood')
     const cn=Math.floor(fightIndex/3)+1
@@ -5241,6 +5394,12 @@ function App(){
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(120,100,50,0.3)',borderRadius:6,
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
               ⚙ Options
+            </button>
+            <button onClick={()=>setShowTrophies(true)}
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'#cc4444',
+                background:'rgba(40,25,5,0.5)',border:'1px solid rgba(180,50,50,0.4)',borderRadius:6,
+                padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
+              💀 Trophies ({Object.keys(getTrophyData()).length}/28)
             </button>
             <button onClick={()=>setShowMastery(true)}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'#c8a040',
