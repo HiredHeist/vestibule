@@ -545,10 +545,10 @@ function tierAtkBonus(m){return m.demonic?4:m.mythic?2:m.foil?1:0}
 function tierHpBonus(m){return m.demonic?8:m.mythic?4:m.foil?2:0}
 function roleBondBonus(tier){return tier==='demonic'?3:tier==='mythic'?2:tier==='foil'?1:0}
 // ── MENTOR LINK ────────────────────────────────────────────────────
-// foil/mythic/demonic placed directly LEFT of same-id basic = Mentor Link
+// foil/mythic/demonic placed directly LEFT of basic member with SAME ROLE = Mentor Link
 // Stat bonus transfers once and sticks even if mentor dies
 // Strike multiplier fires only when both alive + in position
-const MENTOR_LINK_BONUS={foil:{atk:1,hp:2,mult:1.5},mythic:{atk:2,hp:4,mult:2.0},demonic:{atk:4,hp:8,mult:3.0}}
+const MENTOR_LINK_BONUS={foil:{atk:1,hp:2,mult:1.25},mythic:{atk:2,hp:4,mult:1.5},demonic:{atk:4,hp:8,mult:2.0}}
 function scanMentorLinks(stageArr){
   const ns=stageArr.map(m=>m?{...m}:null)
   for(let i=0;i<ns.length-1;i++){
@@ -556,7 +556,7 @@ function scanMentorLinks(stageArr){
     if(!mentor||!basic)continue
     if(!(mentor.foil||mentor.mythic||mentor.demonic))continue
     if(basic.foil||basic.mythic||basic.demonic)continue
-    if(mentor.id!==basic.id)continue
+    if(mentor.role!==basic.role)continue // same ROLE (Lead Guitarist, Bass Player, etc)
     const tier=mentor.demonic?'demonic':mentor.mythic?'mythic':'foil'
     const bonus=MENTOR_LINK_BONUS[tier]
     ns[i]={...mentor,isMentor:true}
@@ -4264,7 +4264,7 @@ function App(){
             ['🌿 Stash','Your currency. Earned from victories, spent in the shop on packs, cards, artifacts, and drugs.'],
             ['💀 Too Stoned','When a member hits 0 HP, they go Too Stoned and cannot attack. Lose all members = game over.'],
             ['🌀 Corruption','A risk/reward axis. Some cards raise it for power. Overdrive needs 60%+. Seance heals more at high corruption.'],
-            ['⛓ Mentor Link','Place a Foil/Mythic/Demonic member LEFT of the same basic member for a damage multiplier.'],
+            ['⛓ Mentor Link','Place a Foil/Mythic/Demonic member LEFT of a basic member with the same ROLE for a damage multiplier. E.g. Foil Lead Guitarist → basic Lead Guitarist.'],
             ['🍄 The Dealer','Buy shrooms or acid in the shop. Use before your first Strike for powerful (or disastrous) effects.'],
             ['🏆 Score','Every run earns score. Lifetime score unlocks new cards, members, and artifacts permanently.'],
           ].map(([title,desc],i)=><div key={i} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:8,padding:'14px 20px'}}>

@@ -46,22 +46,22 @@ const ENEMIES=[
 ];
 
 const ALL_MUSICIANS=[
-  {id:'bjorn',name:'Bjorn',atk:5,hp:6,maxHp:6,keyword:'FRENZIED'},
-  {id:'ragnar',name:'Ragnar',atk:4,hp:7,maxHp:7,keyword:'FRENZIED'},
-  {id:'thor',name:'Thor',atk:0,hp:8,maxHp:8,keyword:'DOUBLE TIME'},
-  {id:'ingrid',name:'Ingrid',atk:3,hp:10,maxHp:10,keyword:'ANCHOR'},
-  {id:'loki',name:'Loki',atk:3,hp:6,maxHp:6,keyword:'CORRUPT'},
-  {id:'nott',name:'Nott',atk:2,hp:7,maxHp:7,keyword:'DEBUFF'},
-  {id:'dag',name:'Dag',atk:2,hp:12,maxHp:12,keyword:'ANCHOR'},
-  {id:'vitalik',name:'Vitalik',atk:6,hp:9,maxHp:9,keyword:'FOLK MAGIC'},
-  {id:'sigrid',name:'Sigrid',atk:3,hp:8,maxHp:8,keyword:'SHREDDER'},
-  {id:'gunnar',name:'Gunnar',atk:4,hp:7,maxHp:7,keyword:'SHREDDER'},
-  {id:'astrid',name:'Astrid',atk:3,hp:8,maxHp:8,keyword:'DEBUFF'},
-  {id:'freya',name:'Freya',atk:4,hp:5,maxHp:5,keyword:'CORRUPT'},
-  {id:'ulf',name:'Ulf',atk:4,hp:9,maxHp:9,keyword:'ANCHOR'},
-  {id:'brynja',name:'Brynja',atk:1,hp:14,maxHp:14,keyword:'ANCHOR'},
-  {id:'rolf',name:'Rolf',atk:1,hp:9,maxHp:9,keyword:'DOUBLE TIME'},
-  {id:'orm',name:'Orm',atk:2,hp:11,maxHp:11,keyword:'HEXED'},
+  {id:'bjorn',role:'Lead Guitarist',name:'Bjorn',atk:5,hp:6,maxHp:6,keyword:'FRENZIED'},
+  {id:'ragnar',role:'Lead Guitarist',name:'Ragnar',atk:4,hp:7,maxHp:7,keyword:'FRENZIED'},
+  {id:'thor',role:'Drummer',name:'Thor',atk:0,hp:8,maxHp:8,keyword:'DOUBLE TIME'},
+  {id:'ingrid',role:'Bass Player',name:'Ingrid',atk:3,hp:10,maxHp:10,keyword:'ANCHOR'},
+  {id:'loki',role:'Synth Player',name:'Loki',atk:3,hp:6,maxHp:6,keyword:'CORRUPT'},
+  {id:'nott',role:'Vocalist',name:'Nott',atk:2,hp:7,maxHp:7,keyword:'DEBUFF'},
+  {id:'dag',role:'Bass Player',name:'Dag',atk:2,hp:12,maxHp:12,keyword:'ANCHOR'},
+  {id:'vitalik',role:'Dark Minstrel',name:'Vitalik',atk:6,hp:9,maxHp:9,keyword:'FOLK MAGIC'},
+  {id:'sigrid',role:'Rhythm Guitarist',name:'Sigrid',atk:3,hp:8,maxHp:8,keyword:'SHREDDER'},
+  {id:'gunnar',role:'Rhythm Guitarist',name:'Gunnar',atk:4,hp:7,maxHp:7,keyword:'SHREDDER'},
+  {id:'astrid',role:'Vocalist',name:'Astrid',atk:3,hp:8,maxHp:8,keyword:'DEBUFF'},
+  {id:'freya',role:'Synth Player',name:'Freya',atk:4,hp:5,maxHp:5,keyword:'CORRUPT'},
+  {id:'ulf',role:'Bass Player',name:'Ulf',atk:4,hp:9,maxHp:9,keyword:'ANCHOR'},
+  {id:'brynja',role:'Bass Player',name:'Brynja',atk:1,hp:14,maxHp:14,keyword:'ANCHOR'},
+  {id:'rolf',role:'Drummer',name:'Rolf',atk:1,hp:9,maxHp:9,keyword:'DOUBLE TIME'},
+  {id:'orm',role:'Dark Minstrel',name:'Orm',atk:2,hp:11,maxHp:11,keyword:'HEXED'},
 ];
 
 const ALL_CARDS=[
@@ -113,7 +113,7 @@ const PACT_IDS=['ember_surge','iron_strings','thick_skin','dark_bargain','speed_
 
 const MAX_STRIKES=4,MAX_DISCARDS=4,HAND_SIZE=6,MAX_STASH=420,MAX_EMBERS_CAP=8;
 const circleBaseMin=[8,6,7,8,9,9,11,11,14],circleBaseRange=[3,4,4,3,4,4,5,5,7]; // v12 stash tightening
-const MENTOR_LINK_BONUS={foil:{atk:1,hp:2,mult:1.5},mythic:{atk:2,hp:4,mult:2.0},demonic:{atk:4,hp:8,mult:3.0}};
+const MENTOR_LINK_BONUS={foil:{atk:1,hp:2,mult:1.25},mythic:{atk:2,hp:4,mult:1.5},demonic:{atk:4,hp:8,mult:2.0}};
 let TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
@@ -135,7 +135,7 @@ function pickStartingPair(){const pool=ALL_MUSICIANS.filter(m=>!m.locked);let be
 function arrangeStage(stage){
   const alive=stage.filter(m=>!m.tooStoned),stoned=stage.filter(m=>m.tooStoned);if(alive.length<=1)return stage;
   const pairs=[],used=new Set(),upgraded=alive.filter(m=>isUpgraded(m));
-  for(const up of upgraded){const basic=alive.find(m=>m.id===up.id&&!isUpgraded(m)&&!used.has(m.uid)&&m.uid!==up.uid);if(basic){pairs.push({mentor:up,protege:basic});used.add(up.uid);used.add(basic.uid)}}
+  for(const up of upgraded){const basic=alive.find(m=>m.role===up.role&&!isUpgraded(m)&&!used.has(m.uid)&&m.uid!==up.uid);if(basic){pairs.push({mentor:up,protege:basic});used.add(up.uid);used.add(basic.uid)}}
   const ordered=[],placed=new Set();for(const p of pairs){ordered.push(p.mentor);ordered.push(p.protege);placed.add(p.mentor.uid);placed.add(p.protege.uid)}
   const remaining=alive.filter(m=>!placed.has(m.uid)),anchors=remaining.filter(m=>m.keyword==='ANCHOR'),nonAnchors=remaining.filter(m=>m.keyword!=='ANCHOR');
   nonAnchors.sort((a,b)=>(b.atk+(b.permAtkBonus||0))-(a.atk+(a.permAtkBonus||0)));
@@ -144,7 +144,7 @@ function arrangeStage(stage){
 function scanMentorLinks(stage){
   const links=[];for(let i=0;i<stage.length-1;i++){const left=stage[i],right=stage[i+1];if(!left||!right||left.tooStoned||right.tooStoned)continue;
     const tier=left.demonic?'demonic':left.mythic?'mythic':left.foil?'foil':null;if(!tier)continue;
-    if(left.id===right.id&&!right.foil&&!right.mythic&&!right.demonic){const bonus=MENTOR_LINK_BONUS[tier];
+    if(left.role===right.role&&!right.foil&&!right.mythic&&!right.demonic){const bonus=MENTOR_LINK_BONUS[tier];
       if(!right.mentorBonusApplied){right.atk+=bonus.atk;right.permAtkBonus=(right.permAtkBonus||0)+bonus.atk;right.maxHp+=bonus.hp;right.hp=Math.min(right.hp+bonus.hp,right.maxHp);right.mentorBonusApplied=true;TRACK.linksFormed++}
       links.push({mentorIdx:i,protegeIdx:i+1,tier,mult:bonus.mult})}}return links;
 }
@@ -152,9 +152,9 @@ function generateCandidates(pack){const pool=ALL_MUSICIANS.filter(m=>!m.locked),
   for(let i=0;i<pack.numCandidates;i++){const available=pool.filter(m=>!usedIds.has(m.id));if(available.length===0)break;const base=pick(available);usedIds.add(base.id);
     const r=Math.random(),tier=r<pack.demonicChance?'demonic':r<pack.demonicChance+pack.mythicChance?'mythic':r<pack.demonicChance+pack.mythicChance+pack.foilChance?'foil':'base';
     candidates.push(makeMember(base,tier==='foil',tier==='mythic',tier==='demonic'))}return candidates}
-function pickBestCandidate(candidates,stage){const stageBasicIds=stage.filter(m=>!isUpgraded(m)).map(m=>m.id),stageUpgradedIds=stage.filter(m=>isUpgraded(m)).map(m=>m.id),stageIds=stage.map(m=>m.id);
-  let best=null,bestP=-1;for(const c of candidates){let p=memberScore(c);if(isUpgraded(c)){if(stageBasicIds.includes(c.id))p+=200;else p+=50;if(c.demonic)p+=80;else if(c.mythic)p+=40;else if(c.foil)p+=20}else{if(stageUpgradedIds.includes(c.id))p+=200}
-    if(stageIds.includes(c.id)&&!isUpgraded(c)&&!stageUpgradedIds.includes(c.id))p-=30;if(p>bestP){bestP=p;best=c}}return best}
+function pickBestCandidate(candidates,stage){const stageBasicRoles=stage.filter(m=>!isUpgraded(m)).map(m=>m.role),stageUpgradedRoles=stage.filter(m=>isUpgraded(m)).map(m=>m.role),stageRoles=stage.map(m=>m.role);
+  let best=null,bestP=-1;for(const c of candidates){let p=memberScore(c);if(isUpgraded(c)){if(stageBasicRoles.includes(c.role))p+=200;else p+=50;if(c.demonic)p+=80;else if(c.mythic)p+=40;else if(c.foil)p+=20}else{if(stageUpgradedRoles.includes(c.role))p+=200}
+    if(stageRoles.filter(r=>r===c.role).length>=2&&!isUpgraded(c))p-=30;if(p>bestP){bestP=p;best=c}}return best}
 function drawCards(gs,n){for(let i=0;i<Math.min(n,10-gs.hand.length);i++){if(gs.deck.length===0){gs.deck=shuffle([...gs.discard]);gs.discard=[]}if(gs.deck.length>0)gs.hand.push(gs.deck.pop())}}
 
 // ── PACT AI: score each pact reward, pick best ──
@@ -524,8 +524,8 @@ function simShop(gs){
     else if(gs.stash>=Math.ceil(10*discount))pack={name:'Garage',cost:Math.ceil(10*discount),numCandidates:2,foilChance:0,mythicChance:0,demonicChance:0};
     if(pack&&gs.stash>=pack.cost){const candidates=generateCandidates(pack);const chosen=pickBestCandidate(candidates,gs.stage);
       if(chosen){gs.stash-=pack.cost;TRACK.packsOpened++;let placed=false;
-        if(isUpgraded(chosen)){for(let i=0;i<gs.stage.length;i++){if(gs.stage[i].id===chosen.id&&!isUpgraded(gs.stage[i])){gs.stage.splice(i,0,chosen);placed=true;break}}}
-        else{for(let i=0;i<gs.stage.length;i++){if(gs.stage[i].id===chosen.id&&isUpgraded(gs.stage[i])){gs.stage.splice(i+1,0,chosen);placed=true;break}}}
+        if(isUpgraded(chosen)){for(let i=0;i<gs.stage.length;i++){if(gs.stage[i].role===chosen.role&&!isUpgraded(gs.stage[i])){gs.stage.splice(i,0,chosen);placed=true;break}}}
+        else{for(let i=0;i<gs.stage.length;i++){if(gs.stage[i].role===chosen.role&&isUpgraded(gs.stage[i])){gs.stage.splice(i+1,0,chosen);placed=true;break}}}
         if(!placed)gs.stage.push(chosen)}}
   }else{
     if(circleNum>=2&&gs.stash>=Math.ceil(22*discount)){
@@ -537,8 +537,8 @@ function simShop(gs){
         if(fireable.length>0){const weakest=fireable.reduce((a,b)=>memberScore(a)<memberScore(b)?a:b);
           const chosenVal=memberScore(chosen)+(isUpgraded(chosen)&&gs.stage.some(m=>m.id===chosen.id&&!isUpgraded(m))?200:0);
           if(chosenVal>memberScore(weakest)+30){gs.stage=gs.stage.filter(m=>m.uid!==weakest.uid);gs.stash-=pack.cost;gs.stash+=3;TRACK.packsOpened++;TRACK.pawnSells++;
-            let placed=false;if(isUpgraded(chosen)){for(let i=0;i<gs.stage.length;i++){if(gs.stage[i].id===chosen.id&&!isUpgraded(gs.stage[i])){gs.stage.splice(i,0,chosen);placed=true;break}}}
-            else{for(let i=0;i<gs.stage.length;i++){if(gs.stage[i].id===chosen.id&&isUpgraded(gs.stage[i])){gs.stage.splice(i+1,0,chosen);placed=true;break}}}
+            let placed=false;if(isUpgraded(chosen)){for(let i=0;i<gs.stage.length;i++){if(gs.stage[i].role===chosen.role&&!isUpgraded(gs.stage[i])){gs.stage.splice(i,0,chosen);placed=true;break}}}
+            else{for(let i=0;i<gs.stage.length;i++){if(gs.stage[i].role===chosen.role&&isUpgraded(gs.stage[i])){gs.stage.splice(i+1,0,chosen);placed=true;break}}}
             if(!placed)gs.stage.push(chosen)}}}}
   }
 
