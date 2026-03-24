@@ -3393,6 +3393,9 @@ function App(){
         setAcidInStock(Math.random()<0.50)
         setGameState('shop')
       }
+      if(e.shiftKey&&(e.key==='C'||e.key==='c')){
+        setGameState('campfire')
+      }
       if(e.shiftKey&&(e.key==='W'||e.key==='w')){
         setDeathCause('victory')
         setStats({fightsSurvived:27,strikesThrown:108,totalDamage:666666,highestStrike:42069,tooStonedCount:3,maxCorruption:100,stashEarned:420,cardsPlayed:420})
