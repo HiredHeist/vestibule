@@ -1525,6 +1525,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'visible',minHeight:0}}>
 
           {/* CARDS ROW */}
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:2,marginTop:2}}>🎸 Cards For Sale</div>
           <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start',paddingTop:4}}>
             {/* THE DEALER — first card */}
             <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',paddingTop:24,position:'relative'}}>
@@ -1588,6 +1589,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{flex:1,minHeight:12,maxHeight:60}}/>
 
           {/* PACKS + PAWN ROW */}
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:2,marginTop:6}}>📦 Booster Packs + Pawn Shop</div>
           <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start'}}>
             {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
             <div style={{paddingTop:24,flexShrink:0}}>
