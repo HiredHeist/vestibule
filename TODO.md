@@ -164,7 +164,7 @@ This is happening.
 - [x] WELCOME TO HELL bonus fight — complete:
       Choice screen (enter/walk away), cutscene (title + loading bar),
       A&R Executive (100k HP, 8 dmg), contract card every 2 strikes,
-      contract play = lose strongest + score mult, WTH victory = x3 score,
+      contract play = lose strongest + score mult, shop visit before fight, WTH victory = x3 score,
       WTH death = no penalty (Lucifer win preserved), second_album unlock
 - [x] Share text enhanced: victory includes band names + ⛧ DEFEATED LUCIFER ⛧ + 🤘
 

@@ -3781,6 +3781,26 @@ function App(){
   },[animPhase,strikesLeft,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,bossRef,stageRefs,drawUpTo,triggerVictory,bossRageAtk,bossDebuff,fightTripBuff,luciferPhase,stolenAtkPool,maxEmbers])
 
   const handleShopLeave=useCallback(()=>{
+    // Welcome to Hell: after final shop, go to cutscene then fight
+    if(welcomeToHell==='shopping'){
+      setWelcomeToHell('cutscene')
+      setGameState('playing') // needed so cutscene screen renders
+      setTimeout(()=>{
+        setEnemy(AR_EXECUTIVE)
+        setEnemyHp(AR_EXECUTIVE.maxHp)
+        setEmbers(maxEmbers);setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS)
+        setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setLastRiffPlayed(null)
+        setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
+        setContractsPlayed(0);setPendingDraw(0);wthStrikesRef.current=0
+        const allCards=[...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
+        const hs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
+        setHand(allCards.slice(0,hs));setDeck(allCards.slice(hs));setDiscardPile([])
+        handTargetRef.current=hs
+        setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined}):null))
+        setWelcomeToHell('fighting')
+      },3000)
+      return
+    }
     const nextIdx=overrideFightIdxRef.current!==null?overrideFightIdxRef.current:Math.min(fightIndex+1, 26)
     overrideFightIdxRef.current=null
     // Show Descent map when entering a new circle (circles 2-9)
@@ -4416,25 +4436,14 @@ function App(){
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#6a5030',textAlign:'center',marginTop:4}}>— The Executive</div>
       <div style={{display:'flex',gap:30,marginTop:24}}>
         <button onClick={()=>{
-          setWelcomeToHell('cutscene')
-          setTimeout(()=>{
-            // Setup the fight
-            setEnemy(AR_EXECUTIVE)
-            setEnemyHp(AR_EXECUTIVE.maxHp)
-            setEmbers(maxEmbers);setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS)
-            setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setLastRiffPlayed(null)
-            setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
-            setContractsPlayed(0);setPendingDraw(0);wthStrikesRef.current=0
-            // Redeal hand
-            const allCards=[...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
-            const hs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
-            setHand(allCards.slice(0,hs));setDeck(allCards.slice(hs));setDiscardPile([])
-            handTargetRef.current=hs
-            // Restore band to full HP
-            setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined}):null))
-            setWelcomeToHell('fighting')
-            setGameState('playing')
-          },3000)
+          setWelcomeToHell('shopping')
+          setShopCards(genShopCards(9))
+          setBoosterPacks(genBoosterPacks(9))
+          setRecruitPack(genRecruitPack(26))
+          setShroomsInStock(Math.random()<0.50)
+          setAcidInStock(Math.random()<0.50)
+          setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false)
+          setGameState('shop')
         }}
           style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,letterSpacing:4,padding:'16px 40px',background:'rgba(130,0,0,0.4)',border:'2px solid #cc1111',borderRadius:6,color:'#ee2222',cursor:'pointer',textShadow:'0 0 14px rgba(200,0,0,0.6)',boxShadow:'0 0 25px rgba(180,0,0,0.4)',transition:'all 0.2s'}}
           onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,0,0,0.5)';e.currentTarget.style.boxShadow='0 0 40px rgba(200,0,0,0.6)'}}
