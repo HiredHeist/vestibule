@@ -2334,6 +2334,7 @@ function App(){
   const [shakeOffset,setShakeOffset]=useState({x:0,y:0})
   const shakeTimerRef=useRef(null)
   const triggerShake=useCallback((intensity=3,duration=200)=>{
+    if(!shakeEnabled)return
     if(shakeTimerRef.current)cancelAnimationFrame(shakeTimerRef.current)
     const start=performance.now()
     const animate=(now)=>{
@@ -2396,6 +2397,7 @@ function App(){
   const activeStake=STAKES.find(s=>s.id===activeStakeId)||STAKES[0]
   const [musicVol,setMusicVol]=useState(()=>parseFloat(localStorage.getItem('vst_music_vol')||'0.3'))
   const [sfxVol,setSfxVol]=useState(()=>parseFloat(localStorage.getItem('vst_sfx_vol')||'0.5'))
+  const [shakeEnabled,setShakeEnabled]=useState(()=>localStorage.getItem('vst_shake')!=='off')
   const playSfx=useCallback((name,vol)=>{
     if(sfxVol<=0)return
     try{
@@ -2604,7 +2606,7 @@ function App(){
       const bc=getCenter(bossRef)
       const sdHp=Math.max(0,enemyHp-dmg);setEnemyHp(sdHp);if(sdHp<=0)setTimeout(triggerVictory,500);addFloat(dmg,bc.x,bc.y-60,'#ff6600',true)
       playHit();setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
-      setStageDiveUsed(true);setSelected(p=>p.filter(uid=>!hand.some(c=>c.id==='stagedive'&&c.uid===uid)));updStat('totalDamage',dmg);updStat('highestStrike',dmg,true);if(dmg>=500){playSfx('big_hit');triggerShake(4,200)}
+      setStageDiveUsed(true);setSelected(p=>p.filter(uid=>!hand.some(c=>c.id==='stagedive'&&c.uid===uid)));updStat('totalDamage',dmg);updStat('highestStrike',dmg,true);if(dmg>=500){playSfx('big_hit');triggerShake(8,250)}
       if(sdHp<=0)setTimeout(triggerVictory,500)
       msg='🤘 '+m.name+' Stage Dives for '+dmg+' damage!'
     }
@@ -2867,7 +2869,7 @@ function App(){
     }
     else if(card.id==='sabbathsigil'){
       setCorruption(100);updStat('maxCorruption',100,true)
-      playSfx('hellquake');triggerShake(8,500);discover('hellquake','HELLQUAKE');tryAchieve('hellquake')
+      playSfx('hellquake');triggerShake(16,600);discover('hellquake','HELLQUAKE');tryAchieve('hellquake')
       const roll=Math.floor(Math.random()*10)+1
       const bc=getCenter(bossRef)
       let hqMsg='',hqFloat='',hqColor='#aa1111',hqDesc=''
@@ -2958,7 +2960,7 @@ function App(){
           if(!disc.includes(chain.id)){disc.push(chain.id);localStorage.setItem('vst_combos_discovered',JSON.stringify(disc))}
         }
         setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji})
-        playSfx('combo');triggerShake(5,300);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! +10% bonus damage!')
+        playSfx('combo');triggerShake(10,350);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! +10% bonus damage!')
         combosFiredRef.current.push(chain.id)
         addFloat('⛧ '+chain.name+' ⛧',getCenter(bossRef).x,getCenter(bossRef).y-140,chain.color,true)
         // Apply combo bonus damage = total stage ATK
@@ -3273,7 +3275,7 @@ function App(){
       const bandNames=stage.filter(m=>m&&!m.tooStoned).map(m=>m.name)
       setVictoryCinematic({phase:0,bandNames,stakeId:activeStake.id,stakeName:activeStake.name})
       setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:1}:null),800) // crack
-      setTimeout(()=>{setVictoryCinematic(p=>p?{...p,phase:2}:null);playSfx('devil_dead');triggerShake(8,600)},2000) // THE DEVIL IS DEAD
+      setTimeout(()=>{setVictoryCinematic(p=>p?{...p,phase:2}:null);playSfx('devil_dead');triggerShake(16,700)},2000) // THE DEVIL IS DEAD
       setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:3}:null),4500) // band members rise
       setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:4}:null),7000) // stake unlocked
       setTimeout(()=>{setVictoryCinematic(null);setWelcomeToHell('choice')},10000) // WTH choice
@@ -3430,7 +3432,7 @@ function App(){
     setTimeout(()=>setActiveTripEffect(null),4000)
   },[tripUsedThisFight,strikesLeft])
 
-  const handleStrike=useCallback(()=>{playSfx('strike');triggerShake(4,250);
+  const handleStrike=useCallback(()=>{playSfx('strike');triggerShake(8,300);
     if(animPhase!=='idle'||strikesLeft<=0||enemyHp<=0)return
     const actives=stage.filter(m=>m&&!m.tooStoned)
     if(actives.length===0){addLog('⚠ No active members!');return}
@@ -3551,7 +3553,7 @@ function App(){
         addFloat('🪈 FOLK MAGIC! Full Embers!',window.innerWidth/2,window.innerHeight*0.35,'#44ddaa',true)
         addLog('🪈 Folk Magic proc! All Embers refunded.')
       }
-      updStat('totalDamage',dmg);updStat('highestStrike',dmg,true);if(dmg>=500){playSfx('big_hit');triggerShake(4,200)}
+      updStat('totalDamage',dmg);updStat('highestStrike',dmg,true);if(dmg>=500){playSfx('big_hit');triggerShake(8,250)}
 
       setStage(function(p){return p.map(function(m){
         if(!m)return null
@@ -3635,7 +3637,7 @@ function App(){
           if(luciferPhase===1){
             // Frozen Wrath: frostbite 3 to all + damageScale +1
             scaledBaseDmg=stakeBaseDmg+bossRageAtk
-            playSfx('boss_attack');triggerShake(5,300);setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:Math.max(0,m.hp-3)}):m))
+            playSfx('boss_attack');triggerShake(10,350);setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:Math.max(0,m.hp-3)}):m))
             addLog('🧊 Frostbite! All members take 3 cold damage.')
           } else if(luciferPhase===2){
             // Infernal: AoE + damageScale +2
@@ -3654,7 +3656,7 @@ function App(){
               for(let ai=0;ai<ns2.length;ai++){
                 if(!ns2[ai]||ns2[ai].tooStoned)continue
                 const newHp=ns2[ai].hp-splitDmg
-                if(newHp<=0&&!ns2[ai].stoneShield){ns2[ai]=Object.assign({},ns2[ai],{hp:0,tooStoned:true});updStat('tooStonedCount',1);playSfx('member_down');triggerShake(6,350)}
+                if(newHp<=0&&!ns2[ai].stoneShield){ns2[ai]=Object.assign({},ns2[ai],{hp:0,tooStoned:true});updStat('tooStonedCount',1);playSfx('member_down');triggerShake(12,400)}
                 else if(newHp<=0&&ns2[ai].stoneShield){const nsh=typeof ns2[ai].stoneShield==='number'?ns2[ai].stoneShield-1:0;ns2[ai]=Object.assign({},ns2[ai],{hp:1,stoneShield:nsh>0?nsh:false})}
                 else{ns2[ai]=Object.assign({},ns2[ai],{hp:Math.max(0,newHp)})}
               }
@@ -3662,7 +3664,7 @@ function App(){
               if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned');playSfx('defeat')};setTimeout(()=>setGameState('end'),800)}
               return ns2
             })
-            setDamageFlash(true);triggerShake(5,300);setTimeout(()=>setDamageFlash(false),400)
+            setDamageFlash(true);triggerShake(10,350);setTimeout(()=>setDamageFlash(false),400)
             setDiceTarget(null)
           } else {
           setStage(function(prev){
@@ -3700,7 +3702,7 @@ function App(){
             return ns2
           })
           if(stage[stage.indexOf(target)]&&!stage[stage.indexOf(target)].tooStoned&&(stage[stage.indexOf(target)].hp-actualDmg)<=0&&!stage[stage.indexOf(target)].stoneShield)addLog('💨 '+target.name+' is TOO STONED!')
-          setDamageFlash(true);triggerShake(5,300);setTimeout(function(){setDamageFlash(false)},400)
+          setDamageFlash(true);triggerShake(10,350);setTimeout(function(){setDamageFlash(false)},400)
           addLog('👁 '+enemy.name+' hits '+target.name+' for '+actualDmg)
           setDiceTarget(null)
           } // end single-target else
@@ -4312,6 +4314,11 @@ function App(){
                 style={{width:120,accentColor:'#e8a820',cursor:'pointer'}}/>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#aa8030',minWidth:36,textAlign:'right'}}>{Math.round(sfxVol*100)}%</span>
             </div>
+          </div>
+          <div style={{marginTop:12,display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#e8a820'}}>Screen Shake</span>
+            <button onClick={()=>{const nv=!shakeEnabled;setShakeEnabled(nv);localStorage.setItem('vst_shake',nv?'on':'off')}}
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:shakeEnabled?'#44cc44':'#cc4444',background:'rgba(0,0,0,0.4)',border:'1px solid '+(shakeEnabled?'#44cc44':'#cc4444'),borderRadius:4,padding:'8px 24px',cursor:'pointer',minWidth:70,textAlign:'center'}}>{shakeEnabled?'ON':'OFF'}</button>
           </div>
           <div style={{marginTop:12,display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(40,5,5,0.4)',border:'1px solid rgba(180,40,40,0.3)',borderRadius:6}}>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#cc4444'}}>Reset All Progress</span>
@@ -4936,6 +4943,11 @@ function App(){
                   style={{width:100,accentColor:'#e8a820',cursor:'pointer'}}/>
                 <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#aa8030',minWidth:30,textAlign:'right'}}>{Math.round(sfxVol*100)}%</span>
               </div>
+            </div>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820'}}>Screen Shake</span>
+              <button onClick={()=>{const nv=!shakeEnabled;setShakeEnabled(nv);localStorage.setItem('vst_shake',nv?'on':'off')}}
+                style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:shakeEnabled?'#44cc44':'#cc4444',background:'rgba(0,0,0,0.4)',border:'1px solid '+(shakeEnabled?'#44cc44':'#cc4444'),borderRadius:4,padding:'6px 20px',cursor:'pointer',minWidth:60,textAlign:'center'}}>{shakeEnabled?'ON':'OFF'}</button>
             </div>
           </div>
           <button onClick={()=>setShowPauseOptions(false)}
