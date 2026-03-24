@@ -1558,19 +1558,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 onClose={()=>setPawnOpen(false)}
               />}
             </div>
-            {/* STASH + REROLL — next to pawn shop */}
+            {/* REROLL + STASH — stacked, centered with pawn shop */}
             <div style={{display:'flex',flexDirection:'column',gap:12,justifyContent:'center'}}>
-              <div style={{width:140,height:100,
-                display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
-                background:'rgba(5,15,5,0.92)',
-                border:'2px solid rgba(50,140,50,0.6)',
-                borderRadius:8}}>
-                <span style={{fontSize:22}}>🌿</span>
-                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:36,fontWeight:900,color:stashColor,lineHeight:1}}>{stash}</span>
-                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#2a5a2a',letterSpacing:2,textTransform:'uppercase'}}>Stash</span>
-              </div>
-              <div style={{width:140,height:100,
-                display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
+              <div style={{width:140,height:140,
+                display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:6,
                 background:'rgba(25,18,4,0.92)',
                 border:'3px solid rgba(200,150,30,0.85)',
                 borderRadius:8,cursor:'pointer',
@@ -1579,9 +1570,18 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 onClick={onReroll}
                 onMouseEnter={e=>{e.currentTarget.style.animation='none';e.currentTarget.style.background='rgba(55,40,8,0.95)'}}
                 onMouseLeave={e=>{e.currentTarget.style.animation='rerollWiggle 3s ease-in-out infinite';e.currentTarget.style.background='rgba(25,18,4,0.92)'}}>
-                <span style={{fontSize:22}}>🔄</span>
-                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:700,color:'#c8a030',letterSpacing:1,textTransform:'uppercase'}}>Re-Roll</span>
-                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,color:'#55ee55'}}>🌿 {rerollCost}</span>
+                <span style={{fontSize:28}}>🔄</span>
+                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#e8c040',letterSpacing:2,textTransform:'uppercase'}}>Re-Roll</span>
+                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:25,fontWeight:900,color:'#e8c040'}}>🌿 {rerollCost}</span>
+              </div>
+              <div style={{width:140,height:140,
+                display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:6,
+                background:'rgba(5,15,5,0.92)',
+                border:'2px solid #44cc44',
+                borderRadius:8}}>
+                <span style={{fontSize:28}}>🌿</span>
+                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:39,fontWeight:900,color:'#44cc44',lineHeight:1}}>{stash}</span>
+                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#44cc44',letterSpacing:2,textTransform:'uppercase',fontWeight:900}}>Stash</span>
               </div>
             </div>
           </div>
