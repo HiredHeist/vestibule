@@ -532,11 +532,11 @@ const SQUIGGLE_CSS=`
 .squiggle:nth-child(2n){animation-name:squiggle2;animation-duration:0.45s}
 .squiggle:nth-child(3n){animation-name:squiggle3;animation-duration:0.33s}
 `
-function MemberPortrait({id,size,style}){
+function MemberPortrait({id,size,style,noSquiggle}){
   const src=MEMBER_PORTRAITS[id]
   if(!src)return null
   const s2=size||80
-  return <img className="squiggle" src={src} alt={id} style={{width:s2,height:s2*1.5,objectFit:'cover',objectPosition:'top center',imageRendering:'auto',filter:'none',...(style||{})}}/>
+  return <img className={noSquiggle?"":"squiggle"} src={src} alt={id} style={{width:s2,height:s2*1.5,objectFit:'cover',objectPosition:'top center',imageRendering:'auto',filter:'none',...(style||{})}}/>
 }
 
 
