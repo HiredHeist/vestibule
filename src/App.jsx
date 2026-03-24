@@ -774,6 +774,7 @@ function BoosterScreen({onComplete,seed}){
 
 function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, onSellCard, onBurnCard, onClose}){
   const [tab, setTab] = useState('cards')
+  const [hoverCard, setHoverCard] = useState(null)
   // Show ALL copies individually so player can sell as many as they want
   // Sort deck+discard by sell price descending, then by name
   const allCards = [...deck,...discard].sort((a,b)=>{
@@ -868,11 +869,12 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
       {/* Cards tab */}
       {tab==='cards'&&<div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',maxWidth:900}}>
         {allCards.length===0&&<div style={{fontFamily:"'ScratchFont',serif",color:'#5a3a6a',fontStyle:'italic',fontSize:16}}>Deck is empty.</div>}
-        {allCards.map(c=>{
+        {allCards.map((c,ci)=>{
           const price = cardSellPrice(c)
           const bc = c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
           return(
-            <div key={c.uid||c.id} style={{width:140,background:'linear-gradient(180deg,#201408,#100804)',border:'1px solid '+bc+'88',borderRadius:6,overflow:'hidden'}}>
+            <div key={c.uid||c.id} style={{width:140,background:'linear-gradient(180deg,#201408,#100804)',border:'1px solid '+bc+'88',borderRadius:6,overflow:'hidden',position:'relative'}}
+              onMouseEnter={()=>setHoverCard({c,ci})} onMouseLeave={()=>setHoverCard(null)}>
               <div style={{height:4,background:bc}}/>
               <div style={{fontSize:36,textAlign:'center',padding:'10px 0',background:'rgba(0,0,0,0.3)'}}>{c.emoji}</div>
               <div style={{padding:'0 8px 10px'}}>
@@ -898,6 +900,17 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
                   🔥 Burn (delete)
                 </button>
               </div>
+              {hoverCard&&hoverCard.ci===ci&&<div style={{position:'absolute',bottom:'105%',left:'50%',transform:'translateX(-50%)',width:260,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'2px solid '+bc,borderRadius:10,padding:'14px',zIndex:100,pointerEvents:'none',boxShadow:'0 8px 30px rgba(0,0,0,0.9)'}}>
+                <div style={{height:4,background:bc,borderRadius:'4px 4px 0 0',marginBottom:8,marginTop:-14,marginLeft:-14,marginRight:-14}}/>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:bc,fontWeight:900,letterSpacing:1,textTransform:'uppercase'}}>{c.type}</div>
+                  <div style={{width:26,height:26,borderRadius:'50%',background:'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)',border:'2px solid #ff6600',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:'#fff'}}>{c.embers}</div>
+                </div>
+                <div style={{fontSize:36,textAlign:'center',marginBottom:6}}>{c.emoji}</div>
+                <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:18,color:'#e8d090',textAlign:'center',marginBottom:2,letterSpacing:1}}>{c.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:bc,textAlign:'center',letterSpacing:2,marginBottom:6,textTransform:'uppercase'}}>{c.rarity}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#c8b080',textAlign:'center',lineHeight:1.5,fontStyle:'italic'}}>{c.effect}</div>
+              </div>}
             </div>
           )
         })}
@@ -2376,11 +2389,11 @@ function App(){
   const activeStake=STAKES.find(s=>s.id===activeStakeId)||STAKES[0]
   const [musicVol,setMusicVol]=useState(()=>parseFloat(localStorage.getItem('vst_music_vol')||'0.3'))
   const [sfxVol,setSfxVol]=useState(()=>parseFloat(localStorage.getItem('vst_sfx_vol')||'0.5'))
-  const playSfx=useCallback((name)=>{
+  const playSfx=useCallback((name,vol)=>{
     if(sfxVol<=0)return
     try{
       const a=new Audio(import.meta.env.BASE_URL+'sfx/'+name+'.mp3')
-      a.volume=sfxVol
+      a.volume=sfxVol*(vol!==undefined?vol:1)
       a.play().catch(()=>{})
     }catch(e){}
   },[sfxVol])
@@ -3939,11 +3952,12 @@ function App(){
     const effectiveCost=chosenPacts.includes('merchants_eye')?Math.max(1,Math.floor(cost*0.8)):cost
     if(stash<effectiveCost)return
     setStash(p=>p-effectiveCost)
+    playSfx('buy')
     if(type==='card'){
       const nc=Object.assign({},item,{uid:Math.random().toString(36).slice(2),shopBought:true})
       setDeck(p=>[...p,nc])
       setShopBoughtIds(p=>[...p,nc.uid])
-      playSfx('buy');addLog('🛒 Bought '+item.name+'!')
+      addLog('🛒 Bought '+item.name+'!')
     } else if(type==='artifact'){
       if(activeArtifacts.length>=3){addLog('⚠ Artifact slots full! Max 3.');return}
       setActiveArtifacts(p=>[...p,item])
@@ -3980,9 +3994,11 @@ function App(){
         if(isUnlocked('vitalik_foil')){candidates=candidates.map(c=>c.id==='vitalik'&&!c.foil&&!c.mythic&&!c.demonic&&Math.random()<0.30?{...c,foil:true}:c)}
       }
       recruitPickFiredRef.current=false
+      playSfx('pack_open')
       setRecruitCandidates(candidates)
       setGameState('recruit')
     } else if(type==='pack'){
+      playSfx('pack_open')
       // Handle booster pack picks — route each picked card to the right place
       const picked = item.pickedCards || []
       const members = picked.filter(c => c.isMember)
@@ -4023,7 +4039,7 @@ function App(){
     } else if(type==='dealer'){
       // Dealer purchases handled by onBuyShrooms/onBuyAcid callbacks, just deduct stash
       addLog('🌿 Dealer transaction complete.')
-    } else {playSfx('pack_open');addLog('📦 Purchased: '+item.name+'!')}
+    } else {addLog('📦 Purchased: '+item.name+'!')}
   },[stash])
 
   const recruitPickFiredRef=useRef(false)
@@ -4861,7 +4877,7 @@ function App(){
               canAfford={card.embers===0||embers>=card.embers}
               isDragging={dragHandIdx===i} isShopBought={shopBoughtIds.includes(card.uid)}
               onHover={()=>setHovered(i)} onLeave={()=>setHovered(null)}
-              onClick={()=>{if(card.id==='stagedive'&&stageDiveUsed)return;playSfx('select');setSelected(p=>p.includes(card.uid)?p.filter(x=>x!==card.uid):[...p,card.uid])}}
+              onClick={()=>{if(card.id==='stagedive'&&stageDiveUsed)return;playSfx('select',0.5);setSelected(p=>p.includes(card.uid)?p.filter(x=>x!==card.uid):[...p,card.uid])}}
               onDragStart={()=>{setDragHandIdx(i);setDragCardUid(card.uid)}}
               onDragEnd={()=>{setDragHandIdx(null);setDragOverHandIdx(null);setDragCardUid(null)}}
               isDragOver={dragOverHandIdx===i&&dragHandIdx!==null&&dragHandIdx!==i}
