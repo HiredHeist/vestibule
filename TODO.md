@@ -195,6 +195,13 @@ The escalating visual corruption is unsettling and memorable — players will sc
 
 ---
 
+## BALANCE PASS v4 (from 300K sim data) — COMPLETED
+- [x] Clean Living pact: 0%→<15% threshold, +2→+3 ATK (was 3.8% WR, 26 picks)
+- [x] Setlist: draw 2→3 cards, upgraded draws 4 (was 1.0 plays/game)
+- [x] Herb Money: 2→1 ember cost (was 2.3 plays/game)  
+- [x] Dial to Eleven: +20%→+15% corruption, added +1 ATK all (was 2.0 plays/game)
+- [x] All changes synced to simulator
+
 ## COMPLETED FEATURES
 
 ### Core Game

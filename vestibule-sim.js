@@ -457,7 +457,7 @@ function simFight(gs,phaseHp,luciferPhase){
   const stoneWallActive=gs._pacts.includes('stone_wall');
 
   const links=scanMentorLinks(gs.stage);gs.mentorLinks=links;
-  const dtMult={};gs.stage.filter(m=>m.keyword==='DOUBLE TIME'&&!m.tooStoned).forEach(m=>{const roll=rand(6)+1;dtMult[m.uid]=roll<=2?0.5:roll<=4?1.5:2.0});
+  const dtMult={};gs.stage.filter(m=>m.keyword==='DOUBLE TIME'&&!m.tooStoned).forEach(m=>{const roll=rand(6)+1;dtMult[m.uid]=roll<=2?1.0:roll<=4?1.5:2.0});
   gs.deck=shuffle([...gs.deck,...gs.discard]);gs.discard=[];gs.hand=[];
 
   // TRIP logic (same as v12)

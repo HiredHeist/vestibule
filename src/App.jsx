@@ -448,7 +448,7 @@ const ALL_CARDS=[
 
 const KEYWORD_DESC={
   'FRENZIED':'High damage dealer. ATK scales with consecutive buffs.',
-  'DOUBLE TIME':'Rolls d6 each fight: 5-6=Double Time (×2 ATK), 3-4=Off Beat (×1.5), 1-2=Half Time (×0.5). A gamble!',
+  'DOUBLE TIME':'Rolls d6 each fight: 5-6=Double Time (×2 ATK), 3-4=Off Beat (×1.5), 1-2=Standard (×1). Never a liability!',
   'ANCHOR':'After each Strike, heals adjacent members +1 HP.',
   'CORRUPT':'ATK increases with Corruption level. Thrives in chaos.',
   'DEBUFF':'Reduces boss damage by 2 each Strike, stacking permanently this fight.',
@@ -835,7 +835,7 @@ function BoosterScreen({onComplete,seed}){
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
           {[
             ['FRENZIED','#ee2222','⚡','Each time the boss is defeated, this member gains +1 ATK permanently.'],
-            ['DOUBLE TIME','#ff8800','🥁','Rolls a d6 each fight: 5-6 doubles all ATK, 3-4 gives ×1.5, 1-2 gives only ×0.5. High risk, high reward.'],
+            ['DOUBLE TIME','#ff8800','🥁','Rolls d6 each fight: 5-6 doubles ATK (×2), 3-4 gives ×1.5. 1-2 is standard (×1). Never a penalty!'],
             ['ANCHOR','#33dd33','⚓','After every Strike, heals the members next to this one for +1 HP.'],
             ['CORRUPT','#cc44ff','🌀','ATK scales up the higher your Corruption is.'],
             ['DEBUFF','#4488ff','🎤','Each Strike permanently reduces boss damage by 2 this fight. Stacks up.'],
@@ -3677,7 +3677,7 @@ function App(){
     // DOUBLE TIME d6 multiplier
     let dblMode='', dblMult=1
     if(hasDbl){
-      if(dblRoll<=2){dblMult=0.5;dblMode='HALF TIME'}
+      if(dblRoll<=2){dblMult=1.0;dblMode='STANDARD'}
       else if(dblRoll<=4){dblMult=1.5;dblMode='OFF BEAT'}
       else{dblMult=2;dblMode='DOUBLE TIME'}
       dmg=Math.round(dmg*dblMult)
