@@ -1690,7 +1690,16 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 20px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
         <div style={{textAlign:'center'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:st?'#555':'#ee2222',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>ATK</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{member.atk}{!st&&member.keyword==='CORRUPT'&&corruption>0&&<span style={{fontSize:24}}>+{Math.floor(corruption/15)}</span>}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{(()=>{
+            if(st)return member.atk
+            const base=ALL_MUSICIANS.find(mu=>mu.id===member.id)
+            const baseAtk=base?base.atk+(member.demonic?4:member.mythic?2:member.foil?1:0):member.atk
+            const permBonus=member.atk-baseAtk
+            const corrBonus=member.keyword==='CORRUPT'&&corruption>0?Math.floor(corruption/15):0
+            const totalBonus=permBonus+corrBonus
+            if(totalBonus>0)return <>{baseAtk}<span style={{fontSize:22,color:'#ff8800'}}>+{totalBonus}</span></>
+            return member.atk
+          })()}</div>
         </div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:st?'#555':'#e8a820',fontWeight:700,letterSpacing:1,textAlign:'center'}}>{member.keyword}</div>
         <div style={{textAlign:'center'}}>
