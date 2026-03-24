@@ -4728,7 +4728,7 @@ function App(){
     const uniqueUpgradeable=allDeckCards.filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i).filter(c=>CARD_UPGRADES[c.id]&&!upgradedCards.includes(c.id))
     return(
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',gap:12,padding:'24px 40px',overflow:'hidden'}}>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:50,color:'#ff8800',textShadow:'0 0 40px rgba(255,120,0,0.6),0 0 80px rgba(200,80,0,0.3),3px 3px 0 #000',letterSpacing:6}}>The Campfire</div>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:50,color:'#ff8800',textShadow:'0 0 40px rgba(255,120,0,0.6),0 0 80px rgba(200,80,0,0.3),3px 3px 0 #000',letterSpacing:6}}>The Doom Forge</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#cc9050',fontStyle:'italic'}}>Every riff can be heavier.</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#887040',letterSpacing:2}}>UPGRADES THIS RUN: {upgradedCards.length}</div>
       <div style={{display:'flex',gap:14,flexWrap:'wrap',justifyContent:'center',maxWidth:1700,overflowY:'auto',flex:1,padding:'10px 0',alignContent:'flex-start'}}>
