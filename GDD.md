@@ -88,7 +88,7 @@ Additional copies: 5% shop chance, 42 herb cost.
 
 ## Musicians (18, across 9 roles)
 Lead Guitarist (FRENZIED), Rhythm Guitarist (SHREDDER), Bass Player (ANCHOR),
-Synth Player (CORRUPT), Drummer (DOUBLE TIME), Vocalist (DEBUFF),
+Synth Player (CORRUPT), Drummer (DOUBLE TIME: d6 → x1/x1.5/x2), Vocalist (DEBUFF),
 Dark Minstrel (FOLK MAGIC/HEXED), Hype Man (HYPE), DJ (REMIX)
 
 ### Mentor Links
@@ -114,7 +114,7 @@ All HP x stake hpMult.
 ## Pacts (12)
 Ember Surge (+1 max ember), Iron Strings (+1 ATK all), Thick Skin (+3 HP all),
 Dark Bargain (-1 CORRUPT cost), Speed Demon (+1 draw), Blood Price (9x Blood Ritual),
-Clean Living (+2 ATK at 0% corr), Corruption Engine (+5% corr/fight),
+Clean Living (+3 ATK at <15% corr), Corruption Engine (+5% corr/fight),
 Merchants Eye (-20% prices), Stone Wall (-1 boss dmg), Sixth Slot (+1 member), War Drums (+1 strike)
 
 ---
@@ -142,12 +142,12 @@ Acid (12 herb): 90% good (Fractal Vision/Dimensional Rift/Ego Dissolution/Astral
 ## Difficulty Stakes
 | Stake | hpMult | Sim Win Rate |
 |-------|--------|-------------|
-| Bronze | x1.30 | 9.33% |
-| Silver | x1.30 | 11.22% |
-| Gold | x1.30 | 11.20% |
-| Obsidian | x1.50 | 9.12% |
-| Blood | x1.75 | 2.10% |
-| Demonic | x1.80 | 0.03% |
+| Bronze | x1.30 | ~10% |
+| Silver | x1.30 | ~11% |
+| Gold | x1.30 | ~11% |
+| Obsidian | x1.50 | ~9% |
+| Blood | x1.75 | ~2% |
+| Demonic | x1.80 | ~0.04% |
 
 ---
 

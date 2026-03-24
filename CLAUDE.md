@@ -31,6 +31,6 @@ Repo: github.com/HiredHeist/vestibule. PAT: ghp_JXh2TtDDWsTeDLcYL7npk4JsTXt6rN05
 - Assets: import.meta.env.BASE_URL + 'sfx/name.mp3' or 'music/name.mp3'
 
 ## Current Balance (Sim v16, 50k games)
-Bronze 9.33% | Silver 11.22% | Gold 11.20% | Obsidian 9.12% | Blood 2.10% | Demonic 0.03%
+Bronze ~10% | Silver ~11% | Gold ~11% | Obsidian ~9% | Blood ~2% | Demonic ~0.04%
 
 ## Content: 41 cards, 69 deck, 18 musicians, 27 enemies, 7 artifacts, 10 passives, 12 pacts, 16 combos, 41 upgrades, 8 boss loot, 30 SFX, 11 music tracks, 6 stakes

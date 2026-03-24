@@ -3396,7 +3396,7 @@ function App(){
     // soulThief: return stolen ATK on victory
     if(stolenAtkPool>0){
       setStage(p=>{const alive=p.filter(m=>m&&!m.tooStoned);if(alive.length===0)return p;
-        const perMember=Math.floor(stolenAtkPool/alive.length),remainder=stolenAtkPool%alive.length;let ri=0
+        const perMember=Math.floor(stolenAtkPool/(alive.length||1)),remainder=stolenAtkPool%alive.length;let ri=0
         return p.map(m=>{if(!m||m.tooStoned)return m;const bonus=perMember+(ri<remainder?1:0);ri++;return Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus})})})
       addLog('🔓 '+stolenAtkPool+' stolen ATK returned to your band!')
       setStolenAtkPool(0)
@@ -4378,7 +4378,7 @@ function App(){
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
     setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
-    setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
+    setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false}
     setDiscovered(new Set())
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
   }
