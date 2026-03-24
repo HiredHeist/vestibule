@@ -1,5 +1,124 @@
 # VESTIBULE — TODO & Status
-**Updated March 24, 2026 | Commit 36e9b4d**
+**Updated March 24, 2026 | Commit 364195c**
+
+---
+
+## TOP 10 — MAXIMUM ADDICTION FEATURES
+
+These features are designed using proven psychological hooks from Balatro (variable ratio reinforcement, number-go-up transparency), Slay the Spire (build identity, meaningful choices), and Hades (meta-progression narrative). Each one targets a specific addiction mechanism.
+
+### 1. DAMAGE BREAKDOWN ANIMATION (Number-Go-Up Dopamine)
+**Hook:** Balatro's #1 trick — watching the score build in real-time.
+After every Strike, show a 2-second animated breakdown:
+- Base ATK ticks up member by member (each name flashes)
+- Multiplier applies with screen shake + pitch-rising SFX
+- Genre bonus adds with color flash
+- Mentor link bonus adds with glow
+- Combo bonus adds with explosion
+- Final number SLAMS onto screen in huge font
+Players will chase bigger numbers obsessively. The transparency makes every upgrade feel earned.
+Currently damage just... happens. This makes it a SPECTACLE.
+
+### 2. DAILY SEED + LEADERBOARD (Social Competition / Daily Habit)
+**Hook:** Wordle's "one puzzle per day" retention. Players return EVERY day.
+- One shared seed per day (same enemies, same shop, same card draws)
+- Post-run: show your score vs global leaderboard (top 100)
+- Share button generates URL: "I scored 420,069 on today's Vestibule seed — can you beat me?"
+- Badge for daily streaks (3-day, 7-day, 30-day)
+- Requires no backend — seed encodes all RNG, leaderboard via simple API or localStorage comparison
+This alone could double retention. Wordle proved daily seeds create habits.
+
+### 3. CARD MASTERY SYSTEM (Long-Term Progression / Completionism)
+**Hook:** Pokemon "gotta catch 'em all" + Slay the Spire ascension unlocks.
+- Each card tracks times played across ALL runs (persistent counter)
+- Mastery tiers: Novice (10 plays) → Adept (50) → Master (200) → Legendary (666)
+- Each tier unlocks a cosmetic: bronze border → silver → gold → animated holographic
+- At Master tier: unlock a LORE ENTRY about the card (metal band history, Hell mythology)
+- Mastery page in main menu shows grid of all 41 cards with progress bars
+- Players will use "bad" cards just to master them, extending playtime massively
+- Visible progress bars exploit completionism — "I'm 180/200 on Battle Cry, ONE more run"
+
+### 4. RANDOM EVENTS BETWEEN FIGHTS (Variable Ratio Reinforcement)
+**Hook:** Slay the Spire's events are what make every run feel unique.
+Between non-boss fights (50% chance), present a Hell-themed event with a CHOICE:
+- "The Ferryman" — Pay 15 stash to peek at next 3 shop cards, or refuse
+- "Crossroads Demon" — Sacrifice 1 card from deck permanently for +3 ATK to all members
+- "The Mosh Pit" — All members take 2 damage but gain +1 ATK permanently
+- "Vinyl Collector" — Choose: gain a random Rare card OR +20 stash
+- "Cursed Amp" — Gain +2 max embers but corruption +15%
+- "Blood Pact" — One member gets double ATK but dies if they take any damage this circle
+- "Audience with Satan" — Preview your next boss loot, but boss gets +10% HP
+- "The Groupie" — Free random member joins (might be terrible, might be Mythic)
+Each event is a GAMBLE. The variable outcomes create the "what if I picked the other one" regret that drives replays.
+
+### 5. ACHIEVEMENT-GATED STARTER DECKS (Meta-Progression / Replayability)
+**Hook:** Slay the Spire's characters + Balatro's deck variants.
+Unlock alternate starting decks by completing achievements:
+- "The Purist" deck — Only 40 cards but all Foil. Unlock: win with 0% corruption
+- "The Corrupted" deck — Start at 50% corruption but includes 3 Rare cards. Unlock: win with 100%+ corruption
+- "The Speedrunner" deck — 30 cards, +2 starting embers. Unlock: win in under 15 minutes
+- "The Hoarder" deck — 90 cards, +50 starting stash. Unlock: reach 420 stash in a run
+- "The Minimalist" deck — 20 cards, all upgraded. Unlock: win with a deck of 30 or fewer
+- "The Sabbath" deck — 69 cards + 3 Sabbath Sigils. Unlock: trigger 3 Hellquakes in one run
+Each deck fundamentally changes strategy. Players who "beat the game" now have 6 MORE games to beat.
+
+### 6. BOSS TROPHY WALL (Collection / Visual Bragging Rights)
+**Hook:** Monster Hunter's trophy room. Visual proof of your conquests.
+Main menu has a "Hall of Damnation" — a dark gallery wall:
+- Each boss you've defeated gets a trophy slot (27 slots + Lucifer + Executive)
+- Trophies show: fastest kill time, highest damage in one strike, difficulty beaten on
+- Empty slots show "???" with the boss silhouette — drives completionists crazy
+- Special frames for Demonic-stake kills (glowing red border)
+- Lucifer's trophy is the centerpiece — tracks total kills across all stakes
+- "Beat all 27 on Gold" unlocks a secret cosmetic. "All on Demonic" unlocks a hidden card.
+The wall makes every loss feel like progress toward filling a slot.
+
+### 7. CORRUPTION GAMBLING MINI-GAME (Risk/Reward Loop)
+**Hook:** Balatro's "skip blind for money" risk. The "do I push my luck?" tension.
+At corruption thresholds (25%, 50%, 75%), offer a gamble:
+- At 25%: "Sell your soul? +5 ATK to all but corruption locks at 25% (can't reduce)"
+- At 50%: "Double or nothing? Flip: heads = corruption drops to 0, tails = goes to 100"
+- At 75%: "The Devil's Offer: next 3 cards are free, but every card after costs +1 ember"
+These create MOMENTS — the player is sweating, weighing risk vs reward. 
+The 50% coin flip is pure gambling psychology. Players will talk about "the flip" for hours.
+Combine with the existing multiplier system: high corruption already boosts CORRUPT card damage, so there's always a reason to STAY corrupted.
+
+### 8. POST-RUN REPLAY HIGHLIGHTS (Social Sharing / "One More Run" Trigger)
+**Hook:** Sports highlight reels. Show the player their own greatest moments.
+After every run (win OR lose), show a 10-second "highlight reel":
+- "Biggest Strike: 12,450 damage on Strike 3 vs The Executioner"
+- "Closest Call: Survived with 1 HP on Thor"
+- "Longest Combo Chain: Shred Storm + Hellfire + Death Wish in one Strike"
+- "Cards Played: 147 | Corruption Peak: 96% | Stash Earned: 389"
+- Share button: generates a screenshot-ready card with your run stats
+- If you LOST: "You were 2 strikes away from beating The Archfraud. Try again?"
+The last line is the killer. Showing HOW CLOSE you were to winning triggers loss aversion. 
+"I was RIGHT THERE" is the most powerful motivator for starting another run immediately.
+
+### 9. BAND LEGACY SYSTEM (Emotional Attachment / Narrative)
+**Hook:** XCOM's soldier attachment. You care because you invested.
+- Your starting pair of musicians PERSIST across runs (until they die)
+- Members accumulate "tour experience": fights survived, damage dealt, times saved by Stonewall
+- After 10 runs, a member gets a "Veteran" title and +1 permanent ATK
+- After 25 runs, they get a unique nickname (player-chosen or procedural: "Ragnar the Undying")
+- If a veteran member dies (Too Stoned and not revived), show a memorial screen
+- "Ragnar the Undying — 47 fights, 12,000 damage dealt. Rest in power."
+- This makes death HURT. Players will play more carefully to protect veterans.
+- Creates stories: "My Ragnar has been with me for 30 runs, he's got +4 permanent ATK from all those tours"
+This transforms disposable band members into characters you CARE about.
+
+### 10. "THE ENCORE" — POST-LUCIFER ENDLESS MODE (Infinite Scaling)
+**Hook:** Cookie Clicker / Vampire Survivors endgame. "How far can I go?"
+After beating Lucifer, unlock "The Encore" — infinite circles with scaling enemies:
+- Circle 10+: Enemies have randomized passives + increasing HP (×1.2 per circle)
+- Every 3 circles: a "Remix Boss" with 2 combined passives (cardHeal + rageScale, etc.)
+- Leaderboard: deepest circle reached + total damage dealt
+- New card drops only available in Encore mode (ultra-rare, broken effects)
+- The further you go, the more the screen distorts (heavier scanlines, color shift, screen shake)
+- At Circle 13: "You've gone too deep. The music is playing backwards."
+- At Circle 20: "The game is watching you."
+This gives endgame players a reason to keep going after mastering all 6 stakes.
+The escalating visual corruption is unsettling and memorable — players will screenshot and share.
 
 ---
 
