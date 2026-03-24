@@ -506,6 +506,17 @@ const MEMBER_PORTRAITS={
   sigrid:'/vestibule/members/sigrid.png',
   vitalik:'/vestibule/members/vitalik.png',
 }
+const STAGE_PORTRAITS={
+  bjorn:'/vestibule/members/bjorn_stage.png',
+  dag:'/vestibule/members/dag_stage.png',
+  freya:'/vestibule/members/freya_stage.png',
+  gunnar:'/vestibule/members/gunnar_stage.png',
+  loki:'/vestibule/members/loki_stage.png',
+  ragnar:'/vestibule/members/ragnar_stage.png',
+  rolf:'/vestibule/members/rolf_stage.png',
+  sigrid:'/vestibule/members/sigrid_stage.png',
+  vitalik:'/vestibule/members/vitalik_stage.png',
+}
 // Dr. Katz "Squigglevision" — CSS wobble effect on portraits
 const SQUIGGLE_CSS=`
 @keyframes squiggle1{
