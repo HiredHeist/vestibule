@@ -2352,7 +2352,8 @@ function App(){
   const [menuView,setMenuView]=useState(null) // null, 'unlocks', 'rules', 'options'
   const [unlockTab,setUnlockTab_]=useState('milestones')
   const [unlockPage,setUnlockPage_]=useState(0)
-  const setUnlockTab=(t)=>{setUnlockTab_(t);setUnlockPage_(0)}
+  const [unlockHover,setUnlockHover]=useState(null) // card data for tooltip
+  const setUnlockTab=(t)=>{setUnlockTab_(t);setUnlockPage_(0);setUnlockHover(null)}
   const [showPauseOptions,setShowPauseOptions]=useState(false)
   const [activeStakeId,setActiveStakeId]=useState(()=>localStorage.getItem('vst_active_stake')||'bronze')
   const activeStake=STAKES.find(s=>s.id===activeStakeId)||STAKES[0]
@@ -4063,7 +4064,7 @@ function App(){
     let items=[]
     if(unlockTab==='milestones')items=UNLOCK_MILESTONES.map(u=>({id:u.id,emoji:lt>=u.score?u.emoji:'🔒',name:lt>=u.score?u.label:'???',sub:u.score.toLocaleString()+' pts',done:lt>=u.score,pct:Math.min(100,Math.round(lt/u.score*100))}))
     else if(unlockTab==='members')items=[...ALL_MUSICIANS.filter(m=>!m.locked).map(m=>({id:m.id,emoji:m.emoji,name:m.name,sub:m.keyword,done:true})),...ALL_MUSICIANS.filter(m=>m.locked).map(m=>{const done=!m.unlockAt||lt>=m.unlockAt;return{id:m.id,emoji:done?m.emoji:'🔒',name:done?m.name:'???',sub:done?m.keyword:'LOCKED',done}}),...Array(7).fill(null).map((_,i)=>({id:'fm'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
-    else if(unlockTab==='cards')items=ALL_CARDS.map(c=>({id:c.id+c.uid,emoji:c.emoji,name:c.name,sub:c.type+' · '+c.rarity+(c.shopOnly?' · SHOP':''),done:true,color:c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'}))
+    else if(unlockTab==='cards')items=ALL_CARDS.map(c=>({id:c.id+(c.uid||''),emoji:c.emoji,name:c.name,sub:c.type+' · '+c.rarity+(c.shopOnly?' · SHOP':''),done:true,color:c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc',card:c}))
     else if(unlockTab==='artifacts')items=[...STARTER_ARTIFACTS.map(a=>{const done=!a.locked||(a.unlockAt&&lt>=a.unlockAt);return{id:a.id,emoji:done?a.emoji:'🔒',name:done?a.name:'???',sub:done?(a.effect||'').substring(0,50):'LOCKED',done}}),...Array(9).fill(null).map((_,i)=>({id:'fa'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
     else if(unlockTab==='pedals')items=[...STARTER_PASSIVES.map(p=>({id:p.id,emoji:p.emoji,name:p.name,sub:(p.effect||'').substring(0,50),done:true})),...Array(10).fill(null).map((_,i)=>({id:'fp'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
     else if(unlockTab==='combos')items=RIFF_CHAINS.map(ch=>{const found=discoveredCombos.includes(ch.id);const c1=ALL_CARDS.find(c=>c.id===ch.cards[0]);const c2=ALL_CARDS.find(c=>c.id===ch.cards[1]);return{id:ch.id,emoji:found?ch.emoji:'🔒',name:found?ch.name:'??? HIDDEN COMBO',sub:found?(c1?c1.name:'?')+' + '+(c2?c2.name:'?'):'Play two synergy cards in the same strike to discover',done:found,color:found?ch.color:'#444'}})
@@ -4085,12 +4086,30 @@ function App(){
           <button onClick={()=>setUnlockPage_(p=>Math.max(0,p-1))} disabled={unlockPage===0}
             style={{fontSize:36,color:unlockPage>0?'#e8a820':'#333',background:'none',border:'none',cursor:unlockPage>0?'pointer':'default',padding:'10px',flexShrink:0}}>◀</button>
           <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14,flex:1,maxWidth:1200,alignContent:'start'}}>
-            {pageItems.map(item=>(
-              <div key={item.id} style={{background:item.done?'rgba(20,12,4,0.7)':'rgba(10,6,2,0.5)',border:item.done?'1px solid '+(item.color||'rgba(160,100,25,0.5)'):'1px solid rgba(160,120,40,0.3)',borderRadius:10,padding:'20px 14px',textAlign:'center',opacity:item.done?1:0.7,transition:'all 0.2s'}}>
+            {pageItems.map((item,idx)=>(
+              <div key={item.id} style={{background:item.done?'rgba(20,12,4,0.7)':'rgba(10,6,2,0.5)',border:item.done?'1px solid '+(item.color||'rgba(160,100,25,0.5)'):'1px solid rgba(160,120,40,0.3)',borderRadius:10,padding:'20px 14px',textAlign:'center',opacity:item.done?1:0.7,transition:'all 0.2s',position:'relative'}}
+                onMouseEnter={()=>{if(item.card)setUnlockHover({card:item.card,idx})}}
+                onMouseLeave={()=>setUnlockHover(null)}>
                 <div style={{fontSize:64,filter:item.done?'none':'brightness(0.6)',marginBottom:6}}>{item.emoji}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:item.done?(item.color||'#e8a820'):'#c8a040',lineHeight:1.2,marginBottom:4}}>{item.name}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:item.done?'#c0a060':'#aa8a50',lineHeight:1.3}}>{item.sub}</div>
                 {item.pct!==undefined&&!item.done&&<div style={{height:6,background:'rgba(20,12,4,0.8)',borderRadius:3,marginTop:6,overflow:'hidden'}}><div style={{height:'100%',width:item.pct+'%',background:'linear-gradient(90deg,#8a2200,#e8a820)',borderRadius:3}}/></div>}
+                {/* Card tooltip */}
+                {unlockHover&&unlockHover.idx===idx&&unlockHover.card&&(()=>{
+                  const c=unlockHover.card
+                  const bc=c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
+                  return <div style={{position:'absolute',bottom:'105%',left:'50%',transform:'translateX(-50%)',width:280,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'2px solid '+bc,borderRadius:10,padding:'16px',zIndex:100,pointerEvents:'none',boxShadow:'0 8px 30px rgba(0,0,0,0.9)'}}>
+                    <div style={{height:5,background:bc,borderRadius:'5px 5px 0 0',marginBottom:10,marginTop:-16,marginLeft:-16,marginRight:-16}}/>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+                      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:bc,fontWeight:900,letterSpacing:1,textTransform:'uppercase'}}>{c.type}</div>
+                      <div style={{width:30,height:30,borderRadius:'50%',background:c.embers>0?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)',border:'2px solid #ff6600',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#fff'}}>{c.embers}</div>
+                    </div>
+                    <div style={{fontSize:44,textAlign:'center',marginBottom:8}}>{c.emoji}</div>
+                    <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:'#e8d090',textAlign:'center',marginBottom:4,letterSpacing:1}}>{c.name}</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:bc,textAlign:'center',letterSpacing:2,marginBottom:8,textTransform:'uppercase'}}>{c.rarity}{c.shopOnly?' · SHOP ONLY':''}</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8b080',textAlign:'center',lineHeight:1.5,fontStyle:'italic'}}>{c.effect}</div>
+                  </div>
+                })()}
               </div>
             ))}
           </div>
