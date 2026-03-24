@@ -6,8 +6,8 @@
 const NUM_GAMES=parseInt(process.argv[2])||5000;
 const STAKE_ID=process.argv[3]||'bronze';
 const STAKES={
-  bronze:{id:'bronze',name:'Bronze',hpMult:1.0,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.0,mentorBonus:0},
-  silver:{id:'silver',name:'Silver',hpMult:1.15,dmgAdd:1,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.5,mentorBonus:0.05},
+  bronze:{id:'bronze',name:'Bronze',hpMult:1.30,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.0,mentorBonus:0},
+  silver:{id:'silver',name:'Silver',hpMult:1.30,dmgAdd:1,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.5,mentorBonus:0.05},
   gold:{id:'gold',name:'Gold',hpMult:1.30,dmgAdd:2,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:2.0,mentorBonus:0.10},
   obsidian:{id:'obsidian',name:'Obsidian',hpMult:1.50,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,scoreMult:2.5,mentorBonus:0.12},
   blood:{id:'blood',name:'Blood',hpMult:1.75,dmgAdd:3,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:true,scoreMult:3.0,mentorBonus:0.35},
@@ -101,7 +101,7 @@ const ALL_CARDS=[
   {id:'overdrive',type:'RIFF',rarity:'Rare',embers:3,copies:1},
   {id:'infencore',type:'RIFF',rarity:'Rare',embers:3,copies:3},
   {id:'remaster',type:'UTILITY',rarity:'Rare',embers:0,copies:1},
-  {id:'sabbathsigil',type:'CORRUPT',rarity:'Rare',embers:2,copies:0,consumable:true},
+  {id:'sabbathsigil',type:'CORRUPT',rarity:'Rare',embers:2,copies:1,consumable:true},
   {id:'possessedperf',type:'RIFF',rarity:'Rare',embers:4,copies:2},
   {id:'goingbroke',type:'RIFF',rarity:'Rare',embers:0,copies:1,shopOnly:true},
   {id:'moshpit',type:'RIFF',rarity:'Uncommon',embers:1,copies:2},

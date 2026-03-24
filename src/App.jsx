@@ -344,8 +344,8 @@ const PACT_REWARDS=[
 ]
 
 const STAKES=[
-  {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.0,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Standard difficulty.',mentorBonus:0},
-  {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.15,dmgAdd:1,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +15% HP. Enemies +1 damage.',mentorBonus:0.05},
+  {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.30,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Standard difficulty. Bosses +30% HP.',mentorBonus:0},
+  {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.30,dmgAdd:1,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +30% HP. Enemies +1 damage.',mentorBonus:0.05},
   {id:'gold',name:'Gold',color:'#ffd700',border:'#ffd700',hpMult:1.30,dmgAdd:2,priceMult:1.25,scoreMult:2.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +30% HP. Enemies +2 damage. Shop prices +25%.',mentorBonus:0.10},
   {id:'obsidian',name:'Obsidian',color:'#7a7a9a',border:'#6a6a8a',hpMult:1.50,dmgAdd:2,priceMult:1.25,scoreMult:2.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +50% HP. No free heal after fights. Drugs 50% more expensive.',mentorBonus:0.12},
   {id:'blood',name:'Blood',color:'#8b0000',border:'#cc0000',hpMult:1.75,dmgAdd:3,priceMult:1.25,scoreMult:3.0,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +75% HP. Start with 4 Embers. Corruption starts at 10%.',mentorBonus:0.35},
