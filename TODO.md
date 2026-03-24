@@ -194,7 +194,7 @@ This is happening.
 - [x] Opening Night layout rewrite (4×2 grid, full-width abilities, uniform card heights)
 - [x] FREE badge → 0 ember circle on all cards
 - [x] Playtester feedback form (HTML, 44 questions, mailto vomitwizard@gmail.com)
-- [x] Dev shortcut Shift+W for win screen
+- [x] Dev shortcut Shift+W triggers full victory cinematic (was skipping to end)
 
 ### Bug Fixes
 - [x] Card multi-select on overlapping cards (stopPropagation + unique z-index)

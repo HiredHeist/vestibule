@@ -3256,7 +3256,14 @@ function App(){
       if(e.shiftKey&&(e.key==='W'||e.key==='w')){
         setDeathCause('victory')
         setStats({fightsSurvived:27,strikesThrown:108,totalDamage:666666,highestStrike:42069,tooStonedCount:3,maxCorruption:100,stashEarned:420,cardsPlayed:420})
-        setGameState('end')
+        // Trigger cinematic sequence
+        const bandNames=stage.filter(m=>m&&!m.tooStoned).map(m=>m.name)
+        setVictoryCinematic({phase:0,bandNames:bandNames.length>0?bandNames:['Ragnar','Bjorn'],stakeId:activeStake.id,stakeName:activeStake.name})
+        setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:1}:null),800)
+        setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:2}:null),2000)
+        setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:3}:null),4500)
+        setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:4}:null),7000)
+        setTimeout(()=>{setVictoryCinematic(null);setGameState('end')},10000)
       }
       if(e.shiftKey&&(e.key==='D'||e.key==='d')){
         setDeathCause('stoned')
