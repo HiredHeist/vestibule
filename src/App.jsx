@@ -3334,7 +3334,10 @@ function App(){
     addLog('🗑 '+toDisc.length+' discarded & replaced.')
   },[selected,discardsLeft,animPhase,hand,deck,discardPile,drawUpTo])
 
+  const victoryFiredRef=useRef(false)
   const triggerVictory=useCallback(function(){
+    if(victoryFiredRef.current)return // prevent double-fire
+    victoryFiredRef.current=true
     // CLUTCH DETECTION
     const aliveCount=stage.filter(m=>m&&!m.tooStoned).length
     if(aliveCount===1){setClutchFlash({text:'SOLO VICTORY!',color:'#ffd700'});playSfx('big_hit');triggerShake(8,300);setTimeout(()=>setClutchFlash(null),2500)}
@@ -3480,6 +3483,13 @@ function App(){
     },1000)
   },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake,stage,hand,enemy,enemyHp,embers,maxEmbers,activeArtifacts,activePassives,chosenPacts,activeGenre,animPhase,discardsLeft,deck,discardPile,fightTripBuff,luciferPhase,welcomeToHell])
 
+
+  // SAFETY NET: catch ANY case where boss HP hits 0 without victory triggering
+  useEffect(()=>{
+    if(enemyHp<=0&&gameState==='playing'&&!victoryFiredRef.current){
+      setTimeout(triggerVictory,500)
+    }
+  },[enemyHp,gameState,triggerVictory])
 
 
   // ── DEV SHORTCUT: Shift+S = jump to shop ─────────────────────────
@@ -3841,7 +3851,9 @@ function App(){
               for(let ai=0;ai<ns2.length;ai++){
                 if(!ns2[ai]||ns2[ai].tooStoned)continue
                 const newHp=ns2[ai].hp-splitDmg
-                if(newHp<=0&&!ns2[ai].stoneShield){ns2[ai]=Object.assign({},ns2[ai],{hp:0,tooStoned:true});updStat('tooStonedCount',1);playSfx('member_down');triggerShake(12,400)}
+                if(newHp<=0&&!ns2[ai].stoneShield){ns2[ai]=Object.assign({},ns2[ai],{hp:0,tooStoned:true});updStat('tooStonedCount',1);playSfx('member_down');triggerShake(12,400)
+                  if(activeArtifacts.some(a=>a.id==='a6')){setEnemyHp(ehp=>{const nh=Math.max(0,ehp-8);if(nh<=0)setTimeout(triggerVictory,500);return nh});addLog('🕯 Black Candle! 8 damage!')}
+                }
                 else if(newHp<=0&&ns2[ai].stoneShield){const nsh=typeof ns2[ai].stoneShield==='number'?ns2[ai].stoneShield-1:0;ns2[ai]=Object.assign({},ns2[ai],{hp:1,stoneShield:nsh>0?nsh:false});setClutchFlash({text:'CLUTCH!',color:'#ffd700'});setTimeout(()=>setClutchFlash(null),1500)}
                 else{ns2[ai]=Object.assign({},ns2[ai],{hp:Math.max(0,newHp)})}
               }
@@ -3862,7 +3874,7 @@ function App(){
                 updStat('tooStonedCount',1)
                 // A6: Black Candle — deal 8 damage
                 if(activeArtifacts.some(a=>a.id==='a6')){
-                  setEnemyHp(ehp=>Math.max(0,ehp-8))
+                  setEnemyHp(ehp=>{const nh=Math.max(0,ehp-8);if(nh<=0)setTimeout(triggerVictory,500);return nh})
                   addLog('🕯 Black Candle! 8 damage from '+target.name+' — sacrificed!')
                 }
                 // P6: Cult Following — gain 3 Stash
@@ -4044,7 +4056,7 @@ function App(){
     if(chosenPacts.includes('corruption_engine'))setCorruption(p=>Math.min(100,p+5))
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({})
+    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({});victoryFiredRef.current=false
     // BOSS LOOT effects at fight start
     if(collectedLoot.includes('love_letter'))setNextCardFree(true)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
