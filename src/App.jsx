@@ -3181,7 +3181,7 @@ function App(){
       const p4Bonus=activePassives.some(p=>p.id==='p4')?1:0
       const handWithout=hand.filter(c=>c.uid!==card.uid)
       const res=drawUpTo(handWithout,deckRef.current,[...discRef.current,card],handWithout.length+1)
-      setHand(res.h);setDeck(res.d);setDiscardPile([...res.disc,card])
+      setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
       setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus-effectiveEmbers))
       addLog('🍯 Groupie! +2 Embers, drew 1 card.')
       addFloat('+2 🔥 +1 card',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')
@@ -3199,7 +3199,7 @@ function App(){
       if(nextCardFreeRef.current)setNextCardFree(false)
       // Draw 2 cards immediately (uncapped), then open force-discard modal
       const handWithout=hand.filter(c=>c.uid!==card.uid)
-      const drawRes=drawUpTo(handWithout,deckRef.current,discRef.current,handWithout.length+2)
+      const drawRes=drawUpTo(handWithout,deckRef.current,[...discRef.current,card],handWithout.length+2)
       setHand(drawRes.h);setDeck(drawRes.d);setDiscardPile(drawRes.disc)
       setSetlistCards(drawRes.h)
       setSetlistOpen(true)
@@ -3221,7 +3221,7 @@ function App(){
       const drawCount=discardCount+1
       const remainingHand=hand.filter(c=>c.uid!==card.uid&&!toDiscard.includes(c.uid))
       const discarded=hand.filter(c=>toDiscard.includes(c.uid))
-      const res=drawUpTo(remainingHand,deckRef.current,[...discRef.current,...discarded],remainingHand.length+drawCount)
+      const res=drawUpTo(remainingHand,deckRef.current,[...discRef.current,card,...discarded],remainingHand.length+drawCount)
       setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
@@ -3242,7 +3242,7 @@ function App(){
       if(nextCardFreeRef.current)setNextCardFree(false)
       const toDelete=hand.find(c=>c.uid===toDeleteUid)
       const handAfterDelete=hand.filter(c=>c.uid!==toDeleteUid&&c.uid!==card.uid)
-      const res=drawUpTo(handAfterDelete,deckRef.current,[...discRef.current,toDelete],handAfterDelete.length+3)
+      const res=drawUpTo(handAfterDelete,deckRef.current,[...discRef.current,card,toDelete],handAfterDelete.length+3)
       setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
@@ -3268,7 +3268,7 @@ function App(){
       const handWithout=hand.filter(c=>c.uid!==card.uid)
       if(handWithout.length===0){
         // No cards to discard, just draw 2
-        const res=drawUpTo(handWithout,deckRef.current,discRef.current,handWithout.length+2)
+        const res=drawUpTo(handWithout,deckRef.current,[...discRef.current,card],handWithout.length+2)
         setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
         addLog('📡 Signal Decay! Drew 2 cards.')
       } else {
@@ -3276,7 +3276,7 @@ function App(){
         const victimIdx=Math.floor(Math.random()*handWithout.length)
         const victim=handWithout[victimIdx]
         const remaining=handWithout.filter((_,i)=>i!==victimIdx)
-        const res=drawUpTo(remaining,deckRef.current,[...discRef.current,victim],remaining.length+2)
+        const res=drawUpTo(remaining,deckRef.current,[...discRef.current,card,victim],remaining.length+2)
         setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
         addLog('📡 Signal Decay! Discarded '+victim.name+', drew 2 cards.')
       }

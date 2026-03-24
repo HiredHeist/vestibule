@@ -44,6 +44,11 @@
   FIX: Add stoneShield check.
 
 - [x] **BUG 12: 126 duplicate React key errors** ✅ FIXED (root cause was Bug 9)
+
+- [x] **BUG 15: Card leak in 5 handleDropOnStage handlers** ✅ FIXED
+  Groupie, Setlist, Burnset, Remaster, Signal Decay all removed played card
+  from hand but never added it to discard. Cards vanished permanently,
+  shrinking deck over time. Fixed by including card in drawUpTo discard arg.
   UIDs appearing in multiple rendered lists simultaneously.
   ROOT CAUSE: Bug 9 (stale state in drawUpTo). Fixing Bug 9 fixes this.
 
