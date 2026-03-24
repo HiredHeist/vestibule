@@ -5175,6 +5175,10 @@ function App(){
   const parchmentFilter=corruptMax?'sepia(0.4) hue-rotate(330deg) saturate(1.8)':corruptHigh?'sepia(0.25) hue-rotate(340deg) saturate(1.4)':corruptLow?'sepia(0.1) saturate(1.1)':'none'
   const bgPulseAnim=corruption>=50?'bgPulse '+(corruption>=75?'1.5s':'3s')+' ease-in-out infinite':'none'
 
+  // ── TROPHY WALL / MASTERY GALLERY (overlay from menu) ──
+  if(showTrophies&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative'}}><TrophyWall onClose={()=>setShowTrophies(false)}/></div>)
+  if(showMastery&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative'}}><MasteryGallery onClose={()=>setShowMastery(false)}/></div>)
+
   // ── MAIN MENU ──────────────────────────────────────────────
   if(gameState==='menu'){
     const lt=lifetimeScore||0
