@@ -510,33 +510,33 @@ const MEMBER_PORTRAITS={
 const SQUIGGLE_CSS=`
 @keyframes squiggle1{
   0%{transform:translate(0,0) rotate(0deg)}
-  25%{transform:translate(0.5px,-0.5px) rotate(0.3deg)}
-  50%{transform:translate(-0.5px,0.5px) rotate(-0.2deg)}
-  75%{transform:translate(0.3px,0.3px) rotate(0.15deg)}
+  25%{transform:translate(0.7px,-0.6px) rotate(0.4deg)}
+  50%{transform:translate(-0.6px,0.7px) rotate(-0.3deg)}
+  75%{transform:translate(0.4px,0.4px) rotate(0.2deg)}
   100%{transform:translate(0,0) rotate(0deg)}
 }
 @keyframes squiggle2{
   0%{transform:translate(0,0) rotate(0deg)}
-  25%{transform:translate(-0.4px,0.4px) rotate(-0.25deg)}
-  50%{transform:translate(0.6px,-0.3px) rotate(0.35deg)}
-  75%{transform:translate(-0.3px,-0.4px) rotate(-0.15deg)}
+  25%{transform:translate(-0.5px,0.5px) rotate(-0.35deg)}
+  50%{transform:translate(0.8px,-0.4px) rotate(0.45deg)}
+  75%{transform:translate(-0.4px,-0.5px) rotate(-0.2deg)}
   100%{transform:translate(0,0) rotate(0deg)}
 }
 @keyframes squiggle3{
-  0%{transform:translate(0.3px,0) rotate(0.1deg)}
-  33%{transform:translate(-0.5px,0.4px) rotate(-0.3deg)}
-  66%{transform:translate(0.4px,-0.5px) rotate(0.25deg)}
-  100%{transform:translate(0.3px,0) rotate(0.1deg)}
+  0%{transform:translate(0.4px,0) rotate(0.15deg)}
+  33%{transform:translate(-0.7px,0.5px) rotate(-0.4deg)}
+  66%{transform:translate(0.5px,-0.7px) rotate(0.35deg)}
+  100%{transform:translate(0.4px,0) rotate(0.15deg)}
 }
-.squiggle{animation:squiggle1 0.15s steps(2) infinite}
-.squiggle:nth-child(2n){animation-name:squiggle2;animation-duration:0.18s}
-.squiggle:nth-child(3n){animation-name:squiggle3;animation-duration:0.13s}
+.squiggle{animation:squiggle1 0.38s steps(3) infinite}
+.squiggle:nth-child(2n){animation-name:squiggle2;animation-duration:0.45s}
+.squiggle:nth-child(3n){animation-name:squiggle3;animation-duration:0.33s}
 `
 function MemberPortrait({id,size,style}){
   const src=MEMBER_PORTRAITS[id]
   if(!src)return null
   const s2=size||80
-  return <img className="squiggle" src={src} alt={id} style={{width:s2,height:s2*1.5,objectFit:'contain',objectPosition:'top center',imageRendering:'auto',filter:'none',...(style||{})}}/>
+  return <img className="squiggle" src={src} alt={id} style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'top center',imageRendering:'auto',filter:'none',...(style||{})}}/>
 }
 
 
@@ -935,7 +935,7 @@ function BoosterScreen({onComplete,seed}){
                 animation:(!isSel&&!dis&&!m.locked)?'throbSlow 4.5s ease-in-out infinite':'none'}}>
               <div style={{height:5,borderRadius:'7px 7px 0 0',background:isSel?'linear-gradient(90deg,#e8a820,#ffcc44)':kwc+'66'}}/>
               {isSel&&<div style={{position:'absolute',top:8,right:8,width:24,height:24,borderRadius:'50%',background:'#e8a820',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,color:'#000',fontWeight:900}}>✓</div>}
-              <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:48,background:'rgba(0,0,0,0.3)',overflow:'hidden'}}>{MEMBER_PORTRAITS[m.id]?<MemberPortrait id={m.id} size={130}/>:m.emoji}</div>
+              <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:48,background:'rgba(0,0,0,0.3)',overflow:'hidden'}}>{MEMBER_PORTRAITS[m.id]?<MemberPortrait id={m.id} size={70}/>:m.emoji}</div>
               <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,color:isSel?'#e8d090':'#c8b878',textAlign:'center',padding:'2px 4px 0px',lineHeight:1,letterSpacing:2}}>{m.name}</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:2,color:'#c8b878',textAlign:'center',padding:'3px 4px 6px',textTransform:'uppercase'}}>{m.role}</div>
               {/* Stat bar — locked vs normal */}
