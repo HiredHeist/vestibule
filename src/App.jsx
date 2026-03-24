@@ -2491,6 +2491,8 @@ function App(){
   const [dblRoll,setDblRoll]=useState(null) // null=not rolled, 1-2=half, 3-4=offbeat, 5-6=double
   const [shredderUsed,setShredderUsed]=useState(false) // tracks if first RIFF played this Strike
   const [nextCardFree,setNextCardFree]=useState(false)
+  const nextCardFreeRef=useRef(false)
+  useEffect(()=>{nextCardFreeRef.current=nextCardFree},[nextCardFree])
   const [allCardsFree,setAllCardsFree]=useState(false) // POSSESSION hellquake: all cards cost 0 this fight
   const allCardsFreeRef=useRef(false)
   useEffect(()=>{allCardsFreeRef.current=allCardsFree},[allCardsFree])
@@ -2720,9 +2722,9 @@ function App(){
     const shredderDiscount=(hasShredder&&!shredderUsed&&card.type==='RIFF'&&card.embers>=1)?1:0
     const synesthesiaDiscount=(fightTripBuff==='SYNESTHESIA')?1:0
     const darkBargainDiscount=(chosenPacts.includes('dark_bargain')&&card.type==='CORRUPT'&&card.embers>=1)?1:0
-    const effectiveEmbers=(nextCardFree&&card.id!=='doubledown')||allCardsFreeRef.current?0:Math.max(0,card.embers-foilDiscount-shredderDiscount-synesthesiaDiscount-darkBargainDiscount)
+    const effectiveEmbers=(nextCardFreeRef.current&&card.id!=='doubledown')||allCardsFreeRef.current?0:Math.max(0,card.embers-foilDiscount-shredderDiscount-synesthesiaDiscount-darkBargainDiscount)
   if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers, have '+embers+'.');return false}
-  if(nextCardFree&&card.id!=='doubledown'){setNextCardFree(false)}
+  if(nextCardFreeRef.current&&card.id!=='doubledown'){setNextCardFree(false)}
     if(card.id==='stagedive'&&stageDiveUsed){addLog('⚠ Stage Dive once per round only.');return false}
     const m=stage[slotIdx]
     let ns=[...stage],spent=effectiveEmbers,msg=''
@@ -3122,7 +3124,7 @@ function App(){
     else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>Math.min(enemy.maxHp,p+6))
     else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>Math.min(enemy.maxHp,p+5))
     return true
-  },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected,fightTripBuff])
+  },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected,fightTripBuff,enemy,enemyHp,maxEmbers,activePassives,activeArtifacts,chosenPacts,activeGenre,fightIndex,shredderUsed,collectedLoot])
 
   const handleDropOnStage=useCallback((slotIdx)=>{
     if(!dragCardUid||animPhase!=='idle')return
@@ -3133,9 +3135,9 @@ function App(){
     if(card.id==='setbreak'){
       const handWithout=hand.filter(c=>c.uid!==card.uid)
       if(handWithout.length===0){addLog('🎼 No cards to discard!');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
-      const effectiveEmbers=nextCardFree||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      const effectiveEmbers=nextCardFreeRef.current||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
-      if(nextCardFree)setNextCardFree(false)
+      if(nextCardFreeRef.current)setNextCardFree(false)
       const preSelected=selected.filter(uid=>uid!==card.uid)
       const victim=preSelected.length>0
         ?(handWithout.find(c=>c.uid===preSelected[0])||handWithout[Math.floor(Math.random()*handWithout.length)])
@@ -3157,9 +3159,9 @@ function App(){
     if(card.id==='groupie'){
       const foilDiscount=(card.foil&&card.embers>=2)?1:0
       const synDiscount=(fightTripBuff==='SYNESTHESIA')?1:0
-      const effectiveEmbers=nextCardFree||allCardsFreeRef.current?0:Math.max(0,card.embers-foilDiscount-synDiscount)
+      const effectiveEmbers=nextCardFreeRef.current||allCardsFreeRef.current?0:Math.max(0,card.embers-foilDiscount-synDiscount)
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
-      if(nextCardFree)setNextCardFree(false)
+      if(nextCardFreeRef.current)setNextCardFree(false)
       const p4Bonus=activePassives.some(p=>p.id==='p4')?1:0
       const handWithout=hand.filter(c=>c.uid!==card.uid)
       const res=drawUpTo(handWithout,deck,discardPile,handWithout.length+1)
@@ -3176,9 +3178,9 @@ function App(){
     // ── SETLIST: handle entirely here to avoid double state updates ──
     if(card.id==='setlist'){
       if(setlistOpen){setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
-      const effectiveEmbers=nextCardFree||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      const effectiveEmbers=nextCardFreeRef.current||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
-      if(nextCardFree)setNextCardFree(false)
+      if(nextCardFreeRef.current)setNextCardFree(false)
       // Draw 2 cards immediately (uncapped), then open force-discard modal
       const handWithout=hand.filter(c=>c.uid!==card.uid)
       const drawRes=drawUpTo(handWithout,deck,discardPile,handWithout.length+2)
@@ -3195,9 +3197,9 @@ function App(){
 
     // ── BURN THE SET: handle entirely here to avoid double state updates ──
     if(card.id==='burnset'){
-      const effectiveEmbers=nextCardFree||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      const effectiveEmbers=nextCardFreeRef.current||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
-      if(nextCardFree)setNextCardFree(false)
+      if(nextCardFreeRef.current)setNextCardFree(false)
       const toDiscard=selected.filter(uid=>uid!==card.uid).slice(0,3)
       const discardCount=toDiscard.length
       const drawCount=discardCount+1
@@ -3219,9 +3221,9 @@ function App(){
     if(card.id==='remaster'){
       const toDeleteUid=selected.find(uid=>uid!==card.uid&&hand.some(c=>c.uid===uid))
       if(!toDeleteUid){addLog('🎙 Select 1 card in hand first, then play The Remaster.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
-      const effectiveEmbers=nextCardFree||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      const effectiveEmbers=nextCardFreeRef.current||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
-      if(nextCardFree)setNextCardFree(false)
+      if(nextCardFreeRef.current)setNextCardFree(false)
       const toDelete=hand.find(c=>c.uid===toDeleteUid)
       const handAfterDelete=hand.filter(c=>c.uid!==toDeleteUid&&c.uid!==card.uid)
       const res=drawUpTo(handAfterDelete,deck,[...discardPile,toDelete],handAfterDelete.length+3)
@@ -3244,9 +3246,9 @@ function App(){
 
     // ── SIGNAL DECAY: discard 1 random from hand, draw 2 ──
     if(card.id==='sigdecay'){
-      const effectiveEmbers=nextCardFree||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      const effectiveEmbers=nextCardFreeRef.current||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
-      if(nextCardFree)setNextCardFree(false)
+      if(nextCardFreeRef.current)setNextCardFree(false)
       const handWithout=hand.filter(c=>c.uid!==card.uid)
       if(handWithout.length===0){
         // No cards to discard, just draw 2
@@ -3300,7 +3302,7 @@ function App(){
       }
     }
     setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
-  },[dragCardUid,hand,animPhase,applyCard])
+  },[dragCardUid,hand,animPhase,applyCard,embers,deck,discardPile,enemy,maxEmbers,selected,activeArtifacts,activePassives])
 
   const handleStageDrop=useCallback((toIdx)=>{
     if(dragCardUid){handleDropOnStage(toIdx);return}
@@ -3476,7 +3478,7 @@ function App(){
         }
       }
     },1000)
-  },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake])
+  },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake,stage,hand,enemy,enemyHp,embers,maxEmbers,activeArtifacts,activePassives,chosenPacts,activeGenre,animPhase,discardsLeft,deck,discardPile,fightTripBuff,luciferPhase,welcomeToHell])
 
 
 
@@ -5084,7 +5086,7 @@ function App(){
             dmg=Math.floor(dmg*bon)
             if(activeGenre==='RIFF_METAL')dmg=Math.round(dmg*1.15)
             if(activeGenre==='DOOM_METAL'&&discardsLeft>=MAX_DISCARDS)dmg+=act.length*2
-            const fin=dmg
+            const fin=strikeMult>1.0?Math.round(dmg*strikeMult):dmg
             return <>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:27,color:'#c8a060',fontWeight:900,textShadow:'0 0 10px rgba(200,160,60,0.6)'}}>Combined Attack</span>
               <span key={fin} style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block'}}>{fin}</span>
