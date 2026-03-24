@@ -946,7 +946,7 @@ function BoosterScreen({onComplete,seed}){
                 animation:(!isSel&&!dis&&!m.locked)?'throbSlow 4.5s ease-in-out infinite':'none'}}>
               <div style={{height:5,borderRadius:'7px 7px 0 0',background:isSel?'linear-gradient(90deg,#e8a820,#ffcc44)':kwc+'66'}}/>
               {isSel&&<div style={{position:'absolute',top:8,right:8,width:24,height:24,borderRadius:'50%',background:'#e8a820',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,color:'#000',fontWeight:900}}>✓</div>}
-              <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:48,background:'rgba(0,0,0,0.3)',overflow:'hidden'}}>{MEMBER_PORTRAITS[m.id]?<MemberPortrait id={m.id} size={45}/>:m.emoji}</div>
+              <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:48,background:'rgba(0,0,0,0.3)',overflow:'hidden'}}>{MEMBER_PORTRAITS[m.id]?<MemberPortrait id={m.id} size={45} noSquiggle/>:m.emoji}</div>
               <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,color:isSel?'#e8d090':'#c8b878',textAlign:'center',padding:'2px 4px 0px',lineHeight:1,letterSpacing:2}}>{m.name}</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:2,color:'#c8b878',textAlign:'center',padding:'3px 4px 6px',textTransform:'uppercase'}}>{m.role}</div>
               {/* Stat bar — locked vs normal */}
@@ -1878,7 +1878,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
         {member.demonic?'⛧ DEMONIC':member.mythic?'✦ MYTHIC':'✨ FOIL'}
       </div>}
       <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative',minHeight:90,overflow:'hidden'}}>
-        {MEMBER_PORTRAITS[member.id]?<MemberPortrait id={member.id} size={45} style={{marginTop:0}}/>:member.emoji}
+        {STAGE_PORTRAITS[member.id]?<img className="squiggle" src={STAGE_PORTRAITS[member.id]} alt={member.id} style={{width:72,height:108,objectFit:'cover',objectPosition:'top center'}}/>:member.emoji}
         {st&&<div style={{position:'absolute',top:4,right:4,fontSize:22}}>💨</div>}
         {isAttacking&&<div style={{position:'absolute',inset:0,background:'rgba(255,50,0,0.12)',animation:'pulse 0.4s ease infinite alternate'}}/>}
       </div>
