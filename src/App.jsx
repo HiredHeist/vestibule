@@ -2447,6 +2447,7 @@ function App(){
   const [fightTripBuff,setFightTripBuff]=useState(null) // persists for entire fight — combat checks read this
   const [luciferPhase,setLuciferPhase]=useState(0) // 0=not lucifer, 1=phase1 ice, 2=phase2 satan
   const [luciferCinematic,setLuciferCinematic]=useState(null) // {text,hpSteps} for HP melt animation
+  const [victoryCinematic,setVictoryCinematic]=useState(null) // {phase,stage} for kill cinematic
   const [stolenAtkPool,setStolenAtkPool]=useState(0) // soulThief: total ATK stolen, returned on win
   const [tripUsedThisFight,setTripUsedThisFight]=useState(false)
   const [stats,setStats]=useState({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -3192,7 +3193,14 @@ function App(){
       const newStreak=lastPlayedDate===yesterday||lastPlayedDate===today?dailyStreak+1:1
       setDailyStreak(newStreak);localStorage.setItem('vst_streak',newStreak)
       setLastPlayedDate(today);localStorage.setItem('vst_lastdate',today)
-      setTimeout(function(){setGameState('end')},800)
+      // Victory cinematic sequence
+      const bandNames=stage.filter(m=>m&&!m.tooStoned).map(m=>m.name)
+      setVictoryCinematic({phase:0,bandNames,stakeId:activeStake.id,stakeName:activeStake.name})
+      setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:1}:null),800) // crack
+      setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:2}:null),2000) // THE DEVIL IS DEAD
+      setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:3}:null),4500) // band members rise
+      setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:4}:null),7000) // stake unlocked
+      setTimeout(()=>{setVictoryCinematic(null);setGameState('end')},10000) // end screen
     }
       else{
         const nextCn=Math.floor((fightIndex+1)/3)+1
@@ -4022,7 +4030,7 @@ function App(){
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
-    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
+    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false)
     setDiscovered(new Set())
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -4435,6 +4443,40 @@ function App(){
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:'#fff',textShadow:`0 0 20px ${comboFlash.color},3px 3px 0 #000`,letterSpacing:6,animation:'fadeIn 0.4s ease'}}>{comboFlash.name}</div>
       </div>}
       {/* CIRCLE CLEARED FLASH */}
+
+      {/* VICTORY CINEMATIC — Lucifer kill sequence */}
+      {victoryCinematic&&<div style={{position:'absolute',inset:0,zIndex:9999,pointerEvents:victoryCinematic.phase>=4?'auto':'none',background:victoryCinematic.phase>=1?'rgba(0,0,0,'+(Math.min(0.95,victoryCinematic.phase*0.25))+')':'transparent',transition:'background 1.5s ease',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,overflow:'hidden'}}>
+        {/* Phase 1: Screen cracks */}
+        {victoryCinematic.phase>=1&&<div style={{position:'absolute',inset:0,pointerEvents:'none',opacity:victoryCinematic.phase>=2?0.3:0.8,transition:'opacity 2s'}}>
+          <svg viewBox="0 0 1920 1080" style={{width:'100%',height:'100%'}}><g stroke="#cc1111" strokeWidth="2" fill="none" opacity="0.7">
+            <path d="M960 0 L940 200 L900 350 L850 500 L800 540 L700 600"/><path d="M960 0 L980 180 L1020 380 L1080 500 L1150 580"/>
+            <path d="M940 200 L800 250 L650 300"/><path d="M980 180 L1100 220 L1250 280"/>
+            <path d="M900 350 L750 400 L600 500"/><path d="M1020 380 L1200 420 L1350 500"/>
+            <path d="M850 500 L700 700 L600 900 L550 1080"/><path d="M1080 500 L1200 700 L1350 900 L1400 1080"/>
+            <path d="M800 540 L500 650 L300 800 L100 1080"/><path d="M1150 580 L1400 680 L1600 820 L1800 1080"/>
+          </g></svg>
+        </div>}
+        {/* Phase 2: THE DEVIL IS DEAD */}
+        {victoryCinematic.phase>=2&&<div style={{animation:'fadeIn 1.5s ease',textAlign:'center'}}>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:110,color:'#cc1111',textShadow:'0 0 60px rgba(200,0,0,0.8),0 0 120px rgba(150,0,0,0.5),0 0 200px rgba(100,0,0,0.3),4px 4px 0 #000',letterSpacing:12,lineHeight:1}}>⛧ THE DEVIL IS DEAD ⛧</div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:32,color:'#e8d090',marginTop:16,animation:'fadeIn 2s ease 0.5s both',fontStyle:'italic',textShadow:'0 0 20px rgba(200,160,60,0.5)'}}>Your band survived the 9 Circles of Hell</div>
+        </div>}
+        {/* Phase 3: Band members rise */}
+        {victoryCinematic.phase>=3&&<div style={{display:'flex',gap:24,marginTop:20,animation:'fadeIn 1s ease'}}>
+          {victoryCinematic.bandNames.map((name,i)=>(
+            <div key={i} style={{textAlign:'center',animation:'fadeIn 0.5s ease '+(i*0.3)+'s both'}}>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,color:'#ffd700',textShadow:'0 0 20px rgba(255,215,0,0.6)',letterSpacing:2}}>{name}</div>
+              <div style={{fontSize:10,color:'#ffd700',marginTop:4}}>★</div>
+            </div>
+          ))}
+        </div>}
+        {/* Phase 4: Stake unlocked */}
+        {victoryCinematic.phase>=4&&<div style={{animation:'fadeIn 1s ease',textAlign:'center',marginTop:24}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#e8a820',letterSpacing:4,textShadow:'0 0 20px rgba(200,140,0,0.6)'}}>⛧ {victoryCinematic.stakeName.toUpperCase()} CONQUERED ⛧</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#c8a040',marginTop:8,fontStyle:'italic'}}>Click anywhere to continue</div>
+          <div style={{position:'absolute',inset:0,cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setGameState('end')}}/>
+        </div>}
+      </div>}
       {circleClearedData&&<div style={{position:'absolute',inset:0,zIndex:9750,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:0,background:'rgba(0,0,0,0.94)',animation:'fadeIn 0.3s ease'}}>
         <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',opacity:0.06}}>
           <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:864,height:864,objectFit:'contain'}}/>

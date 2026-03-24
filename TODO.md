@@ -147,8 +147,12 @@ This is happening.
 - [x] Unlock Cards tab: hover tooltip shows full card preview (280px, type/cost/emoji/name/rarity/effect)
 
 ### Feature 5: VICTORY EXPERIENCE — "The Encore" + "Welcome to Hell"
-- [ ] Lucifer kill cinematic: screen freeze → crack SVG → shatter → text reveal
-      "⛧ THE DEVIL IS DEAD ⛧" 120px → band members rise gold → score roll-up
+- [x] Lucifer kill cinematic: 5-phase sequence over 10 seconds
+      Phase 0: screen darkens. Phase 1 (0.8s): SVG crack lines spread from center.
+      Phase 2 (2s): "⛧ THE DEVIL IS DEAD ⛧" 110px red glow reveal.
+      Phase 3 (4.5s): band member names rise in gold, staggered 0.3s each.
+      Phase 4 (7s): "STAKE CONQUERED" + click to continue.
+      Phase 5 (10s): auto-transition to end screen.
 - [ ] Score counting animation (Balatro-style number roll-up with sound)
 - [ ] Victory music track (6th mp3)
 - [ ] Win-exclusive unlocks per stake:
