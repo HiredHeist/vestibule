@@ -153,6 +153,7 @@ This is happening.
       Phase 3 (4.5s): band member names rise in gold, staggered 0.3s each.
       Phase 4 (7s): "STAKE CONQUERED" + click to continue.
       Phase 5 (10s): auto-transition to end screen.
+      POLISH LATER: crack SVG is placeholder — needs animated canvas/WebGL crack effect
 - [ ] Score counting animation (Balatro-style number roll-up with sound)
 - [ ] Victory music track (6th mp3)
 - [ ] Win-exclusive unlocks per stake:
