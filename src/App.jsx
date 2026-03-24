@@ -224,23 +224,23 @@ const REWARD_TIPS={
 }
 
 const DESCENT_REWARDS_1=[ // Fight 1 skip rewards (small) — 9 options
-  {id:'s_stash',name:'+15 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>p+15);gs.addLog('🌿 Skipped fight: +15 Stash')}},
+  {id:'s_stash',name:'+15 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>Math.min(420,p+15));gs.addLog('🌿 Skipped fight: +15 Stash')}},
   {id:'s_ember',name:'+1 Max Ember',emoji:'🔥',apply:(gs)=>{gs.setMaxEmbers(p=>Math.min(8,p+1));gs.addLog('🔥 Skipped fight: +1 Max Ember')}},
   {id:'s_corrupt',name:'-15% Corruption',emoji:'✨',apply:(gs)=>{gs.setCorruption(p=>Math.max(0,p-15));gs.addLog('✨ Skipped fight: -15% Corruption')}},
   {id:'s_atk',name:'Random Member +1 ATK',emoji:'🎸',apply:(gs)=>{gs.setStage(p=>{const alive=p.map((m,i)=>m&&!m.tooStoned?i:null).filter(i=>i!==null);if(alive.length===0)return p;const idx=alive[Math.floor(Math.random()*alive.length)];const ns=[...p];ns[idx]=Object.assign({},ns[idx],{atk:ns[idx].atk+1,permAtkBonus:(ns[idx].permAtkBonus||0)+1});gs.addLog('🎸 Skipped fight: '+ns[idx].name+' +1 ATK');return ns})}},
   {id:'s_draw1',name:'Draw +1 Next Fight',emoji:'📋',apply:(gs)=>{gs.setPendingDraw(p=>p+1);gs.addLog('📋 Skipped fight: +1 Card next fight')}},
   {id:'s_discard',name:'+1 Discard Next Fight',emoji:'🗑',apply:(gs)=>{gs.setBonusDiscards(p=>p+1);gs.addLog('🗑 Skipped fight: +1 Discard next fight')}},
   {id:'s_card',name:'Random Common Card',emoji:'🃏',apply:(gs)=>{const commons=ALL_CARDS.filter(c=>c.rarity==='Common');const pick=commons[Math.floor(Math.random()*commons.length)];gs.addToDeck({...pick,uid:uid()});gs.addLog('🃏 Skipped fight: Added '+pick.name+' to deck')}},
-  {id:'s_stashper',name:'+5 Stash Per Member',emoji:'💰',apply:(gs)=>{gs.setStage(p=>{const alive=p.filter(m=>m&&!m.tooStoned).length;gs.setStash(s=>s+alive*5);gs.addLog('💰 Skipped fight: +'+alive*5+' Stash ('+alive+' members x 5)');return p})}},
+  {id:'s_stashper',name:'+5 Stash Per Member',emoji:'💰',apply:(gs)=>{gs.setStage(p=>{const alive=p.filter(m=>m&&!m.tooStoned).length;gs.setStash(s=>Math.min(420,s+alive*5));gs.addLog('💰 Skipped fight: +'+alive*5+' Stash ('+alive+' members x 5)');return p})}},
   {id:'s_embers2',name:'+2 Bonus Embers',emoji:'⚡',apply:(gs)=>{gs.setBonusEmbers(p=>p+2);gs.addLog('⚡ Skipped fight: +2 Bonus Embers next fight')}},
 ]
 const DESCENT_REWARDS_2=[ // Fight 2 skip rewards (medium) — 9 options
-  {id:'m_stash',name:'+25 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>p+25);gs.addLog('🌿 Skipped fight: +25 Stash')}},
+  {id:'m_stash',name:'+25 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>Math.min(420,p+25));gs.addLog('🌿 Skipped fight: +25 Stash')}},
   {id:'m_corrupt',name:'Corruption → 0%',emoji:'✨',apply:(gs)=>{gs.setCorruption(0);gs.addLog('✨ Skipped fight: Corruption reset to 0%')}},
   {id:'m_draw2',name:'Draw +2 Next Fight',emoji:'📋',apply:(gs)=>{gs.setPendingDraw(p=>p+2);gs.addLog('📋 Skipped fight: +2 Cards next fight')}},
   {id:'m_card',name:'Random Uncommon Card',emoji:'🃏',apply:(gs)=>{const uncommons=ALL_CARDS.filter(c=>c.rarity==='Uncommon');const pick=uncommons[Math.floor(Math.random()*uncommons.length)];gs.addToDeck({...pick,uid:uid()});gs.addLog('🃏 Skipped fight: Added '+pick.name+' to deck')}},
   {id:'m_allatk',name:'All Members +1 ATK',emoji:'🎸',apply:(gs)=>{gs.setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1}):m));gs.addLog('🎸 Skipped fight: All members +1 ATK')}},
-  {id:'m_stash40',name:'+40 Stash',emoji:'💰',apply:(gs)=>{gs.setStash(p=>p+40);gs.addLog('💰 Skipped fight: +40 Stash')}},
+  {id:'m_stash40',name:'+40 Stash',emoji:'💰',apply:(gs)=>{gs.setStash(p=>Math.min(420,p+40));gs.addLog('💰 Skipped fight: +40 Stash')}},
   {id:'m_delete',name:'Delete Random Common',emoji:'🗑',apply:(gs)=>{gs.deleteRandomCommon()}},
   {id:'m_free',name:'First Card Free',emoji:'⚡',apply:(gs)=>{gs.setNextCardFree(true);gs.addLog('⚡ Skipped fight: First card next fight is free')}},
   {id:'m_stonewall',name:'Stonewall All',emoji:'🛡',apply:(gs)=>{gs.setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{stoneShield:2}):m));gs.addLog('🛡 Skipped fight: All members shielded for 2 strikes')}},
@@ -1591,7 +1591,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 </div>
               </div>
             </div>
-            {shopCards.map((card,i)=><SaleCard key={i} card={card} idx={i}/>)}
+            {shopCards.filter(Boolean).map((card,i)=><SaleCard key={i} card={card} idx={i}/>)}
           </div>
           </div>
 
@@ -3180,7 +3180,7 @@ function App(){
       if(nextCardFreeRef.current)setNextCardFree(false)
       const p4Bonus=activePassives.some(p=>p.id==='p4')?1:0
       const handWithout=hand.filter(c=>c.uid!==card.uid)
-      const res=drawUpTo(handWithout,deck,discardPile,handWithout.length+1)
+      const res=drawUpTo(handWithout,deckRef.current,[...discRef.current,card],handWithout.length+1)
       setHand(res.h);setDeck(res.d);setDiscardPile([...res.disc,card])
       setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus-effectiveEmbers))
       addLog('🍯 Groupie! +2 Embers, drew 1 card.')
@@ -3199,7 +3199,7 @@ function App(){
       if(nextCardFreeRef.current)setNextCardFree(false)
       // Draw 2 cards immediately (uncapped), then open force-discard modal
       const handWithout=hand.filter(c=>c.uid!==card.uid)
-      const drawRes=drawUpTo(handWithout,deck,discardPile,handWithout.length+2)
+      const drawRes=drawUpTo(handWithout,deckRef.current,discRef.current,handWithout.length+2)
       setHand(drawRes.h);setDeck(drawRes.d);setDiscardPile(drawRes.disc)
       setSetlistCards(drawRes.h)
       setSetlistOpen(true)
@@ -3221,7 +3221,7 @@ function App(){
       const drawCount=discardCount+1
       const remainingHand=hand.filter(c=>c.uid!==card.uid&&!toDiscard.includes(c.uid))
       const discarded=hand.filter(c=>toDiscard.includes(c.uid))
-      const res=drawUpTo(remainingHand,deck,[...discardPile,...discarded],remainingHand.length+drawCount)
+      const res=drawUpTo(remainingHand,deckRef.current,[...discRef.current,...discarded],remainingHand.length+drawCount)
       setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
@@ -3242,7 +3242,7 @@ function App(){
       if(nextCardFreeRef.current)setNextCardFree(false)
       const toDelete=hand.find(c=>c.uid===toDeleteUid)
       const handAfterDelete=hand.filter(c=>c.uid!==toDeleteUid&&c.uid!==card.uid)
-      const res=drawUpTo(handAfterDelete,deck,[...discardPile,toDelete],handAfterDelete.length+3)
+      const res=drawUpTo(handAfterDelete,deckRef.current,[...discRef.current,toDelete],handAfterDelete.length+3)
       setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
@@ -3268,7 +3268,7 @@ function App(){
       const handWithout=hand.filter(c=>c.uid!==card.uid)
       if(handWithout.length===0){
         // No cards to discard, just draw 2
-        const res=drawUpTo(handWithout,deck,discardPile,handWithout.length+2)
+        const res=drawUpTo(handWithout,deckRef.current,discRef.current,handWithout.length+2)
         setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
         addLog('📡 Signal Decay! Drew 2 cards.')
       } else {
@@ -3276,7 +3276,7 @@ function App(){
         const victimIdx=Math.floor(Math.random()*handWithout.length)
         const victim=handWithout[victimIdx]
         const remaining=handWithout.filter((_,i)=>i!==victimIdx)
-        const res=drawUpTo(remaining,deck,[...discardPile,victim],remaining.length+2)
+        const res=drawUpTo(remaining,deckRef.current,[...discRef.current,victim],remaining.length+2)
         setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
         addLog('📡 Signal Decay! Discarded '+victim.name+', drew 2 cards.')
       }
@@ -3351,7 +3351,7 @@ function App(){
     // (Amp Overload no longer skips discards — it costs one instead)
     const toDisc=hand.filter(c=>selected.includes(c.uid))
     const rem=hand.filter(c=>!selected.includes(c.uid))
-    const res=drawUpTo(rem,deck,[...discardPile,...toDisc],Math.max(HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0),hand.length))
+    const res=drawUpTo(rem,deckRef.current,[...discRef.current,...toDisc],Math.max(HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0),hand.length))
     setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
     playSfx('discard');setDiscardsLeft(p=>p-1);setSelected([])
     addLog('🗑 '+toDisc.length+' discarded & replaced.')
@@ -3642,7 +3642,7 @@ function App(){
     if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
     if(pendingDraw>0){
       const _pd=pendingDraw
-      const pdRes=drawUpTo(hand,deck,discardPile,hand.length+_pd)
+      const pdRes=drawUpTo(handRef.current,deckRef.current,discRef.current,handRef.current.length+_pd)
       setHand(pdRes.h);setDeck(pdRes.d);setDiscardPile(pdRes.disc)
       addLog('🎛 Soundboard draw! +'+_pd+' card'+(_pd>1?'s':'')+'.')
       setPendingDraw(0)
@@ -4850,7 +4850,7 @@ function App(){
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,color:'#e8a820',textShadow:'0 0 40px rgba(200,140,0,0.6),0 0 80px rgba(150,100,0,0.3),3px 3px 0 #000',letterSpacing:8}}>⛧ The Pact ⛧</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#aa9060',fontStyle:'italic'}}>Choose your reward. The other is lost to the Void.</div>
       <div style={{display:'flex',gap:40,marginTop:16}}>
-        {pactChoices.map(pact=>(
+        {pactChoices.filter(Boolean).map(pact=>(
           <div key={pact.id} onClick={()=>{
             setChosenPacts(p=>[...p,pact.id])
             // Apply immediate pact effects
@@ -4881,7 +4881,7 @@ function App(){
   )
   if(gameState==='campfire'){
     const allDeckCards=[...deck,...discardPile]
-    const uniqueUpgradeable=allDeckCards.filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i).filter(c=>CARD_UPGRADES[c.id]&&!upgradedCards.includes(c.id))
+    const uniqueUpgradeable=allDeckCards.filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i).filter(c=>!c.consumable&&CARD_UPGRADES[c.id]&&!upgradedCards.includes(c.id))
     return(
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',gap:12,padding:'24px 40px',overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:50,color:'#ff8800',textShadow:'0 0 40px rgba(255,120,0,0.6),0 0 80px rgba(200,80,0,0.3),3px 3px 0 #000',letterSpacing:6}}>The Doom Forge</div>
@@ -4938,8 +4938,8 @@ function App(){
       {damageFlash&&<div style={{position:'absolute',inset:0,zIndex:8500,pointerEvents:'none',background:'radial-gradient(ellipse at center,rgba(200,0,0,0.25),rgba(100,0,0,0.4))',animation:'flashFade 0.4s ease-out forwards'}}/>}
       {corruptHigh&&!corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 40%,rgba(100,0,0,0.15) 100%)',animation:bgPulseAnim}}/>}
       {corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 20%,rgba(140,0,0,0.3) 100%)',animation:'bgPulse 1s ease-in-out infinite'}}/>}
-      {floats.map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
-      {projectiles.map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
+      {floats.filter(Boolean).map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
+      {projectiles.filter(Boolean).map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
       {showDice&&diceTarget&&<DiceRoll target={diceTarget} onDone={()=>setShowDice(false)}/>}
       {hellquakeAnim&&<div style={{position:'absolute',inset:0,zIndex:9500,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.85)',animation:'fadeIn 0.1s ease'}}>
         <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.04) 3px,rgba(255,255,255,0.04) 4px)',animation:'interlaceFlicker 0.08s steps(1) infinite',pointerEvents:'none'}}/>
@@ -5129,7 +5129,7 @@ function App(){
               <span style={{color:'#e8a820',fontSize:18,textShadow:'0 0 8px rgba(200,160,60,0.5)'}}>⟶</span>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:27,color:'#c8a060',fontWeight:700}}>{enemy.name}</span>
               {chosenPacts.length>0&&<div style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',display:'flex',gap:4}}>
-                {chosenPacts.map(pid=>{const p=PACT_REWARDS.find(r=>r.id===pid);return p?<div key={pid} style={{position:'relative',cursor:'help'}}
+                {chosenPacts.filter(Boolean).map(pid=>{const p=PACT_REWARDS.find(r=>r.id===pid);return p?<div key={pid} style={{position:'relative',cursor:'help'}}
                   onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='block'}}
                   onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='none'}}>
                   <div style={{width:24,height:24,borderRadius:4,background:'rgba(0,0,0,0.6)',border:`1px solid ${p.color}66`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>{p.emoji}</div>
@@ -5250,7 +5250,7 @@ function App(){
             </div>
           })()}
           {activePassives.length>0&&<div style={{width:'100%',borderTop:'1px solid rgba(80,60,160,0.3)',paddingTop:3}}>
-            {activePassives.map((p,i)=><div key={i} style={{fontSize:10,color:'#8090c0',fontFamily:"'MBScribblesFont',serif",position:'relative',cursor:'help'}}
+            {activePassives.filter(Boolean).map((p,i)=><div key={i} style={{fontSize:10,color:'#8090c0',fontFamily:"'MBScribblesFont',serif",position:'relative',cursor:'help'}}
               onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-ptip]');if(t)t.style.opacity='1'}}
               onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-ptip]');if(t)t.style.opacity='0'}}>
               {p.emoji} {p.name}

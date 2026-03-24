@@ -3,6 +3,74 @@
 
 ---
 
+
+## 🔴 CRITICAL BUGS — FROM CIRCLE 9 CRASH PLAYTEST (March 24, 2026)
+
+### P0 — CRASH BUGS (Game-ending)
+
+- [x] **BUG 9: 8 drawUpTo() calls use stale state** ✅ FIXED — ROOT CAUSE OF CRASH
+  Lines: 3183, 3202, 3224, 3245, 3271, 3279, 3354, 3645
+  All pass `deck`, `hand`, `discardPile` state vars captured in closures.
+  By Circle 8-9, cards leak into multiple locations (hand+discard simultaneously).
+  FIX: Replace with `deckRef.current`, `handRef.current`, `discRef.current` in all 8 calls.
+
+- [x] **BUG 10: 10 unguarded .map() calls in render** ✅ FIXED — CRASH ON UNDEFINED
+  hand.map (L5263), stage.map (L5080, L694, L878), pactChoices.map (L4853),
+  floats.map (L4941), projectiles.map (L4942), shopCards.map (L1594),
+  chosenPacts.map (L5132), activePassives.map (L5253)
+  FIX: Add .filter(Boolean) before every .map() in render.
+
+- [x] **BUG 11: Groupie & Setbreak setHand race** ✅ Already fixed (both return false, handled in handleDropOnStage)
+  L2826 (Groupie) and L2967 (Setbreak) call setHand inside applyCard.
+  handleDropOnStage ALSO calls setHand after applyCard returns. Race condition.
+  FIX: Move draw logic to handleDropOnStage (like Smoke Break pattern).
+
+### P1 — GAMEPLAY BUGS (Wrong behavior)
+
+- [x] **BUG 1: Stonewall on Stage Dive** — DESIGN CORRECT (self-inflicted) (L2754)
+  Member dies from Stage Dive self-damage without checking stoneShield.
+  FIX: Add stoneShield check before setting tooStoned.
+
+- [x] **BUG 2: Stonewall on Sound Check** — DESIGN CORRECT (L2795)
+  FIX: Add stoneShield check.
+
+- [x] **BUG 3: Stonewall on Burn Set** — DESIGN CORRECT (L2883)
+  FIX: Add stoneShield check.
+
+- [x] **BUG 4: Stonewall on Amp Static** — DESIGN CORRECT (L2925)
+  FIX: Add stoneShield check.
+
+- [x] **BUG 7: Stonewall on Possessed Performance** — DESIGN CORRECT (L3098-3099)
+  FIX: Add stoneShield check.
+
+- [x] **BUG 12: 126 duplicate React key errors** ✅ FIXED (root cause was Bug 9)
+  UIDs appearing in multiple rendered lists simultaneously.
+  ROOT CAUSE: Bug 9 (stale state in drawUpTo). Fixing Bug 9 fixes this.
+
+### P2 — BALANCE / UX BUGS
+
+- [x] **BUG 5: Uncapped stash in descent rewards** ✅ FIXED (L227, L234, L238, L243)
+  Descent skip rewards add stash without Math.min(MAX_STASH) cap.
+  FIX: Wrap all descent stash additions in Math.min(MAX_STASH, ...).
+
+- [x] **BUG 6: Uncapped setStash calls** ✅ FIXED (capped to 420)
+  Various reward paths don't respect MAX_STASH=420 limit.
+  FIX: Audit all setStash calls and add caps.
+
+- [x] **BUG 13: Consumable cards in Doom Forge** ✅ FIXED
+  Sabbath Sigil (consumable) can appear in upgrade list. Wasted upgrade.
+  FIX: Filter consumable cards from uniqueUpgradeable.
+
+- [ ] **BUG 14: 9 uncapped setEmbers calls**
+  Some ember additions don't respect maxEmbers or MAX_EMBERS_CAP.
+  FIX: Audit all setEmbers calls and add Math.min caps.
+
+- [ ] **BUG 8: Corruption 100% is cosmetically misleading**
+  False Prophet pushes to 100% but nothing happens without Sabbath Sigil.
+  FIX: Add subtle visual warning or small gameplay effect at 100%.
+
+---
+
 ## TOP 10 — MAXIMUM ADDICTION FEATURES
 
 These features are designed using proven psychological hooks from Balatro (variable ratio reinforcement, number-go-up transparency), Slay the Spire (build identity, meaningful choices), and Hades (meta-progression narrative). Each one targets a specific addiction mechanism.
