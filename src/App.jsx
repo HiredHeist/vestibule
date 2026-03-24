@@ -132,11 +132,11 @@ const ENEMIES=[
   // ── CIRCLE III: GLUTTONY — Heals when you play cards ─────────
   {id:'glutton',tagline:'It ate your strikes for breakfast.',name:'The Glutton',circle:'Circle III — Gluttony',subtitle:'Fight 1 of 3',maxHp:130,baseDmg:5,emoji:'🍖',passive:'Insatiable. Heals 2 HP every time a card is played.',passiveId:'cardHeal'},
   {id:'feaster',tagline:'Still hungry. Always hungry.',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:170,baseDmg:6,emoji:'🦷',passive:'Voracious. Heals 3 HP every time a card is played.',passiveId:'cardHeal3'},
-  {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:230,baseDmg:7,emoji:'🕳',passive:'Endless hunger. Heals 4 HP per card played. Strike fast.',passiveId:'cardHeal5'},
+  {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:230,baseDmg:7,emoji:'🕳',passive:'Endless hunger. Heals 6 HP per card played. Strike fast.',passiveId:'cardHeal6'},
   // ── CIRCLE IV: GREED — Steals stash each strike ──────────────
   {id:'miser',tagline:'You could not afford to win.',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:340,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1🌿 from your Stash each Strike. Win to take it back.',passiveId:'stashSteal'},
   {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:400,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2🌿 per Strike. Your stash is its stash.',passiveId:'stashSteal2'},
-  {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:500,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3🌿 per Strike. Win to reclaim everything.',passiveId:'stashSteal3'},
+  {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:666,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3🌿 per Strike. 666 HP of pure greed.',passiveId:'stashSteal3'},
   // ── CIRCLE V: ANGER — Hits harder the more you buff ─────────
   {id:'wrathful',tagline:'Your buffs fed its rage.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:900,baseDmg:5,emoji:'🔥',passive:'Enraged. +1 damage for each buffed member on your stage.',passiveId:'rageScale1'},
   {id:'berserker',tagline:'Fury without limit.',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:1000,baseDmg:6,emoji:'⚔️',passive:'Furious. +1 damage per buffed member.',passiveId:'rageScale1'},
@@ -144,7 +144,7 @@ const ENEMIES=[
   // ── CIRCLE VI: HERESY — Corrupts your corruption system ──────
   {id:'heretic',tagline:'Your soul is sufficiently corrupted now.',name:'The Heretic',circle:'Circle VI — Heresy',subtitle:'Fight 1 of 3',maxHp:1650,baseDmg:5,emoji:'🔱',passive:'Blasphemous. Each Strike raises your Corruption by 10%.',passiveId:'corruptPlayer'},
   {id:'apostate',tagline:'Corruption claimed another believer.',name:'The Apostate',circle:'Circle VI — Heresy',subtitle:'Fight 2 of 3',maxHp:1900,baseDmg:6,emoji:'⛧',passive:'Corrupting. Raises Corruption by 15% each Strike.',passiveId:'corruptPlayer15'},
-  {id:'heresy_boss',tagline:'Even your chaos served its doctrine.',name:'The False Prophet',circle:'Circle VI — Heresy',subtitle:'Circle Boss — Fight 3 of 3',maxHp:3000,baseDmg:7,emoji:'📖',passive:'Toxic doctrine. Corruption +20% per Strike. Hellquake territory every fight.',passiveId:'corruptPlayer20'},
+  {id:'heresy_boss',tagline:'Even your chaos served its doctrine.',name:'The False Prophet',circle:'Circle VI — Heresy',subtitle:'Circle Boss — Fight 3 of 3',maxHp:2600,baseDmg:7,emoji:'📖',passive:'Toxic doctrine. Corruption +20% per Strike. Hellquake territory every fight.',passiveId:'corruptPlayer20'},
   // ── CIRCLE VII: VIOLENCE — Targets your healthiest member ────
   {id:'brute',tagline:'Your healthiest fell first.',name:'The Brute',circle:'Circle VII — Violence',subtitle:'Fight 1 of 3',maxHp:3000,baseDmg:6,emoji:'🗡️',passive:'Calculated. Always targets the member with highest HP.',passiveId:'targetHighestHp'},
   {id:'hunter',tagline:'Prey spotted. Prey eliminated.',name:'The Hunter',circle:'Circle VII — Violence',subtitle:'Fight 2 of 3',maxHp:4000,baseDmg:7,emoji:'🏹',passive:'Predatory. Targets highest HP member. Deals +50% damage to them.',passiveId:'targetHighestHp2'},
@@ -319,7 +319,7 @@ function getUnlockedStakes(){
   return unlocked
 }
 // ── WELCOME TO HELL: The Executive bonus boss ──────────────────────
-const AR_EXECUTIVE={id:'ar_exec',name:'The Executive',emoji:'🕴',maxHp:100000,baseDmg:8,
+const AR_EXECUTIVE={id:'ar_exec',name:'The Executive',emoji:'🕴',maxHp:69000,baseDmg:8,
   passive:'Corporate Pressure. Every 2 strikes, a Record Deal contract appears in your hand.',
   passiveId:'corporate',tagline:'The real Devil wears a suit.'}
 
@@ -366,16 +366,16 @@ const ALL_CARDS=[
   {id:'sigdecay',name:'Signal Decay',type:'CORRUPT',rarity:'Common',emoji:'📡',embers:1,effect:'Discard 1 card from hand. Draw 2 cards.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'battlecry',name:'Battle Cry',type:'RIFF',rarity:'Common',emoji:'🤘',embers:1,effect:'Target member +1 ATK permanently.',color:'#9933cc',typeColor:'#7722aa',copies:4},
   {id:'roadie',name:'Roadie',type:'UTILITY',rarity:'Common',emoji:'🛡',embers:1,effect:'Target cannot go Too Stoned for 2 Strikes. Heals 2 HP.',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'setlist',name:'Setlist',type:'UTILITY',rarity:'Common',emoji:'📋',embers:1,effect:'Draw 2 cards. Then discard 1 card of your choice.',color:'#22aa44',typeColor:'#118833',copies:1},
+  {id:'setlist',name:'Setlist',type:'UTILITY',rarity:'Common',emoji:'📋',embers:0,effect:'Draw 2 cards. Then discard 1 card of your choice.',color:'#22aa44',typeColor:'#118833',copies:1},
   {id:'groupie',name:'Groupie',type:'EMBER',rarity:'Uncommon',emoji:'🍯',embers:1,effect:'Gain 2 Embers. Draw 1 card immediately.',color:'#c87820',typeColor:'#a05a10',copies:2},
-  {id:'demotape',name:'Demo Tape',type:'RIFF',rarity:'Common',emoji:'📼',embers:2,effect:'Copy the last Riff played, cast it free.',color:'#9933cc',typeColor:'#7722aa',copies:1},
+  {id:'demotape',name:'Demo Tape',type:'RIFF',rarity:'Common',emoji:'📼',embers:1,effect:'Copy the last Riff played, cast it free.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'newstrings',name:'New Strings',type:'RIFF',rarity:'Uncommon',emoji:'🎸',embers:2,effect:'+2 ATK permanently to target member.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'encore',name:'Encore',type:'RIFF',rarity:'Uncommon',emoji:'🔁',embers:2,effect:'Target member attacks again this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:3},
   {id:'wakeup',name:'Wake Up Call',type:'UTILITY',rarity:'Uncommon',emoji:'☕',embers:1,effect:'Heal all members 2 HP. If any member is Too Stoned, revive them.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'feedbackloop',name:'Feedback Loop',type:'CORRUPT',rarity:'Uncommon',emoji:'🎛',embers:3,effect:'Deal damage equal to Corruption ÷ 2.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'tappedout',name:'Tapped Out',type:'EMBER',rarity:'Uncommon',emoji:'🪙',embers:0,effect:'Gain 5 Embers at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'controlfeedback',name:'Controlled Feedback',type:'CORRUPT',rarity:'Uncommon',emoji:'🎚',embers:2,effect:'Set Corruption to 50%. Heal target member to full HP.',color:'#aa1111',typeColor:'#880000',copies:1},
-  {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:1,effect:'Select up to 3 cards first, then play this to discard them and draw that many +1. (No selection = draw 1 card.)',color:'#9933cc',typeColor:'#7722aa',copies:1},
+  {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:0,effect:'Select up to 3 cards first, then play this to discard them and draw that many +1. (No selection = draw 1 card.)',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:2,effect:'Direct damage: 5 (C1-3), 8 (C4-6), 12 (C7-9). Bypasses boss passive.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:4,effect:'Damage = target HP to boss. Once per round.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'If Corruption >=60%, double ALL ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:1},
@@ -3039,6 +3039,7 @@ function App(){
     if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
     else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
     else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>Math.min(enemy.maxHp,p+4))
+    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>Math.min(enemy.maxHp,p+6))
     else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>Math.min(enemy.maxHp,p+5))
     return true
   },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected,fightTripBuff])
@@ -3063,9 +3064,9 @@ function App(){
       setHand(remaining)
       setDiscardPile(p=>[...p,card,victim])
       setSelected([])
-      setEmbers(p=>Math.min(maxEmbers,p+2-effectiveEmbers))
-      addLog('🎼 Smoke Break! '+victim.name+' discarded. +2 Embers.'+(preSelected.length===0?' (tip: select a card first)':''))
-      addFloat('+2 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
+      setEmbers(p=>Math.min(maxEmbers,p+3-effectiveEmbers))
+      addLog('🎼 Smoke Break! '+victim.name+' discarded. +3 Embers.'+(preSelected.length===0?' (tip: select a card first)':''))
+      addFloat('+3 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
       updStat('cardsPlayed',1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard'] // count victim too for refill
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
@@ -3155,6 +3156,7 @@ function App(){
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
       else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
       else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>Math.min(enemy.maxHp,p+4))
+    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>Math.min(enemy.maxHp,p+6))
     else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>Math.min(enemy.maxHp,p+5))
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -3187,6 +3189,7 @@ function App(){
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>Math.min(enemy.maxHp,p+2))
       else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>Math.min(enemy.maxHp,p+3))
       else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>Math.min(enemy.maxHp,p+4))
+    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>Math.min(enemy.maxHp,p+6))
     else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>Math.min(enemy.maxHp,p+5))
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return

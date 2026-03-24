@@ -24,16 +24,16 @@ const ENEMIES=[
   {id:'lust_boss',name:'Seducer',maxHp:220,baseDmg:7,passiveId:'selfbuff2'},
   {id:'glutton',name:'Glutton',maxHp:130,baseDmg:5,passiveId:'cardHeal'},
   {id:'feaster',name:'Feaster',maxHp:170,baseDmg:6,passiveId:'cardHeal3'},
-  {id:'gluttony_boss',name:'Devourer',maxHp:230,baseDmg:7,passiveId:'cardHeal5'},
+  {id:'gluttony_boss',name:'Devourer',maxHp:230,baseDmg:7,passiveId:'cardHeal6'},
   {id:'miser',name:'Miser',maxHp:340,baseDmg:4,passiveId:'stashSteal'},
   {id:'hoarder',name:'Hoarder',maxHp:400,baseDmg:5,passiveId:'stashSteal2'},
-  {id:'greed_boss',name:'Usurer',maxHp:500,baseDmg:6,passiveId:'stashSteal3'},
+  {id:'greed_boss',name:'Usurer',maxHp:666,baseDmg:6,passiveId:'stashSteal3'},
   {id:'wrathful',name:'Wrathful',maxHp:900,baseDmg:5,passiveId:'rageScale1'},
   {id:'berserker',name:'Berserker',maxHp:1000,baseDmg:6,passiveId:'rageScale1'},
   {id:'anger_boss',name:'Warlord',maxHp:1111,baseDmg:7,passiveId:'rageScale2'},
   {id:'heretic',name:'Heretic',maxHp:1650,baseDmg:5,passiveId:'corruptPlayer'},
   {id:'apostate',name:'Apostate',maxHp:1900,baseDmg:6,passiveId:'corruptPlayer15'},
-  {id:'heresy_boss',name:'False Prophet',maxHp:3000,baseDmg:7,passiveId:'corruptPlayer20'},
+  {id:'heresy_boss',name:'False Prophet',maxHp:2600,baseDmg:7,passiveId:'corruptPlayer20'},
   {id:'brute',name:'Brute',maxHp:3000,baseDmg:6,passiveId:'targetHighestHp'},
   {id:'hunter',name:'Hunter',maxHp:4000,baseDmg:7,passiveId:'targetHighestHp2'},
   {id:'violence_boss',name:'Executioner',maxHp:5500,baseDmg:8,passiveId:'targetHighestHp3'},
@@ -71,9 +71,9 @@ const ALL_CARDS=[
   {id:'sigdecay',type:'CORRUPT',rarity:'Common',embers:1,copies:1},
   {id:'battlecry',type:'RIFF',rarity:'Common',embers:1,copies:4},
   {id:'roadie',type:'UTILITY',rarity:'Common',embers:1,copies:2},
-  {id:'setlist',type:'UTILITY',rarity:'Common',embers:1,copies:1},
+  {id:'setlist',type:'UTILITY',rarity:'Common',embers:0,copies:1},
   {id:'groupie',type:'EMBER',rarity:'Uncommon',embers:1,copies:2},
-  {id:'demotape',type:'RIFF',rarity:'Common',embers:2,copies:1},
+  {id:'demotape',type:'RIFF',rarity:'Common',embers:1,copies:1},
   {id:'distortion',type:'CORRUPT',rarity:'Common',embers:1,copies:3},
   {id:'staticcharge',type:'CORRUPT',rarity:'Common',embers:0,copies:2},
   {id:'powertap',type:'EMBER',rarity:'Common',embers:0,copies:2},
@@ -82,15 +82,15 @@ const ALL_CARDS=[
   {id:'newstrings',type:'RIFF',rarity:'Uncommon',embers:2,copies:2},
   {id:'encore',type:'RIFF',rarity:'Uncommon',embers:2,copies:3},
   {id:'wakeup',type:'UTILITY',rarity:'Uncommon',embers:1,copies:2},
-  {id:'feedbackloop',type:'CORRUPT',rarity:'Uncommon',embers:3,copies:1},
+  {id:'feedbackloop',type:'CORRUPT',rarity:'Uncommon',embers:2,copies:1},
   {id:'tappedout',type:'EMBER',rarity:'Uncommon',embers:0,copies:2},
   {id:'controlfeedback',type:'CORRUPT',rarity:'Uncommon',embers:2,copies:1},
-  {id:'burnset',type:'RIFF',rarity:'Uncommon',embers:1,copies:1},
+  {id:'burnset',type:'RIFF',rarity:'Uncommon',embers:0,copies:1},
   {id:'soundwall',type:'RIFF',rarity:'Uncommon',embers:2,copies:1},
   {id:'doubledown',type:'RIFF',rarity:'Uncommon',embers:3,copies:2,shopOnly:true},
   {id:'deathriff',type:'CORRUPT',rarity:'Uncommon',embers:1,copies:2},
   {id:'ampoverload',type:'EMBER',rarity:'Uncommon',embers:0,copies:1},
-  {id:'ampstatic',type:'CORRUPT',rarity:'Uncommon',embers:3,copies:2},
+  {id:'ampstatic',type:'CORRUPT',rarity:'Uncommon',embers:2,copies:2},
   {id:'seance',type:'CORRUPT',rarity:'Uncommon',embers:1,copies:1},
   {id:'soundboard',type:'EMBER',rarity:'Uncommon',embers:1,copies:1},
   {id:'heavyriff',type:'RIFF',rarity:'Uncommon',embers:2,copies:2},
@@ -318,7 +318,7 @@ function applyCardSim(card,gs,enemy){
     case 'ampoverload':{gs.embers+=3+(gs.passives.some(p=>p.id==='p4')?1:0);gs._discardsLeft=Math.max(0,gs._discardsLeft-1);break}
     case 'groupie':{gs.embers+=2+(gs.passives.some(p=>p.id==='p4')?1:0);gs._drawExtra=(gs._drawExtra||0)+1;break}
     case 'soundboard':{gs.embers+=2+(gs.passives.some(p=>p.id==='p4')?1:0);gs._drawNextStrike=(gs._drawNextStrike||0)+1;break}
-    case 'setbreak':gs.embers+=2;break;
+    case 'setbreak':gs.embers+=3;break;
     case 'setlist':gs._drawExtra=(gs._drawExtra||0)+2;break;
     case 'doubledown':gs._nextCardFree=true;break;
     case 'wakeup':alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));stage.forEach(m=>{if(m.tooStoned){m.tooStoned=false;m.hp=m.maxHp}});break;
@@ -338,7 +338,8 @@ function applyCardSim(card,gs,enemy){
   if(enemy.passiveId==='cardHeal')enemy._hp=Math.min(enemy.maxHp,enemy._hp+2);
   if(enemy.passiveId==='cardHeal3')enemy._hp=Math.min(enemy.maxHp,enemy._hp+3);
   if(enemy.passiveId==='cardHeal4')enemy._hp=Math.min(enemy.maxHp,enemy._hp+4);
-  if(enemy.passiveId==='cardHeal5')enemy._hp=Math.min(enemy.maxHp,enemy._hp+5);
+  if(enemy.passiveId==='cardHeal5')enemy._hp=Math.min(enemy.maxHp,enemy._hp+5)
+  if(enemy.passiveId==='cardHeal6')enemy._hp=Math.min(enemy.maxHp,enemy._hp+6);
 }
 
 // ── GENRE BONUS COMPUTATION ──
@@ -670,7 +671,7 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
       gs.stage.forEach(m=>{m.hp=m.maxHp;m.tooStoned=false;m.stoneShield=false;m.tempAtkBonus=0})
       gs._wthFight=true;gs._contractsPlayed=0;
       gs.deck=shuffle([...gs.deck,...gs.discard]);gs.discard=[];gs.hand=[];
-      const r=simFight(gs,Math.ceil(100000*STAKE.hpMult),0)
+      const r=simFight(gs,Math.ceil(69000*STAKE.hpMult),0)
       if(r.won){wthWon=true;TRACK.wthWins++}
     }
   }
