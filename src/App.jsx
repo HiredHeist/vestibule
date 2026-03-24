@@ -2375,6 +2375,9 @@ function App(){
   const [dblRoll,setDblRoll]=useState(null) // null=not rolled, 1-2=half, 3-4=offbeat, 5-6=double
   const [shredderUsed,setShredderUsed]=useState(false) // tracks if first RIFF played this Strike
   const [nextCardFree,setNextCardFree]=useState(false)
+  const [allCardsFree,setAllCardsFree]=useState(false) // POSSESSION hellquake: all cards cost 0 this fight
+  const allCardsFreeRef=useRef(false)
+  useEffect(()=>{allCardsFreeRef.current=allCardsFree},[allCardsFree])
   const [skipNextDiscard,setSkipNextDiscard]=useState(false)
   const [setlistOpen,setSetlistOpen]=useState(false)
   const [setlistCards,setSetlistCards]=useState([])
@@ -2576,7 +2579,7 @@ function App(){
     const shredderDiscount=(hasShredder&&!shredderUsed&&card.type==='RIFF'&&card.embers>=1)?1:0
     const synesthesiaDiscount=(fightTripBuff==='SYNESTHESIA')?1:0
     const darkBargainDiscount=(chosenPacts.includes('dark_bargain')&&card.type==='CORRUPT'&&card.embers>=1)?1:0
-    const effectiveEmbers=nextCardFree&&card.id!=='doubledown'?0:Math.max(0,card.embers-foilDiscount-shredderDiscount-synesthesiaDiscount-darkBargainDiscount)
+    const effectiveEmbers=(nextCardFree&&card.id!=='doubledown')||allCardsFreeRef.current?0:Math.max(0,card.embers-foilDiscount-shredderDiscount-synesthesiaDiscount-darkBargainDiscount)
   if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers, have '+embers+'.');return false}
   if(nextCardFree&&card.id!=='doubledown'){setNextCardFree(false)}
     if(card.id==='stagedive'&&stageDiveUsed){addLog('⚠ Stage Dive once per round only.');return false}
@@ -2899,9 +2902,9 @@ function App(){
         if(voidHp<=0)setTimeout(triggerVictory,2100)
         hqMsg='⛧ HELLQUAKE: THE VOID! '+voidDmg+' damage, soul cleansed!';hqFloat='THE VOID!';hqColor='#4400aa';hqDesc='Corruption converted to '+voidDmg+' damage. Soul cleansed to 0%.'
       } else if(roll===6){
-        // 6: POSSESSION — all cards free this Strike (positive)
-        setEmbers(maxEmbers);setPendingEmbers(maxEmbers)
-        hqMsg='⛧ HELLQUAKE: POSSESSION! All cards free this Strike!';hqFloat='POSSESSED!';hqColor='#aa44ff';hqDesc='All cards cost 0 Embers this Strike and next.'
+        // 6: POSSESSION — all cards free this fight (positive)
+        setAllCardsFree(true)
+        hqMsg='⛧ HELLQUAKE: POSSESSION! All cards free this fight!';hqFloat='POSSESSED!';hqColor='#aa44ff';hqDesc='All cards cost 0 Embers for the rest of this fight.'
       } else if(roll===7){
         // 7: BACKLASH — 30 damage BUT one random member falls (mixed)
         const backlashHp=Math.max(0,enemyHp-30);setEnemyHp(backlashHp);if(backlashHp<=0)setTimeout(triggerVictory,500)
@@ -2988,7 +2991,7 @@ function App(){
     if(card.id==='setbreak'){
       const handWithout=hand.filter(c=>c.uid!==card.uid)
       if(handWithout.length===0){addLog('🎼 No cards to discard!');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
-      const effectiveEmbers=nextCardFree?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      const effectiveEmbers=nextCardFree||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
       if(nextCardFree)setNextCardFree(false)
       const preSelected=selected.filter(uid=>uid!==card.uid)
@@ -3012,7 +3015,7 @@ function App(){
     if(card.id==='groupie'){
       const foilDiscount=(card.foil&&card.embers>=2)?1:0
       const synDiscount=(fightTripBuff==='SYNESTHESIA')?1:0
-      const effectiveEmbers=nextCardFree?0:Math.max(0,card.embers-foilDiscount-synDiscount)
+      const effectiveEmbers=nextCardFree||allCardsFreeRef.current?0:Math.max(0,card.embers-foilDiscount-synDiscount)
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
       if(nextCardFree)setNextCardFree(false)
       const p4Bonus=activePassives.some(p=>p.id==='p4')?1:0
@@ -3031,7 +3034,7 @@ function App(){
     // ── SETLIST: handle entirely here to avoid double state updates ──
     if(card.id==='setlist'){
       if(setlistOpen){setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
-      const effectiveEmbers=nextCardFree?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      const effectiveEmbers=nextCardFree||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
       if(nextCardFree)setNextCardFree(false)
       // Draw 2 cards immediately (uncapped), then open force-discard modal
@@ -3050,7 +3053,7 @@ function App(){
 
     // ── BURN THE SET: handle entirely here to avoid double state updates ──
     if(card.id==='burnset'){
-      const effectiveEmbers=nextCardFree?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      const effectiveEmbers=nextCardFree||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
       if(nextCardFree)setNextCardFree(false)
       const toDiscard=selected.filter(uid=>uid!==card.uid).slice(0,3)
@@ -3074,7 +3077,7 @@ function App(){
     if(card.id==='remaster'){
       const toDeleteUid=selected.find(uid=>uid!==card.uid&&hand.some(c=>c.uid===uid))
       if(!toDeleteUid){addLog('🎙 Select 1 card in hand first, then play The Remaster.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
-      const effectiveEmbers=nextCardFree?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      const effectiveEmbers=nextCardFree||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
       if(nextCardFree)setNextCardFree(false)
       const toDelete=hand.find(c=>c.uid===toDeleteUid)
@@ -3098,7 +3101,7 @@ function App(){
 
     // ── SIGNAL DECAY: discard 1 random from hand, draw 2 ──
     if(card.id==='sigdecay'){
-      const effectiveEmbers=nextCardFree?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
+      const effectiveEmbers=nextCardFree||allCardsFreeRef.current?0:Math.max(0,card.embers-((card.foil&&card.embers>=2)?1:0))
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
       if(nextCardFree)setNextCardFree(false)
       const handWithout=hand.filter(c=>c.uid!==card.uid)
@@ -3851,7 +3854,7 @@ function App(){
     if(chosenPacts.includes('corruption_engine'))setCorruption(p=>Math.min(100,p+5))
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
+    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
     if(fightIndex===26){
       // 8 circle bosses killed = 8 × 51,750 = 414,000 reduction → 6,666 HP
