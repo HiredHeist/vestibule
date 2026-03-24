@@ -300,6 +300,7 @@ Special:
 - [x] Wake Up Call 0→1 ember, Herb Money 2→1 ember
 
 ### Sim + Balance
+- [x] Sim v14.0: pacts, descent, genre, WTH, deck thin, stash tightening
 - [x] Sim v10.0 + v11.0 run (100k + 20k games)
 - [x] Lucifer 2-phase boss (420,666 → 6,666 HP) — 5.01% win rate
 - [x] C9 rework (Paranoia + Soul Thief)
