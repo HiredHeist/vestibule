@@ -244,7 +244,7 @@ const DESCENT_REWARDS_2=[ // Fight 2 skip rewards (medium) — 9 options
   {id:'m_stonewall',name:'Stonewall All',emoji:'🛡',apply:(gs)=>{gs.setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{stoneShield:2}):m));gs.addLog('🛡 Skipped fight: All members shielded for 2 strikes')}},
 ]
 
-// -- CARD UPGRADES: campfire after each boss --
+// -- CARD UPGRADES: Doom Forge after each boss --
 const CARD_UPGRADES={
   battlecry:{desc:'+2 ATK (was +1). +1 max HP to target.',hp:'target',hpAmt:1},
   amp:{desc:'Doubles ATK AND +2 max HP to target.',hp:'target',hpAmt:2},
@@ -4729,9 +4729,9 @@ function App(){
     return(
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',gap:12,padding:'24px 40px',overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:50,color:'#ff8800',textShadow:'0 0 40px rgba(255,120,0,0.6),0 0 80px rgba(200,80,0,0.3),3px 3px 0 #000',letterSpacing:6}}>The Campfire</div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#cc9050',fontStyle:'italic'}}>Upgrade one card permanently. Choose wisely.</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#cc9050',fontStyle:'italic'}}>Every riff can be heavier.</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#887040',letterSpacing:2}}>UPGRADES THIS RUN: {upgradedCards.length}</div>
-      <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center',maxWidth:1400,overflowY:'auto',flex:1,padding:'10px 0',alignContent:'flex-start'}}>
+      <div style={{display:'flex',gap:14,flexWrap:'wrap',justifyContent:'center',maxWidth:1700,overflowY:'auto',flex:1,padding:'10px 0',alignContent:'flex-start'}}>
         {uniqueUpgradeable.map(c=>{
           const up=CARD_UPGRADES[c.id]
           const bc=c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
@@ -4748,17 +4748,17 @@ function App(){
               else if(up.hp==='hurt'){setStage(prev=>prev.map(m=>m&&!m.tooStoned&&m.hp<m.maxHp?Object.assign({},m,{maxHp:m.maxHp+up.hpAmt,hp:m.hp+up.hpAmt}):m))}
               else if(up.hp==='random'&&alive.length>0){const r=alive[Math.floor(Math.random()*alive.length)];setStage(prev=>prev.map(m=>m&&m.uid===r.uid?Object.assign({},m,{maxHp:m.maxHp+up.hpAmt,hp:m.hp+up.hpAmt}):m))}
             }
-            playSfx('buy');addLog('Upgraded: '+c.name+'+')
+            playSfx('buy');addLog('Doom Forge: '+c.name+'+ forged!')
             setGameState('shop')
-          }} style={{width:160,background:'linear-gradient(180deg,#1a1008,#0a0604)',border:'2px solid '+bc+'88',borderRadius:8,padding:'0 0 10px',cursor:'pointer',transition:'all 0.2s',position:'relative'}}
+          }} style={{width:240,background:'linear-gradient(180deg,#1a1008,#0a0604)',border:'2px solid '+bc+'88',borderRadius:10,padding:'0 0 14px',cursor:'pointer',transition:'all 0.2s',position:'relative'}}
             onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-6px)';e.currentTarget.style.borderColor='#ffd700';e.currentTarget.style.boxShadow='0 6px 25px rgba(200,150,0,0.3)'}}
             onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor=bc+'88';e.currentTarget.style.boxShadow='none'}}>
-            <div style={{height:4,background:bc,borderRadius:'8px 8px 0 0'}}/>
-            <div style={{fontSize:36,textAlign:'center',padding:'10px 0'}}>{c.emoji}</div>
-            <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:15,color:'#ffd700',textAlign:'center',letterSpacing:1}}>{c.name}+</div>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:bc,textAlign:'center',letterSpacing:1,textTransform:'uppercase',marginBottom:4}}>{c.type} {c.rarity}</div>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8b080',textAlign:'center',lineHeight:1.4,padding:'0 8px'}}>{up.desc}</div>
-            {hasHp&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#44cc44',textAlign:'center',marginTop:4,fontWeight:900}}>+{up.hpAmt} MAX HP ({up.hp})</div>}
+            <div style={{height:5,background:bc,borderRadius:'10px 10px 0 0'}}/>
+            <div style={{fontSize:52,textAlign:'center',padding:'14px 0'}}>{c.emoji}</div>
+            <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:20,color:'#ffd700',textAlign:'center',letterSpacing:1}}>{c.name}+</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:bc,textAlign:'center',letterSpacing:1,textTransform:'uppercase',marginBottom:6}}>{c.type} {c.rarity}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8b080',textAlign:'center',lineHeight:1.5,padding:'0 12px'}}>{up.desc}</div>
+            {hasHp&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#44cc44',textAlign:'center',marginTop:6,fontWeight:900}}>+{up.hpAmt} MAX HP ({up.hp})</div>}
           </div>
         })}
         {uniqueUpgradeable.length===0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#886644',fontStyle:'italic',padding:40}}>All cards already upgraded!</div>}
