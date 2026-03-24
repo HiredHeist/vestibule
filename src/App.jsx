@@ -2123,31 +2123,72 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   }
 
   // ── NEAR MISS MESSAGES ─────────────────────────────────────
+  // ── NEAR MISS — the "one more run" trigger ─────────────────
   const NearMiss=()=>{
     if(isVictory)return null
-    const msgs=[]
-    // How close to killing the boss
-    if(enemyHp>0&&enemyHp<=Math.max(50,stats.highestStrike*0.3)){
-      msgs.push('💀 '+enemyHp+' more damage would have killed '+(enemy?.name||'the boss')+'!')
-    } else if(enemyHp>0&&enemyHp<=200){
-      msgs.push('💀 Only '+enemyHp+' HP left on '+(enemy?.name||'the boss')+'!')
+    // Find the single most compelling near-miss
+    let headline=null, headlineColor='#ff4422'
+    if(enemyHp>0&&enemyHp<=Math.max(80,stats.highestStrike*0.4)){
+      headline={text:enemyHp+' HP',sub:'away from killing '+(enemy?.name||'the boss'),emoji:'💀'}
     }
-    // Members who almost survived
-    if(stage){
-      const almostAlive=stage.filter(m=>m&&m.tooStoned&&m.maxHp>0)
-      for(const m of almostAlive.slice(0,2)){
-        const hpNeeded=Math.max(1,Math.ceil(m.maxHp*0.1))
-        if(hpNeeded<=5)msgs.push('😵 '+m.name+' was just '+hpNeeded+' HP from surviving!')
-      }
-    }
-    // Close to next circle
     const fightInCircle=stats.fightsSurvived%3
-    if(fightInCircle===2){msgs.push('🔥 One more fight would have cleared Circle '+circleReached+'!')}
-    // Close to personal best
-    if(shortBy>0&&shortBy<=500&&!isBest){msgs.push('⚡ Just '+shortBy+' pts from your personal best!')}
-    if(msgs.length===0)return null
-    return(<div style={{display:'flex',flexDirection:'column',gap:4,alignItems:'center',maxWidth:600,margin:'6px 0'}}>
-      {msgs.slice(0,3).map((m,i)=><div key={i} style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'#cc6644',fontStyle:'italic',textShadow:'0 0 10px rgba(200,80,40,0.4)',textAlign:'center'}}>{m}</div>)}
+    if(!headline&&fightInCircle===2){
+      headline={text:'1 FIGHT',sub:'from clearing Circle '+circleReached,emoji:'🔥'}
+    }
+    if(!headline&&shortBy>0&&shortBy<=1000){
+      headline={text:shortBy.toLocaleString()+' PTS',sub:'from your personal best',emoji:'⚡'}
+    }
+    if(!headline&&enemyHp>0&&enemyHp<=500){
+      headline={text:enemyHp+' HP',sub:'left on '+(enemy?.name||'the boss'),emoji:'💀'}
+    }
+    if(!headline)return null
+    const pulseKf='@keyframes nmPulse{0%,100%{transform:scale(1);opacity:0.9}50%{transform:scale(1.03);opacity:1}}'
+    return(<div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:2,margin:'12px 0 4px',animation:'nmPulse 2s ease-in-out infinite'}}>
+      <style>{pulseKf}</style>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:6,color:'#884433',textTransform:'uppercase'}}>YOU WERE</div>
+      <div style={{display:'flex',alignItems:'baseline',gap:12}}>
+        <span style={{fontSize:32}}>{headline.emoji}</span>
+        <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:headlineColor,textShadow:'0 0 30px rgba(255,50,20,0.6),0 0 60px rgba(200,30,0,0.3),2px 2px 0 #000',letterSpacing:3}}>{headline.text}</span>
+      </div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'#cc8866',fontStyle:'italic',textShadow:'0 0 15px rgba(200,100,60,0.4)'}}>{headline.sub}</div>
+    </div>)
+  }
+
+  // ── RUN HIGHLIGHTS — best moments from this run ───────────
+  const RunHighlights=()=>{
+    const highlights=[]
+    // Always show: highest strike
+    if(stats.highestStrike>0){
+      highlights.push({emoji:'⚔',label:'Biggest Strike',value:stats.highestStrike.toLocaleString(),color:'#ff4422'})
+    }
+    // Total damage
+    if(stats.totalDamage>0){
+      highlights.push({emoji:'💥',label:'Total Damage',value:stats.totalDamage.toLocaleString(),color:'#ff8844'})
+    }
+    // Cards played
+    if(stats.cardsPlayed>0){
+      highlights.push({emoji:'🃏',label:'Cards Played',value:stats.cardsPlayed.toString(),color:'#c8a040'})
+    }
+    // Max corruption reached
+    if(stats.maxCorruption>0){
+      highlights.push({emoji:'🌀',label:'Peak Corruption',value:stats.maxCorruption+'%',color:stats.maxCorruption>=69?'#cc44ff':'#aa6688'})
+    }
+    // Fights survived
+    highlights.push({emoji:'⛧',label:isVictory?'Fights Won':'Fights Survived',value:stats.fightsSurvived+'/27',color:isVictory?'#ffd700':'#c8a060'})
+    // Stash earned
+    if(stats.stashEarned>0){
+      highlights.push({emoji:'🌿',label:'Stash Earned',value:stats.stashEarned.toString(),color:'#44cc44'})
+    }
+    if(highlights.length===0)return null
+    return(<div style={{background:'rgba(15,8,2,0.9)',border:'1px solid rgba(120,70,15,0.4)',borderRadius:10,padding:'16px 24px',width:'100%',maxWidth:700,margin:'4px 0'}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:5,color:'#886644',textTransform:'uppercase',textAlign:'center',marginBottom:12}}>Run Highlights</div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
+        {highlights.map((h,i)=>(<div key={i} style={{display:'flex',flexDirection:'column',alignItems:'center',padding:'8px 4px',background:'rgba(0,0,0,0.3)',borderRadius:6,border:'1px solid rgba(80,50,10,0.2)'}}>
+          <span style={{fontSize:22,marginBottom:2}}>{h.emoji}</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,fontWeight:900,color:h.color,lineHeight:1,textShadow:'0 0 10px '+h.color+'44'}}>{h.value}</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#887755',letterSpacing:2,textTransform:'uppercase',marginTop:2}}>{h.label}</span>
+        </div>))}
+      </div>
     </div>)
   }
 
@@ -2265,6 +2306,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <AchievementBadges/>
                 {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #aa4444',borderRadius:4}}>{streakMsg}</div>}
+        <RunHighlights/>
         <StatsGrid/>
         <RunHistory/>
         <BottomRow/>
@@ -2306,6 +2348,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <AchievementBadges/>
                 {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:streakWins>1?'#ff6600':'#aa4444',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:`1px solid ${streakWins>1?'#ff6600':'#aa4444'}`,borderRadius:4}}>{streakMsg}</div>}
+        <RunHighlights/>
         <StatsGrid/>
         <RunHistory/>
         <BottomRow/>
@@ -2337,6 +2380,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <AchievementBadges/>
                 {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'5px 20px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>🔥 {dailyStreak} DAY STREAK</div>}
         {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#ff6600',letterSpacing:3,padding:'6px 24px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:4}}>{streakMsg}</div>}
+        <RunHighlights/>
         <StatsGrid/>
         <RunHistory/>
         <BottomRow/>
