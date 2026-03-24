@@ -5172,7 +5172,15 @@ function App(){
             </div>
           })()}
           {activePassives.length>0&&<div style={{width:'100%',borderTop:'1px solid rgba(80,60,160,0.3)',paddingTop:3}}>
-            {activePassives.map((p,i)=><div key={i} style={{fontSize:10,color:'#8090c0',fontFamily:"'MBScribblesFont',serif"}}>{p.emoji} {p.name}</div>)}
+            {activePassives.map((p,i)=><div key={i} style={{fontSize:10,color:'#8090c0',fontFamily:"'MBScribblesFont',serif",position:'relative',cursor:'help'}}
+              onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-ptip]');if(t)t.style.opacity='1'}}
+              onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-ptip]');if(t)t.style.opacity='0'}}>
+              {p.emoji} {p.name}
+              <div data-ptip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:88,top:-10,zIndex:9999,pointerEvents:'none',minWidth:200,maxWidth:260,background:'rgba(12,7,2,0.97)',border:'1px solid rgba(80,60,180,0.5)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:700,color:'#aa88ee',marginBottom:4}}>{p.emoji} {p.name}</div>
+                <div style={{fontFamily:"'ScratchFont',serif",fontSize:9,color:'#9a8050',fontStyle:'italic',lineHeight:1.4}}>{p.effect}</div>
+              </div>
+            </div>)}
           </div>}
         </div>
 
