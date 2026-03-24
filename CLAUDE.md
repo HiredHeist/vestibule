@@ -1,6 +1,6 @@
 # VESTIBULE — Master Development Context
 > Read this first. Every time. Without exception.
-> *Last updated: Session 12, March 22, 2026*
+> *Last updated: Session 14, March 24, 2026*
 
 ---
 
