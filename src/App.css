@@ -205,6 +205,12 @@ body {
   100% { transform: scale(1.02); opacity: 0; }
 }
 
+@keyframes cardAbsorbFlash {
+  0% { opacity: 0.9; transform: scale(1.1); }
+  30% { opacity: 0.7; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
 @keyframes chainGlow {
   0% { opacity: 0; }
   8% { opacity: 1; }

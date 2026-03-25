@@ -2510,7 +2510,7 @@ function CombatLogViewer({log,onClose}){
   )
 }
 
-function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered,newAchievements,enemyHp,stage,chosenPacts,fullRunLog}){
+function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered,newAchievements,enemyHp,stage,chosenPacts,fullRunLog,newTrophies}){
   const [showEndLog,setShowEndLog]=useState(false)
   const isStoned=cause==='stoned'
   const isBeaten=cause==='beaten'
@@ -2961,7 +2961,24 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
           </div>
         </div>
 
-        {/* ROW 5.5: Mastery Progress — top 3 cards closest to next tier */}
+        {/* ROW 5.4: New Trophies */}
+        {newTrophies&&newTrophies.length>0&&<div style={{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
+          {newTrophies.map(t=>(
+            <div key={t.id} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 20px',
+              background:'rgba(60,40,0,0.7)',border:'2px solid #ffd700',borderRadius:8,
+              animation:'throb 1.5s ease-in-out infinite',
+              boxShadow:'0 0 20px rgba(255,200,0,0.3)'}}>
+              <span style={{fontSize:28}}>{t.emoji}</span>
+              <div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ffd700',letterSpacing:2,fontWeight:900}}>NEW TROPHY</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#ffe080',fontWeight:900}}>{t.name}</div>
+              </div>
+              <span style={{fontSize:18}}>💀</span>
+            </div>
+          ))}
+        </div>}
+
+                {/* ROW 5.5: Mastery Progress — top 3 cards closest to next tier */}
         {(()=>{
           const mData=getMasteryData()
           const progress=ALL_CARDS.filter(c=>!c.consumable).map(c=>{
@@ -3298,7 +3315,8 @@ function App(){
   },[])
   const [circleClearedData,setCircleClearedData]=useState(null) // {circle, bossName, bossEmoji}
   const [chosenPacts,setChosenPacts]=useState([]) // pact IDs chosen this run
-  const [upgradedCards,setUpgradedCards]=useState([]) // card IDs upgraded at campfire this run
+  const [upgradedCards,setUpgradedCards]=useState([])
+  const [newTrophies,setNewTrophies]=useState([]) // card IDs upgraded at campfire this run
   const [pactChoices,setPactChoices]=useState([]) // 2 pact options for current choice
   const [descentData,setDescentData]=useState(null) // {circleNum, fights, reward1, reward2}
   const skipDescentRef=useRef(false)
@@ -4252,7 +4270,7 @@ function App(){
       setStolenAtkPool(0)
     }
     if(perfectBonus>0)addFloat('PERFECT! +'+perfectBonus,getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
-    playSfx('victory');recordTrophyKill(enemy.id,activeStake.id,stats.highestStrike,activeStake.maxStrikes-strikesLeft);addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.'))
+    playSfx('victory');const _tr=recordTrophyKill(enemy.id,activeStake.id,stats.highestStrike,activeStake.maxStrikes-strikesLeft);if(_tr.kills===1)setNewTrophies(p=>[...p,{id:enemy.id,name:enemy.name,emoji:enemy.emoji}]);addLog('⛧ Victory! +'+stashEarned+' Stash'+(perfectBonus>0?' (Perfect Strike bonus!)':' earned.'))
     // ── ACHIEVEMENT TRIGGERS ─────────────────────────────────
     tryAchieve('first_blood')
     const cn=Math.floor(fightIndex/3)+1
@@ -5439,7 +5457,7 @@ function App(){
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
-    setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
+    setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
     setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -6033,7 +6051,7 @@ function App(){
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} chosenPacts={chosenPacts} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
-  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
+  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
 
   return(
     <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
@@ -6212,7 +6230,11 @@ function App(){
                 {m&&memberBuffs[m.uid]&&memberBuffs[m.uid].length>0&&<div style={{position:'absolute',top:-4,left:'50%',transform:'translateX(-50%)',zIndex:90,display:'flex',flexDirection:'column-reverse',alignItems:'center',gap:2,pointerEvents:'none'}}>
                   {memberBuffs[m.uid].map((b,bi)=><div key={bi} style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:b.color,textShadow:'0 0 8px '+b.color+'88,1px 1px 0 #000',letterSpacing:1,whiteSpace:'nowrap',animation:'fadeIn 0.3s ease'}}>{b.text}</div>)}
                 </div>}
-                <StageSlot member={m} slotIdx={i}
+                {cardAbsorb&&cardAbsorb.slotIdx===i&&<div key={cardAbsorb.key} style={{position:'absolute',inset:0,zIndex:80,borderRadius:6,pointerEvents:'none',
+                background:cardAbsorb.color,
+                animation:'cardAbsorbFlash 0.5s ease-out forwards',
+                boxShadow:'0 0 30px '+cardAbsorb.color+', inset 0 0 20px '+cardAbsorb.color}}/>}
+              <StageSlot member={m} slotIdx={i}
                 isAttacking={animPhase==='attacking'&&m&&!m.tooStoned}
                 isDiceTarget={diceTarget&&m&&diceTarget.id===m.id}
                 innerRef={function(el){stageRefs.current[i]={current:el}}}
