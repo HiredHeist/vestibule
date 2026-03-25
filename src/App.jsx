@@ -2052,7 +2052,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'5px 5px 2px',letterSpacing:.4,lineHeight:1.2,borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:bc,textAlign:'center',padding:'3px 4px',letterSpacing:1.8,textTransform:'uppercase',flexShrink:0,textShadow:'0 0 8px '+bc+'88'}}>{card.type}</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#d0b888',textAlign:'center',padding:'2px 6px 5px',lineHeight:1.4,flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>{card.effect}
-        {isHovered&&chainHintsOn&&(()=>{const hints=getChainHints(card.id);return hints.length>0?<div style={{marginTop:4,width:'100%'}}>{hints.map((h,i)=><div key={i} style={{padding:'3px 6px',background:'rgba(255,200,0,0.1)',border:'1px solid rgba(255,200,0,0.25)',borderRadius:3,marginTop:2,fontSize:10,color:h.color,fontWeight:700,textAlign:'center'}}>⛧ {h.name} — needs {h.partnerName}</div>)}</div>:null})()}</div>
+        {isHovered&&chainHintsOn&&(()=>{const hints=getChainHints(card.id);return hints.length>0?<div style={{marginTop:4,width:'100%'}}>{hints.map((h,i)=><div key={i} style={{padding:'3px 6px',background:'rgba(255,200,0,0.1)',border:'1px solid rgba(255,200,0,0.25)',borderRadius:3,marginTop:2,fontFamily:"'MBScribblesFont',serif",fontSize:11,color:h.color,fontWeight:700,textAlign:'center'}}>⛧ {h.name} — needs {h.partnerName}</div>)}</div>:null})()}</div>
     </div>
   )
 }
@@ -6393,6 +6393,7 @@ function App(){
               isDragOver={dragOverHandIdx===i&&dragHandIdx!==null&&dragHandIdx!==i}
               onHandDragOver={()=>{if(dragHandIdx!==null&&dragHandIdx!==i)setDragOverHandIdx(i)}}
               onHandDrop={()=>handleHandReorder(dragHandIdx,i)}
+              chainHintsOn={chainHintsOn}
             />
           ))}
         </div>
