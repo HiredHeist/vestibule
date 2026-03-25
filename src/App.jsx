@@ -2483,7 +2483,7 @@ function CombatLogViewer({log,onClose}){
           const isFightHeader=entry.startsWith('══')
           return <div key={i} style={{
             fontFamily:"'MBScribblesFont',serif",
-            fontSize:isFightHeader?16:13,
+            fontSize:isFightHeader?26:23,
             color:colorForEntry(entry),
             padding:isFightHeader?'10px 0 4px':'2px 0',
             borderTop:isFightHeader&&i>0?'1px solid rgba(200,150,40,0.2)':'none',
