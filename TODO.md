@@ -67,6 +67,9 @@
 - [ ] **4. Strike Anticipation** — The 0.5s before projectiles launch feels dead. Add stage cards tilting forward slightly + bass rumble sound as wind-up.
 - [ ] **5. Boss Low HP Urgency** — When boss HP < 20%, increase HP bar pulse speed and add screen-edge vignette. The "almost dead" moment should feel frantic.
 
+### Combat Information
+- [ ] **21. Combat Log Viewer** — HIGH PRIORITY. Pause menu: 'Combat Log' button opens scrollable overlay of current fight log (newest first, color-coded: chains gold, damage red, healing green, corruption purple, events orange). End screen: 'View Run Log' button shows full run history grouped by fight. All data already collected via addLog() — just needs rendering.
+
 ### Card/Deck Management
 - [ ] **6. Card Play Count on Hover** — When hovering a card in hand, show "Played 3× this fight" on the expanded card. Helps track Riff Chain progress.
 - [ ] **7. Discard Pile Preview** — Add "last 3 discarded" mini-preview on hover without opening full view. Quick glance vs full inspection.
