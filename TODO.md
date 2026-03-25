@@ -50,11 +50,11 @@
 
 ## 🐛 KNOWN BUGS — Must Fix Before Public Launch
 
-- [ ] **Hall of Damnation overflow** — Trophy Wall doesn't fit in 1080px when trophies are populated. No back/close button visible. Needs scroll or compact layout fix.
-- [ ] **Blood Oath flag persists on dead members** — If a Blood Oath member dies from Mosh Pit event (not boss damage), the flag stays. Should clear on any death source.
-- [ ] **Corruption Lock + Corruption Engine visual** — When Cursed Amp locks corruption and player has Corruption Engine pact, the pact icon shows but does nothing. Needs "LOCKED" visual state.
-- [ ] **Encore Mode victory trigger** — Encore resets fightIndex to 0 but victory checks fightIndex>=26. Second full clear may or may not trigger properly. Needs verification.
-- [ ] **Gold stake win rate** — 10.16% (above Bronze 9.28%). Mentor bonus +0.10 overcompensates. May need dmgAdd 3→4.
+- [x] **Hall of Damnation overflow** — Trophy Wall doesn't fit in 1080px when trophies are populated. No back/close button visible. Needs scroll or compact layout fix.
+- [x] **Blood Oath flag persists on dead members** — If a Blood Oath member dies from Mosh Pit event (not boss damage), the flag stays. Should clear on any death source.
+- [x] **Corruption Lock + Corruption Engine visual** — When Cursed Amp locks corruption and player has Corruption Engine pact, the pact icon shows but does nothing. Needs "LOCKED" visual state.
+- [x] **Encore Mode victory trigger** — Encore resets fightIndex to 0 but victory checks fightIndex>=26. Second full clear may or may not trigger properly. Needs verification.
+- [x] **Gold stake win rate** — 10.16% (above Bronze 9.28%). Mentor bonus +0.10 overcompensates. May need dmgAdd 3→4.
 
 
 ## 🔧 POLISH — 20 Improvements (from 60K Game Audit)

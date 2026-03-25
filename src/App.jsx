@@ -349,7 +349,7 @@ const PACT_REWARDS=[
 const STAKES=[
   {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.30,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Standard difficulty. Bosses +30% HP.',mentorBonus:0},
   {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.30,dmgAdd:2,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +30% HP. Enemies +2 damage.',mentorBonus:0.05},
-  {id:'gold',name:'Gold',color:'#ffd700',border:'#ffd700',hpMult:1.30,dmgAdd:3,priceMult:1.25,scoreMult:2.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +30% HP. Enemies +3 damage. Shop prices +25%.',mentorBonus:0.10},
+  {id:'gold',name:'Gold',color:'#ffd700',border:'#ffd700',hpMult:1.30,dmgAdd:3,priceMult:1.25,scoreMult:2.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +30% HP. Enemies +3 damage. Shop prices +25%.',mentorBonus:0.05},
   {id:'obsidian',name:'Obsidian',color:'#7a7a9a',border:'#6a6a8a',hpMult:1.50,dmgAdd:2,priceMult:1.25,scoreMult:2.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +50% HP. No free heal after fights. Drugs 50% more expensive.',mentorBonus:0.12},
   {id:'blood',name:'Blood',color:'#8b0000',border:'#cc0000',hpMult:1.60,dmgAdd:2,priceMult:1.25,scoreMult:3.0,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +60% HP. Enemies +2 damage. Start with 4 Embers. Corruption starts at 10%.',mentorBonus:0.35},
   {id:'demonic',name:'Demonic ⛧',color:'#ff0000',border:'#ff0000',hpMult:1.8,dmgAdd:4,priceMult:1.5,scoreMult:4.0,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,drugPriceMult:2.0,badTripChance:0.15,desc:'Bosses +80% HP. Max 3 Strikes. Bad trips 15%. Pure hell.',mentorBonus:0.75},
@@ -2847,7 +2847,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
             </button>
             {isVictory&&<button onClick={()=>{/* Encore: restart with scaled enemies */
               setEncoreMode(true);setEncoreCircle(p=>p+10)
-              setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(Math.round(ENEMIES[0].maxHp*2.0))
+              setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(Math.round(ENEMIES[0].maxHp*activeStake.hpMult*2.0))
               setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(4)
               setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
               setGameState('playing');setAnimPhase('idle');setDeathCause(null)
@@ -3483,7 +3483,7 @@ function App(){
       if(alive.length<=1){addLog('📝 Cannot sign — need at least 2 members!');return false}
       const strongest=alive[0]
       const sIdx=ns.findIndex(m=>m&&m.uid===strongest.uid)
-      ns[sIdx]=Object.assign({},strongest,{tooStoned:true,hp:0})
+      ns[sIdx]=Object.assign({},strongest,{tooStoned:true,bloodOath:false,hp:0})
       setContractsPlayed(p=>p+1)
       msg='📝 CONTRACT SIGNED! '+strongest.name+' leaves the band. Score multiplier increased!'
       addFloat('📝 SIGNED!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ffd700',true)
@@ -3802,7 +3802,7 @@ function App(){
         updStat('totalDamage',30)
         if(backlashHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},2100)
         const alive=ns.filter(m=>m&&!m.tooStoned)
-        if(alive.length>0){const victim=alive[Math.floor(Math.random()*alive.length)];const vi=ns.indexOf(victim);ns[vi]=Object.assign({},victim,{hp:0,tooStoned:true})}
+        if(alive.length>0){const victim=alive[Math.floor(Math.random()*alive.length)];const vi=ns.indexOf(victim);ns[vi]=Object.assign({},victim,{hp:0,tooStoned:true,bloodOath:false})}
         hqMsg='⛧ HELLQUAKE: BACKLASH! 30 damage, one member lost!';hqFloat='BACKLASH!';hqColor='#9933cc';hqDesc='30 damage dealt — but one member went Too Stoned.'
       } else if(roll===8){
         // 8: FEEDBACK — boss dmg doubles 2 strikes but +3 embers (mixed)
@@ -3816,7 +3816,7 @@ function App(){
       } else {
         // 10: TOTAL WIPEOUT — random member Too Stoned AND boss heals 15 (negative)
         const alive2=ns.filter(m=>m&&!m.tooStoned)
-        if(alive2.length>0){const v2=alive2[Math.floor(Math.random()*alive2.length)];const vi2=ns.indexOf(v2);ns[vi2]=Object.assign({},v2,{hp:0,tooStoned:true})}
+        if(alive2.length>0){const v2=alive2[Math.floor(Math.random()*alive2.length)];const vi2=ns.indexOf(v2);ns[vi2]=Object.assign({},v2,{hp:0,tooStoned:true,bloodOath:false})}
         setEnemyHp(function(prev){return Math.min(enemy.maxHp,prev+15)})
         hqMsg='⛧ HELLQUAKE: TOTAL WIPEOUT! A member falls and the boss recovers!';hqFloat='WIPEOUT!';hqColor='#440000';hqDesc='A member fell and the boss recovered 15 HP.'
       }
@@ -4685,7 +4685,7 @@ function App(){
               for(let ai=0;ai<ns2.length;ai++){
                 if(!ns2[ai]||ns2[ai].tooStoned)continue
                 const newHp=ns2[ai].hp-splitDmg
-                if(newHp<=0&&!ns2[ai].stoneShield){ns2[ai]=Object.assign({},ns2[ai],{hp:0,tooStoned:true});updStat('tooStonedCount',1);playSfx('member_down');triggerShake(12,400)
+                if(newHp<=0&&!ns2[ai].stoneShield){ns2[ai]=Object.assign({},ns2[ai],{hp:0,tooStoned:true,bloodOath:false});updStat('tooStonedCount',1);playSfx('member_down');triggerShake(12,400)
                   if(activeArtifacts.some(a=>a.id==='a6')){setEnemyHp(ehp=>{const nh=Math.max(0,ehp-8);if(nh<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);return nh});addLog('🕯 Black Candle! 8 damage!')}
                 }
                 else if(newHp<=0&&ns2[ai].stoneShield){const nsh=typeof ns2[ai].stoneShield==='number'?ns2[ai].stoneShield-1:0;ns2[ai]=Object.assign({},ns2[ai],{hp:1,stoneShield:nsh>0?nsh:false});setClutchFlash({text:'CLUTCH!',color:'#ffd700'});setTimeout(()=>setClutchFlash(null),1500)}
@@ -4712,7 +4712,7 @@ function App(){
               } else {
               const newHp=ns2[ti].hp-actualDmg
               if(newHp<=0&&!ns2[ti].stoneShield){
-                ns2[ti]=Object.assign({},ns2[ti],{hp:0,tooStoned:true})
+                ns2[ti]=Object.assign({},ns2[ti],{hp:0,tooStoned:true,bloodOath:false})
                 if(ns2[ti].isMentor){for(let _bi=0;_bi<ns2.length;_bi++){if(ns2[_bi]&&ns2[_bi].mentorLinkedToUid===ns2[ti].uid)ns2[_bi]={...ns2[_bi],mentorAlive:false}}}
                 updStat('tooStonedCount',1)
                 // A6: Black Candle — deal 8 damage
@@ -4800,7 +4800,7 @@ function App(){
                   if(newHp<=0){
                     addLog('😈 Lucifer has fallen! The Devil is dead. GAME OVER.')
                     playSfx('defeat');setTimeout(()=>{setDeathCause('fallen');setGameState('end')},800)
-                    return Object.assign({},m,{hp:0,tooStoned:true})
+                    return Object.assign({},m,{hp:0,tooStoned:true,bloodOath:false})
                   }
                   return Object.assign({},m,{hp:newHp})
                 }
@@ -5031,7 +5031,7 @@ function App(){
           if(newHp<=0){
             addLog('💀 '+m.name+' was crushed in the Mosh Pit!')
             playSfx('member_down')
-            return Object.assign({},m,{hp:0,tooStoned:true})
+            return Object.assign({},m,{hp:0,tooStoned:true,bloodOath:false})
           }
           addLog('🤘 '+m.name+' survives the pit! +1 ATK')
           return Object.assign({},m,{hp:newHp,atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1})
@@ -5101,7 +5101,7 @@ function App(){
           // TAILS — strongest member dies
           if(alive.length>0){
             const strongest=alive.reduce((a,b)=>a.atk>b.atk?a:b)
-            setStage(p=>p.map(m=>m&&m.uid===strongest.uid?Object.assign({},m,{hp:0,tooStoned:true}):m))
+            setStage(p=>p.map(m=>m&&m.uid===strongest.uid?Object.assign({},m,{hp:0,tooStoned:true,bloodOath:false}):m))
             addLog('🪙 TAILS. '+strongest.name+' collapses. The Devil laughs.')
             playSfx('member_down')
           }
@@ -6105,7 +6105,7 @@ function App(){
                 {chosenPacts.filter(Boolean).map(pid=>{const p=PACT_REWARDS.find(r=>r.id===pid);return p?<div key={pid} style={{position:'relative',cursor:'help'}}
                   onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='block'}}
                   onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='none'}}>
-                  <div style={{width:24,height:24,borderRadius:4,background:'rgba(0,0,0,0.6)',border:`1px solid ${p.color}66`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>{p.emoji}</div>
+                  <div style={{width:24,height:24,borderRadius:4,background:p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')?'rgba(60,30,30,0.8)':'rgba(0,0,0,0.6)',border:`1px solid ${p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')?'#ff000066':p.color+'66'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,position:'relative'}}>{p.emoji}{p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')&&<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.6)',borderRadius:4,fontSize:7,color:'#ff4444',fontWeight:900,letterSpacing:1}}>🔒</div>}</div>
                   <div data-pacttip="" style={{display:'none',position:'absolute',bottom:'120%',right:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 12px',zIndex:9999,pointerEvents:'none',minWidth:180,boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:p.color,marginBottom:3}}>{p.emoji} {p.name}</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8b080',lineHeight:1.4}}>{p.desc}</div>
