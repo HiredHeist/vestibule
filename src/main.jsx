@@ -21,6 +21,17 @@ if (!window.__vstOverlayInit) {
       80%     { transform: translateY(-1.2px); }
       90%     { transform: translateY(1.5px); }
     }
+    @keyframes vhsWarp {
+      0%   { transform: translateX(0) skewX(0); }
+      2%   { transform: translateX(-10px) skewX(-0.8deg); }
+      4%   { transform: translateX(8px) skewX(0.5deg); }
+      5%   { transform: translateX(0) skewX(0); }
+      48%  { transform: translateX(0); }
+      50%  { transform: translateX(12px) skewX(1deg); }
+      52%  { transform: translateX(-7px) skewX(-0.6deg); }
+      54%  { transform: translateX(0) skewX(0); }
+      100% { transform: translateX(0); }
+    }
     @keyframes vhsFlickerStrong {
       0%   { opacity: 1; }
       3%   { opacity: 0.94; }
@@ -49,6 +60,7 @@ if (!window.__vstOverlayInit) {
       v = document.createElement('div'); v.id = 'vst-vfx'
       v.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:99991;animation:vhsJitter 0.4s linear infinite;'
       v.innerHTML = '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.30) 100%);"></div>'
+        + '<div style="position:absolute;inset:0;animation:vhsFlickerStrong .2s steps(3) infinite;background:rgba(0,0,0,.01);"></div>'
         + '<div style="position:absolute;inset:0;animation:vhsFlickerStrong 0.2s steps(3) infinite;background:rgba(0,0,0,0.01);"></div>'
       document.body.appendChild(v)
     } else if (!vhsOn && v) { v.remove() }
