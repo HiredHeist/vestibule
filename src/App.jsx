@@ -4721,8 +4721,11 @@ function App(){
       const md=memberDmgs.find(d=>d.m.uid===m.uid)
       const curDelay=delay
       // Calculate offset from member to boss
-      const dx=bc.x-from.x
-      const dy=bc.y-from.y
+      // Compensate for ScaleRoot scaling
+      const scaleEl2=document.querySelector('[style*="transform: scale"]')
+      const gs2=scaleEl2?parseFloat(scaleEl2.style.transform.match(/scale\(([\d.]+)\)/)?.[1]||1):1
+      const dx=(bc.x-from.x)/gs2
+      const dy=(bc.y-from.y)/gs2
       // Phase 1: DIP (0ms) — card dips down
       setTimeout(function(){
         setStrikingMemberIdx(si)
@@ -4832,8 +4835,12 @@ function App(){
           const targetSlotIdx=stage.indexOf(target)
           const bossPos=getCenter(bossRef)
           const targetPos=getCenter(stageRefs.current[targetSlotIdx])
-          const bdx=targetPos.x-bossPos.x
-          const bdy=targetPos.y-bossPos.y
+          // Compensate for ScaleRoot scaling — getBoundingClientRect is in screen coords
+          // but CSS transforms are in game coords (1920x1080)
+          const scaleEl=document.querySelector('[style*="transform: scale"]')
+          const gameScale=scaleEl?parseFloat(scaleEl.style.transform.match(/scale\(([\d.]+)\)/)?.[1]||1):1
+          const bdx=(targetPos.x-bossPos.x)/gameScale
+          const bdy=(targetPos.y-bossPos.y)/gameScale
           // Phase 1: WINDUP — boss dips
           setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'windup',dx:bdx,dy:bdy})
           // Phase 2: LAUNCH — boss flies toward member
