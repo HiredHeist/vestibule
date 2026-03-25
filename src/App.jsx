@@ -5609,11 +5609,7 @@ function App(){
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#aa8030',minWidth:36,textAlign:'right'}}>{Math.round(sfxVol*100)}%</span>
             </div>
           </div>
-          <div style={{marginTop:12,display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#e8a820'}}>Screen Shake</span>
-            <button onClick={()=>{const nv=!shakeEnabled;setShakeEnabled(nv);localStorage.setItem('vst_shake',nv?'on':'off')}}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:shakeEnabled?'#44cc44':'#cc4444',background:'rgba(0,0,0,0.4)',border:'1px solid '+(shakeEnabled?'#44cc44':'#cc4444'),borderRadius:4,padding:'8px 24px',cursor:'pointer',minWidth:70,textAlign:'center'}}>{shakeEnabled?'ON':'OFF'}</button>
-          </div>
+
           <div style={{marginTop:12,display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(40,5,5,0.4)',border:'1px solid rgba(180,40,40,0.3)',borderRadius:6}}>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#cc4444'}}>Reset All Progress</span>
             <button onClick={()=>{if(confirm('This will erase ALL progress, scores, achievements, and unlocks. Are you sure?')){localStorage.clear();window.location.reload()}}}
@@ -6438,26 +6434,9 @@ function App(){
                 <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#aa8030',minWidth:30,textAlign:'right'}}>{Math.round(sfxVol*100)}%</span>
               </div>
             </div>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820'}}>Screen Shake</span>
-              <button onClick={()=>{const nv=!shakeEnabled;setShakeEnabled(nv);localStorage.setItem('vst_shake',nv?'on':'off')}}
-                style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:shakeEnabled?'#44cc44':'#cc4444',background:'rgba(0,0,0,0.4)',border:'1px solid '+(shakeEnabled?'#44cc44':'#cc4444'),borderRadius:4,padding:'6px 20px',cursor:'pointer',minWidth:60,textAlign:'center'}}>{shakeEnabled?'ON':'OFF'}</button>
-            </div>
+
           </div>
-          {/* STARTER DECK PICKER */}
-          <div style={{display:'flex',gap:6,justifyContent:'center',flexWrap:'wrap',maxWidth:900}}>
-            {getUnlockedDecks().map(d=>(
-              <div key={d.id} onClick={()=>setSelectedDeck(d.id)}
-                style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,letterSpacing:1,
-                  padding:'6px 14px',cursor:'pointer',borderRadius:4,transition:'all 0.15s',
-                  background:selectedDeck===d.id?d.color+'33':'rgba(20,10,5,0.5)',
-                  border:selectedDeck===d.id?'2px solid '+d.color:'1px solid rgba(80,50,15,0.3)',
-                  color:selectedDeck===d.id?d.color:'#8a7050',
-                  boxShadow:selectedDeck===d.id?'0 0 12px '+d.color+'44':'none'}}>
-                {d.emoji} {d.name}
-              </div>
-            ))}
-          </div>
+
 
           <button onClick={()=>{setShowPauseOptions(false);setShowCombatLog(true)}}
             style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:3,
