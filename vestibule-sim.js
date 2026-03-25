@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-// vestibule-sim.js v16.0 — Expert AI Simulator for Vestibule
-// Session 15 — FULL SYNC: ALL mechanics (artifacts, passives, loot, combos, multiplier, hellquake)
+// vestibule-sim.js v17.0 — Expert AI Simulator for Vestibule
+// Session 16 — +Immediate draws, 15-card loop — +Events, Corruption Thresholds, Blood Oath: ALL mechanics (artifacts, passives, loot, combos, multiplier, hellquake)
 // Usage: node vestibule-sim.js [numGames] [stake]  (default 5000 bronze)
 
 const NUM_GAMES=parseInt(process.argv[2])||5000;
 const STAKE_ID=process.argv[3]||'bronze';
 const STAKES={
   bronze:{id:'bronze',name:'Bronze',hpMult:1.30,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.0,mentorBonus:0},
-  silver:{id:'silver',name:'Silver',hpMult:1.30,dmgAdd:1,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.5,mentorBonus:0.03},
-  gold:{id:'gold',name:'Gold',hpMult:1.30,dmgAdd:2,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:2.0,mentorBonus:0.03},
-  obsidian:{id:'obsidian',name:'Obsidian',hpMult:1.50,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,scoreMult:2.5,mentorBonus:0.06},
-  blood:{id:'blood',name:'Blood',hpMult:1.75,dmgAdd:3,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:true,scoreMult:3.0,mentorBonus:0.15},
+  silver:{id:'silver',name:'Silver',hpMult:1.30,dmgAdd:2,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.5,mentorBonus:0.05},
+  gold:{id:'gold',name:'Gold',hpMult:1.30,dmgAdd:3,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:2.0,mentorBonus:0.05},
+  obsidian:{id:'obsidian',name:'Obsidian',hpMult:1.50,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,scoreMult:2.5,mentorBonus:0.12},
+  blood:{id:'blood',name:'Blood',hpMult:1.60,dmgAdd:2,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:true,scoreMult:3.0,mentorBonus:0.35},
   demonic:{id:'demonic',name:'Demonic ⛧',hpMult:1.8,dmgAdd:4,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,scoreMult:4.0,mentorBonus:0.75}
 };
 const STAKE=STAKES[STAKE_ID]||STAKES.bronze;
@@ -25,23 +25,23 @@ const ENEMIES=[
   {id:'glutton',name:'Glutton',maxHp:130,baseDmg:5,passiveId:'cardHeal'},
   {id:'feaster',name:'Feaster',maxHp:170,baseDmg:6,passiveId:'cardHeal3'},
   {id:'gluttony_boss',name:'Devourer',maxHp:230,baseDmg:7,passiveId:'cardHeal6'},
-  {id:'miser',name:'Miser',maxHp:340,baseDmg:4,passiveId:'stashSteal'},
-  {id:'hoarder',name:'Hoarder',maxHp:400,baseDmg:5,passiveId:'stashSteal2'},
-  {id:'greed_boss',name:'Usurer',maxHp:666,baseDmg:6,passiveId:'stashSteal3'},
-  {id:'wrathful',name:'Wrathful',maxHp:936,baseDmg:5,passiveId:'rageScale1'},
-  {id:'berserker',name:'Berserker',maxHp:1040,baseDmg:6,passiveId:'rageScale1'},
-  {id:'anger_boss',name:'Warlord',maxHp:1155,baseDmg:7,passiveId:'rageScale2'},
-  {id:'heretic',name:'Heretic',maxHp:1815,baseDmg:5,passiveId:'corruptPlayer'},
-  {id:'apostate',name:'Apostate',maxHp:2090,baseDmg:6,passiveId:'corruptPlayer15'},
-  {id:'heresy_boss',name:'False Prophet',maxHp:2860,baseDmg:7,passiveId:'corruptPlayer20'},
-  {id:'brute',name:'Brute',maxHp:3480,baseDmg:6,passiveId:'targetHighestHp'},
-  {id:'hunter',name:'Hunter',maxHp:4640,baseDmg:7,passiveId:'targetHighestHp2'},
-  {id:'violence_boss',name:'Executioner',maxHp:6380,baseDmg:8,passiveId:'targetHighestHp3'},
-  {id:'trickster',name:'Trickster',maxHp:6448,baseDmg:6,passiveId:'fraudShuffle'},
-  {id:'deceiver',name:'Deceiver',maxHp:8432,baseDmg:7,passiveId:'fraudShuffle2'},
-  {id:'fraud_boss',name:'Archfraud',maxHp:11904,baseDmg:8,passiveId:'fraudShuffle3'},
-  {id:'traitor',name:'Traitor',maxHp:11700,baseDmg:6,passiveId:'paranoia'},
-  {id:'betrayer',name:'Betrayer',maxHp:14820,baseDmg:7,passiveId:'soulThief'},
+  {id:'miser',name:'Miser',maxHp:347,baseDmg:4,passiveId:'stashSteal'},
+  {id:'hoarder',name:'Hoarder',maxHp:408,baseDmg:5,passiveId:'stashSteal2'},
+  {id:'greed_boss',name:'Usurer',maxHp:679,baseDmg:6,passiveId:'stashSteal3'},
+  {id:'wrathful',name:'Wrathful',maxHp:972,baseDmg:5,passiveId:'rageScale1'},
+  {id:'berserker',name:'Berserker',maxHp:1080,baseDmg:6,passiveId:'rageScale1'},
+  {id:'anger_boss',name:'Warlord',maxHp:1200,baseDmg:7,passiveId:'rageScale2'},
+  {id:'heretic',name:'Heretic',maxHp:1897,baseDmg:5,passiveId:'corruptPlayer'},
+  {id:'apostate',name:'Apostate',maxHp:2185,baseDmg:6,passiveId:'corruptPlayer15'},
+  {id:'heresy_boss',name:'False Prophet',maxHp:2990,baseDmg:7,passiveId:'corruptPlayer20'},
+  {id:'brute',name:'Brute',maxHp:3660,baseDmg:6,passiveId:'targetHighestHp'},
+  {id:'hunter',name:'Hunter',maxHp:4880,baseDmg:7,passiveId:'targetHighestHp2'},
+  {id:'violence_boss',name:'Executioner',maxHp:6710,baseDmg:8,passiveId:'targetHighestHp3'},
+  {id:'trickster',name:'Trickster',maxHp:6864,baseDmg:6,passiveId:'fraudShuffle'},
+  {id:'deceiver',name:'Deceiver',maxHp:8976,baseDmg:7,passiveId:'fraudShuffle2'},
+  {id:'fraud_boss',name:'Archfraud',maxHp:12672,baseDmg:8,passiveId:'fraudShuffle3'},
+  {id:'traitor',name:'Traitor',maxHp:12600,baseDmg:6,passiveId:'paranoia'},
+  {id:'betrayer',name:'Betrayer',maxHp:15960,baseDmg:7,passiveId:'soulThief'},
   {id:'lucifer',name:'LUCIFER',maxHp:420666,baseDmg:9,passiveId:'luciferBoss'},
 ];
 
@@ -69,9 +69,9 @@ const ALL_CARDS=[
   {id:'dialtoeleven',type:'CORRUPT',rarity:'Common',embers:0,copies:2},
   {id:'soundcheck',type:'UTILITY',rarity:'Common',embers:2,copies:2},
   {id:'sigdecay',type:'CORRUPT',rarity:'Common',embers:1,copies:1},
-  {id:'battlecry',type:'RIFF',rarity:'Common',embers:1,copies:4},
+  {id:'battlecry',type:'RIFF',rarity:'Common',embers:2,copies:4},
   {id:'roadie',type:'UTILITY',rarity:'Common',embers:1,copies:2},
-  {id:'setlist',type:'UTILITY',rarity:'Common',embers:0,copies:1},
+  {id:'setlist',type:'UTILITY',rarity:'Common',embers:0,copies:2},
   {id:'groupie',type:'EMBER',rarity:'Uncommon',embers:1,copies:2},
   {id:'demotape',type:'RIFF',rarity:'Common',embers:1,copies:1},
   {id:'distortion',type:'CORRUPT',rarity:'Common',embers:1,copies:3},
@@ -87,7 +87,7 @@ const ALL_CARDS=[
   {id:'controlfeedback',type:'CORRUPT',rarity:'Uncommon',embers:2,copies:1},
   {id:'burnset',type:'RIFF',rarity:'Uncommon',embers:0,copies:1},
   {id:'soundwall',type:'RIFF',rarity:'Uncommon',embers:2,copies:1},
-  {id:'doubledown',type:'RIFF',rarity:'Uncommon',embers:3,copies:2,shopOnly:true},
+  {id:'doubledown',type:'RIFF',rarity:'Uncommon',embers:1,copies:2,shopOnly:true},
   {id:'deathriff',type:'CORRUPT',rarity:'Uncommon',embers:1,copies:2},
   {id:'ampoverload',type:'EMBER',rarity:'Uncommon',embers:0,copies:1},
   {id:'ampstatic',type:'CORRUPT',rarity:'Uncommon',embers:2,copies:2},
@@ -98,7 +98,7 @@ const ALL_CARDS=[
   {id:'herbmoney',type:'RIFF',rarity:'Uncommon',embers:1,copies:1},
   {id:'darktuning',type:'CORRUPT',rarity:'Uncommon',embers:3,copies:2},
   {id:'stagedive',type:'RIFF',rarity:'Rare',embers:4,copies:2},
-  {id:'overdrive',type:'RIFF',rarity:'Rare',embers:3,copies:1},
+  {id:'overdrive',type:'RIFF',rarity:'Rare',embers:2,copies:1},
   {id:'infencore',type:'RIFF',rarity:'Rare',embers:3,copies:3},
   {id:'remaster',type:'UTILITY',rarity:'Rare',embers:0,copies:1},
   {id:'sabbathsigil',type:'CORRUPT',rarity:'Rare',embers:2,copies:1,consumable:true},
@@ -204,7 +204,7 @@ const MENTOR_LINK_BONUS={foil:{atk:1,hp:2,mult:1.25},mythic:{atk:2,hp:4,mult:1.5
 let TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
-  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0};
+  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0,eventsTriggered:0,eventMoshPit:0,eventCursedAmp:0,eventBloodOath:0,eventHellfire:0,eventSabbath:0,eventWager:0,whisperDmg:0,hungerExtraCost:0,madnessCards:0,possessionBonus:0};
 let CARD_PLAYS={};
 
 function rand(n){return Math.floor(Math.random()*n)}
@@ -319,6 +319,28 @@ function rollTrip(type){
 }
 
 function scoreCard(card,gs,enemy,strikeNum,cardsPlayed){
+  let base=_scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed);
+  // CHAIN BONUS: completing a chain is worth +40 priority
+  const played=gs._cardsPlayedIds||[];
+  const fired=gs._firedChains||new Set();
+  for(const chain of RIFF_CHAINS_SIM){
+    const ck=chain[0]+'+'+chain[1];
+    if(fired.has(ck))continue;
+    if((card.id===chain[0]&&played.includes(chain[1]))||(card.id===chain[1]&&played.includes(chain[0]))){
+      base+=40;break;
+    }
+  }
+  // CHAIN SETUP: if the other half of a chain is in hand, slight boost
+  for(const chain of RIFF_CHAINS_SIM){
+    const ck=chain[0]+'+'+chain[1];
+    if(fired.has(ck))continue;
+    const partner=card.id===chain[0]?chain[1]:card.id===chain[1]?chain[0]:null;
+    if(partner&&gs.hand.some(c=>c.id===partner)){base+=15;break}
+  }
+  return base;
+}
+
+function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
   const{stage,corruption,stash,embers,hand}=gs,alive=stage.filter(m=>!m.tooStoned);if(alive.length===0)return 0;
   const totalAtk=alive.reduce((s,m)=>s+m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0),0),highestAtk=alive.reduce((s,m)=>Math.max(s,m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0)),0);
   const lowestHp=alive.reduce((a,b)=>a.hp<b.hp?a:b),anyHurt=alive.some(m=>m.hp<m.maxHp*0.5);
@@ -368,9 +390,9 @@ function applyCardSim(card,gs,enemy){
     case 'soundcheck':alive.forEach(m=>{const h=m.hp<m.maxHp;m.hp=Math.min(m.maxHp,m.hp+(card.upgraded?6:4));if(h)m.tempAtkBonus=(m.tempAtkBonus||0)+1});break;
     case 'roadie':weakest.stoneShield=card.upgraded?3:2;weakest.hp=Math.min(weakest.maxHp,weakest.hp+(card.upgraded?4:2));break;
     case 'distortion':gs.corruption=Math.min(100,gs.corruption+15);alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+1);break;
-    case 'dialtoeleven':gs.corruption=Math.min(100,gs.corruption+15);gs.stage.forEach(m=>{if(!m.tooStoned){m.atk+=1;m.tempAtkBonus=(m.tempAtkBonus||0)+1}});break;
+    case 'dialtoeleven':gs.corruption=Math.min(100,gs.corruption+10);gs.stage.forEach(m=>{if(!m.tooStoned){m.atk+=2;m.tempAtkBonus=(m.tempAtkBonus||0)+2}});break;
     case 'controlfeedback':{gs.corruption=50;const ht=alive.reduce((a,b)=>a.hp/a.maxHp<b.hp/b.maxHp?a:b);ht.hp=ht.maxHp;break}
-    case 'sigdecay':gs._drawExtra=(gs._drawExtra||0)+2;break;
+    case 'sigdecay':{if(gs.hand.length>0){const vi=rand(gs.hand.length);gs.discard.push(gs.hand.splice(vi,1)[0])};drawCards(gs,2);break}
     case 'feedbackloop':{let d=Math.floor(gs.corruption/(card.upgraded?1.5:2));if(gs._activeGenre==='BLACK_METAL')d=Math.round(d*1.25);gs._directDmg=(gs._directDmg||0)+d;break}
     case 'soundwall':{const cn=Math.floor(gs.fightIndex/3)+1;const sw=cn<=3?5:cn<=6?8:12;gs._directDmg=(gs._directDmg||0)+sw+(gs.passives.some(p=>p.id==='p5')?4:0)+(card.upgraded?4:0);break}
     case 'heavyriff':{const ta=alive.reduce((s,m)=>s+m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0),0);gs._directDmg=(gs._directDmg||0)+Math.floor(ta*(card.upgraded?0.6:0.5));break}
@@ -384,10 +406,10 @@ function applyCardSim(card,gs,enemy){
     case 'staticcharge':gs.embers=Math.min(gs.maxEmbers,gs.embers+(gs.corruption===0?4:2));break;
     case 'tappedout':gs._tappedOutNext=true;if(gs.passives.some(p=>p.id==='p4'))gs.embers=Math.min(gs.maxEmbers,gs.embers+1);break;
     case 'ampoverload':{gs.embers=Math.min(gs.maxEmbers,gs.embers+3+(gs.passives.some(p=>p.id==='p4')?1:0));gs._discardsLeft=Math.max(0,gs._discardsLeft-1);break}
-    case 'groupie':{gs.embers=Math.min(gs.maxEmbers,gs.embers+2+(gs.passives.some(p=>p.id==='p4')?1:0));gs._drawExtra=(gs._drawExtra||0)+1;break}
+    case 'groupie':{gs.embers=Math.min(gs.maxEmbers,gs.embers+2+(gs.passives.some(p=>p.id==='p4')?1:0));drawCards(gs,1);break}
     case 'soundboard':{gs.embers=Math.min(gs.maxEmbers,gs.embers+2+(gs.passives.some(p=>p.id==='p4')?1:0));gs._drawNextStrike=(gs._drawNextStrike||0)+1;break}
     case 'setbreak':gs.embers=Math.min(gs.maxEmbers,gs.embers+3);break;
-    case 'setlist':gs._drawExtra=(gs._drawExtra||0)+2;break;
+    case 'setlist':drawCards(gs,card.upgraded?4:3);break;
     case 'doubledown':gs._nextCardFree=true;break;
     case 'wakeup':alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));stage.forEach(m=>{if(m.tooStoned){m.tooStoned=false;m.hp=m.maxHp}});break;
     case 'demotape':gs._directDmg=(gs._directDmg||0)+Math.floor((target.atk+(target.permAtkBonus||0))*0.5);break;
@@ -396,8 +418,8 @@ function applyCardSim(card,gs,enemy){
     case 'darktuning':{const bu=Math.floor(gs.corruption/10);for(let i=0;i<bu;i++){const t=pick(alive);t.atk+=1;t.permAtkBonus=(t.permAtkBonus||0)+1}break}
     case 'herbmoney':{gs._directDmg=(gs._directDmg||0)+gs.stash;break}
     case 'goingbroke':gs._directDmg=(gs._directDmg||0)+gs.stash;gs.stash=0;break;
-    case 'burnset':gs._drawExtra=(gs._drawExtra||0)+1;break;
-    case 'remaster':gs._drawExtra=(gs._drawExtra||0)+3;break;
+    case 'burnset':drawCards(gs,1);break;
+    case 'remaster':drawCards(gs,3);break;
     case 'seance':{const h=Math.max(1,Math.floor(gs.corruption/4));alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+h));break}
     case 'moshpit':{gs._directDmg=(gs._directDmg||0)+alive.length*(card.upgraded?5:3);break}
     case 'bloodritual':{const t=alive.reduce((a,b)=>a.hp>b.hp?a:b);const sac=Math.floor(t.hp*0.25);t.hp-=sac;gs._directDmg=(gs._directDmg||0)+sac*(card.upgraded?8:6);gs.corruption=Math.min(100,gs.corruption+15);break}
@@ -452,6 +474,9 @@ function simFight(gs,phaseHp,luciferPhase){
   if(gs._pendingBurnStage){gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+5);gs._pendingBurnStage=false}
   gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set();gs._allCardsFree=false;gs._hellquakeFired=false
   // Pact: clean_living bonus
+  // CORRUPTION THRESHOLDS at fight start
+  if(gs.corruption>=25){const _alive=gs.stage.filter(m=>!m.tooStoned);if(_alive.length>0){const _w=_alive.reduce((a,b)=>a.hp<b.hp?a:b);_w.hp=Math.max(1,_w.hp-1);TRACK.whisperDmg++}}
+  if(gs.corruption>=100&&!gs._possessionFired){gs._possessionFired=true;gs.stage.forEach(m=>{if(!m.tooStoned&&m.keyword==='CORRUPT'){m.atk+=3;m.permAtkBonus=(m.permAtkBonus||0)+3}});TRACK.possessionBonus++}
   if(gs._pacts.includes('clean_living')&&gs.corruption<15)gs.stage.filter(m=>!m.tooStoned).forEach(m=>{m.tempAtkBonus=(m.tempAtkBonus||0)+2});
   // Pact: stone_wall
   const stoneWallActive=gs._pacts.includes('stone_wall');
@@ -501,13 +526,15 @@ function simFight(gs,phaseHp,luciferPhase){
     if(enemy.passiveId==='selfbuff')enemy._atkBuff+=1;
     if(enemy.passiveId==='selfbuff2')enemy._atkBuff+=2;
 
+    // CORRUPTION 75%: Madness — 15% chance lose a card before strike
+    if(gs.corruption>=75&&Math.random()<0.15&&gs.hand.length>1){const _mi=rand(gs.hand.length);gs.discard.push(gs.hand.splice(_mi,1)[0]);TRACK.madnessCards++}
     let shredderUsed=false,evilEyeUsed=!gs.artifacts.some(a=>a.id==='a3');
     const alive=gs.stage.filter(m=>!m.tooStoned);if(alive.length===0)break;
     let paranoiaVictimUid=null
     if(enemy.passiveId==='paranoia'&&alive.length>1){const victim=pick(alive);paranoiaVictimUid=victim.uid;const allies=alive.filter(m=>m.uid!==victim.uid);if(allies.length>0){const t=pick(allies);t.hp=Math.max(0,t.hp-3)}}
 
     let cardsPlayed=0;
-    for(let att=0;att<6;att++){
+    for(let att=0;att<15;att++){
       const playable=gs.hand.map((c,idx)=>({c,idx})).filter(({c})=>{
         let cost=c.embers-(gs._tripBuff==='SYNESTHESIA'?1:0);if(gs._allCardsFree)cost=0;else if(!evilEyeUsed)cost=0;else if(gs._nextCardFree)cost=0;
         else if(!shredderUsed&&c.type==='RIFF'&&alive.some(m=>m.keyword==='SHREDDER'))cost=Math.max(0,cost-1);
@@ -522,7 +549,7 @@ function simFight(gs,phaseHp,luciferPhase){
       cost=Math.max(0,cost)
       gs.embers-=cost;gs.hand.splice(best.idx,1);
       applyCardSim(card,gs,enemy);if(gs._consumeCard){gs._consumeCard=false}else if(card.id!=='contract')gs.discard.push(card);cardsPlayed++;
-      gs._strikeMult=Math.min(1.15,Math.round((gs._strikeMult+0.03)*100)/100)
+      gs._strikeMult=Math.min(6.66,Math.round((gs._strikeMult+0.05)*100)/100)
       gs._cardsPlayedIds.push(card.id)
       if(card.type==='EMBER'&&gs.passives.some(p=>p.id==='p4'))gs.embers=Math.min(gs.maxEmbers,gs.embers+1)
       // Riff chain detection
@@ -531,7 +558,7 @@ function simFight(gs,phaseHp,luciferPhase){
           if(!gs._firedChains)gs._firedChains=new Set()
           const ck=chain[0]+'+'+chain[1]
           if(!gs._firedChains.has(ck)){
-            gs._firedChains.add(ck);gs._strikeMult=Math.min(1.15,Math.round((gs._strikeMult+0.15)*100)/100)
+            gs._firedChains.add(ck);gs._strikeMult=Math.min(6.66,Math.round((gs._strikeMult*1.78)*100)/100)
             gs._directDmg=(gs._directDmg||0)+Math.round(gs.stage.filter(m=>!m.tooStoned).reduce((s,m)=>s+m.atk,0)*0.10)
             TRACK.combosTriggered=(TRACK.combosTriggered||0)+1
           }
@@ -577,7 +604,7 @@ function simFight(gs,phaseHp,luciferPhase){
     enemy._hp-=strikeDmg;if(enemy._hp<=0)break;
 
     // BOSS ATTACKS
-    let bossDmg=enemy.baseDmg+enemy._atkBuff+STAKE.dmgAdd;
+    let bossDmg=enemy.baseDmg+enemy._atkBuff+STAKE.dmgAdd+(gs.corruption>=100?3:0);
     if(stoneWallActive)bossDmg=Math.max(1,bossDmg-1);
     if(enemy.passiveId==='stashSteal'&&gs.stash>0){const s=Math.min(gs.stash,1);gs.stash-=s;gs.stashStolen+=s}
     if(enemy.passiveId==='stashSteal2'&&gs.stash>0){const s=Math.min(gs.stash,2);gs.stash-=s;gs.stashStolen+=s}
@@ -628,8 +655,70 @@ function simFight(gs,phaseHp,luciferPhase){
   return{won,allDead};
 }
 
+function simEvent(gs){
+  const events=['mosh_pit','cursed_amp','blood_oath','hellfire_baptism','sabbath_offering','devils_wager'];
+  const avail=events.filter(e=>!gs._eventsSeenThisRun.includes(e));
+  if(avail.length===0)return;
+  const evt=pick(avail);
+  gs._eventsSeenThisRun.push(evt);
+  TRACK.eventsTriggered++;
+  const alive=gs.stage.filter(m=>!m.tooStoned);
+
+  if(evt==='mosh_pit'){
+    // AI: take it if average HP > 6, otherwise walk away
+    if(alive.length>0&&alive.reduce((s,m)=>s+m.hp,0)/alive.length>6){
+      gs.stage.forEach(m=>{if(!m.tooStoned){m.hp-=4;if(m.hp<=0){m.hp=0;m.tooStoned=true}else{m.atk+=1;m.permAtkBonus=(m.permAtkBonus||0)+1}}});
+      TRACK.eventMoshPit++;
+    }else{gs.stash=Math.max(0,gs.stash-15)}
+  }
+  else if(evt==='cursed_amp'){
+    // AI: take it if corruption < 40 (locking low is good), refuse if high
+    if(gs.corruption<40){gs.maxEmbers=Math.min(10,gs.maxEmbers+2);gs._corruptionLocked=true;TRACK.eventCursedAmp++}
+    else{gs.corruption=Math.max(0,gs.corruption-15)}
+  }
+  else if(evt==='blood_oath'){
+    // AI: refuse (too risky — member dies on any boss hit)
+    // 25% chance AI takes it if strongest has >8 ATK
+    const strongest=alive.length>0?alive.reduce((a,b)=>a.atk>b.atk?a:b):null;
+    if(strongest&&strongest.atk>=8&&Math.random()<0.25){
+      strongest.atk+=5;strongest.permAtkBonus=(strongest.permAtkBonus||0)+5;strongest.bloodOath=true;
+      TRACK.eventBloodOath++
+    }
+  }
+  else if(evt==='hellfire_baptism'){
+    // AI: take it if corruption > 40 (already high, +2 ATK worth it)
+    if(gs.corruption>40||alive.some(m=>m.keyword==='CORRUPT')){
+      gs.corruption=69;gs.stage.forEach(m=>{if(!m.tooStoned){m.atk+=2;m.permAtkBonus=(m.permAtkBonus||0)+2}});
+      TRACK.eventHellfire++
+    }
+  }
+  else if(evt==='sabbath_offering'){
+    // AI: take it if HP is low and deck > 50
+    const avgHp=alive.length>0?alive.reduce((s,m)=>s+m.hp/m.maxHp,0)/alive.length:1;
+    if(avgHp<0.6&&gs.deck.length>45){
+      for(let i=0;i<Math.min(3,gs.deck.length);i++){gs.deck.splice(rand(gs.deck.length),1)}
+      gs.stage.forEach(m=>{if(!m.tooStoned)m.hp=m.maxHp});
+      TRACK.eventSabbath++
+    }
+  }
+  else if(evt==='devils_wager'){
+    // AI: almost never take (75% refuse)
+    if(Math.random()<0.25){
+      if(Math.random()<0.5){
+        gs.stage.forEach(m=>{if(!m.tooStoned){m.atk+=3;m.permAtkBonus=(m.permAtkBonus||0)+3}})
+      }else{
+        const strongest=alive.reduce((a,b)=>a.atk>b.atk?a:b);
+        if(strongest){strongest.hp=0;strongest.tooStoned=true}
+      }
+      TRACK.eventWager++
+    }
+  }
+}
+
+// 50% Hunger applied inside simShop via priceMult
 function simShop(gs){
-  const priceMult=gs._pacts.includes('merchants_eye')?0.8:1.0
+  const hungerMult=gs.corruption>=50?1.25:1.0
+  const priceMult=(gs._pacts.includes('merchants_eye')?0.8:1.0)*hungerMult
 
   const circleNum=Math.floor(gs.fightIndex/3)+1;
   if(circleNum!==gs.lastCircle){gs.circleArtBought=false;gs.circlePassBought=false;gs.lastCircle=circleNum}
@@ -686,7 +775,7 @@ function simShop(gs){
 
 function newGame(){return{stage:pickStartingPair(),deck:buildDeck(),discard:[],hand:[],stash:3,embers:STAKE.startEmbers,maxEmbers:STAKE.startEmbers,corruption:STAKE.startCorruption,fightIndex:0,bossKills:0,artifacts:[],passives:[],fightsSurvived:0,totalDamage:0,highestStrike:0,stashEarned:0,tooStonedCount:0,won:false,mentorLinks:[],lastCircle:1,stashStolen:0,
   heldShrooms:false,heldAcid:false,stolenAtkPool:0,circleArtBought:false,circlePassBought:false,
-  _pacts:[],_speedDemon:false,_warDrums:false,_genreCounts:{RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0},_activeGenre:null,_wthFight:false,_contractsPlayed:0,_upgradedCards:[],artifacts:[],passives:[],loot:[],_strikeMult:1.0,_cardsPlayedIds:[],_firstStrike:true,_allCardsFree:false,_nextCardFree:false,_pendingBurnStage:false}}
+  _pacts:[],_speedDemon:false,_warDrums:false,_genreCounts:{RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0},_activeGenre:null,_wthFight:false,_contractsPlayed:0,_upgradedCards:[],artifacts:[],passives:[],loot:[],_strikeMult:1.0,_cardsPlayedIds:[],_firstStrike:true,_allCardsFree:false,_nextCardFree:false,_pendingBurnStage:false,_eventsSeenThisRun:[],_corruptionLocked:false,_bloodOathUid:null,_possessionFired:false}}
 
 function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
   for(let f=0;f<27;f++){gs.fightIndex=f;
@@ -768,6 +857,10 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
             TRACK.forgeUpgrades++
           }
         }
+        // RANDOM EVENTS (30% between non-boss fights)
+        if(!isBoss&&gs._eventsSeenThisRun.length<6&&Math.random()<0.30){
+          simEvent(gs)
+        }
         if(fightInCircle<2||isBoss)simShop(gs) // skip shop for skipped fights
       }else{deathFight=f;deathCause=result.allDead?'stoned':'beaten';break}
     }}
@@ -792,12 +885,12 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
   return{won:gs.won,wthWon,deathFight,deathCause,fightsSurvived:gs.fightsSurvived,totalDamage:gs.totalDamage,highestStrike:gs.highestStrike,stageSize:gs.stage.length,mentorLinks:gs.mentorLinks.length,pacts:gs._pacts.length,upgrades:gs._upgradedCards.length}}
 
 // ── RUN SIMULATION ──
-console.log(`\n⛧ VESTIBULE SIM v16.0 [${STAKE.name}] — ${NUM_GAMES.toLocaleString()} games\n`);
+console.log(`\n⛧ VESTIBULE SIM v17.1 [${STAKE.name}] — ${NUM_GAMES.toLocaleString()} games\n`);
 const t0=Date.now();
 TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
-  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0};
+  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0,eventsTriggered:0,eventMoshPit:0,eventCursedAmp:0,eventBloodOath:0,eventHellfire:0,eventSabbath:0,eventWager:0,whisperDmg:0,hungerExtraCost:0,madnessCards:0,possessionBonus:0};
 CARD_PLAYS={};
 const deathsByFight=new Array(27).fill(0),surviveByFight=new Array(27).fill(0);let wins=0,wthWins=0,totalFights=0,gamesWithLinks=0,totalPacts=0;
 for(let i=0;i<NUM_GAMES;i++){const r=simGame();totalFights+=r.fightsSurvived;totalPacts+=r.pacts;if(r.mentorLinks>0)gamesWithLinks++;
@@ -818,6 +911,19 @@ console.log('─'.repeat(80));
 console.log(`\nDeath distribution by circle:`);
 for(let c=1;c<=9;c++){let d=0;for(let f=(c-1)*3;f<c*3;f++)d+=deathsByFight[f];console.log(`  Circle ${c}: ${(d/NUM_GAMES*100).toFixed(1)}% of runs end here`)}
 console.log(`  Lucifer wins: ${(wins/NUM_GAMES*100).toFixed(2)}%`);
+console.log(`\n🔮 CORRUPTION THRESHOLDS:`)
+console.log(`  Whisper dmg (25%): ${TRACK.whisperDmg.toLocaleString()}`)
+console.log(`  Hunger extra cost (50%): applied via shop mult`)
+console.log(`  Madness cards lost (75%): ${TRACK.madnessCards.toLocaleString()}`)
+console.log(`  Possession bonuses (100%): ${TRACK.possessionBonus.toLocaleString()}`)
+console.log(`\n🎲 RANDOM EVENTS:`)
+console.log(`  Total events: ${TRACK.eventsTriggered.toLocaleString()} (${(TRACK.eventsTriggered/NUM_GAMES).toFixed(1)}/game)`)
+console.log(`  Mosh Pit taken: ${TRACK.eventMoshPit}`)
+console.log(`  Cursed Amp taken: ${TRACK.eventCursedAmp}`)
+console.log(`  Blood Oath taken: ${TRACK.eventBloodOath}`)
+console.log(`  Hellfire Baptism taken: ${TRACK.eventHellfire}`)
+console.log(`  Sabbath Offering taken: ${TRACK.eventSabbath}`)
+console.log(`  Devil's Wager taken: ${TRACK.eventWager}`)
 console.log(`\n⛧ NEW FEATURE STATS:`);
 console.log(`  Pacts chosen: ${TRACK.pactsChosen.toLocaleString()} (${(totalPacts/NUM_GAMES).toFixed(1)} avg/game)`);
 console.log(`  Fights skipped: ${TRACK.fightsSkipped.toLocaleString()} (${(TRACK.fightsSkipped/NUM_GAMES).toFixed(1)} avg/game)`);
