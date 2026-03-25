@@ -1,5 +1,5 @@
 # VESTIBULE — Game Design Document
-**Version 16.0 | Updated March 24, 2026**
+**Version 17.0 | Updated March 25, 2026**
 
 ## Overview
 Vestibule is a roguelite deck-building card game set in Hell. Players assemble a band of musicians, play cards to buff their band and deal damage, then strike bosses across 9 circles of Hell — culminating in a fight against Lucifer himself.
@@ -11,7 +11,7 @@ Vestibule is a roguelite deck-building card game set in Hell. Players assemble a
 ---
 
 ## Technical Details
-- **Stack:** React 19 + Vite, single-file architecture (App.jsx, 5359 lines, 405KB)
+- **Stack:** React 19 + Vite, single-file architecture (App.jsx, 6351 lines, 470KB)
 - **Resolution:** 1920x1080 fixed with ScaleRoot responsive scaling
 - **Repo:** github.com/HiredHeist/vestibule (private)
 - **Deploy:** royceprinting.com/vestibule/
@@ -23,19 +23,125 @@ Vestibule is a roguelite deck-building card game set in Hell. Players assemble a
 |----------|-------|
 | Unique cards | 41 |
 | Starting deck | 69 cards |
-| Musicians | 18 |
-| Enemies | 27 (9 circles x 3) |
+| Musicians | 18 (9 with hand-drawn portraits) |
+| Enemies | 28 (27 + The Executive bonus boss) |
 | Artifacts (Vintage Amps) | 7 |
 | Passives (Effect Pedals) | 10 |
 | Pacts | 12 |
 | Riff Chains (combos) | 16 |
 | Card upgrades (Doom Forge) | 41 (15 with HP buffs) |
 | Boss loot drops | 8 |
+| Random Events | 6 (between non-boss fights) |
+| Corruption Thresholds | 4 (25/50/75/100%) |
+| Starter Decks | 6 (5 achievement-gated) |
+| Mastery Tiers | 4 (Novice/Adept/Master/Legendary) |
 | SFX files | 30 |
 | Music tracks | 11 |
 | Difficulty stakes | 6 |
 
 ---
+
+
+---
+
+## New Features (Session 16-17)
+
+### Random Events (Between Non-Boss Fights)
+30% chance after fights 1 and 2 in each circle (never before bosses). Full-screen parchment card with 2 choices. Each event only appears once per run. Net EV slightly negative (game stays hard).
+
+| Event | Choice A | Choice B |
+|-------|----------|----------|
+| Mosh Pit | All take 4 dmg, survivors +1 ATK | Lose 15 stash |
+| Cursed Amp | +2 max embers, corruption locks | -15% corruption |
+| Blood Oath | Strongest +5 ATK, dies on boss hit | Refuse |
+| Hellfire Baptism | Corruption→69%, all +2 ATK | Nothing |
+| Sabbath Offering | Burn 3 random cards, full heal | Keep cards |
+| Devil's Wager | Coin flip: +3 ATK all / strongest dies | Refuse |
+
+### Corruption Threshold System
+Passive effects that activate as corruption rises. Bar visible on Combined Attack bar during combat.
+
+| Threshold | Name | Effect |
+|-----------|------|--------|
+| 25% | The Whispers | Weakest member takes 1 dmg at fight start |
+| 50% | The Hunger | Shop prices +25% |
+| 75% | The Madness | 15% chance to lose random card before Strike |
+| 100% | The Possession | Boss damage +3. CORRUPT members get one-time +3 ATK |
+
+Flash notification on each threshold crossing with name + description.
+
+### Damage Breakdown Animation
+After every Strike, a Balatro-style panel reveals damage sources:
+1. Per-member ATK lines appear (140ms each)
+2. BASE ATK subtotal
+3. Modifiers: Double Time, Encore, Band Synergy, Mentor Link, Genre, Trip, Strike mult
+4. FINAL TOTAL slams at 56px with screen shake + big_hit SFX
+5. Boss attack delayed until breakdown completes
+
+### Band Member Portraits
+9 hand-drawn ink portraits (bjorn, dag, freya, gunnar, loki, ragnar, rolf, sigrid, vitalik). Two sizes per member:
+- Small (`{name}.png`, ~400×660) — Opening Night, Recruit, Pawn Shop (static)
+- Large (`{name}_stage.png`, ~650×1056) — Stage combat (with Dr. Katz squigglevision wobble)
+
+Squigglevision: 3 CSS keyframe animations, 0.38s/0.45s/0.33s duration, steps(3), ±0.7px translate ±0.4deg rotate. Falls back to emoji for 9 members without portraits.
+
+### Card Mastery System
+41 cards × 4 tiers tracked in localStorage (`vst_mastery`). Every card play increments counter.
+
+| Tier | Plays | Visual |
+|------|-------|--------|
+| Unplayed | 0 | No badge |
+| Novice | 10 | Bronze border + badge |
+| Adept | 50 | Silver border + badge |
+| Master | 200 | Gold border + badge + glow |
+| Legendary | 666 | Holographic shimmer + pink glow |
+
+Gallery: 9-column grid on main menu (🏆 MASTERY button).
+
+### Boss Trophy Wall
+28 boss slots in "Hall of Damnation" (💀 TROPHIES button on main menu). Per-boss tracking: kills, bestDamage, bestStrikes, bestStake, firstKill date. 9 rows by circle + bonus Executive row. Defeated show emoji/name/kills/best hit/stake badge. Undefeated show "???" silhouette.
+
+### Achievement-Gated Starter Decks
+6 decks (1 default + 5 unlockable):
+- **Standard** — default 69-card deck (always available)
+- **Purist** — Commons only, no Corrupt (unlock: beat Circle 5)
+- **Corrupted** — Heavy Corrupt, start 25% corruption (unlock: corruption_lord)
+- **Speedrunner** — Riffs + free cards, 45 max (unlock: perfect_strike)
+- **Hoarder** — Ember+Utility, +20 starting stash (unlock: circle_7)
+- **Sabbath** — Rare+Uncommon only, no Commons (unlock: circle_9)
+
+### Band Legacy System
+Musicians track stats across ALL runs in localStorage (`vst_legacy`): runs, wins, deaths, totalDmg, bestCircle, bestDmg. Auto-nicknames: The Immortal (20 runs 0 deaths), The Legendary (10+ wins), Bonecrusher (500+ best hit), etc. Shown on Opening Night cards.
+
+### The Encore (Endless Mode)
+After beating Lucifer, victory screen shows "⛧ The Encore ⛧" button. Restarts from fight 0 with ALL enemies ×2.0 HP.
+
+### Daily Seed Polish
+Best score per day tracked in localStorage. "🌍 NEW DAILY BEST!" on end screen.
+
+### End Screen Redesign
+Unified no-scroll layout for all 3 screen types (Stoned/Beaten/Victory). Play Again button next to score. Stats in 5×2 compact grid. Achievements/discoveries as inline chips. All elements enlarged ~50% to fill 1920×1080.
+
+---
+
+## Balance State (v17.0 — 60K Game Audit)
+
+### Win Rates
+| Stake | Win Rate | Primary Death Zone |
+|-------|----------|-------------------|
+| Bronze | 9.28% | C6-C7 (50% of deaths) |
+| Silver | 8.57% | C1 (28%) + C7 |
+| Gold | 10.16% | C1 (31%) + C7 |
+| Obsidian | 8.72% | C1 (16%) + C6-C7 |
+| Blood | 5.76% | C1 (67%) |
+| Demonic | 0.09% | C1 (99%) |
+
+### Card Diversity
+- 14 STAPLE cards (8+ plays/game)
+- 10 STRONG cards (4-8)
+- 12 SOLID cards (2-4)
+- 4 WEAK cards (<2) — Smoke Break, Dial to Eleven, Sabbath Sigil, Record Deal
+- 90% of cards see meaningful play — excellent diversity
 
 ## Game Flow
 

@@ -1,6 +1,6 @@
 # VESTIBULE — Master TODO
 **Living document — updated with every push**
-**Latest: 833fc82 | March 25, 2026 JST**
+**Latest: 10c798c | March 25, 2026 JST**
 
 ---
 
@@ -46,6 +46,51 @@
 - [ ] Addiction Loop Timer ("Average run time: 8 minutes")
 - [ ] Seed Sharing + Challenge Mode (URL-based seed comparison)
 - [ ] Performance optimization (component splitting if needed)
+
+
+## 🐛 KNOWN BUGS — Must Fix Before Public Launch
+
+- [ ] **Hall of Damnation overflow** — Trophy Wall doesn't fit in 1080px when trophies are populated. No back/close button visible. Needs scroll or compact layout fix.
+- [ ] **Blood Oath flag persists on dead members** — If a Blood Oath member dies from Mosh Pit event (not boss damage), the flag stays. Should clear on any death source.
+- [ ] **Corruption Lock + Corruption Engine visual** — When Cursed Amp locks corruption and player has Corruption Engine pact, the pact icon shows but does nothing. Needs "LOCKED" visual state.
+- [ ] **Encore Mode victory trigger** — Encore resets fightIndex to 0 but victory checks fightIndex>=26. Second full clear may or may not trigger properly. Needs verification.
+- [ ] **Gold stake win rate** — 10.16% (above Bronze 9.28%). Mentor bonus +0.10 overcompensates. May need dmgAdd 3→4.
+
+
+## 🔧 POLISH — 20 Improvements (from 60K Game Audit)
+*No new features — only improving what exists*
+
+### Combat Feel
+- [ ] **1. Riff Chain Celebration** — When a Riff Chain fires, show a full-width banner (2 seconds) with chain name + combo bonus in huge text. Currently chains trigger 16.4×/game but feel invisible. This is the Balatro "planet scored" moment.
+- [ ] **2. Card Play Feedback** — When dropping a card on a member, add a "absorbed" shrink animation with a flash of the card's type color. Currently the card just disappears.
+- [ ] **3. Near-Death Heartbeat** — When any member drops below 25% HP, add a subtle red pulse border on their stage card. Players should FEEL danger without checking numbers.
+- [ ] **4. Strike Anticipation** — The 0.5s before projectiles launch feels dead. Add stage cards tilting forward slightly + bass rumble sound as wind-up.
+- [ ] **5. Boss Low HP Urgency** — When boss HP < 20%, increase HP bar pulse speed and add screen-edge vignette. The "almost dead" moment should feel frantic.
+
+### Card/Deck Management
+- [ ] **6. Card Play Count on Hover** — When hovering a card in hand, show "Played 3× this fight" on the expanded card. Helps track Riff Chain progress.
+- [ ] **7. Discard Pile Preview** — Add "last 3 discarded" mini-preview on hover without opening full view. Quick glance vs full inspection.
+- [ ] **8. Ember Cost Preview** — When hovering a card, show ghost/preview of remaining embers after playing it. "5/5 → 3/5" preview.
+- [ ] **9. Upgrade Indicator in Hand** — Upgraded cards (from Doom Forge) should have a visible "★" badge. Currently can't tell without reading effect text.
+- [ ] **10. Deck Composition Mini-Bar** — Show tiny 4-color stacked bar (RIFF/CORRUPT/UTILITY/EMBER) below deck count, always visible. Currently only on hover.
+
+### Shop/Economy
+- [ ] **11. Hunger Price Display** — When corruption ≥50%, shop prices should show inflated price with "⚠+25%" indicator. Players don't know WHY things cost more.
+- [ ] **12. Pawn Shop Comparison** — When selling a member, show what you'd LOSE (ATK contribution, keyword) alongside GAIN (stash). More informed decision.
+
+### Information Display
+- [ ] **13. Boss Passive Reminder** — Pin boss passive as small persistent badge near boss emoji. Current header text can scroll off during long fights.
+- [ ] **14. Corruption Threshold Preview** — Add faint labels at 25/50/75/100 markers on corruption bar showing WHAT happens at each level before reaching it.
+- [ ] **15. Pact Tooltip Persistence** — Add 300ms delay before hiding pact tooltips on mouseout. Currently disappear instantly.
+
+### Progression/Retention
+- [ ] **16. Mastery Progress on End Screen** — Show 2-3 cards that made most progress toward next tier. "Battle Cry: 45/50 → ADEPT!" drives "one more run."
+- [ ] **17. Trophy Wall Progress on End Screen** — Flash "NEW TROPHY: The Heretic" when killing a boss for the first time. Ties trophy wall to gameplay.
+- [ ] **18. Legacy Nickname Notification** — When a member earns a new nickname, show brief toast during gameplay. Currently only on Opening Night.
+
+### Audio/Visual Polish
+- [ ] **19. Corruption Threshold Sounds** — Give each threshold a unique sound (Whispers=drone, Hunger=growl, Madness=screech, Possession=demonic laugh). Currently all use big_hit.
+- [ ] **20. Genre Activation Visual** — When a genre activates, add colored flash across stage bottom with genre name. Genres fire 24×/game but feel invisible.
 
 ---
 
