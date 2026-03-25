@@ -4814,10 +4814,8 @@ function App(){
         }
         // Lucifer Phase 2: AoE — hits ALL members (damage split)
         const luciferAoE=enemy.passiveId==='luciferBoss'&&luciferPhase===2
-        setDiceTarget(target);setShowDice(true);playDice()
+        // BOSS STRIKE ANIMATION — emoji flies to target
         setTimeout(function(){
-          setShowDice(false)
-          // BOSS STRIKE ANIMATION — emoji flies to target
           const targetSlotIdx=stage.indexOf(target)
           setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'windup'})
           setTimeout(()=>setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'launch'}),speedFast?150:300)
@@ -4888,7 +4886,6 @@ function App(){
               return ns2
             })
             setDamageFlash(true);triggerShake(10,350);setTimeout(()=>setDamageFlash(false),400)
-            setDiceTarget(null)
           } else {
           setStage(function(prev){
             const ns2=[...prev]
@@ -4937,7 +4934,6 @@ function App(){
           if(stage[stage.indexOf(target)]&&!stage[stage.indexOf(target)].tooStoned&&(stage[stage.indexOf(target)].hp-actualDmg)<=0&&!stage[stage.indexOf(target)].stoneShield)addLog('💨 '+target.name+' is TOO STONED!')
           setDamageFlash(true);triggerShake(10,350);setTimeout(function(){setDamageFlash(false)},400)
           addLog('👁 '+enemy.name+' hits '+target.name+' for '+actualDmg)
-          setDiceTarget(null)
           } // end single-target else
           },speedFast?500:1000) // boss animation delay
           setTimeout(function(){
@@ -6126,7 +6122,7 @@ function App(){
       })()}
       {projectiles.filter(Boolean).map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
       {dmgBreakdown&&<DamageBreakdown data={dmgBreakdown} onDone={()=>setDmgBreakdown(null)}/>}
-      {showDice&&diceTarget&&<DiceRoll target={diceTarget} onDone={()=>setShowDice(false)}/>}
+
       {hellquakeAnim&&<div style={{position:'absolute',inset:0,zIndex:9500,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.85)',animation:'fadeIn 0.1s ease'}}>
         <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.04) 3px,rgba(255,255,255,0.04) 4px)',animation:'interlaceFlicker 0.08s steps(1) infinite',pointerEvents:'none'}}/>
         <div style={{fontSize:120,animation:'throb 0.3s ease-in-out infinite',filter:`drop-shadow(-4px 0 rgba(255,0,0,0.8)) drop-shadow(4px 0 rgba(0,80,255,0.8))`}}>⛧</div>
@@ -6301,7 +6297,7 @@ function App(){
                 isAttacking={animPhase==='attacking'&&m&&!m.tooStoned}
                 isStriking={typeof strikingMemberIdx!=='undefined'&&strikingMemberIdx===i}
                 strikeAnim={strikeAnim&&strikeAnim.slotIdx===i?strikeAnim:null}
-                isDiceTarget={diceTarget&&m&&diceTarget.id===m.id}
+                isDiceTarget={false}
                 innerRef={function(el){stageRefs.current[i]={current:el}}}
                 onDragStart={function(){if(m)setDragStageIdx(i)}}
                 onDragOver={function(){}}
