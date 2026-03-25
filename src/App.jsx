@@ -6570,6 +6570,7 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(e,info){console.error('VESTIBULE RENDER ERROR:',e.message,info.componentStack)}
   render(){
     if(this.state.error)return <div style={{color:'red',padding:40,fontFamily:'monospace',background:'#000',position:'fixed',inset:0,zIndex:999999,overflow:'auto'}}><h1>RENDER ERROR</h1><pre>{this.state.error.message}</pre><pre>{this.state.error.stack}</pre><button onClick={()=>this.setState({error:null})} style={{color:'#0f0',background:'#333',padding:'10px 20px',border:'none',cursor:'pointer',marginTop:20}}>Try Again</button></div>
+    return this.props.children
   }
 }
 
