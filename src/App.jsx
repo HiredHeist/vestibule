@@ -945,7 +945,7 @@ function Projectile({from,to,emoji,onDone}){
     fr.current=requestAnimationFrame(go)
     return ()=>cancelAnimationFrame(fr.current)
   },[])
-  return <div style={{position:'absolute',left:p.x,top:p.y,transform:`translate(-50%,-50%) scale(${p.s})`,fontSize:52,opacity:p.o,pointerEvents:'none',zIndex:8000,filter:'drop-shadow(0 0 20px rgba(255,80,0,0.95))'}}>{emoji}</div>
+  return <div style={{position:'absolute',left:p.x,top:p.y,transform:`translate(-50%,-50%) scale(${p.s})`,fontSize:72,opacity:p.o,pointerEvents:'none',zIndex:8000,filter:'drop-shadow(0 0 30px rgba(255,80,0,1)) drop-shadow(0 0 60px rgba(255,40,0,0.6))'}}>{emoji}</div>
 }
 
 function Float({v,x,y,color,big,onDone}){
@@ -1928,7 +1928,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   )
 }
 
-function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption}){
+function StageSlot({member,isAttacking,isStriking,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption}){
   const [over,setOver]=useState(false)
   const [showTip,setShowTip]=useState(false)
   if(!member){
@@ -1949,7 +1949,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
         boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':mentorState==='active'&&!st?'0 0 40px rgba(255,215,0,0.9),0 6px 24px rgba(0,0,0,0.85)':mentorState==='mentor'&&!st?'0 0 22px rgba(255,215,0,0.5),0 6px 24px rgba(0,0,0,0.85)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':!st&&member.demonic?'0 0 25px rgba(255,200,0,0.5),0 6px 24px rgba(0,0,0,0.85)':!st&&member.mythic?'0 0 25px rgba(200,0,255,0.4),0 6px 24px rgba(0,0,0,0.85)':!st&&member.foil?'0 0 20px rgba(100,180,255,0.35),0 6px 24px rgba(0,0,0,0.85)':'0 6px 24px rgba(0,0,0,0.85)',
         transform:st?'rotate(15deg) scale(0.95)':'none',
         opacity:st?0.5:1,
-        animation:(!st&&!isAttacking&&!isDiceTarget)?(nearDeath?'nearDeathPulse 0.8s ease-in-out infinite':'throb 3s ease-in-out infinite'):'none',
+        animation:isStriking?'strikeWindup 0.35s ease-out forwards':(!st&&!isAttacking&&!isDiceTarget)?(nearDeath?'nearDeathPulse 0.8s ease-in-out infinite':'throb 3s ease-in-out infinite'):'none',
         transition:'border 0.2s, box-shadow 0.2s, opacity 0.3s, transform 0.3s',
         cursor:'grab',position:'relative'}}>
       {/* Keyword tooltip */}
@@ -1972,7 +1972,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
       <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative',minHeight:90,overflow:'hidden'}}>
         {STAGE_PORTRAITS[member.id]?<img className="squiggle" src={STAGE_PORTRAITS[member.id]} alt={member.id} style={{width:'70%',height:'90%',objectFit:'contain',objectPosition:'center center'}}/>:member.emoji}
         {st&&<div style={{position:'absolute',top:4,right:4,fontSize:22}}>💨</div>}
-        {isAttacking&&<div style={{position:'absolute',inset:0,background:'rgba(255,50,0,0.12)',animation:'pulse 0.4s ease infinite alternate'}}/>}
+        {isAttacking&&<div style={{position:'absolute',inset:0,background:isStriking?'rgba(255,80,0,0.25)':'rgba(255,50,0,0.12)',animation:isStriking?'pulse 0.2s ease infinite alternate':'pulse 0.4s ease infinite alternate'}}/>}
       </div>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:st?'#555':'#e8d8a0',textAlign:'center',padding:'8px 6px 3px',lineHeight:1}}>{member.name}</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,letterSpacing:1.5,color:st?'#444':'#8a7a50',textAlign:'center',padding:'4px 4px 8px',textTransform:'uppercase'}}>{member.role}</div>
@@ -3296,6 +3296,7 @@ function App(){
   const [showCombatLog,setShowCombatLog]=useState(false)
   const [damageFlash,setDamageFlash]=useState(false)
   const [animPhase,setAnimPhase]=useState('idle')
+  const [strikingMemberIdx,setStrikingMemberIdx]=useState(-1)
   const [shakeOffset,setShakeOffset]=useState({x:0,y:0})
   const shakeTimerRef=useRef(null)
   const triggerShake=useCallback((intensity=3,duration=200)=>{
@@ -4692,18 +4693,31 @@ function App(){
     memberDmgs.forEach(d=>{_breakdownLines.push({type:'member',label:d.m.name,emoji:d.m.emoji,value:d.atk,color:'#c8a060'})})
     _breakdownLines.push({type:'subtotal',label:'BASE ATK',value:dmg,color:'#e8a820'})
     _bkRunning=dmg
-    actives.forEach(function(m){
+    const speedFast=localStorage.getItem('vst_speed')==='fast'
+    const memberDelay=speedFast?400:900
+    const windupTime=speedFast?150:350
+    actives.forEach(function(m,attackIdx){
       if(m.role==='Drummer')return
       const si=stage.indexOf(m)
       const from=getCenter(stageRefs.current[si])
       const ppid=prid.current++
       const md=memberDmgs.find(d=>d.m.uid===m.uid)
       const curDelay=delay
+      // WINDUP: member leans forward
+      setTimeout(function(){
+        setStrikingMemberIdx(si)
+      },curDelay)
+      // LAUNCH: projectile fires after windup
       setTimeout(function(){try{(ATK_SND[m.role]||ATK_SND['Lead Guitarist'])()}catch(e){}
         setProjectiles(function(p){return[...p,{id:ppid,from:from,to:bc,emoji:m.emoji}]})
         if(md)addFloat(md.atk,from.x,from.y-40,'#cc8800',false)
-      },curDelay)
-      delay+=260
+      },curDelay+windupTime)
+      // IMPACT: per-member shake
+      setTimeout(function(){
+        triggerShake(6,200)
+        setStrikingMemberIdx(-1)
+      },curDelay+windupTime+500)
+      delay+=memberDelay
     })
 
     setTimeout(function(){
@@ -4974,7 +4988,7 @@ function App(){
                 addLog('🃏 '+enemy.name+' shuffles your hand! '+toDiscard+' card'+(toDiscard>1?'s':'')+' swapped.')
               }
             }
-            setAnimPhase('idle');setSelected([]);
+            setAnimPhase('idle');setStrikingMemberIdx(-1);setSelected([]);
             // Check out-of-strikes death AFTER this strike resolves
             setStrikesLeft(function(cur){
               if(cur<=0){
@@ -5004,7 +5018,7 @@ function App(){
         setEnemy(AR_EXECUTIVE)
         setEnemyHp(AR_EXECUTIVE.maxHp)
         setEmbers(maxEmbers);setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS)
-        setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setLastRiffPlayed(null)
+        setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setSelected([]);setLastRiffPlayed(null)
         setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
         setContractsPlayed(0);setPendingDraw(0);wthStrikesRef.current=0
         const allCards=[...handRef.current,...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
@@ -5054,7 +5068,7 @@ function App(){
     }
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({});victoryFiredRef.current=false
+    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({});victoryFiredRef.current=false
     // BOSS LOOT effects at fight start
     if(collectedLoot.includes('love_letter'))setNextCardFree(true)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
@@ -5456,7 +5470,7 @@ function App(){
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
-    setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
+    setAnimPhase('idle');setStrikingMemberIdx(-1);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
     setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
     setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
@@ -6236,6 +6250,7 @@ function App(){
                 boxShadow:'0 0 30px '+cardAbsorb.color+', inset 0 0 20px '+cardAbsorb.color}}/>}
               <StageSlot member={m} slotIdx={i}
                 isAttacking={animPhase==='attacking'&&m&&!m.tooStoned}
+                isStriking={strikingMemberIdx===i}
                 isDiceTarget={diceTarget&&m&&diceTarget.id===m.id}
                 innerRef={function(el){stageRefs.current[i]={current:el}}}
                 onDragStart={function(){if(m)setDragStageIdx(i)}}
