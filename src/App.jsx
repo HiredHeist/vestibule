@@ -1939,6 +1939,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
     </div>
   }
   const st=member.tooStoned
+  const nearDeath=!st&&member.hp<=Math.ceil(member.maxHp*0.25)&&member.hp>0
   const buffCount=member.buffCount||0
   return(
     <div ref={innerRef} draggable onDragStart={onDragStart} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}} onMouseEnter={()=>setShowTip(true)} onMouseLeave={()=>setShowTip(false)}
@@ -1948,7 +1949,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
         boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':mentorState==='active'&&!st?'0 0 40px rgba(255,215,0,0.9),0 6px 24px rgba(0,0,0,0.85)':mentorState==='mentor'&&!st?'0 0 22px rgba(255,215,0,0.5),0 6px 24px rgba(0,0,0,0.85)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':!st&&member.demonic?'0 0 25px rgba(255,200,0,0.5),0 6px 24px rgba(0,0,0,0.85)':!st&&member.mythic?'0 0 25px rgba(200,0,255,0.4),0 6px 24px rgba(0,0,0,0.85)':!st&&member.foil?'0 0 20px rgba(100,180,255,0.35),0 6px 24px rgba(0,0,0,0.85)':'0 6px 24px rgba(0,0,0,0.85)',
         transform:st?'rotate(15deg) scale(0.95)':'none',
         opacity:st?0.5:1,
-        animation:(!st&&!isAttacking&&!isDiceTarget)?'throb 3s ease-in-out infinite':'none',
+        animation:(!st&&!isAttacking&&!isDiceTarget)?(nearDeath?'nearDeathPulse 0.8s ease-in-out infinite':'throb 3s ease-in-out infinite'):'none',
         transition:'border 0.2s, box-shadow 0.2s, opacity 0.3s, transform 0.3s',
         cursor:'grab',position:'relative'}}>
       {/* Keyword tooltip */}
@@ -1991,8 +1992,8 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
         </div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:st?'#555':'#e8a820',fontWeight:700,letterSpacing:1,textAlign:'center'}}>{member.keyword}</div>
         <div style={{textAlign:'center'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:st?'#555':member.hp<=2?'#ff4400':'#33dd33',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>HP</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:36,fontWeight:900,lineHeight:1,color:st?'#555':member.hp<=2?'#ff4400':'#33dd33',textShadow:st?'none':'0 0 12px rgba(0,190,0,0.5)'}}>{member.hp}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:st?'#555':nearDeath?'#ff2200':'#33dd33',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>HP</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:36,fontWeight:900,lineHeight:1,color:st?'#555':nearDeath?'#ff2200':'#33dd33',textShadow:st?'none':nearDeath?'0 0 16px rgba(255,0,0,0.8)':'0 0 12px rgba(0,190,0,0.5)'}}>{member.hp}</div>
         </div>
       </div>
       <div style={{height:5,background:'rgba(0,0,0,0.5)',borderRadius:'0 0 6px 6px'}}><div style={{height:'100%',borderRadius:'0 0 6px 6px',background:st?'#333':'linear-gradient(90deg,#003800,#33dd33)',width:`${(member.hp/member.maxHp)*100}%`,transition:'width 0.4s ease'}}/></div>
@@ -2405,7 +2406,7 @@ function EventScreen({event,onChoose}){
 }
 
 function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRoll}){
-  const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35
+  const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35,isCritical=currentHp>0&&currentHp<enemy.maxHp*.20
   return(
     <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:180}}>
       <div style={{width:180,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:'6px 0 0 6px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:90,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:'hidden',transition:'all 0.5s',alignSelf:'stretch'}}>
@@ -2421,7 +2422,7 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
         <div style={{width:'100%',marginTop:4}}>
           <div style={{width:'100%',height:26,background:'rgba(50,25,8,0.75)',border:'1px solid rgba(100,55,15,0.6)',borderRadius:2,overflow:'hidden',boxShadow:'inset 0 2px 6px rgba(0,0,0,0.7)',position:'relative'}}>
             {[25,50,75].map(pp=><div key={pp} style={{position:'absolute',top:0,bottom:0,left:`${pp}%`,width:1,background:'rgba(0,0,0,0.35)',zIndex:2}}/>)}
-            <div style={{height:'100%',background:isLow?'linear-gradient(90deg,#660000,#cc0000,#ff2200)':'linear-gradient(90deg,#7a0000,#aa1100,#cc2200)',width:`${pct}%`,transition:'width 0.7s cubic-bezier(0.4,0,0.2,1)'}}/>
+            <div style={{height:'100%',background:isLow?'linear-gradient(90deg,#660000,#cc0000,#ff2200)':'linear-gradient(90deg,#7a0000,#aa1100,#cc2200)',width:`${pct}%`,transition:'width 0.7s cubic-bezier(0.4,0,0.2,1)',animation:isCritical?'bossHpCritical 0.5s ease-in-out infinite':'none'}}/>
             <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'rgba(255,230,180,1)',letterSpacing:3,textShadow:'0 0 8px rgba(0,0,0,0.99),0 1px 3px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)} HP REMAINING</div>
           </div>
         </div>
@@ -6002,6 +6003,7 @@ function App(){
   return(
     <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
 
+      {enemyHp>0&&enemyHp<enemy.maxHp*0.20&&<div style={{position:'absolute',inset:0,zIndex:7998,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 50%,rgba(180,0,0,0.2) 100%)',animation:'bossUrgency 0.6s ease-in-out infinite alternate'}}/>}
       {damageFlash&&<div style={{position:'absolute',inset:0,zIndex:8500,pointerEvents:'none',background:'radial-gradient(ellipse at center,rgba(200,0,0,0.25),rgba(100,0,0,0.4))',animation:'flashFade 0.4s ease-out forwards'}}/>}
       {corruptHigh&&!corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 40%,rgba(100,0,0,0.15) 100%)',animation:bgPulseAnim}}/>}
       {corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 20%,rgba(140,0,0,0.3) 100%)',animation:'bgPulse 1s ease-in-out infinite'}}/>}

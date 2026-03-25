@@ -260,3 +260,21 @@ body {
   80%  { opacity: 0.95; }
   82%  { opacity: 1; }
 }
+
+/* Near-death heartbeat — red pulse on member cards below 25% HP */
+@keyframes nearDeathPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(255,0,0,0.3), 0 6px 24px rgba(0,0,0,0.85); border-color: rgba(255,50,0,0.6); }
+  50% { box-shadow: 0 0 28px rgba(255,0,0,0.7), 0 0 60px rgba(200,0,0,0.3), 0 6px 24px rgba(0,0,0,0.85); border-color: rgba(255,80,0,0.9); }
+}
+
+/* Boss HP critical — bar pulses red/orange */
+@keyframes bossHpCritical {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.6); }
+}
+
+/* Boss urgency — screen edge red vignette breathes */
+@keyframes bossUrgency {
+  0% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
