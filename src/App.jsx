@@ -2405,10 +2405,15 @@ function EventScreen({event,onChoose}){
   </div>)
 }
 
-function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRoll}){
+function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRoll,bossStrikeAnim}){
   const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35,isCritical=currentHp>0&&currentHp<enemy.maxHp*.20
   return(
-    <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:180}}>
+    <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:180,
+      transform:bossStrikeAnim?bossStrikeAnim.phase==='windup'?'translateY(15px) scale(1.05) rotate(-2deg)':bossStrikeAnim.phase==='launch'?'translateY(250px) scale(0.8) rotate(3deg)':bossStrikeAnim.phase==='impact'?'translateY(350px) scale(1.2) rotate(0deg)':bossStrikeAnim.phase==='return'?'translateY(50px) scale(1.02)':'none':'none',
+      transition:bossStrikeAnim?'transform 0.35s cubic-bezier(0.2,0.8,0.3,1.2)':'transform 0.3s',
+      zIndex:bossStrikeAnim?200:1,
+      filter:bossStrikeAnim&&(bossStrikeAnim.phase==='launch'||bossStrikeAnim.phase==='impact')?'drop-shadow(0 0 40px rgba(255,0,0,0.8))':'none',
+      position:'relative'}}>
       <div data-boss-emoji="1" style={{width:180,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:'6px 0 0 6px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:90,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:'hidden',transition:'all 0.5s',alignSelf:'stretch'}}>
         {enemy.emoji}
         {isLow&&<div style={{position:'absolute',inset:0,background:'rgba(120,0,0,0.2)',animation:'pulse 1.2s ease infinite alternate'}}/>}
@@ -3632,7 +3637,7 @@ function App(){
       const dmg=m.hp
       const bc=getCenter(bossRef)
       const sdHp=Math.max(0,enemyHp-dmg);setEnemyHp(sdHp);if(sdHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);addFloat(dmg,bc.x,bc.y-60,'#ff6600',true)
-      playHit();setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
+      setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
       setStageDiveUsed(true);setSelected(p=>p.filter(uid=>!hand.some(c=>c.id==='stagedive'&&c.uid===uid)));updStat('totalDamage',dmg);updStat('highestStrike',dmg,true);if(dmg>=500){playSfx('big_hit');triggerShake(8,250)}
       if(sdHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
       msg='🤘 '+m.name+' Stage Dives for '+dmg+' damage!'
@@ -4573,7 +4578,7 @@ function App(){
     setTimeout(()=>setActiveTripEffect(null),4000)
   },[tripUsedThisFight,strikesLeft])
 
-  const handleStrike=useCallback(()=>{playSfx('strike');triggerShake(8,300)
+  const handleStrike=useCallback(()=>{
     // CORRUPTION THRESHOLD: 75% — The Madness (15% chance discard random card)
     if(corruption>=75&&Math.random()<0.15&&handRef.current.length>1){
       const idx=Math.floor(Math.random()*handRef.current.length)
@@ -4721,12 +4726,13 @@ function App(){
       },curDelay+(speedFast?150:300))
       // Phase 3: LAUNCH (700ms) — card flies toward boss
       setTimeout(function(){
-        try{(ATK_SND[m.role]||ATK_SND['Lead Guitarist'])()}catch(e){}
         setStrikeAnim({slotIdx:si,phase:'launch',dx,dy})
       },curDelay+(speedFast?350:700))
-      // Phase 4: IMPACT (1200ms) — card hits boss, shake
+      // Phase 4: IMPACT (1200ms) — card hits boss, SFX + shake + damage
       setTimeout(function(){
         setStrikeAnim({slotIdx:si,phase:'impact',dx,dy})
+        try{(ATK_SND[m.role]||ATK_SND['Lead Guitarist'])()}catch(e){}
+        playHit()
         triggerShake(8,250)
         if(md)addFloat(md.atk,bc.x,bc.y-60,'#cc8800',md.atk>=15)
       },curDelay+(speedFast?550:1200))
@@ -4743,7 +4749,7 @@ function App(){
     })
 
     setTimeout(function(){
-      playHit();setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
+      setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
       setProjectiles([])
       const tripMult=fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION'?2:1;const finalDmg=Math.round(dmg*tripMult*currentMult)
       if(tripMult>1){const _tr=Math.round(dmg*tripMult);_breakdownLines.push({type:'multiply',label:(fightTripBuff||'Trip')+' ×'+tripMult,label2:'= '+_tr.toLocaleString(),runningAfter:_tr,color:'#ff44ff'})}
@@ -4814,13 +4820,23 @@ function App(){
         }
         // Lucifer Phase 2: AoE — hits ALL members (damage split)
         const luciferAoE=enemy.passiveId==='luciferBoss'&&luciferPhase===2
-        // BOSS STRIKE ANIMATION — emoji flies to target
-        setTimeout(function(){
+        // BOSS STRIKE ANIMATION — whole box flies to target
           const targetSlotIdx=stage.indexOf(target)
+          // Phase 1: WINDUP — boss dips
           setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'windup'})
-          setTimeout(()=>setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'launch'}),speedFast?150:300)
-          setTimeout(()=>{setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'impact'});triggerShake(10,350)},speedFast?400:800)
-          setTimeout(()=>setBossStrikeAnim(null),speedFast?600:1200)
+          // Phase 2: LAUNCH — boss flies toward member
+          setTimeout(()=>setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'launch'}),speedFast?200:400)
+          // Phase 3: IMPACT — boss slams member, sound + shake
+          setTimeout(()=>{
+            setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'impact'})
+            playSfx('boss_attack')
+            playHit()
+            triggerShake(12,350)
+          },speedFast?500:1000)
+          // Phase 4: RETURN — boss floats back
+          setTimeout(()=>setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'return'}),speedFast?700:1400)
+          // Phase 5: DONE
+          setTimeout(()=>setBossStrikeAnim(null),speedFast?900:1800)
           // Delay damage application until after boss animation
           setTimeout(function(){
           const variance=0
@@ -4935,7 +4951,7 @@ function App(){
           setDamageFlash(true);triggerShake(10,350);setTimeout(function(){setDamageFlash(false)},400)
           addLog('👁 '+enemy.name+' hits '+target.name+' for '+actualDmg)
           } // end single-target else
-          },speedFast?500:1000) // boss animation delay
+          },speedFast?600:1200) // boss animation delay
           setTimeout(function(){
             let nh=[...handRef.current],nd=[...deckRef.current],ndisc=[...discRef.current];
             const cardsToReplace=Math.min(cardsToDrawRef.current,10-nh.length);
@@ -5031,7 +5047,6 @@ function App(){
               return cur;
             });
           },900)
-        },1200)
       },_bossDelay)
     },delay+200)
   },[animPhase,strikesLeft,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,bossRef,stageRefs,drawUpTo,triggerVictory,bossRageAtk,bossDebuff,fightTripBuff,luciferPhase,stolenAtkPool,maxEmbers])
@@ -6102,24 +6117,6 @@ function App(){
       {corruptHigh&&!corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 40%,rgba(100,0,0,0.15) 100%)',animation:bgPulseAnim}}/>}
       {corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 20%,rgba(140,0,0,0.3) 100%)',animation:'bgPulse 1s ease-in-out infinite'}}/>}
       {floats.filter(Boolean).map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
-      {bossStrikeAnim&&(()=>{
-        const bossEl=document.querySelector('[data-boss-emoji]')
-        const targetEl=stageRefs.current[bossStrikeAnim.targetIdx]?.current
-        if(!bossEl||!targetEl)return null
-        const bf=bossEl.getBoundingClientRect()
-        const tf=targetEl.getBoundingClientRect()
-        const bx=bf.left+bf.width/2,by=bf.top+bf.height/2
-        const tx=tf.left+tf.width/2,ty=tf.top+tf.height/2
-        const phase=bossStrikeAnim.phase
-        const x=phase==='windup'?bx:phase==='launch'?(bx+tx)/2:tx
-        const y=phase==='windup'?by-20:phase==='launch'?Math.min(by,ty)-100:ty
-        const sc=phase==='windup'?1.3:phase==='launch'?1.6:2.0
-        return <div style={{position:'fixed',left:x,top:y,transform:'translate(-50%,-50%) scale('+sc+')',
-          fontSize:72,zIndex:9500,pointerEvents:'none',
-          filter:'drop-shadow(0 0 30px rgba(255,0,0,1)) drop-shadow(0 0 60px rgba(200,0,0,0.6))',
-          transition:'all 0.3s cubic-bezier(0.2,0.8,0.3,1.2)',
-          opacity:phase==='impact'?0.8:1}}>{enemy.emoji}</div>
-      })()}
       {projectiles.filter(Boolean).map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
       {dmgBreakdown&&<DamageBreakdown data={dmgBreakdown} onDone={()=>setDmgBreakdown(null)}/>}
 
@@ -6260,7 +6257,7 @@ function App(){
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
         <div style={{padding:'8px 16px 6px',position:'relative',zIndex:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0}}>
           <div style={{width:'100%',maxWidth:950,background:'rgba(8,0,0,0.55)',border:'2px solid rgba(160,20,0,0.8)',borderRadius:8,padding:'0',overflow:'hidden',animation:'bossGlow 2s ease-in-out infinite',boxShadow:'0 0 30px rgba(150,0,0,0.4),inset 0 0 40px rgba(80,0,0,0.3)'}}>
-            <BossSection enemy={enemy} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll}/>
+            <BossSection enemy={enemy} bossStrikeAnim={bossStrikeAnim} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll}/>
           </div>
         </div>
         <div style={{position:'relative',zIndex:5,background:'rgba(20,11,3,0.42)',borderTop:'2px solid rgba(60,35,5,0.45)',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>
