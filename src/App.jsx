@@ -6192,7 +6192,27 @@ function App(){
             ))}
           </div>
         </div>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,padding:'1px 20px 2px',position:'relative',zIndex:5,flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)'}}>
+        {/* ═══ GENRE ACTIVATION INDICATOR ═══ */}
+        {activeGenre&&<div style={{
+          display:'flex',alignItems:'center',justifyContent:'center',gap:12,
+          padding:'4px 20px',flexShrink:0,
+          background:activeGenre==='RIFF_METAL'?'rgba(100,30,160,0.25)':activeGenre==='BLACK_METAL'?'rgba(140,0,40,0.25)':activeGenre==='PROG_ROCK'?'rgba(20,120,50,0.25)':'rgba(60,60,120,0.25)',
+          borderTop:'2px solid '+(activeGenre==='RIFF_METAL'?'#9933cc':activeGenre==='BLACK_METAL'?'#cc1144':activeGenre==='PROG_ROCK'?'#22aa44':'#6666aa'),
+          borderBottom:'1px solid '+(activeGenre==='RIFF_METAL'?'#9933cc44':activeGenre==='BLACK_METAL'?'#cc114444':activeGenre==='PROG_ROCK'?'#22aa4444':'#6666aa44'),
+          animation:'fadeIn 0.3s ease',zIndex:6}}>
+          <span style={{fontSize:20}}>
+            {activeGenre==='RIFF_METAL'?'⚡':activeGenre==='BLACK_METAL'?'🔥':activeGenre==='PROG_ROCK'?'🌿':'🌑'}
+          </span>
+          <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,letterSpacing:4,
+            color:activeGenre==='RIFF_METAL'?'#cc66ff':activeGenre==='BLACK_METAL'?'#ff3366':activeGenre==='PROG_ROCK'?'#44dd66':'#8888cc',
+            textShadow:'0 0 12px '+(activeGenre==='RIFF_METAL'?'rgba(150,50,200,0.6)':activeGenre==='BLACK_METAL'?'rgba(200,0,60,0.6)':activeGenre==='PROG_ROCK'?'rgba(30,180,60,0.6)':'rgba(80,80,160,0.6)')}}>
+            {activeGenre==='RIFF_METAL'?'THRASH METAL':activeGenre==='BLACK_METAL'?'BLACK METAL':activeGenre==='PROG_ROCK'?'STONER ROCK':'DOOM METAL'}
+          </span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#c8b080',letterSpacing:1}}>
+            {activeGenre==='RIFF_METAL'?'+15% Strike Damage':activeGenre==='BLACK_METAL'?'+25% Corruption Damage':activeGenre==='PROG_ROCK'?'+1 Card Draw Next Strike':'Max Discards? +2 DMG Per Member'}
+          </span>
+        </div>}
+                <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,padding:'1px 20px 2px',position:'relative',zIndex:5,flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)'}}>
           {/* PHASE BANNER — left side, absolute so it never shifts center content */}
           <div style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:3,textTransform:'uppercase',
             color:phaseBanner==='play'?'#c8a040':phaseBanner==='strike'?'#ee2222':'#ff4444',
