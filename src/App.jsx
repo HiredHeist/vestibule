@@ -1239,7 +1239,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
   )
 }
 
-function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,shroomsInStock,acidInStock,onBuyShrooms,onBuyAcid}){
+function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,shroomsInStock,acidInStock,onBuyShrooms,onBuyAcid,corruption,chosenPacts}){
   const drugMax=isUnlocked('double_dealer')?2:1
   const [hovId,setHovId]=useState(null)
   const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
@@ -1250,7 +1250,11 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   useEffect(()=>{setBoughtIds([]);setBoughtPackIds([])},[shopCards])
   const [openPackModal,setOpenPackModal]=useState(null) // {pack, cards, picksLeft, picked}
   const circleNum=Math.floor(fightIndex/3)+1
-  const can=p=>stash>=p
+  const hungerActive=corruption>=50
+  const hungerMult=hungerActive?1.25:1.0
+  const merchDiscount=chosenPacts&&chosenPacts.includes('merchants_eye')?0.8:1.0
+  const realPrice=p=>Math.ceil(p*merchDiscount*hungerMult)
+  const can=p=>stash>=realPrice(p)
   const stashColor=stash>=420?'#ff3300':stash>=380?'#ff9900':'#55ee66'
   const typeClr=t=>t==='CORRUPT'?'#aa1111':t==='UTILITY'?'#22aa44':t==='EMBER'?'#c87820':'#9933cc'
   const typeGlow=t=>t==='CORRUPT'?'rgba(170,0,0,0.5)':t==='UTILITY'?'rgba(30,160,50,0.5)':t==='EMBER'?'rgba(200,120,20,0.5)':'rgba(140,40,200,0.5)'
@@ -1540,7 +1544,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           padding:'4px 16px',zIndex:15,whiteSpace:'nowrap',
           fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
-          boxShadow:canBuy?'0 2px 16px rgba(50,200,50,0.4)':'none'}}>🌿 {price}</div>
+          boxShadow:canBuy?'0 2px 16px rgba(50,200,50,0.4)':'none'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.5,fontSize:12}}>{price}</span> 🌿 {realPrice(price)}</>:<>🌿 {price}</>}{hungerActive&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#ff6644',letterSpacing:1,marginTop:-2}}>⚠ HUNGER +25%</div>}</div>
         <div onClick={()=>canBuy&&!bought&&buyCard(card)}
           style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',position:'relative',
             background:'linear-gradient(180deg,#201408,#100804)',
@@ -1617,7 +1621,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           padding:'3px 14px',zIndex:15,whiteSpace:'nowrap',
           fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
-          transition:'transform 0.12s'}}>🌿 {price}</div>
+          transition:'transform 0.12s'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:10}}>{price}</span> 🌿 {realPrice(price)}</>:<>🌿 {price}</>}</div>
         <div onClick={()=>canBuy&&onBuy()}
           style={{flex:1,position:'relative',display:'flex',flexDirection:'column',
             background:'linear-gradient(180deg,#1c1408,#0e0a04)',
@@ -1664,7 +1668,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           padding:'4px 16px',zIndex:15,whiteSpace:'nowrap',
           fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
           color:canBuy?'#55ee55':'#554428',
-          transition:'transform 0.12s'}}>🌿 {pack.cost}</div>
+          transition:'transform 0.12s'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:10}}>{pack.cost}</span> 🌿 {realPrice(pack.cost)}</>:<>🌿 {pack.cost}</>}</div>
         <div onClick={()=>canBuy&&handleOpenPack(pack)}
           style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',alignItems:'center',
             background:'linear-gradient(160deg,#12100a 0%,#1e1a0e 40%,#120e08 100%)',
@@ -1783,7 +1787,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                     border:'2px solid '+(shroomsInStock&&heldShrooms<drugMax&&can(6)?'#44bb44':'#4a3318'),borderRadius:20,
                     padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
                     fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-                    color:shroomsInStock&&heldShrooms<drugMax&&can(6)?'#55ee55':'#554428'}}>🌿 6</div>
+                    color:shroomsInStock&&heldShrooms<drugMax&&can(6)?'#55ee55':'#554428'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:9}}>6</span> 🌿 {realPrice(6)}</>:'🌿 6'}</div>
                   <div style={{fontSize:72}}>🍄</div>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
                     color:shroomsInStock?'#e8a820':'#554428',marginTop:4}}>
@@ -1804,7 +1808,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                     border:'2px solid '+(acidInStock&&heldAcid<drugMax&&can(12)?'#44bb44':'#4a3318'),borderRadius:20,
                     padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
                     fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-                    color:acidInStock&&heldAcid<drugMax&&can(12)?'#55ee55':'#554428'}}>🌿 12</div>
+                    color:acidInStock&&heldAcid<drugMax&&can(12)?'#55ee55':'#554428'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:9}}>12</span> 🌿 {realPrice(12)}</>:'🌿 12'}</div>
                   <div style={{fontSize:72}}>🧪</div>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
                     color:acidInStock?'#cc44ff':'#4a2a6a',marginTop:4}}>
@@ -1892,7 +1896,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 onMouseLeave={e=>{e.currentTarget.style.animation='rerollWiggle 3s ease-in-out infinite';e.currentTarget.style.background='rgba(25,18,4,0.92)'}}>
                 <span style={{fontSize:28}}>🔄</span>
                 <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#e8c040',letterSpacing:2,textTransform:'uppercase'}}>Re-Roll</span>
-                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:25,fontWeight:900,color:'#e8c040'}}>🌿 {rerollCost}</span>
+                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:25,fontWeight:900,color:'#e8c040'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:16}}>{rerollCost}</span> 🌿 {realPrice(rerollCost)}</>:<>🌿 {rerollCost}</>}</span>
               </div>
               <div style={{width:140,height:140,
                 display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:6,
@@ -5513,19 +5517,40 @@ function App(){
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Rules</div>
         <div style={{maxWidth:800,width:'100%',display:'flex',flexDirection:'column',gap:12}}>
           {[
-            ['🎸 The Goal','Build a metal band and fight through 9 Circles of Hell. Defeat Lucifer to win.'],
-            ['⚔ Strikes','You get 4 Strikes per fight. Play cards from your hand, then Strike to deal damage.'],
-            ['↓ Discards','You get 4 Discards per fight. Select cards and discard to cycle for better ones.'],
-            ['🔥 Embers','Cards cost Embers to play. You refill Embers each Strike. Manage them wisely.'],
-            ['🌿 Stash','Your currency. Earned from victories, spent in the shop on packs, cards, artifacts, and drugs.'],
-            ['💀 Too Stoned','When a member hits 0 HP, they go Too Stoned and cannot attack. Lose all members = game over.'],
-            ['🌀 Corruption','A risk/reward axis. Some cards raise it for power. Overdrive needs 60%+. Seance heals more at high corruption.'],
-            ['⛓ Mentor Link','Place a Foil/Mythic/Demonic member LEFT of a basic member with the same ROLE for a damage multiplier. E.g. Foil Lead Guitarist → basic Lead Guitarist.'],
-            ['🍄 The Dealer','Buy shrooms or acid in the shop. Use before your first Strike for powerful (or disastrous) effects.'],
-            ['🏆 Score','Every run earns score. Lifetime score unlocks new cards, members, and artifacts permanently.'],
+            ['🎸 The Goal','Build a doom metal band and fight through 9 Circles of Hell. Defeat all 27 enemies and Lucifer to win. Each circle has 2 regular fights and 1 boss fight.'],
+            ['⚔ Strikes','You get 4 Strikes per fight (some stakes change this). Play cards to buff your band, then press Strike. All living members deal their ATK as damage to the boss.'],
+            ['↓ Discards','You get 4 Discards per fight. Select unwanted cards and discard them to draw fresh ones. Strategic discarding is key to finding your best cards.'],
+            ['🔥 Embers','Cards cost Embers to play. You refill to your max Embers at the start of each Strike. Max Embers increases by +1 after each boss kill.'],
+            ['🌿 Stash','Your currency. Earned after victories (scales with circle depth). Spent in the shop on recruit packs, cards, artifacts, passives, and drugs. Capped at 420.'],
+            ['💀 Too Stoned','When a member reaches 0 HP, they go Too Stoned and can\'t attack or be targeted. If ALL members go Too Stoned, the run ends.'],
+            ['👥 Band Members','Your band has up to 5 slots (6 with the Sixth Slot pact). Each member has ATK, HP, and a keyword ability. Recruit new members from packs in the shop.'],
+            ['🏷 Member Keywords','FRENZIED: +1 ATK on boss kills. DOUBLE TIME: Roll d6 for damage multiplier. ANCHOR: Heals adjacent members. CORRUPT: +1 ATK per 15% corruption. DEBUFF: Reduces boss damage. FOLK MAGIC: 20% chance to refill all Embers. SHREDDER: First RIFF card each strike costs -1 Ember. HEXED: Auto-raises corruption, gains ATK from it.'],
+            ['⛓ Mentor Links','Place a Foil/Mythic/Demonic member directly LEFT of a basic member with the same role. They form a Mentor Link — a permanent damage multiplier that fires every Strike while both are alive.'],
+            ['✨ Member Tiers','Members come in tiers: Basic (standard), Foil (+1 ATK/HP, -1 Ember on cards), Mythic (+3 ATK/HP), Demonic (+5 ATK/HP, golden glow). Higher tiers appear in better packs.'],
+            ['🃏 Card Types','RIFF (purple): Direct damage and ATK buffs. CORRUPT (red): Corruption-scaling power. UTILITY (green): Healing, draw, and economy. EMBER (orange): Ember management and recovery.'],
+            ['⛧ Riff Chains','Playing specific card pairs triggers Riff Chains — massive combo bonuses! Chains multiply your Strike damage (e.g., Battle Cry + Stage Dive = DEATH WISH). 16 chains to discover. The celebration shows which cards triggered it.'],
+            ['×️ Strike Multiplier','Every card played adds +0.05× to your Strike multiplier. Riff Chains add ×1.78 multiplicative. Maximum multiplier: ×6.66 (Mark of the Beast). The multiplier resets each Strike.'],
+            ['🎵 Genre Bonus','If 50%+ of cards played in a Strike are one type, a genre activates: Thrash Metal (RIFF, +15% damage), Black Metal (CORRUPT, +25% corruption damage), Stoner Rock (UTILITY, +1 card draw), Doom Metal (EMBER, +2 damage per member if max discards).'],
+            ['🌀 Corruption','A risk/reward axis from 0-100%. Some cards and enemies raise it. CORRUPT keyword members get stronger at high corruption. Overdrive requires 60%+. Feedback Loop and Amp the Static scale with it.'],
+            ['⚠ Corruption Thresholds','25% THE WHISPERS: Weakest member takes 1 damage each fight. 50% THE HUNGER: All shop prices +25%. 75% THE MADNESS: 15% chance to lose a random card before each Strike. 100% THE POSSESSION: Boss damage +3, but CORRUPT members get one-time +3 ATK.'],
+            ['🧹 Reducing Corruption','Smoke Break: -15%. Herb Money: -15%. Controlled Feedback: Sets to 50%. Signal Decay: -15%. Atonement pact: -15% after each boss kill. Some descent rewards also reduce corruption.'],
+            ['⛧ Pacts','After each boss kill, choose 1 of 2 pact offers. Pacts are permanent buffs for the rest of the run. 13 pacts total including Ember Surge, Iron Strings, Thick Skin, Clean Living, Corruption Engine, Atonement, and more.'],
+            ['🔨 Doom Forge','After choosing a pact, the Doom Forge appears. Upgrade one card in your deck permanently. Upgraded cards have stronger effects and some grant permanent HP buffs.'],
+            ['🗺 Descent Map','At the start of each new circle (C2-C9), choose which of the 3 fights to face. You can skip up to 2 fights for rewards (Stash, ATK, Embers, corruption reduction, HP, cards).'],
+            ['🎲 Random Events','30% chance of a Hell-themed event between non-boss fights. Choose between two options with risk/reward tradeoffs. 6 events: Mosh Pit, Cursed Amp, Blood Oath, Hellfire Baptism, Sabbath Offering, Devil\'s Wager.'],
+            ['🏪 The Shop','After each fight: buy recruit packs (add members), card packs (add cards), artifacts, passives, and drugs. Circle artifacts and passives change each circle.'],
+            ['🍄 The Dealer','Buy Shrooms (6🌿) or Acid (12🌿) in the shop. Use before your first Strike. Shrooms: 90% good trip (various buffs), 5% bad trip, 5% bunk. Acid: stronger effects but riskier.'],
+            ['⚙ Artifacts & Passives','Vintage Amps (artifacts) give powerful active effects. Effect Pedals (passives) provide ongoing bonuses. Max 3 artifacts, 5 passives. Buy in the shop.'],
+            ['♻ Pawn Shop','Sell unwanted members or cards for Stash. Burn cards to permanently remove them from your deck (deck thinning). Access via the shop.'],
+            ['🏆 Mastery','Every card play earns mastery XP. 4 tiers: Novice (10 plays), Adept (50), Master (200), Legendary (666). View progress in the Mastery Gallery from the main menu.'],
+            ['💀 Trophy Wall','The Hall of Damnation tracks every boss you\'ve killed. Kills, best damage, best stake — all recorded. 28 trophies to collect.'],
+            ['📊 Band Legacy','Your band members remember past runs. They track wins, deaths, total damage, and earn nicknames (The Immortal, Bonecrusher, The Legendary). Visible on Opening Night.'],
+            ['🎯 Stakes','6 difficulty levels: Bronze (standard), Silver (+2 boss dmg), Gold (+3 boss dmg, +25% shop prices), Obsidian (+38% boss HP, no post-fight heal), Blood (+48% boss HP, start at 10% corruption), Demonic (max 3 Strikes, +66% boss HP).'],
+            ['🌍 Daily Challenge','A shared daily seed. Everyone faces the same RNG. Your best daily score is tracked. Play from the main menu or end screen.'],
+            ['📜 Combat Log','Press ESC during combat to open the pause menu, then click Combat Log to review every event in the current run. Also available on the end screen as Run Log.'],
           ].map(([title,desc],i)=><div key={i} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:8,padding:'14px 20px'}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#e8a820',marginBottom:6}}>{title}</div>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#c8b080',lineHeight:1.5}}>{desc}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,color:'#e8a820',marginBottom:4}}>{title}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#c8b080',lineHeight:1.5}}>{desc}</div>
           </div>)}
         </div>
         <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:8}}>← Back</button>
@@ -5959,7 +5984,7 @@ function App(){
   )}
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} chosenPacts={chosenPacts} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
   if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
 
   return(
