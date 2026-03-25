@@ -2412,6 +2412,7 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
         </div>
 
       </div>
+      {showEndLog&&fullRunLog&&<CombatLogViewer log={fullRunLog} onClose={()=>setShowEndLog(false)}/>}
     </div>
   )
 }
@@ -2449,7 +2450,53 @@ function PhaseDots({left,total,color,wide}){
   const sz=wide?17:13;const start=total-left;return <div style={{display:'flex',gap:wide?4:4}}>{Array.from({length:total}).map((_,i)=>{const filled=i>=start;return <div key={i} style={{width:sz,height:sz,borderRadius:4,background:filled?color:'rgba(40,20,8,0.6)',border:`1px solid ${filled?color:'rgba(80,50,20,0.3)'}`,boxShadow:filled?`0 0 9px ${color}99`:'none',transition:'all 0.25s'}}/>})}</div>
 }
 
-function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered,newAchievements,enemyHp,stage,chosenPacts}){
+
+// ═══════════════════════════════════════════════════════════
+// COMBAT LOG VIEWER — scrollable overlay of all game events
+// ═══════════════════════════════════════════════════════════
+function CombatLogViewer({log,onClose}){
+  function colorForEntry(msg){
+    if(msg.startsWith('══'))return '#e8a820'
+    if(msg.includes('RIFF CHAIN')||msg.includes('⛧'))return '#ffd700'
+    if(msg.includes('damage')||msg.includes('Strike')||msg.includes('💥')||msg.includes('ATK'))return '#ee3333'
+    if(msg.includes('heal')||msg.includes('HP')||msg.includes('Séance')||msg.includes('♥'))return '#33dd33'
+    if(msg.includes('Corruption')||msg.includes('corruption')||msg.includes('🔮'))return '#cc44ff'
+    if(msg.includes('Ember')||msg.includes('ember')||msg.includes('🔥'))return '#ff8800'
+    if(msg.includes('stash')||msg.includes('Stash')||msg.includes('🌿'))return '#44cc44'
+    if(msg.includes('event')||msg.includes('Mosh')||msg.includes('Cursed')||msg.includes('Blood Oath')||msg.includes('Hellfire')||msg.includes('Sabbath')||msg.includes('Devil'))return '#ff6600'
+    if(msg.includes('Bought')||msg.includes('Shop')||msg.includes('Forge'))return '#c8a060'
+    if(msg.includes('Too Stoned')||msg.includes('☠')||msg.includes('💀'))return '#ff2222'
+    return '#aa9977'
+  }
+  return(
+    <div style={{position:'absolute',inset:0,zIndex:9999,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',padding:'30px 40px'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',width:'100%',maxWidth:1200,marginBottom:16}}>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:'#d0b060',textShadow:'0 0 20px rgba(200,150,20,0.3)'}}>Combat Log</div>
+        <button onClick={onClose} style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:3,padding:'8px 28px',background:'rgba(40,20,5,0.6)',border:'2px solid #4a3010',borderRadius:4,color:'#c8a040',cursor:'pointer'}}>✕ CLOSE</button>
+      </div>
+      <div style={{flex:1,width:'100%',maxWidth:1200,overflowY:'auto',background:'rgba(10,6,2,0.6)',border:'1px solid rgba(100,55,10,0.4)',borderRadius:6,padding:'12px 20px'}}>
+        {log.map((entry,i)=>{
+          const isFightHeader=entry.startsWith('══')
+          return <div key={i} style={{
+            fontFamily:"'ScratchFont',serif",
+            fontSize:isFightHeader?16:13,
+            color:colorForEntry(entry),
+            padding:isFightHeader?'10px 0 4px':'2px 0',
+            borderTop:isFightHeader&&i>0?'1px solid rgba(200,150,40,0.2)':'none',
+            fontWeight:isFightHeader?900:400,
+            letterSpacing:isFightHeader?2:0,
+            lineHeight:1.5,
+            opacity:isFightHeader?1:0.9
+          }}>{entry}</div>
+        })}
+      </div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#665533',marginTop:8}}>{log.length} entries this run</div>
+    </div>
+  )
+}
+
+function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered,newAchievements,enemyHp,stage,chosenPacts,fullRunLog}){
+  const [showEndLog,setShowEndLog]=useState(false)
   const isStoned=cause==='stoned'
   const isBeaten=cause==='beaten'
   const isVictory=cause==='victory'
@@ -2845,6 +2892,12 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
                 animation:'throb 2s ease-in-out infinite',transition:'all 0.15s'}}>
               {isVictory?'⛧ Play Again ⛧':'↺ Play Again'}
             </button>
+            <button onClick={()=>setShowEndLog(true)}
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,
+                padding:'10px 28px',background:'rgba(30,15,5,0.6)',
+                border:'2px solid #4a3010',borderRadius:6,color:'#8a7040',cursor:'pointer'}}>
+              📜 Run Log
+            </button>
             {isVictory&&<button onClick={()=>{/* Encore: restart with scaled enemies */
               setEncoreMode(true);setEncoreCircle(p=>p+10)
               setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(Math.round(ENEMIES[0].maxHp*activeStake.hpMult*2.0))
@@ -3172,6 +3225,8 @@ function App(){
   const [dragOverHandIdx,setDragOverHandIdx]=useState(null)
   const [handSort,setHandSort]=useState('none') // 'none'|'embers'|'rarity'
   const [log,setLog]=useState(['⛧ The gig begins.'])
+  const fullRunLogRef=useRef(['⛧ The gig begins.'])
+  const [showCombatLog,setShowCombatLog]=useState(false)
   const [damageFlash,setDamageFlash]=useState(false)
   const [animPhase,setAnimPhase]=useState('idle')
   const [shakeOffset,setShakeOffset]=useState({x:0,y:0})
@@ -3401,6 +3456,7 @@ function App(){
       if(!window.__devLog)window.__devLog=[]
       window.__devLog.push({t:new Date().toLocaleTimeString('en-US',{timeZone:'Asia/Tokyo',hour12:false}),msg:m})
     }
+    fullRunLogRef.current=[m,...fullRunLogRef.current]
     setLog(p=>[m,...p.slice(0,99)])
   }
   const addFloat=(v,x,y,color,big)=>{big=big||false;const id=fid.current++;setFloats(p=>[...p,{id,v,x,y,color:color||'#dd2222',big}])}
@@ -4908,6 +4964,7 @@ function App(){
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);setEnemyHp(Math.ceil(nextEnemy.maxHp*activeStake.hpMult*(encoreMode?2.0:1.0)))
+    addLog('══════ FIGHT '+(nextIdx+1)+': '+nextEnemy.name+' ('+Math.ceil(nextEnemy.maxHp*activeStake.hpMult*(encoreMode?2.0:1.0))+' HP) ══════')
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
     // CORRUPTION THRESHOLD: 25% — The Whispers (weakest takes 1 dmg)
@@ -5320,7 +5377,7 @@ function App(){
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
     setAnimPhase('idle');setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
-    setLog(['⛧ Starting fresh...']);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
+    setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
     setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -5895,7 +5952,7 @@ function App(){
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
-  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
+  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
 
   return(
     <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
@@ -5937,6 +5994,7 @@ function App(){
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#ff0000',textShadow:'0 0 40px rgba(255,0,0,0.9),0 0 80px rgba(200,0,0,0.6),-3px 0 rgba(255,0,0,0.5),3px 0 rgba(200,0,0,0.5),3px 3px 0 #000',letterSpacing:6,animation:'throb 0.4s ease-in-out infinite'}}>⛧ 6.66 ⛧</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#ff4444',letterSpacing:8,textTransform:'uppercase',marginTop:4,textShadow:'0 0 20px rgba(255,0,0,0.7)'}}>MARK OF THE BEAST</div>
       </div>}
+      {showCombatLog&&<CombatLogViewer log={fullRunLogRef.current} onClose={()=>setShowCombatLog(false)}/>}
       {corruptionFlash&&<div style={{position:'absolute',top:'35%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9600,textAlign:'center',animation:'fadeIn 0.3s ease',pointerEvents:'none'}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:corruptionFlash.color,textShadow:'0 0 30px '+corruptionFlash.color+',0 0 60px rgba(200,0,60,0.5),2px 2px 0 #000',letterSpacing:4}}>⚠ {corruptionFlash.name} ⚠</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#cc8899',marginTop:6,textShadow:'0 0 10px rgba(0,0,0,0.9)'}}>{corruptionFlash.desc}</div>
@@ -6153,6 +6211,7 @@ function App(){
         {/* Header */}
         <div style={{textAlign:'center',padding:'3px 0 0',position:'relative',zIndex:1,minHeight:16}}>
           {pendingEmbers>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff6600'}}>+{pendingEmbers} 🔥 pending</span>}
+          <button onClick={()=>setShowCombatLog(true)} style={{position:'absolute',right:120,top:2,fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:2,padding:'2px 10px',background:'rgba(30,15,5,0.7)',border:'1px solid rgba(100,55,10,0.4)',borderRadius:3,color:'#8a7040',cursor:'pointer',zIndex:40}}>📜 LOG</button>
         </div>
 
         {/* LEFT COLUMN: Deck/Discard — absolute */}
