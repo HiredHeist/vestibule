@@ -2160,7 +2160,7 @@ function TrophyWall({onClose}){
       {t?.bestStake&&<div style={{position:'absolute',top:4,right:4,width:8,height:8,borderRadius:'50%',background:stakeColor,boxShadow:'0 0 4px '+stakeColor}}/>}
 
       {/* Emoji / silhouette */}
-      <div style={{fontSize:defeated?40:28,textAlign:'center',padding:'6px 0 2px',filter:defeated?'none':'brightness(0) opacity(0.15)'}}>
+      <div style={{fontSize:defeated?36:24,textAlign:'center',padding:'4px 0 1px',filter:defeated?'none':'brightness(0) opacity(0.15)'}}>
         {defeated?enemy.emoji:'❓'}
       </div>
 
@@ -2170,13 +2170,13 @@ function TrophyWall({onClose}){
       </div>
 
       {/* Kill count */}
-      {defeated&&<div style={{textAlign:'center',padding:'2px 0 6px'}}>
+      {defeated&&<div style={{textAlign:'center',padding:'1px 0 3px'}}>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:'#cc4444'}}>{t.kills}</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#886644',letterSpacing:1,textTransform:'uppercase'}}>{t.kills===1?'KILL':'KILLS'}</div>
       </div>}
 
       {/* Best damage */}
-      {defeated&&t.bestDamage>0&&<div style={{background:'rgba(0,0,0,0.5)',padding:'3px 6px',textAlign:'center',borderTop:'1px solid rgba(80,50,10,0.2)'}}>
+      {defeated&&t.bestDamage>0&&<div style={{background:'rgba(0,0,0,0.5)',padding:'2px 6px',textAlign:'center',borderTop:'1px solid rgba(80,50,10,0.2)'}}>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#aa8844'}}>BEST HIT</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#e8a820'}}>{t.bestDamage.toLocaleString()}</div>
       </div>}
@@ -2188,7 +2188,7 @@ function TrophyWall({onClose}){
     </div>)
   }
 
-  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.99)',display:'flex',flexDirection:'column',alignItems:'center',padding:'12px 40px',overflow:'hidden'}}>
+  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.99)',display:'flex',flexDirection:'column',alignItems:'center',padding:'12px 40px',overflow:'hidden',gap:4}}>
     <style>{glowAnim+revealAnim}</style>
     <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),2px 2px 0 #000',letterSpacing:6}}>Hall of Damnation</div>
     <div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#a09060',fontStyle:'italic',marginBottom:2}}>Every boss you have conquered earns a place on this wall</div>
@@ -2202,7 +2202,7 @@ function TrophyWall({onClose}){
     </div>
 
     {/* Circle rows */}
-    <div style={{display:'flex',flexDirection:'column',gap:2,width:'100%',maxWidth:1400,alignItems:'center'}}>
+    <div style={{display:'flex',flexDirection:'column',gap:1,width:'100%',maxWidth:1400,alignItems:'center',flex:1,overflowY:'auto',overflowX:'hidden'}}>
       {CIRCLES.map((circle,ci)=>{
         const allDefeated=circle.enemies.every(eid=>trophies[eid])
         return(<div key={ci} style={{display:'flex',alignItems:'center',gap:10,width:'100%'}}>
@@ -2237,7 +2237,7 @@ function TrophyWall({onClose}){
       </div>
     </div>
 
-    <button onClick={onClose} style={{marginTop:8,fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:4,padding:'10px 48px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'#c8a040',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
+    <button onClick={onClose} style={{marginTop:4,fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,padding:'8px 40px',flexShrink:0,background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'#c8a040',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
       Close
     </button>
   </div>)
@@ -2324,7 +2324,7 @@ function MasteryGallery({onClose}){
       })}
     </div>
 
-    <button onClick={onClose} style={{marginTop:8,fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:4,padding:'10px 48px',background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'#c8a040',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
+    <button onClick={onClose} style={{marginTop:4,fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,padding:'8px 40px',flexShrink:0,background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'#c8a040',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
       Close
     </button>
   </div>)
@@ -2943,7 +2943,7 @@ function DemonicConflictScreen({conflict,onChoice}){
     )
   }
   return(
-    <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(2,1,0,0.98)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:32,padding:'40px 20px'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(2,1,0,0.98)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:24,padding:'20px 20px',overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,color:'#cc1111',textShadow:'0 0 40px rgba(200,0,0,0.9),0 0 80px rgba(150,0,0,0.6)',textAlign:'center'}}>Only One May Remain</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic',textAlign:'center'}}>Two demonic powers cannot share the same stage.<br/>Choose who stays — the other is gone forever.</div>
       <div style={{display:'flex',gap:60,alignItems:'center',flexWrap:'wrap',justifyContent:'center'}}>
@@ -2961,7 +2961,7 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
   const activeMembers=stage.map((m,i)=>m?{m,i}:null).filter(Boolean).filter(x=>!x.m.tooStoned)
   function fireSellPrice(m){return m.demonic?69:5+(m.foil?3:0)+(m.mythic?8:0)}
   return(
-    <div style={{position:'absolute',inset:0,zIndex:9600,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:24,padding:'40px 20px'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9600,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,padding:'20px 20px',overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#d0b060',textShadow:'0 0 30px rgba(200,150,20,0.4)'}}>Recruit a Member</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#a09060',fontStyle:'italic'}}>{isFull?'🔥 Stage is full — fire a member to make room, or pass':'Choose one musician to join your band — or pass'}</div>
       <div style={{display:'flex',gap:20,flexWrap:'wrap',justifyContent:'center',maxWidth:1000}}>
@@ -5343,8 +5343,8 @@ function App(){
   const bgPulseAnim=corruption>=50?'bgPulse '+(corruption>=75?'1.5s':'3s')+' ease-in-out infinite':'none'
 
   // ── TROPHY WALL / MASTERY GALLERY (overlay from menu) ──
-  if(showTrophies&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative'}}><TrophyWall onClose={()=>setShowTrophies(false)}/></div>)
-  if(showMastery&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative'}}><MasteryGallery onClose={()=>setShowMastery(false)}/></div>)
+  if(showTrophies&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><TrophyWall onClose={()=>setShowTrophies(false)}/></div>)
+  if(showMastery&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><MasteryGallery onClose={()=>setShowMastery(false)}/></div>)
 
   // ── MAIN MENU ──────────────────────────────────────────────
   if(gameState==='menu'){
@@ -5883,7 +5883,7 @@ function App(){
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
-  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative'}}><EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
+  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
 
   return(
     <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
