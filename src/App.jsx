@@ -2412,7 +2412,6 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
         </div>
 
       </div>
-      {showEndLog&&fullRunLog&&<CombatLogViewer log={fullRunLog} onClose={()=>setShowEndLog(false)}/>}
     </div>
   )
 }
@@ -2962,6 +2961,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
           <BottomRow/>
         </div>
       </div>
+      {showEndLog&&fullRunLog&&<CombatLogViewer log={fullRunLog} onClose={()=>setShowEndLog(false)}/>}
     </div>
   )
 }
@@ -6211,7 +6211,6 @@ function App(){
         {/* Header */}
         <div style={{textAlign:'center',padding:'3px 0 0',position:'relative',zIndex:1,minHeight:16}}>
           {pendingEmbers>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff6600'}}>+{pendingEmbers} 🔥 pending</span>}
-          <button onClick={()=>setShowCombatLog(true)} style={{position:'absolute',right:120,top:2,fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:2,padding:'2px 10px',background:'rgba(30,15,5,0.7)',border:'1px solid rgba(100,55,10,0.4)',borderRadius:3,color:'#8a7040',cursor:'pointer',zIndex:40}}>📜 LOG</button>
         </div>
 
         {/* LEFT COLUMN: Deck/Discard — absolute */}
@@ -6413,6 +6412,13 @@ function App(){
             ))}
           </div>
 
+          <button onClick={()=>{setShowPauseOptions(false);setShowCombatLog(true)}}
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:3,
+              padding:'12px 40px',background:'rgba(30,15,5,0.7)',
+              border:'2px solid rgba(100,65,15,0.5)',borderRadius:6,color:'#c8a060',cursor:'pointer',
+              textTransform:'uppercase',width:'100%'}}>
+            📜 Combat Log
+          </button>
           <button onClick={()=>setShowPauseOptions(false)}
             style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,letterSpacing:4,color:'#ee2222',background:'rgba(120,0,0,0.25)',border:'2px solid #aa0000',borderRadius:8,padding:'12px 60px',cursor:'pointer',marginTop:8,animation:'throb 2s ease-in-out infinite'}}>Resume</button>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#555',letterSpacing:2,marginTop:4}}>Press ESC to close</div>
