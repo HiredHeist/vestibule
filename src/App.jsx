@@ -3853,8 +3853,8 @@ function App(){
           const disc=JSON.parse(localStorage.getItem('vst_combos_discovered')||'[]')
           if(!disc.includes(chain.id)){disc.push(chain.id);localStorage.setItem('vst_combos_discovered',JSON.stringify(disc))}
         }
-        setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.78*100)/100})
-        playSfx('combo');triggerShake(14,500);setStrikeMult(p=>Math.min(6.66,Math.round((p*1.78)*100)/100));addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ×1.78 MULTIPLIER!')
+        setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.78*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
+        playSfx('combo');triggerShake(14,500);setStrikeMult(p=>Math.min(6.66,Math.round((p*1.78)*100)/100));addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×1.78 MULTIPLIER!')
         combosFiredRef.current.push(chain.id)
         addFloat('⛧ '+chain.name+' ⛧',getCenter(bossRef).x,getCenter(bossRef).y-140,chain.color,true)
         // Apply combo bonus damage = total stage ATK
@@ -5980,6 +5980,8 @@ function App(){
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:comboFlash.color,textShadow:`0 0 50px ${comboFlash.color},0 0 100px ${comboFlash.color}88,-3px 0 rgba(255,0,0,0.4),3px 0 rgba(0,100,255,0.3),3px 3px 0 #000`,letterSpacing:10,animation:'fadeIn 0.15s ease',zIndex:1}}>⛧ RIFF CHAIN ⛧</div>
         {/* Chain name */}
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#fff',textShadow:`0 0 30px ${comboFlash.color},0 0 60px ${comboFlash.color}66,3px 3px 0 #000`,letterSpacing:8,animation:'fadeIn 0.25s ease',zIndex:1}}>{comboFlash.name}</div>
+        {/* Card combo that triggered it */}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:comboFlash.color,letterSpacing:3,marginTop:6,animation:'fadeIn 0.35s ease',zIndex:1,textShadow:'0 0 10px rgba(0,0,0,0.9)',opacity:0.9}}>{comboFlash.card1} + {comboFlash.card2}</div>
         {/* Multiplier display — the Balatro money shot */}
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:56,fontWeight:900,color:'#fff',textShadow:`0 0 30px ${comboFlash.color},0 0 60px rgba(255,200,0,0.5),3px 3px 0 #000`,letterSpacing:4,marginTop:8,animation:'fadeIn 0.4s ease',zIndex:1}}>×{comboFlash.mult?.toFixed(2)||'1.50'}</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:comboFlash.color,letterSpacing:6,textTransform:'uppercase',marginTop:2,zIndex:1,textShadow:'0 0 10px rgba(0,0,0,0.9)'}}>STRIKE MULTIPLIER</div>
