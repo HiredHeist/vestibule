@@ -6195,8 +6195,8 @@ function App(){
         {/* ═══ GENRE ACTIVATION INDICATOR ═══ */}
         {activeGenre&&<div style={{
           display:'flex',alignItems:'center',justifyContent:'center',gap:12,
-          padding:'4px 20px',flexShrink:0,
-          background:activeGenre==='RIFF_METAL'?'rgba(100,30,160,0.25)':activeGenre==='BLACK_METAL'?'rgba(140,0,40,0.25)':activeGenre==='PROG_ROCK'?'rgba(20,120,50,0.25)':'rgba(60,60,120,0.25)',
+          padding:'6px 20px',flexShrink:0,
+          background:activeGenre==='RIFF_METAL'?'rgba(40,10,60,0.85)':activeGenre==='BLACK_METAL'?'rgba(60,0,15,0.85)':activeGenre==='PROG_ROCK'?'rgba(8,40,18,0.85)':'rgba(20,20,50,0.85)',
           borderTop:'2px solid '+(activeGenre==='RIFF_METAL'?'#9933cc':activeGenre==='BLACK_METAL'?'#cc1144':activeGenre==='PROG_ROCK'?'#22aa44':'#6666aa'),
           borderBottom:'1px solid '+(activeGenre==='RIFF_METAL'?'#9933cc44':activeGenre==='BLACK_METAL'?'#cc114444':activeGenre==='PROG_ROCK'?'#22aa4444':'#6666aa44'),
           animation:'fadeIn 0.3s ease',zIndex:6}}>
@@ -6208,7 +6208,7 @@ function App(){
             textShadow:'0 0 12px '+(activeGenre==='RIFF_METAL'?'rgba(150,50,200,0.6)':activeGenre==='BLACK_METAL'?'rgba(200,0,60,0.6)':activeGenre==='PROG_ROCK'?'rgba(30,180,60,0.6)':'rgba(80,80,160,0.6)')}}>
             {activeGenre==='RIFF_METAL'?'THRASH METAL':activeGenre==='BLACK_METAL'?'BLACK METAL':activeGenre==='PROG_ROCK'?'STONER ROCK':'DOOM METAL'}
           </span>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#c8b080',letterSpacing:1}}>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#c8b080',letterSpacing:1}}>
             {activeGenre==='RIFF_METAL'?'+15% Strike Damage':activeGenre==='BLACK_METAL'?'+25% Corruption Damage':activeGenre==='PROG_ROCK'?'+1 Card Draw Next Strike':'Max Discards? +2 DMG Per Member'}
           </span>
         </div>}
