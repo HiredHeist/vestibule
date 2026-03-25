@@ -6248,13 +6248,13 @@ function App(){
                 {m&&memberBuffs[m.uid]&&memberBuffs[m.uid].length>0&&<div style={{position:'absolute',top:-4,left:'50%',transform:'translateX(-50%)',zIndex:90,display:'flex',flexDirection:'column-reverse',alignItems:'center',gap:2,pointerEvents:'none'}}>
                   {memberBuffs[m.uid].map((b,bi)=><div key={bi} style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:b.color,textShadow:'0 0 8px '+b.color+'88,1px 1px 0 #000',letterSpacing:1,whiteSpace:'nowrap',animation:'fadeIn 0.3s ease'}}>{b.text}</div>)}
                 </div>}
-                {cardAbsorb&&cardAbsorb.slotIdx===i&&<div key={cardAbsorb.key} style={{position:'absolute',inset:0,zIndex:80,borderRadius:6,pointerEvents:'none',
+                {typeof cardAbsorb!=='undefined'&&cardAbsorb&&cardAbsorb.slotIdx===i&&<div key={cardAbsorb.key} style={{position:'absolute',inset:0,zIndex:80,borderRadius:6,pointerEvents:'none',
                 background:cardAbsorb.color,
                 animation:'cardAbsorbFlash 0.5s ease-out forwards',
                 boxShadow:'0 0 30px '+cardAbsorb.color+', inset 0 0 20px '+cardAbsorb.color}}/>}
               <StageSlot member={m} slotIdx={i}
                 isAttacking={animPhase==='attacking'&&m&&!m.tooStoned}
-                isStriking={strikingMemberIdx===i}
+                isStriking={typeof strikingMemberIdx!=='undefined'&&strikingMemberIdx===i}
                 isDiceTarget={diceTarget&&m&&diceTarget.id===m.id}
                 innerRef={function(el){stageRefs.current[i]={current:el}}}
                 onDragStart={function(){if(m)setDragStageIdx(i)}}
@@ -6493,8 +6493,8 @@ function App(){
               isDragOver={dragOverHandIdx===i&&dragHandIdx!==null&&dragHandIdx!==i}
               onHandDragOver={()=>{if(dragHandIdx!==null&&dragHandIdx!==i)setDragOverHandIdx(i)}}
               onHandDrop={()=>handleHandReorder(dragHandIdx,i)}
-              chainHintsOn={chainHintsOn}
-              hoverZoomOn={localStorage.getItem('vst_hoverzoom')!=='off'}
+              chainHintsOn={typeof chainHintsOn!=='undefined'?chainHintsOn:false}
+              hoverZoomOn={typeof localStorage!=='undefined'&&localStorage.getItem('vst_hoverzoom')!=='off'}
             />
           ))}
         </div>
@@ -6596,3 +6596,4 @@ function ScaleRoot(){
   )
 }
 export default ScaleRoot
+
