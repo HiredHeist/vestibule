@@ -61,7 +61,7 @@
 *No new features — only improving what exists*
 
 ### Combat Feel
-- [ ] **1. Riff Chain Celebration** — When a Riff Chain fires, show a full-width banner (2 seconds) with chain name + combo bonus in huge text. Currently chains trigger 16.4×/game but feel invisible. This is the Balatro "planet scored" moment.
+- [x] **1. Riff Chain Celebration** — When a Riff Chain fires, show a full-width banner (2 seconds) with chain name + combo bonus in huge text. Currently chains trigger 16.4×/game but feel invisible. This is the Balatro "planet scored" moment.
 - [ ] **2. Card Play Feedback** — When dropping a card on a member, add a "absorbed" shrink animation with a flash of the card's type color. Currently the card just disappears.
 - [ ] **3. Near-Death Heartbeat** — When any member drops below 25% HP, add a subtle red pulse border on their stage card. Players should FEEL danger without checking numbers.
 - [ ] **4. Strike Anticipation** — The 0.5s before projectiles launch feels dead. Add stage cards tilting forward slightly + bass rumble sound as wind-up.

@@ -141,48 +141,48 @@ const ENEMIES=[
   {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:400,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2🌿 per Strike. Your stash is its stash.',passiveId:'stashSteal2'},
   {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:666,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3🌿 per Strike. 666 HP of pure greed.',passiveId:'stashSteal3'},
   // ── CIRCLE V: ANGER — Hits harder the more you buff ─────────
-  {id:'wrathful',tagline:'Your buffs fed its rage.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:900,baseDmg:5,emoji:'🔥',passive:'Enraged. +1 damage for each buffed member on your stage.',passiveId:'rageScale1'},
-  {id:'berserker',tagline:'Fury without limit.',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:1000,baseDmg:6,emoji:'⚔️',passive:'Furious. +1 damage per buffed member.',passiveId:'rageScale1'},
-  {id:'anger_boss',tagline:'Strategy means nothing to rage.',name:'The Warlord',circle:'Circle V — Anger',subtitle:'Circle Boss — Fight 3 of 3',maxHp:1111,baseDmg:7,emoji:'💢',passive:'Explosive rage. +2 damage per buffed member.',passiveId:'rageScale2'},
+  {id:'wrathful',tagline:'Your buffs fed its rage.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:945,baseDmg:5,emoji:'🔥',passive:'Enraged. +1 damage for each buffed member on your stage.',passiveId:'rageScale1'},
+  {id:'berserker',tagline:'Fury without limit.',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:1050,baseDmg:6,emoji:'⚔️',passive:'Furious. +1 damage per buffed member.',passiveId:'rageScale1'},
+  {id:'anger_boss',tagline:'Strategy means nothing to rage.',name:'The Warlord',circle:'Circle V — Anger',subtitle:'Circle Boss — Fight 3 of 3',maxHp:1167,baseDmg:7,emoji:'💢',passive:'Explosive rage. +2 damage per buffed member.',passiveId:'rageScale2'},
   // ── CIRCLE VI: HERESY — Corrupts your corruption system ──────
-  {id:'heretic',tagline:'Your soul is sufficiently corrupted now.',name:'The Heretic',circle:'Circle VI — Heresy',subtitle:'Fight 1 of 3',maxHp:1650,baseDmg:5,emoji:'🔱',passive:'Blasphemous. Each Strike raises your Corruption by 10%.',passiveId:'corruptPlayer'},
-  {id:'apostate',tagline:'Corruption claimed another believer.',name:'The Apostate',circle:'Circle VI — Heresy',subtitle:'Fight 2 of 3',maxHp:1900,baseDmg:6,emoji:'⛧',passive:'Corrupting. Raises Corruption by 15% each Strike.',passiveId:'corruptPlayer15'},
-  {id:'heresy_boss',tagline:'Even your chaos served its doctrine.',name:'The False Prophet',circle:'Circle VI — Heresy',subtitle:'Circle Boss — Fight 3 of 3',maxHp:2600,baseDmg:7,emoji:'📖',passive:'Toxic doctrine. Corruption +20% per Strike. Hellquake territory every fight.',passiveId:'corruptPlayer20'},
+  {id:'heretic',tagline:'Your soul is sufficiently corrupted now.',name:'The Heretic',circle:'Circle VI — Heresy',subtitle:'Fight 1 of 3',maxHp:1815,baseDmg:5,emoji:'🔱',passive:'Blasphemous. Each Strike raises your Corruption by 10%.',passiveId:'corruptPlayer'},
+  {id:'apostate',tagline:'Corruption claimed another believer.',name:'The Apostate',circle:'Circle VI — Heresy',subtitle:'Fight 2 of 3',maxHp:2090,baseDmg:6,emoji:'⛧',passive:'Corrupting. Raises Corruption by 15% each Strike.',passiveId:'corruptPlayer15'},
+  {id:'heresy_boss',tagline:'Even your chaos served its doctrine.',name:'The False Prophet',circle:'Circle VI — Heresy',subtitle:'Circle Boss — Fight 3 of 3',maxHp:2860,baseDmg:7,emoji:'📖',passive:'Toxic doctrine. Corruption +20% per Strike. Hellquake territory every fight.',passiveId:'corruptPlayer20'},
   // ── CIRCLE VII: VIOLENCE — Targets your healthiest member ────
-  {id:'brute',tagline:'Your healthiest fell first.',name:'The Brute',circle:'Circle VII — Violence',subtitle:'Fight 1 of 3',maxHp:3000,baseDmg:6,emoji:'🗡️',passive:'Calculated. Always targets the member with highest HP.',passiveId:'targetHighestHp'},
-  {id:'hunter',tagline:'Prey spotted. Prey eliminated.',name:'The Hunter',circle:'Circle VII — Violence',subtitle:'Fight 2 of 3',maxHp:4000,baseDmg:7,emoji:'🏹',passive:'Predatory. Targets highest HP member. Deals +50% damage to them.',passiveId:'targetHighestHp2'},
-  {id:'violence_boss',tagline:'The sentence was carried out.',name:'The Executioner',circle:'Circle VII — Violence',subtitle:'Circle Boss — Fight 3 of 3',maxHp:5500,baseDmg:8,emoji:'🩸',passive:'Methodical. Targets highest HP and deals double damage. Protect your strongest.',passiveId:'targetHighestHp3'},
+  {id:'brute',tagline:'Your healthiest fell first.',name:'The Brute',circle:'Circle VII — Violence',subtitle:'Fight 1 of 3',maxHp:3450,baseDmg:6,emoji:'🗡️',passive:'Calculated. Always targets the member with highest HP.',passiveId:'targetHighestHp'},
+  {id:'hunter',tagline:'Prey spotted. Prey eliminated.',name:'The Hunter',circle:'Circle VII — Violence',subtitle:'Fight 2 of 3',maxHp:4600,baseDmg:7,emoji:'🏹',passive:'Predatory. Targets highest HP member. Deals +50% damage to them.',passiveId:'targetHighestHp2'},
+  {id:'violence_boss',tagline:'The sentence was carried out.',name:'The Executioner',circle:'Circle VII — Violence',subtitle:'Circle Boss — Fight 3 of 3',maxHp:6325,baseDmg:8,emoji:'🩸',passive:'Methodical. Targets highest HP and deals double damage. Protect your strongest.',passiveId:'targetHighestHp3'},
   // ── CIRCLE VIII: FRAUD — Shuffles your hand after each strike ──
-  {id:'trickster',tagline:'You played right into its hands.',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:5200,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle'},
-  {id:'deceiver',tagline:'Nothing was what it seemed.',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:6800,baseDmg:7,emoji:'🎭',passive:'Manipulative. After each Strike, 2 cards in hand are discarded and replaced.',passiveId:'fraudShuffle2'},
-  {id:'fraud_boss',tagline:'The greatest con: you thought you could win.',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:9600,baseDmg:8,emoji:'🪞',passive:'Master of lies. After each Strike, 3 cards in hand are discarded and replaced.',passiveId:'fraudShuffle3'},
+  {id:'trickster',tagline:'You played right into its hands.',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:6500,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle'},
+  {id:'deceiver',tagline:'Nothing was what it seemed.',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:8500,baseDmg:7,emoji:'🎭',passive:'Manipulative. After each Strike, 2 cards in hand are discarded and replaced.',passiveId:'fraudShuffle2'},
+  {id:'fraud_boss',tagline:'The greatest con: you thought you could win.',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:12000,baseDmg:8,emoji:'🪞',passive:'Master of lies. After each Strike, 3 cards in hand are discarded and replaced.',passiveId:'fraudShuffle3'},
   // ── CIRCLE IX: TREACHERY ──────────────────────────────────────
-  {id:'traitor',tagline:'Your own band turned on you.',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:9000,baseDmg:6,emoji:'🗝️',passive:'Paranoia. Each Strike, 1 random member refuses to attack and deals 3 damage to an ally.',passiveId:'paranoia'},
-  {id:'betrayer',tagline:'It stole everything you built.',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:11400,baseDmg:7,emoji:'🔒',passive:'Soul Thief. Each Strike, steals 1 permanent ATK from a random member. Returned on victory.',passiveId:'soulThief'},
+  {id:'traitor',tagline:'Your own band turned on you.',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:11700,baseDmg:6,emoji:'🗝️',passive:'Paranoia. Each Strike, 1 random member refuses to attack and deals 3 damage to an ally.',passiveId:'paranoia'},
+  {id:'betrayer',tagline:'It stole everything you built.',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:14820,baseDmg:7,emoji:'🔒',passive:'Soul Thief. Each Strike, steals 1 permanent ATK from a random member. Returned on victory.',passiveId:'soulThief'},
   {id:'lucifer',tagline:'He has seen better challengers. A lot of them.',name:'Lucifer',circle:'Circle IX — Treachery',subtitle:'⛧ The Final Circle — Fight 3 of 3',maxHp:420666,baseDmg:9,emoji:'😈',passive:'The Lord of Hell. Your victories weaken him. Two phases. The ultimate test.',passiveId:'luciferBoss'},
 ]
 
 const ALL_MUSICIANS=[
-  {id:'bjorn',name:'Bjorn',role:'Lead Guitarist',atk:5,hp:6,maxHp:6,emoji:'🎸',keyword:'FRENZIED',desc:'High ATK, fragile. The carry.'},
-  {id:'ragnar',name:'Ragnar',role:'Lead Guitarist',atk:4,hp:7,maxHp:7,emoji:'🎸',keyword:'FRENZIED',desc:'Slightly tankier lead.'},
-  {id:'thor',name:'Thor',role:'Drummer',atk:0,hp:8,maxHp:8,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Attack fires twice per turn.'},
-  {id:'ingrid',name:'Ingrid',role:'Bass Player',atk:3,hp:10,maxHp:10,emoji:'🎵',keyword:'ANCHOR',desc:'High HP. Regen adjacent members.'},
-  {id:'loki',name:'Loki',role:'Synth Player',atk:3,hp:6,maxHp:6,emoji:'🎹',keyword:'CORRUPT',desc:'Damage scales with Corruption.'},
-  {id:'nott',name:'Nott',role:'Vocalist',atk:2,hp:7,maxHp:7,emoji:'🎤',keyword:'DEBUFF',desc:'Reduces boss passive each turn.'},
-  {id:'dag',name:'Dag',role:'Bass Player',atk:2,hp:12,maxHp:12,emoji:'🎵',keyword:'ANCHOR',desc:'Tankiest member.'},
-  {id:'vitalik',name:'Vitalik',role:'Dark Minstrel',atk:6,hp:9,maxHp:9,emoji:'🪈',keyword:'FOLK MAGIC',desc:'Nobody asked. Nobody complained twice.'},
+  {id:'bjorn',name:'Bjorn',role:'Lead Guitarist',atk:5,hp:6,maxHp:8,emoji:'🎸',keyword:'FRENZIED',desc:'High ATK, fragile. The carry.'},
+  {id:'ragnar',name:'Ragnar',role:'Lead Guitarist',atk:4,hp:7,maxHp:9,emoji:'🎸',keyword:'FRENZIED',desc:'Slightly tankier lead.'},
+  {id:'thor',name:'Thor',role:'Drummer',atk:0,hp:8,maxHp:11,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Attack fires twice per turn.'},
+  {id:'ingrid',name:'Ingrid',role:'Bass Player',atk:3,hp:10,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'High HP. Regen adjacent members.'},
+  {id:'loki',name:'Loki',role:'Synth Player',atk:3,hp:6,maxHp:8,emoji:'🎹',keyword:'CORRUPT',desc:'Damage scales with Corruption.'},
+  {id:'nott',name:'Nott',role:'Vocalist',atk:2,hp:7,maxHp:9,emoji:'🎤',keyword:'DEBUFF',desc:'Reduces boss passive each turn.'},
+  {id:'dag',name:'Dag',role:'Bass Player',atk:2,hp:12,maxHp:16,emoji:'🎵',keyword:'ANCHOR',desc:'Tankiest member.'},
+  {id:'vitalik',name:'Vitalik',role:'Dark Minstrel',atk:6,hp:9,maxHp:12,emoji:'🪈',keyword:'FOLK MAGIC',desc:'Nobody asked. Nobody complained twice.'},
   // ── NEW MEMBERS ────────────────────────────────────────────────
-  {id:'sigrid',name:'Sigrid',role:'Rhythm Guitarist',atk:3,hp:8,maxHp:8,emoji:'🎸',keyword:'SHREDDER',desc:'Every riff she plays, the next one comes faster.'},
-  {id:'gunnar',name:'Gunnar',role:'Rhythm Guitarist',atk:4,hp:7,maxHp:7,emoji:'🎸',keyword:'SHREDDER',desc:'Rhythm? He makes the rhythm.'},
-  {id:'astrid',name:'Astrid',role:'Vocalist',atk:3,hp:8,maxHp:8,emoji:'🎤',keyword:'DEBUFF',desc:'Her voice alone can break a curse.'},
-  {id:'freya',name:'Freya',role:'Synth Player',atk:4,hp:5,maxHp:5,emoji:'🎹',keyword:'CORRUPT',desc:'She plays the dark frequencies.'},
-  {id:'ulf',name:'Ulf',role:'Bass Player',atk:4,hp:9,maxHp:9,emoji:'🎵',keyword:'ANCHOR',desc:'The anchor that also bites.'},
-  {id:'brynja',name:'Brynja',role:'Bass Player',atk:1,hp:14,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'An immovable wall. The bass never stops.'},
-  {id:'rolf',name:'Rolf',role:'Drummer',atk:1,hp:9,maxHp:9,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Hits harder than the rest combined. Statistically speaking.'},
-  {id:'orm',name:'Orm',role:'Dark Minstrel',atk:2,hp:11,maxHp:11,emoji:'🪈',keyword:'HEXED',desc:'The longer he plays, the worse it gets. For everyone.'},
+  {id:'sigrid',name:'Sigrid',role:'Rhythm Guitarist',atk:3,hp:8,maxHp:11,emoji:'🎸',keyword:'SHREDDER',desc:'Every riff she plays, the next one comes faster.'},
+  {id:'gunnar',name:'Gunnar',role:'Rhythm Guitarist',atk:4,hp:7,maxHp:9,emoji:'🎸',keyword:'SHREDDER',desc:'Rhythm? He makes the rhythm.'},
+  {id:'astrid',name:'Astrid',role:'Vocalist',atk:3,hp:8,maxHp:11,emoji:'🎤',keyword:'DEBUFF',desc:'Her voice alone can break a curse.'},
+  {id:'freya',name:'Freya',role:'Synth Player',atk:4,hp:5,maxHp:7,emoji:'🎹',keyword:'CORRUPT',desc:'She plays the dark frequencies.'},
+  {id:'ulf',name:'Ulf',role:'Bass Player',atk:4,hp:9,maxHp:12,emoji:'🎵',keyword:'ANCHOR',desc:'The anchor that also bites.'},
+  {id:'brynja',name:'Brynja',role:'Bass Player',atk:1,hp:14,maxHp:19,emoji:'🎵',keyword:'ANCHOR',desc:'An immovable wall. The bass never stops.'},
+  {id:'rolf',name:'Rolf',role:'Drummer',atk:1,hp:9,maxHp:12,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Hits harder than the rest combined. Statistically speaking.'},
+  {id:'orm',name:'Orm',role:'Dark Minstrel',atk:2,hp:11,maxHp:15,emoji:'🪈',keyword:'HEXED',desc:'The longer he plays, the worse it gets. For everyone.'},
   // ── UNLOCKABLE MEMBERS (locked until lifetime score milestone) ──
-  {id:'tanuki',name:'Tanuki',role:'Bass Player',atk:8,hp:8,maxHp:8,emoji:'🦝',keyword:'ANCHOR',desc:'The heaviest bass in Hell. Built like a tank, hits like a truck.',locked:true,unlockAt:3000},
-  {id:'lucifer_member',name:'Lucifer',role:'The Devil',atk:20,hp:69,maxHp:69,emoji:'😈',keyword:'FALLEN',desc:'Cannot be healed. Loses 1 HP per strike. If he dies, game over. Max 3 band members. Sell for 69 herb.',locked:true,unlockAt:100000},
+  {id:'tanuki',name:'Tanuki',role:'Bass Player',atk:8,hp:8,maxHp:11,emoji:'🦝',keyword:'ANCHOR',desc:'The heaviest bass in Hell. Built like a tank, hits like a truck.',locked:true,unlockAt:3000},
+  {id:'lucifer_member',name:'Lucifer',role:'The Devil',atk:20,hp:69,maxHp:96,emoji:'😈',keyword:'FALLEN',desc:'Cannot be healed. Loses 1 HP per strike. If he dies, game over. Max 3 band members. Sell for 69 herb.',locked:true,unlockAt:100000},
 ]
 
 // ── UNLOCK MILESTONES ──────────────────────────────────────────
@@ -361,7 +361,7 @@ function getUnlockedStakes(){
   return unlocked
 }
 // ── WELCOME TO HELL: The Executive bonus boss ──────────────────────
-const AR_EXECUTIVE={id:'ar_exec',name:'The Executive',emoji:'🕴',maxHp:69000,baseDmg:8,
+const AR_EXECUTIVE={id:'ar_exec',name:'The Executive',emoji:'🕴',maxHp:89700,baseDmg:8,
   passive:'Corporate Pressure. Every 2 strikes, a Record Deal contract appears in your hand.',
   passiveId:'corporate',tagline:'The real Devil wears a suit.'}
 
@@ -3839,7 +3839,7 @@ function App(){
     setStage(ns)
     if(spent>0)setEmbers(function(p){return p-spent})
     if(msg)addLog(msg)
-    updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+    updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
     if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
     if(card.type==='RIFF')setLastRiffPlayed(card)
     // ── RIFF CHAIN COMBO DETECTION ──
@@ -3853,15 +3853,15 @@ function App(){
           const disc=JSON.parse(localStorage.getItem('vst_combos_discovered')||'[]')
           if(!disc.includes(chain.id)){disc.push(chain.id);localStorage.setItem('vst_combos_discovered',JSON.stringify(disc))}
         }
-        setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji})
-        playSfx('combo');triggerShake(10,350);setStrikeMult(p=>Math.round((p+0.15)*100)/100);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! +10% bonus damage!')
+        setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.5*100)/100})
+        playSfx('combo');triggerShake(14,500);setStrikeMult(p=>Math.min(6.66,Math.round((p*1.5)*100)/100));addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ×1.5 MULTIPLIER!')
         combosFiredRef.current.push(chain.id)
         addFloat('⛧ '+chain.name+' ⛧',getCenter(bossRef).x,getCenter(bossRef).y-140,chain.color,true)
         // Apply combo bonus damage = total stage ATK
         const comboBonus=ns.filter(m=>m&&!m.tooStoned).reduce((s,m)=>s+m.atk,0)
         setEnemyHp(p=>{const nh=Math.max(0,p-comboBonus);if(nh<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);return nh})
         updStat('totalDamage',comboBonus)
-        setTimeout(()=>setComboFlash(null),2700)
+        setTimeout(()=>setComboFlash(null),3000)
         break
       }
     }
@@ -3897,7 +3897,7 @@ function App(){
       setEmbers(p=>Math.min(maxEmbers,p+3-effectiveEmbers))
       addLog('🎼 Smoke Break! '+victim.name+' discarded. +3 Embers.'+(preSelected.length===0?' (tip: select a card first)':''))
       addFloat('+3 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard'] // count victim too for refill
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -3917,7 +3917,7 @@ function App(){
       setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus-effectiveEmbers))
       addLog('🍯 Groupie! +2 Embers, drew 1 card.')
       addFloat('+2 🔥 +1 card',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -3937,7 +3937,7 @@ function App(){
       setSetlistOpen(true)
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       addLog('📋 Setlist! Drew 2 cards — now pick 1 to discard.')
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -3958,7 +3958,7 @@ function App(){
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       addLog('🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+drawCount+'.'+(discardCount===0?' (Tip: select cards before playing)':''))
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       setLastRiffPlayed(card)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
@@ -3980,7 +3980,7 @@ function App(){
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
       addLog('🎙 Remastered! Deleted '+toDelete.name+', drew 3.')
       addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       // cardHeal enemy passive
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
@@ -4014,7 +4014,7 @@ function App(){
       }
       setSelected([])
       if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.round((p+0.03)*100)/100)
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
       else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
@@ -4268,6 +4268,18 @@ function App(){
     document.head.appendChild(el)
     return()=>document.head.removeChild(el)
   },[])
+
+  // ── 6.66 MULTIPLIER FLASH ──
+  const [beastFlash,setBeastFlash]=useState(false)
+  useEffect(()=>{
+    if(strikeMult>=6.66&&!beastFlash&&gameState==='playing'){
+      setBeastFlash(true)
+      playSfx('big_hit');triggerShake(16,600)
+      addLog('⛧ MARK OF THE BEAST! ×6.66 MULTIPLIER! ⛧')
+      setTimeout(()=>setBeastFlash(false),2500)
+    }
+    if(strikeMult<6.66)setBeastFlash(false)
+  },[strikeMult])
 
   // ── CORRUPTION THRESHOLD FLASH NOTIFICATIONS ──
   useEffect(()=>{
@@ -5921,6 +5933,10 @@ function App(){
           {luciferCinematic.phase===2?'Band fully restored. All strikes reset. Finish this.':'8 Circle Bosses defeated. Their echoes weaken the Devil.'}</div>
       </div>}
       {/* CLUTCH FLASH */}
+      {beastFlash&&<div style={{position:'absolute',top:'30%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9700,textAlign:'center',pointerEvents:'none'}}>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#ff0000',textShadow:'0 0 40px rgba(255,0,0,0.9),0 0 80px rgba(200,0,0,0.6),-3px 0 rgba(255,0,0,0.5),3px 0 rgba(200,0,0,0.5),3px 3px 0 #000',letterSpacing:6,animation:'throb 0.4s ease-in-out infinite'}}>⛧ 6.66 ⛧</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#ff4444',letterSpacing:8,textTransform:'uppercase',marginTop:4,textShadow:'0 0 20px rgba(255,0,0,0.7)'}}>MARK OF THE BEAST</div>
+      </div>}
       {corruptionFlash&&<div style={{position:'absolute',top:'35%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9600,textAlign:'center',animation:'fadeIn 0.3s ease',pointerEvents:'none'}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:corruptionFlash.color,textShadow:'0 0 30px '+corruptionFlash.color+',0 0 60px rgba(200,0,60,0.5),2px 2px 0 #000',letterSpacing:4}}>⚠ {corruptionFlash.name} ⚠</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#cc8899',marginTop:6,textShadow:'0 0 10px rgba(0,0,0,0.9)'}}>{corruptionFlash.desc}</div>
@@ -5951,11 +5967,22 @@ function App(){
         </div>
       </div>}
       {/* RIFF CHAIN COMBO FLASH */}
-      {comboFlash&&<div style={{position:'absolute',inset:0,zIndex:9600,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:8}}>
-        <div style={{position:'absolute',inset:0,border:`3px solid ${comboFlash.color}`,animation:'fadeIn 0.1s ease',opacity:0.8,boxShadow:`inset 0 0 60px ${comboFlash.color}44,0 0 40px ${comboFlash.color}44`}}/>
-        <div style={{fontSize:80,filter:`drop-shadow(0 0 30px ${comboFlash.color})`,animation:'throb 0.3s ease-in-out infinite'}}>{comboFlash.emoji}</div>
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:comboFlash.color,textShadow:`0 0 40px ${comboFlash.color},0 0 80px ${comboFlash.color}66,3px 3px 0 #000`,letterSpacing:8,animation:'fadeIn 0.2s ease'}}>⛧ RIFF CHAIN ⛧</div>
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:'#fff',textShadow:`0 0 20px ${comboFlash.color},3px 3px 0 #000`,letterSpacing:6,animation:'fadeIn 0.4s ease'}}>{comboFlash.name}</div>
+      {comboFlash&&<div style={{position:'absolute',inset:0,zIndex:9600,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:0}}>
+        {/* Full-screen color wash */}
+        <div style={{position:'absolute',inset:0,background:`radial-gradient(ellipse at center, ${comboFlash.color}22 0%, ${comboFlash.color}11 40%, transparent 70%)`,animation:'fadeIn 0.15s ease'}}/>
+        {/* Border glow — thicker, more dramatic */}
+        <div style={{position:'absolute',inset:0,border:`4px solid ${comboFlash.color}`,boxShadow:`inset 0 0 100px ${comboFlash.color}33,0 0 60px ${comboFlash.color}44`,animation:'fadeIn 0.1s ease'}}/>
+        {/* Horizontal banner bar */}
+        <div style={{position:'absolute',left:0,right:0,top:'38%',height:200,background:`linear-gradient(180deg, transparent, ${comboFlash.color}15 20%, ${comboFlash.color}25 50%, ${comboFlash.color}15 80%, transparent)`,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4}}/>
+        {/* Chain emoji — huge, pulsing */}
+        <div style={{fontSize:90,filter:`drop-shadow(0 0 40px ${comboFlash.color})`,animation:'throb 0.4s ease-in-out infinite',marginBottom:4,zIndex:1}}>{comboFlash.emoji}</div>
+        {/* RIFF CHAIN title */}
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:comboFlash.color,textShadow:`0 0 50px ${comboFlash.color},0 0 100px ${comboFlash.color}88,-3px 0 rgba(255,0,0,0.4),3px 0 rgba(0,100,255,0.3),3px 3px 0 #000`,letterSpacing:10,animation:'fadeIn 0.15s ease',zIndex:1}}>⛧ RIFF CHAIN ⛧</div>
+        {/* Chain name */}
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#fff',textShadow:`0 0 30px ${comboFlash.color},0 0 60px ${comboFlash.color}66,3px 3px 0 #000`,letterSpacing:8,animation:'fadeIn 0.25s ease',zIndex:1}}>{comboFlash.name}</div>
+        {/* Multiplier display — the Balatro money shot */}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:56,fontWeight:900,color:'#fff',textShadow:`0 0 30px ${comboFlash.color},0 0 60px rgba(255,200,0,0.5),3px 3px 0 #000`,letterSpacing:4,marginTop:8,animation:'fadeIn 0.4s ease',zIndex:1}}>×{comboFlash.mult?.toFixed(2)||'1.50'}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:comboFlash.color,letterSpacing:6,textTransform:'uppercase',marginTop:2,zIndex:1,textShadow:'0 0 10px rgba(0,0,0,0.9)'}}>STRIKE MULTIPLIER</div>
       </div>}
       {/* CIRCLE CLEARED FLASH */}
 
@@ -6172,9 +6199,17 @@ function App(){
         {/* RIGHT COLUMN: Strike/Discard/Embers/Stats — absolute, clamped to right edge */}
         <div style={{position:'absolute',right:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-evenly',padding:'8px 14px',background:'rgba(10,5,2,0.75)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none',width:210}}>
           <div style={{width:'100%'}}>
-            {strikeMult>1.0&&<div style={{textAlign:'center',marginBottom:6,padding:'4px 0',background:'rgba(255,100,0,0.15)',border:'1px solid rgba(255,100,0,0.5)',borderRadius:4}}>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff6600',letterSpacing:2,fontWeight:900}}>MULTIPLIER</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#ff8800',textShadow:'0 0 16px rgba(255,120,0,0.6)',lineHeight:1}}>x{strikeMult.toFixed(2)}</div>
+            {strikeMult>1.0&&<div style={{textAlign:'center',marginBottom:6,padding:strikeMult>=2.0?'6px 0':'4px 0',
+              background:strikeMult>=6.66?'rgba(200,0,0,0.5)':strikeMult>=3.0?'rgba(255,50,0,0.3)':strikeMult>=2.0?'rgba(255,80,0,0.25)':'rgba(255,100,0,0.15)',
+              border:strikeMult>=6.66?'3px solid #ff0000':strikeMult>=3.0?'2px solid #ff4400':strikeMult>=2.0?'2px solid #ff6600':'1px solid rgba(255,100,0,0.5)',
+              borderRadius:4,
+              boxShadow:strikeMult>=6.66?'0 0 30px rgba(255,0,0,0.7),0 0 60px rgba(200,0,0,0.3)':strikeMult>=2.0?'0 0 20px rgba(255,100,0,0.4)':'none',
+              animation:strikeMult>=6.66?'throb 0.5s ease-in-out infinite':strikeMult>=2.0?'throb 1s ease-in-out infinite':'none'}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:strikeMult>=6.66?'#ff0000':strikeMult>=3.0?'#ff4400':strikeMult>=2.0?'#ff6600':'#ff6600',letterSpacing:2,fontWeight:900}}>{strikeMult>=6.66?'⛧ MARK OF THE BEAST ⛧':'MULTIPLIER'}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:strikeMult>=6.66?44:strikeMult>=3.0?38:strikeMult>=2.0?34:28,fontWeight:900,
+                color:strikeMult>=6.66?'#ff0000':strikeMult>=3.0?'#ff4400':strikeMult>=2.0?'#ff8800':'#ff8800',
+                textShadow:strikeMult>=6.66?'0 0 30px rgba(255,0,0,1),0 0 60px rgba(200,0,0,0.8),0 0 100px rgba(150,0,0,0.4)':strikeMult>=2.0?'0 0 20px rgba(255,100,0,0.8),0 0 40px rgba(255,60,0,0.4)':'0 0 16px rgba(255,120,0,0.6)',
+                lineHeight:1}}>×{strikeMult.toFixed(2)}</div>
             </div>}
             <button onClick={handleStrike} disabled={!canStrike}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'10px 14px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:4,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:'100%'}}>⚔ Strike</button>
