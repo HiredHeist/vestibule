@@ -1,7 +1,7 @@
 
 // ═══ TODO — NEXT SESSION ═══
-// [ ] Boss attack: make ENTIRE boss box fly (not just emoji) — same style as member attacks
-// [ ] Corruption bar redesign feedback/tuning from player
+// [x] Boss attack: emoji square only flies (DONE)
+// [ ] Corruption thermometer tuning from player feedback
 // [ ] Event choice audit — Sabbath Offering useless on Bronze/Silver/Gold
 // ═══════════════════════════
 
@@ -2414,13 +2414,13 @@ function EventScreen({event,onChoose}){
 function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRoll,bossStrikeAnim}){
   const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35,isCritical=currentHp>0&&currentHp<enemy.maxHp*.20
   return(
-    <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:180,
-      transform:bossStrikeAnim?bossStrikeAnim.phase==='windup'?'translateY(15px) scale(1.05) rotate(-2deg)':bossStrikeAnim.phase==='launch'?'translateY(250px) scale(0.8) rotate(3deg)':bossStrikeAnim.phase==='impact'?'translateY(350px) scale(1.2) rotate(0deg)':bossStrikeAnim.phase==='return'?'translateY(50px) scale(1.02)':'none':'none',
-      transition:bossStrikeAnim?'transform 0.35s cubic-bezier(0.2,0.8,0.3,1.2)':'transform 0.3s',
-      zIndex:bossStrikeAnim?200:1,
-      filter:bossStrikeAnim&&(bossStrikeAnim.phase==='launch'||bossStrikeAnim.phase==='impact')?'drop-shadow(0 0 40px rgba(255,0,0,0.8))':'none',
-      position:'relative'}}>
-      <div data-boss-emoji="1" style={{width:180,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:'6px 0 0 6px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:90,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:'hidden',transition:'all 0.5s',alignSelf:'stretch'}}>
+    <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:180,position:'relative'}}>
+      <div data-boss-emoji="1" style={{width:180,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:'6px 0 0 6px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:90,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:bossStrikeAnim?'visible':'hidden',
+        transform:bossStrikeAnim?bossStrikeAnim.phase==='windup'?'translateY(15px) scale(1.08) rotate(-3deg)':bossStrikeAnim.phase==='launch'?'translateY(280px) scale(0.85) rotate(4deg)':bossStrikeAnim.phase==='impact'?'translateY(380px) scale(1.25) rotate(0deg)':bossStrikeAnim.phase==='return'?'translateY(40px) scale(1.02)':'none':'none',
+        transition:bossStrikeAnim?'transform 0.35s cubic-bezier(0.2,0.8,0.3,1.2), box-shadow 0.3s':'all 0.5s',
+        zIndex:bossStrikeAnim?200:1,
+        filter:bossStrikeAnim&&(bossStrikeAnim.phase==='launch'||bossStrikeAnim.phase==='impact')?'drop-shadow(0 0 40px rgba(255,0,0,0.9))':'none',
+        alignSelf:'stretch'}}>
         {enemy.emoji}
         {isLow&&<div style={{position:'absolute',inset:0,background:'rgba(120,0,0,0.2)',animation:'pulse 1.2s ease infinite alternate'}}/>}
         {debuff>0&&<div style={{position:'absolute',bottom:4,right:4,background:'rgba(0,80,160,0.9)',border:'1px solid #4488ff',borderRadius:4,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#88aaff'}}>-{debuff}dmg</div>}
@@ -4696,6 +4696,7 @@ function App(){
 
     const bc=getCenter(bossRef)
     let delay=0
+    const startHp=enemyHp // save for final calc
     // Compute per-member damage for cascade display
     const memberDmgs=[]
     actives.forEach(function(m){
@@ -4740,7 +4741,7 @@ function App(){
         try{(ATK_SND[m.role]||ATK_SND['Lead Guitarist'])()}catch(e){}
         playHit()
         triggerShake(8,250)
-        if(md)addFloat(md.atk,bc.x,bc.y-60,'#cc8800',md.atk>=15)
+        if(md){addFloat(md.atk,bc.x,bc.y-60,'#cc8800',md.atk>=15);setEnemyHp(p=>Math.max(0,p-md.atk))}
       },curDelay+(speedFast?550:1200))
       // Phase 5: RETURN (1500ms) — card floats back
       setTimeout(function(){
@@ -4759,7 +4760,7 @@ function App(){
       setProjectiles([])
       const tripMult=fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION'?2:1;const finalDmg=Math.round(dmg*tripMult*currentMult)
       if(tripMult>1){const _tr=Math.round(dmg*tripMult);_breakdownLines.push({type:'multiply',label:(fightTripBuff||'Trip')+' ×'+tripMult,label2:'= '+_tr.toLocaleString(),runningAfter:_tr,color:'#ff44ff'})}
-      if(currentMult>1.0){_breakdownLines.push({type:'multiply',label:'Strike ×'+currentMult.toFixed(2),label2:'= '+finalDmg.toLocaleString(),runningAfter:finalDmg,color:'#ff4400'})};const newEHp=Math.max(0,enemyHp-finalDmg)
+      if(currentMult>1.0){_breakdownLines.push({type:'multiply',label:'Strike ×'+currentMult.toFixed(2),label2:'= '+finalDmg.toLocaleString(),runningAfter:finalDmg,color:'#ff4400'})};const newEHp=Math.max(0,startHp-finalDmg)
       setEnemyHp(newEHp)
       // damageScaleAtk: boss gains ATK per 20 damage taken
       if(enemy.passiveId==='luciferBoss'){
