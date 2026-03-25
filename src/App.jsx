@@ -2961,7 +2961,42 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
           </div>
         </div>
 
-        {/* ROW 6: Achievements + Discoveries + Streak — all inline */}
+        {/* ROW 5.5: Mastery Progress — top 3 cards closest to next tier */}
+        {(()=>{
+          const mData=getMasteryData()
+          const progress=ALL_CARDS.filter(c=>!c.consumable).map(c=>{
+            const plays=mData[c.id]||0
+            if(plays===0)return null
+            let tier=MASTERY_TIERS[0]
+            for(const t of MASTERY_TIERS){if(plays>=t.min)tier=t}
+            const tierIdx=MASTERY_TIERS.indexOf(tier)
+            const nextTier=MASTERY_TIERS[tierIdx+1]
+            if(!nextTier)return null // already Legendary
+            const pct=Math.round(((plays-tier.min)/(nextTier.min-tier.min))*100)
+            return{card:c,plays,tier,nextTier,pct}
+          }).filter(Boolean).sort((a,b)=>b.pct-a.pct).slice(0,3)
+          if(progress.length===0)return null
+          return(
+            <div style={{display:'flex',gap:12,justifyContent:'center',width:'100%',maxWidth:1000}}>
+              {progress.map(p=>(
+                <div key={p.card.id} style={{flex:1,maxWidth:300,background:'rgba(15,8,3,0.85)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:8,padding:'12px 16px',display:'flex',flexDirection:'column',alignItems:'center',gap:6}}>
+                  <div style={{display:'flex',alignItems:'center',gap:8}}>
+                    <span style={{fontSize:22}}>{p.card.emoji}</span>
+                    <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#e8d090'}}>{p.card.name}</span>
+                  </div>
+                  <div style={{width:'100%',height:12,background:'rgba(0,0,0,0.5)',borderRadius:6,overflow:'hidden',border:'1px solid '+(p.nextTier.border||'#444')+'44'}}>
+                    <div style={{height:'100%',width:p.pct+'%',background:p.nextTier.border||'#888',borderRadius:6,transition:'width 0.5s',boxShadow:'0 0 8px '+(p.nextTier.glow||'transparent')}}/>
+                  </div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:p.nextTier.color||'#888'}}>
+                    {p.plays}/{p.nextTier.min} → {p.nextTier.name}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        })()}
+
+                {/* ROW 6: Achievements + Discoveries + Streak — all inline */}
         <div style={{display:'flex',gap:12,alignItems:'center',justifyContent:'center',flexWrap:'wrap'}}>
           {newAchIds.length>0&&newAchIds.slice(0,4).map(id=>{const a=ACHIEVEMENTS.find(x=>x.id===id);if(!a)return null;return <div key={id} style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#ffd700',background:'rgba(60,40,0,0.7)',border:'1px solid #ffd700',borderRadius:4,padding:'3px 10px',animation:'throb 1.5s ease-in-out infinite'}}>{a.emoji} {a.label}</div>})}
           {discoveryList.slice(0,4).map((d,i)=><div key={i} style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#e8a820',background:'rgba(40,25,5,0.7)',border:'1px solid rgba(200,140,30,0.3)',borderRadius:3,padding:'2px 8px'}}>NEW: {d}</div>)}
