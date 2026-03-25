@@ -402,6 +402,15 @@ const RIFF_CHAINS=[
   {id:'last_stand',name:'LAST STAND',cards:['stagedive','wakeup'],color:'#00ddff',emoji:'💪'},
 ]
 
+// Chain lookup: given a card id, return chains it participates in + partner card name
+function getChainHints(cardId){
+  return RIFF_CHAINS.filter(ch=>ch.cards.includes(cardId)).map(ch=>{
+    const partnerIdx=ch.cards[0]===cardId?1:0
+    const partner=ALL_CARDS.find(c=>c.id===ch.cards[partnerIdx])
+    return{name:ch.name,emoji:ch.emoji,color:ch.color,partnerName:partner?partner.name:'???',partnerId:ch.cards[partnerIdx]}
+  })
+}
+
 const ALL_CARDS=[
   {id:'amp',name:'Amp It Up',type:'RIFF',rarity:'Common',emoji:'⚡',embers:2,effect:'Target member deals double ATK this turn.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:0,effect:'+10% Corruption. All members +2 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:2},
@@ -1991,7 +2000,7 @@ function StageSlot({member,isAttacking,isDiceTarget,onDrop,onDragOver,onDragStar
   )
 }
 
-function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop,isUsed,lastRiffPlayed}){
+function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop,isUsed,lastRiffPlayed,chainHintsOn}){
   const mastery=getMasteryTier(card.id)
   const spread=Math.min(4,20/total),mid=(total-1)/2
   const rot=(index-mid)*spread,yOff=Math.abs(index-mid)*2
@@ -2042,7 +2051,8 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       </div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'5px 5px 2px',letterSpacing:.4,lineHeight:1.2,borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:bc,textAlign:'center',padding:'3px 4px',letterSpacing:1.8,textTransform:'uppercase',flexShrink:0,textShadow:'0 0 8px '+bc+'88'}}>{card.type}</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#d0b888',textAlign:'center',padding:'2px 6px 5px',lineHeight:1.4,flex:1,display:'flex',alignItems:'center',justifyContent:'center'}}>{card.effect}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#d0b888',textAlign:'center',padding:'2px 6px 5px',lineHeight:1.4,flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>{card.effect}
+        {isHovered&&chainHintsOn&&(()=>{const hints=getChainHints(card.id);return hints.length>0?<div style={{marginTop:4,width:'100%'}}>{hints.map((h,i)=><div key={i} style={{padding:'3px 6px',background:'rgba(255,200,0,0.1)',border:'1px solid rgba(255,200,0,0.25)',borderRadius:3,marginTop:2,fontSize:10,color:h.color,fontWeight:700,textAlign:'center'}}>⛧ {h.name} — needs {h.partnerName}</div>)}</div>:null})()}</div>
     </div>
   )
 }
@@ -3323,6 +3333,7 @@ function App(){
   const [unlockHover,setUnlockHover]=useState(null) // card data for tooltip
   const setUnlockTab=(t)=>{setUnlockTab_(t);setUnlockPage_(0);setUnlockHover(null)}
   const [showPauseOptions,setShowPauseOptions]=useState(false)
+  const chainHintsOn=localStorage.getItem('vst_chainhints')!=='off'
   const [showMastery,setShowMastery]=useState(false)
   const [selectedDeck,setSelectedDeck]=useState('standard')
   const [encoreMode,setEncoreMode]=useState(false)
@@ -5567,6 +5578,8 @@ function App(){
             ['Screen Shake','vst_shake',localStorage.getItem('vst_shake')!=='off'],
             ['Card Hover Zoom','vst_hoverzoom',localStorage.getItem('vst_hoverzoom')!=='off'],
             ['Damage Numbers','vst_dmgnums',localStorage.getItem('vst_dmgnums')!=='off'],
+              ['Chain Hints','vst_chainhints',localStorage.getItem('vst_chainhints')!=='off'],
+              ['Chain Hints','vst_chainhints',localStorage.getItem('vst_chainhints')!=='off'],
           ].map(([label,key,on])=>(
             <div key={key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#e8a820'}}>{label}</span>
