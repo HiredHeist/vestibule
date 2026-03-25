@@ -348,12 +348,12 @@ const PACT_REWARDS=[
 ]
 
 const STAKES=[
-  {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.30,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Standard difficulty. Bosses +30% HP.',mentorBonus:0},
-  {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.30,dmgAdd:2,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +30% HP. Enemies +2 damage.',mentorBonus:0.03},
-  {id:'gold',name:'Gold',color:'#ffd700',border:'#ffd700',hpMult:1.30,dmgAdd:3,priceMult:1.25,scoreMult:2.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +30% HP. Enemies +3 damage. Shop prices +25%.',mentorBonus:0.03},
-  {id:'obsidian',name:'Obsidian',color:'#7a7a9a',border:'#6a6a8a',hpMult:1.50,dmgAdd:2,priceMult:1.25,scoreMult:2.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +50% HP. No free heal after fights. Drugs 50% more expensive.',mentorBonus:0.06},
-  {id:'blood',name:'Blood',color:'#8b0000',border:'#cc0000',hpMult:1.60,dmgAdd:2,priceMult:1.25,scoreMult:3.0,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +60% HP. Enemies +2 damage. Start with 4 Embers. Corruption starts at 10%.',mentorBonus:0.15},
-  {id:'demonic',name:'Demonic ⛧',color:'#ff0000',border:'#ff0000',hpMult:1.8,dmgAdd:4,priceMult:1.5,scoreMult:4.0,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,drugPriceMult:2.0,badTripChance:0.15,desc:'Bosses +80% HP. Max 3 Strikes. Bad trips 15%. Pure hell.',mentorBonus:0.75},
+  {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.20,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Standard difficulty. Bosses +20% HP.',mentorBonus:0},
+  {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.25,dmgAdd:2,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +25% HP. Enemies +2 damage.',mentorBonus:0.03},
+  {id:'gold',name:'Gold',color:'#ffd700',border:'#ffd700',hpMult:1.25,dmgAdd:3,priceMult:1.25,scoreMult:2.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Bosses +25% HP. Enemies +3 damage. Shop prices +25%.',mentorBonus:0.03},
+  {id:'obsidian',name:'Obsidian',color:'#7a7a9a',border:'#6a6a8a',hpMult:1.45,dmgAdd:2,priceMult:1.25,scoreMult:2.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +45% HP. No free heal after fights. Drugs 50% more expensive.',mentorBonus:0.06},
+  {id:'blood',name:'Blood',color:'#8b0000',border:'#cc0000',hpMult:1.70,dmgAdd:2,priceMult:1.25,scoreMult:3.0,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Bosses +70% HP. Enemies +2 damage. Start with 4 Embers. Corruption starts at 10%.',mentorBonus:0.15},
+  {id:'demonic',name:'Demonic ⛧',color:'#ff0000',border:'#ff0000',hpMult:1.66,dmgAdd:4,priceMult:1.5,scoreMult:4.0,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,drugPriceMult:2.0,badTripChance:0.15,desc:'Bosses +66% HP. Max 3 Strikes. Bad trips 15%. Pure hell.',mentorBonus:0.75},
 ]
 function getUnlockedStakes(){
   const beaten=JSON.parse(localStorage.getItem('vst_stakes_beaten')||'[]')
@@ -2478,7 +2478,7 @@ function CombatLogViewer({log,onClose}){
         {log.map((entry,i)=>{
           const isFightHeader=entry.startsWith('══')
           return <div key={i} style={{
-            fontFamily:"'ScratchFont',serif",
+            fontFamily:"'MBScribblesFont',serif",
             fontSize:isFightHeader?16:13,
             color:colorForEntry(entry),
             padding:isFightHeader?'10px 0 4px':'2px 0',
