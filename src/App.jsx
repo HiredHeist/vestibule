@@ -1,4 +1,10 @@
 
+// ═══ TODO — NEXT SESSION ═══
+// [ ] Boss attack: make ENTIRE boss box fly (not just emoji) — same style as member attacks
+// [ ] Corruption bar redesign feedback/tuning from player
+// [ ] Event choice audit — Sabbath Offering useless on Bronze/Silver/Gold
+// ═══════════════════════════
+
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 let _uidCounter=Date.now()
 function uid(){return(++_uidCounter).toString(36)}
@@ -6112,7 +6118,50 @@ function App(){
   return(
     <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
 
-      {enemyHp>0&&enemyHp<enemy.maxHp*0.20&&<div style={{position:'absolute',inset:0,zIndex:7998,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 50%,rgba(180,0,0,0.2) 100%)',animation:'bossUrgency 0.6s ease-in-out infinite alternate'}}/>}
+      {/* ═══ CORRUPTION THERMOMETER — right edge ═══ */}
+      <div style={{position:'absolute',right:12,top:20,bottom:360,width:48,zIndex:50,display:'flex',flexDirection:'column',alignItems:'center',gap:0}}>
+        {/* Percentage at top */}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,
+          color:corruption>=100?'#ff4466':corruption>=75?'#ee3355':corruption>=50?'#cc2244':'#e8c040',
+          textShadow:corruption>=75?'0 0 12px rgba(255,0,60,0.8)':'0 0 8px rgba(200,160,40,0.5)',
+          marginBottom:4,letterSpacing:2}}>{corruption}%</div>
+        {/* Thermometer body */}
+        <div style={{flex:1,width:32,background:'rgba(15,5,10,0.9)',border:'2px solid '+(corruption>=75?'rgba(200,0,60,0.7)':corruption>=50?'rgba(150,0,40,0.5)':'rgba(80,30,20,0.5)'),
+          borderRadius:16,overflow:'hidden',position:'relative',
+          boxShadow:corruption>=75?'0 0 20px rgba(200,0,60,0.4),inset 0 0 15px rgba(100,0,30,0.3)':corruption>=50?'0 0 10px rgba(150,0,40,0.2)':'none',
+          transition:'border-color 0.5s, box-shadow 0.5s'}}>
+          {/* Threshold markers */}
+          {[25,50,75].map(t=><div key={t} style={{position:'absolute',left:0,right:0,bottom:t+'%',height:2,
+            background:corruption>=t?'rgba(255,200,60,0.4)':'rgba(255,255,255,0.08)',zIndex:3}}>
+            <div style={{position:'absolute',right:-2,top:-6,fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,
+              color:corruption>=t?'#e8c040':'#554430',textShadow:'0 0 4px rgba(0,0,0,0.9)',
+              transform:'translateX(100%)',paddingLeft:4,whiteSpace:'nowrap'}}>
+              {t===25?'⚠':t===50?'🔥':t===75?'💀':''}
+            </div>
+          </div>)}
+          {/* Fill — rises from bottom */}
+          <div style={{position:'absolute',bottom:0,left:0,right:0,
+            height:Math.min(100,corruption)+'%',
+            transition:'height 0.7s ease',
+            background:corruption>=100?'linear-gradient(0deg,#440022,#cc0055,#ff0077)':corruption>=75?'linear-gradient(0deg,#330018,#990044,#cc0055)':corruption>=50?'linear-gradient(0deg,#220010,#770033,#990044)':corruption>=25?'linear-gradient(0deg,#1a000a,#550022,#770033)':'linear-gradient(0deg,#110005,#330011,#440018)',
+            boxShadow:corruption>=75?'0 0 16px rgba(255,0,80,0.6), inset 0 -8px 20px rgba(255,0,80,0.3)':corruption>=50?'0 0 8px rgba(200,0,60,0.3)':'none'}}/>
+          {/* Vertical text — C O R R U P T I O N */}
+          <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',zIndex:5,gap:0}}>
+            {'CORRUPTION'.split('').map((ch,i)=><span key={i} style={{
+              fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,lineHeight:1.15,
+              color:'#e8c040',textShadow:'0 0 6px rgba(0,0,0,0.95), 0 0 3px rgba(0,0,0,1)',
+              letterSpacing:0}}>{ch}</span>)}
+          </div>
+        </div>
+        {/* Active threshold label at bottom */}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,marginTop:4,textAlign:'center',
+          color:corruption>=100?'#ff4466':corruption>=75?'#ee3355':corruption>=50?'#cc2244':corruption>=25?'#aa3344':'#554430',
+          textShadow:corruption>=50?'0 0 8px rgba(200,0,60,0.6)':'none',letterSpacing:1,lineHeight:1.2}}>
+          {corruption>=100?'☠ POSSESSED':corruption>=75?'💀 MADNESS':corruption>=50?'🔥 HUNGER':corruption>=25?'⚠ WHISPERS':''}
+        </div>
+      </div>
+
+            {enemyHp>0&&enemyHp<enemy.maxHp*0.20&&<div style={{position:'absolute',inset:0,zIndex:7998,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 50%,rgba(180,0,0,0.2) 100%)',animation:'bossUrgency 0.6s ease-in-out infinite alternate'}}/>}
       {damageFlash&&<div style={{position:'absolute',inset:0,zIndex:8500,pointerEvents:'none',background:'radial-gradient(ellipse at center,rgba(200,0,0,0.25),rgba(100,0,0,0.4))',animation:'flashFade 0.4s ease-out forwards'}}/>}
       {corruptHigh&&!corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 40%,rgba(100,0,0,0.15) 100%)',animation:bgPulseAnim}}/>}
       {corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 20%,rgba(140,0,0,0.3) 100%)',animation:'bgPulse 1s ease-in-out infinite'}}/>}
@@ -6361,20 +6410,7 @@ function App(){
               {bon>1&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#e8a820',letterSpacing:1}}>+{Math.round((bon-1)*100)}% SYNERGY</span>}
               <span style={{color:'#e8a820',fontSize:18,textShadow:'0 0 8px rgba(200,160,60,0.5)'}}>⟶</span>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:27,color:'#c8a060',fontWeight:700}}>{enemy.name}</span>
-              {/* CORRUPTION BAR — right side of attack bar */}
-              <div style={{position:'absolute',right:chosenPacts.length>0?12+chosenPacts.length*28+16:12,top:'50%',transform:'translateY(-50%)',width:280,height:18,background:'rgba(30,10,20,0.85)',border:'1px solid rgba(100,30,60,0.5)',borderRadius:3,overflow:'hidden'}}>
-                {[25,50,75].map(t=><div key={t} style={{position:'absolute',top:0,bottom:0,left:t+'%',width:1,background:corruption>=t?'rgba(255,255,255,0.2)':'rgba(255,255,255,0.06)',zIndex:3}}/>)}
-                <div style={{height:'100%',width:Math.min(100,corruption)+'%',transition:'width 0.7s ease',
-                  background:corruption>=100?'linear-gradient(90deg,#660044,#cc0066,#ff0088)':corruption>=75?'linear-gradient(90deg,#550022,#aa0044,#dd0066)':corruption>=50?'linear-gradient(90deg,#440011,#880033)':corruption>=25?'linear-gradient(90deg,#330011,#660022)':'linear-gradient(90deg,#220008,#440011)',
-                  boxShadow:corruption>=75?'0 0 10px rgba(200,0,80,0.4)':'none'}}/>
-                <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',gap:6}}>
-                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:corruption>=100?'#ff88aa':corruption>=75?'#ff6688':corruption>=50?'#dd4466':'#aa3344',letterSpacing:2,textShadow:'0 0 6px rgba(0,0,0,0.95)'}}>CORRUPTION {corruption}%</span>
-                  {corruption>=25&&corruption<50&&<span style={{fontSize:8,color:'#cc6677',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>⚠ Whispers</span>}
-                  {corruption>=50&&corruption<75&&<span style={{fontSize:8,color:'#dd5566',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>⚠ Hunger</span>}
-                  {corruption>=75&&corruption<100&&<span style={{fontSize:8,color:'#ee4455',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>⚠ Madness</span>}
-                  {corruption>=100&&<span style={{fontSize:8,color:'#ff2244',textShadow:'0 0 4px rgba(0,0,0,0.9)'}}>☠ Possessed</span>}
-                </div>
-              </div>
+
               {chosenPacts.length>0&&<div style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',display:'flex',gap:4}}>
                 {chosenPacts.filter(Boolean).map(pid=>{const p=PACT_REWARDS.find(r=>r.id===pid);return p?<div key={pid} style={{position:'relative',cursor:'help'}}
                   onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='block'}}
