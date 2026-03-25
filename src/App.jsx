@@ -344,6 +344,7 @@ const PACT_REWARDS=[
   {id:'stone_wall',name:'Stone Wall',emoji:'🧱',desc:'Members take 1 less damage per Strike (min 1).',color:'#8888aa'},
   {id:'sixth_slot',name:'Sixth Slot',emoji:'👥',desc:'+1 band member slot. Recruit at next shop.',color:'#e8a820'},
   {id:'war_drums',name:'War Drums',emoji:'🥁',desc:'+1 Strike per fight permanently.',color:'#dd2222'},
+  {id:'atonement',name:'Atonement',emoji:'🕊',desc:'-15% Corruption after every boss kill.',color:'#88ccff'},
 ]
 
 const STAKES=[
@@ -437,10 +438,10 @@ const ALL_CARDS=[
   {id:'darktuning',name:'Dark Tuning',type:'CORRUPT',rarity:'Uncommon',emoji:'🌑',embers:3,effect:'For each 15% Corruption, one random member gains +1 ATK permanently.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'powertap',name:'Power Tap',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'Gain 2 Embers.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'soundboard',name:'Soundboard',type:'EMBER',rarity:'Uncommon',emoji:'🎛',embers:1,effect:'Gain 2 Embers. Draw 1 extra card at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:1},
-  {id:'setbreak',name:'Smoke Break',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Select 1 card first, then play to discard it. Gain 2 Embers. (Random if no selection)',color:'#22aa44',typeColor:'#118833',copies:2},
+  {id:'setbreak',name:'Smoke Break',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Select 1 card first, then play to discard it. Gain 2 Embers. -15% Corruption. (Random if no selection)',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'heavyriff',name:'Heavy Riff',type:'RIFF',rarity:'Uncommon',emoji:'🥊',embers:2,effect:'Deal damage = stage total ATK ÷ 2, direct to boss.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'resonancecard',name:'Resonance',type:'RIFF',rarity:'Uncommon',emoji:'🌀',embers:1,effect:'Target member ATK becomes equal to highest ATK on stage.',color:'#9933cc',typeColor:'#7722aa',copies:3},
-  {id:'herbmoney',name:'Herb Money',type:'RIFF',rarity:'Uncommon',emoji:'🌿',embers:1,effect:'Deal damage equal to your current Stash. Keep your Stash.',color:'#9933cc',typeColor:'#7722aa',copies:1},
+  {id:'herbmoney',name:'Herb Money',type:'RIFF',rarity:'Uncommon',emoji:'🌿',embers:1,effect:'Deal damage equal to your current Stash. Keep your Stash. -15% Corruption.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'goingbroke',name:'Going Broke',type:'RIFF',rarity:'Rare',emoji:'💸',embers:0,effect:'Spend ALL your Stash. Deal that much damage to the boss.',color:'#9933cc',typeColor:'#7722aa',copies:1,shopOnly:true},
   // ── UNLOCKABLE CARDS ───────────────────────────────────────────
   {id:'moshpit',name:'Mosh Pit',type:'RIFF',rarity:'Uncommon',emoji:'🤘',embers:1,effect:'Deal 3 damage per alive member on stage.',color:'#9933cc',typeColor:'#7722aa',copies:2,locked:true,unlockAt:1000},
@@ -3773,7 +3774,8 @@ function App(){
       const hmHp=Math.max(0,enemyHp-herbDmg);setEnemyHp(hmHp);if(hmHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
       addFloat(herbDmg,bc.x,bc.y-60,'#22aa44',herbDmg>=20);playHit();updStat('totalDamage',herbDmg)
       if(hmHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
-      msg='🌿 Herb Money! '+herbDmg+' damage ('+stash+'🌿 Stash). Stash kept.'
+      setCorruption(p=>Math.max(0,p-15))
+      msg='🌿 Herb Money! '+herbDmg+' damage ('+stash+'🌿 Stash). Stash kept. -15% Corruption.'
     }
     else if(card.id==='goingbroke'){
       if(stash<=0){addLog('💸 You are already broke!');return false}
@@ -3951,7 +3953,8 @@ function App(){
       setDiscardPile(p=>[...p,card,victim])
       setSelected([])
       setEmbers(p=>Math.min(maxEmbers,p+3-effectiveEmbers))
-      addLog('🎼 Smoke Break! '+victim.name+' discarded. +3 Embers.'+(preSelected.length===0?' (tip: select a card first)':''))
+      setCorruption(p=>Math.max(0,p-15))
+      addLog('🎼 Smoke Break! '+victim.name+' discarded. +3 Embers. -15% Corruption.'+(preSelected.length===0?' (tip: select a card first)':''))
       addFloat('+3 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard'] // count victim too for refill
@@ -4163,6 +4166,11 @@ function App(){
         return m
       })
     })
+    // ATONEMENT PACT: -15% corruption on boss kill
+    const isBossKill=(fightIndex+1)%3===0
+    if(isBossKill&&chosenPacts.includes('atonement')){
+      setCorruption(p=>{const nc=Math.max(0,p-15);addLog('🕊 Atonement! Boss defeated. Corruption -15% → '+nc+'%');return nc})
+    }
     // Bonus scales with circle depth
   const circleNum=Math.floor(fightIndex/3)+1
   const perfectBonus=strikesLeft>=3?(circleNum):0 // won in 1 Strike = perfect
