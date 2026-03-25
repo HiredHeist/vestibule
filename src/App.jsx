@@ -2416,7 +2416,7 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
   return(
     <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:180,position:'relative',overflow:bossStrikeAnim?'visible':'hidden',zIndex:bossStrikeAnim?300:1}}>
       <div data-boss-emoji="1" style={{width:180,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:'6px 0 0 6px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:90,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:bossStrikeAnim?'visible':'hidden',
-        transform:bossStrikeAnim?bossStrikeAnim.phase==='windup'?'translateY(15px) scale(1.08) rotate(-3deg)':bossStrikeAnim.phase==='launch'?'translateY(280px) scale(0.85) rotate(4deg)':bossStrikeAnim.phase==='impact'?'translateY(380px) scale(1.25) rotate(0deg)':bossStrikeAnim.phase==='return'?'translateY(40px) scale(1.02)':'none':'none',
+        transform:bossStrikeAnim?bossStrikeAnim.phase==='windup'?'translateY(15px) scale(1.08) rotate(-3deg)':bossStrikeAnim.phase==='launch'?'translate('+(bossStrikeAnim.dx*0.5)+'px,'+(bossStrikeAnim.dy*0.5-40)+'px) scale(0.85) rotate(4deg)':bossStrikeAnim.phase==='impact'?'translate('+bossStrikeAnim.dx+'px,'+bossStrikeAnim.dy+'px) scale(1.25) rotate(0deg)':bossStrikeAnim.phase==='return'?'translateY(40px) scale(1.02)':'none':'none',
         transition:bossStrikeAnim?'transform 0.35s cubic-bezier(0.2,0.8,0.3,1.2), box-shadow 0.3s':'all 0.5s',
         zIndex:bossStrikeAnim?500:1,
         filter:bossStrikeAnim&&(bossStrikeAnim.phase==='launch'||bossStrikeAnim.phase==='impact')?'drop-shadow(0 0 40px rgba(255,0,0,0.9))':'none',
@@ -4713,6 +4713,7 @@ function App(){
     _bkRunning=dmg
     const speedFast=localStorage.getItem('vst_speed')==='fast'
     const memberDelay=speedFast?900:2000
+    delay=100 // small initial delay so React commits attacking phase first
     actives.forEach(function(m,attackIdx){
       if(m.role==='Drummer')return
       const si=stage.indexOf(m)
@@ -4827,21 +4828,25 @@ function App(){
         }
         // Lucifer Phase 2: AoE — hits ALL members (damage split)
         const luciferAoE=enemy.passiveId==='luciferBoss'&&luciferPhase===2
-        // BOSS STRIKE ANIMATION — whole box flies to target
+        // BOSS STRIKE ANIMATION — emoji square flies to target member
           const targetSlotIdx=stage.indexOf(target)
+          const bossPos=getCenter(bossRef)
+          const targetPos=getCenter(stageRefs.current[targetSlotIdx])
+          const bdx=targetPos.x-bossPos.x
+          const bdy=targetPos.y-bossPos.y
           // Phase 1: WINDUP — boss dips
-          setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'windup'})
+          setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'windup',dx:bdx,dy:bdy})
           // Phase 2: LAUNCH — boss flies toward member
-          setTimeout(()=>setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'launch'}),speedFast?200:400)
+          setTimeout(()=>setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'launch',dx:bdx,dy:bdy}),speedFast?200:400)
           // Phase 3: IMPACT — boss slams member, sound + shake
           setTimeout(()=>{
-            setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'impact'})
+            setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'impact',dx:bdx,dy:bdy})
             playSfx('boss_attack')
             playHit()
             triggerShake(12,350)
           },speedFast?500:1000)
           // Phase 4: RETURN — boss floats back
-          setTimeout(()=>setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'return'}),speedFast?700:1400)
+          setTimeout(()=>setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'return',dx:bdx,dy:bdy}),speedFast?700:1400)
           // Phase 5: DONE
           setTimeout(()=>setBossStrikeAnim(null),speedFast?900:1800)
           // Delay damage application until after boss animation
