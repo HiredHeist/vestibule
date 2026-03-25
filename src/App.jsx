@@ -2819,8 +2819,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   // UNIFIED END SCREEN — compact, no-scroll, professional
   // ═══════════════════════════════════════════════════════════
   const bgColor=isVictory?'rgba(4,3,1,0.97)':isStoned?'rgba(2,0,0,0.97)':'rgba(6,0,0,0.97)'
-  const scanlineColor=isVictory?'rgba(200,150,0,0.08)':isStoned?'rgba(0,180,0,0.12)':'rgba(180,0,0,0.10)'
-  const vignetteColor=isVictory?'rgba(60,40,0,0.5)':isStoned?'rgba(0,80,0,0.4)':'rgba(80,0,0,0.5)'
+    const vignetteColor=isVictory?'rgba(60,40,0,0.5)':isStoned?'rgba(0,80,0,0.4)':'rgba(80,0,0,0.5)'
 
   // Compact stats — 2 rows of 5
   const compactStats=[
@@ -2862,7 +2861,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   return(
     <div style={{position:'absolute',inset:0,zIndex:9800,background:bgColor,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',animation:'fadeIn 0.8s ease',overflow:'hidden'}}>
       {/* Scanlines */}
-      {localStorage.getItem('vst_scanlines')!=='off'&&<div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,rgba(0,0,0,0.12),rgba(0,0,0,0.12) 1px,transparent 1px,transparent 3px)',pointerEvents:'none',zIndex:0}}/>}
+      
       {/* Vignette */}
       <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 20%,'+vignetteColor+' 100%)',pointerEvents:'none',zIndex:0}}/>
       {/* Watermark */}
@@ -5631,7 +5630,7 @@ function App(){
           <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:972,height:972,objectFit:'contain'}}/>
         </div>
         {/* Scanlines */}
-        <div style={{position:'absolute',inset:0,pointerEvents:'none',backgroundImage:'repeating-linear-gradient(0deg,rgba(0,0,0,0.15),rgba(0,0,0,0.15) 1px,transparent 1px,transparent 3px)',zIndex:1}}/>
+        
         {/* Content */}
         <div style={{position:'relative',zIndex:2,display:'flex',flexDirection:'column',alignItems:'center',gap:8}}>
 
@@ -5816,7 +5815,7 @@ function App(){
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(gameState==='circleSplash'&&circleSplash)return(
     <div style={{width:1920,height:1080,position:'relative',background:'#020100',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,overflow:'hidden'}}>
-      <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,rgba(0,0,0,0.12),rgba(0,0,0,0.12) 1px,transparent 1px,transparent 3px)',pointerEvents:'none'}}/>
+      
       <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 30%,rgba(80,0,0,0.4) 100%)',pointerEvents:'none'}}/>
       <div style={{fontSize:120,filter:'drop-shadow(0 0 40px rgba(200,0,0,0.6))',animation:'throb 1s ease-in-out infinite'}}>{circleSplash.circleEmoji}</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#cc4444',letterSpacing:6,textTransform:'uppercase',animation:'fadeIn 0.5s ease'}}>Entering</div>
@@ -6038,27 +6037,7 @@ function App(){
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#ff0000',textShadow:'0 0 40px rgba(255,0,0,0.9),0 0 80px rgba(200,0,0,0.6),-3px 0 rgba(255,0,0,0.5),3px 0 rgba(200,0,0,0.5),3px 3px 0 #000',letterSpacing:6,animation:'throb 0.4s ease-in-out infinite'}}>⛧ 6.66 ⛧</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#ff4444',letterSpacing:8,textTransform:'uppercase',marginTop:4,textShadow:'0 0 20px rgba(255,0,0,0.7)'}}>MARK OF THE BEAST</div>
       </div>}
-      {localStorage.getItem('vst_scanlines')!=='off'&&<div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,rgba(0,0,0,0.15),rgba(0,0,0,0.15) 1px,transparent 1px,transparent 3px)',pointerEvents:'none',zIndex:1}}/>}
-      {vhsOn&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:2}}>
-        {/* Slight overall flicker */}
-        <div style={{position:'absolute',inset:0,animation:'vhsFlicker 0.1s infinite',background:'rgba(0,0,0,0.02)'}}/>
-        {/* Chromatic aberration — red/blue shift on edges */}
-        <div style={{position:'absolute',inset:0,
-          boxShadow:'inset 2px 0 0 rgba(255,0,0,0.06), inset -2px 0 0 rgba(0,80,255,0.06)',
-          mixBlendMode:'screen'}}/>
-        {/* Tracking line — single white line scrolling down */}
-        <div style={{position:'absolute',left:0,right:0,height:3,
-          background:'linear-gradient(90deg,transparent 5%,rgba(255,255,255,0.08) 20%,rgba(255,255,255,0.12) 50%,rgba(255,255,255,0.08) 80%,transparent 95%)',
-          animation:'vhsTrackingLine 6s linear infinite'}}/>
-        {/* Noise grain overlay */}
-        <div style={{position:'absolute',inset:0,opacity:0.03,
-          backgroundImage:'url(data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>')+')',
-          backgroundSize:'200px 200px'}}/>
-        {/* Bottom edge distortion bar */}
-        <div style={{position:'absolute',bottom:0,left:0,right:0,height:8,
-          background:'linear-gradient(180deg,transparent,rgba(255,255,255,0.04))',
-          animation:'vhsFlicker 0.08s infinite'}}/>
-      </div>}
+      
       {showCombatLog&&<CombatLogViewer log={fullRunLogRef.current} onClose={()=>setShowCombatLog(false)}/>}
       {corruptionFlash&&<div style={{position:'absolute',top:'35%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9600,textAlign:'center',animation:'fadeIn 0.3s ease',pointerEvents:'none'}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:corruptionFlash.color,textShadow:'0 0 30px '+corruptionFlash.color+',0 0 60px rgba(200,0,60,0.5),2px 2px 0 #000',letterSpacing:4}}>⚠ {corruptionFlash.name} ⚠</div>
@@ -6476,12 +6455,40 @@ function App(){
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#555',letterSpacing:2,marginTop:4}}>Press ESC to close</div>
         </div>
       </div>}
+
     </div>
   )
 }
 
 // ── SCALE ROOT — fits game to any screen size ──────────────────
 const DESIGN_W=1920,DESIGN_H=1080
+function CRTOverlay(){
+  const [,forceUpdate]=useState(0)
+  const scanOn=localStorage.getItem('vst_scanlines')!=='off'
+  const vhsOn=localStorage.getItem('vst_vhs')!=='off'
+  // Re-render when settings change (listen for storage events)
+  useEffect(()=>{
+    const h=()=>forceUpdate(p=>p+1)
+    window.addEventListener('storage',h)
+    // Also re-check every 500ms for same-tab localStorage changes
+    const t=setInterval(h,500)
+    return()=>{window.removeEventListener('storage',h);clearInterval(t)}
+  },[])
+  return(<>
+    {scanOn&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:9990,
+      backgroundImage:'repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px)',
+      backgroundSize:'100% 4px'}}/>}
+    {vhsOn&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:9991}}>
+      <div style={{position:'absolute',inset:0,boxShadow:'inset 4px 0 0 rgba(255,0,0,0.08), inset -4px 0 0 rgba(0,80,255,0.08)'}}/>
+      <div style={{position:'absolute',inset:0,animation:'vhsFlicker 0.12s infinite',background:'rgba(0,0,0,0.02)'}}/>
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.4) 100%)'}}/>
+      <div style={{position:'absolute',inset:0,opacity:0.05,mixBlendMode:'overlay',
+        backgroundImage:'url(data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>')+')',
+        backgroundSize:'200px 200px'}}/>
+    </div>}
+  </>)
+}
+
 function ScaleRoot(){
   const [scale,setScale]=useState(1)
   const [dims,setDims]=useState({w:DESIGN_W,h:DESIGN_H})
@@ -6500,6 +6507,25 @@ function ScaleRoot(){
     <div style={{width:'100vw',height:'100vh',overflow:'hidden',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}>
       <div style={{width:DESIGN_W,height:DESIGN_H,transform:`scale(${scale})`,transformOrigin:'center center',position:'relative'}}>
         <App/>
+        {/* GLOBAL CRT SCANLINES — visible on ALL screens */}
+        {localStorage.getItem('vst_scanlines')!=='off'&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:9990,
+          backgroundImage:'repeating-linear-gradient(0deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.25) 2px, rgba(0,0,0,0.25) 4px)',
+          backgroundSize:'100% 4px'}}/>}
+        {/* GLOBAL VHS EFFECT — visible on ALL screens */}
+        {localStorage.getItem('vst_vhs')!=='off'&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:9991}}>
+          {/* Chromatic aberration — red/blue fringe */}
+          <div style={{position:'absolute',inset:0,
+            boxShadow:'inset 3px 0 0 rgba(255,0,0,0.07), inset -3px 0 0 rgba(0,80,255,0.07)'}}/>
+          {/* Subtle flicker */}
+          <div style={{position:'absolute',inset:0,animation:'vhsFlicker 0.12s infinite',background:'rgba(0,0,0,0.015)'}}/>
+          {/* Slight vignette — darker corners */}
+          <div style={{position:'absolute',inset:0,
+            background:'radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.35) 100%)'}}/>
+          {/* Very subtle noise grain */}
+          <div style={{position:'absolute',inset:0,opacity:0.04,mixBlendMode:'overlay',
+            backgroundImage:'url(data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>')+')',
+            backgroundSize:'200px 200px'}}/>
+        </div>}
       </div>
     </div>
   )
