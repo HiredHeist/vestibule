@@ -4848,8 +4848,8 @@ function App(){
           // but CSS transforms are in game coords (1920x1080)
           const scaleEl=document.querySelector('[style*="transform: scale"]')
           const gameScale=scaleEl?parseFloat(scaleEl.style.transform.match(/scale\(([\d.]+)\)/)?.[1]||1):1
-          const bdx=(targetPos.x-bossPos.x)/gameScale
-          const bdy=(targetPos.y-bossPos.y)/gameScale
+          const bdx=targetPos.x-bossPos.x
+          const bdy=targetPos.y-bossPos.y
           // Phase 1: WINDUP — boss dips
           setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'windup',dx:bdx,dy:bdy})
           // Phase 2: LAUNCH — boss flies toward member
