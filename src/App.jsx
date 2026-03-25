@@ -5515,7 +5515,7 @@ function App(){
     if(menuView==='rules')return(
       <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.98)',display:'flex',flexDirection:'column',alignItems:'center',gap:12,padding:'40px 20px',overflowY:'auto'}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Rules</div>
-        <div style={{maxWidth:800,width:'100%',display:'flex',flexDirection:'column',gap:12}}>
+        <div style={{maxWidth:1500,width:'100%',display:'flex',flexDirection:'column',gap:12}}>
           {[
             ['🎸 The Goal','Build a doom metal band and fight through 9 Circles of Hell. Defeat all 27 enemies and Lucifer to win. Each circle has 2 regular fights and 1 boss fight.'],
             ['⚔ Strikes','You get 4 Strikes per fight (some stakes change this). Play cards to buff your band, then press Strike. All living members deal their ATK as damage to the boss.'],
@@ -5549,8 +5549,8 @@ function App(){
             ['🌍 Daily Challenge','A shared daily seed. Everyone faces the same RNG. Your best daily score is tracked. Play from the main menu or end screen.'],
             ['📜 Combat Log','Press ESC during combat to open the pause menu, then click Combat Log to review every event in the current run. Also available on the end screen as Run Log.'],
           ].map(([title,desc],i)=><div key={i} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:8,padding:'14px 20px'}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:30,fontWeight:900,color:'#e8a820',marginBottom:4}}>{title}</div>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:30,color:'#c8b080',lineHeight:1.5}}>{desc}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:36,fontWeight:900,color:'#e8a820',marginBottom:4}}>{title}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,color:'#c8b080',lineHeight:1.5}}>{desc}</div>
           </div>)}
         </div>
         <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:8}}>← Back</button>
