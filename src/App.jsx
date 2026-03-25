@@ -3854,7 +3854,7 @@ function App(){
           if(!disc.includes(chain.id)){disc.push(chain.id);localStorage.setItem('vst_combos_discovered',JSON.stringify(disc))}
         }
         setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.78*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
-        playSfx('combo');triggerShake(14,500);setStrikeMult(p=>Math.min(6.66,Math.round((p*1.78)*100)/100));addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×1.78 MULTIPLIER!')
+        playSfx('chain_combo');triggerShake(18,600);setStrikeMult(p=>Math.min(6.66,Math.round((p*1.78)*100)/100));addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×1.78 MULTIPLIER!')
         combosFiredRef.current.push(chain.id)
         addFloat('⛧ '+chain.name+' ⛧',getCenter(bossRef).x,getCenter(bossRef).y-140,chain.color,true)
         // Apply combo bonus damage = total stage ATK
@@ -5967,24 +5967,26 @@ function App(){
         </div>
       </div>}
       {/* RIFF CHAIN COMBO FLASH */}
-      {comboFlash&&<div style={{position:'absolute',inset:0,zIndex:9600,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:0}}>
-        {/* Full-screen color wash */}
-        <div style={{position:'absolute',inset:0,background:`radial-gradient(ellipse at center, ${comboFlash.color}22 0%, ${comboFlash.color}11 40%, transparent 70%)`,animation:'fadeIn 0.15s ease'}}/>
-        {/* Border glow — thicker, more dramatic */}
-        <div style={{position:'absolute',inset:0,border:`4px solid ${comboFlash.color}`,boxShadow:`inset 0 0 100px ${comboFlash.color}33,0 0 60px ${comboFlash.color}44`,animation:'fadeIn 0.1s ease'}}/>
-        {/* Horizontal banner bar */}
-        <div style={{position:'absolute',left:0,right:0,top:'38%',height:200,background:`linear-gradient(180deg, transparent, ${comboFlash.color}15 20%, ${comboFlash.color}25 50%, ${comboFlash.color}15 80%, transparent)`,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4}}/>
-        {/* Chain emoji — huge, pulsing */}
-        <div style={{fontSize:90,filter:`drop-shadow(0 0 40px ${comboFlash.color})`,animation:'throb 0.4s ease-in-out infinite',marginBottom:4,zIndex:1}}>{comboFlash.emoji}</div>
-        {/* RIFF CHAIN title */}
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:comboFlash.color,textShadow:`0 0 50px ${comboFlash.color},0 0 100px ${comboFlash.color}88,-3px 0 rgba(255,0,0,0.4),3px 0 rgba(0,100,255,0.3),3px 3px 0 #000`,letterSpacing:10,animation:'fadeIn 0.15s ease',zIndex:1}}>⛧ RIFF CHAIN ⛧</div>
-        {/* Chain name */}
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#fff',textShadow:`0 0 30px ${comboFlash.color},0 0 60px ${comboFlash.color}66,3px 3px 0 #000`,letterSpacing:8,animation:'fadeIn 0.25s ease',zIndex:1}}>{comboFlash.name}</div>
-        {/* Card combo that triggered it */}
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:comboFlash.color,letterSpacing:3,marginTop:6,animation:'fadeIn 0.35s ease',zIndex:1,textShadow:'0 0 10px rgba(0,0,0,0.9)',opacity:0.9}}>{comboFlash.card1} + {comboFlash.card2}</div>
-        {/* Multiplier display — the Balatro money shot */}
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:56,fontWeight:900,color:'#fff',textShadow:`0 0 30px ${comboFlash.color},0 0 60px rgba(255,200,0,0.5),3px 3px 0 #000`,letterSpacing:4,marginTop:8,animation:'fadeIn 0.4s ease',zIndex:1}}>×{comboFlash.mult?.toFixed(2)||'1.50'}</div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:comboFlash.color,letterSpacing:6,textTransform:'uppercase',marginTop:2,zIndex:1,textShadow:'0 0 10px rgba(0,0,0,0.9)'}}>STRIKE MULTIPLIER</div>
+      {comboFlash&&<div style={{position:'absolute',inset:0,zIndex:9600,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:0,animation:'chainGlow 3s ease forwards'}}>
+        {/* Full-screen dark overlay */}
+        <div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.7)',animation:'chainGlow 3s ease forwards'}}/>
+        {/* Color wash — intense */}
+        <div style={{position:'absolute',inset:0,background:`radial-gradient(ellipse at center, ${comboFlash.color}44 0%, ${comboFlash.color}22 30%, transparent 65%)`,animation:'chainGlow 3s ease forwards'}}/>
+        {/* Border glow — thick, pulsing */}
+        <div style={{position:'absolute',inset:0,border:`6px solid ${comboFlash.color}`,boxShadow:`inset 0 0 150px ${comboFlash.color}44,0 0 80px ${comboFlash.color}55,0 0 200px ${comboFlash.color}22`,animation:'chainGlow 3s ease forwards'}}/>
+        {/* Horizontal banner — wider, more visible */}
+        <div style={{position:'absolute',left:0,right:0,top:'28%',height:280,background:`linear-gradient(180deg, transparent, ${comboFlash.color}18 15%, ${comboFlash.color}30 50%, ${comboFlash.color}18 85%, transparent)`,animation:'chainGlow 3s ease forwards'}}/>
+        {/* Chain emoji — MASSIVE, slams in */}
+        <div style={{fontSize:120,filter:`drop-shadow(0 0 60px ${comboFlash.color})`,animation:'chainSlam 3s ease forwards',zIndex:1,marginBottom:0}}>{comboFlash.emoji}</div>
+        {/* RIFF CHAIN title — screen-wide */}
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:96,color:comboFlash.color,textShadow:`0 0 60px ${comboFlash.color},0 0 120px ${comboFlash.color}88,-4px 0 rgba(255,0,0,0.5),4px 0 rgba(0,80,255,0.4),4px 4px 0 #000`,letterSpacing:14,animation:'chainSlam 3s ease forwards',zIndex:1}}>⛧ RIFF CHAIN ⛧</div>
+        {/* Chain name — BIG */}
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:'#fff',textShadow:`0 0 40px ${comboFlash.color},0 0 80px ${comboFlash.color}88,4px 4px 0 #000`,letterSpacing:10,animation:'chainSlam 3s ease forwards',zIndex:1,marginTop:4}}>{comboFlash.name}</div>
+        {/* Card combo — the recipe */}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:comboFlash.color,letterSpacing:4,marginTop:10,animation:'chainSlam 3s ease forwards',zIndex:1,textShadow:`0 0 20px ${comboFlash.color},2px 2px 0 #000`}}>{comboFlash.card1}  +  {comboFlash.card2}</div>
+        {/* Multiplier — THE money shot, biggest element */}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:80,fontWeight:900,color:'#fff',textShadow:`0 0 40px ${comboFlash.color},0 0 80px rgba(255,200,0,0.6),0 0 120px ${comboFlash.color}44,4px 4px 0 #000`,letterSpacing:6,marginTop:12,animation:'chainSlam 3s ease forwards',zIndex:1}}>×{comboFlash.mult?.toFixed(2)||'1.78'}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:comboFlash.color,letterSpacing:8,textTransform:'uppercase',marginTop:4,zIndex:1,textShadow:'0 0 15px rgba(0,0,0,0.95)',animation:'chainSlam 3s ease forwards'}}>STRIKE MULTIPLIER</div>
       </div>}
       {/* CIRCLE CLEARED FLASH */}
 
