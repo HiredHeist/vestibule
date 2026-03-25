@@ -1000,11 +1000,14 @@ function EmberDisplay({current,max}){
 function BoosterScreen({onComplete,seed}){
   const [sel,setSel]=useState([])
   const getRandom8=()=>{
-    const real=getUnlockedMusicians()
-    const locked=ALL_MUSICIANS.filter(m=>m.locked)
+    const lt=parseInt(localStorage.getItem('vst_lifetime')||'0')
+    // "real" = playable members (unlocked or score-unlocked), with locked flag cleared
+    const real=getUnlockedMusicians().map(m=>m.locked&&isUnlocked(m.id,lt)?{...m,locked:false}:m)
+    // "truly locked" = members the player hasn't unlocked yet
+    const trulyLocked=ALL_MUSICIANS.filter(m=>m.locked&&!isUnlocked(m.id,lt))
     const shuffled=[...real].sort(()=>Math.random()-0.5)
-    // Always exactly 1 locked card, 7 random real members
-    const oneLocked=locked.length>0?[locked[Math.floor(Math.random()*locked.length)]]:[]
+    // Always exactly 1 truly locked card (if any exist), rest are playable
+    const oneLocked=trulyLocked.length>0?[trulyLocked[Math.floor(Math.random()*trulyLocked.length)]]:[]
     const picked=shuffled.slice(0,8-oneLocked.length)
     return [...picked,...oneLocked].sort(()=>Math.random()-0.5)
   }
