@@ -2819,7 +2819,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   // UNIFIED END SCREEN — compact, no-scroll, professional
   // ═══════════════════════════════════════════════════════════
   const bgColor=isVictory?'rgba(4,3,1,0.97)':isStoned?'rgba(2,0,0,0.97)':'rgba(6,0,0,0.97)'
-  const scanlineColor=isVictory?'rgba(200,150,0,0.02)':isStoned?'rgba(0,180,0,0.04)':'rgba(180,0,0,0.035)'
+  const scanlineColor=isVictory?'rgba(200,150,0,0.08)':isStoned?'rgba(0,180,0,0.12)':'rgba(180,0,0,0.10)'
   const vignetteColor=isVictory?'rgba(60,40,0,0.5)':isStoned?'rgba(0,80,0,0.4)':'rgba(80,0,0,0.5)'
 
   // Compact stats — 2 rows of 5
@@ -2862,7 +2862,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   return(
     <div style={{position:'absolute',inset:0,zIndex:9800,background:bgColor,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',animation:'fadeIn 0.8s ease',overflow:'hidden'}}>
       {/* Scanlines */}
-      {localStorage.getItem('vst_scanlines')!=='off'&&<div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,'+scanlineColor+' 2px,'+scanlineColor+' 4px)',pointerEvents:'none',zIndex:0}}/>}
+      {localStorage.getItem('vst_scanlines')!=='off'&&<div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,rgba(0,0,0,0.12),rgba(0,0,0,0.12) 1px,transparent 1px,transparent 3px)',pointerEvents:'none',zIndex:0}}/>}
       {/* Vignette */}
       <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 20%,'+vignetteColor+' 100%)',pointerEvents:'none',zIndex:0}}/>
       {/* Watermark */}
@@ -3334,6 +3334,7 @@ function App(){
   const setUnlockTab=(t)=>{setUnlockTab_(t);setUnlockPage_(0);setUnlockHover(null)}
   const [showPauseOptions,setShowPauseOptions]=useState(false)
   const chainHintsOn=localStorage.getItem('vst_chainhints')!=='off'
+  const vhsOn=localStorage.getItem('vst_vhs')!=='off'
   const speedMult=(localStorage.getItem('vst_speed')==='fast')?0.5:1.0
   const [showMastery,setShowMastery]=useState(false)
   const [selectedDeck,setSelectedDeck]=useState('standard')
@@ -5580,6 +5581,7 @@ function App(){
             ['Card Hover Zoom','vst_hoverzoom',localStorage.getItem('vst_hoverzoom')!=='off'],
             ['Damage Numbers','vst_dmgnums',localStorage.getItem('vst_dmgnums')!=='off'],
             ['Chain Hints','vst_chainhints',localStorage.getItem('vst_chainhints')!=='off'],
+            ['VHS Effect','vst_vhs',localStorage.getItem('vst_vhs')!=='off'],
           ].map(([label,key,on])=>(
             <div key={key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#e8a820'}}>{label}</span>
@@ -5629,7 +5631,7 @@ function App(){
           <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:972,height:972,objectFit:'contain'}}/>
         </div>
         {/* Scanlines */}
-        <div style={{position:'absolute',inset:0,pointerEvents:'none',backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.015) 2px,rgba(255,255,255,0.015) 4px)',zIndex:1}}/>
+        <div style={{position:'absolute',inset:0,pointerEvents:'none',backgroundImage:'repeating-linear-gradient(0deg,rgba(0,0,0,0.15),rgba(0,0,0,0.15) 1px,transparent 1px,transparent 3px)',zIndex:1}}/>
         {/* Content */}
         <div style={{position:'relative',zIndex:2,display:'flex',flexDirection:'column',alignItems:'center',gap:8}}>
 
@@ -5814,7 +5816,7 @@ function App(){
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(gameState==='circleSplash'&&circleSplash)return(
     <div style={{width:1920,height:1080,position:'relative',background:'#020100',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,overflow:'hidden'}}>
-      <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(180,0,0,0.03) 2px,rgba(180,0,0,0.03) 4px)',pointerEvents:'none'}}/>
+      <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,rgba(0,0,0,0.12),rgba(0,0,0,0.12) 1px,transparent 1px,transparent 3px)',pointerEvents:'none'}}/>
       <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 30%,rgba(80,0,0,0.4) 100%)',pointerEvents:'none'}}/>
       <div style={{fontSize:120,filter:'drop-shadow(0 0 40px rgba(200,0,0,0.6))',animation:'throb 1s ease-in-out infinite'}}>{circleSplash.circleEmoji}</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#cc4444',letterSpacing:6,textTransform:'uppercase',animation:'fadeIn 0.5s ease'}}>Entering</div>
@@ -6036,7 +6038,27 @@ function App(){
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#ff0000',textShadow:'0 0 40px rgba(255,0,0,0.9),0 0 80px rgba(200,0,0,0.6),-3px 0 rgba(255,0,0,0.5),3px 0 rgba(200,0,0,0.5),3px 3px 0 #000',letterSpacing:6,animation:'throb 0.4s ease-in-out infinite'}}>⛧ 6.66 ⛧</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#ff4444',letterSpacing:8,textTransform:'uppercase',marginTop:4,textShadow:'0 0 20px rgba(255,0,0,0.7)'}}>MARK OF THE BEAST</div>
       </div>}
-      {localStorage.getItem('vst_scanlines')!=='off'&&<div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.012) 2px,rgba(255,255,255,0.012) 4px)',pointerEvents:'none',zIndex:1}}/>}
+      {localStorage.getItem('vst_scanlines')!=='off'&&<div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,rgba(0,0,0,0.15),rgba(0,0,0,0.15) 1px,transparent 1px,transparent 3px)',pointerEvents:'none',zIndex:1}}/>}
+      {vhsOn&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:2}}>
+        {/* Slight overall flicker */}
+        <div style={{position:'absolute',inset:0,animation:'vhsFlicker 0.1s infinite',background:'rgba(0,0,0,0.02)'}}/>
+        {/* Chromatic aberration — red/blue shift on edges */}
+        <div style={{position:'absolute',inset:0,
+          boxShadow:'inset 2px 0 0 rgba(255,0,0,0.06), inset -2px 0 0 rgba(0,80,255,0.06)',
+          mixBlendMode:'screen'}}/>
+        {/* Tracking line — single white line scrolling down */}
+        <div style={{position:'absolute',left:0,right:0,height:3,
+          background:'linear-gradient(90deg,transparent 5%,rgba(255,255,255,0.08) 20%,rgba(255,255,255,0.12) 50%,rgba(255,255,255,0.08) 80%,transparent 95%)',
+          animation:'vhsTrackingLine 6s linear infinite'}}/>
+        {/* Noise grain overlay */}
+        <div style={{position:'absolute',inset:0,opacity:0.03,
+          backgroundImage:'url(data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>')+')',
+          backgroundSize:'200px 200px'}}/>
+        {/* Bottom edge distortion bar */}
+        <div style={{position:'absolute',bottom:0,left:0,right:0,height:8,
+          background:'linear-gradient(180deg,transparent,rgba(255,255,255,0.04))',
+          animation:'vhsFlicker 0.08s infinite'}}/>
+      </div>}
       {showCombatLog&&<CombatLogViewer log={fullRunLogRef.current} onClose={()=>setShowCombatLog(false)}/>}
       {corruptionFlash&&<div style={{position:'absolute',top:'35%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9600,textAlign:'center',animation:'fadeIn 0.3s ease',pointerEvents:'none'}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:corruptionFlash.color,textShadow:'0 0 30px '+corruptionFlash.color+',0 0 60px rgba(200,0,60,0.5),2px 2px 0 #000',letterSpacing:4}}>⚠ {corruptionFlash.name} ⚠</div>
@@ -6407,6 +6429,7 @@ function App(){
               ['Card Hover Zoom','vst_hoverzoom',localStorage.getItem('vst_hoverzoom')!=='off'],
               ['Damage Numbers','vst_dmgnums',localStorage.getItem('vst_dmgnums')!=='off'],
               ['Chain Hints','vst_chainhints',localStorage.getItem('vst_chainhints')!=='off'],
+              ['VHS Effect','vst_vhs',localStorage.getItem('vst_vhs')!=='off'],
             ].map(([label,key,on])=>(
               <div key={key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
                 <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820'}}>{label}</span>
