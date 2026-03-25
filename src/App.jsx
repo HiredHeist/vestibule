@@ -3335,40 +3335,7 @@ function App(){
   const chainHintsOn=localStorage.getItem('vst_chainhints')!=='off'
   const vhsOn=localStorage.getItem('vst_vhs')!=='off'
 
-  // ═══ GLOBAL CRT/VHS OVERLAY — managed via DOM, not React ═══
-  useEffect(()=>{
-    function updateOverlays(){
-      const scanOn=localStorage.getItem('vst_scanlines')!=='off'
-      const vhsActive=localStorage.getItem('vst_vhs')!=='off'
-      
-      // SCANLINES
-      let scanEl=document.getElementById('vst-scanlines')
-      if(scanOn){
-        if(!scanEl){
-          scanEl=document.createElement('div')
-          scanEl.id='vst-scanlines'
-          scanEl.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:99990;background-image:repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.045) 2px, rgba(0,0,0,0.045) 4px);background-size:100% 4px;'
-          document.body.appendChild(scanEl)
-        }
-      }else if(scanEl){scanEl.remove()}
-      
-      // VHS
-      let vhsEl=document.getElementById('vst-vhs')
-      if(vhsActive){
-        if(!vhsEl){
-          vhsEl=document.createElement('div')
-          vhsEl.id='vst-vhs'
-          vhsEl.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:99991;'
-          const noiseUrl='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>')
-          vhsEl.innerHTML=`<div style="position:absolute;inset:0;box-shadow:inset 8px 0 0 rgba(255,0,0,0.15), inset -8px 0 0 rgba(0,100,255,0.15);"></div><div style="position:absolute;inset:0;animation:vhsFlicker 0.15s infinite;background:rgba(0,0,0,0.04);"></div><div style="position:absolute;inset:0;background:radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 100%);"></div><div style="position:absolute;inset:0;opacity:0.1;mix-blend-mode:overlay;background-image:url(${noiseUrl});background-size:200px 200px;"></div>`
-          document.body.appendChild(vhsEl)
-        }
-      }else if(vhsEl){vhsEl.remove()}
-    }
-    updateOverlays()
-    const interval=setInterval(updateOverlays,400)
-    return()=>{clearInterval(interval);document.getElementById('vst-scanlines')?.remove();document.getElementById('vst-vhs')?.remove()}
-  },[])
+
   const speedMult=(localStorage.getItem('vst_speed')==='fast')?0.5:1.0
   const [showMastery,setShowMastery]=useState(false)
   const [selectedDeck,setSelectedDeck]=useState('standard')
