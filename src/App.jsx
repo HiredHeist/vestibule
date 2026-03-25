@@ -2414,8 +2414,9 @@ function EventScreen({event,onChoose}){
   </div>)
 }
 
-function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRoll,bossStrikeAnim}){
-  const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35,isCritical=currentHp>0&&currentHp<enemy.maxHp*.20
+function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chromaStr,dblRoll,bossStrikeAnim}){
+  const eMaxHp=scaledMaxHp||enemy.maxHp
+  const pct=Math.max(0,(currentHp/eMaxHp)*100),isLow=currentHp<eMaxHp*.35,isCritical=currentHp>0&&currentHp<eMaxHp*.20
   return(
     <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:180,position:'relative',overflow:bossStrikeAnim?'visible':'hidden',zIndex:bossStrikeAnim?300:1}}>
       <div data-boss-emoji="1" style={{width:180,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:'6px 0 0 6px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:90,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:bossStrikeAnim?'visible':'hidden',
@@ -2928,7 +2929,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
             </button>
             {isVictory&&<button onClick={()=>{/* Encore: restart with scaled enemies */
               setEncoreMode(true);setEncoreCircle(p=>p+10)
-              setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(Math.round(ENEMIES[0].maxHp*activeStake.hpMult*2.0))
+              setFightIndex(0);setEnemy(ENEMIES[0]);const _wHp=Math.round(ENEMIES[0].maxHp*activeStake.hpMult*2.0);setEnemyHp(_wHp);setScaledMaxHp(_wHp)
               setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(4)
               setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
               setGameState('playing');setAnimPhase('idle');setDeathCause(null)
@@ -3283,6 +3284,7 @@ function App(){
   const [fightIndex,setFightIndex]=useState(0)
   const [enemy,setEnemy]=useState(ENEMIES[0])
   const [enemyHp,setEnemyHp]=useState(ENEMIES[0].maxHp)
+  const [scaledMaxHp,setScaledMaxHp]=useState(ENEMIES[0].maxHp)
   const [stage,setStage]=useState([null,null,null,null,null])
   const [deck,setDeck]=useState([]);const deckRef=useRef([]);
   const [hand,setHand]=useState([]);const handRef=useRef([]);
@@ -4805,7 +4807,7 @@ function App(){
         // LUCIFER PHASE TRANSITION: Phase 1 → Phase 2
         if(enemy.passiveId==='luciferBoss'&&luciferPhase===1){
           setLuciferPhase(2)
-          setEnemyHp(3333)
+          setEnemyHp(3333);setScaledMaxHp(3333)
           setBossRageAtk(0)
           // Full band reset
           setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,stoneShield:false,tempBuff:false,encoreReady:false,ampedThisStrike:false}):null))
@@ -4912,7 +4914,7 @@ function App(){
         else{scaledBaseDmg=stakeBaseDmg}
         const possessionBonus=corruption>=100?3:0
         const actualDmg=(fightTripBuff==='ASTRAL PROJECTION')?0:Math.max(1,Math.round(scaledBaseDmg)+possessionBonus-bossDebuff)
-          const ti=stage.indexOf(target)
+          const ti=targetSlotIdx
           if(luciferAoE&&actualDmg>0){
             // Phase 2: AoE — split damage across ALL alive members
             const splitDmg=Math.ceil(actualDmg/activeM.length)
@@ -4944,7 +4946,7 @@ function App(){
                 updStat('tooStonedCount',1)
                 addLog('🩸 BLOOD OATH FULFILLED! '+ns2[ti].name+' is destroyed by a single blow!')
                 playSfx('member_down')
-                addFloat('BLOOD OATH!',getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-60,'#cc0000',true)
+                addFloat('BLOOD OATH!',targetPos.x,targetPos.y-60,'#cc0000',true)
               } else {
               const newHp=ns2[ti].hp-actualDmg
               if(newHp<=0&&!ns2[ti].stoneShield){
@@ -4961,17 +4963,17 @@ function App(){
                   setStash(ps=>Math.min(MAX_STASH,ps+3))
                   addLog('🎭 Cult Following! +3 Stash.')
                 }
-                addFloat('TOO STONED',getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-60,'#888',false)
+                addFloat('TOO STONED',targetPos.x,targetPos.y-60,'#888',false)
               } else if(newHp<=0&&ns2[ti].stoneShield){
                 // StoneShield absorbs lethal hit — survives at 1 HP, decrement shield
                 const newShield=typeof ns2[ti].stoneShield==='number'?ns2[ti].stoneShield-1:0
                 ns2[ti]=Object.assign({},ns2[ti],{hp:1,stoneShield:newShield>0?newShield:false})
                 addLog('🛡 '+target.name+' shielded from death! 1 HP remaining.'+(newShield>0?' ('+newShield+' shield left)':''))
-                addFloat('SHIELDED!',getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-60,'#44ccff',true)
+                addFloat('SHIELDED!',targetPos.x,targetPos.y-60,'#44ccff',true)
               } else {
                 ns2[ti]=Object.assign({},ns2[ti],{hp:Math.max(0,newHp)})
               }
-              addFloat(actualDmg,getCenter(stageRefs.current[ti]).x,getCenter(stageRefs.current[ti]).y-50,'#ff3300',false)
+              addFloat(actualDmg,targetPos.x,targetPos.y-50,'#ff3300',false)
               } // end blood oath else
             }
             const allStoned=ns2.filter(function(m){return m}).every(function(m){return m.tooStoned})
@@ -5130,7 +5132,7 @@ function App(){
     }
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
-    setEnemy(nextEnemy);setEnemyHp(Math.ceil(nextEnemy.maxHp*activeStake.hpMult*(encoreMode?2.0:1.0)))
+    setEnemy(nextEnemy);const _sHp=Math.ceil(nextEnemy.maxHp*activeStake.hpMult*(encoreMode?2.0:1.0));setEnemyHp(_sHp);setScaledMaxHp(_sHp)
     addLog('══════ FIGHT '+(nextIdx+1)+': '+nextEnemy.name+' ('+Math.ceil(nextEnemy.maxHp*activeStake.hpMult*(encoreMode?2.0:1.0))+' HP) ══════')
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
@@ -6350,7 +6352,7 @@ function App(){
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
         <div style={{padding:'8px 16px 6px',position:'relative',zIndex:bossStrikeAnim?300:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0,overflow:'visible'}}>
           <div style={{width:'100%',maxWidth:950,background:'rgba(8,0,0,0.55)',border:'2px solid rgba(160,20,0,0.8)',borderRadius:8,padding:'0',overflow:bossStrikeAnim?'visible':'hidden',animation:'bossGlow 2s ease-in-out infinite',boxShadow:'0 0 30px rgba(150,0,0,0.4),inset 0 0 40px rgba(80,0,0,0.3)',position:'relative',zIndex:bossStrikeAnim?300:1}}>
-            <BossSection enemy={enemy} bossStrikeAnim={bossStrikeAnim} currentHp={enemyHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll}/>
+            <BossSection enemy={enemy} bossStrikeAnim={bossStrikeAnim} currentHp={enemyHp} scaledMaxHp={scaledMaxHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll}/>
           </div>
         </div>
         <div style={{position:'relative',zIndex:5,background:'rgba(20,11,3,0.42)',overflow:'visible',borderTop:'2px solid rgba(60,35,5,0.45)',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>
