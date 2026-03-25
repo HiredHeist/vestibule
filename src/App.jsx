@@ -937,7 +937,7 @@ function breakMentorLink(sold,stage){
 
 
 // ── Projectile ────────────────────────────────────────────────────────────────
-function Projectile({from,to,emoji,onDone}){
+function Projectile({from,to,emoji,onDone,isBoss}){
   const [p,setP]=useState({x:from.x,y:from.y,s:1,o:1})
   const fr=useRef(null),st=useRef(null)
   useEffect(()=>{
@@ -951,7 +951,7 @@ function Projectile({from,to,emoji,onDone}){
     fr.current=requestAnimationFrame(go)
     return ()=>cancelAnimationFrame(fr.current)
   },[])
-  return <div style={{position:'absolute',left:p.x,top:p.y,transform:`translate(-50%,-50%) scale(${p.s})`,fontSize:72,opacity:p.o,pointerEvents:'none',zIndex:8000,filter:'drop-shadow(0 0 30px rgba(255,80,0,1)) drop-shadow(0 0 60px rgba(255,40,0,0.6))'}}>{emoji}</div>
+  return <div style={{position:'absolute',left:p.x,top:p.y,transform:`translate(-50%,-50%) scale(${p.s})`,fontSize:72,opacity:p.o,pointerEvents:'none',zIndex:8000,filter:isBoss?'drop-shadow(0 0 40px rgba(255,0,0,1)) drop-shadow(0 0 80px rgba(200,0,0,0.7))':'drop-shadow(0 0 30px rgba(255,80,0,1)) drop-shadow(0 0 60px rgba(255,40,0,0.6))'}}>{emoji}</div>
 }
 
 function Float({v,x,y,color,big,onDone}){
@@ -2420,7 +2420,7 @@ function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chr
   return(
     <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:180,position:'relative',overflow:bossStrikeAnim?'visible':'hidden',zIndex:bossStrikeAnim?300:1}}>
       <div data-boss-emoji="1" style={{width:180,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:'6px 0 0 6px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:90,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:bossStrikeAnim?'visible':'hidden',
-        transform:bossStrikeAnim?bossStrikeAnim.phase==='windup'?'translateY(15px) scale(1.08) rotate(-3deg)':bossStrikeAnim.phase==='launch'?'translate('+(bossStrikeAnim.dx*0.5)+'px,'+(bossStrikeAnim.dy*0.5-40)+'px) scale(0.85) rotate(4deg)':bossStrikeAnim.phase==='impact'?'translate('+bossStrikeAnim.dx+'px,'+bossStrikeAnim.dy+'px) scale(1.25) rotate(0deg)':bossStrikeAnim.phase==='return'?'translateY(40px) scale(1.02)':'none':'none',
+        transform:bossStrikeAnim?bossStrikeAnim.phase==='windup'?'translateY(15px) scale(1.08) rotate(-3deg)':bossStrikeAnim.phase==='launch'?'translateY(-10px) scale(1.15)':bossStrikeAnim.phase==='impact'?'translateY(8px) scale(0.95)':bossStrikeAnim.phase==='return'?'translateY(0px) scale(1.0)':'none':'none',
         transition:bossStrikeAnim?'transform 0.35s cubic-bezier(0.2,0.8,0.3,1.2), box-shadow 0.3s':'all 0.5s',
         zIndex:bossStrikeAnim?500:1,
         filter:bossStrikeAnim&&(bossStrikeAnim.phase==='launch'||bossStrikeAnim.phase==='impact')?'drop-shadow(0 0 40px rgba(255,0,0,0.9))':'none',
@@ -6212,7 +6212,7 @@ function App(){
         </div>
       })()}
       {floats.filter(Boolean).map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
-      {projectiles.filter(Boolean).map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
+      {projectiles.filter(Boolean).map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))} isBoss={p.isBoss}/>)}
       {dmgBreakdown&&<DamageBreakdown data={dmgBreakdown} onDone={()=>setDmgBreakdown(null)}/>}
 
       {hellquakeAnim&&<div style={{position:'absolute',inset:0,zIndex:9500,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.85)',animation:'fadeIn 0.1s ease'}}>
