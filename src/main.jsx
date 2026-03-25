@@ -15,7 +15,7 @@ if (!window.__vstOverlayInit) {
     let s = document.getElementById('vst-crt')
     if (scanOn && !s) {
       s = document.createElement('div'); s.id = 'vst-crt'
-      s.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:99990;background-image:repeating-linear-gradient(0deg,transparent 0px,transparent 2px,rgba(0,0,0,0.045) 2px,rgba(0,0,0,0.045) 4px);background-size:100% 4px;'
+      s.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:99990;background-image:repeating-linear-gradient(0deg,transparent 0px,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);background-size:100% 4px;'
       document.body.appendChild(s)
     } else if (!scanOn && s) { s.remove() }
     // VHS
@@ -23,9 +23,9 @@ if (!window.__vstOverlayInit) {
     if (vhsOn && !v) {
       v = document.createElement('div'); v.id = 'vst-vfx'
       v.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:99991;'
-      v.innerHTML = '<div style="position:absolute;inset:0;box-shadow:inset 8px 0 rgba(255,0,0,.15),inset -8px 0 rgba(0,100,255,.15)"></div>'
-        + '<div style="position:absolute;inset:0;animation:vhsFlicker .15s infinite;background:rgba(0,0,0,.04)"></div>'
-        + '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.55) 100%)"></div>'
+      v.innerHTML = '<div style="position:absolute;inset:0;box-shadow:inset 12px 0 rgba(255,0,0,.25),inset -12px 0 rgba(0,100,255,.25)"></div>'
+        + '<div style="position:absolute;inset:0;animation:vhsFlicker .15s infinite;background:rgba(0,0,0,.06)"></div>'
+        + '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,.7) 100%)"></div>'
       document.body.appendChild(v)
     } else if (!vhsOn && v) { v.remove() }
   }
