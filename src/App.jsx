@@ -2409,7 +2409,7 @@ function BossSection({enemy,currentHp,isWiggling,innerRef,debuff,chromaStr,dblRo
   const pct=Math.max(0,(currentHp/enemy.maxHp)*100),isLow=currentHp<enemy.maxHp*.35,isCritical=currentHp>0&&currentHp<enemy.maxHp*.20
   return(
     <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:180}}>
-      <div style={{width:180,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:'6px 0 0 6px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:90,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:'hidden',transition:'all 0.5s',alignSelf:'stretch'}}>
+      <div data-boss-emoji="1" style={{width:180,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:'6px 0 0 6px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:90,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:'hidden',transition:'all 0.5s',alignSelf:'stretch'}}>
         {enemy.emoji}
         {isLow&&<div style={{position:'absolute',inset:0,background:'rgba(120,0,0,0.2)',animation:'pulse 1.2s ease infinite alternate'}}/>}
         {debuff>0&&<div style={{position:'absolute',bottom:4,right:4,background:'rgba(0,80,160,0.9)',border:'1px solid #4488ff',borderRadius:4,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#88aaff'}}>-{debuff}dmg</div>}
@@ -3298,6 +3298,7 @@ function App(){
   const [animPhase,setAnimPhase]=useState('idle')
   const [strikingMemberIdx,setStrikingMemberIdx]=useState(-1)
   const [strikeAnim,setStrikeAnim]=useState(null) // {slotIdx,phase,dx,dy}
+  const [bossStrikeAnim,setBossStrikeAnim]=useState(null) // {targetIdx,phase}
   const [cardAbsorb,setCardAbsorb]=useState(null)
   const [shakeOffset,setShakeOffset]=useState({x:0,y:0})
   const shakeTimerRef=useRef(null)
@@ -4699,7 +4700,7 @@ function App(){
     _breakdownLines.push({type:'subtotal',label:'BASE ATK',value:dmg,color:'#e8a820'})
     _bkRunning=dmg
     const speedFast=localStorage.getItem('vst_speed')==='fast'
-    const memberDelay=speedFast?450:1000
+    const memberDelay=speedFast?900:2000
     actives.forEach(function(m,attackIdx){
       if(m.role==='Drummer')return
       const si=stage.indexOf(m)
@@ -4714,30 +4715,30 @@ function App(){
         setStrikingMemberIdx(si)
         setStrikeAnim({slotIdx:si,phase:'dip',dx,dy})
       },curDelay)
-      // Phase 2: WIGGLE (150ms)
+      // Phase 2: WIGGLE (300ms)
       setTimeout(function(){
         setStrikeAnim({slotIdx:si,phase:'wiggle',dx,dy})
-      },curDelay+(speedFast?80:150))
-      // Phase 3: LAUNCH (300ms) — card flies toward boss
+      },curDelay+(speedFast?150:300))
+      // Phase 3: LAUNCH (700ms) — card flies toward boss
       setTimeout(function(){
         try{(ATK_SND[m.role]||ATK_SND['Lead Guitarist'])()}catch(e){}
         setStrikeAnim({slotIdx:si,phase:'launch',dx,dy})
-      },curDelay+(speedFast?150:300))
-      // Phase 4: IMPACT (600ms) — card hits boss, shake
+      },curDelay+(speedFast?350:700))
+      // Phase 4: IMPACT (1200ms) — card hits boss, shake
       setTimeout(function(){
         setStrikeAnim({slotIdx:si,phase:'impact',dx,dy})
         triggerShake(8,250)
         if(md)addFloat(md.atk,bc.x,bc.y-60,'#cc8800',md.atk>=15)
-      },curDelay+(speedFast?280:600))
-      // Phase 5: RETURN (750ms) — card floats back
+      },curDelay+(speedFast?550:1200))
+      // Phase 5: RETURN (1500ms) — card floats back
       setTimeout(function(){
         setStrikeAnim({slotIdx:si,phase:'return',dx,dy})
-      },curDelay+(speedFast?340:750))
-      // Phase 6: DONE (950ms) — reset for next member
+      },curDelay+(speedFast?680:1500))
+      // Phase 6: DONE (1900ms) — reset for next member
       setTimeout(function(){
         setStrikingMemberIdx(-1)
         setStrikeAnim(null)
-      },curDelay+(speedFast?420:950))
+      },curDelay+(speedFast?850:1900))
       delay+=memberDelay
     })
 
@@ -4797,7 +4798,7 @@ function App(){
         if(triggerVictoryRef.current)triggerVictoryRef.current();return
       }
 
-      const _bossDelay=(_breakdownLines.length>1)?(_breakdownLines.length*140+200+1100):800
+      const _bossDelay=(_breakdownLines.length>1)?(_breakdownLines.length*140+200+1100+1000):(800+1000)
       if(_breakdownLines.length>1){const _slamAt=_breakdownLines.length*140+200;setTimeout(()=>{try{playSfx('big_hit')}catch(e){}},_slamAt)}
       setTimeout(function(){
         setDmgBreakdown(null) // dismiss breakdown before boss attacks
@@ -4816,6 +4817,14 @@ function App(){
         setDiceTarget(target);setShowDice(true);playDice()
         setTimeout(function(){
           setShowDice(false)
+          // BOSS STRIKE ANIMATION — emoji flies to target
+          const targetSlotIdx=stage.indexOf(target)
+          setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'windup'})
+          setTimeout(()=>setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'launch'}),speedFast?150:300)
+          setTimeout(()=>{setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'impact'});triggerShake(10,350)},speedFast?400:800)
+          setTimeout(()=>setBossStrikeAnim(null),speedFast?600:1200)
+          // Delay damage application until after boss animation
+          setTimeout(function(){
           const variance=0
           // Apply enemy passive scaling effects before damage
         const stakeBaseDmg=enemy.baseDmg+activeStake.dmgAdd
@@ -4930,6 +4939,7 @@ function App(){
           addLog('👁 '+enemy.name+' hits '+target.name+' for '+actualDmg)
           setDiceTarget(null)
           } // end single-target else
+          },speedFast?500:1000) // boss animation delay
           setTimeout(function(){
             let nh=[...handRef.current],nd=[...deckRef.current],ndisc=[...discRef.current];
             const cardsToReplace=Math.min(cardsToDrawRef.current,10-nh.length);
@@ -5009,7 +5019,7 @@ function App(){
                 addLog('🃏 '+enemy.name+' shuffles your hand! '+toDiscard+' card'+(toDiscard>1?'s':'')+' swapped.')
               }
             }
-            setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setSelected([]);
+            setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setSelected([]);
             // Check out-of-strikes death AFTER this strike resolves
             setStrikesLeft(function(cur){
               if(cur<=0){
@@ -5039,7 +5049,7 @@ function App(){
         setEnemy(AR_EXECUTIVE)
         setEnemyHp(AR_EXECUTIVE.maxHp)
         setEmbers(maxEmbers);setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS)
-        setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setSelected([]);setLastRiffPlayed(null)
+        setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setSelected([]);setLastRiffPlayed(null)
         setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
         setContractsPlayed(0);setPendingDraw(0);wthStrikesRef.current=0
         const allCards=[...handRef.current,...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
@@ -5089,7 +5099,7 @@ function App(){
     }
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({});victoryFiredRef.current=false
+    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({});victoryFiredRef.current=false
     // BOSS LOOT effects at fight start
     if(collectedLoot.includes('love_letter'))setNextCardFree(true)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
@@ -5491,7 +5501,7 @@ function App(){
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
-    setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
+    setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
     setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
     setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
@@ -6096,6 +6106,24 @@ function App(){
       {corruptHigh&&!corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 40%,rgba(100,0,0,0.15) 100%)',animation:bgPulseAnim}}/>}
       {corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 20%,rgba(140,0,0,0.3) 100%)',animation:'bgPulse 1s ease-in-out infinite'}}/>}
       {floats.filter(Boolean).map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
+      {bossStrikeAnim&&(()=>{
+        const bossEl=document.querySelector('[data-boss-emoji]')
+        const targetEl=stageRefs.current[bossStrikeAnim.targetIdx]?.current
+        if(!bossEl||!targetEl)return null
+        const bf=bossEl.getBoundingClientRect()
+        const tf=targetEl.getBoundingClientRect()
+        const bx=bf.left+bf.width/2,by=bf.top+bf.height/2
+        const tx=tf.left+tf.width/2,ty=tf.top+tf.height/2
+        const phase=bossStrikeAnim.phase
+        const x=phase==='windup'?bx:phase==='launch'?(bx+tx)/2:tx
+        const y=phase==='windup'?by-20:phase==='launch'?Math.min(by,ty)-100:ty
+        const sc=phase==='windup'?1.3:phase==='launch'?1.6:2.0
+        return <div style={{position:'fixed',left:x,top:y,transform:'translate(-50%,-50%) scale('+sc+')',
+          fontSize:72,zIndex:9500,pointerEvents:'none',
+          filter:'drop-shadow(0 0 30px rgba(255,0,0,1)) drop-shadow(0 0 60px rgba(200,0,0,0.6))',
+          transition:'all 0.3s cubic-bezier(0.2,0.8,0.3,1.2)',
+          opacity:phase==='impact'?0.8:1}}>{enemy.emoji}</div>
+      })()}
       {projectiles.filter(Boolean).map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))}/>)}
       {dmgBreakdown&&<DamageBreakdown data={dmgBreakdown} onDone={()=>setDmgBreakdown(null)}/>}
       {showDice&&diceTarget&&<DiceRoll target={diceTarget} onDone={()=>setShowDice(false)}/>}
