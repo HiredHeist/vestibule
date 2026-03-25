@@ -6212,7 +6212,7 @@ function App(){
             {activeGenre==='RIFF_METAL'?'+15% Strike Damage':activeGenre==='BLACK_METAL'?'+25% Corruption Damage':activeGenre==='PROG_ROCK'?'+1 Card Draw Next Strike':'Max Discards? +2 DMG Per Member'}
           </span>
           <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#887755',fontStyle:'italic'}}>
-            ({activeGenre==='RIFF_METAL'?genreCounts.RIFF+'/'+genreTotal+' Riff cards':activeGenre==='BLACK_METAL'?genreCounts.CORRUPT+'/'+genreTotal+' Corrupt cards':activeGenre==='PROG_ROCK'?genreCounts.UTILITY+'/'+genreTotal+' Utility cards':genreCounts.EMBER+'/'+genreTotal+' Ember cards'} played)
+            (played {activeGenre==='RIFF_METAL'?genreCounts.RIFF+' Riff':activeGenre==='BLACK_METAL'?genreCounts.CORRUPT+' Corrupt':activeGenre==='PROG_ROCK'?genreCounts.UTILITY+' Utility':genreCounts.EMBER+' Ember'} cards)
           </span>
         </div>}
                 <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,padding:'1px 20px 2px',position:'relative',zIndex:5,flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)'}}>
