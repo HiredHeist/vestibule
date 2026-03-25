@@ -4517,7 +4517,7 @@ function App(){
     // CA4: Wailing Guitar — first Strike deals double damage
     if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===activeStake.maxStrikes){dmg*=2;_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Wailing Guitar ×2',label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff4488'});addLog('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')}
     // GENRE BONUSES
-    if(activeGenre==='RIFF_METAL'){dmg=Math.round(dmg*1.15);_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Riff Metal ×1.15',label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#9933cc'});addLog('🎸 Riff Metal genre! +15% strike damage!')}
+    if(activeGenre==='RIFF_METAL'){dmg=Math.round(dmg*1.15);_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Thrash Metal ×1.15',label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#9933cc'});addLog('🎸 Thrash Metal genre! +15% strike damage!')}
     if(activeGenre==='DOOM_METAL'&&discardsLeft>=MAX_DISCARDS){dmg+=actives.length*2;_bkRunning=dmg;_breakdownLines.push({type:'add',label:'Doom Metal',emoji:'🎵',value:actives.length*2,runningAfter:dmg,color:'#666699'});addLog('🎵 Doom Metal genre! +'+actives.length*2+' ATK (no discards used)')}
     // HEXED: auto-raise corruption +5%, member gains +1 ATK per 10% corruption
     const hexedMembers=actives.filter(m=>m.keyword==='HEXED')
@@ -6244,9 +6244,9 @@ function App(){
             if(total<4)return null
             const pcts={RIFF:genreCounts.RIFF/total,CORRUPT:genreCounts.CORRUPT/total,UTILITY:genreCounts.UTILITY/total,EMBER:genreCounts.EMBER/total}
             const genres=[
-              {type:'RIFF',name:'RIFF METAL',pct:pcts.RIFF,color:'#9933cc',bonus:'+15% RIFF damage'},
+              {type:'RIFF',name:'THRASH METAL',pct:pcts.RIFF,color:'#9933cc',bonus:'+15% RIFF damage'},
               {type:'CORRUPT',name:'BLACK METAL',pct:pcts.CORRUPT,color:'#cc44ff',bonus:'+25% corruption damage'},
-              {type:'UTILITY',name:'PROG ROCK',pct:pcts.UTILITY,color:'#22aa44',bonus:'+1 card draw'},
+              {type:'UTILITY',name:'STONER ROCK',pct:pcts.UTILITY,color:'#22aa44',bonus:'+1 card draw'},
               {type:'EMBER',name:'DOOM METAL',pct:pcts.EMBER,color:'#c87820',bonus:'+2 ATK (no discards)'},
             ]
             const active=genres.find(g=>g.pct>=0.5)
