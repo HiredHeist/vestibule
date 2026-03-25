@@ -3297,6 +3297,7 @@ function App(){
   const [damageFlash,setDamageFlash]=useState(false)
   const [animPhase,setAnimPhase]=useState('idle')
   const [strikingMemberIdx,setStrikingMemberIdx]=useState(-1)
+  const [cardAbsorb,setCardAbsorb]=useState(null)
   const [shakeOffset,setShakeOffset]=useState({x:0,y:0})
   const shakeTimerRef=useRef(null)
   const triggerShake=useCallback((intensity=3,duration=200)=>{
@@ -4159,6 +4160,9 @@ function App(){
 
     const ok=applyCard(card,slotIdx)
     if(ok){
+      const absorbColor=card.type==='RIFF'?'rgba(150,50,200,0.6)':card.type==='CORRUPT'?'rgba(200,0,40,0.6)':card.type==='UTILITY'?'rgba(30,170,60,0.6)':'rgba(200,120,20,0.6)'
+      setCardAbsorb({slotIdx,color:absorbColor,key:Date.now()})
+      setTimeout(()=>setCardAbsorb(null),500)
       const playedId=card.id
       const curHand=[...hand]
       const remaining=curHand.filter(c=>c.uid!==dragCardUid)
