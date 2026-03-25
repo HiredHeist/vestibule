@@ -1425,7 +1425,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             textShadow:'0 0 14px rgba(255,200,0,0.9)',
             background:'rgba(80,60,0,0.6)',padding:'4px 0'}}>✨ FOIL ✨</div>}
           {card.rarity==='Rare'&&!card.foil&&!card.mythic&&<div style={{position:'absolute',top:10,left:10,padding:'2px 7px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
-          {card.upgraded&&<div style={{position:'absolute',bottom:6,right:6,width:22,height:22,borderRadius:'50%',background:'radial-gradient(circle at 35% 35%,#ffd700,#cc8800)',border:'2px solid #ffd700',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#000',boxShadow:'0 0 10px rgba(255,200,0,0.6)'}}>+</div>}
+          {card.upgraded&&<div style={{position:'absolute',bottom:6,right:6,width:28,height:28,borderRadius:4,background:'rgba(0,0,0,0.7)',border:'2px solid #ffd700',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,color:'#ffd700',boxShadow:'0 0 14px rgba(255,200,0,0.6),0 0 30px rgba(255,200,0,0.2)',textShadow:'0 0 8px rgba(255,200,0,0.8)'}}>⛧</div>}
           {/* ember cost */}
           {card.embers>0&&<div style={{position:'absolute',top:card.foil||card.mythic?38:8,right:10,width:40,height:40,borderRadius:'50%',
             background:'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)',
@@ -1450,7 +1450,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           </div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,
             color:'#c8a878',textAlign:'center',padding:'8px 14px',
-            lineHeight:1.45,flex:1}}>{card.id==='demotape'?(lastRiffPlayed?'📼 Will replay: '+lastRiffPlayed.name+' (free)':'📼 No riff recorded yet — play a RIFF card first'):card.effect||card.desc||''}</div>
+            lineHeight:1.45,flex:1}}>{card.id==='demotape'?(lastRiffPlayed?'📼 Will replay: '+lastRiffPlayed.name+' (free)':'📼 No riff recorded yet — play a RIFF card first'):(<>{card.effect||card.desc||''}{card.upgraded&&CARD_UPGRADES[card.id]&&<div style={{marginTop:4,padding:'3px 8px',background:'rgba(255,200,0,0.12)',border:'1px solid rgba(255,200,0,0.3)',borderRadius:4,color:'#ffd700',fontSize:12,fontWeight:700}}>⛧ {CARD_UPGRADES[card.id].desc}</div>}</>)}</div>
           {card.isMember&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',
             padding:'8px 14px',borderTop:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>
             <div style={{textAlign:'center'}}>
