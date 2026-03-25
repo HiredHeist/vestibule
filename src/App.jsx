@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 let _uidCounter=Date.now()
 function uid(){return(++_uidCounter).toString(36)}
 import './App.css'
@@ -6560,6 +6560,15 @@ function App(){
 
 // ── SCALE ROOT — fits game to any screen size ──────────────────
 const DESIGN_W=1920,DESIGN_H=1080
+class ErrorBoundary extends React.Component {
+  constructor(props){super(props);this.state={error:null}}
+  static getDerivedStateFromError(error){return{error}}
+  componentDidCatch(e,info){console.error('VESTIBULE RENDER ERROR:',e.message,info.componentStack)}
+  render(){
+    if(this.state.error)return <div style={{color:'red',padding:40,fontFamily:'monospace',background:'#000',position:'fixed',inset:0,zIndex:999999,overflow:'auto'}}><h1>RENDER ERROR</h1><pre>{this.state.error.message}</pre><pre>{this.state.error.stack}</pre><button onClick={()=>this.setState({error:null})} style={{color:'#0f0',background:'#333',padding:'10px 20px',border:'none',cursor:'pointer',marginTop:20}}>Try Again</button></div>
+  }
+}
+
 function ScaleRoot(){
   const [scale,setScale]=useState(1)
   const [dims,setDims]=useState({w:DESIGN_W,h:DESIGN_H})
@@ -6577,7 +6586,7 @@ function ScaleRoot(){
   return(
     <div style={{width:'100vw',height:'100vh',overflow:'hidden',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}>
       <div style={{width:DESIGN_W,height:DESIGN_H,transform:`scale(${scale})`,transformOrigin:'center center',position:'relative'}}>
-        <App/>
+        <ErrorBoundary><App/></ErrorBoundary>
       </div>
     </div>
   )
