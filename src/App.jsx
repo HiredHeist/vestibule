@@ -5999,8 +5999,7 @@ function App(){
 
   return(
     <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
-      <div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:8000,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px,transparent 4px,transparent 7px,rgba(0,0,0,0.10) 7px,rgba(0,0,0,0.10) 8px,transparent 8px,transparent 14px,rgba(0,0,0,0.04) 14px,rgba(0,0,0,0.04) 15px)',animation:'vhsDrift 8s ease-in-out infinite',mixBlendMode:'overlay'}}/>
-      <div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:8001,animation:'vhsLine 12s linear infinite',background:'transparent'}}/>
+
       {damageFlash&&<div style={{position:'absolute',inset:0,zIndex:8500,pointerEvents:'none',background:'radial-gradient(ellipse at center,rgba(200,0,0,0.25),rgba(100,0,0,0.4))',animation:'flashFade 0.4s ease-out forwards'}}/>}
       {corruptHigh&&!corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 40%,rgba(100,0,0,0.15) 100%)',animation:bgPulseAnim}}/>}
       {corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 20%,rgba(140,0,0,0.3) 100%)',animation:'bgPulse 1s ease-in-out infinite'}}/>}
@@ -6476,13 +6475,13 @@ function CRTOverlay(){
   },[])
   return(<>
     {scanOn&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:9990,
-      backgroundImage:'repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px)',
+      backgroundImage:'repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px)',
       backgroundSize:'100% 4px'}}/>}
     {vhsOn&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:9991}}>
-      <div style={{position:'absolute',inset:0,boxShadow:'inset 4px 0 0 rgba(255,0,0,0.08), inset -4px 0 0 rgba(0,80,255,0.08)'}}/>
-      <div style={{position:'absolute',inset:0,animation:'vhsFlicker 0.12s infinite',background:'rgba(0,0,0,0.02)'}}/>
-      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.4) 100%)'}}/>
-      <div style={{position:'absolute',inset:0,opacity:0.05,mixBlendMode:'overlay',
+      <div style={{position:'absolute',inset:0,boxShadow:'inset 6px 0 0 rgba(255,0,0,0.12), inset -6px 0 0 rgba(0,100,255,0.12)'}}/>
+      <div style={{position:'absolute',inset:0,animation:'vhsFlicker 0.15s infinite',background:'rgba(0,0,0,0.04)'}}/>
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5) 100%)'}}/>
+      <div style={{position:'absolute',inset:0,opacity:0.08,mixBlendMode:'overlay',
         backgroundImage:'url(data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>')+')',
         backgroundSize:'200px 200px'}}/>
     </div>}
