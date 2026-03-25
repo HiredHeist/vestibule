@@ -54,6 +54,8 @@
 - [x] **Blood Oath flag persists on dead members** — If a Blood Oath member dies from Mosh Pit event (not boss damage), the flag stays. Should clear on any death source.
 - [x] **Corruption Lock + Corruption Engine visual** — When Cursed Amp locks corruption and player has Corruption Engine pact, the pact icon shows but does nothing. Needs "LOCKED" visual state.
 - [x] **Encore Mode victory trigger** — Encore resets fightIndex to 0 but victory checks fightIndex>=26. Second full clear may or may not trigger properly. Needs verification.
+- [ ] **Event choice audit** — Review ALL 6 random events for logic issues. Sabbath Offering ("burn 3 cards, heal to full") is useless on Bronze/Silver/Gold because members already heal to full after fights. Events need to account for stake differences or offer universally meaningful rewards. Audit: Mosh Pit, Cursed Amp, Blood Oath, Hellfire Baptism, Sabbath Offering, Devil's Wager.
+- [ ] **Corruption balance** — Corruption almost always hits 100% (92% of games). Only 4 ways to reduce it vs 12+ ways it increases. Need more reduction options: Smoke Break -5%, Herb Money -5%, new Atonement pact -5% per boss kill. See audit notes.
 - [x] **Gold stake win rate** — 10.16% (above Bronze 9.28%). Mentor bonus +0.10 overcompensates. May need dmgAdd 3→4.
 
 
