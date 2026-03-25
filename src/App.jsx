@@ -3334,6 +3334,41 @@ function App(){
   const [showPauseOptions,setShowPauseOptions]=useState(false)
   const chainHintsOn=localStorage.getItem('vst_chainhints')!=='off'
   const vhsOn=localStorage.getItem('vst_vhs')!=='off'
+
+  // ═══ GLOBAL CRT/VHS OVERLAY — managed via DOM, not React ═══
+  useEffect(()=>{
+    function updateOverlays(){
+      const scanOn=localStorage.getItem('vst_scanlines')!=='off'
+      const vhsActive=localStorage.getItem('vst_vhs')!=='off'
+      
+      // SCANLINES
+      let scanEl=document.getElementById('vst-scanlines')
+      if(scanOn){
+        if(!scanEl){
+          scanEl=document.createElement('div')
+          scanEl.id='vst-scanlines'
+          scanEl.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:99990;background-image:repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.045) 2px, rgba(0,0,0,0.045) 4px);background-size:100% 4px;'
+          document.body.appendChild(scanEl)
+        }
+      }else if(scanEl){scanEl.remove()}
+      
+      // VHS
+      let vhsEl=document.getElementById('vst-vhs')
+      if(vhsActive){
+        if(!vhsEl){
+          vhsEl=document.createElement('div')
+          vhsEl.id='vst-vhs'
+          vhsEl.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:99991;'
+          const noiseUrl='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>')
+          vhsEl.innerHTML=`<div style="position:absolute;inset:0;box-shadow:inset 8px 0 0 rgba(255,0,0,0.15), inset -8px 0 0 rgba(0,100,255,0.15);"></div><div style="position:absolute;inset:0;animation:vhsFlicker 0.15s infinite;background:rgba(0,0,0,0.04);"></div><div style="position:absolute;inset:0;background:radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 100%);"></div><div style="position:absolute;inset:0;opacity:0.1;mix-blend-mode:overlay;background-image:url(${noiseUrl});background-size:200px 200px;"></div>`
+          document.body.appendChild(vhsEl)
+        }
+      }else if(vhsEl){vhsEl.remove()}
+    }
+    updateOverlays()
+    const interval=setInterval(updateOverlays,400)
+    return()=>{clearInterval(interval);document.getElementById('vst-scanlines')?.remove();document.getElementById('vst-vhs')?.remove()}
+  },[])
   const speedMult=(localStorage.getItem('vst_speed')==='fast')?0.5:1.0
   const [showMastery,setShowMastery]=useState(false)
   const [selectedDeck,setSelectedDeck]=useState('standard')
@@ -6461,33 +6496,6 @@ function App(){
 
 // ── SCALE ROOT — fits game to any screen size ──────────────────
 const DESIGN_W=1920,DESIGN_H=1080
-function CRTOverlay(){
-  const [,forceUpdate]=useState(0)
-  const scanOn=localStorage.getItem('vst_scanlines')!=='off'
-  const vhsOn=localStorage.getItem('vst_vhs')!=='off'
-  // Re-render when settings change (listen for storage events)
-  useEffect(()=>{
-    const h=()=>forceUpdate(p=>p+1)
-    window.addEventListener('storage',h)
-    // Also re-check every 500ms for same-tab localStorage changes
-    const t=setInterval(h,500)
-    return()=>{window.removeEventListener('storage',h);clearInterval(t)}
-  },[])
-  return(<>
-    {scanOn&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:9990,
-      backgroundImage:'repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px)',
-      backgroundSize:'100% 4px'}}/>}
-    {vhsOn&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:9991}}>
-      <div style={{position:'absolute',inset:0,boxShadow:'inset 6px 0 0 rgba(255,0,0,0.12), inset -6px 0 0 rgba(0,100,255,0.12)'}}/>
-      <div style={{position:'absolute',inset:0,animation:'vhsFlicker 0.15s infinite',background:'rgba(0,0,0,0.04)'}}/>
-      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5) 100%)'}}/>
-      <div style={{position:'absolute',inset:0,opacity:0.08,mixBlendMode:'overlay',
-        backgroundImage:'url(data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>')+')',
-        backgroundSize:'200px 200px'}}/>
-    </div>}
-  </>)
-}
-
 function ScaleRoot(){
   const [scale,setScale]=useState(1)
   const [dims,setDims]=useState({w:DESIGN_W,h:DESIGN_H})
@@ -6506,25 +6514,6 @@ function ScaleRoot(){
     <div style={{width:'100vw',height:'100vh',overflow:'hidden',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}>
       <div style={{width:DESIGN_W,height:DESIGN_H,transform:`scale(${scale})`,transformOrigin:'center center',position:'relative'}}>
         <App/>
-        {/* GLOBAL CRT SCANLINES — visible on ALL screens */}
-        {localStorage.getItem('vst_scanlines')!=='off'&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:9990,
-          backgroundImage:'repeating-linear-gradient(0deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.25) 2px, rgba(0,0,0,0.25) 4px)',
-          backgroundSize:'100% 4px'}}/>}
-        {/* GLOBAL VHS EFFECT — visible on ALL screens */}
-        {localStorage.getItem('vst_vhs')!=='off'&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:9991}}>
-          {/* Chromatic aberration — red/blue fringe */}
-          <div style={{position:'absolute',inset:0,
-            boxShadow:'inset 3px 0 0 rgba(255,0,0,0.07), inset -3px 0 0 rgba(0,80,255,0.07)'}}/>
-          {/* Subtle flicker */}
-          <div style={{position:'absolute',inset:0,animation:'vhsFlicker 0.12s infinite',background:'rgba(0,0,0,0.015)'}}/>
-          {/* Slight vignette — darker corners */}
-          <div style={{position:'absolute',inset:0,
-            background:'radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.35) 100%)'}}/>
-          {/* Very subtle noise grain */}
-          <div style={{position:'absolute',inset:0,opacity:0.04,mixBlendMode:'overlay',
-            backgroundImage:'url(data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>')+')',
-            backgroundSize:'200px 200px'}}/>
-        </div>}
       </div>
     </div>
   )
