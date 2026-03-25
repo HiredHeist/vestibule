@@ -5549,8 +5549,8 @@ function App(){
             ['🌍 Daily Challenge','A shared daily seed. Everyone faces the same RNG. Your best daily score is tracked. Play from the main menu or end screen.'],
             ['📜 Combat Log','Press ESC during combat to open the pause menu, then click Combat Log to review every event in the current run. Also available on the end screen as Run Log.'],
           ].map(([title,desc],i)=><div key={i} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:8,padding:'14px 20px'}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,color:'#e8a820',marginBottom:4}}>{title}</div>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:25,color:'#c8b080',lineHeight:1.5}}>{desc}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:30,fontWeight:900,color:'#e8a820',marginBottom:4}}>{title}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:30,color:'#c8b080',lineHeight:1.5}}>{desc}</div>
           </div>)}
         </div>
         <button onClick={()=>setMenuView(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#cc1111',background:'rgba(80,0,0,0.2)',border:'2px solid #881111',borderRadius:6,padding:'12px 48px',cursor:'pointer',marginTop:8}}>← Back</button>
