@@ -1,201 +1,63 @@
-# VESTIBULE — Master TODO
-**Living document — updated with every push**
-**Latest: 10c798c | March 25, 2026 JST**
+# VESTIBULE — TODO & STATUS
+
+## Latest Session: Session 18 (March 26, 2026)
+**Latest commit:** a5431d2
+**Sim version:** v17.1 (synced with game code)
 
 ---
 
-## 🎯 PRIORITY ROADMAP — Ship the Playtest Demo
+## COMPLETED — Polish List (Session 17-18)
 
-### TIER 1 — Must Ship (gameplay feel)
-- [x] **Damage Breakdown Animation** — Balatro-style number-go-up spectacle after every Strike. Base ATK ticks up per member → multiplier applies with shake → genre/mentor/combo bonuses flash → final number SLAMS. Currently damage just happens silently. This is THE #1 addiction hook.
-- [x] **Random Events Between Fights** — Slay the Spire events. 50% chance between non-boss fights. 8 Hell-themed choices: Ferryman, Crossroads Demon, Mosh Pit, Vinyl Collector, Cursed Amp, Blood Pact, Audience with Satan, The Groupie. Makes every run unique.
-- [ ] **Opening Night Redesign** — 4-5 candidates instead of full roster, synergy hints, flavor text. First impression matters.
-- [ ] **Deploy to royceprinting.com/vestibule/** — Nobody can play it until this ships. Production build + hosting.
+### Tier A - ALL DONE
+- [x] 1. Combat Log Viewer
+- [x] 2. Corruption Threshold Preview
+- [x] 3. Hunger Price Display
+- [x] 4. Upgrade Indicator (gold pentagram + bonus text)
+- [x] 5. Riff Chain Hints on Hover (toggleable)
 
-### TIER 2 — Should Ship (retention / "one more run")
-- [x] **Post-Run Highlights** — "You were 2 strikes from beating the Archfraud. Try again?" + biggest strike, closest call, longest combo chain. Loss aversion is the most powerful Play Again trigger.
-- [x] **End Screen Stats Bigger** — Individual stat boxes, screenshot-worthy layout. Current stats are small and forgettable.
-- [x] **Card Mastery System** — 41 cards × 4 tiers (Novice→Adept→Master→Legendary). Persistent progress bars across runs. Completionists play for weeks.
-- [x] **Boss Trophy Wall** — "Hall of Damnation" in main menu. 29 boss slots (27 + Lucifer + Executive). Empty "???" slots drive completionists. Demonic-stake frames glow red.
+### Tier B - ALL DONE
+- [x] 6. Near-Death Heartbeat
+- [x] 7. Boss Low HP Urgency
+- [x] 8. Genre Activation Visual
+- [x] 10. Mastery Progress on End Screen
 
-### TIER 3 — Nice to Have (depth / replayability)
-- [x] **Achievement-Gated Starter Decks** — 6 alternate decks: Purist, Corrupted, Speedrunner, Hoarder, Minimalist, Sabbath. Each unlocked by specific achievements. Turns 1 game into 7.
-- [x] **Daily Seed + Leaderboard** — Wordle-style daily habit. One shared seed, global comparison, streak badges. Requires simple backend or seed-encoded scoring.
-- [x] **Corruption Threshold System** — At 25/50/75% corruption thresholds, offer risk/reward gambles. The 50% coin flip is pure gambling psychology.
-- [x] **Band Legacy System** — Musicians persist across runs, gain experience, earn nicknames. XCOM-style attachment. Death of a veteran member HURTS.
-- [x] **The Encore (Endless Mode)** — Post-Lucifer infinite scaling. Circle 10+: random passives, x1.2 HP per circle. Remix Bosses. Escalating visual distortion.
+### Tier C - ALL DONE
+- [x] 11. Trophy Wall on End Screen
+- [x] 12. Card Play Feedback (fly + flash)
 
-### TIER 4 — Art & Audio (player provides)
-- [ ] Replace all emoji placeholders with custom card art
-- [ ] Boss artwork for all 27 enemies
-- [ ] Card frame designs per type (RIFF purple, CORRUPT red, UTILITY green, EMBER orange)
-- [ ] Unique music tracks for boss, lucifer, pact, forge, descent, victory (currently reusing select/shop)
-- [ ] Circle splash audio (short 3-sec dramatic stings per circle)
+### Tier D
+- [x] 16. Dramatic Strike Animation (2s per member)
 
-### TIER 5 — Polish & Future
-- [ ] Card animations (play, discard, draw)
-- [ ] Turn flow animations (strike sequence, boss attack)
-- [ ] Score chain visualization
-- [ ] Deck tracker overlay
-- [ ] Combo reveals (preview available combos before playing)
-- [ ] Daily mutations (modifiers that change each day)
-- [ ] Boss loot table expansion
-- [ ] Stash gambling mini-game
-- [ ] Deck Personality System (track player card preferences)
-- [ ] Skill tree (meta-progression between runs)
-- [ ] Addiction Loop Timer ("Average run time: 8 minutes")
-- [ ] Seed Sharing + Challenge Mode (URL-based seed comparison)
-- [ ] Performance optimization (component splitting if needed)
-
-
-## 🐛 KNOWN BUGS — Must Fix Before Public Launch
-
-- [x] **Hall of Damnation overflow** — Trophy Wall doesn't fit in 1080px when trophies are populated. No back/close button visible. Needs scroll or compact layout fix.
-- [x] **Blood Oath flag persists on dead members** — If a Blood Oath member dies from Mosh Pit event (not boss damage), the flag stays. Should clear on any death source.
-- [x] **Corruption Lock + Corruption Engine visual** — When Cursed Amp locks corruption and player has Corruption Engine pact, the pact icon shows but does nothing. Needs "LOCKED" visual state.
-- [x] **Encore Mode victory trigger** — Encore resets fightIndex to 0 but victory checks fightIndex>=26. Second full clear may or may not trigger properly. Needs verification.
-- [ ] **Event choice audit** — Review ALL 6 random events for logic issues. Sabbath Offering ("burn 3 cards, heal to full") is useless on Bronze/Silver/Gold because members already heal to full after fights. Events need to account for stake differences or offer universally meaningful rewards. Audit: Mosh Pit, Cursed Amp, Blood Oath, Hellfire Baptism, Sabbath Offering, Devil's Wager.
-- [ ] **Corruption balance** — Corruption almost always hits 100% (92% of games). Only 4 ways to reduce it vs 12+ ways it increases. Need more reduction options: Smoke Break -5%, Herb Money -5%, new Atonement pact -5% per boss kill. See audit notes.
-- [x] **Gold stake win rate** — 10.16% (above Bronze 9.28%). Mentor bonus +0.10 overcompensates. May need dmgAdd 3→4.
-
-
-## 🔧 POLISH — 20 Improvements (from 60K Game Audit)
-*No new features — only improving what exists*
-
-### Combat Feel
-- [x] **1. Riff Chain Celebration** — DONE: 3s slam animation, screen-filling text (96px title, 64px chain name, 28px card combo, 80px multiplier), dark overlay, color wash, 6px border glow, 18px/600ms shake, chain_combo.mp3 placeholder for custom audio — When a Riff Chain fires, show a full-width banner (2 seconds) with chain name + combo bonus in huge text. Currently chains trigger 16.4×/game but feel invisible. This is the Balatro "planet scored" moment.
-- [ ] **2. Card Play Feedback** — When dropping a card on a member, add a "absorbed" shrink animation with a flash of the card's type color. Currently the card just disappears.
-- [ ] **3. Near-Death Heartbeat** — When any member drops below 25% HP, add a subtle red pulse border on their stage card. Players should FEEL danger without checking numbers.
-- [ ] **4. Strike Anticipation** — The 0.5s before projectiles launch feels dead. Add stage cards tilting forward slightly + bass rumble sound as wind-up.
-- [ ] **5. Boss Low HP Urgency** — When boss HP < 20%, increase HP bar pulse speed and add screen-edge vignette. The "almost dead" moment should feel frantic.
-
-### Combat Information
-- [ ] **21. Combat Log Viewer** — HIGH PRIORITY. Pause menu: 'Combat Log' button opens scrollable overlay of current fight log (newest first, color-coded: chains gold, damage red, healing green, corruption purple, events orange). End screen: 'View Run Log' button shows full run history grouped by fight. All data already collected via addLog() — just needs rendering.
-
-### Card/Deck Management
-- [ ] **6. Card Play Count on Hover** — When hovering a card in hand, show "Played 3× this fight" on the expanded card. Helps track Riff Chain progress.
-- [ ] **7. Discard Pile Preview** — Add "last 3 discarded" mini-preview on hover without opening full view. Quick glance vs full inspection.
-- [ ] **8. Ember Cost Preview** — When hovering a card, show ghost/preview of remaining embers after playing it. "5/5 → 3/5" preview.
-- [ ] **9. Upgrade Indicator in Hand** — Upgraded cards (from Doom Forge) should have a visible "★" badge. Currently can't tell without reading effect text.
-- [ ] **10. Deck Composition Mini-Bar** — Show tiny 4-color stacked bar (RIFF/CORRUPT/UTILITY/EMBER) below deck count, always visible. Currently only on hover.
-
-### Shop/Economy
-- [ ] **11. Hunger Price Display** — When corruption ≥50%, shop prices should show inflated price with "⚠+25%" indicator. Players don't know WHY things cost more.
-- [ ] **12. Pawn Shop Comparison** — When selling a member, show what you'd LOSE (ATK contribution, keyword) alongside GAIN (stash). More informed decision.
-
-### Information Display
-- [ ] **13. Boss Passive Reminder** — Pin boss passive as small persistent badge near boss emoji. Current header text can scroll off during long fights.
-- [ ] **14. Corruption Threshold Preview** — Add faint labels at 25/50/75/100 markers on corruption bar showing WHAT happens at each level before reaching it.
-- [ ] **15. Pact Tooltip Persistence** — Add 300ms delay before hiding pact tooltips on mouseout. Currently disappear instantly.
-
-### Progression/Retention
-- [ ] **16. Mastery Progress on End Screen** — Show 2-3 cards that made most progress toward next tier. "Battle Cry: 45/50 → ADEPT!" drives "one more run."
-- [ ] **17. Trophy Wall Progress on End Screen** — Flash "NEW TROPHY: The Heretic" when killing a boss for the first time. Ties trophy wall to gameplay.
-- [ ] **18. Legacy Nickname Notification** — When a member earns a new nickname, show brief toast during gameplay. Currently only on Opening Night.
-
-### Audio/Visual Polish
-- [ ] **19. Corruption Threshold Sounds** — Give each threshold a unique sound (Whispers=drone, Hunger=growl, Madness=screech, Possession=demonic laugh). Currently all use big_hit.
-- [ ] **20. Genre Activation Visual** — When a genre activates, add colored flash across stage bottom with genre name. Genres fire 24×/game but feel invisible.
+### Bonus Items
+- [x] Black screen crash fix (ErrorBoundary)
+- [x] Corruption reduction balance
+- [x] Full stake rebalance (Bronze 8.7% to Demonic 0.9%)
+- [x] Rules Screen (35 entries)
+- [x] Options cleanup (7 toggles all functional)
+- [x] CRT Scanlines + VHS Effect (toggleable)
+- [x] Boss Projectile attack (correct targeting)
+- [x] HP bar uses scaledMaxHp
+- [x] Per-member HP drain during strike
+- [x] Vertical corruption thermometer
+- [x] Card fly-and-shrink animation
+- [x] Only 1 locked member in Opening Night
+- [x] Dice roll removed
 
 ---
 
-## ✅ COMPLETED — All checked off
+## REMAINING TODO
+- [ ] Corruption thermometer tuning
+- [ ] Event choice audit (Sabbath Offering)
+- [ ] Card fly animation polish
 
-### Bug Fixes (Circle 9 Crash — 15 bugs found and fixed)
-- [x] BUG 9: 8 drawUpTo() stale state calls → all use deckRef/discRef now
-- [x] BUG 10: 10 unguarded .map() in render → .filter(Boolean) added
-- [x] BUG 11: Groupie/Setbreak setHand race → return false pattern
-- [x] BUG 12: 126 duplicate React key errors → root cause (Bug 9) fixed
-- [x] BUG 15: 6 card leak bugs (Groupie, Setlist, Burnset, Remaster, Signal Decay, Setbreak) → cards now go to discard
-- [x] BUG 1-4,7: Stonewall bypass on self-inflicted card effects → DESIGN CORRECT
-- [x] BUG 5+6: Uncapped stash additions → Math.min(420) on all calls
-- [x] BUG 8: Corruption 100% visual → ☠ prefix + bright red
-- [x] BUG 13: Consumable cards in Doom Forge → filtered from upgrade list
-- [x] BUG 14: Uncapped setEmbers → all capped to maxEmbers
+---
 
-### Play Again Bugs (found during edge case audit)
-- [x] handleReset missing setStrikeMult → multiplier carried over between runs
-- [x] handleReset missing victoryFiredRef → bosses UNKILLABLE on second run
-- [x] handleReset missing setAllCardsFree → POSSESSION hellquake persisted forever
-- [x] handleReset missing setNextCardFree/Ref → free card stuck on
-- [x] handleReset missing setMemberBuffs → stale buff badges
-- [x] handleReset missing milestonesFiredRef → boss HP milestones never re-fired
-- [x] handleReset missing wthStrikesRef + recruitPickFiredRef
-- [x] Division by alive.length without ||1 guard
-
-### Balance Pass v4 (from 300K sim data)
-- [x] Clean Living pact: 0%→<15% threshold, +2→+3 ATK (was 3.8% WR)
-- [x] Setlist: draw 2→3 cards, upgraded draws 4 (was 1.0 plays/game)
-- [x] Herb Money: 2→1 ember cost (was 2.3 plays/game)
-- [x] Dial to Eleven: +20%→+15% corruption, added +1 ATK all (was 2.0 plays/game)
-- [x] Drummer DOUBLE TIME: removed x0.5 penalty → x1.0 standard (was 5.5% WR)
-- [x] All changes synced to simulator
-
-### Core Game
-- [x] 41 unique cards, 69-card starting deck
-- [x] 18 musicians across 9 roles
-- [x] 27 enemies across 9 circles of Hell
-- [x] 6 difficulty stakes (Bronze through Demonic)
-- [x] Lucifer 2-phase final boss
-- [x] Welcome to Hell bonus boss (The Executive, 69k HP)
-- [x] ScaleRoot responsive scaling at 1920x1080
-
-### Big 5 Features
-- [x] Riff Chains (16 combos, +10% ATK + multiplier spike)
-- [x] Pacts (12 choices after each boss)
-- [x] Descent Map (fight skip with rewards)
-- [x] Genre Bonus (4 genres at 50%+ threshold)
-- [x] Victory Cinematic + Welcome to Hell bonus boss
-
-### Addiction Features
-- [x] Score Multiplier Counter (x0.03/card, x0.15/combo, wired into damage)
-- [x] Near-Death Clutch System (SOLO VICTORY / BY THE SKIN OF YOUR TEETH / CLUTCH)
-- [x] Boss Loot Drops (8 unique drops per circle boss)
-- [x] Streak Rewards (2-win ember, 3-win Foil, 5-win Mythic)
-- [x] One More Circle Hook (next circle enemy preview on boss clear)
-
-### Doom Forge
-- [x] 41 upgrade definitions, 15 with permanent HP buffs
-- [x] Gold "+" badge on upgraded cards
-- [x] Consumable cards excluded from upgrades
-- [x] Appears after Pact, before Shop
-
-### UI/UX
-- [x] Multiplier wired into strike damage
-- [x] Persistent buff badges on members
-- [x] Stage 17% smaller, cards 20% larger
-- [x] Boss box v4: 180px icon, centered text, 35pt passive, dark blood red
-- [x] Passive/Artifact tooltips in combat
-- [x] Deck hover distribution tooltip
-- [x] Shop section borders + labels
-- [x] Circle transition splash (3-second)
-- [x] Card hover 50% scale
-- [x] Sabbath Sigil consumable (1 in deck, 5% shop at 42 herb)
-
-### Audio
-- [x] 30 SFX files, 21 unique playSfx calls
-- [x] 11 music tracks with smart per-screen switching
-- [x] All audio normalized -6dB
-- [x] Crossfade on track switch
-- [x] Boss/Lucifer/Victory music overrides
-
-### Balance
-- [x] Sim v16.0 with ALL mechanics modeled
-- [x] 300K game simulation report (SIMULATION_REPORT.md)
-- [x] Bronze ~10% | Silver ~11% | Gold ~11% | Obsidian ~9% | Blood ~2% | Demonic ~0.04%
-- [x] 18-point code verification — all clean
-
-### Previous Bug Fixes
-- [x] Strike damage scope + strikeMult ref
-- [x] Free first card (nextCardFreeRef)
-- [x] Nested setState (Soundboard)
-- [x] Victory checks on ALL direct damage cards
-- [x] POSSESSION Hellquake state
-- [x] Missing useCallback deps
-- [x] activeGenre temporal dead zone
-- [x] Boss not dying (triggerVictoryRef)
-- [x] cardHeal resurrection guard (15 lines)
-- [x] Safety net self-block
-- [x] Black Candle game lock
-- [x] Play Again button crash
-- [x] EndScreen scroll clipping
+## WIN RATES (10K each)
+| Stake | Win Rate | Avg Fight |
+|-------|----------|-----------|
+| Bronze | 8.67% | 19.86/26 |
+| Silver | 7.20% | 17.46/26 |
+| Gold | 6.77% | 16.89/26 |
+| Obsidian | 3.56% | 14.76/26 |
+| Blood | 1.94% | 8.66/26 |
+| Demonic | 0.94% | 2.72/26 |

@@ -1,39 +1,40 @@
-# VESTIBULE — 300K Game Simulation Report
-**50,000 games x 6 stakes | March 25, 2026 | Sim v16.0**
+# VESTIBULE — Simulation Report v17.1
+**Date:** March 26, 2026
+**Sim version:** v17.1 (synced with game code)
+**Samples:** 10,000 games per stake
 
-## WIN RATES
-| Stake | Win Rate | Avg Damage | Highest Strike |
-|-------|----------|------------|----------------|
-| Bronze | 9.44% | 41,228 | 97,037 |
-| Silver | 11.28% | 40,893 | 80,387 |
-| Gold | 11.04% | 36,323 | 93,523 |
-| Obsidian | 8.76% | 39,691 | 88,412 |
-| Blood | 1.88% | 7,565 | 101,609 |
-| Demonic | 0.04% | 243 | 32,285 |
+---
 
-## BRONZE SURVIVAL CURVE
-C1: 7.7% die | C2: 1.0% | C3: 0.3% | C4: 2.6% | C5: 9.6% | C6: 19.6% | C7: 26.5% | C8: 15.6% | C9: 7.1%
-Circle 6-7 = 46% of all deaths (THE WALL)
+## Win Rate Summary
 
-## TOP 15 CARDS (plays/game)
-Battle Cry 17.6, Infernal Encore 13.8, Encore 13.4, Distortion 12.4, Resonance 11.9, Possessed Perf 9.7, Power Tap 9.2, Amp It Up 9.2, Static Charge 9.1, Tapped Out 9.1, New Strings 8.5, Groupie 8.4, Mosh Pit 8.3, Heavy Riff 8.1, Stage Dive 7.3
+| Stake | Win Rate | Avg Fight Reached | Corruption Thresholds |
+|-------|----------|-------------------|-----------------------|
+| Bronze | 8.67% | 19.86 / 26 | Whisper: 16.1K dmg, Madness: 42K cards, Possess: 9.4K |
+| Silver | 7.20% | 17.46 / 26 | Whisper: 14.4K dmg, Madness: 38K cards, Possess: 8.4K |
+| Gold | 6.77% | 16.89 / 26 | Whisper: 14.0K dmg, Madness: 36K cards, Possess: 8.1K |
+| Obsidian | 3.56% | 14.76 / 26 | Whisper: 12.3K dmg, Madness: 32K cards, Possess: 7.4K |
+| Blood | 1.94% | 8.66 / 26 | Whisper: 6.9K dmg, Madness: 18.5K cards, Possess: 4.2K |
+| Demonic | 0.94% | 2.72 / 26 | Whisper: 1.5K dmg, Madness: 3K cards, Possess: 0.9K |
 
-## BOTTOM 10 CARDS (plays/game)
-Contract 0.2, Sabbath Sigil 0.5, Setlist 1.0, Dial to Eleven 2.0, Smoke Break 2.1, Herb Money 2.3, Overdrive 3.3, Feedback Loop 3.3, Control Feedback 3.4, Signal Decay 3.5
+## Key Stats (Bronze 10K)
+- Genre activations: 209,271 (~21 per game)
+- Riff Chains triggered: 184,017 (~18 per game)
+- Mentor Links formed: 14,102 (1.41 per game)
+- Cards burned (pawn shop): 58,908 (5.9 per game)
 
-## PACT WIN RATES (Bronze)
-Thick Skin 16.4%, Merchants Eye 15.5%, War Drums 14.5%, Corruption Engine 14.1%, Stone Wall 13.8%, Ember Surge 13.6%, Sixth Slot 13.6%, Blood Price 13.5%, Iron Strings 13.1%, Speed Demon 12.8%, Dark Bargain 12.7%, Clean Living 3.8%
+## Balance Assessment
+- All stakes properly descending - no inversions
+- Bronze hits target range (8-10%)
+- Demonic is near-impossible (<1%) as intended
+- Blood starts at 10% corruption, avg fight 8.66 = most runs die around Circle III
+- Corruption thresholds fire proportionally across all stakes
 
-## MEMBER WIN RATES (Bronze)
-Ragnar 12.6%, Bjorn 12.2%, Orm 10.3%, Vitalik 10.1%, Loki 9.5%, Gunnar 9.4%, Ulf 8.9%, Freya 8.9%, Astrid 7.8%, Sigrid 7.8%, Ingrid 7.6%, Brynja 7.6%, Dag 7.5%, Nott 7.3%, Thor 5.5%, Rolf 5.5%
-
-## CORRUPTION
-55.4% of Bronze games reach 100% corruption. Only Sabbath Sigil triggers Hellquake.
-
-## DECK MANAGEMENT
-Avg burned: 4.3 cards/game, Avg deck at death: 50.5 (from 69), Mentor links: 72.6% of games, Pacts: 5.5/game, Forge upgrades: 5.5/game
-
-## BALANCE RECOMMENDATIONS
-BUFF: Clean Living (3.8% WR), Drummers Thor/Rolf (5.5% WR), Herb Money (2.3/game), Setlist (1.0/game)
-NERF WATCH: Battle Cry (17.6/game dominant), Vitalik (75% pick rate)
-DESIGN: Corruption 100% needs effect, C3-4 too easy (0.3% death), C7 is perfect wall (26.5%)
+## Stake Difficulty Parameters
+| Stake | Boss HP Mult | Boss +DMG | Max Strikes | Start Corrupt | Heal? | Mentor Bonus |
+|-------|-------------|-----------|-------------|---------------|-------|-------------|
+| Bronze | 1.20 | +0 | 4 | 0% | Yes | 0% |
+| Silver | 1.25 | +2 | 4 | 0% | Yes | 3% |
+| Gold | 1.25 | +3 | 4 | 0% | Yes | 3% |
+| Obsidian | 1.45 | +2 | 4 | 0% | No | 6% |
+| Blood | 1.70 | +2 | 4 | 10% | No | 15% |
+| Demonic | 1.66 | +4 | 3 | 15% | No | 75% |

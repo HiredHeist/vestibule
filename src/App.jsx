@@ -1,8 +1,11 @@
 
 // ═══ TODO — NEXT SESSION ═══
-// [x] Boss attack: emoji square only flies (DONE)
+// [x] Boss attack: uses Projectile for correct targeting (DONE)
+// [x] HP bar uses scaledMaxHp — drains from first hit (DONE)
+// [x] Rules screen: 35 entries covering all mechanics (DONE)
 // [ ] Corruption thermometer tuning from player feedback
 // [ ] Event choice audit — Sabbath Offering useless on Bronze/Silver/Gold
+// [ ] Card fly animation polish (trajectory/timing)
 // ═══════════════════════════
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
@@ -5705,6 +5708,10 @@ function App(){
             ['🎯 Stakes','6 difficulty levels: Bronze (standard), Silver (+2 boss dmg), Gold (+3 boss dmg, +25% shop prices), Obsidian (+38% boss HP, no post-fight heal), Blood (+48% boss HP, start at 10% corruption), Demonic (max 3 Strikes, +66% boss HP).'],
             ['🌍 Daily Challenge','A shared daily seed. Everyone faces the same RNG. Your best daily score is tracked. Play from the main menu or end screen.'],
             ['📜 Combat Log','Press ESC during combat to open the pause menu, then click Combat Log to review every event in the current run. Also available on the end screen as Run Log.'],
+            ['💪 Synergy Bonus','When 3+ members have been buffed (ATK increased by cards), your Strike gets a damage bonus: 3 buffed = +10%, 4 buffed = +20%, 5 buffed = +35%. Reward for investing cards in your whole band.'],
+            ['🎁 Boss Loot','Each circle boss drops a unique permanent reward when defeated. These include +1 ATK to all members, +1 max Ember, member HP boosts, and more. Boss loot stacks across the entire run.'],
+            ['🛡 Stone Shield','Roadie and some events grant Stone Shield — when a member would die, they survive at 1 HP instead. The shield absorbs the lethal hit and is consumed. Essential for surviving boss fights.'],
+            ['🔄 Encore Mode','After defeating Lucifer and clearing all 9 Circles, you can choose to enter Encore Mode — all enemies return with ×2.0 HP. How far can you push your band?'],
           ].map(([title,desc],i)=><div key={i} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:8,padding:'14px 20px'}}>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:36,fontWeight:900,color:'#e8a820',marginBottom:4}}>{title}</div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,color:'#c8b080',lineHeight:1.5}}>{desc}</div>
