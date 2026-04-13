@@ -1,16 +1,20 @@
 
 // ═══ TODO ═══
-// [x] Tutorial system (3 scripted fights + tooltips)
-// [x] QoL: gray borders unaffordable cards, chain badges, shop dimming
+// [x] Tutorial system (3 scripted fights + tooltips + first-encounter tips)
+// [x] QoL: gray borders unaffordable, chain badges, shop dimming
 // [x] QoL: hide corruption thermometer at 0%, skip 0 ATK animations
-// ── HIGH PRIORITY ──
-// [ ] BOSS INFO OVERHAUL — visual boss with image, text to the side
-//     Boss should look like a monster, not a text box. Cool art + layout.
-// [ ] Genre banner: only show at 40%+ of one type (reduce noise)
-// ── MEDIUM PRIORITY ──
-// [ ] Event choice audit — Sabbath Offering useless on Bronze/Silver/Gold
-// [ ] Progressive rules screen (gray out undiscovered, NEW badges)
-// [ ] Corruption thermometer tuning
+// ── NEXT UP ──
+// [ ] Card balance: buff Dial to Eleven, Setlist, Smoke Break, Record Deal
+// [ ] CORRUPT keyword: +1 per 12% (was 15%) — make corruption builds viable
+// [ ] Event audit: rework Sabbath Offering (chosen 1/10K games)
+// [ ] Early game pacing — Circles I-IV too safe (2.1% deaths combined)
+// ── IDEAS TO EXPLORE ──
+// [ ] Corruption deck concept — special cards unlocked at thresholds
+// [ ] Boss info overhaul — visual boss art, cleaner layout
+// [ ] Genre banner: only show at 40%+ threshold (reduce noise)
+// [ ] Progressive rules screen (show only encountered mechanics)
+// [ ] Show boss HP as fraction ("52/60 HP")
+// [ ] Run summary toast on death ("What killed you" highlight)
 // ═══════════════════════════
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
