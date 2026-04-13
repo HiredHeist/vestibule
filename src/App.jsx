@@ -1,14 +1,16 @@
 
-// ═══ TODO — CURRENT SESSION: TUTORIAL SYSTEM ═══
-// [x] Tutorial state tracking (localStorage vst_tutorial)
-// [x] Main menu: Start Tutorial / Skip Tutorial buttons
-// [x] Fight 1: "The Basics" — cards, embers, Strike
-// [x] Fight 2: "Corruption & The Shop" — corruption bar, shop
-// [x] Fight 3: "The Combo" — seeded chain pair, genre bonus
-// [x] Tooltip overlay system (modal, one at a time)
-// [x] First-encounter contextual tips (pacts, forge, events)
-// [ ] Corruption thermometer tuning from player feedback
+// ═══ TODO ═══
+// [x] Tutorial system (3 scripted fights + tooltips)
+// [x] QoL: gray borders unaffordable cards, chain badges, shop dimming
+// [x] QoL: hide corruption thermometer at 0%, skip 0 ATK animations
+// ── HIGH PRIORITY ──
+// [ ] BOSS INFO OVERHAUL — visual boss with image, text to the side
+//     Boss should look like a monster, not a text box. Cool art + layout.
+// [ ] Genre banner: only show at 40%+ of one type (reduce noise)
+// ── MEDIUM PRIORITY ──
 // [ ] Event choice audit — Sabbath Offering useless on Bronze/Silver/Gold
+// [ ] Progressive rules screen (gray out undiscovered, NEW badges)
+// [ ] Corruption thermometer tuning
 // ═══════════════════════════
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
@@ -1702,7 +1704,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             background:'linear-gradient(180deg,#1c1408,#0e0a04)',
             border:hov&&canBuy?'2px solid '+ac:'1px solid '+ac+(canBuy?'88':'44'),
             borderTop:'4px solid '+ac,borderRadius:8,overflow:'hidden',
-            cursor:canBuy?'pointer':'default',
+            cursor:canBuy?'pointer':'default',opacity:canBuy?1:0.4,
             transform:hov&&canBuy?'translateY(-3px)':'none',
             transition:'transform 0.15s,border-color 0.15s,box-shadow 0.15s',
             boxShadow:hov&&canBuy?'0 10px 30px rgba(0,0,0,0.8),0 0 16px '+ac+'44':'2px 4px 14px rgba(0,0,0,0.6)',
@@ -2067,7 +2069,7 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
   )
 }
 
-function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop,isUsed,lastRiffPlayed,chainHintsOn,hoverZoomOn}){
+function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop,isUsed,lastRiffPlayed,chainHintsOn,hoverZoomOn,chainReady}){
   const mastery=getMasteryTier(card.id)
   const spread=Math.min(4,20/total),mid=(total-1)/2
   const rot=(index-mid)*spread,yOff=Math.abs(index-mid)*2
@@ -2085,17 +2087,17 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       onMouseEnter={onHover} onMouseLeave={onLeave} onClick={e=>{e.stopPropagation();onClick()}}
       style={{width:210,height:310,flexShrink:0,position:'relative',display:'flex',flexDirection:'column',
         background:isSelected?'linear-gradient(180deg,#2a1a0a,#160e05)':'linear-gradient(180deg,#201408,#100804)',
-        border:isSelected?`2px solid #cc0000`:isHovered?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
+        border:isSelected?`2px solid #cc0000`:unaffordable?'1px solid #333':isHovered?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
         borderRadius:7,cursor:'grab',position:'relative',
         transformOrigin:'bottom center',
         transform:isDragging?'scale(0.85) rotate(5deg)':isHovered?(hoverZoomOn?'translateY(-80px) scale(1.5) rotate(0deg)':'translateY(-40px) scale(1.0) rotate(0deg)'):isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
         zIndex:isDragging?0:isHovered?9999:isSelected?50+index:10+index,
-        boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:(mastery.glow?'2px 4px 16px rgba(0,0,0,0.75),0 0 8px '+mastery.glow:'2px 4px 16px rgba(0,0,0,0.75)'),
-        opacity:isDragging?0.4:1,
+        boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:chainReady&&canAfford?'2px 4px 16px rgba(0,0,0,0.75),0 0 14px rgba(255,220,50,0.5),0 0 28px rgba(255,200,0,0.2)':(mastery.glow?'2px 4px 16px rgba(0,0,0,0.75),0 0 8px '+mastery.glow:'2px 4px 16px rgba(0,0,0,0.75)'),
+        opacity:isDragging?0.4:unaffordable?0.55:1,
         animation:shimmerAnim,
         margin:total>HAND_SIZE?'0 -28px':'0 -22px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
-      <div style={{height:6,flexShrink:0,borderRadius:'7px 7px 0 0',background:bc,boxShadow:`0 0 14px ${glow}`}}/>
+      <div style={{height:6,flexShrink:0,borderRadius:'7px 7px 0 0',background:unaffordable?'#333':bc,boxShadow:unaffordable?'none':`0 0 14px ${glow}`}}/>
       {isUsed&&<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'rgba(0,0,0,0.85)',border:'2px solid #888',borderRadius:6,padding:'6px 14px',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#888',letterSpacing:4,zIndex:20,pointerEvents:'none'}}>USED</div>}
       {card.embers>0?(
         <div style={{position:'absolute',top:8,right:8,display:'flex',flexDirection:'column',alignItems:'center',gap:1}}>
@@ -2109,6 +2111,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       )}
       {card.foil&&<div style={{position:'absolute',top:8,left:28,padding:'2px 5px',borderRadius:3,background:'rgba(255,215,0,0.3)',border:'1px solid rgba(255,215,0,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#ffd700',letterSpacing:1}}>✨FOIL</div>}
       {card.mythic&&<div style={{position:'absolute',top:8,left:28,padding:'2px 5px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#cc44ff',letterSpacing:1}}>⛧MYTHIC</div>}
+      {chainReady&&canAfford&&<div style={{position:'absolute',top:-4,left:'50%',transform:'translateX(-50%)',padding:'2px 8px',borderRadius:4,background:'rgba(255,200,0,0.2)',border:'1px solid rgba(255,220,50,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:8,fontWeight:900,color:'#ffdd44',letterSpacing:1,zIndex:20,whiteSpace:'nowrap'}}>⛧ CHAIN</div>}
       {card.rarity==='Rare'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
       {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
       {mastery.border&&<div style={{position:'absolute',bottom:4,left:4,padding:'1px 5px',borderRadius:2,background:'rgba(0,0,0,0.75)',border:'1px solid '+mastery.border+'88',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:900,color:mastery.color,letterSpacing:1,textTransform:'uppercase',zIndex:5}}>{mastery.name}</div>}
@@ -4927,9 +4930,10 @@ function App(){
     delay=100 // small initial delay so React commits attacking phase first
     actives.forEach(function(m,attackIdx){
       if(m.role==='Drummer')return
+      const md=memberDmgs.find(d=>d.m.uid===m.uid)
+      if(!md||md.atk<=0)return // skip 0 damage members
       const si=stage.indexOf(m)
       const from=getCenter(stageRefs.current[si])
-      const md=memberDmgs.find(d=>d.m.uid===m.uid)
       const curDelay=delay
       // Calculate offset from member to boss
       // Compensate for ScaleRoot scaling
@@ -6375,8 +6379,8 @@ function App(){
   return(
     <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
 
-      {/* ═══ CORRUPTION THERMOMETER — right edge (hidden during tutorial fight 1) ═══ */}
-      {tutorialFight!==1&&
+      {/* ═══ CORRUPTION THERMOMETER — right edge ═══ */}
+      {corruption>0&&tutorialFight!==1&&
       <div style={{position:'absolute',right:12,top:20,bottom:360,width:48,zIndex:50,display:'flex',flexDirection:'column',alignItems:'center',gap:0}}>
         {/* Percentage at top */}
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,
@@ -6833,7 +6837,7 @@ function App(){
         {/* CARD FAN — centered, padded to avoid columns */}
         <div style={{position:'absolute',left:200,right:210,top:18,bottom:0,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:10,overflow:'visible',zIndex:50}}>
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).filter(Boolean).map((card,i)=>(
-            <HandCard key={card.uid} card={card} index={i} total={hand.length} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
+            <HandCard key={card.uid} card={card} index={i} total={hand.length} chainReady={RIFF_CHAINS.some(ch=>ch.cards.includes(card.id)&&hand.some(c2=>c2.uid!==card.uid&&ch.cards.includes(c2.id)))} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
               isHovered={hovered===i} isSelected={selected.includes(card.uid)}
               anyHovered={hovered!==null}
               canAfford={card.embers===0||embers>=card.embers}
