@@ -3363,7 +3363,7 @@ function TutorialMessage({text,onContinue,isFinal}){
       <div style={{maxWidth:600,background:'linear-gradient(180deg,#1a1208,#0a0704)',border:'3px solid '+(isFinal?'#cc1111':'#e8a820'),borderRadius:12,padding:'40px 48px',textAlign:'center',boxShadow:'0 0 80px '+(isFinal?'rgba(200,0,0,0.5)':'rgba(232,168,32,0.4)')}}>
         {isFinal&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#cc1111',textShadow:'0 0 30px rgba(200,0,0,0.8)',letterSpacing:8,marginBottom:16}}>Tutorial Complete</div>}
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:isFinal?20:24,color:'#e8d0a0',lineHeight:1.6,marginBottom:24}}>{isFinal?'You know the basics. The full descent awaits — 9 Circles, 27 enemies, 1 chance. Discover Riff Chains, forge upgrades, and choose your pacts. The deeper you go, the darker it gets.':text}</div>
-        <button onClick={onContinue} style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,letterSpacing:6,color:isFinal?'#ee2222':'#e8a820',background:isFinal?'rgba(200,0,0,0.2)':'rgba(232,168,32,0.15)',border:'2px solid '+(isFinal?'#cc1111':'#e8a820'),borderRadius:6,padding:'14px 48px',cursor:'pointer',textTransform:'uppercase'}}>{isFinal?'⛧ Enter the Vestibule ⛧':'Continue'}</button>
+        <button onClick={onContinue} style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,letterSpacing:6,color:isFinal?'#ee2222':'#e8a820',background:isFinal?'rgba(200,0,0,0.2)':'rgba(232,168,32,0.15)',border:'2px solid '+(isFinal?'#cc1111':'#e8a820'),borderRadius:6,padding:'14px 48px',cursor:'pointer',textTransform:'uppercase',whiteSpace:'nowrap'}}>{isFinal?'⛧ Enter the Vestibule ⛧':'Continue'}</button>
       </div>
     </div>
   )
