@@ -694,7 +694,8 @@ const TUTORIAL_TIPS={
     {id:"t2_corrupt_card",text:"CORRUPT cards (red) are risky. They raise corruption but can be very powerful.",target:"hand",position:"above"},
   ],
   3:[
-    {id:"t3_chain",text:"Some cards combo together. Try playing Battle Cry AND Stage Dive in the same Strike...",target:"hand",position:"above"},
+    {id:"t3_embers",text:"You have extra Embers this fight. Embers are your fuel — every card costs Embers to play. Some cards like Groupie give Embers back.",target:"embers",position:"left"},
+    {id:"t3_chain",text:"Certain card pairs trigger Riff Chains — powerful combos that multiply your damage. Try playing Battle Cry and Stage Dive on a member in the same Strike!",target:"hand",position:"above"},
   ],
 }
 const TUTORIAL_POST_FIGHT={
@@ -3701,8 +3702,8 @@ function App(){
     setDiscardPile([])
     setStrikesLeft(4)
     setDiscardsLeft(4)
-    setEmbers(5)
-    setMaxEmbers(5)
+    setEmbers(fightNum===3?8:5)
+    setMaxEmbers(fightNum===3?8:5)
     setCorruption(fightNum>=2?10:0) // Fight 2+ starts with some corruption
     setAnimPhase('idle')
     setGameState('playing')
