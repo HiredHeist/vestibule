@@ -677,17 +677,17 @@ const TUTORIAL_ENEMIES=[
 const TUTORIAL_MEMBERS=['bjorn','gunnar'] // Lead Guitarist (FRENZIED) + Rhythm Guitarist (SHREDDER)
 // Predetermined hands for each tutorial fight
 const TUTORIAL_HANDS={
-  1:['battlecry','ampitup','newstrings','groupie','distortion','heavyriff','moshpit'], // basics: buff + attack
-  2:['battlecry','darktuning','smokebreak','distortion','encore','roadie','groupie'], // corruption cards + heals
-  3:['battlecry','stagedive','encore','ampitup','heavyriff','distortion','groupie'], // battlecry+stagedive = DEATH WISH chain
+  1:['battlecry','amp','newstrings','groupie','distortion','heavyriff','moshpit'], // basics: buff + attack
+  2:['battlecry','darktuning','setbreak','distortion','encore','roadie','groupie'], // corruption cards + heals
+  3:['battlecry','stagedive','encore','amp','heavyriff','distortion','groupie'], // battlecry+stagedive = DEATH WISH chain
 }
 // Tooltip sequences per fight
 const TUTORIAL_TIPS={
   1:[
-    {id:"t1_welcome",text:"Welcome to the Vestibule. Your band must fight through the 9 Circles of Hell.",target:"boss",position:"below"},
-    {id:"t1_hand",text:"These are your cards. Drag a card onto a band member to play it and buff them.",target:"hand",position:"above"},
-    {id:"t1_embers",text:"Each card costs \u{1F525} Embers to play. You start with 5 per fight.",target:"embers",position:"left"},
-    {id:"t1_strike",text:"When you are ready, hit STRIKE. Your band attacks the enemy with their combined ATK.",target:"strike",position:"left"},
+    {id:"t1_welcome",text:"Welcome to the Vestibule. Your band must fight through the 9 Circles of Hell. Let us show you how.",target:"boss",position:"below"},
+    {id:"t1_hand",text:"Playing cards is everything. Drag a card onto a band member to buff their ATK, heal them, or trigger special effects. Try it now!",target:"hand",position:"above"},
+    {id:"t1_embers",text:"Cards cost Embers to play. You have 5 per fight. Spend them wisely — every card makes your Strike stronger.",target:"embers",position:"left"},
+    {id:"t1_strike",text:"When you have played your cards, hit STRIKE. Every band member attacks the enemy with their ATK. More buffs = more damage.",target:"strike",position:"left"},
   ],
   2:[
     {id:"t2_corruption",text:"See the meter on the right? That is Corruption. Some cards raise it. Higher corruption means more danger... but also more power.",target:"corruption",position:"left"},
@@ -3696,7 +3696,7 @@ function App(){
     const tutHand=handIds.map(id=>{const c=ALL_CARDS.find(x=>x.id===id);return{...c,uid:uid()}})
     setHand(tutHand)
     // Fill deck with basic cards for draws
-    const deckCards=['battlecry','ampitup','moshpit','groupie','distortion','newstrings','heavyriff','encore','roadie','tappedout'].map(id=>{const c=ALL_CARDS.find(x=>x.id===id);return{...c,uid:uid()}})
+    const deckCards=['battlecry','amp','moshpit','groupie','distortion','newstrings','heavyriff','encore','roadie','tappedout'].map(id=>{const c=ALL_CARDS.find(x=>x.id===id);return{...c,uid:uid()}})
     setDeck(deckCards)
     setDiscardPile([])
     setStrikesLeft(4)
@@ -3709,7 +3709,24 @@ function App(){
     setDblRoll(null)
     setStrikeMult(1.0)
     setPhaseBanner('play')
-    fullRunLogRef.current=['⛧ Tutorial Fight '+fightNum+' begins.']
+    setIsWiggling(false)
+    setDamageFlash(false)
+    setProjectiles([])
+    setStrikingMemberIdx(-1)
+    setStrikeAnim(null)
+    setBossStrikeAnim(null)
+    setFlyingCard(null)
+    setCardAbsorb(null)
+    setSelected([])
+    setCardsPlayedThisStrike([])
+    cardsPlayedRef.current=[]
+    combosFiredRef.current=[]
+    victoryFiredRef.current=false
+    setStash(20) // enough to buy stuff if shop appears
+    setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
+    setBossDebuff(0)
+    setChosenPacts([])
+    fullRunLogRef.current=['\u26E7 Tutorial Fight '+fightNum+' begins.']
   },[])
 
   const handleTutorialVictory=useCallback(()=>{
