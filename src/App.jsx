@@ -1629,7 +1629,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             transform:hov&&canBuy&&!bought?'translateY(-6px) scale(1.02)':'none',
             transition:'transform 0.18s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
             boxShadow:hov&&canBuy&&!bought?'0 16px 48px rgba(0,0,0,0.95),0 0 28px '+gl:'2px 4px 16px rgba(0,0,0,0.7)',
-            animation:bought?'':'throbShop 4.5s ease-in-out infinite'}}>
+            animation:bought?'':'throbShop 4.5s ease-in-out infinite',opacity:!canBuy&&!bought?0.4:1}}>
           {bought&&<SoldOverlay/>}
           <div style={{height:7,flexShrink:0,background:bc,boxShadow:'0 0 12px '+gl}}/>
           <div style={{position:'relative',height:32,flexShrink:0}}>
@@ -1754,7 +1754,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             transition:'transform 0.18s,box-shadow 0.15s,border-color 0.15s',
             boxShadow:hov&&canBuy?'0 16px 48px rgba(0,0,0,0.95),0 0 32px '+ac+'55':'2px 6px 20px rgba(0,0,0,0.7)',
             position:'relative',padding:'0 14px 18px',
-            animation:bought?'':'throbShop 4.5s ease-in-out infinite'}}>
+            animation:bought?'':'throbShop 4.5s ease-in-out infinite',opacity:!canBuy&&!bought?0.4:1}}>
           {bought&&<SoldOverlay/>}
           <div style={{width:'100%',height:8,flexShrink:0,
             background:'linear-gradient(90deg,'+ac+'44,'+ac+'ee,'+ac+'44)',
