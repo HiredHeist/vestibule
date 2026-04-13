@@ -1,11 +1,14 @@
 
-// ═══ TODO — NEXT SESSION ═══
-// [x] Boss attack: uses Projectile for correct targeting (DONE)
-// [x] HP bar uses scaledMaxHp — drains from first hit (DONE)
-// [x] Rules screen: 35 entries covering all mechanics (DONE)
+// ═══ TODO — CURRENT SESSION: TUTORIAL SYSTEM ═══
+// [x] Tutorial state tracking (localStorage vst_tutorial)
+// [x] Main menu: Start Tutorial / Skip Tutorial buttons
+// [x] Fight 1: "The Basics" — cards, embers, Strike
+// [x] Fight 2: "Corruption & The Shop" — corruption bar, shop
+// [x] Fight 3: "The Combo" — seeded chain pair, genre bonus
+// [x] Tooltip overlay system (modal, one at a time)
+// [x] First-encounter contextual tips (pacts, forge, events)
 // [ ] Corruption thermometer tuning from player feedback
 // [ ] Event choice audit — Sabbath Offering useless on Bronze/Silver/Gold
-// [ ] Card fly animation polish (trajectory/timing)
 // ═══════════════════════════
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
@@ -662,6 +665,56 @@ function getCenter(ref){
   const r=ref.current.getBoundingClientRect()
   return{x:r.left+r.width/2,y:r.top+r.height/2}
 }
+
+
+// ═══ TUTORIAL SYSTEM ═══════════════════════════════════════════════════════
+const TUTORIAL_ENEMIES=[
+  {id:'tut_shade',name:'The Shade',circle:'TUTORIAL',subtitle:'Fight 1 of 3',maxHp:30,baseDmg:2,emoji:'👤',passive:'A weak spirit. An easy first kill.',passiveId:null},
+  {id:'tut_wraith',name:'The Wraith',circle:'TUTORIAL',subtitle:'Fight 2 of 3',maxHp:45,baseDmg:3,emoji:'👻',passive:'Its touch corrupts. +10% Corruption per Strike.',passiveId:'corruptPlayer10tut'},
+  {id:'tut_revenant',name:'The Revenant',circle:'TUTORIAL',subtitle:'Fight 3 of 3',maxHp:55,baseDmg:3,emoji:'💀',passive:'Stronger, but beatable. Find the combo.',passiveId:null},
+]
+// Members the player starts with in the tutorial
+const TUTORIAL_MEMBERS=['bjorn','gunnar'] // Lead Guitarist (FRENZIED) + Rhythm Guitarist (SHREDDER)
+// Predetermined hands for each tutorial fight
+const TUTORIAL_HANDS={
+  1:['battlecry','ampitup','newstrings','groupie','distortion','heavyriff','moshpit'], // basics: buff + attack
+  2:['battlecry','darktuning','smokebreak','distortion','encore','roadie','groupie'], // corruption cards + heals
+  3:['battlecry','stagedive','encore','ampitup','heavyriff','distortion','groupie'], // battlecry+stagedive = DEATH WISH chain
+}
+// Tooltip sequences per fight
+const TUTORIAL_TIPS={
+  1:[
+    {id:"t1_welcome",text:"Welcome to the Vestibule. Your band must fight through the 9 Circles of Hell.",target:"boss",position:"below"},
+    {id:"t1_hand",text:"These are your cards. Drag a card onto a band member to play it and buff them.",target:"hand",position:"above"},
+    {id:"t1_embers",text:"Each card costs \u{1F525} Embers to play. You start with 5 per fight.",target:"embers",position:"left"},
+    {id:"t1_strike",text:"When you are ready, hit STRIKE. Your band attacks the enemy with their combined ATK.",target:"strike",position:"left"},
+  ],
+  2:[
+    {id:"t2_corruption",text:"See the meter on the right? That is Corruption. Some cards raise it. Higher corruption means more danger... but also more power.",target:"corruption",position:"left"},
+    {id:"t2_corrupt_card",text:"CORRUPT cards (red) are risky. They raise corruption but can be very powerful.",target:"hand",position:"above"},
+  ],
+  3:[
+    {id:"t3_chain",text:"Some cards combo together. Try playing Battle Cry AND Stage Dive in the same Strike...",target:"hand",position:"above"},
+  ],
+}
+const TUTORIAL_POST_FIGHT={
+  1:'Nice work! That was just a warm-up. The real darkness lies ahead...',
+  2:'You felt the corruption creeping in. Learn to use it — or it will consume you.',
+  3:'TUTORIAL COMPLETE',
+}
+function isTutorialDone(){return localStorage.getItem('vst_tutorial')==='done'}
+// First-encounter tips — shown once per mechanic
+const FIRST_TIPS={
+  pact:"After each boss, choose a Pact — a permanent buff for the rest of your run. Choose wisely, you can only pick one.",
+  forge:"The Doom Forge lets you upgrade one card permanently. Upgraded cards have enhanced effects. Pick your best card.",
+  shop:"Welcome to the Shop. Spend Stash to buy new cards, recruit members, and find artifacts. Browse carefully.",
+  event:"A random event! These offer risky choices with big rewards. Read both options before deciding.",
+  descent:"The Descent Map shows your path through Hell. You can skip some fights for alternative rewards.",
+  drugs:"The Dealer sells Shrooms and Acid. Drugs give powerful trip effects before fights, but bad trips are possible.",
+}
+function hasSeenTip(id){return(JSON.parse(localStorage.getItem('vst_tips')||'[]')).includes(id)}
+function markTipSeen(id){const seen=JSON.parse(localStorage.getItem('vst_tips')||'[]');if(!seen.includes(id)){seen.push(id);localStorage.setItem('vst_tips',JSON.stringify(seen))}}
+function markTutorialDone(){localStorage.setItem('vst_tutorial','done')}
 
 // ── STARTER ARTIFACTS A1-A10 ─────────────────────────────────
 const STARTER_ARTIFACTS=[
@@ -3279,8 +3332,49 @@ function SetlistModal({hand,onConfirm}){
   )
 }
 
+
+// ═══ TUTORIAL TOOLTIP ═══
+function TutorialTooltip({tip,onDismiss}){
+  if(!tip)return null
+  // Position mapping based on target
+  const positions={
+    boss:{top:'22%',left:'50%',transform:'translateX(-50%)'},
+    hand:{bottom:'370px',left:'50%',transform:'translateX(-50%)'},
+    embers:{bottom:'180px',right:'160px'},
+    strike:{bottom:'280px',right:'80px'},
+    corruption:{top:'40%',right:'80px'},
+  }
+  const pos=positions[tip.target]||{top:'40%',left:'50%',transform:'translateX(-50%)'}
+  return(
+    <div style={{position:'fixed',inset:0,zIndex:99999,background:'rgba(0,0,0,0.7)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <div style={{position:'absolute',...pos,maxWidth:500,background:'linear-gradient(180deg,#1a1208,#0a0704)',border:'3px solid #e8a820',borderRadius:12,padding:'24px 32px',boxShadow:'0 0 60px rgba(232,168,32,0.4),0 8px 40px rgba(0,0,0,0.9)',zIndex:100000}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,color:'#e8d0a0',lineHeight:1.5,marginBottom:16,textShadow:'0 1px 3px rgba(0,0,0,0.8)'}}>{tip.text}</div>
+        <button onClick={onDismiss} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:4,color:'#e8a820',background:'rgba(232,168,32,0.15)',border:'2px solid #e8a820',borderRadius:6,padding:'10px 32px',cursor:'pointer',textTransform:'uppercase',display:'block',margin:'0 auto'}}>Got it</button>
+      </div>
+    </div>
+  )
+}
+
+// ═══ TUTORIAL POST-FIGHT MESSAGE ═══
+function TutorialMessage({text,onContinue,isFinal}){
+  return(
+    <div style={{position:'fixed',inset:0,zIndex:99998,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <div style={{maxWidth:600,background:'linear-gradient(180deg,#1a1208,#0a0704)',border:'3px solid '+(isFinal?'#cc1111':'#e8a820'),borderRadius:12,padding:'40px 48px',textAlign:'center',boxShadow:'0 0 80px '+(isFinal?'rgba(200,0,0,0.5)':'rgba(232,168,32,0.4)')}}>
+        {isFinal&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#cc1111',textShadow:'0 0 30px rgba(200,0,0,0.8)',letterSpacing:8,marginBottom:16}}>Tutorial Complete</div>}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:isFinal?20:24,color:'#e8d0a0',lineHeight:1.6,marginBottom:24}}>{isFinal?'You know the basics. The full descent awaits — 9 Circles, 27 enemies, 1 chance. Discover Riff Chains, forge upgrades, and choose your pacts. The deeper you go, the darker it gets.':text}</div>
+        <button onClick={onContinue} style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,letterSpacing:6,color:isFinal?'#ee2222':'#e8a820',background:isFinal?'rgba(200,0,0,0.2)':'rgba(232,168,32,0.15)',border:'2px solid '+(isFinal?'#cc1111':'#e8a820'),borderRadius:6,padding:'14px 48px',cursor:'pointer',textTransform:'uppercase'}}>{isFinal?'⛧ Enter the Vestibule ⛧':'Continue'}</button>
+      </div>
+    </div>
+  )
+}
+
 function App(){
   const [gameState,setGameState]=useState('menu')
+  const [tutorialFight,setTutorialFight]=useState(0)
+  const [firstTip,setFirstTip]=useState(null) // {id, text} for first-encounter tips // 0=not in tutorial, 1/2/3=tutorial fight
+  const [tutorialTipIdx,setTutorialTipIdx]=useState(0) // which tooltip in current fight's sequence
+  const [tutorialShopDone,setTutorialShopDone]=useState(false)
+  const [showTutorialMsg,setShowTutorialMsg]=useState(null) // post-fight message
   const getDailySeed=()=>{const d=new Date();return parseInt(d.getFullYear().toString()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'))}
   const [runSeed,setRunSeed]=useState(()=>Math.floor(Math.random()*0xFFFFFF))
   const [isDailyRun,setIsDailyRun]=useState(false)
@@ -3583,6 +3677,72 @@ function App(){
     if(hasDrummer){let roll=Math.floor(Math.random()*6)+1;if(drumCount2>=2&&roll<=2)roll=Math.floor(Math.random()*6)+1;setDblRoll(roll)}
     else setDblRoll(null)
   }
+  // ═══ TUTORIAL START ═══
+  const startTutorialFight=useCallback((fightNum)=>{
+    const tutEnemy=TUTORIAL_ENEMIES[fightNum-1]
+    setEnemy(tutEnemy)
+    setEnemyHp(tutEnemy.maxHp)
+    setScaledMaxHp(tutEnemy.maxHp)
+    setFightIndex(fightNum-1)
+    setTutorialFight(fightNum)
+    setTutorialTipIdx(0)
+    setShowTutorialMsg(null)
+    // Set tutorial members
+    const members=TUTORIAL_MEMBERS.map(id=>ALL_MUSICIANS.find(m=>m.id===id))
+    const initStage=[null,...members.map(m=>({...m,maxHp:m.hp,uid:uid()})),...Array(3).fill(null)]
+    setStage(initStage)
+    // Set tutorial hand
+    const handIds=TUTORIAL_HANDS[fightNum]
+    const tutHand=handIds.map(id=>{const c=ALL_CARDS.find(x=>x.id===id);return{...c,uid:uid()}})
+    setHand(tutHand)
+    // Fill deck with basic cards for draws
+    const deckCards=['battlecry','ampitup','moshpit','groupie','distortion','newstrings','heavyriff','encore','roadie','tappedout'].map(id=>{const c=ALL_CARDS.find(x=>x.id===id);return{...c,uid:uid()}})
+    setDeck(deckCards)
+    setDiscardPile([])
+    setStrikesLeft(4)
+    setDiscardsLeft(4)
+    setEmbers(5)
+    setMaxEmbers(5)
+    setCorruption(fightNum>=2?10:0) // Fight 2+ starts with some corruption
+    setAnimPhase('idle')
+    setGameState('playing')
+    setDblRoll(null)
+    setStrikeMult(1.0)
+    setPhaseBanner('play')
+    fullRunLogRef.current=['⛧ Tutorial Fight '+fightNum+' begins.']
+  },[])
+
+  const handleTutorialVictory=useCallback(()=>{
+    const fightNum=tutorialFight
+    if(fightNum===3){
+      // Tutorial complete
+      markTutorialDone()
+      setShowTutorialMsg('TUTORIAL COMPLETE')
+    } else {
+      setShowTutorialMsg(TUTORIAL_POST_FIGHT[fightNum])
+    }
+  },[tutorialFight])
+
+  const handleTutorialContinue=useCallback(()=>{
+    if(showTutorialMsg==='TUTORIAL COMPLETE'){
+      // Return to menu, start real game
+      setTutorialFight(0)
+      setShowTutorialMsg(null)
+      setGameState('menu')
+      return
+    }
+    const nextFight=tutorialFight+1
+    if(nextFight===3){
+      // Fight 3 — go straight in
+      setShowTutorialMsg(null)
+      startTutorialFight(3)
+    } else {
+      // Fight 2 — go straight in
+      setShowTutorialMsg(null)
+      startTutorialFight(nextFight)
+    }
+  },[tutorialFight,showTutorialMsg])
+
   const startGame=useCallback(selIds=>{
     const musicians=selIds.map(id=>ALL_MUSICIANS.find(m=>m.id===id))
     const maxStage=chosenPacts.includes('sixth_slot')?6:5
@@ -4260,6 +4420,12 @@ function App(){
   const triggerVictory=useCallback(function(){
     if(victoryFiredRef.current)return // prevent double-fire
     victoryFiredRef.current=true
+    // ═══ TUTORIAL INTERCEPT ═══
+    if(tutorialFight>0){
+      playSfx('victory')
+      setTimeout(()=>handleTutorialVictory(),1500)
+      return // skip all normal victory processing
+    }
     // CLUTCH DETECTION
     const aliveCount=stage.filter(m=>m&&!m.tooStoned).length
     if(aliveCount===1){setClutchFlash({text:'SOLO VICTORY!',color:'#ffd700'});playSfx('big_hit');triggerShake(8,300);setTimeout(()=>setClutchFlash(null),2500)}
@@ -4422,6 +4588,16 @@ function App(){
     },1000)
   },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake,stage,hand,enemy,enemyHp,embers,maxEmbers,activeArtifacts,activePassives,chosenPacts,activeGenre,animPhase,discardsLeft,deck,discardPile,fightTripBuff,luciferPhase,welcomeToHell,eventsSeenThisRun])
   triggerVictoryRef.current=triggerVictory
+
+  // ═══ FIRST-ENCOUNTER TIPS ═══
+  useEffect(()=>{
+    if(tutorialFight>0)return // no tips during tutorial
+    if(firstTip)return // already showing one
+    if(gameState==='pact'&&!hasSeenTip('pact')){setFirstTip({id:'pact',text:FIRST_TIPS.pact});markTipSeen('pact')}
+    else if(gameState==='shop'&&!hasSeenTip('shop')){setFirstTip({id:'shop',text:FIRST_TIPS.shop});markTipSeen('shop')}
+    else if(gameState==='event'&&!hasSeenTip('event')){setFirstTip({id:'event',text:FIRST_TIPS.event});markTipSeen('event')}
+    else if(gameState==='descent'&&!hasSeenTip('descent')){setFirstTip({id:'descent',text:FIRST_TIPS.descent});markTipSeen('descent')}
+  },[gameState,tutorialFight,firstTip])
 
 
   // SAFETY NET: catch ANY case where boss HP hits 0 without victory triggering
@@ -4886,7 +5062,7 @@ function App(){
         else if(enemy.passiveId==='rageScale1'){const buffed=stage.filter(m=>m&&(m.buffCount||0)>0).length;scaledBaseDmg=stakeBaseDmg+buffed*1}
         else if(enemy.passiveId==='rageScale2'){const buffed=stage.filter(m=>m&&(m.buffCount||0)>0).length;scaledBaseDmg=stakeBaseDmg+buffed*2}
         // corruptPlayer: raises player corruption each Strike
-        else if(enemy.passiveId==='corruptPlayer'){setCorruption(p=>Math.min(100,p+10));addLog('🔱 Heretic corrupts your band! +10% Corruption.')}
+        else if(enemy.passiveId==='corruptPlayer'||enemy.passiveId==='corruptPlayer10tut'){setCorruption(p=>Math.min(100,p+10));addLog('🔱 '+enemy.name+' corrupts your band! +10% Corruption.')}
         else if(enemy.passiveId==='corruptPlayer15'){setCorruption(p=>Math.min(100,p+15));addLog('⛧ Apostate corrupts! +15% Corruption.')}
         else if(enemy.passiveId==='corruptPlayer20'){setCorruption(p=>Math.min(100,p+20));addLog('📖 False Prophet corrupts! +20% Corruption.')}
         // stashSteal: steals stash each strike
@@ -4934,7 +5110,7 @@ function App(){
                 else{ns2[ai]=Object.assign({},ns2[ai],{hp:Math.max(0,newHp)})}
               }
               const allStoned=ns2.filter(m=>m).every(m=>m.tooStoned)
-              if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned');playSfx('defeat')};setTimeout(()=>setGameState('end'),800)}
+              if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else if(tutorialFight>0){setShowTutorialMsg('You got stoned! No worries, try that one again.');setTimeout(()=>startTutorialFight(tutorialFight),2000);return}else{setDeathCause('stoned');playSfx('defeat')};setTimeout(()=>setGameState('end'),800)}
               return ns2
             })
             setDamageFlash(true);triggerShake(10,350);setTimeout(()=>setDamageFlash(false),400)
@@ -5798,17 +5974,37 @@ function App(){
             {(personalBest||0)>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#aa8030',letterSpacing:2}}>BEST: {personalBest.toLocaleString()}</div>}
           </div>
 
-          {/* PLAY button — HUGE */}
-          <button onClick={()=>setGameState('booster')}
-            style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:63,letterSpacing:10,color:'#ee2222',
-              background:'rgba(120,0,0,0.25)',border:'3px solid #aa0000',borderRadius:10,
-              padding:'28px 140px',cursor:'pointer',textTransform:'uppercase',
-              textShadow:'0 0 30px rgba(220,0,0,0.7)',
-              boxShadow:'0 0 50px rgba(180,0,0,0.3)',
-              animation:'throb 2s ease-in-out infinite',transition:'all 0.2s',marginBottom:16}}>
-            {getStakeUnlocks().includes('demonic')&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#ff0044',textShadow:'0 0 20px rgba(255,0,68,0.6),0 0 40px rgba(255,0,68,0.3)',letterSpacing:6,marginBottom:8,animation:'throb 3s ease-in-out infinite'}}>⛧ GOD KILLER ⛧</div>}
-            ⛧ Enter the Vestibule ⛧
-          </button>
+          {/* PLAY BUTTONS */}
+          {!isTutorialDone()?(
+            <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:12,marginBottom:16}}>
+              <button onClick={()=>startTutorialFight(1)}
+                style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:63,letterSpacing:10,color:'#ee2222',
+                  background:'rgba(120,0,0,0.25)',border:'3px solid #aa0000',borderRadius:10,
+                  padding:'28px 120px',cursor:'pointer',textTransform:'uppercase',
+                  textShadow:'0 0 30px rgba(220,0,0,0.7)',
+                  boxShadow:'0 0 50px rgba(180,0,0,0.3)',
+                  animation:'throb 2s ease-in-out infinite',transition:'all 0.2s'}}>
+                ⛧ Start Tutorial ⛧
+              </button>
+              <button onClick={()=>{markTutorialDone();setGameState('booster')}}
+                style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,letterSpacing:4,color:'#8a7a50',
+                  background:'none',border:'none',cursor:'pointer',textDecoration:'underline',
+                  textTransform:'uppercase',opacity:0.7}}>
+                Skip Tutorial — I know what I'm doing
+              </button>
+            </div>
+          ):(
+            <button onClick={()=>setGameState('booster')}
+              style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:63,letterSpacing:10,color:'#ee2222',
+                background:'rgba(120,0,0,0.25)',border:'3px solid #aa0000',borderRadius:10,
+                padding:'28px 140px',cursor:'pointer',textTransform:'uppercase',
+                textShadow:'0 0 30px rgba(220,0,0,0.7)',
+                boxShadow:'0 0 50px rgba(180,0,0,0.3)',
+                animation:'throb 2s ease-in-out infinite',transition:'all 0.2s',marginBottom:16}}>
+              {getStakeUnlocks().includes('demonic')&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#ff0044',textShadow:'0 0 20px rgba(255,0,68,0.6),0 0 40px rgba(255,0,68,0.3)',letterSpacing:6,marginBottom:8,animation:'throb 3s ease-in-out infinite'}}>⛧ GOD KILLER ⛧</div>}
+              ⛧ Enter the Vestibule ⛧
+            </button>
+          )}
 
           {/* Menu buttons row */}
           <div style={{display:'flex',gap:12}}>
@@ -5964,6 +6160,15 @@ function App(){
     </div>
   )
 
+  if(firstTip)return(
+    <div style={{width:1920,height:1080,position:'relative',overflow:'hidden',background:'#040201',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <div style={{maxWidth:550,background:'linear-gradient(180deg,#1a1208,#0a0704)',border:'3px solid #e8a820',borderRadius:12,padding:'32px 40px',textAlign:'center',boxShadow:'0 0 60px rgba(232,168,32,0.4)'}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#e8a820',letterSpacing:4,textTransform:'uppercase',marginBottom:12}}>New Mechanic</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#e8d0a0',lineHeight:1.6,marginBottom:20}}>{firstTip.text}</div>
+        <button onClick={()=>setFirstTip(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:4,color:'#e8a820',background:'rgba(232,168,32,0.15)',border:'2px solid #e8a820',borderRadius:6,padding:'10px 40px',cursor:'pointer',textTransform:'uppercase'}}>Got it</button>
+      </div>
+    </div>
+  )
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(gameState==='circleSplash'&&circleSplash)return(
     <div style={{width:1920,height:1080,position:'relative',background:'#020100',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,overflow:'hidden'}}>
@@ -6152,7 +6357,8 @@ function App(){
   return(
     <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
 
-      {/* ═══ CORRUPTION THERMOMETER — right edge ═══ */}
+      {/* ═══ CORRUPTION THERMOMETER — right edge (hidden during tutorial fight 1) ═══ */}
+      {tutorialFight!==1&&
       <div style={{position:'absolute',right:12,top:20,bottom:360,width:48,zIndex:50,display:'flex',flexDirection:'column',alignItems:'center',gap:0}}>
         {/* Percentage at top */}
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,
@@ -6193,7 +6399,7 @@ function App(){
           textShadow:corruption>=50?'0 0 8px rgba(200,0,60,0.6)':'none',letterSpacing:1,lineHeight:1.2}}>
           {corruption>=100?'☠ POSSESSED':corruption>=75?'💀 MADNESS':corruption>=50?'🔥 HUNGER':corruption>=25?'⚠ WHISPERS':''}
         </div>
-      </div>
+      </div>}
 
             {enemyHp>0&&enemyHp<enemy.maxHp*0.20&&<div style={{position:'absolute',inset:0,zIndex:7998,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 50%,rgba(180,0,0,0.2) 100%)',animation:'bossUrgency 0.6s ease-in-out infinite alternate'}}/>}
       {damageFlash&&<div style={{position:'absolute',inset:0,zIndex:8500,pointerEvents:'none',background:'radial-gradient(ellipse at center,rgba(200,0,0,0.25),rgba(100,0,0,0.4))',animation:'flashFade 0.4s ease-out forwards'}}/>}
@@ -6684,6 +6890,15 @@ function App(){
             style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,letterSpacing:4,color:'#ee2222',background:'rgba(120,0,0,0.25)',border:'2px solid #aa0000',borderRadius:8,padding:'12px 60px',cursor:'pointer',marginTop:8,animation:'throb 2s ease-in-out infinite'}}>Resume</button>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#555',letterSpacing:2,marginTop:4}}>Press ESC to close</div>
         </div>
+      </div>}
+
+      {/* ═══ TUTORIAL OVERLAYS ═══ */}
+      {tutorialFight>0&&TUTORIAL_TIPS[tutorialFight]&&tutorialTipIdx<TUTORIAL_TIPS[tutorialFight].length&&
+        <TutorialTooltip tip={TUTORIAL_TIPS[tutorialFight][tutorialTipIdx]} onDismiss={()=>setTutorialTipIdx(p=>p+1)}/>}
+      {showTutorialMsg&&<TutorialMessage text={showTutorialMsg} isFinal={showTutorialMsg==='TUTORIAL COMPLETE'} onContinue={handleTutorialContinue}/>}
+      {/* Tutorial fight indicator */}
+      {tutorialFight>0&&<div style={{position:'absolute',top:8,left:'50%',transform:'translateX(-50%)',zIndex:9990,fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#e8a820',letterSpacing:4,textTransform:'uppercase',background:'rgba(10,6,2,0.85)',border:'1px solid rgba(232,168,32,0.4)',borderRadius:6,padding:'6px 24px'}}>
+        TUTORIAL — Fight {tutorialFight} of 3
       </div>}
 
     </div>
