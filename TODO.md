@@ -1,8 +1,83 @@
 # VESTIBULE — TODO & STATUS
 
-## Latest Session: April 13, 2026
+## Latest Session: April 14, 2026
 **Latest commit:** 9715dd9
 **Sim version:** v17.1 (synced with game code)
+
+---
+
+## SPRITE ASSETS — IN PROGRESS 🎨
+
+### Global Prompt Prefix (prepend to ALL sprites)
+`pixel art, [SIZE], neutral flat dungeon lighting, no strong light source, transparent background,`
+
+### Export Rules
+- Format: **PNG only** (never JPG — alpha channel)
+- Tool: PixelLab (`pixellab.ai`) — enable "remove background" before export
+- Style anchor: generate Bjorn first, use as reference for all remaining members
+
+---
+
+### Band Members — 96×96px (17 sprites)
+
+| ID | Name | Role / Keyword | Status | Prompt (after global prefix) |
+|----|------|----------------|--------|------------------------------|
+| `bjorn` | Bjorn | Lead Guitarist / FRENZIED | [ ] | doom metal guitarist, wild long blonde hair, flying V guitar, leather jacket, snarling expression, frenzied energy |
+| `ragnar` | Ragnar | Lead Guitarist / FRENZIED | [ ] | doom metal guitarist, braided red hair, Les Paul guitar, battle vest, calmer but intense |
+| `thor` | Thor | Drummer / DOUBLE TIME | [ ] | doom metal drummer, massive arms, mohawk, double kick pedal visible, sweat, motion blur on sticks |
+| `ingrid` | Ingrid | Bass Player / ANCHOR | [ ] | doom metal bassist, tall stoic woman, long dark hair, thick low-slung bass, rune tattoos |
+| `loki` | Loki | Synth Player / CORRUPT | [ ] | dark synth player, gaunt pale face, glowing purple keys, corruption smoke wisping from hands, unsettling grin |
+| `dag` | Dag | Bass Player / ANCHOR | [ ] | doom metal bassist, enormous bearded man, shoulder-width stance, massive bass guitar, immovable wall energy |
+| `vitalik` | Vitalik | Dark Minstrel / FOLK MAGIC | [ ] | dark folk minstrel, wild unkempt hair, wooden flute, pagan charms hanging from neck, slightly unhinged smile |
+| `sigrid` | Sigrid | Rhythm Guitarist / SHREDDER | [ ] | doom metal rhythm guitarist, sharp angular features, telecaster guitar, fast aggressive stance, picking hand blur |
+| `gunnar` | Gunnar | Rhythm Guitarist / SHREDDER | [ ] | doom metal rhythm guitarist, stocky build, shaved head, SG guitar, confident swagger |
+| `astrid` | Astrid | Vocalist / DEBUFF | [ ] | doom metal vocalist, dramatic stage presence, microphone raised, witchy black robes, voice crackling with dark energy |
+| `freya` | Freya | Synth Player / CORRUPT | [ ] | dark synth player, ethereal woman, analog synth, dark frequencies visualized as distortion aura, ominous purple glow |
+| `ulf` | Ulf | Bass Player / ANCHOR | [ ] | doom metal bassist, scarred muscular man, aggressive low stance, chunky bass guitar, anchor chain tattoo |
+| `brynja` | Brynja | Bass Player / ANCHOR | [ ] | doom metal bassist, impossibly tall woman, stone-faced, downtuned 5-string bass, does not move |
+| `rolf` | Rolf | Drummer / DOUBLE TIME | [ ] | doom metal drummer, wiry intense man, sparse kit, mechanical precision, thousand yard stare |
+| `orm` | Orm | Dark Minstrel / HEXED | [ ] | cursed folk musician, hollow eyes, cursed lute, dark mist seeping from instrument, hexed runes on hands |
+| `tanuki` | Tanuki | Bass Player / ANCHOR *(locked)* | [ ] | raccoon-dog yokai bassist, tanuki creature, heaviest bass guitar imaginable, Japanese folk meets doom metal |
+| `lucifer_member` | Lucifer | The Devil / FALLEN *(locked)* | [ ] | the devil as band member, crown of thorns, burning wings folded, radiant yet decaying, tragic fallen presence |
+
+### File placement: `public/members/{id}_stage.png` — register in `STAGE_PORTRAITS` object (~line 578)
+
+---
+
+### Bosses — 128×128px (28 sprites)
+
+| ID | Name | Circle | Status | Prompt (after global prefix) |
+|----|------|--------|--------|------------------------------|
+| `wanderer` | The Wanderer | I — Limbo | [ ] | lost soul, translucent humanoid, empty eye sockets, shambling posture, grey fog wisps, melancholy |
+| `lostsoul` | The Lost Soul | I — Limbo | [ ] | damned spirit, skeletal form, jaw unhinged in silent scream, hunger radiating outward, reaching hands |
+| `drifter` | The Drifter | I — Limbo | [ ] | relentless specter, featureless dark silhouette, single glowing eye, aggressive forward lean |
+| `siren` | The Siren | II — Lust | [ ] | demonic siren, flowing hair becomes waves, hypnotic gaze, scales on arms, beauty masking menace |
+| `tempter` | The Tempter | II — Lust | [ ] | demon of temptation, seductive shadow form, golden chains around wrists, corrupted halo |
+| `lust_boss` | The Seducer | II — Lust | [ ] | lust circle boss, tall powerful demon, crimson skin, commanding presence, damage aura pulsing |
+| `glutton` | The Glutton | III — Gluttony | [ ] | bloated hunger demon, distended belly, endless mouth, constantly eating, disgusting vitality |
+| `feaster` | The Feaster | III — Gluttony | [ ] | ravenous fiend, multiple mouths across body, jagged teeth, healing from every wound |
+| `gluttony_boss` | The Devourer | III — Gluttony | [ ] | massive void creature, everything bends into gravitational hunger, blackhole mouth |
+| `miser` | The Miser | IV — Greed | [ ] | greed demon, clutching stolen gold coins, sunken eyes, vault door as shield, hoarding posture |
+| `hoarder` | The Hoarder | IV — Greed | [ ] | avaricious demon, buried in stolen treasures, multiple arms grabbing outward, paranoid eyes |
+| `greed_boss` | The Usurer | IV — Greed | [ ] | demonic banker in torn suit, debt ledger as weapon, golden crown of thorns, 666 in eyes |
+| `wrathful` | The Wrathful | V — Anger | [ ] | rage demon, veins glowing red, fists raised, volcanic heat haze |
+| `berserker` | The Berserker | V — Anger | [ ] | berserk demon warrior, shattered armor, eyes white with fury, wrath chains broken |
+| `anger_boss` | The Warlord | V — Anger | [ ] | anger circle boss, massive demon general, strategy abandoned for pure rage, war-scarred |
+| `heretic` | The Heretic | VI — Heresy | [ ] | heresy demon, inverted religious symbols, corruption smoke pouring from mouth, blasphemy made flesh |
+| `apostate` | The Apostate | VI — Heresy | [ ] | fallen believer demon, burned scripture, eyes replaced by void, corrupting touch |
+| `heresy_boss` | The False Prophet | VI — Heresy | [ ] | preaching demon, toxic doctrine dripping from tongue, false halo, corrupted congregation behind |
+| `brute` | The Brute | VII — Violence | [ ] | calculating violence demon, cold eyes, massive clawed hands, surgical aggression |
+| `hunter` | The Hunter | VII — Violence | [ ] | predatory demon, crouched stalker pose, glowing tracking eyes, prey already marked |
+| `violence_boss` | The Executioner | VII — Violence | [ ] | demon executioner, enormous axe, methodical stance, sentence already written |
+| `trickster` | The Trickster | VIII — Fraud | [ ] | fraud demon, jester mask, cards in hand that vanish, deceptive shimmer, laughing |
+| `deceiver` | The Deceiver | VIII — Fraud | [ ] | manipulative demon, two faces, strings attached to puppet hands, your deck is its plaything |
+| `fraud_boss` | The Archfraud | VIII — Fraud | [ ] | master illusionist demon, mirror shards orbiting body, nothing is real |
+| `traitor` | The Traitor | IX — Treachery | [ ] | paranoia demon, backstabber form, knives in back, your band's silhouettes behind it |
+| `betrayer` | The Betrayer | IX — Treachery | [ ] | soul thief demon, stolen strength visible as glowing auras, hollow mirror of your band |
+| `lucifer` | Lucifer | IX — Final Boss | [ ] | satan final boss — Phase 1: regal fallen angel, cracked crown, contemptuous; Phase 2: Lord of the Flies, insect swarm, infernal throne |
+| `ar_exec` | The Executive | Special | [ ] | A&R demon in business suit, contract in one hand, soul in other, empty smile, the real devil wears Armani |
+
+### File placement: `public/bosses/{id}.png` — wire into `BossSection` component (~line 1813), replace the 90px emoji div
 
 ---
 

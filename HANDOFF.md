@@ -1,5 +1,15 @@
 # VESTIBULE — Developer Handoff
-**Latest commit: 36e9b4d | March 24, 2026**
+**Latest commit: 9715dd9 | April 14, 2026**
+
+## Current Focus: Sprite Assets
+45 pixel art sprites being generated — 17 band members (96×96) + 28 bosses (128×128).
+- **Tool:** PixelLab (pixellab.ai) — free tier, enable "remove background", export PNG
+- **Global prompt prefix:** `pixel art, [SIZE], neutral flat dungeon lighting, no strong light source, transparent background,`
+- **Style anchor:** Generate Bjorn first, use as reference image for all remaining members
+- **Member files:** `public/members/{id}_stage.png` → register in `STAGE_PORTRAITS` (~line 578)
+- **Boss files:** `public/bosses/{id}.png` → wire into `BossSection` (~line 1813), replace 90px emoji div
+- Full prompt list + checkboxes in `TODO.md`
+- **Next after sprites:** Animation frame spec (idle loops, strike trigger, death)
 
 ## Quick Start
 ```bash
