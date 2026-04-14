@@ -7,6 +7,20 @@
 // [ ] GHOST PREVIEW on drag — hovering a held card over a member shows
 //     "+1 ATK" or "+2 HP" preview on that member BEFORE dropping.
 //     Shows the RIGHT info at the RIGHT moment. Huge UX win.
+// [ ] HAND AREA OVERHAUL — "cockpit" layout:
+//     - DISCARD button (left panel) + remaining discards
+//     - STRIKE button (right panel) + damage number + remaining strikes
+//     - Cards centered with more breathing room
+//     - Secondary stats (embers, deck, pile, stash) in slim bottom strip
+//     - Embers as "🔥 4/7" number pair (scales to any max, not fixed pips)
+// [ ] DECK PEEK — tap deck icon to see remaining cards sorted by type
+//     Columns by type (RIFF/CORRUPT/UTILITY/EMBER) with color headers.
+//     Summary counts at top: "RIFF: 12 | CORRUPT: 5 | UTILITY: 3"
+//     Lets players calculate odds before discarding. No deck order shown.
+// [ ] DISCARD/PLAYED HISTORY — tap discard pile icon to see chronological
+//     list of cards played and discarded this fight. Most recent at top.
+//     Labels: "Played on Strike 2" / "Discarded on Strike 1"
+//     Helps players track what they have used and learn their patterns.
 // [ ] Card balance: buff Dial to Eleven, Setlist, Smoke Break, Record Deal
 // [ ] CORRUPT keyword: +1 per 12% (was 15%) — make corruption builds viable
 // [ ] Event audit: rework Sabbath Offering (chosen 1/10K games)
