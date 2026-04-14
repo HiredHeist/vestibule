@@ -26,17 +26,27 @@
 // [ ] Event audit: rework Sabbath Offering (chosen 1/10K games)
 // [ ] Early game pacing — Circles I-IV too safe (2.1% deaths combined)
 // ── IDEAS TO EXPLORE ──
-// [ ] Dark stage background — replace parchment with 3-zone tonal shift
-// [ ] Group all resources (embers/strikes/discards) in one HUD cluster
-// [ ] Combined attack number inside Strike button (not separate bar)
-// [ ] Hand area darker background strip (visual separation)
+// [ ] UNIFIED BATTLE AREA — merge boss + band into one zone:
+//     - Remove boss box/divider, boss floats on shared background
+//     - Concert poster boss layout (top to bottom):
+//       CIRCLE III · FIGHT 2 OF 3        (tiny, dim, contextual)
+//       THE FEASTER  ⚔6                  (big name + damage inline)
+//       Heals 3 HP every time played     (colored by threat type)
+//       🍖                                (large emoji, glowing)
+//       ████████░░░░ 119/156 HP          (HP as fraction)
+//     - Passive color-coded: purple=corruption, green=heal, red=damage
+//     - Band members sit below on same background, no divider
+//     - 2 zones (battle + hand) instead of 3
+// [ ] ANIMATED BATTLE BACKGROUND — slow dark gradient shift:
+//     - Deep crimson/purple/black, like embers glowing
+//     - Shifts redder as corruption rises
+//     - Pulses on chain triggers, fractures when boss near death
+//     - CSS gradient animations (no canvas needed for v1)
 // [ ] Reduce border noise — shadows instead of borders on member cards
 // [ ] Rigid member card layout — ATK/HP/keyword always in same spot
 // [ ] Corruption deck concept — special cards unlocked at thresholds
-// [ ] Boss info overhaul — visual boss art, cleaner layout
 // [ ] Genre banner: only show at 40%+ threshold (reduce noise)
 // [ ] Progressive rules screen (show only encountered mechanics)
-// [ ] Show boss HP as fraction ("52/60 HP")
 // [ ] Run summary toast on death ("What killed you" highlight)
 // ═══════════════════════════
 
