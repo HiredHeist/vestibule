@@ -4,11 +4,20 @@
 // [x] QoL: gray borders unaffordable, chain badges, shop dimming
 // [x] QoL: hide corruption thermometer at 0%, skip 0 ATK animations
 // ── NEXT UP ──
+// [ ] GHOST PREVIEW on drag — hovering a held card over a member shows
+//     "+1 ATK" or "+2 HP" preview on that member BEFORE dropping.
+//     Shows the RIGHT info at the RIGHT moment. Huge UX win.
 // [ ] Card balance: buff Dial to Eleven, Setlist, Smoke Break, Record Deal
 // [ ] CORRUPT keyword: +1 per 12% (was 15%) — make corruption builds viable
 // [ ] Event audit: rework Sabbath Offering (chosen 1/10K games)
 // [ ] Early game pacing — Circles I-IV too safe (2.1% deaths combined)
 // ── IDEAS TO EXPLORE ──
+// [ ] Dark stage background — replace parchment with 3-zone tonal shift
+// [ ] Group all resources (embers/strikes/discards) in one HUD cluster
+// [ ] Combined attack number inside Strike button (not separate bar)
+// [ ] Hand area darker background strip (visual separation)
+// [ ] Reduce border noise — shadows instead of borders on member cards
+// [ ] Rigid member card layout — ATK/HP/keyword always in same spot
 // [ ] Corruption deck concept — special cards unlocked at thresholds
 // [ ] Boss info overhaul — visual boss art, cleaner layout
 // [ ] Genre banner: only show at 40%+ threshold (reduce noise)
