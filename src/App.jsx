@@ -21,8 +21,16 @@
 //     list of cards played and discarded this fight. Most recent at top.
 //     Labels: "Played on Strike 2" / "Discarded on Strike 1"
 //     Helps players track what they have used and learn their patterns.
-// [ ] Card balance: buff Dial to Eleven, Setlist, Smoke Break, Record Deal
-// [ ] CORRUPT keyword: +1 per 12% (was 15%) — make corruption builds viable
+// [ ] CARD BALANCE + 69-CARD DECK (sim-tested at 7.68% Bronze, matches current 7.74%):
+//     DECK: 69 cards (RIFF:32 EMBER:9 CORRUPT:15 UTIL:11)
+//     Move to shop-only: Sabbath Sigil, Overdrive, Going Broke, Remaster,
+//       Controlled Feedback, Amp the Static, Feedback Loop, Double Down,
+//       Stage Dive, Record Deal (rework to deck thinning)
+//     BUFFS:
+//       Dial to Eleven: +2 ATK, corruption +5% (was +10%) — half the risk
+//       Smoke Break: +3 embers + DRAW 1 CARD (now replaces itself)
+//       CORRUPT keyword: +1 ATK per 10% corruption (was /15) — clean math
+//       Record Deal: rework to deck thinning (remove cards from deck for stash)
 // [ ] Event audit: rework Sabbath Offering (chosen 1/10K games)
 // [ ] Early game pacing — Circles I-IV too safe (2.1% deaths combined)
 // ── IDEAS TO EXPLORE ──
