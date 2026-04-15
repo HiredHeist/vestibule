@@ -3644,7 +3644,7 @@ function App(){
   const skipDescentRef=useRef(false)
   const overrideFightIdxRef=useRef(null) // set by descent to override next fight index
   const [corruption,setCorruption]=useState(0)
-  const [corruptionGiftsGiven,setCorruptionGiftsGiven]=useState([]) // tracks which thresholds gave gifts
+
   const [stageDiveUsed,setStageDiveUsed]=useState(false)
   const [diceTarget,setDiceTarget]=useState(null)
   const [showDice,setShowDice]=useState(false)
@@ -3699,15 +3699,15 @@ function App(){
     if(gameState!=='playing'||tutorialFight>0)return
     const thresholds=[25,50,75]
     thresholds.forEach(t=>{
-      if(corruption>=t&&!corruptCardsGiven.includes(t)&&CORRUPTION_CARDS[t]){
-        setCorruptCardsGiven(p=>[...p,t])
+      if(corruption>=t&&!corruptCardsGivenRef.current.includes(t)&&CORRUPTION_CARDS[t]){
+        corruptCardsGivenRef.current=[...corruptCardsGivenRef.current,t]
         const cc=Object.assign({},CORRUPTION_CARDS[t],{uid:uid()})
         setHand(p=>[...p,cc])
         addLog('🌀 Corruption reaches '+t+'%! A dark card appears in your hand: '+cc.name)
         addFloat(cc.name,960,400,'#cc1144',true)
       }
     })
-  },[corruption,gameState,corruptCardsGiven,tutorialFight])
+  },[corruption,gameState,tutorialFight])
   const [corruptionFlash,setCorruptionFlash]=useState(null)
   const lastCorruptThreshold=useRef(0) // current HELL_EVENT or null
   const [eventsSeenThisRun,setEventsSeenThisRun]=useState([]) // ids of events seen // {circleNum, circleName, circleEmoji} for 3s transition
@@ -4854,23 +4854,23 @@ function App(){
   },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake,stage,hand,enemy,enemyHp,embers,maxEmbers,activeArtifacts,activePassives,chosenPacts,activeGenre,animPhase,discardsLeft,deck,discardPile,fightTripBuff,luciferPhase,welcomeToHell,eventsSeenThisRun])
   triggerVictoryRef.current=triggerVictory
 
-  // ═══ CORRUPTION DECK — gift cards at thresholds ═══
-  useEffect(()=>{
-    if(gameState!=='playing'||tutorialFight>0)return
-    const thresholds=[{t:25,id:'whispercard',name:'Dark Whisper'},{t:50,id:'hungercard',name:'Hungering Flame'},{t:75,id:'madnesscard',name:'Madness Unleashed'}]
-    thresholds.forEach(({t,id,name})=>{
-      if(corruption>=t&&!corruptionGiftsGiven.includes(t)){
-        setCorruptionGiftsGiven(p=>[...p,t])
-        const card=ALL_CARDS.find(c=>c.id===id)
-        if(card){
-          const giftCard=Object.assign({},card,{uid:uid()})
-          setHand(p=>[...p,giftCard])
-          addLog('\u{1F300} Corruption gift! '+name+' added to your hand at '+t+'% corruption.')
-          addFloat(name+'!',960,400,'#cc1144',true)
-        }
-      }
-    })
-  },[corruption,gameState,corruptionGiftsGiven,tutorialFight])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // ═══ FIRST-ENCOUNTER TIPS ═══
   useEffect(()=>{
