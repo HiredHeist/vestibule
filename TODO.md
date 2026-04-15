@@ -32,6 +32,7 @@
 | `sigrid` | Sigrid | Rhythm Guitarist / SHREDDER | [ ] | doom metal rhythm guitarist, sharp angular features, telecaster guitar, fast aggressive stance, picking hand blur |
 | `gunnar` | Gunnar | Rhythm Guitarist / SHREDDER | [ ] | doom metal rhythm guitarist, stocky build, shaved head, SG guitar, confident swagger |
 | `astrid` | Astrid | Vocalist / DEBUFF | [ ] | doom metal vocalist, dramatic stage presence, microphone raised, witchy black robes, voice crackling with dark energy |
+| `grimnir` | Grimnir | Vocalist / DEBUFF | [x] | doom metal male vocalist, ornate dark Norse ritual mask with one eye hole, holding microphone, dark hooded cloak, scarred chest, rune markings, the masked one |
 | `freya` | Freya | Synth Player / CORRUPT | [ ] | dark synth player, ethereal woman, analog synth, dark frequencies visualized as distortion aura, ominous purple glow |
 | `ulf` | Ulf | Bass Player / ANCHOR | [ ] | doom metal bassist, scarred muscular man, aggressive low stance, chunky bass guitar, anchor chain tattoo |
 | `brynja` | Brynja | Bass Player / ANCHOR | [ ] | doom metal bassist, impossibly tall woman, stone-faced, downtuned 5-string bass, does not move |

@@ -51,7 +51,7 @@ const ALL_MUSICIANS=[
   {id:'thor',role:'Drummer',name:'Thor',atk:0,hp:8,maxHp:8,keyword:'DOUBLE TIME'},
   {id:'ingrid',role:'Bass Player',name:'Ingrid',atk:3,hp:10,maxHp:10,keyword:'ANCHOR'},
   {id:'loki',role:'Synth Player',name:'Loki',atk:3,hp:6,maxHp:6,keyword:'CORRUPT'},
-  {id:'nott',role:'Vocalist',name:'Nott',atk:2,hp:7,maxHp:7,keyword:'DEBUFF'},
+  {id:'grimnir',role:'Vocalist',name:'Grimnir',atk:2,hp:7,maxHp:7,keyword:'DEBUFF'},
   {id:'dag',role:'Bass Player',name:'Dag',atk:2,hp:12,maxHp:12,keyword:'ANCHOR'},
   {id:'vitalik',role:'Dark Minstrel',name:'Vitalik',atk:6,hp:9,maxHp:9,keyword:'FOLK MAGIC'},
   {id:'sigrid',role:'Rhythm Guitarist',name:'Sigrid',atk:3,hp:8,maxHp:8,keyword:'SHREDDER'},

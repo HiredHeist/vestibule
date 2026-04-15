@@ -227,7 +227,7 @@ const ALL_MUSICIANS=[
   {id:'thor',name:'Thor',role:'Drummer',atk:0,hp:8,maxHp:11,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Attack fires twice per turn.'},
   {id:'ingrid',name:'Ingrid',role:'Bass Player',atk:3,hp:10,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'High HP. Regen adjacent members.'},
   {id:'loki',name:'Loki',role:'Synth Player',atk:3,hp:6,maxHp:8,emoji:'🎹',keyword:'CORRUPT',desc:'Damage scales with Corruption.'},
-  {id:'nott',name:'Nott',role:'Vocalist',atk:2,hp:7,maxHp:9,emoji:'🎤',keyword:'DEBUFF',desc:'Reduces boss passive each turn.'},
+  {id:'grimnir',name:'Grimnir',role:'Vocalist',atk:2,hp:7,maxHp:9,emoji:'🎤',keyword:'DEBUFF',desc:'The Masked One. Reduces boss passive each turn.'},
   {id:'dag',name:'Dag',role:'Bass Player',atk:2,hp:12,maxHp:16,emoji:'🎵',keyword:'ANCHOR',desc:'Tankiest member.'},
   {id:'vitalik',name:'Vitalik',role:'Dark Minstrel',atk:6,hp:9,maxHp:12,emoji:'🪈',keyword:'FOLK MAGIC',desc:'Nobody asked. Nobody complained twice.'},
   // ── NEW MEMBERS ────────────────────────────────────────────────
@@ -4866,9 +4866,9 @@ function App(){
       setPendingDraw(0)
     }
 
-    // DEBUFF keyword: Nott reduces boss damage each Strike
+    // DEBUFF keyword: Vocalists reduce boss damage each Strike
     const debuffCount=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='DEBUFF').length
-    if(debuffCount>0){setBossDebuff(p=>p+debuffCount*2);addLog('🎤 Nott debuffs the boss! (-'+(debuffCount*2)+' damage)')}
+    if(debuffCount>0){setBossDebuff(p=>p+debuffCount*2);addLog('🎤 Vocalist debuffs the boss! (-'+(debuffCount*2)+' damage)')}
     cardsToDrawRef.current=cardsPlayedRef.current.length+(activeGenre==='PROG_ROCK'?1:0)
     setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
 
