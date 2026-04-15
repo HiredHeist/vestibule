@@ -7014,7 +7014,18 @@ function App(){
             style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'5px 8px',width:90,background:handSort==='rarity'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='rarity'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='rarity'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>⭐ RARITY</button>
         </div>
 
-        {/* RIGHT COLUMN: Strike/Discard/Embers/Stats — absolute, clamped to right edge */}
+
+        {/* LEFT PANEL: DISCARD — cockpit left side */}
+        <div style={{position:'absolute',left:210,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,padding:'12px 14px',width:140}}>
+          <button onClick={handleDiscard} disabled={!canDiscard}
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 10px',background:canDiscard?'rgba(100,70,0,0.5)':'rgba(25,15,5,0.3)',border:'2px solid '+(canDiscard?'#cc9900':'#2a1a05'),borderRadius:6,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 18px rgba(140,100,0,0.3)':'none',transition:'all 0.15s',width:'100%'}}>\u2193 DISCARD</button>
+          <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center'}}>
+            <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555'}}>{discardsLeft}/{MAX_DISCARDS}</span>
+          </div>
+        </div>
+
+        {/* RIGHT PANEL: Strike + Stats — cockpit right side */}
         <div style={{position:'absolute',right:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-evenly',padding:'8px 14px',background:'rgba(10,5,2,0.75)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none',width:210}}>
           <div style={{width:'100%'}}>
             {strikeMult>1.0&&<div style={{textAlign:'center',marginBottom:6,padding:strikeMult>=2.0?'6px 0':'4px 0',
@@ -7037,14 +7048,7 @@ function App(){
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555'}}>{strikesLeft}/{activeStake.maxStrikes}</span>
             </div>
           </div>
-          <div style={{width:'100%'}}>
-            <button onClick={handleDiscard} disabled={!canDiscard}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'10px 14px',background:canDiscard?'rgba(100,70,0,0.4)':'rgba(25,15,5,0.4)',border:`2px solid ${canDiscard?'#cc9900':'#2a1a05'}`,borderRadius:4,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 22px rgba(140,100,0,0.35)':'none',transition:'all 0.15s',width:'100%'}}>↓ Discard</button>
-            <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center',width:'100%',marginTop:4}}>
-              <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555'}}>{discardsLeft}/{MAX_DISCARDS}</span>
-            </div>
-          </div>
+          {/* Discard moved to left panel */}
           <EmberDisplayLarge current={embers} max={maxEmbers}/>
           <div style={{display:'flex',gap:14,justifyContent:'center',width:'100%'}}>
             {[['Fight',(fightIndex%3+1)+'/3','#dd2222'],['Corrupt',corruption>=100?'☠ '+corruption+'%':corruption+'%',corruption>=100?'#ff0000':corruption>60?'#ff3300':'#aa5500'],['Stash',stash+(stash>=420?' 🔒':stash>=380?' ⚠':''),(stash>=420?'#ff3300':stash>=380?'#ff9900':'#44cc44')]].map(function(item){return(
