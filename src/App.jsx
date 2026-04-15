@@ -2168,9 +2168,9 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
   return(
     <div ref={innerRef} draggable onDragStart={onDragStart} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}} onMouseEnter={()=>setShowTip(true)} onMouseLeave={()=>setShowTip(false)}
       style={{width:290,height:360,display:'flex',flexDirection:'column',background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
-        border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':mentorState==='active'?'3px solid #ffd700':mentorState==='broken'?'2px solid #555':mentorState==='mentor'?'2px solid #ffd700':bondColor?'2px solid '+bondColor:over?'2px solid #e8a820':st?'1px solid #333':member.demonic?'2px solid #ffd700':member.mythic?'2px solid #cc44ff':member.foil?'2px solid #88ccff':'1px solid rgba(190,120,25,0.35)',
+        border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':mentorState==='active'?'3px solid #ffd700':mentorState==='broken'?'2px solid #555':mentorState==='mentor'?'2px solid #ffd700':bondColor?'2px solid '+bondColor:over?'2px solid #e8a820':st?'1px solid #333':member.demonic?'2px solid #ffd700':member.mythic?'2px solid #cc44ff':member.foil?'2px solid #88ccff':'1px solid rgba(190,120,25,0.08)',
         borderRadius:6,
-        boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':mentorState==='active'&&!st?'0 0 40px rgba(255,215,0,0.9),0 6px 24px rgba(0,0,0,0.85)':mentorState==='mentor'&&!st?'0 0 22px rgba(255,215,0,0.5),0 6px 24px rgba(0,0,0,0.85)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':!st&&member.demonic?'0 0 25px rgba(255,200,0,0.5),0 6px 24px rgba(0,0,0,0.85)':!st&&member.mythic?'0 0 25px rgba(200,0,255,0.4),0 6px 24px rgba(0,0,0,0.85)':!st&&member.foil?'0 0 20px rgba(100,180,255,0.35),0 6px 24px rgba(0,0,0,0.85)':'0 6px 24px rgba(0,0,0,0.85)',
+        boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':mentorState==='active'&&!st?'0 0 40px rgba(255,215,0,0.9),0 6px 24px rgba(0,0,0,0.85)':mentorState==='mentor'&&!st?'0 0 22px rgba(255,215,0,0.5),0 6px 24px rgba(0,0,0,0.85)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':!st&&member.demonic?'0 0 25px rgba(255,200,0,0.5),0 6px 24px rgba(0,0,0,0.85)':!st&&member.mythic?'0 0 25px rgba(200,0,255,0.4),0 6px 24px rgba(0,0,0,0.85)':!st&&member.foil?'0 0 20px rgba(100,180,255,0.35),0 6px 24px rgba(0,0,0,0.85)':'0 4px 20px rgba(0,0,0,0.9),0 0 1px rgba(190,120,25,0.3)',
         transform:st?'rotate(15deg) scale(0.95)':strikeAnim&&strikeAnim.phase==='dip'?'translateY(20px) scale(0.95) rotate(-3deg)':strikeAnim&&strikeAnim.phase==='wiggle'?'translateY(12px) scale(0.97) rotate(4deg)':strikeAnim&&strikeAnim.phase==='launch'?'translate('+strikeAnim.dx+'px,'+(strikeAnim.dy-80)+'px) scale(0.7) rotate(-5deg)':strikeAnim&&strikeAnim.phase==='impact'?'translate('+strikeAnim.dx+'px,'+strikeAnim.dy+'px) scale(1.15) rotate(0deg)':strikeAnim&&strikeAnim.phase==='return'?'translate(0px,-30px) scale(1.05)':'none',
         opacity:st?0.5:1,
         animation:(!st&&!isAttacking&&!isDiceTarget&&!isStriking)?(nearDeath?'nearDeathPulse 0.8s ease-in-out infinite':'throb 3s ease-in-out infinite'):'none',
@@ -6742,7 +6742,33 @@ function App(){
             <div onClick={()=>{setDeckViewOpen(false);setDiscardViewOpen(false)}} style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#cc4444',cursor:'pointer',padding:'6px 16px',border:'1px solid #aa2222',borderRadius:4}}>✕ Close</div>
           </div>
           <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
-            {(deckViewOpen?[...deck].sort((a,b)=>(a.name||'').localeCompare(b.name||'')):discardPile).filter(Boolean).map((c,i)=>{
+            {deckViewOpen?
+              /* DECK VIEW: 4 columns by type */
+              <div style={{display:'flex',gap:20,justifyContent:'center',width:'100%'}}>
+                {['RIFF','CORRUPT','UTILITY','EMBER'].map(type=>{
+                  const typeCards=[...deck].filter(c=>c.type===type).sort((a,b)=>(a.name||'').localeCompare(b.name||''))
+                  const bc=type==='CORRUPT'?'#aa1111':type==='UTILITY'?'#22aa44':type==='EMBER'?'#c87820':'#9933cc'
+                  return <div key={type} style={{flex:1,minWidth:200,maxWidth:280}}>
+                    <div style={{textAlign:'center',marginBottom:10,padding:'6px 0',borderBottom:'2px solid '+bc+'66'}}>
+                      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:bc,letterSpacing:3}}>{type}</div>
+                      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,fontWeight:900,color:bc,opacity:0.7}}>{typeCards.length}</div>
+                    </div>
+                    <div style={{display:'flex',flexDirection:'column',gap:4}}>
+                      {typeCards.map((c,i)=><div key={c.uid||i} style={{display:'flex',alignItems:'center',gap:6,padding:'4px 8px',background:'rgba(10,6,2,0.6)',borderRadius:4,borderLeft:'3px solid '+bc+'66'}}>
+                        <span style={{fontSize:18}}>{c.emoji}</span>
+                        <div style={{flex:1}}>
+                          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:700,color:'#eedfc0'}}>{c.name}{c.upgraded?' ⛧':''}</div>
+                          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#887755'}}>{c.rarity}{c.embers>0?' · '+c.embers+'🔥':' · FREE'}</div>
+                        </div>
+                      </div>)}
+                      {typeCards.length===0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#554433',fontStyle:'italic',padding:8}}>none</div>}
+                    </div>
+                  </div>
+                })}
+              </div>
+            :
+              /* DISCARD VIEW: chronological list */
+              (discardPile).filter(Boolean).map((c,i)=>{
               const bc=c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
               return <div key={c.uid||i} style={{width:120,background:'linear-gradient(180deg,#201408,#100804)',border:'1px solid '+bc+'88',borderRadius:5,padding:'0 0 8px'}}>
                 <div style={{height:3,background:bc,borderRadius:'5px 5px 0 0'}}/>
