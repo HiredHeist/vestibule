@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// vestibule-sim.js v18.0 — Expert AI Simulator for Vestibule
+// vestibule-sim.js v19.0 — Expert AI Simulator for Vestibule
 // Session 16 — +Immediate draws, 15-card loop — +Events, Corruption Thresholds, Blood Oath: ALL mechanics (artifacts, passives, loot, combos, multiplier, hellquake)
 // Usage: node vestibule-sim.js [numGames] [stake]  (default 5000 bronze)
 
@@ -19,12 +19,12 @@ const ENEMIES=[
   {id:'wanderer',name:'Wanderer',maxHp:65,baseDmg:4,passiveId:null},
   {id:'lostsoul',name:'Lost Soul',maxHp:95,baseDmg:5,passiveId:null},
   {id:'drifter',name:'Drifter',maxHp:140,baseDmg:7,passiveId:null},
-  {id:'siren',name:'Siren',maxHp:125,baseDmg:5,passiveId:'selfbuff'},
-  {id:'tempter',name:'Tempter',maxHp:180,baseDmg:6,passiveId:'selfbuff'},
-  {id:'lust_boss',name:'Seducer',maxHp:265,baseDmg:7,passiveId:'selfbuff2'},
-  {id:'glutton',name:'Glutton',maxHp:160,baseDmg:5,passiveId:'cardHeal'},
-  {id:'feaster',name:'Feaster',maxHp:210,baseDmg:6,passiveId:'cardHeal3'},
-  {id:'gluttony_boss',name:'Devourer',maxHp:280,baseDmg:7,passiveId:'cardHeal6'},
+  {id:'siren',name:'Siren',maxHp:145,baseDmg:5,passiveId:'selfbuff'},
+  {id:'tempter',name:'Tempter',maxHp:210,baseDmg:6,passiveId:'selfbuff'},
+  {id:'lust_boss',name:'Seducer',maxHp:310,baseDmg:7,passiveId:'selfbuff2'},
+  {id:'glutton',name:'Glutton',maxHp:160,baseDmg:5,passiveId:'cardHeal3b'},
+  {id:'feaster',name:'Feaster',maxHp:210,baseDmg:6,passiveId:'cardHeal5'},
+  {id:'gluttony_boss',name:'Devourer',maxHp:280,baseDmg:7,passiveId:'cardHeal8'},
   {id:'miser',name:'Miser',maxHp:400,baseDmg:4,passiveId:'stashSteal'},
   {id:'hoarder',name:'Hoarder',maxHp:470,baseDmg:5,passiveId:'stashSteal2'},
   {id:'greed_boss',name:'Usurer',maxHp:780,baseDmg:6,passiveId:'stashSteal3'},
@@ -426,10 +426,12 @@ function applyCardSim(card,gs,enemy){
     case 'sabbathsigil':gs.corruption=100;if(!gs._hellquakeFired){gs._hellquakeFired=true;rollHellquake(gs);TRACK.hellquakesFired=(TRACK.hellquakesFired||0)+1};alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));gs._directDmg=(gs._directDmg||0)+15;gs._consumeCard=true;break;
   }
   if(enemy.passiveId==='cardHeal')enemy._hp=Math.min(enemy.maxHp,enemy._hp+2);
+  if(enemy.passiveId==='cardHeal3b')enemy._hp=Math.min(enemy.maxHp,enemy._hp+3);
   if(enemy.passiveId==='cardHeal3')enemy._hp=Math.min(enemy.maxHp,enemy._hp+3);
   if(enemy.passiveId==='cardHeal4')enemy._hp=Math.min(enemy.maxHp,enemy._hp+4);
   if(enemy.passiveId==='cardHeal5')enemy._hp=Math.min(enemy.maxHp,enemy._hp+5)
   if(enemy.passiveId==='cardHeal6')enemy._hp=Math.min(enemy.maxHp,enemy._hp+6);
+  if(enemy.passiveId==='cardHeal8')enemy._hp=Math.min(enemy.maxHp,enemy._hp+8);
 }
 
 // ── GENRE BONUS COMPUTATION ──

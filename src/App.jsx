@@ -188,13 +188,13 @@ const ENEMIES=[
   {id:'lostsoul',tagline:'You were lost before you started.',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:95,baseDmg:5,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
   {id:'drifter',tagline:'110 HP and pure aggression.',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:140,baseDmg:7,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
   // ── CIRCLE II: LUST — Enemy buffs itself each strike ─────────
-  {id:'siren',tagline:'She sang. You listened. You lost.',name:'The Siren',circle:'Circle II — Lust',subtitle:'Fight 1 of 3',maxHp:125,baseDmg:5,emoji:'🌊',passive:'Seductive. Gains +1 damage each Strike.',passiveId:'selfbuff'},
-  {id:'tempter',tagline:'Temptation wins again.',name:'The Tempter',circle:'Circle II — Lust',subtitle:'Fight 2 of 3',maxHp:180,baseDmg:6,emoji:'🌹',passive:'Enthralling. Gains +1 damage each Strike. Starts stronger.',passiveId:'selfbuff'},
-  {id:'lust_boss',tagline:'Irresistible to the end.',name:'The Seducer',circle:'Circle II — Lust',subtitle:'Circle Boss — Fight 3 of 3',maxHp:265,baseDmg:7,emoji:'💋',passive:'Irresistible. Gains +2 damage each Strike. Dangerous if left alive.',passiveId:'selfbuff2'},
+  {id:'siren',tagline:'She sang. You listened. You lost.',name:'The Siren',circle:'Circle II — Lust',subtitle:'Fight 1 of 3',maxHp:145,baseDmg:5,emoji:'🌊',passive:'Seductive. Gains +1 damage each Strike.',passiveId:'selfbuff'},
+  {id:'tempter',tagline:'Temptation wins again.',name:'The Tempter',circle:'Circle II — Lust',subtitle:'Fight 2 of 3',maxHp:210,baseDmg:6,emoji:'🌹',passive:'Enthralling. Gains +1 damage each Strike. Starts stronger.',passiveId:'selfbuff'},
+  {id:'lust_boss',tagline:'Irresistible to the end.',name:'The Seducer',circle:'Circle II — Lust',subtitle:'Circle Boss — Fight 3 of 3',maxHp:310,baseDmg:7,emoji:'💋',passive:'Irresistible. Gains +2 damage each Strike. Dangerous if left alive.',passiveId:'selfbuff2'},
   // ── CIRCLE III: GLUTTONY — Heals when you play cards ─────────
-  {id:'glutton',tagline:'It ate your strikes for breakfast.',name:'The Glutton',circle:'Circle III — Gluttony',subtitle:'Fight 1 of 3',maxHp:160,baseDmg:5,emoji:'🍖',passive:'Insatiable. Heals 2 HP every time a card is played.',passiveId:'cardHeal'},
-  {id:'feaster',tagline:'Still hungry. Always hungry.',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:210,baseDmg:6,emoji:'🦷',passive:'Voracious. Heals 3 HP every time a card is played.',passiveId:'cardHeal3'},
-  {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:280,baseDmg:7,emoji:'🕳',passive:'Endless hunger. Heals 6 HP per card played. Strike fast.',passiveId:'cardHeal6'},
+  {id:'glutton',tagline:'It ate your strikes for breakfast.',name:'The Glutton',circle:'Circle III — Gluttony',subtitle:'Fight 1 of 3',maxHp:160,baseDmg:5,emoji:'🍖',passive:'Insatiable. Heals 3 HP every time a card is played.',passiveId:'cardHeal3b'},
+  {id:'feaster',tagline:'Still hungry. Always hungry.',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:210,baseDmg:6,emoji:'🦷',passive:'Voracious. Heals 5 HP every time a card is played.',passiveId:'cardHeal5'},
+  {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:280,baseDmg:7,emoji:'🕳',passive:'Endless hunger. Heals 8 HP per card played. Strike fast.',passiveId:'cardHeal8'},
   // ── CIRCLE IV: GREED — Steals stash each strike ──────────────
   {id:'miser',tagline:'You could not afford to win.',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:400,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1🌿 from your Stash each Strike. Win to take it back.',passiveId:'stashSteal'},
   {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:470,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2🌿 per Strike. Your stash is its stash.',passiveId:'stashSteal2'},
@@ -442,6 +442,13 @@ function beatStake(stakeId){
 }
 
 // ── RIFF CHAINS: 2-card combos that trigger bonus damage + visual feedback ──
+
+// ═══ CORRUPTION DECK — cards added to hand when crossing corruption thresholds ═══
+const CORRUPTION_CARDS={
+  25:{id:'dark_whisper',name:'Dark Whisper',type:'CORRUPT',rarity:'Common',emoji:'👁',embers:0,effect:'FREE. Target +2 ATK. +5% Corruption.',color:'#aa1111',typeColor:'#880000'},
+  50:{id:'blood_price',name:'Blood Price',type:'CORRUPT',rarity:'Uncommon',emoji:'🩸',embers:0,effect:'FREE. Target +4 ATK permanently. -3 HP to that member.',color:'#aa1111',typeColor:'#880000'},
+  75:{id:'void_pact',name:'Void Pact',type:'CORRUPT',rarity:'Rare',emoji:'🌀',embers:0,effect:'FREE. All members +2 ATK this Strike. +10% Corruption.',color:'#aa1111',typeColor:'#880000'},
+}
 const RIFF_CHAINS=[
   {id:'shred_storm',name:'SHRED STORM',cards:['resonancecard','infencore'],color:'#ffdd00',emoji:'⚡'},
   {id:'hellfire',name:'HELLFIRE',cards:['darktuning','overdrive'],color:'#ff4400',emoji:'🔥'},
@@ -3138,7 +3145,8 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
               setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(4)
               setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
               setGameState('playing');setAnimPhase('idle');setDeathCause(null)
-              setVictoryFired(false);if(victoryFiredRef)victoryFiredRef.current=false;setCorruptionGiftsGiven([])
+              setVictoryFired(false);if(victoryFiredRef)victoryFiredRef.current=false
+    setCorruptCardsGiven([]);setCorruptionGiftsGiven([])
               addLog('⛧ THE ENCORE BEGINS — All enemies ×2.0 HP! ⛧')
             }}
               style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,letterSpacing:4,
@@ -3639,6 +3647,21 @@ function App(){
   const [circleSplash,setCircleSplash]=useState(null)
   const [pendingEvent,setPendingEvent]=useState(null)
   const [possessionFired,setPossessionFired]=useState(false)
+  const [corruptCardsGiven,setCorruptCardsGiven]=useState([]) // track which thresholds have given cards
+  // ═══ CORRUPTION DECK — give free cards at thresholds ═══
+  useEffect(()=>{
+    if(gameState!=='playing'||tutorialFight>0)return
+    const thresholds=[25,50,75]
+    thresholds.forEach(t=>{
+      if(corruption>=t&&!corruptCardsGiven.includes(t)&&CORRUPTION_CARDS[t]){
+        setCorruptCardsGiven(p=>[...p,t])
+        const cc=Object.assign({},CORRUPTION_CARDS[t],{uid:uid()})
+        setHand(p=>[...p,cc])
+        addLog('🌀 Corruption reaches '+t+'%! A dark card appears in your hand: '+cc.name)
+        addFloat(cc.name,960,400,'#cc1144',true)
+      }
+    })
+  },[corruption,gameState,corruptCardsGiven,tutorialFight])
   const [corruptionFlash,setCorruptionFlash]=useState(null)
   const lastCorruptThreshold=useRef(0) // current HELL_EVENT or null
   const [eventsSeenThisRun,setEventsSeenThisRun]=useState([]) // ids of events seen // {circleNum, circleName, circleEmoji} for 3s transition
@@ -4015,6 +4038,20 @@ function App(){
     else if(card.id==='whispercard'){ns=ns.map((m,mi)=>mi===slotIdx?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2,buffCount:(m.buffCount||0)+1}):m);msg='\u{1F300} Dark Whisper! +2 ATK permanently.'}
     else if(card.id==='hungercard'){ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,tempAtkBonus:(m.tempAtkBonus||0)+1,buffCount:(m.buffCount||0)+1}):m);drawUpTo(hand.filter(c=>c.uid!==card.uid),deckRef.current,[...discRef.current,card],2);msg='\u{1F525} Hungering Flame! All +1 ATK, drew 2 cards.'}
     else if(card.id==='madnesscard'){const maxHp=enemy?Math.ceil(enemy.maxHp*(activeStake.hpMult||1.3)):100;const dmg=Math.floor(maxHp*0.15);const bc2=getCenter(bossRef);const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp);if(newHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);addFloat(dmg,bc2.x,bc2.y-60,'#cc1144',dmg>=20);playHit();updStat('totalDamage',dmg);msg='\u{1F480} Madness Unleashed! '+dmg+' damage (15% of max HP)!'}
+    else if(card.id==='dark_whisper'){
+      const nc=Math.min(100,corruption+5);setCorruption(nc);updStat('maxCorruption',nc,true)
+      ns=ns.map((m,mi)=>mi===slotIdx&&m?Object.assign({},m,{atk:m.atk+2,tempAtkBonus:(m.tempAtkBonus||0)+2,buffCount:(m.buffCount||0)+1}):m)
+      msg='👁 Dark Whisper! +2 ATK. Corruption +5% → '+nc+'%'
+    }
+    else if(card.id==='blood_price'){
+      ns=ns.map((m,mi)=>mi===slotIdx&&m?Object.assign({},m,{atk:m.atk+4,permAtkBonus:(m.permAtkBonus||0)+4,hp:Math.max(1,m.hp-3),buffCount:(m.buffCount||0)+1}):m)
+      msg='🩸 Blood Price! +4 ATK permanent. -3 HP.'
+    }
+    else if(card.id==='void_pact'){
+      const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true)
+      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+2,tempAtkBonus:(m.tempAtkBonus||0)+2,buffCount:(m.buffCount||0)+1}):m)
+      msg='🌀 Void Pact! All members +2 ATK. Corruption +10% → '+nc+'%'
+    }
     else if(card.id==='dialtoeleven'){const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true);ns=ns.map(function(m){return m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+(card.upgraded?4:3),tempAtkBonus:(m.tempAtkBonus||0)+(card.upgraded?4:3),buffCount:(m.buffCount||0)+1}):m});msg='📻 Dial to Eleven! Corruption +10% → '+nc+'%. All members +3 ATK!'}
     else if(card.id==='sigdecay'){
       // Handled in handleDropOnStage (modifies hand/deck like setlist)
@@ -4359,6 +4396,8 @@ function App(){
     else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+4))
     else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+6))
     else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+5))
+    else if(enemy.passiveId==='cardHeal3b')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
+    else if(enemy.passiveId==='cardHeal8')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+8))
     return true
   },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected,fightTripBuff,enemy,enemyHp,maxEmbers,activePassives,activeArtifacts,chosenPacts,activeGenre,fightIndex,shredderUsed,collectedLoot])
 
@@ -4478,6 +4517,8 @@ function App(){
       else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+4))
     else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+6))
     else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+5))
+    else if(enemy.passiveId==='cardHeal3b')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
+    else if(enemy.passiveId==='cardHeal8')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+8))
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
     }
@@ -4511,6 +4552,8 @@ function App(){
       else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+4))
     else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+6))
     else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+5))
+    else if(enemy.passiveId==='cardHeal3b')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
+    else if(enemy.passiveId==='cardHeal8')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+8))
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
     }
