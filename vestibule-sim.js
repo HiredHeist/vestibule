@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// vestibule-sim.js v19.0 — Expert AI Simulator for Vestibule
+// vestibule-sim.js v19.1 — Expert AI Simulator for Vestibule
 // Session 16 — +Immediate draws, 15-card loop — +Events, Corruption Thresholds, Blood Oath: ALL mechanics (artifacts, passives, loot, combos, multiplier, hellquake)
 // Usage: node vestibule-sim.js [numGames] [stake]  (default 5000 bronze)
 
@@ -451,7 +451,7 @@ function simFight(gs,phaseHp,luciferPhase){
   const effectiveMaxHp=phaseHp||Math.ceil(baseEnemy.maxHp*STAKE.hpMult)
   const enemy={...baseEnemy,maxHp:effectiveMaxHp,_hp:effectiveMaxHp,_atkBuff:0}
   const circleNum=Math.floor(fightIdx/3)+1,isBoss=(fightIdx+1)%3===0
-  gs.embers=gs.maxEmbers;gs._tappedOutNext=false;gs._drawNextStrike=0;gs._discardsLeft=MAX_DISCARDS;gs.stashStolen=0;gs._tripBuff=null
+  gs.embers=gs.maxEmbers;gs._tappedOutNext=false;gs._drawNextStrike=0;gs._discardsLeft=MAX_DISCARDS;gs.stashStolen=0;gs._tripBuff=null;gs._corruptCardsGiven=[]
   let maxStrikes=STAKE.maxStrikes+(gs._warDrums?1:0)
   gs._strikesLeft=maxStrikes
   gs.stage=arrangeStage(gs.stage)
