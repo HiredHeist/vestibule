@@ -565,26 +565,95 @@ function getTotalMastery(){
 // MEMBER PORTRAITS — replaces emoji with ink art + Dr. Katz wiggle
 // ═══════════════════════════════════════════════════════════
 const MEMBER_PORTRAITS={
-  bjorn:'/vestibule/members/bjorn.png',
-  dag:'/vestibule/members/dag.png',
-  freya:'/vestibule/members/freya.png',
-  gunnar:'/vestibule/members/gunnar.png',
-  loki:'/vestibule/members/loki.png',
-  ragnar:'/vestibule/members/ragnar.png',
-  rolf:'/vestibule/members/rolf.png',
-  sigrid:'/vestibule/members/sigrid.png',
-  vitalik:'/vestibule/members/vitalik.png',
+  bjorn:'/vestibule/members/bjorn_stage.png',
+  ragnar:'/vestibule/members/ragnar_stage.png',
+  thor:'/vestibule/members/thor_stage.png',
+  rolf:'/vestibule/members/rolf_stage.png',
+  ingrid:'/vestibule/members/ingrid_stage.png',
+  dag:'/vestibule/members/dag_stage.png',
+  ulf:'/vestibule/members/ulf_stage.png',
+  brynja:'/vestibule/members/brynja_stage.png',
+  loki:'/vestibule/members/loki_stage.png',
+  freya:'/vestibule/members/freya_stage.png',
+  astrid:'/vestibule/members/astrid_stage.png',
+  grimnir:'/vestibule/members/grimnir_stage.png',
+  sigrid:'/vestibule/members/sigrid_stage.png',
+  gunnar:'/vestibule/members/gunnar_stage.png',
+  vitalik:'/vestibule/members/vitalik_stage.png',
+  orm:'/vestibule/members/orm_stage.png',
+  tanuki:'/vestibule/members/tanuki_stage.png',
+  lucifer_member:'/vestibule/members/lucifer_member_stage.png',
 }
 const STAGE_PORTRAITS={
   bjorn:'/vestibule/members/bjorn_stage.png',
-  dag:'/vestibule/members/dag_stage.png',
-  freya:'/vestibule/members/freya_stage.png',
-  gunnar:'/vestibule/members/gunnar_stage.png',
-  loki:'/vestibule/members/loki_stage.png',
   ragnar:'/vestibule/members/ragnar_stage.png',
+  thor:'/vestibule/members/thor_stage.png',
   rolf:'/vestibule/members/rolf_stage.png',
+  ingrid:'/vestibule/members/ingrid_stage.png',
+  dag:'/vestibule/members/dag_stage.png',
+  ulf:'/vestibule/members/ulf_stage.png',
+  brynja:'/vestibule/members/brynja_stage.png',
+  loki:'/vestibule/members/loki_stage.png',
+  freya:'/vestibule/members/freya_stage.png',
+  astrid:'/vestibule/members/astrid_stage.png',
+  grimnir:'/vestibule/members/grimnir_stage.png',
   sigrid:'/vestibule/members/sigrid_stage.png',
+  gunnar:'/vestibule/members/gunnar_stage.png',
   vitalik:'/vestibule/members/vitalik_stage.png',
+  orm:'/vestibule/members/orm_stage.png',
+  tanuki:'/vestibule/members/tanuki_stage.png',
+  lucifer_member:'/vestibule/members/lucifer_member_stage.png',
+}
+
+const IDLE_PORTRAITS={
+  bjorn:'/vestibule/members/idle/bjorn_stage_idle.gif',
+  ragnar:'/vestibule/members/idle/ragnar_stage_idle.gif',
+  thor:'/vestibule/members/idle/thor_stage_idle.gif',
+  rolf:'/vestibule/members/idle/rolf_stage_idle.gif',
+  ingrid:'/vestibule/members/idle/ingrid_stage_idle.gif',
+  dag:'/vestibule/members/idle/dag_stage_idle.gif',
+  ulf:'/vestibule/members/idle/ulf_stage_idle.gif',
+  brynja:'/vestibule/members/idle/brynja_stage_idle.gif',
+  loki:'/vestibule/members/idle/loki_stage_idle.gif',
+  freya:'/vestibule/members/idle/freya_stage_idle.gif',
+  astrid:'/vestibule/members/idle/astrid_stage_idle.gif',
+  grimnir:'/vestibule/members/idle/grimnir_stage_idle.gif',
+  sigrid:'/vestibule/members/idle/sigrid_stage_idle.gif',
+  gunnar:'/vestibule/members/idle/gunnar_stage_idle.gif',
+  vitalik:'/vestibule/members/idle/vitalik_stage_idle.gif',
+  orm:'/vestibule/members/idle/orm_stage_idle.gif',
+  tanuki:'/vestibule/members/idle/tanuki_stage_idle.gif',
+  lucifer_member:'/vestibule/members/idle/lucifer_member_stage_idle.gif',
+}
+const BOSS_PORTRAITS={
+  wanderer:'/vestibule/bosses/wanderer.png',
+  lostsoul:'/vestibule/bosses/lostsoul.png',
+  drifter:'/vestibule/bosses/drifter.png',
+  siren:'/vestibule/bosses/siren.png',
+  tempter:'/vestibule/bosses/tempter.png',
+  lust_boss:'/vestibule/bosses/lust_boss.png',
+  glutton:'/vestibule/bosses/glutton.png',
+  feaster:'/vestibule/bosses/feaster.png',
+  gluttony_boss:'/vestibule/bosses/gluttony_boss.png',
+  miser:'/vestibule/bosses/miser.png',
+  hoarder:'/vestibule/bosses/hoarder.png',
+  greed_boss:'/vestibule/bosses/greed_boss.png',
+  wrathful:'/vestibule/bosses/wrathful.png',
+  berserker:'/vestibule/bosses/berserker.png',
+  anger_boss:'/vestibule/bosses/anger_boss.png',
+  heretic:'/vestibule/bosses/heretic.png',
+  apostate:'/vestibule/bosses/apostate.png',
+  heresy_boss:'/vestibule/bosses/heresy_boss.png',
+  brute:'/vestibule/bosses/brute.png',
+  hunter:'/vestibule/bosses/hunter.png',
+  violence_boss:'/vestibule/bosses/violence_boss.png',
+  trickster:'/vestibule/bosses/trickster.png',
+  deceiver:'/vestibule/bosses/deceiver.png',
+  fraud_boss:'/vestibule/bosses/fraud_boss.png',
+  traitor:'/vestibule/bosses/traitor.png',
+  betrayer:'/vestibule/bosses/betrayer.png',
+  lucifer:'/vestibule/bosses/lucifer_p1.png',
+  ar_exec:'/vestibule/bosses/ar_exec.png',
 }
 // Dr. Katz "Squigglevision" — CSS wobble effect on portraits
 const SQUIGGLE_CSS=`
@@ -2083,7 +2152,7 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
         {member.demonic?'⛧ DEMONIC':member.mythic?'✦ MYTHIC':'✨ FOIL'}
       </div>}
       <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative',minHeight:90,overflow:'hidden'}}>
-        {STAGE_PORTRAITS[member.id]?<img className="squiggle" src={STAGE_PORTRAITS[member.id]} alt={member.id} style={{width:'70%',height:'90%',objectFit:'contain',objectPosition:'center center'}}/>:member.emoji}
+        {STAGE_PORTRAITS[member.id]?<img className={animPhase==='idle'?'':'squiggle'} src={animPhase==='idle'&&IDLE_PORTRAITS[member.id]?IDLE_PORTRAITS[member.id]:STAGE_PORTRAITS[member.id]} alt={member.id} style={{width:'70%',height:'90%',objectFit:'contain',objectPosition:'center center',imageRendering:'pixelated'}}/>:member.emoji}
         {st&&<div style={{position:'absolute',top:4,right:4,fontSize:22}}>💨</div>}
         {isAttacking&&<div style={{position:'absolute',inset:0,background:strikeAnim?'rgba(255,80,0,0.3)':'rgba(255,50,0,0.12)',animation:strikeAnim?'pulse 0.15s ease infinite alternate':'pulse 0.4s ease infinite alternate'}}/>}
       </div>
@@ -2289,9 +2358,9 @@ function TrophyWall({onClose}){
       {/* Stake badge */}
       {t?.bestStake&&<div style={{position:'absolute',top:4,right:4,width:8,height:8,borderRadius:'50%',background:stakeColor,boxShadow:'0 0 4px '+stakeColor}}/>}
 
-      {/* Emoji / silhouette */}
+      {/* Portrait / silhouette */}
       <div style={{fontSize:defeated?36:24,textAlign:'center',padding:'4px 0 1px',filter:defeated?'none':'brightness(0) opacity(0.15)'}}>
-        {defeated?enemy.emoji:'❓'}
+        {defeated&&BOSS_PORTRAITS[enemy.id]?<img src={BOSS_PORTRAITS[enemy.id]} alt={enemy.name} style={{width:36,height:36,objectFit:'contain',imageRendering:'pixelated'}}/>:defeated?enemy.emoji:'❓'}
       </div>
 
       {/* Name */}
@@ -2519,7 +2588,7 @@ function EventScreen({event,onChoose}){
   </div>)
 }
 
-function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chromaStr,dblRoll,bossStrikeAnim}){
+function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chromaStr,dblRoll,bossStrikeAnim,luciferPhase}){
   const eMaxHp=scaledMaxHp||enemy.maxHp
   const pct=Math.max(0,(currentHp/eMaxHp)*100),isLow=currentHp<eMaxHp*.35,isCritical=currentHp>0&&currentHp<eMaxHp*.20
   return(
@@ -2530,7 +2599,7 @@ function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chr
         zIndex:bossStrikeAnim?500:1,
         filter:bossStrikeAnim&&(bossStrikeAnim.phase==='launch'||bossStrikeAnim.phase==='impact')?'drop-shadow(0 0 40px rgba(255,0,0,0.9))':'none',
         alignSelf:'stretch'}}>
-        {enemy.emoji}
+        {BOSS_PORTRAITS[enemy.id]?<img src={enemy.id==='lucifer'&&luciferPhase===2?'/vestibule/bosses/lucifer_p2.png':BOSS_PORTRAITS[enemy.id]} alt={enemy.name} style={{width:120,height:120,objectFit:'contain',imageRendering:'pixelated'}}/>:enemy.emoji}
         {isLow&&<div style={{position:'absolute',inset:0,background:'rgba(120,0,0,0.2)',animation:'pulse 1.2s ease infinite alternate'}}/>}
         {debuff>0&&<div style={{position:'absolute',bottom:4,right:4,background:'rgba(0,80,160,0.9)',border:'1px solid #4488ff',borderRadius:4,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#88aaff'}}>-{debuff}dmg</div>}
       </div>
@@ -2964,7 +3033,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
     </>)
     if(isBeaten)return(<>
       <div style={{display:'flex',alignItems:'center',gap:20}}>
-        <div style={{fontSize:80,filter:'drop-shadow(0 0 20px rgba(200,0,0,0.5))'}}>{enemy?.emoji||'💀'}</div>
+        <div style={{fontSize:80,filter:'drop-shadow(0 0 20px rgba(200,0,0,0.5))'}}>{enemy&&BOSS_PORTRAITS[enemy.id]?<img src={BOSS_PORTRAITS[enemy.id]} alt={enemy.name} style={{width:80,height:80,objectFit:'contain',imageRendering:'pixelated'}}/>:enemy?.emoji||'💀'}</div>
         <div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:6,color:'#662222',textTransform:'uppercase'}}>Defeated by</div>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#cc2222',lineHeight:1,textShadow:'-2px 0 rgba(255,0,0,0.6),2px 0 rgba(180,0,0,0.4),0 0 30px rgba(160,0,0,0.5),2px 2px 0 #000'}}>{enemy?.name||'The Vestibule'}</div>
@@ -4616,7 +4685,7 @@ function App(){
     if(isBossKill&&collectedLoot.includes('golden_tooth')){setStash(p=>Math.min(MAX_STASH,p+5));addLog('🪙 Golden Tooth! +5 bonus Stash.')}
         const cn=Math.floor(fightIndex/3)+1
         const circleNames=['','I — Limbo','II — Lust','III — Gluttony','IV — Greed','V — Anger','VI — Heresy','VII — Violence','VIII — Fraud','IX — Treachery']
-        setCircleClearedData({circle:cn,circleName:circleNames[cn]||cn,bossName:enemy.name,bossEmoji:enemy.emoji,isBoss:isBossKill})
+        setCircleClearedData({circle:cn,circleName:circleNames[cn]||cn,bossName:enemy.name,bossEmoji:enemy.emoji,bossId:enemy.id,isBoss:isBossKill})
         if(isBossKill){
           // BOSS LOOT
           const loot=BOSS_LOOT[fightIndex]
@@ -6296,7 +6365,7 @@ function App(){
                 onMouseEnter={e=>{if(!isSkipped)e.currentTarget.style.background=isBoss?'linear-gradient(180deg,#3a1010,#1a0808)':'linear-gradient(180deg,#2a1810,#140c08)'}}
                 onMouseLeave={e=>{e.currentTarget.style.background=isBoss?'linear-gradient(180deg,#2a0a0a,#140404)':'linear-gradient(180deg,#1a1008,#0a0604)'}}>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:isBoss?'#cc1111':'#c8a040',letterSpacing:3,textTransform:'uppercase'}}>{isBoss?'CIRCLE BOSS':'FIGHT '+(i+1)+' OF 3'}</div>
-                <div style={{fontSize:48}}>{enemy.emoji}</div>
+                <div style={{fontSize:48}}>{BOSS_PORTRAITS[enemy.id]?<img src={BOSS_PORTRAITS[enemy.id]} alt={enemy.name} style={{width:48,height:48,objectFit:'contain',imageRendering:'pixelated'}}/>:enemy.emoji}</div>
                 <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:isBoss?'#ee2222':'#e8d090',textShadow:isBoss?'0 0 20px rgba(200,0,0,0.5)':'none',letterSpacing:2}}>{enemy.name}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#aa8040'}}>{Math.ceil(enemy.maxHp*activeStake.hpMult)} HP</div>
                 {isSkipped&&reward&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#88dd88',marginTop:4}}>{reward.emoji} {reward.name}</div>}
@@ -6584,7 +6653,7 @@ function App(){
           <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:864,height:864,objectFit:'contain'}}/>
         </div>
         <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:12}}>
-          <div style={{fontSize:100,filter:'drop-shadow(0 0 30px rgba(200,0,0,0.6))',animation:'throb 0.6s ease-in-out infinite'}}>{circleClearedData.bossEmoji}</div>
+          <div style={{fontSize:100,filter:'drop-shadow(0 0 30px rgba(200,0,0,0.6))',animation:'throb 0.6s ease-in-out infinite'}}>{circleClearedData.bossId&&BOSS_PORTRAITS[circleClearedData.bossId]?<img src={BOSS_PORTRAITS[circleClearedData.bossId]} alt={circleClearedData.bossName} style={{width:100,height:100,objectFit:'contain',imageRendering:'pixelated'}}/>:circleClearedData.bossEmoji}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:6,color:'#aa4444',textTransform:'uppercase'}}>Defeated</div>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:'#cc2222',textShadow:'0 0 40px rgba(200,0,0,0.7),3px 3px 0 #000',textAlign:'center',lineHeight:1}}>{circleClearedData.bossName}</div>
           <div style={{width:200,height:2,background:'linear-gradient(90deg,transparent,#cc2222,transparent)',margin:'8px 0'}}/>
@@ -6632,7 +6701,7 @@ function App(){
         <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
         <div style={{padding:'8px 16px 6px',position:'relative',zIndex:bossStrikeAnim?300:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0,overflow:'visible'}}>
           <div style={{width:'100%',maxWidth:950,background:'rgba(8,0,0,0.55)',border:'2px solid rgba(160,20,0,0.8)',borderRadius:8,padding:'0',overflow:bossStrikeAnim?'visible':'hidden',animation:'bossGlow 2s ease-in-out infinite',boxShadow:'0 0 30px rgba(150,0,0,0.4),inset 0 0 40px rgba(80,0,0,0.3)',position:'relative',zIndex:bossStrikeAnim?300:1}}>
-            <BossSection enemy={enemy} bossStrikeAnim={bossStrikeAnim} currentHp={enemyHp} scaledMaxHp={scaledMaxHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll}/>
+            <BossSection enemy={enemy} bossStrikeAnim={bossStrikeAnim} currentHp={enemyHp} scaledMaxHp={scaledMaxHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll} luciferPhase={luciferPhase}/>
           </div>
         </div>
         <div style={{position:'relative',zIndex:5,background:'rgba(20,11,3,0.42)',overflow:'visible',borderTop:'2px solid rgba(60,35,5,0.45)',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>
