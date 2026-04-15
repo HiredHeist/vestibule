@@ -821,6 +821,8 @@ const TUTORIAL_POST_FIGHT={
 }
 function isTutorialDone(){return localStorage.getItem('vst_tutorial')==='done'}
 // First-encounter tips — shown once per mechanic
+function getEncounteredRules(){try{return JSON.parse(localStorage.getItem('vst_rules_seen')||'[]')}catch(e){return[]}}
+function markRuleSeen(idx){const seen=getEncounteredRules();if(!seen.includes(idx)){seen.push(idx);localStorage.setItem('vst_rules_seen',JSON.stringify(seen))}}
 const FIRST_TIPS={
   pact:"After each boss, choose a Pact — a permanent buff for the rest of your run. Choose wisely, you can only pick one.",
   forge:"The Doom Forge lets you upgrade one card permanently. Upgraded cards have enhanced effects. Pick your best card.",
@@ -1438,6 +1440,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   const [boughtIds,setBoughtIds]=useState([])
   const [leftBought,setLeftBought]=useState({cart:false,cpas:false,rec:false})
   const [boughtPackIds,setBoughtPackIds]=useState([])
+  const [shopTab,setShopTab]=useState('all') // all, cards, packs, gear
   useEffect(()=>{setBoughtIds([]);setBoughtPackIds([])},[shopCards])
   const [openPackModal,setOpenPackModal]=useState(null) // {pack, cards, picksLeft, picked}
   const circleNum=Math.floor(fightIndex/3)+1
@@ -1928,11 +1931,23 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         </button>
       </div>
 
+      {/* SHOP TABS */}
+      <div style={{flexShrink:0,display:'flex',gap:6,justifyContent:'center',padding:'0 12px'}}>
+        {[['all','All'],['cards','Cards'],['packs','Packs'],['gear','Gear']].map(([id,label])=>
+          <button key={id} onClick={()=>setShopTab(id)}
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:2,
+              color:shopTab===id?'#e8a820':'#665544',
+              background:shopTab===id?'rgba(232,168,32,0.12)':'rgba(20,12,4,0.3)',
+              border:'1px solid '+(shopTab===id?'rgba(232,168,32,0.4)':'rgba(100,80,40,0.15)'),
+              borderRadius:4,padding:'4px 16px',cursor:'pointer',textTransform:'uppercase',
+              transition:'all 0.15s'}}>{label}</button>)}
+      </div>
+
       {/* MAIN */}
       <div style={{flex:1,display:'flex',gap:10,overflow:'hidden',minHeight:0}}>
 
-        {/* LEFT COLUMN */}
-        <div style={{width:240,flexShrink:0,display:'flex',flexDirection:'column',gap:14}}>
+        {/* LEFT COLUMN — gear */}
+        <div style={{width:240,flexShrink:0,display:shopTab==='cards'||shopTab==='packs'?'none':'flex',flexDirection:'column',gap:14}}>
           <LeftCard item={recruitPack} price={recruitPack.cost}
             label="Band Recruitment" accent='#e8a820' id='rec' sold={leftBought.rec===true}
             onBuy={()=>{if(can(recruitPack.cost)){onSpend(recruitPack.cost,'recruit',recruitPack);setLeftBought(p=>({...p,rec:true}))}}} />
@@ -1950,7 +1965,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'visible',minHeight:0}}>
 
           {/* CARDS ROW */}
-          <div style={{border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
+          <div style={{display:shopTab==='packs'||shopTab==='gear'?'none':'block',border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>🎸 Cards For Sale</div>
           <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start',paddingTop:4}}>
             {/* THE DEALER — first card */}
@@ -2016,7 +2031,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{flex:1,minHeight:8,maxHeight:30}}/>
 
           {/* PACKS + PAWN ROW */}
-          <div style={{border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
+          <div style={{display:shopTab==='cards'||shopTab==='gear'?'none':'block',border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>📦 Booster Packs + Pawn Shop</div>
           <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start'}}>
             {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
@@ -2606,7 +2621,7 @@ function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chr
       <div style={{flex:1,padding:'10px 24px',display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',gap:2}}>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,letterSpacing:4,color:'#ff4422',textTransform:'uppercase',fontWeight:900,textShadow:'0 0 18px rgba(255,60,20,0.9),0 0 40px rgba(200,30,0,0.6)',textAlign:'center'}}>{enemy.circle} · {enemy.subtitle}</div>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#120804',lineHeight:1,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 1px 1px 0 rgba(0,0,0,0.5)`:'1px 1px 0 rgba(0,0,0,0.5)',textAlign:'center',marginTop:10}}>{enemy.name}</div>
-        <div style={{fontFamily:"'ScratchFont',serif",fontSize:35,color:'#4a0808',fontStyle:'italic',lineHeight:1.2,fontWeight:900,textAlign:'center',marginTop:2}}>{enemy.passive}</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:35,color:'#4a0808',fontStyle:'italic',lineHeight:1.2,fontWeight:900,textAlign:'center',marginTop:2,cursor:'help'}} title={enemy.passive}>{enemy.tagline||enemy.passive}</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#3a0606',letterSpacing:1,fontWeight:900,textAlign:'center'}}>Base damage: {enemy.baseDmg} per Strike</div>
         <div style={{width:'100%',marginTop:4}}>
           <div style={{width:'100%',height:26,background:'rgba(50,25,8,0.75)',border:'1px solid rgba(100,55,15,0.6)',borderRadius:2,overflow:'hidden',boxShadow:'inset 0 2px 6px rgba(0,0,0,0.7)',position:'relative'}}>
@@ -3039,6 +3054,13 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#cc2222',lineHeight:1,textShadow:'-2px 0 rgba(255,0,0,0.6),2px 0 rgba(180,0,0,0.4),0 0 30px rgba(160,0,0,0.5),2px 2px 0 #000'}}>{enemy?.name||'The Vestibule'}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:'#aa4444',textTransform:'uppercase'}}>{enemy?.circle||''}</div>
           {enemy?.passive&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#884444',marginTop:4,fontStyle:'italic'}}>"{enemy.passive}"</div>}
+          <div style={{display:'flex',gap:16,marginTop:8,flexWrap:'wrap'}}>
+            {[['Fights',stats.fightsSurvived||0],['Chains',stats.chainsTriggered||0],['Cards Played',stats.cardsPlayed||0],['Max Strike',stats.highestStrike?stats.highestStrike.toLocaleString():'0']].map(([label,val],i)=>
+              <div key={i} style={{background:'rgba(60,20,20,0.4)',border:'1px solid rgba(120,40,40,0.3)',borderRadius:4,padding:'4px 10px',textAlign:'center'}}>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#886655',letterSpacing:1,textTransform:'uppercase'}}>{label}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'#cc8866'}}>{val}</div>
+              </div>)}
+          </div>
         </div>
       </div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'#cc6666',fontStyle:'italic',textShadow:'0 0 12px rgba(180,0,0,0.3)',maxWidth:500,textAlign:'center'}}>"{enemy?.tagline||'The Vestibule claims another soul.'}"</div>
@@ -3528,6 +3550,8 @@ function App(){
   const [showCombatLog,setShowCombatLog]=useState(false)
   const [damageFlash,setDamageFlash]=useState(false)
   const [animPhase,setAnimPhase]=useState('idle')
+  const [speedMode,setSpeedMode]=useState(()=>localStorage.getItem('vst_speed')==='fast')
+  const [footerCollapsed,setFooterCollapsed]=useState(false)
   const [strikingMemberIdx,setStrikingMemberIdx]=useState(-1)
   const [strikeAnim,setStrikeAnim]=useState(null) // {slotIdx,phase,dx,dy}
   const [bossStrikeAnim,setBossStrikeAnim]=useState(null) // {targetIdx,phase}
@@ -3575,6 +3599,7 @@ function App(){
   const [genreCounts,setGenreCounts]=useState({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
   const genreTotal=genreCounts.RIFF+genreCounts.CORRUPT+genreCounts.UTILITY+genreCounts.EMBER
   const activeGenre=genreTotal>=4?(genreCounts.RIFF/genreTotal>=0.5?'RIFF_METAL':genreCounts.CORRUPT/genreTotal>=0.5?'BLACK_METAL':genreCounts.UTILITY/genreTotal>=0.5?'PROG_ROCK':genreCounts.EMBER/genreTotal>=0.5?'DOOM_METAL':null):null
+  const approachingGenre=!activeGenre&&genreTotal>=3?(genreCounts.RIFF/genreTotal>=0.4?'RIFF_METAL':genreCounts.CORRUPT/genreTotal>=0.4?'BLACK_METAL':genreCounts.UTILITY/genreTotal>=0.4?'PROG_ROCK':genreCounts.EMBER/genreTotal>=0.4?'DOOM_METAL':null):null
   const discoveredRef=useRef(new Set())
   const [bossDebuff,setBossDebuff]=useState(0)
   const [bossRageAtk,setBossRageAtk]=useState(0)
@@ -3627,7 +3652,7 @@ function App(){
   const vhsOn=localStorage.getItem('vst_vhs')!=='off'
 
 
-  const speedMult=(localStorage.getItem('vst_speed')==='fast')?0.5:1.0
+  const speedMult=speedMode?0.5:1.0
   const [showMastery,setShowMastery]=useState(false)
   const [selectedDeck,setSelectedDeck]=useState('standard')
   const [encoreMode,setEncoreMode]=useState(false)
@@ -3714,6 +3739,7 @@ function App(){
   const [streakLosses,setStreakLosses]=useState(0)
   const [totalRunsPlayed,setTotalRunsPlayed]=useState(()=>parseInt(localStorage.getItem('vst_runs')||'0'))
   const [personalBest,setPersonalBest]=useState(()=>parseInt(localStorage.getItem('vst_best')||'0'))
+  const bestRunCircle=parseInt(localStorage.getItem('vst_best_circle')||'0')
   const [lifetimeScore,setLifetimeScore]=useState(()=>parseInt(localStorage.getItem('vst_lifetime')||'0'))
   const [dailyStreak,setDailyStreak]=useState(()=>parseInt(localStorage.getItem('vst_streak')||'0'))
   const [lastPlayedDate,setLastPlayedDate]=useState(()=>localStorage.getItem('vst_lastdate')||'')
@@ -5041,7 +5067,7 @@ function App(){
     memberDmgs.forEach(d=>{_breakdownLines.push({type:'member',label:d.m.name,emoji:d.m.emoji,value:d.atk,color:'#c8a060'})})
     _breakdownLines.push({type:'subtotal',label:'BASE ATK',value:dmg,color:'#e8a820'})
     _bkRunning=dmg
-    const speedFast=localStorage.getItem('vst_speed')==='fast'
+    const speedFast=speedMode
     const memberDelay=speedFast?900:2000
     delay=100 // small initial delay so React commits attacking phase first
     actives.forEach(function(m,attackIdx){
@@ -5294,7 +5320,7 @@ function App(){
               } // end blood oath else
             }
             const allStoned=ns2.filter(function(m){return m}).every(function(m){return m.tooStoned})
-            if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned');playSfx('defeat')};recordLegacyRun(stage,stats,false,Math.floor(fightIndex/3)+1);setTimeout(function(){setGameState('end')},800)}
+            if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned');playSfx('defeat')};const _bc=Math.floor(fightIndex/3)+1;if(_bc>bestRunCircle){localStorage.setItem('vst_best_circle',_bc.toString())};recordLegacyRun(stage,stats,false,Math.floor(fightIndex/3)+1);setTimeout(function(){setGameState('end')},800)}
             return ns2
           })
           if(stage[stage.indexOf(target)]&&!stage[stage.indexOf(target)].tooStoned&&(stage[stage.indexOf(target)].hp-actualDmg)<=0&&!stage[stage.indexOf(target)].stoneShield)addLog('💨 '+target.name+' is TOO STONED!')
@@ -6061,8 +6087,8 @@ function App(){
           ))}
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#e8a820'}}>Combat Speed</span>
-            <button onClick={()=>{const cur=localStorage.getItem('vst_speed')||'normal';localStorage.setItem('vst_speed',cur==='normal'?'fast':'normal');setMenuView('options')}}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#e8a820',background:'rgba(0,0,0,0.4)',border:'1px solid #c87820',borderRadius:4,padding:'8px 24px',cursor:'pointer',minWidth:70,textAlign:'center'}}>{(localStorage.getItem('vst_speed')||'normal').toUpperCase()}</button>
+            <button onClick={()=>{setSpeedMode(p=>{const nv=!p;localStorage.setItem('vst_speed',nv?'fast':'normal');return nv});setMenuView('options')}}
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#e8a820',background:'rgba(0,0,0,0.4)',border:'1px solid #c87820',borderRadius:4,padding:'8px 24px',cursor:'pointer',minWidth:70,textAlign:'center'}}>{speedMode?'FAST':'NORMAL'}</button>
           </div>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#e8a820'}}>Music Volume</span>
@@ -6334,6 +6360,7 @@ function App(){
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>⛧ The Descent ⛧</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:39,color:'#e8d090',fontStyle:'italic'}}>Circle {descentData.circleName} {descentData.circleEmoji}</div>
+        {bestRunCircle>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#886644',letterSpacing:2}}>PERSONAL BEST: Circle {bestRunCircle} {Math.floor(fightIndex/3)+1>bestRunCircle?' \u2714':''}  </div>}
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#e8d090',letterSpacing:2,fontWeight:900}}>Choose your path. Skipping a fight forfeits its shop.</div>
       <div style={{display:'flex',gap:30,marginTop:10}}>
         {descentData.fights.map((enemy,i)=>{
@@ -6782,7 +6809,19 @@ function App(){
             (played {activeGenre==='RIFF_METAL'?genreCounts.RIFF+' Riff':activeGenre==='BLACK_METAL'?genreCounts.CORRUPT+' Corrupt':activeGenre==='PROG_ROCK'?genreCounts.UTILITY+' Utility':genreCounts.EMBER+' Ember'} cards)
           </span>
         </div>}
-                <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,padding:'1px 20px 2px',position:'relative',zIndex:5,flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)'}}>
+        {!activeGenre&&approachingGenre&&tutorialFight===0&&<div style={{
+          display:'flex',alignItems:'center',justifyContent:'center',gap:8,
+          padding:'4px 16px',flexShrink:0,opacity:0.6,
+          background:'rgba(20,15,5,0.5)',borderTop:'1px solid rgba(100,80,40,0.2)',
+          animation:'fadeIn 0.3s ease',zIndex:6}}>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#887755',letterSpacing:2}}>
+            APPROACHING: {approachingGenre==='RIFF_METAL'?'Thrash Metal':approachingGenre==='BLACK_METAL'?'Black Metal':approachingGenre==='PROG_ROCK'?'Stoner Rock':'Doom Metal'} (1-2 more cards)
+          </span>
+        </div>}
+                {footerCollapsed&&<div onClick={()=>setFooterCollapsed(false)} style={{display:'flex',alignItems:'center',justifyContent:'center',padding:'2px 20px',flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)',cursor:'pointer'}}><span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#665544',letterSpacing:2}}>▲ SHOW STATS</span></div>}
+                <div style={{display:footerCollapsed?'none':'flex',alignItems:'center',justifyContent:'center',gap:10,padding:'1px 20px 2px',position:'relative',zIndex:5,flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)'}}>
+          {/* FOOTER COLLAPSE TOGGLE */}
+          <div onClick={()=>setFooterCollapsed(p=>!p)} style={{position:'absolute',right:8,top:-14,zIndex:10,cursor:'pointer',fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#665544',background:'rgba(20,12,4,0.8)',border:'1px solid rgba(100,80,40,0.2)',borderRadius:3,padding:'1px 8px',letterSpacing:1}}>{'▼ HIDE'}</div>
           {/* PHASE BANNER — left side, absolute so it never shifts center content */}
           <div style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:3,textTransform:'uppercase',
             color:phaseBanner==='play'?'#c8a040':phaseBanner==='strike'?'#ee2222':'#ff4444',
@@ -6897,6 +6936,7 @@ function App(){
                 textShadow:strikeMult>=6.66?'0 0 30px rgba(255,0,0,1),0 0 60px rgba(200,0,0,0.8),0 0 100px rgba(150,0,0,0.4)':strikeMult>=2.0?'0 0 20px rgba(255,100,0,0.8),0 0 40px rgba(255,60,0,0.4)':'0 0 16px rgba(255,120,0,0.6)',
                 lineHeight:1}}>×{strikeMult.toFixed(2)}</div>
             </div>}
+            <button onClick={()=>setSpeedMode(p=>{const nv=!p;localStorage.setItem('vst_speed',nv?'fast':'normal');return nv})} style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:speedMode?'#ff8800':'#665544',background:speedMode?'rgba(255,136,0,0.15)':'rgba(40,25,5,0.5)',border:'1px solid '+(speedMode?'#ff8800':'rgba(100,80,40,0.3)'),borderRadius:4,padding:'6px 10px',cursor:'pointer',letterSpacing:1,marginRight:8}}>{speedMode?'\u26A1 2X':'1X'}</button>
             <button onClick={handleStrike} disabled={!canStrike}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'10px 14px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:4,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:'100%'}}>⚔ Strike</button>
             <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center',width:'100%',marginTop:4}}>
@@ -6998,8 +7038,8 @@ function App(){
             ))}
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820'}}>Combat Speed</span>
-              <button onClick={()=>{const cur=localStorage.getItem('vst_speed')||'normal';localStorage.setItem('vst_speed',cur==='normal'?'fast':'normal');setShowPauseOptions(false);setTimeout(()=>setShowPauseOptions(true),10)}}
-                style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#e8a820',background:'rgba(0,0,0,0.4)',border:'1px solid #c87820',borderRadius:4,padding:'6px 20px',cursor:'pointer',minWidth:60,textAlign:'center'}}>{(localStorage.getItem('vst_speed')||'normal').toUpperCase()}</button>
+              <button onClick={()=>{setSpeedMode(p=>{const nv=!p;localStorage.setItem('vst_speed',nv?'fast':'normal');return nv});setShowPauseOptions(false);setTimeout(()=>setShowPauseOptions(true),10)}}
+                style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#e8a820',background:'rgba(0,0,0,0.4)',border:'1px solid #c87820',borderRadius:4,padding:'6px 20px',cursor:'pointer',minWidth:60,textAlign:'center'}}>{speedMode?'FAST':'NORMAL'}</button>
             </div>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820'}}>Music Volume</span>
