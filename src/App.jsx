@@ -2140,7 +2140,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   )
 }
 
-function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption,animPhase}){
+function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption,animPhase,ghostCard}){
   const [over,setOver]=useState(false)
   const [showTip,setShowTip]=useState(false)
   if(!member){
@@ -2181,12 +2181,15 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
         textShadow:member.demonic?'0 0 8px rgba(255,200,0,0.9)':member.mythic?'0 0 8px rgba(200,0,255,0.9)':'0 0 8px rgba(100,180,255,0.9)'}}>
         {member.demonic?'⛧ DEMONIC':member.mythic?'✦ MYTHIC':'✨ FOIL'}
       </div>}
-      <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative',minHeight:90,overflow:'hidden'}}>
+      <div style={{flex:'0 0 100px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative',minHeight:90,overflow:'hidden'}}>
         {STAGE_PORTRAITS[member.id]?<img className={animPhase==='idle'?'':'squiggle'} src={animPhase==='idle'&&IDLE_PORTRAITS[member.id]?IDLE_PORTRAITS[member.id]:STAGE_PORTRAITS[member.id]} alt={member.id} style={{width:'70%',height:'90%',objectFit:'contain',objectPosition:'center center',imageRendering:'pixelated'}}/>:member.emoji}
         {st&&<div style={{position:'absolute',top:4,right:4,fontSize:22}}>💨</div>}
         {isAttacking&&<div style={{position:'absolute',inset:0,background:strikeAnim?'rgba(255,80,0,0.3)':'rgba(255,50,0,0.12)',animation:strikeAnim?'pulse 0.15s ease infinite alternate':'pulse 0.4s ease infinite alternate'}}/>}
       </div>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:st?'#555':'#e8d8a0',textAlign:'center',padding:'8px 6px 3px',lineHeight:1}}>{member.name}</div>
+      {ghostCard&&!st&&<div style={{position:'absolute',top:4,left:'50%',transform:'translateX(-50%)',zIndex:30,fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#44ff44',background:'rgba(0,40,0,0.9)',border:'1px solid #44ff44',borderRadius:4,padding:'2px 8px',whiteSpace:'nowrap',animation:'fadeIn 0.15s ease'}}>
+        {ghostCard.id==='battlecry'||ghostCard.id==='heavyriff'?'+1 ATK':ghostCard.id==='amp'?'x2 ATK':ghostCard.id==='newstrings'?'+2 HP':ghostCard.id==='roadie'?'+Shield':ghostCard.id==='encore'?'Encore!':ghostCard.id==='darktuning'?'+ATK(corr)':ghostCard.id==='crowdsurf'?'Draw+ATK':ghostCard.id==='wakeup'?'+2 HP all':ghostCard.effect?ghostCard.effect.slice(0,25)+'...':'PLAY'}
+      </div>}
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,letterSpacing:1.5,color:st?'#444':'#8a7a50',textAlign:'center',padding:'4px 4px 8px',textTransform:'uppercase'}}>{member.role}</div>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 16px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
         <div style={{textAlign:'center'}}>
@@ -3558,6 +3561,7 @@ function App(){
   const [selected,setSelected]=useState([])
   const [dragCardUid,setDragCardUid]=useState(null)
   const [dragStageIdx,setDragStageIdx]=useState(null)
+  const [dragOverSlotIdx,setDragOverSlotIdx]=useState(null) // ghost preview
   const [dragHandIdx,setDragHandIdx]=useState(null)
   const [dragOverHandIdx,setDragOverHandIdx]=useState(null)
   const [handSort,setHandSort]=useState('none') // 'none'|'embers'|'rarity'
@@ -6598,7 +6602,7 @@ function App(){
   if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
 
   return(
-    <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:'var(--void)',overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
+    <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:`radial-gradient(ellipse at 50% 30%, ${corruption>=75?'rgba(80,0,20,0.4)':corruption>=50?'rgba(50,0,15,0.25)':corruption>=25?'rgba(30,0,10,0.15)':'rgba(10,5,15,0.1)'}, var(--void))`,overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
 
       {/* ═══ CORRUPTION THERMOMETER — right edge ═══ */}
       {corruption>0&&tutorialFight!==1&&
@@ -6844,14 +6848,15 @@ function App(){
                 boxShadow:'0 0 30px '+cardAbsorb.color+', inset 0 0 20px '+cardAbsorb.color}}/>}
               <StageSlot member={m} slotIdx={i}
                 animPhase={animPhase}
+                ghostCard={dragOverSlotIdx===i&&dragCardUid?hand.find(c=>c.uid===dragCardUid):null}
                 isAttacking={animPhase==='attacking'&&m&&!m.tooStoned}
                 isStriking={typeof strikingMemberIdx!=='undefined'&&strikingMemberIdx===i}
                 strikeAnim={strikeAnim&&strikeAnim.slotIdx===i?strikeAnim:null}
                 isDiceTarget={false}
                 innerRef={function(el){stageRefs.current[i]={current:el}}}
                 onDragStart={function(){if(m)setDragStageIdx(i)}}
-                onDragOver={function(){}}
-                onDrop={function(){handleStageDrop(i)}}
+                onDragOver={function(){setDragOverSlotIdx(i)}}
+                onDrop={function(){setDragOverSlotIdx(null);handleStageDrop(i)}}
                 bondColor={m?getBondColor(m,stage):null}
                 mentorState={m&&m.mentorLinkedToUid?(m.mentorAlive?'active':'broken'):m&&m.isMentor&&stage[i+1]&&stage[i+1].mentorLinkedToUid===m.uid&&!m.tooStoned?'mentor':null}
                 corruption={corruption}
