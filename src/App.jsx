@@ -184,17 +184,17 @@ function unlockAchievement(id){
 
 const ENEMIES=[
   // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
-  {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:50,baseDmg:4,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
-  {id:'lostsoul',tagline:'You were lost before you started.',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:75,baseDmg:5,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
-  {id:'drifter',tagline:'110 HP and pure aggression.',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:110,baseDmg:7,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
+  {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:65,baseDmg:4,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
+  {id:'lostsoul',tagline:'You were lost before you started.',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:95,baseDmg:5,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
+  {id:'drifter',tagline:'110 HP and pure aggression.',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:140,baseDmg:7,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
   // ── CIRCLE II: LUST — Enemy buffs itself each strike ─────────
-  {id:'siren',tagline:'She sang. You listened. You lost.',name:'The Siren',circle:'Circle II — Lust',subtitle:'Fight 1 of 3',maxHp:100,baseDmg:5,emoji:'🌊',passive:'Seductive. Gains +1 damage each Strike.',passiveId:'selfbuff'},
-  {id:'tempter',tagline:'Temptation wins again.',name:'The Tempter',circle:'Circle II — Lust',subtitle:'Fight 2 of 3',maxHp:150,baseDmg:6,emoji:'🌹',passive:'Enthralling. Gains +1 damage each Strike. Starts stronger.',passiveId:'selfbuff'},
-  {id:'lust_boss',tagline:'Irresistible to the end.',name:'The Seducer',circle:'Circle II — Lust',subtitle:'Circle Boss — Fight 3 of 3',maxHp:220,baseDmg:7,emoji:'💋',passive:'Irresistible. Gains +2 damage each Strike. Dangerous if left alive.',passiveId:'selfbuff2'},
+  {id:'siren',tagline:'She sang. You listened. You lost.',name:'The Siren',circle:'Circle II — Lust',subtitle:'Fight 1 of 3',maxHp:125,baseDmg:5,emoji:'🌊',passive:'Seductive. Gains +1 damage each Strike.',passiveId:'selfbuff'},
+  {id:'tempter',tagline:'Temptation wins again.',name:'The Tempter',circle:'Circle II — Lust',subtitle:'Fight 2 of 3',maxHp:180,baseDmg:6,emoji:'🌹',passive:'Enthralling. Gains +1 damage each Strike. Starts stronger.',passiveId:'selfbuff'},
+  {id:'lust_boss',tagline:'Irresistible to the end.',name:'The Seducer',circle:'Circle II — Lust',subtitle:'Circle Boss — Fight 3 of 3',maxHp:265,baseDmg:7,emoji:'💋',passive:'Irresistible. Gains +2 damage each Strike. Dangerous if left alive.',passiveId:'selfbuff2'},
   // ── CIRCLE III: GLUTTONY — Heals when you play cards ─────────
-  {id:'glutton',tagline:'It ate your strikes for breakfast.',name:'The Glutton',circle:'Circle III — Gluttony',subtitle:'Fight 1 of 3',maxHp:130,baseDmg:5,emoji:'🍖',passive:'Insatiable. Heals 2 HP every time a card is played.',passiveId:'cardHeal'},
-  {id:'feaster',tagline:'Still hungry. Always hungry.',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:170,baseDmg:6,emoji:'🦷',passive:'Voracious. Heals 3 HP every time a card is played.',passiveId:'cardHeal3'},
-  {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:230,baseDmg:7,emoji:'🕳',passive:'Endless hunger. Heals 6 HP per card played. Strike fast.',passiveId:'cardHeal6'},
+  {id:'glutton',tagline:'It ate your strikes for breakfast.',name:'The Glutton',circle:'Circle III — Gluttony',subtitle:'Fight 1 of 3',maxHp:160,baseDmg:5,emoji:'🍖',passive:'Insatiable. Heals 2 HP every time a card is played.',passiveId:'cardHeal'},
+  {id:'feaster',tagline:'Still hungry. Always hungry.',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:210,baseDmg:6,emoji:'🦷',passive:'Voracious. Heals 3 HP every time a card is played.',passiveId:'cardHeal3'},
+  {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:280,baseDmg:7,emoji:'🕳',passive:'Endless hunger. Heals 6 HP per card played. Strike fast.',passiveId:'cardHeal6'},
   // ── CIRCLE IV: GREED — Steals stash each strike ──────────────
   {id:'miser',tagline:'You could not afford to win.',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:340,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1🌿 from your Stash each Strike. Win to take it back.',passiveId:'stashSteal'},
   {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:400,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2🌿 per Strike. Your stash is its stash.',passiveId:'stashSteal2'},
@@ -472,7 +472,7 @@ function getChainHints(cardId){
 
 const ALL_CARDS=[
   {id:'amp',name:'Amp It Up',type:'RIFF',rarity:'Common',emoji:'⚡',embers:2,effect:'Target member deals double ATK this turn.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:0,effect:'+10% Corruption. All members +2 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:2},
+  {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:0,effect:'+10% Corruption. All members +3 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'soundcheck',name:'Sound Check',type:'UTILITY',rarity:'Common',emoji:'🔊',embers:2,effect:'All members +4 HP. Injured members also gain +1 ATK this Strike.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'sigdecay',name:'Signal Decay',type:'CORRUPT',rarity:'Common',emoji:'📡',embers:1,effect:'Discard 1 card from hand. Draw 2 cards.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'battlecry',name:'Battle Cry',type:'RIFF',rarity:'Common',emoji:'🤘',embers:2,effect:'Target member +1 ATK permanently.',color:'#9933cc',typeColor:'#7722aa',copies:4},
@@ -506,7 +506,7 @@ const ALL_CARDS=[
   {id:'darktuning',name:'Dark Tuning',type:'CORRUPT',rarity:'Uncommon',emoji:'🌑',embers:3,effect:'For each 15% Corruption, one random member gains +1 ATK permanently.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'powertap',name:'Power Tap',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'Gain 2 Embers.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'soundboard',name:'Soundboard',type:'EMBER',rarity:'Uncommon',emoji:'🎛',embers:1,effect:'Gain 2 Embers. Draw 1 extra card at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:1},
-  {id:'setbreak',name:'Smoke Break',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Select 1 card first, then play to discard it. Gain 2 Embers. -15% Corruption. (Random if no selection)',color:'#22aa44',typeColor:'#118833',copies:2},
+  {id:'setbreak',name:'Smoke Break',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Select 1 card first, then play to discard it. Gain 2 Embers. -15% Corruption. Draw 1 card. (Random if no selection)',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'heavyriff',name:'Heavy Riff',type:'RIFF',rarity:'Uncommon',emoji:'🥊',embers:2,effect:'Deal damage = stage total ATK ÷ 2, direct to boss.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'resonancecard',name:'Resonance',type:'RIFF',rarity:'Uncommon',emoji:'🌀',embers:1,effect:'Target member ATK becomes equal to highest ATK on stage.',color:'#9933cc',typeColor:'#7722aa',copies:3},
   {id:'herbmoney',name:'Herb Money',type:'RIFF',rarity:'Uncommon',emoji:'🌿',embers:1,effect:'Deal damage equal to your current Stash. Keep your Stash. -15% Corruption.',color:'#9933cc',typeColor:'#7722aa',copies:1},
@@ -908,7 +908,7 @@ const HELL_EVENTS=[
     choiceB:{label:'Find Another Way',desc:'Nothing happens. You press on.',emoji:'↩'}},
   {id:'sabbath_offering',name:'Sabbath Offering',emoji:'⛧',
     flavor:'An altar of black stone demands sacrifice. Three cards, chosen by fate.',
-    choiceA:{label:'Make the Offering',desc:'3 random cards burned from your deck. All members healed to full HP.',emoji:'🪦'},
+    choiceA:{label:'Make the Offering',desc:'Remove 3 weakest cards from your deck permanently. All members +1 ATK. Thin your deck, sharpen your band.',emoji:'🪦'},
     choiceB:{label:'Keep Your Cards',desc:'The altar crumbles. You keep your deck intact.',emoji:'🃏'}},
   {id:'devils_wager',name:"The Devil\'s Wager",emoji:'🎲',
     flavor:'Old Scratch himself appears, flipping a coin. "Feeling lucky, mortal?"',
@@ -2166,7 +2166,7 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
             const base=ALL_MUSICIANS.find(mu=>mu.id===member.id)
             const baseAtk=base?base.atk+(member.demonic?4:member.mythic?2:member.foil?1:0):member.atk
             const permBonus=member.atk-baseAtk
-            const corrBonus=member.keyword==='CORRUPT'&&corruption>0?Math.floor(corruption/15):0
+            const corrBonus=member.keyword==='CORRUPT'&&corruption>0?Math.floor(corruption/12):0
             const totalBonus=permBonus+corrBonus
             if(totalBonus>0)return <>{baseAtk}<span style={{fontSize:22,color:'#ff8800'}}>+{totalBonus}</span></>
             return member.atk
@@ -2612,7 +2612,7 @@ function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chr
           <div style={{width:'100%',height:26,background:'rgba(50,25,8,0.75)',border:'1px solid rgba(100,55,15,0.6)',borderRadius:2,overflow:'hidden',boxShadow:'inset 0 2px 6px rgba(0,0,0,0.7)',position:'relative'}}>
             {[25,50,75].map(pp=><div key={pp} style={{position:'absolute',top:0,bottom:0,left:`${pp}%`,width:1,background:'rgba(0,0,0,0.35)',zIndex:2}}/>)}
             <div style={{height:'100%',background:isLow?'linear-gradient(90deg,#660000,#cc0000,#ff2200)':'linear-gradient(90deg,#7a0000,#aa1100,#cc2200)',width:`${pct}%`,transition:'width 0.7s cubic-bezier(0.4,0,0.2,1)',animation:isCritical?'bossHpCritical 0.5s ease-in-out infinite':'none'}}/>
-            <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'rgba(255,230,180,1)',letterSpacing:3,textShadow:'0 0 8px rgba(0,0,0,0.99),0 1px 3px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)} HP REMAINING</div>
+            <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'rgba(255,230,180,1)',letterSpacing:3,textShadow:'0 0 8px rgba(0,0,0,0.99),0 1px 3px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)}/{eMaxHp} HP</div>
           </div>
         </div>
 
@@ -3038,6 +3038,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:6,color:'#662222',textTransform:'uppercase'}}>Defeated by</div>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#cc2222',lineHeight:1,textShadow:'-2px 0 rgba(255,0,0,0.6),2px 0 rgba(180,0,0,0.4),0 0 30px rgba(160,0,0,0.5),2px 2px 0 #000'}}>{enemy?.name||'The Vestibule'}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:'#aa4444',textTransform:'uppercase'}}>{enemy?.circle||''}</div>
+          {enemy?.passive&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#884444',marginTop:4,fontStyle:'italic'}}>"{enemy.passive}"</div>}
         </div>
       </div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'#cc6666',fontStyle:'italic',textShadow:'0 0 12px rgba(180,0,0,0.3)',maxWidth:500,textAlign:'center'}}>"{enemy?.tagline||'The Vestibule claims another soul.'}"</div>
@@ -3976,7 +3977,7 @@ function App(){
       msg='🔊 Sound Check! All +4 HP'+(injuredCount>0?' + '+injuredCount+' injured member(s) +1 ATK!':'!');stage.filter(x=>x&&!x.tooStoned).forEach(x=>addBuff(x.uid,'+HP','#33dd33'))
       addFloat('+4 HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')
     }
-    else if(card.id==='dialtoeleven'){const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true);ns=ns.map(function(m){return m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+(card.upgraded?3:2),tempAtkBonus:(m.tempAtkBonus||0)+(card.upgraded?3:2),buffCount:(m.buffCount||0)+1}):m});msg='📻 Dial to Eleven! Corruption +10% → '+nc+'%. All members +2 ATK!'}
+    else if(card.id==='dialtoeleven'){const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true);ns=ns.map(function(m){return m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+(card.upgraded?4:3),tempAtkBonus:(m.tempAtkBonus||0)+(card.upgraded?4:3),buffCount:(m.buffCount||0)+1}):m});msg='📻 Dial to Eleven! Corruption +10% → '+nc+'%. All members +3 ATK!'}
     else if(card.id==='sigdecay'){
       // Handled in handleDropOnStage (modifies hand/deck like setlist)
       return false
@@ -4119,7 +4120,7 @@ function App(){
       addFloat('+'+scBonus+' 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='darktuning'){
-      const stacks=Math.floor(corruption/15)
+      const stacks=Math.floor(corruption/12)
       if(stacks===0){addLog('🌑 Need 15%+ Corruption!');return false}
       let remaining=stacks
       const activeSlots=ns.map((m,i)=>m&&!m.tooStoned?i:-1).filter(i=>i>=0)
@@ -4345,10 +4346,11 @@ function App(){
       setSelected([])
       setEmbers(p=>Math.min(maxEmbers,p+3-effectiveEmbers))
       setCorruption(p=>Math.max(0,p-15))
-      addLog('🎼 Smoke Break! '+victim.name+' discarded. +3 Embers. -15% Corruption.'+(preSelected.length===0?' (tip: select a card first)':''))
+      addLog('🎼 Smoke Break! '+victim.name+' discarded. +3 Embers. -15% Corruption. Drew 1 card.'+(preSelected.length===0?' (tip: select a card first)':''))
       addFloat('+3 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
-      cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard'] // count victim too for refill
+      cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard']
+      drawUpTo(remaining,deckRef.current,[...discRef.current,card,victim],1) // count victim too for refill
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
     }
@@ -4859,7 +4861,7 @@ function App(){
         if(d4===0){
           effectName='EGO DEATH';effectDesc='All members +2 ATK this fight!';effectColor='#ffdd44'
           setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+2}):m))
-          addLog('🍄 EGO DEATH! All members +2 ATK!')
+          addLog('🍄 EGO DEATH! All members +3 ATK!')
         } else if(d4===1){
           effectName='TIME DILATION';effectDesc='+1 bonus Strike this fight!';effectColor='#ff8800'
           setStrikesLeft(p=>p+1)
@@ -4958,7 +4960,7 @@ function App(){
     const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===activeStake.maxStrikes?10:0
     const _breakdownLines=[]
     let dmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
-      const effectiveAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
+      const effectiveAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
       const cleanLivingBonus=(chosenPacts.includes('clean_living')&&corruption<15)?3:0
       return s+effectiveAtk+cleanLivingBonus
     },0)+p10Bonus
@@ -4973,7 +4975,7 @@ function App(){
       if(dblMult!==1)_breakdownLines.push({type:'multiply',label:dblMode+' ×'+dblMult,label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff8800'})
     }
     const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer').reduce((s,m)=>{
-      const ea=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
+      const ea=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
       return s+ea
     },0)
     dmg+=encDmg
@@ -4986,8 +4988,8 @@ function App(){
       const _mn=stage[_i],_bs=stage[_i+1]
       if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue
       if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){
-        const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/15):_mn.atk
-        const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/15):_bs.atk
+        const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/12):_mn.atk
+        const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/12):_bs.atk
         const _effectiveMult=_bs.mentorMult+(activeStake.mentorBonus||0)
         const _b=Math.round((_ma+_ba)*(_effectiveMult-1))
         _mlb+=_b
@@ -5030,7 +5032,7 @@ function App(){
     actives.forEach(function(m){
       if(m.role==='Drummer')return
       if(paranoiaVictim&&m.uid===paranoiaVictim.uid)return
-      let mAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
+      let mAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
       if(chosenPacts.includes('clean_living')&&corruption<15)mAtk+=3
       if(m.encoreReady)mAtk*=2
       memberDmgs.push({m,atk:mAtk})
@@ -5622,22 +5624,27 @@ function App(){
       if(choice==='A'){
         setCorruption(69)
         setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2}):m))
-        addLog('🔥 Hellfire Baptism! Corruption → 69%. All members +2 ATK!')
+        addLog('🔥 Hellfire Baptism! Corruption → 69%. All members +3 ATK!')
       } else {
         addLog('↩ You find another way around. Nothing happens.')
       }
     }
     else if(eid==='sabbath_offering'){
       if(choice==='A'){
-        // Burn 3 random cards from deck
+        // Remove 3 weakest cards (commons first, then by lowest copies count)
         setDeck(p=>{
-          const shuffled=[...p].sort(()=>Math.random()-0.5)
-          const burned=shuffled.slice(0,Math.min(3,shuffled.length))
-          burned.forEach(c=>addLog('🪦 Burned: '+c.name))
-          return shuffled.slice(Math.min(3,shuffled.length))
+          const sorted=[...p].sort((a,b)=>{
+            const rarityOrder={Common:0,Uncommon:1,Rare:2}
+            const ra=rarityOrder[a.rarity]||0, rb=rarityOrder[b.rarity]||0
+            if(ra!==rb) return ra-rb // commons first
+            return (a.embers||0)-(b.embers||0) // then cheapest
+          })
+          const removed=sorted.slice(0,Math.min(3,sorted.length))
+          removed.forEach(c=>addLog('🪦 Offered: '+c.name+' ('+c.rarity+')'))
+          return sorted.slice(Math.min(3,sorted.length))
         })
-        setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
-        addLog('⛧ Sabbath Offering! 3 cards burned. All members healed to full.')
+        setStage(p=>p.map(m=>m?Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1}):m))
+        addLog('⛧ Sabbath Offering accepted! 3 weakest cards removed. All members +1 ATK permanently.')
       } else {
         addLog('🃏 You keep your cards. The altar crumbles.')
       }
@@ -6786,12 +6793,12 @@ function App(){
           {(()=>{
             const act=stage.filter(m=>m&&!m.tooStoned)
             let dmg=act.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
-              let effAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/15):m.atk
+              let effAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
               if(chosenPacts.includes('clean_living')&&corruption<15)effAtk+=3
               if(m.encoreReady)effAtk*=2
               return s+effAtk
             },0)
-            for(let _mi=0;_mi<stage.length-1;_mi++){const _mn=stage[_mi],_bs=stage[_mi+1];if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue;if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){const _em=_bs.mentorMult+(activeStake.mentorBonus||0);const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/15):_mn.atk;const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/15):_bs.atk;dmg+=Math.round((_ma+_ba)*(_em-1))}}
+            for(let _mi=0;_mi<stage.length-1;_mi++){const _mn=stage[_mi],_bs=stage[_mi+1];if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue;if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){const _em=_bs.mentorMult+(activeStake.mentorBonus||0);const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/12):_mn.atk;const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/12):_bs.atk;dmg+=Math.round((_ma+_ba)*(_em-1))}}
             const dbl=act.some(m=>m.role==='Drummer')
             if(dbl)dmg*=2
             const buf=act.filter(m=>(m.buffCount||0)>0).length
