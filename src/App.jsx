@@ -6828,20 +6828,14 @@ function App(){
         setSetlistOpen(false)
         addLog('📋 Setlist locked in.')
       }} onClose={()=>setSetlistOpen(false)}/>}
-      {/* PARCHMENT */}
-      <div style={{flex:1,margin:'0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'visible',zIndex:10,background:'linear-gradient(168deg,#cbb872 0%,#bfa85a 20%,#c8b060 40%,#baa050 60%,#c4a85c 80%,#b89e50 100%)',border:`2px solid ${corruptMax?'#660000':corruptHigh?'#7a2010':'#7a5820'}`,boxShadow:`inset 0 0 60px rgba(60,35,5,0.6),0 0 30px rgba(0,0,0,0.95)${corruptHigh?',0 0 60px rgba(120,0,0,0.3)':''}${corruptMax?',0 0 100px rgba(180,0,0,0.5)':''}`,filter:parchmentFilter,display:'flex',flexDirection:'column'}}>
-        <div style={{position:'absolute',inset:5,border:'1px solid rgba(80,50,10,0.28)',pointerEvents:'none',zIndex:10,borderRadius:2}}/>
-        <div style={{padding:'8px 16px 6px',position:'relative',zIndex:bossStrikeAnim?300:5,display:'flex',justifyContent:'center',borderBottom:'1px solid rgba(60,35,5,0.3)',flexShrink:0,overflow:'visible'}}>
-          <div style={{width:'100%',maxWidth:950,background:'rgba(8,0,0,0.55)',border:'2px solid rgba(160,20,0,0.8)',borderRadius:8,padding:'0',overflow:bossStrikeAnim?'visible':'hidden',animation:'bossGlow 2s ease-in-out infinite',boxShadow:'0 0 30px rgba(150,0,0,0.4),inset 0 0 40px rgba(80,0,0,0.3)',position:'relative',zIndex:bossStrikeAnim?300:1}}>
+      {/* BATTLE AREA — unified dark zone */}
+      <div style={{flex:1,margin:'0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'visible',zIndex:10,background:'rgba(4,2,6,0.6)',border:'none',boxShadow:'inset 0 0 80px rgba(0,0,0,0.5)',display:'flex',flexDirection:'column'}}>
+        <div style={{padding:'6px 16px 4px',position:'relative',zIndex:bossStrikeAnim?300:5,display:'flex',justifyContent:'center',flexShrink:0,overflow:'visible'}}>
+          <div style={{width:'100%',maxWidth:950,background:'rgba(8,0,0,0.45)',border:'1px solid rgba(160,20,0,0.5)',borderRadius:8,padding:'0',overflow:bossStrikeAnim?'visible':'hidden',boxShadow:'0 0 20px rgba(150,0,0,0.3)',position:'relative',zIndex:bossStrikeAnim?300:1}}>
             <BossSection enemy={enemy} bossStrikeAnim={bossStrikeAnim} currentHp={enemyHp} scaledMaxHp={scaledMaxHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll} luciferPhase={luciferPhase}/>
           </div>
         </div>
-        <div style={{position:'relative',zIndex:5,background:'rgba(20,11,3,0.42)',overflow:'visible',borderTop:'2px solid rgba(60,35,5,0.45)',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>
-          <div style={{display:'flex',alignItems:'center',gap:10,padding:'3px 16px 1px'}}>
-            <div style={{flex:1,height:1,background:'rgba(60,35,5,0.2)'}}/>
-            <div style={{fontFamily:"'ScratchFont',serif",fontSize:10,color:'#8a6838',opacity:.4,fontStyle:'italic',letterSpacing:4}}>— stage —</div>
-            <div style={{flex:1,height:1,background:'rgba(60,35,5,0.2)'}}/>
-          </div>
+        <div style={{position:'relative',zIndex:5,overflow:'visible',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>
           <div style={{display:'flex',alignItems:'center',gap:stage.length>5?16:50,padding:stage.length>5?'0px 10px 0px 100px':'0px 10px 0px 130px',justifyContent:'center',flex:1,position:'relative'}}>
             <div style={{display:'flex',flexDirection:'column',gap:8,alignSelf:'center',flexShrink:0,background:'rgba(0,0,0,0.22)',borderRadius:'0 6px 6px 0',padding:'8px 10px 8px 10px',borderRight:'1px solid rgba(140,90,20,0.35)',position:'absolute',left:0,top:'50%',transform:'translateY(-50%)'}}>
               {[0,1,2].map(i=>{const a=(activeArtifacts||[])[i];return(
