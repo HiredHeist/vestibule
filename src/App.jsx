@@ -196,9 +196,9 @@ const ENEMIES=[
   {id:'feaster',tagline:'Still hungry. Always hungry.',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:210,baseDmg:6,emoji:'🦷',passive:'Voracious. Heals 3 HP every time a card is played.',passiveId:'cardHeal3'},
   {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:280,baseDmg:7,emoji:'🕳',passive:'Endless hunger. Heals 6 HP per card played. Strike fast.',passiveId:'cardHeal6'},
   // ── CIRCLE IV: GREED — Steals stash each strike ──────────────
-  {id:'miser',tagline:'You could not afford to win.',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:340,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1🌿 from your Stash each Strike. Win to take it back.',passiveId:'stashSteal'},
-  {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:400,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2🌿 per Strike. Your stash is its stash.',passiveId:'stashSteal2'},
-  {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:666,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3🌿 per Strike. 666 HP of pure greed.',passiveId:'stashSteal3'},
+  {id:'miser',tagline:'You could not afford to win.',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:400,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1🌿 from your Stash each Strike. Win to take it back.',passiveId:'stashSteal'},
+  {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:470,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2🌿 per Strike. Your stash is its stash.',passiveId:'stashSteal2'},
+  {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:780,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3🌿 per Strike. 666 HP of pure greed.',passiveId:'stashSteal3'},
   // ── CIRCLE V: ANGER — Hits harder the more you buff ─────────
   {id:'wrathful',tagline:'Your buffs fed its rage.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:936,baseDmg:5,emoji:'🔥',passive:'Enraged. +1 damage for each buffed member on your stage.',passiveId:'rageScale1'},
   {id:'berserker',tagline:'Fury without limit.',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:1040,baseDmg:6,emoji:'⚔️',passive:'Furious. +1 damage per buffed member.',passiveId:'rageScale1'},
@@ -492,6 +492,9 @@ const ALL_CARDS=[
   {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'If Corruption >=60%, double ALL ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'infencore',name:'Infernal Encore',type:'RIFF',rarity:'Rare',emoji:'👿',embers:3,effect:'ALL members attack again simultaneously.',color:'#9933cc',typeColor:'#7722aa',copies:3},
   {id:'remaster',name:'The Remaster',type:'UTILITY',rarity:'Rare',emoji:'🎙',embers:0,effect:'Select 1 card in hand, then play this to delete it and draw 3 cards.',color:'#22aa44',typeColor:'#118833',copies:1},
+  {id:'whispercard',name:'Dark Whisper',type:'CORRUPT',rarity:'Rare',emoji:'🌀',embers:0,effect:'FREE. Target member +2 ATK permanently. Corruption gift at 25%.',color:'#aa1111',typeColor:'#880000',copies:0},
+  {id:'hungercard',name:'Hungering Flame',type:'CORRUPT',rarity:'Rare',emoji:'🔥',embers:0,effect:'FREE. All members +1 ATK this Strike. Draw 2 cards. Corruption gift at 50%.',color:'#aa1111',typeColor:'#880000',copies:0},
+  {id:'madnesscard',name:'Madness Unleashed',type:'CORRUPT',rarity:'Rare',emoji:'💀',embers:0,effect:'FREE. Deal 15% of enemy max HP as direct damage. Corruption gift at 75%.',color:'#aa1111',typeColor:'#880000',copies:0},
   {id:'sabbathsigil',name:'Black Sabbath Sigil',type:'CORRUPT',rarity:'Rare',emoji:'⛧',embers:2,effect:'CONSUMABLE. Corruption → 100%. Hellquake d10. Card is destroyed after use.',color:'#aa1111',typeColor:'#880000',copies:1,consumable:true,shopCost:42},
   {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:4,effect:'All members deal triple ATK this Strike only.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'crowdsurf',name:'Crowd Surf',type:'RIFF',rarity:'Common',emoji:'🏄',embers:2,effect:'Deal damage equal to cards in hand × 3.',color:'#9933cc',typeColor:'#7722aa',copies:2},
@@ -657,6 +660,11 @@ const BOSS_PORTRAITS={
 }
 // Dr. Katz "Squigglevision" — CSS wobble effect on portraits
 const SQUIGGLE_CSS=`
+@keyframes corruptPulse{
+  0%{opacity:1;filter:brightness(1)}
+  50%{opacity:0.7;filter:brightness(1.4)}
+  100%{opacity:1;filter:brightness(1)}
+}
 @keyframes squiggle1{
   0%{transform:translate(0,0) rotate(0deg)}
   25%{transform:translate(0.7px,-0.6px) rotate(0.4deg)}
@@ -3130,7 +3138,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
               setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(4)
               setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
               setGameState('playing');setAnimPhase('idle');setDeathCause(null)
-              setVictoryFired(false);if(victoryFiredRef)victoryFiredRef.current=false
+              setVictoryFired(false);if(victoryFiredRef)victoryFiredRef.current=false;setCorruptionGiftsGiven([])
               addLog('⛧ THE ENCORE BEGINS — All enemies ×2.0 HP! ⛧')
             }}
               style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,letterSpacing:4,
@@ -3583,6 +3591,7 @@ function App(){
   const skipDescentRef=useRef(false)
   const overrideFightIdxRef=useRef(null) // set by descent to override next fight index
   const [corruption,setCorruption]=useState(0)
+  const [corruptionGiftsGiven,setCorruptionGiftsGiven]=useState([]) // tracks which thresholds gave gifts
   const [stageDiveUsed,setStageDiveUsed]=useState(false)
   const [diceTarget,setDiceTarget]=useState(null)
   const [showDice,setShowDice]=useState(false)
@@ -4003,6 +4012,9 @@ function App(){
       msg='🔊 Sound Check! All +4 HP'+(injuredCount>0?' + '+injuredCount+' injured member(s) +1 ATK!':'!');stage.filter(x=>x&&!x.tooStoned).forEach(x=>addBuff(x.uid,'+HP','#33dd33'))
       addFloat('+4 HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')
     }
+    else if(card.id==='whispercard'){ns=ns.map((m,mi)=>mi===slotIdx?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2,buffCount:(m.buffCount||0)+1}):m);msg='\u{1F300} Dark Whisper! +2 ATK permanently.'}
+    else if(card.id==='hungercard'){ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,tempAtkBonus:(m.tempAtkBonus||0)+1,buffCount:(m.buffCount||0)+1}):m);drawUpTo(hand.filter(c=>c.uid!==card.uid),deckRef.current,[...discRef.current,card],2);msg='\u{1F525} Hungering Flame! All +1 ATK, drew 2 cards.'}
+    else if(card.id==='madnesscard'){const maxHp=enemy?Math.ceil(enemy.maxHp*(activeStake.hpMult||1.3)):100;const dmg=Math.floor(maxHp*0.15);const bc2=getCenter(bossRef);const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp);if(newHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);addFloat(dmg,bc2.x,bc2.y-60,'#cc1144',dmg>=20);playHit();updStat('totalDamage',dmg);msg='\u{1F480} Madness Unleashed! '+dmg+' damage (15% of max HP)!'}
     else if(card.id==='dialtoeleven'){const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true);ns=ns.map(function(m){return m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+(card.upgraded?4:3),tempAtkBonus:(m.tempAtkBonus||0)+(card.upgraded?4:3),buffCount:(m.buffCount||0)+1}):m});msg='📻 Dial to Eleven! Corruption +10% → '+nc+'%. All members +3 ATK!'}
     else if(card.id==='sigdecay'){
       // Handled in handleDropOnStage (modifies hand/deck like setlist)
@@ -4751,6 +4763,24 @@ function App(){
     },1000)
   },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake,stage,hand,enemy,enemyHp,embers,maxEmbers,activeArtifacts,activePassives,chosenPacts,activeGenre,animPhase,discardsLeft,deck,discardPile,fightTripBuff,luciferPhase,welcomeToHell,eventsSeenThisRun])
   triggerVictoryRef.current=triggerVictory
+
+  // ═══ CORRUPTION DECK — gift cards at thresholds ═══
+  useEffect(()=>{
+    if(gameState!=='playing'||tutorialFight>0)return
+    const thresholds=[{t:25,id:'whispercard',name:'Dark Whisper'},{t:50,id:'hungercard',name:'Hungering Flame'},{t:75,id:'madnesscard',name:'Madness Unleashed'}]
+    thresholds.forEach(({t,id,name})=>{
+      if(corruption>=t&&!corruptionGiftsGiven.includes(t)){
+        setCorruptionGiftsGiven(p=>[...p,t])
+        const card=ALL_CARDS.find(c=>c.id===id)
+        if(card){
+          const giftCard=Object.assign({},card,{uid:uid()})
+          setHand(p=>[...p,giftCard])
+          addLog('\u{1F300} Corruption gift! '+name+' added to your hand at '+t+'% corruption.')
+          addFloat(name+'!',960,400,'#cc1144',true)
+        }
+      }
+    })
+  },[corruption,gameState,corruptionGiftsGiven,tutorialFight])
 
   // ═══ FIRST-ENCOUNTER TIPS ═══
   useEffect(()=>{
@@ -6553,6 +6583,7 @@ function App(){
           <div style={{position:'absolute',bottom:0,left:0,right:0,
             height:Math.min(100,corruption)+'%',
             transition:'height 0.7s ease',
+            animation:(corruption%25>=20&&corruption%25<=24&&corruption<100)?'corruptPulse 0.8s ease-in-out infinite':'none',
             background:corruption>=100?'linear-gradient(0deg,#440022,#cc0055,#ff0077)':corruption>=75?'linear-gradient(0deg,#330018,#990044,#cc0055)':corruption>=50?'linear-gradient(0deg,#220010,#770033,#990044)':corruption>=25?'linear-gradient(0deg,#1a000a,#550022,#770033)':'linear-gradient(0deg,#110005,#330011,#440018)',
             boxShadow:corruption>=75?'0 0 16px rgba(255,0,80,0.6), inset 0 -8px 20px rgba(255,0,80,0.3)':corruption>=50?'0 0 8px rgba(200,0,60,0.3)':'none'}}/>
           {/* Vertical text — C O R R U P T I O N */}

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// vestibule-sim.js v17.0 — Expert AI Simulator for Vestibule
+// vestibule-sim.js v18.0 — Expert AI Simulator for Vestibule
 // Session 16 — +Immediate draws, 15-card loop — +Events, Corruption Thresholds, Blood Oath: ALL mechanics (artifacts, passives, loot, combos, multiplier, hellquake)
 // Usage: node vestibule-sim.js [numGames] [stake]  (default 5000 bronze)
 
@@ -16,18 +16,18 @@ const STAKES={
 const STAKE=STAKES[STAKE_ID]||STAKES.bronze;
 
 const ENEMIES=[
-  {id:'wanderer',name:'Wanderer',maxHp:50,baseDmg:4,passiveId:null},
-  {id:'lostsoul',name:'Lost Soul',maxHp:75,baseDmg:5,passiveId:null},
-  {id:'drifter',name:'Drifter',maxHp:110,baseDmg:7,passiveId:null},
-  {id:'siren',name:'Siren',maxHp:100,baseDmg:5,passiveId:'selfbuff'},
-  {id:'tempter',name:'Tempter',maxHp:150,baseDmg:6,passiveId:'selfbuff'},
-  {id:'lust_boss',name:'Seducer',maxHp:220,baseDmg:7,passiveId:'selfbuff2'},
-  {id:'glutton',name:'Glutton',maxHp:130,baseDmg:5,passiveId:'cardHeal'},
-  {id:'feaster',name:'Feaster',maxHp:170,baseDmg:6,passiveId:'cardHeal3'},
-  {id:'gluttony_boss',name:'Devourer',maxHp:230,baseDmg:7,passiveId:'cardHeal6'},
-  {id:'miser',name:'Miser',maxHp:347,baseDmg:4,passiveId:'stashSteal'},
-  {id:'hoarder',name:'Hoarder',maxHp:408,baseDmg:5,passiveId:'stashSteal2'},
-  {id:'greed_boss',name:'Usurer',maxHp:679,baseDmg:6,passiveId:'stashSteal3'},
+  {id:'wanderer',name:'Wanderer',maxHp:65,baseDmg:4,passiveId:null},
+  {id:'lostsoul',name:'Lost Soul',maxHp:95,baseDmg:5,passiveId:null},
+  {id:'drifter',name:'Drifter',maxHp:140,baseDmg:7,passiveId:null},
+  {id:'siren',name:'Siren',maxHp:125,baseDmg:5,passiveId:'selfbuff'},
+  {id:'tempter',name:'Tempter',maxHp:180,baseDmg:6,passiveId:'selfbuff'},
+  {id:'lust_boss',name:'Seducer',maxHp:265,baseDmg:7,passiveId:'selfbuff2'},
+  {id:'glutton',name:'Glutton',maxHp:160,baseDmg:5,passiveId:'cardHeal'},
+  {id:'feaster',name:'Feaster',maxHp:210,baseDmg:6,passiveId:'cardHeal3'},
+  {id:'gluttony_boss',name:'Devourer',maxHp:280,baseDmg:7,passiveId:'cardHeal6'},
+  {id:'miser',name:'Miser',maxHp:400,baseDmg:4,passiveId:'stashSteal'},
+  {id:'hoarder',name:'Hoarder',maxHp:470,baseDmg:5,passiveId:'stashSteal2'},
+  {id:'greed_boss',name:'Usurer',maxHp:780,baseDmg:6,passiveId:'stashSteal3'},
   {id:'wrathful',name:'Wrathful',maxHp:972,baseDmg:5,passiveId:'rageScale1'},
   {id:'berserker',name:'Berserker',maxHp:1080,baseDmg:6,passiveId:'rageScale1'},
   {id:'anger_boss',name:'Warlord',maxHp:1200,baseDmg:7,passiveId:'rageScale2'},
@@ -390,7 +390,7 @@ function applyCardSim(card,gs,enemy){
     case 'soundcheck':alive.forEach(m=>{const h=m.hp<m.maxHp;m.hp=Math.min(m.maxHp,m.hp+(card.upgraded?6:4));if(h)m.tempAtkBonus=(m.tempAtkBonus||0)+1});break;
     case 'roadie':weakest.stoneShield=card.upgraded?3:2;weakest.hp=Math.min(weakest.maxHp,weakest.hp+(card.upgraded?4:2));break;
     case 'distortion':gs.corruption=Math.min(100,gs.corruption+15);alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+1);break;
-    case 'dialtoeleven':gs.corruption=Math.min(100,gs.corruption+10);gs.stage.forEach(m=>{if(!m.tooStoned){m.atk+=2;m.tempAtkBonus=(m.tempAtkBonus||0)+2}});break;
+    case 'dialtoeleven':gs.corruption=Math.min(100,gs.corruption+10);gs.stage.forEach(m=>{if(!m.tooStoned){m.atk+=3;m.tempAtkBonus=(m.tempAtkBonus||0)+3}});break;
     case 'controlfeedback':{gs.corruption=50;const ht=alive.reduce((a,b)=>a.hp/a.maxHp<b.hp/b.maxHp?a:b);ht.hp=ht.maxHp;break}
     case 'sigdecay':{if(gs.hand.length>0){const vi=rand(gs.hand.length);gs.discard.push(gs.hand.splice(vi,1)[0])};drawCards(gs,2);break}
     case 'feedbackloop':{let d=Math.floor(gs.corruption/(card.upgraded?1.5:2));if(gs._activeGenre==='BLACK_METAL')d=Math.round(d*1.25);gs._directDmg=(gs._directDmg||0)+d;break}
@@ -408,14 +408,14 @@ function applyCardSim(card,gs,enemy){
     case 'ampoverload':{gs.embers=Math.min(gs.maxEmbers,gs.embers+3+(gs.passives.some(p=>p.id==='p4')?1:0));gs._discardsLeft=Math.max(0,gs._discardsLeft-1);break}
     case 'groupie':{gs.embers=Math.min(gs.maxEmbers,gs.embers+2+(gs.passives.some(p=>p.id==='p4')?1:0));drawCards(gs,1);break}
     case 'soundboard':{gs.embers=Math.min(gs.maxEmbers,gs.embers+2+(gs.passives.some(p=>p.id==='p4')?1:0));gs._drawNextStrike=(gs._drawNextStrike||0)+1;break}
-    case 'setbreak':gs.embers=Math.min(gs.maxEmbers,gs.embers+3);break;
+    case 'setbreak':gs.embers=Math.min(gs.maxEmbers,gs.embers+3);{const d=gs.deck.length>0?gs.deck.pop():null;if(d)gs.hand.push(d)};break;
     case 'setlist':drawCards(gs,card.upgraded?4:3);break;
     case 'doubledown':gs._nextCardFree=true;break;
     case 'wakeup':alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));stage.forEach(m=>{if(m.tooStoned){m.tooStoned=false;m.hp=m.maxHp}});break;
     case 'demotape':gs._directDmg=(gs._directDmg||0)+Math.floor((target.atk+(target.permAtkBonus||0))*0.5);break;
     case 'resonancecard':target.tempAtkBonus=(target.tempAtkBonus||0)+Math.max(0,highestAtk-(target.atk+(target.permAtkBonus||0)+(target.tempAtkBonus||0)));break;
-    case 'ampstatic':{let b=Math.floor(gs.corruption/10);if(gs._activeGenre==='BLACK_METAL')b=Math.round(b*1.25);target.tempAtkBonus=(target.tempAtkBonus||0)+b;break}
-    case 'darktuning':{const bu=Math.floor(gs.corruption/10);for(let i=0;i<bu;i++){const t=pick(alive);t.atk+=1;t.permAtkBonus=(t.permAtkBonus||0)+1}break}
+    case 'ampstatic':{let b=Math.floor(gs.corruption/12);if(gs._activeGenre==='BLACK_METAL')b=Math.round(b*1.25);target.tempAtkBonus=(target.tempAtkBonus||0)+b;break}
+    case 'darktuning':{const bu=Math.floor(gs.corruption/12);for(let i=0;i<bu;i++){const t=pick(alive);t.atk+=1;t.permAtkBonus=(t.permAtkBonus||0)+1}break}
     case 'herbmoney':{gs._directDmg=(gs._directDmg||0)+gs.stash;break}
     case 'goingbroke':gs._directDmg=(gs._directDmg||0)+gs.stash;gs.stash=0;break;
     case 'burnset':drawCards(gs,1);break;
@@ -519,7 +519,7 @@ function simFight(gs,phaseHp,luciferPhase){
     // WTH: inject contract every 2 strikes
     if(gs._wthFight){wthStrikeCount++;if(wthStrikeCount%2===0&&wthStrikeCount>0)gs.hand.push({id:'contract',type:'CORRUPT',rarity:'Rare',embers:0,uid:'ctr'+wthStrikeCount})}
 
-    gs.stage.filter(m=>m.keyword==='HEXED'&&!m.tooStoned).forEach(m=>{gs.corruption=Math.min(100,gs.corruption+5);m.tempAtkBonus=(m.tempAtkBonus||0)+Math.floor(gs.corruption/10)});
+    gs.stage.filter(m=>m.keyword==='HEXED'&&!m.tooStoned).forEach(m=>{gs.corruption=Math.min(100,gs.corruption+5);m.tempAtkBonus=(m.tempAtkBonus||0)+Math.floor(gs.corruption/12)});
     if(enemy.passiveId==='corruptPlayer')gs.corruption=Math.min(100,gs.corruption+10);
     if(enemy.passiveId==='corruptPlayer15')gs.corruption=Math.min(100,gs.corruption+15);
     if(enemy.passiveId==='corruptPlayer20')gs.corruption=Math.min(100,gs.corruption+20);
@@ -574,7 +574,7 @@ function simFight(gs,phaseHp,luciferPhase){
     for(const m of aliveNow){
       if(paranoiaVictimUid&&m.uid===paranoiaVictimUid)continue;
       let atk=m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0);
-      if(m.keyword==='CORRUPT')atk+=Math.floor(gs.corruption/10);
+      if(m.keyword==='CORRUPT')atk+=Math.floor(gs.corruption/12);
       if(m.ampedThisStrike)atk*=2;if(gs._possessedActive)atk*=3;if(gs._overdriveActive)atk*=2;
       if(dtMult[m.uid]!==undefined)atk=Math.floor(atk*dtMult[m.uid]);
       strikeDmg+=Math.max(0,atk);if(m.encoreThisStrike)strikeDmg+=Math.max(0,atk);
