@@ -1,5 +1,26 @@
 
 // ═══ TODO ═══
+// ── 20 QoL IMPROVEMENTS (prioritized) ──
+// [ ] 1. Damage preview on Strike button — show estimated total live
+// [ ] 2. Ember forecast — hovering card dims pips to show remaining
+// [ ] 3. Fight intro splash — "CIRCLE V — ANGER" + enemy name slam
+// [ ] 4. Keyboard shortcuts — S=Strike, D=Discard, 1-6=select cards
+// [ ] 5. Undo last card play — one-step within same strike
+// [ ] 6. Hand size indicator — "6/6" turns gold at overcap
+// [ ] 7. Victory fanfare — golden burst + VICTORY slam
+// [ ] 8. Boss HP drain animation — smooth countdown
+// [ ] 9. Stash change floats — "+5 🌿" on stash changes
+// [ ] 10. Screen transitions — 0.3s crossfade between states
+// [ ] 11. Card upgrade shimmer — persistent golden pulse on border
+// [ ] 12. Pact icons in combat — small row top-left
+// [ ] 13. Boss telegraph — "NEXT: 6 DMG to weakest" shown on boss
+// [ ] 14. Card count remaining — "2 left in deck" on hover
+// [ ] 15. End-of-fight summary — 2s popup with damage/cards/chains
+// [ ] 16. Auto-sort preference — persist in localStorage
+// [ ] 17. Bulk discard — select multiple then discard
+// [ ] 18. Run timer — elapsed time on end screen
+// [ ] 19. Corruption milestone audio — dark tones at 25/50/75/100%
+// [ ] 20. "Why did I die?" tooltip — brief analysis on death screen
 // [x] Tutorial system (3 scripted fights + tooltips + first-encounter tips)
 // [x] QoL: gray borders unaffordable, chain badges, shop dimming
 // [x] QoL: hide corruption thermometer at 0%, skip 0 ATK animations
@@ -667,15 +688,15 @@ const BOSS_PORTRAITS={
 }
 // ═══ CIRCLE BACKGROUND THEMES ═══
 const CIRCLE_BG={
-  1:{base:'#0a0810',glow:'rgba(60,50,80,0.15)',name:'Limbo'},           // grey-purple fog
-  2:{base:'#100510',glow:'rgba(120,20,60,0.15)',name:'Lust'},            // deep magenta
-  3:{base:'#080a04',glow:'rgba(50,80,20,0.15)',name:'Gluttony'},         // sickly bile green
-  4:{base:'#0c0a04',glow:'rgba(140,100,20,0.15)',name:'Greed'},          // amber gold
-  5:{base:'#100404',glow:'rgba(160,40,0,0.2)',name:'Anger'},             // fiery orange-red
-  6:{base:'#08040c',glow:'rgba(80,0,120,0.2)',name:'Heresy'},            // void purple
-  7:{base:'#0c0204',glow:'rgba(140,0,20,0.25)',name:'Violence'},         // blood crimson
-  8:{base:'#040a0a',glow:'rgba(0,100,100,0.15)',name:'Fraud'},           // shifting teal
-  9:{base:'#040408',glow:'rgba(40,60,140,0.2)',name:'Treachery'},        // frozen blue-black
+  1:{base:'#0c0a14',glow:'rgba(80,60,120,0.35)',name:'Limbo'},           // grey-purple fog
+  2:{base:'#180818',glow:'rgba(160,30,80,0.35)',name:'Lust'},            // deep magenta
+  3:{base:'#0a0e04',glow:'rgba(60,100,20,0.30)',name:'Gluttony'},        // sickly bile green
+  4:{base:'#100c04',glow:'rgba(180,120,20,0.30)',name:'Greed'},          // amber gold
+  5:{base:'#180606',glow:'rgba(200,50,0,0.40)',name:'Anger'},            // fiery orange-red
+  6:{base:'#0c0614',glow:'rgba(100,0,160,0.40)',name:'Heresy'},          // void purple
+  7:{base:'#140406',glow:'rgba(180,0,30,0.45)',name:'Violence'},         // blood crimson
+  8:{base:'#060e0e',glow:'rgba(0,130,130,0.30)',name:'Fraud'},           // shifting teal
+  9:{base:'#06060c',glow:'rgba(50,80,180,0.40)',name:'Treachery'},       // frozen blue-black
 }
 // Dr. Katz "Squigglevision" — CSS wobble effect on portraits
 const SQUIGGLE_CSS=`
@@ -2281,7 +2302,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       {card.rarity==='Rare'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
       {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
       {mastery.border&&<div style={{position:'absolute',bottom:4,left:4,padding:'1px 5px',borderRadius:2,background:'rgba(0,0,0,0.75)',border:'1px solid '+mastery.border+'88',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:900,color:mastery.color,letterSpacing:1,textTransform:'uppercase',zIndex:5}}>{mastery.name}</div>}
-      <div style={{height:75,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:40,background:'rgba(0,0,0,0.35)',position:'relative'}}>
+      <div style={{height:100,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:52,background:'rgba(0,0,0,0.35)',position:'relative'}}>
         <div style={{position:'absolute',inset:0,background:`radial-gradient(circle at center,${bc}18,transparent 70%)`}}/>
         {card.emoji}
       </div>
@@ -3168,7 +3189,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
               setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
               setGameState('playing');setAnimPhase('idle');setDeathCause(null)
               setVictoryFired(false);if(victoryFiredRef)victoryFiredRef.current=false
-    setCorruptCardsGiven([]);setCorruptionGiftsGiven([])
+    corruptCardsGivenRef.current=[];setCorruptionGiftsGiven([])
               addLog('⛧ THE ENCORE BEGINS — All enemies ×2.0 HP! ⛧')
             }}
               style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,letterSpacing:4,
@@ -3672,7 +3693,7 @@ function App(){
   const [circleSplash,setCircleSplash]=useState(null)
   const [pendingEvent,setPendingEvent]=useState(null)
   const [possessionFired,setPossessionFired]=useState(false)
-  const [corruptCardsGiven,setCorruptCardsGiven]=useState([]) // track which thresholds have given cards
+  const corruptCardsGivenRef=useRef([]) // track which thresholds have given cards (ref to avoid React 18 double-fire)
   // ═══ CORRUPTION DECK — give free cards at thresholds ═══
   useEffect(()=>{
     if(gameState!=='playing'||tutorialFight>0)return
@@ -4653,7 +4674,7 @@ function App(){
     // (Amp Overload no longer skips discards — it costs one instead)
     const toDisc=hand.filter(c=>selected.includes(c.uid))
     const rem=hand.filter(c=>!selected.includes(c.uid))
-    const res=drawUpTo(rem,deckRef.current,[...discRef.current,...toDisc],Math.max(HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0),hand.length))
+    const res=drawUpTo(rem,deckRef.current,[...discRef.current,...toDisc],HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0))
     setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
     playSfx('discard');setDiscardsLeft(p=>p-1);setSelected([])
     addLog('🗑 '+toDisc.length+' discarded & replaced.')
