@@ -992,6 +992,13 @@ function cardPrice(card){
 }
 
 // Generate shop cards scaled by circle depth (circleNum 1-9)
+function isGoodDeal(card){
+  const cost=card.shopCost||getShopCost(card)
+  if(card.rarity==='Rare'&&cost<=10)return true
+  if(card.rarity==='Uncommon'&&cost<=6)return true
+  if(card.upgraded)return true
+  return false
+}
 function genShopCards(circleNum){
   const cn=circleNum||1
   // 9% chance to replace one slot with a member appearance
@@ -1993,7 +2000,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
 
           {/* CARDS ROW */}
           <div style={{display:shopTab==='packs'||shopTab==='gear'?'none':'block',border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>🎸 Cards For Sale</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>🎸 Cards For Sale (★ = good deal)</div>
           <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start',paddingTop:4}}>
             {/* THE DEALER — first card */}
             <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',paddingTop:24,position:'relative'}}>
@@ -2152,7 +2159,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   )
 }
 
-function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption,animPhase,ghostCard}){
+function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption,animPhase,ghostCard,onQuickPlay}){
   const [over,setOver]=useState(false)
   const [showTip,setShowTip]=useState(false)
   if(!member){
@@ -2166,13 +2173,13 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
   const nearDeath=!st&&member.hp<=Math.ceil(member.maxHp*0.25)&&member.hp>0
   const buffCount=member.buffCount||0
   return(
-    <div ref={innerRef} draggable onDragStart={onDragStart} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}} onMouseEnter={()=>setShowTip(true)} onMouseLeave={()=>setShowTip(false)}
+    <div ref={innerRef} draggable onDragStart={onDragStart} onClick={onQuickPlay} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}} onMouseEnter={()=>setShowTip(true)} onMouseLeave={()=>setShowTip(false)}
       style={{width:290,height:360,display:'flex',flexDirection:'column',background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
         border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':mentorState==='active'?'3px solid #ffd700':mentorState==='broken'?'2px solid #555':mentorState==='mentor'?'2px solid #ffd700':bondColor?'2px solid '+bondColor:over?'2px solid #e8a820':st?'1px solid #333':member.demonic?'2px solid #ffd700':member.mythic?'2px solid #cc44ff':member.foil?'2px solid #88ccff':'1px solid rgba(190,120,25,0.08)',
         borderRadius:6,
         boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':mentorState==='active'&&!st?'0 0 40px rgba(255,215,0,0.9),0 6px 24px rgba(0,0,0,0.85)':mentorState==='mentor'&&!st?'0 0 22px rgba(255,215,0,0.5),0 6px 24px rgba(0,0,0,0.85)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':!st&&member.demonic?'0 0 25px rgba(255,200,0,0.5),0 6px 24px rgba(0,0,0,0.85)':!st&&member.mythic?'0 0 25px rgba(200,0,255,0.4),0 6px 24px rgba(0,0,0,0.85)':!st&&member.foil?'0 0 20px rgba(100,180,255,0.35),0 6px 24px rgba(0,0,0,0.85)':'0 4px 20px rgba(0,0,0,0.9),0 0 1px rgba(190,120,25,0.3)',
         transform:st?'rotate(15deg) scale(0.95)':strikeAnim&&strikeAnim.phase==='dip'?'translateY(20px) scale(0.95) rotate(-3deg)':strikeAnim&&strikeAnim.phase==='wiggle'?'translateY(12px) scale(0.97) rotate(4deg)':strikeAnim&&strikeAnim.phase==='launch'?'translate('+strikeAnim.dx+'px,'+(strikeAnim.dy-80)+'px) scale(0.7) rotate(-5deg)':strikeAnim&&strikeAnim.phase==='impact'?'translate('+strikeAnim.dx+'px,'+strikeAnim.dy+'px) scale(1.15) rotate(0deg)':strikeAnim&&strikeAnim.phase==='return'?'translate(0px,-30px) scale(1.05)':'none',
-        opacity:st?0.5:1,
+        opacity:st?0.5:animPhase==='idle'&&!isAttacking&&buffCount===0?0.7:1,
         animation:(!st&&!isAttacking&&!isDiceTarget&&!isStriking)?(nearDeath?'nearDeathPulse 0.8s ease-in-out infinite':'throb 3s ease-in-out infinite'):'none',
         transition:strikeAnim?'transform 0.25s cubic-bezier(0.2,0.8,0.3,1.2), border 0.2s, box-shadow 0.2s, opacity 0.3s':'border 0.2s, box-shadow 0.2s, opacity 0.3s, transform 0.3s',
         cursor:'grab',position:'relative'}}>
@@ -3572,6 +3579,7 @@ function App(){
   const [hovered,setHovered]=useState(null)
   const [selected,setSelected]=useState([])
   const [dragCardUid,setDragCardUid]=useState(null)
+  const [quickPlayCardUid,setQuickPlayCardUid]=useState(null) // tap-to-play: selected card
   const [dragStageIdx,setDragStageIdx]=useState(null)
   const [dragOverSlotIdx,setDragOverSlotIdx]=useState(null) // ghost preview
   const [dragHandIdx,setDragHandIdx]=useState(null)
@@ -3697,7 +3705,7 @@ function App(){
   const [unlockHover,setUnlockHover]=useState(null) // card data for tooltip
   const setUnlockTab=(t)=>{setUnlockTab_(t);setUnlockPage_(0);setUnlockHover(null)}
   const [showPauseOptions,setShowPauseOptions]=useState(false)
-  const chainHintsOn=localStorage.getItem('vst_chainhints')!=='off'
+  const chainHintsOn=localStorage.getItem('vst_chainhints')!=='off'&&(JSON.parse(localStorage.getItem('vst_combos_discovered')||'[]')).length>0
   const vhsOn=localStorage.getItem('vst_vhs')!=='off'
 
 
@@ -4420,6 +4428,7 @@ function App(){
 
   const handleDropOnStage=useCallback((slotIdx)=>{
     if(!dragCardUid||animPhase!=='idle')return
+    setQuickPlayCardUid(null)
     const card=hand.find(c=>c.uid===dragCardUid)
     if(!card)return
 
@@ -5219,7 +5228,7 @@ function App(){
         const phaseTotalDmg=luciferPhase===1?(3333-newEHp):(3333-newEHp)
         setBossRageAtk(Math.floor(Math.max(0,phaseTotalDmg)/20)*atkGain)
       }
-      if(_breakdownLines.length>1)setDmgBreakdown({lines:_breakdownLines,total:finalDmg})
+      if(_breakdownLines.length>1){setDmgBreakdown({lines:_breakdownLines,total:finalDmg});setTimeout(()=>setDmgBreakdown(null),1500)}
       addFloat(finalDmg.toLocaleString(),bc.x,bc.y-60,'#ff2200',true)
       if(folkMagicFired){
         setEmbers(maxEmbers)
@@ -6898,6 +6907,7 @@ function App(){
                 onDragOver={function(){setDragOverSlotIdx(i)}}
                 onDrop={function(){setDragOverSlotIdx(null);handleStageDrop(i)}}
                 bondColor={m?getBondColor(m,stage):null}
+                onQuickPlay={()=>{if(quickPlayCardUid&&m){setDragCardUid(quickPlayCardUid);handleDropOnStage(i);setQuickPlayCardUid(null)}}}
                 mentorState={m&&m.mentorLinkedToUid?(m.mentorAlive?'active':'broken'):m&&m.isMentor&&stage[i+1]&&stage[i+1].mentorLinkedToUid===m.uid&&!m.tooStoned?'mentor':null}
                 corruption={corruption}
               />
@@ -7123,12 +7133,12 @@ function App(){
         <div style={{position:'absolute',left:200,right:210,top:18,bottom:0,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:10,overflow:'visible',zIndex:50}}>
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).filter(Boolean).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} chainReady={RIFF_CHAINS.some(ch=>ch.cards.includes(card.id)&&hand.some(c2=>c2.uid!==card.uid&&ch.cards.includes(c2.id)))} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
-              isHovered={hovered===i} isSelected={selected.includes(card.uid)}
+              isHovered={hovered===i} isSelected={selected.includes(card.uid)||quickPlayCardUid===card.uid}
               anyHovered={hovered!==null}
               canAfford={card.embers===0||embers>=card.embers}
               isDragging={dragHandIdx===i} isShopBought={shopBoughtIds.includes(card.uid)}
               onHover={()=>setHovered(i)} onLeave={()=>setHovered(null)}
-              onClick={()=>{if(card.id==='stagedive'&&stageDiveUsed)return;playSfx('select',0.5);setSelected(p=>p.includes(card.uid)?p.filter(x=>x!==card.uid):[...p,card.uid])}}
+              onClick={()=>{if(card.id==='stagedive'&&stageDiveUsed)return;playSfx('select',0.5);setSelected(p=>p.includes(card.uid)?p.filter(x=>x!==card.uid):[...p,card.uid]);setQuickPlayCardUid(p=>p===card.uid?null:card.uid)}}
               onDragStart={()=>{setDragHandIdx(i);setDragCardUid(card.uid)}}
               onDragEnd={()=>{setDragHandIdx(null);setDragOverHandIdx(null);setDragCardUid(null)}}
               isDragOver={dragOverHandIdx===i&&dragHandIdx!==null&&dragHandIdx!==i}
