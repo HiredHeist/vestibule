@@ -665,6 +665,18 @@ const BOSS_PORTRAITS={
   lucifer:'/vestibule/bosses/lucifer_p1.png',
   ar_exec:'/vestibule/bosses/ar_exec.png',
 }
+// ═══ CIRCLE BACKGROUND THEMES ═══
+const CIRCLE_BG={
+  1:{base:'#0a0810',glow:'rgba(60,50,80,0.15)',name:'Limbo'},           // grey-purple fog
+  2:{base:'#100510',glow:'rgba(120,20,60,0.15)',name:'Lust'},            // deep magenta
+  3:{base:'#080a04',glow:'rgba(50,80,20,0.15)',name:'Gluttony'},         // sickly bile green
+  4:{base:'#0c0a04',glow:'rgba(140,100,20,0.15)',name:'Greed'},          // amber gold
+  5:{base:'#100404',glow:'rgba(160,40,0,0.2)',name:'Anger'},             // fiery orange-red
+  6:{base:'#08040c',glow:'rgba(80,0,120,0.2)',name:'Heresy'},            // void purple
+  7:{base:'#0c0204',glow:'rgba(140,0,20,0.25)',name:'Violence'},         // blood crimson
+  8:{base:'#040a0a',glow:'rgba(0,100,100,0.15)',name:'Fraud'},           // shifting teal
+  9:{base:'#040408',glow:'rgba(40,60,140,0.2)',name:'Treachery'},        // frozen blue-black
+}
 // Dr. Katz "Squigglevision" — CSS wobble effect on portraits
 const SQUIGGLE_CSS=`
 @keyframes corruptPulse{
@@ -2156,7 +2168,7 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
   return(
     <div ref={innerRef} draggable onDragStart={onDragStart} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}} onMouseEnter={()=>setShowTip(true)} onMouseLeave={()=>setShowTip(false)}
       style={{width:290,height:360,display:'flex',flexDirection:'column',background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
-        border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':mentorState==='active'?'3px solid #ffd700':mentorState==='broken'?'2px solid #555':mentorState==='mentor'?'2px solid #ffd700':bondColor?'2px solid '+bondColor:over?'2px solid #e8a820':st?'1px solid #333':member.demonic?'2px solid #ffd700':member.mythic?'2px solid #cc44ff':member.foil?'2px solid #88ccff':'2px solid rgba(190,120,25,0.85)',
+        border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':mentorState==='active'?'3px solid #ffd700':mentorState==='broken'?'2px solid #555':mentorState==='mentor'?'2px solid #ffd700':bondColor?'2px solid '+bondColor:over?'2px solid #e8a820':st?'1px solid #333':member.demonic?'2px solid #ffd700':member.mythic?'2px solid #cc44ff':member.foil?'2px solid #88ccff':'1px solid rgba(190,120,25,0.35)',
         borderRadius:6,
         boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':mentorState==='active'&&!st?'0 0 40px rgba(255,215,0,0.9),0 6px 24px rgba(0,0,0,0.85)':mentorState==='mentor'&&!st?'0 0 22px rgba(255,215,0,0.5),0 6px 24px rgba(0,0,0,0.85)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':!st&&member.demonic?'0 0 25px rgba(255,200,0,0.5),0 6px 24px rgba(0,0,0,0.85)':!st&&member.mythic?'0 0 25px rgba(200,0,255,0.4),0 6px 24px rgba(0,0,0,0.85)':!st&&member.foil?'0 0 20px rgba(100,180,255,0.35),0 6px 24px rgba(0,0,0,0.85)':'0 6px 24px rgba(0,0,0,0.85)',
         transform:st?'rotate(15deg) scale(0.95)':strikeAnim&&strikeAnim.phase==='dip'?'translateY(20px) scale(0.95) rotate(-3deg)':strikeAnim&&strikeAnim.phase==='wiggle'?'translateY(12px) scale(0.97) rotate(4deg)':strikeAnim&&strikeAnim.phase==='launch'?'translate('+strikeAnim.dx+'px,'+(strikeAnim.dy-80)+'px) scale(0.7) rotate(-5deg)':strikeAnim&&strikeAnim.phase==='impact'?'translate('+strikeAnim.dx+'px,'+strikeAnim.dy+'px) scale(1.15) rotate(0deg)':strikeAnim&&strikeAnim.phase==='return'?'translate(0px,-30px) scale(1.05)':'none',
@@ -3645,7 +3657,8 @@ function App(){
   useEffect(()=>{strikeMultRef.current=strikeMult},[strikeMult])
   const [memberBuffs,setMemberBuffs]=useState({}) // {uid: [{text,color},...]} persistent until strike
   const addBuff=useCallback((uid,text,color)=>{setMemberBuffs(p=>({...p,[uid]:[...(p[uid]||[]),{text,color}]}))},[])  
-  const [clutchFlash,setClutchFlash]=useState(null) // {text,color} for clutch moments
+  const [clutchFlash,setClutchFlash]=useState(null)
+  const [chainFlashActive,setChainFlashActive]=useState(false) // {text,color} for clutch moments
   const [circlePreview,setCirclePreview]=useState(null) // next circle preview data
   const [collectedLoot,setCollectedLoot]=useState([]) // boss loot IDs collected this run
   const [circleSplash,setCircleSplash]=useState(null)
@@ -4383,7 +4396,7 @@ function App(){
           if(!disc.includes(chain.id)){disc.push(chain.id);localStorage.setItem('vst_combos_discovered',JSON.stringify(disc))}
         }
         setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.78*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
-        playSfx('chain_combo');triggerShake(18,600);setStrikeMult(p=>Math.min(6.66,Math.round((p*1.78)*100)/100));addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×1.78 MULTIPLIER!')
+        playSfx('chain_combo');triggerShake(18,600);setChainFlashActive(true);setTimeout(()=>setChainFlashActive(false),600);setStrikeMult(p=>Math.min(6.66,Math.round((p*1.78)*100)/100));addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×1.78 MULTIPLIER!')
         combosFiredRef.current.push(chain.id)
         addFloat('⛧ '+chain.name+' ⛧',getCenter(bossRef).x,getCenter(bossRef).y-140,chain.color,true)
         // Apply combo bonus damage = total stage ATK
@@ -6602,8 +6615,13 @@ function App(){
   if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
 
   return(
-    <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:`radial-gradient(ellipse at 50% 30%, ${corruption>=75?'rgba(80,0,20,0.4)':corruption>=50?'rgba(50,0,15,0.25)':corruption>=25?'rgba(30,0,10,0.15)':'rgba(10,5,15,0.1)'}, var(--void))`,overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
+    <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:`${(()=>{const cn=Math.floor(fightIndex/3)+1;const ct=CIRCLE_BG[cn]||CIRCLE_BG[1];return 'radial-gradient(ellipse at 50% 20%, '+ct.glow+', '+ct.base+')'})()}`,overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
 
+      {/* ═══ CORRUPTION VIGNETTE — dark blood edges ═══ */}
+      {corruption>15&&<div style={{position:'absolute',inset:0,zIndex:1,pointerEvents:'none',
+        background:`radial-gradient(ellipse at 50% 50%, transparent ${corruption>=75?'20%':corruption>=50?'35%':'50%'}, rgba(${corruption>=75?'80,0,10':corruption>=50?'60,0,15':'40,0,10'},${corruption>=75?'0.45':corruption>=50?'0.25':'0.12'}) 100%)`,
+        transition:'background 2s ease',
+        animation:corruption>=75?'vignettePulse 3s ease-in-out infinite':'none'}}/>}
       {/* ═══ CORRUPTION THERMOMETER — right edge ═══ */}
       {corruption>0&&tutorialFight!==1&&
       <div style={{position:'absolute',right:12,top:20,bottom:360,width:48,zIndex:50,display:'flex',flexDirection:'column',alignItems:'center',gap:0}}>
@@ -6649,7 +6667,9 @@ function App(){
         </div>
       </div>}
 
-            {enemyHp>0&&enemyHp<enemy.maxHp*0.20&&<div style={{position:'absolute',inset:0,zIndex:7998,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 50%,rgba(180,0,0,0.2) 100%)',animation:'bossUrgency 0.6s ease-in-out infinite alternate'}}/>}
+            {enemyHp>0&&enemyHp<scaledMaxHp*0.10&&<div style={{position:'absolute',inset:0,zIndex:8000,pointerEvents:'none',animation:'fracture 0.4s ease-in-out infinite',mixBlendMode:'screen',background:'linear-gradient(${Math.random()*360}deg,transparent 45%,rgba(255,0,0,0.1) 50%,transparent 55%)'}}/>}
+      {enemyHp>0&&enemyHp<enemy.maxHp*0.20&&<div style={{position:'absolute',inset:0,zIndex:7998,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 50%,rgba(180,0,0,0.2) 100%)',animation:'bossUrgency 0.6s ease-in-out infinite alternate'}}/>}
+      {chainFlashActive&&<div style={{position:'absolute',inset:0,zIndex:8400,pointerEvents:'none',background:'radial-gradient(circle at 50% 50%,rgba(255,220,50,0.3),rgba(200,150,0,0.1),transparent)',animation:'chainFlash 0.6s ease-out forwards'}}/>}
       {damageFlash&&<div style={{position:'absolute',inset:0,zIndex:8500,pointerEvents:'none',background:'radial-gradient(ellipse at center,rgba(200,0,0,0.25),rgba(100,0,0,0.4))',animation:'flashFade 0.4s ease-out forwards'}}/>}
       {corruptHigh&&!corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 40%,rgba(100,0,0,0.15) 100%)',animation:bgPulseAnim}}/>}
       {corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 20%,rgba(140,0,0,0.3) 100%)',animation:'bgPulse 1s ease-in-out infinite'}}/>}
