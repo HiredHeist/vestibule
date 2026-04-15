@@ -2221,8 +2221,8 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
         textShadow:member.demonic?'0 0 8px rgba(255,200,0,0.9)':member.mythic?'0 0 8px rgba(200,0,255,0.9)':'0 0 8px rgba(100,180,255,0.9)'}}>
         {member.demonic?'⛧ DEMONIC':member.mythic?'✦ MYTHIC':'✨ FOIL'}
       </div>}
-      <div style={{flex:'0 0 100px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative',minHeight:90,overflow:'hidden'}}>
-        {STAGE_PORTRAITS[member.id]?<img className={animPhase==='idle'?'':'squiggle'} src={animPhase==='idle'&&IDLE_PORTRAITS[member.id]?IDLE_PORTRAITS[member.id]:STAGE_PORTRAITS[member.id]} alt={member.id} style={{width:'70%',height:'90%',objectFit:'contain',objectPosition:'center center',imageRendering:'pixelated'}}/>:member.emoji}
+      <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative',minHeight:120,overflow:'hidden'}}>
+        {STAGE_PORTRAITS[member.id]?<img className={animPhase==='idle'?'':'squiggle'} src={animPhase==='idle'&&IDLE_PORTRAITS[member.id]?IDLE_PORTRAITS[member.id]:STAGE_PORTRAITS[member.id]} alt={member.id} style={{width:'85%',height:'95%',objectFit:'contain',objectPosition:'center center',imageRendering:'pixelated'}}/>:member.emoji}
         {st&&<div style={{position:'absolute',top:4,right:4,fontSize:22}}>💨</div>}
         {isAttacking&&<div style={{position:'absolute',inset:0,background:strikeAnim?'rgba(255,80,0,0.3)':'rgba(255,50,0,0.12)',animation:strikeAnim?'pulse 0.15s ease infinite alternate':'pulse 0.4s ease infinite alternate'}}/>}
       </div>
@@ -7072,86 +7072,41 @@ function App(){
         </div>
 
 
-        {/* LEFT PANEL: DISCARD — cockpit left side */}
-        <div style={{position:'absolute',left:210,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,padding:'12px 14px',width:140}}>
+        {/* LEFT PANEL: Discard + Embers + Stats */}
+        <div style={{position:'absolute',left:110,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-evenly',gap:4,padding:'6px 10px',background:'rgba(10,5,2,0.75)',borderRadius:'0 6px 6px 0',border:'1px solid rgba(100,65,15,0.3)',borderLeft:'none',width:180}}>
           <button onClick={handleDiscard} disabled={!canDiscard}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 10px',background:canDiscard?'rgba(100,70,0,0.5)':'rgba(25,15,5,0.3)',border:'2px solid '+(canDiscard?'#cc9900':'#2a1a05'),borderRadius:6,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',boxShadow:canDiscard?'0 0 18px rgba(140,100,0,0.3)':'none',transition:'all 0.15s',width:'100%'}}>\u2193 DISCARD</button>
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'8px 10px',background:canDiscard?'rgba(100,70,0,0.5)':'rgba(25,15,5,0.3)',border:'2px solid '+(canDiscard?'#cc9900':'#2a1a05'),borderRadius:4,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',transition:'all 0.15s',width:'100%'}}>{String.fromCharCode(8595)} DISCARD</button>
           <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center'}}>
             <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555'}}>{discardsLeft}/{MAX_DISCARDS}</span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555'}}>{discardsLeft}/{MAX_DISCARDS}</span>
           </div>
-        </div>
-
-        {/* RIGHT PANEL: Strike + Stats — cockpit right side */}
-        <div style={{position:'absolute',right:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-evenly',padding:'8px 14px',background:'rgba(10,5,2,0.75)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none',width:210}}>
-          <div style={{width:'100%'}}>
-            {strikeMult>1.0&&<div style={{textAlign:'center',marginBottom:6,padding:strikeMult>=2.0?'6px 0':'4px 0',
-              background:strikeMult>=6.66?'rgba(200,0,0,0.5)':strikeMult>=3.0?'rgba(255,50,0,0.3)':strikeMult>=2.0?'rgba(255,80,0,0.25)':'rgba(255,100,0,0.15)',
-              border:strikeMult>=6.66?'3px solid #ff0000':strikeMult>=3.0?'2px solid #ff4400':strikeMult>=2.0?'2px solid #ff6600':'1px solid rgba(255,100,0,0.5)',
-              borderRadius:4,
-              boxShadow:strikeMult>=6.66?'0 0 30px rgba(255,0,0,0.7),0 0 60px rgba(200,0,0,0.3)':strikeMult>=2.0?'0 0 20px rgba(255,100,0,0.4)':'none',
-              animation:strikeMult>=6.66?'throb 0.5s ease-in-out infinite':strikeMult>=2.0?'throb 1s ease-in-out infinite':'none'}}>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:strikeMult>=6.66?'#ff0000':strikeMult>=3.0?'#ff4400':strikeMult>=2.0?'#ff6600':'#ff6600',letterSpacing:2,fontWeight:900}}>{strikeMult>=6.66?'⛧ MARK OF THE BEAST ⛧':'MULTIPLIER'}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:strikeMult>=6.66?44:strikeMult>=3.0?38:strikeMult>=2.0?34:28,fontWeight:900,
-                color:strikeMult>=6.66?'#ff0000':strikeMult>=3.0?'#ff4400':strikeMult>=2.0?'#ff8800':'#ff8800',
-                textShadow:strikeMult>=6.66?'0 0 30px rgba(255,0,0,1),0 0 60px rgba(200,0,0,0.8),0 0 100px rgba(150,0,0,0.4)':strikeMult>=2.0?'0 0 20px rgba(255,100,0,0.8),0 0 40px rgba(255,60,0,0.4)':'0 0 16px rgba(255,120,0,0.6)',
-                lineHeight:1}}>×{strikeMult.toFixed(2)}</div>
-            </div>}
-            <button onClick={()=>setSpeedMode(p=>{const nv=!p;localStorage.setItem('vst_speed',nv?'fast':'normal');return nv})} style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:speedMode?'#ff8800':'#665544',background:speedMode?'rgba(255,136,0,0.15)':'rgba(40,25,5,0.5)',border:'1px solid '+(speedMode?'#ff8800':'rgba(100,80,40,0.3)'),borderRadius:4,padding:'6px 10px',cursor:'pointer',letterSpacing:1,marginRight:8}}>{speedMode?'\u26A1 2X':'1X'}</button>
-            <button onClick={handleStrike} disabled={!canStrike}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'10px 14px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:`2px solid ${canStrike?'#cc1111':'#2a1508'}`,borderRadius:4,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',boxShadow:canStrike?'0 0 22px rgba(130,0,0,0.3)':'none',transition:'all 0.15s',width:'100%'}}>⚔ Strike</button>
-            <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center',width:'100%',marginTop:4}}>
-              <PhaseDots left={strikesLeft} total={activeStake.maxStrikes} color='#dd2222' wide={true}/>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555'}}>{strikesLeft}/{activeStake.maxStrikes}</span>
-            </div>
-          </div>
-          {/* Discard moved to left panel */}
           <EmberDisplayLarge current={embers} max={maxEmbers}/>
-          <div style={{display:'flex',gap:14,justifyContent:'center',width:'100%'}}>
-            {[['Fight',(fightIndex%3+1)+'/3','#dd2222'],['Corrupt',corruption>=100?'☠ '+corruption+'%':corruption+'%',corruption>=100?'#ff0000':corruption>60?'#ff3300':'#aa5500'],['Stash',stash+(stash>=420?' 🔒':stash>=380?' ⚠':''),(stash>=420?'#ff3300':stash>=380?'#ff9900':'#44cc44')]].map(function(item){return(
+          <div style={{display:'flex',gap:10,justifyContent:'center',width:'100%'}}>
+            {[['Fight',(fightIndex%3+1)+'/3','#dd2222'],['Stash',stash,'#44cc44']].map(function(item){return(
               <div key={item[0]} style={{textAlign:'center'}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#9a7a40',letterSpacing:2,textTransform:'uppercase',marginBottom:2}}>{item[0]}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#9a7a40',letterSpacing:1,textTransform:'uppercase'}}>{item[0]}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
               </div>
             )})}
           </div>
-          {(()=>{
-            const total=genreCounts.RIFF+genreCounts.CORRUPT+genreCounts.UTILITY+genreCounts.EMBER
-            if(total<4)return null
-            const pcts={RIFF:genreCounts.RIFF/total,CORRUPT:genreCounts.CORRUPT/total,UTILITY:genreCounts.UTILITY/total,EMBER:genreCounts.EMBER/total}
-            const genres=[
-              {type:'RIFF',name:'THRASH METAL',pct:pcts.RIFF,color:'#9933cc',bonus:'+15% RIFF damage'},
-              {type:'CORRUPT',name:'BLACK METAL',pct:pcts.CORRUPT,color:'#cc44ff',bonus:'+25% corruption damage'},
-              {type:'UTILITY',name:'STONER ROCK',pct:pcts.UTILITY,color:'#22aa44',bonus:'+1 card draw'},
-              {type:'EMBER',name:'DOOM METAL',pct:pcts.EMBER,color:'#c87820',bonus:'+2 ATK (no discards)'},
-            ]
-            const active=genres.find(g=>g.pct>=0.5)
-            const top=genres.reduce((a,b)=>a.pct>b.pct?a:b)
-            return <div style={{width:'100%',borderTop:'1px solid rgba(100,65,15,0.3)',paddingTop:4,marginTop:2}}>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:active?active.color:'#c8a040',letterSpacing:1,textAlign:'center',fontWeight:active?900:400}}>
-                {active?active.name+' ⚡':top.name+' '+Math.round(top.pct*100)+'%'}
-              </div>
-              {active&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:active.color,textAlign:'center',opacity:0.8}}>{active.bonus}</div>}
-              <div style={{display:'flex',gap:1,marginTop:3,height:4,borderRadius:2,overflow:'hidden'}}>
-                {genres.map(g=><div key={g.type} style={{flex:g.pct||0.01,background:g.color,opacity:g.pct>=0.5?1:0.4,transition:'all 0.3s'}}/>)}
-              </div>
-            </div>
-          })()}
-          {activePassives.length>0&&<div style={{width:'100%',borderTop:'1px solid rgba(80,60,160,0.3)',paddingTop:3}}>
-            {activePassives.filter(Boolean).map((p,i)=><div key={i} style={{fontSize:10,color:'#8090c0',fontFamily:"'MBScribblesFont',serif",position:'relative',cursor:'help'}}
-              onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-ptip]');if(t)t.style.opacity='1'}}
-              onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-ptip]');if(t)t.style.opacity='0'}}>
-              {p.emoji} {p.name}
-              <div data-ptip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:88,top:-10,zIndex:9999,pointerEvents:'none',minWidth:200,maxWidth:260,background:'rgba(12,7,2,0.97)',border:'1px solid rgba(80,60,180,0.5)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:700,color:'#aa88ee',marginBottom:4}}>{p.emoji} {p.name}</div>
-                <div style={{fontFamily:"'ScratchFont',serif",fontSize:9,color:'#9a8050',fontStyle:'italic',lineHeight:1.4}}>{p.effect}</div>
-              </div>
-            </div>)}
+        </div>
+
+                {/* RIGHT PANEL: Strike only */}
+        <div style={{position:'absolute',right:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,padding:'8px 14px',background:'rgba(10,5,2,0.75)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none',width:140}}>
+          {strikeMult>1.0&&<div style={{textAlign:'center',padding:'4px 0',background:strikeMult>=3.0?'rgba(255,50,0,0.3)':'rgba(255,100,0,0.15)',border:'1px solid '+(strikeMult>=3.0?'#ff4400':'rgba(255,100,0,0.5)'),borderRadius:4,width:'100%'}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:strikeMult>=3.0?28:22,fontWeight:900,color:strikeMult>=3.0?'#ff4400':'#ff8800',textShadow:'0 0 16px rgba(255,100,0,0.6)',lineHeight:1}}>x{strikeMult.toFixed(2)}</div>
           </div>}
+          <button onClick={()=>setSpeedMode(p=>{const nv=!p;localStorage.setItem('vst_speed',nv?'fast':'normal');return nv})} style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:speedMode?'#ff8800':'#665544',background:speedMode?'rgba(255,136,0,0.15)':'rgba(40,25,5,0.5)',border:'1px solid '+(speedMode?'#ff8800':'rgba(100,80,40,0.3)'),borderRadius:4,padding:'4px 8px',cursor:'pointer',letterSpacing:1}}>{speedMode?'⚡ 2X':'1X'}</button>
+          <button onClick={handleStrike} disabled={!canStrike}
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'10px 12px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:'2px solid '+(canStrike?'#cc1111':'#2a1508'),borderRadius:4,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',transition:'all 0.15s',width:'100%'}}>{String.fromCharCode(9876)} STRIKE</button>
+          <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center'}}>
+            <PhaseDots left={strikesLeft} total={activeStake.maxStrikes} color='#dd2222' wide={true}/>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555'}}>{strikesLeft}/{activeStake.maxStrikes}</span>
+          </div>
         </div>
 
         {/* CARD FAN — centered, padded to avoid columns */}
-        <div style={{position:'absolute',left:200,right:210,top:18,bottom:0,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:10,overflow:'visible',zIndex:50}}>
+        <div style={{position:'absolute',left:300,right:160,top:18,bottom:0,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:10,overflow:'visible',zIndex:50}}>
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).filter(Boolean).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} chainReady={RIFF_CHAINS.some(ch=>ch.cards.includes(card.id)&&hand.some(c2=>c2.uid!==card.uid&&ch.cards.includes(c2.id)))} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
               isHovered={hovered===i} isSelected={selected.includes(card.uid)||quickPlayCardUid===card.uid}
