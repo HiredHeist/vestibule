@@ -685,7 +685,7 @@ function MemberPortrait({id,size,style,noSquiggle}){
   const src=MEMBER_PORTRAITS[id]
   if(!src)return null
   const s2=size||80
-  return <img className={noSquiggle?"":"squiggle"} src={src} alt={id} style={{width:s2,height:s2*1.5,objectFit:'cover',objectPosition:'top center',imageRendering:'auto',filter:'none',...(style||{})}}/>
+  return <img className={noSquiggle?"":"squiggle"} src={src} alt={id} style={{width:s2,height:s2*1.5,objectFit:'cover',objectPosition:'top center',imageRendering:'pixelated',filter:'none',...(style||{})}}/>
 }
 
 
@@ -3157,7 +3157,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
               background:'rgba(60,40,0,0.7)',border:'2px solid #ffd700',borderRadius:8,
               animation:'throb 1.5s ease-in-out infinite',
               boxShadow:'0 0 20px rgba(255,200,0,0.3)'}}>
-              <span style={{fontSize:28}}>{t.emoji}</span>
+              <span style={{fontSize:28}}>{BOSS_PORTRAITS[t.id]?<img src={BOSS_PORTRAITS[t.id]} alt={t.name} style={{width:28,height:28,objectFit:'contain',imageRendering:'pixelated'}}/>:t.emoji}</span>
               <div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ffd700',letterSpacing:2,fontWeight:900}}>NEW TROPHY</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#ffe080',fontWeight:900}}>{t.name}</div>
