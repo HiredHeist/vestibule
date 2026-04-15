@@ -1,188 +1,166 @@
 # VESTIBULE — TODO & STATUS
 
-## Latest Session: April 14, 2026
-**Latest commit:** 9715dd9
-**Sim version:** v17.1 (synced with game code)
+## Latest Session: April 15, 2026
+**Latest commit:** 4acd218
+**Sim version:** v19.1 (synced with game code)
 
 ---
 
-## SPRITE ASSETS — IN PROGRESS 🎨
+## 🔴 PRIORITY 1 — UI CLEANUP (must fix before anything else)
 
-### Global Prompt Prefix (prepend to ALL sprites)
-`pixel art, [SIZE], neutral flat dungeon lighting, no strong light source, transparent background,`
+The cockpit layout is functional but needs design polish to feel clean and professional.
 
-### Export Rules
-- Format: **PNG only** (never JPG — alpha channel)
-- Tool: PixelLab (`pixellab.ai`) — enable "remove background" before export
-- Style anchor: generate Bjorn first, use as reference for all remaining members
+### Battle Area
+- [ ] Background needs more visual life — animated gradient shift, subtle particle/fog effects
+- [ ] Boss section could be more compact / concert-poster style
+- [ ] Stage slot member cards need design pass — sprite should dominate, text minimal at bottom
+- [ ] Empty stage slots look barren — subtle placeholder art or darker treatment
+- [ ] Artifact tray on left feels disconnected from the battle area
 
----
+### Hand Area / Cockpit
+- [ ] Left panel (discard + stats) spacing and alignment needs polish
+- [ ] Right panel (strike) sizing and centering needs tuning
+- [ ] Card fan overlap/spacing — cards feel cramped with the panels
+- [ ] Card portrait area still has dead space below emoji — effect text too tall
+- [ ] Hover zoom on cards may clip behind panels
+- [ ] Corruption/genre indicators between battle and hand need cleaner positioning
 
-### Band Members — 96×96px (17 sprites)
-
-| ID | Name | Role / Keyword | Status | Prompt (after global prefix) |
-|----|------|----------------|--------|------------------------------|
-| `bjorn` | Bjorn | Lead Guitarist / FRENZIED | [ ] | doom metal guitarist, wild long blonde hair, flying V guitar, leather jacket, snarling expression, frenzied energy |
-| `ragnar` | Ragnar | Lead Guitarist / FRENZIED | [ ] | doom metal guitarist, braided red hair, Les Paul guitar, battle vest, calmer but intense |
-| `thor` | Thor | Drummer / DOUBLE TIME | [ ] | doom metal drummer, massive arms, mohawk, double kick pedal visible, sweat, motion blur on sticks |
-| `ingrid` | Ingrid | Bass Player / ANCHOR | [ ] | doom metal bassist, tall stoic woman, long dark hair, thick low-slung bass, rune tattoos |
-| `loki` | Loki | Synth Player / CORRUPT | [ ] | dark synth player, gaunt pale face, glowing purple keys, corruption smoke wisping from hands, unsettling grin |
-| `dag` | Dag | Bass Player / ANCHOR | [ ] | doom metal bassist, enormous bearded man, shoulder-width stance, massive bass guitar, immovable wall energy |
-| `vitalik` | Vitalik | Dark Minstrel / FOLK MAGIC | [ ] | dark folk minstrel, wild unkempt hair, wooden flute, pagan charms hanging from neck, slightly unhinged smile |
-| `sigrid` | Sigrid | Rhythm Guitarist / SHREDDER | [ ] | doom metal rhythm guitarist, sharp angular features, telecaster guitar, fast aggressive stance, picking hand blur |
-| `gunnar` | Gunnar | Rhythm Guitarist / SHREDDER | [ ] | doom metal rhythm guitarist, stocky build, shaved head, SG guitar, confident swagger |
-| `astrid` | Astrid | Vocalist / DEBUFF | [ ] | doom metal vocalist, dramatic stage presence, microphone raised, witchy black robes, voice crackling with dark energy |
-| `grimnir` | Grimnir | Vocalist / DEBUFF | [x] | doom metal male vocalist, ornate dark Norse ritual mask with one eye hole, holding microphone, dark hooded cloak, scarred chest, rune markings, the masked one |
-| `freya` | Freya | Synth Player / CORRUPT | [ ] | dark synth player, ethereal woman, analog synth, dark frequencies visualized as distortion aura, ominous purple glow |
-| `ulf` | Ulf | Bass Player / ANCHOR | [ ] | doom metal bassist, scarred muscular man, aggressive low stance, chunky bass guitar, anchor chain tattoo |
-| `brynja` | Brynja | Bass Player / ANCHOR | [ ] | doom metal bassist, impossibly tall woman, stone-faced, downtuned 5-string bass, does not move |
-| `rolf` | Rolf | Drummer / DOUBLE TIME | [ ] | doom metal drummer, wiry intense man, sparse kit, mechanical precision, thousand yard stare |
-| `orm` | Orm | Dark Minstrel / HEXED | [ ] | cursed folk musician, hollow eyes, cursed lute, dark mist seeping from instrument, hexed runes on hands |
-| `tanuki` | Tanuki | Bass Player / ANCHOR *(locked)* | [ ] | raccoon-dog yokai bassist, tanuki creature, heaviest bass guitar imaginable, Japanese folk meets doom metal |
-| `lucifer_member` | Lucifer | The Devil / FALLEN *(locked)* | [ ] | the devil as band member, crown of thorns, burning wings folded, radiant yet decaying, tragic fallen presence |
-
-### File placement: `public/members/{id}_stage.png` — register in `STAGE_PORTRAITS` object (~line 578)
+### General
+- [ ] Screen transitions between fight/shop/event/descent (currently instant swap)
+- [ ] Font sizing consistency pass across all UI elements
+- [ ] Color consistency — too many slightly-different gold/amber shades
+- [ ] Mobile/touch considerations for quick-play
 
 ---
 
-### Bosses — 128×128px (28 sprites)
+## 🟡 PRIORITY 2 — 20 QoL Improvements (impact-ordered)
 
-| ID | Name | Circle | Status | Prompt (after global prefix) |
-|----|------|--------|--------|------------------------------|
-| `wanderer` | The Wanderer | I — Limbo | [ ] | lost soul, translucent humanoid, empty eye sockets, shambling posture, grey fog wisps, melancholy |
-| `lostsoul` | The Lost Soul | I — Limbo | [ ] | damned spirit, skeletal form, jaw unhinged in silent scream, hunger radiating outward, reaching hands |
-| `drifter` | The Drifter | I — Limbo | [ ] | relentless specter, featureless dark silhouette, single glowing eye, aggressive forward lean |
-| `siren` | The Siren | II — Lust | [ ] | demonic siren, flowing hair becomes waves, hypnotic gaze, scales on arms, beauty masking menace |
-| `tempter` | The Tempter | II — Lust | [ ] | demon of temptation, seductive shadow form, golden chains around wrists, corrupted halo |
-| `lust_boss` | The Seducer | II — Lust | [ ] | lust circle boss, tall powerful demon, crimson skin, commanding presence, damage aura pulsing |
-| `glutton` | The Glutton | III — Gluttony | [ ] | bloated hunger demon, distended belly, endless mouth, constantly eating, disgusting vitality |
-| `feaster` | The Feaster | III — Gluttony | [ ] | ravenous fiend, multiple mouths across body, jagged teeth, healing from every wound |
-| `gluttony_boss` | The Devourer | III — Gluttony | [ ] | massive void creature, everything bends into gravitational hunger, blackhole mouth |
-| `miser` | The Miser | IV — Greed | [ ] | greed demon, clutching stolen gold coins, sunken eyes, vault door as shield, hoarding posture |
-| `hoarder` | The Hoarder | IV — Greed | [ ] | avaricious demon, buried in stolen treasures, multiple arms grabbing outward, paranoid eyes |
-| `greed_boss` | The Usurer | IV — Greed | [ ] | demonic banker in torn suit, debt ledger as weapon, golden crown of thorns, 666 in eyes |
-| `wrathful` | The Wrathful | V — Anger | [ ] | rage demon, veins glowing red, fists raised, volcanic heat haze |
-| `berserker` | The Berserker | V — Anger | [ ] | berserk demon warrior, shattered armor, eyes white with fury, wrath chains broken |
-| `anger_boss` | The Warlord | V — Anger | [ ] | anger circle boss, massive demon general, strategy abandoned for pure rage, war-scarred |
-| `heretic` | The Heretic | VI — Heresy | [ ] | heresy demon, inverted religious symbols, corruption smoke pouring from mouth, blasphemy made flesh |
-| `apostate` | The Apostate | VI — Heresy | [ ] | fallen believer demon, burned scripture, eyes replaced by void, corrupting touch |
-| `heresy_boss` | The False Prophet | VI — Heresy | [ ] | preaching demon, toxic doctrine dripping from tongue, false halo, corrupted congregation behind |
-| `brute` | The Brute | VII — Violence | [ ] | calculating violence demon, cold eyes, massive clawed hands, surgical aggression |
-| `hunter` | The Hunter | VII — Violence | [ ] | predatory demon, crouched stalker pose, glowing tracking eyes, prey already marked |
-| `violence_boss` | The Executioner | VII — Violence | [ ] | demon executioner, enormous axe, methodical stance, sentence already written |
-| `trickster` | The Trickster | VIII — Fraud | [ ] | fraud demon, jester mask, cards in hand that vanish, deceptive shimmer, laughing |
-| `deceiver` | The Deceiver | VIII — Fraud | [ ] | manipulative demon, two faces, strings attached to puppet hands, your deck is its plaything |
-| `fraud_boss` | The Archfraud | VIII — Fraud | [ ] | master illusionist demon, mirror shards orbiting body, nothing is real |
-| `traitor` | The Traitor | IX — Treachery | [ ] | paranoia demon, backstabber form, knives in back, your band's silhouettes behind it |
-| `betrayer` | The Betrayer | IX — Treachery | [ ] | soul thief demon, stolen strength visible as glowing auras, hollow mirror of your band |
-| `lucifer` | Lucifer | IX — Final Boss | [ ] | satan final boss — Phase 1: regal fallen angel, cracked crown, contemptuous; Phase 2: Lord of the Flies, insect swarm, infernal throne |
-| `ar_exec` | The Executive | Special | [ ] | A&R demon in business suit, contract in one hand, soul in other, empty smile, the real devil wears Armani |
+### Combat Flow
+- [ ] 1. **Damage preview on Strike button** — show estimated total live as you buff
+- [ ] 2. **Ember forecast** — hovering card dims pips to show remaining
+- [ ] 3. **Fight intro splash** — "CIRCLE V — ANGER" + enemy name slam (1s)
+- [ ] 4. **Keyboard shortcuts** — S=Strike, D=Discard, 1-6=select cards, Space=speed
+- [ ] 5. **Undo last card play** — one-step within same strike
+- [ ] 6. **Hand size indicator** — "6/6" turns gold at overcap
 
-### File placement: `public/bosses/{id}.png` — wire into `BossSection` component (~line 1813), replace the 90px emoji div
+### Visual Feedback (juice)
+- [ ] 7. **Victory fanfare** — golden burst + "VICTORY" slam when boss dies
+- [ ] 8. **Boss HP drain animation** — smooth countdown, not instant jump
+- [ ] 9. **Stash change floats** — "+5 🌿" / "-3 🌿" on stash changes
+- [ ] 10. **Screen transitions** — 0.3s crossfade between game states
+- [ ] 11. **Card upgrade shimmer** — persistent golden pulse on upgraded card borders
+
+### Information & Clarity
+- [ ] 12. **Pact icons in combat** — small row of active pact icons visible
+- [ ] 13. **Boss telegraph** — "NEXT: 6 DMG to weakest" shown on boss
+- [ ] 14. **Card count remaining** — "2 left in deck" on hover
+- [ ] 15. **End-of-fight summary** — 2s popup: damage dealt, cards played, chains
+
+### Quality of Life
+- [ ] 16. **Auto-sort preference** — persist hand sort in localStorage
+- [ ] 17. **Bulk discard** — select multiple then discard all at once
+- [ ] 18. **Run timer** — elapsed time on death/victory screen
+- [ ] 19. **Corruption milestone audio** — dark tones at 25/50/75/100%
+- [ ] 20. **"Why did I die?" tooltip** — brief analysis on death screen
 
 ---
 
-## COMPLETED THIS SESSION
+## 🟢 PRIORITY 3 — Animations (PixelLab, separate chat)
 
-### Tutorial System ✅
-- [x] 3 scripted tutorial fights with predetermined hands
-- [x] Fight 1: Cards, embers, Strike (corruption hidden)
-- [x] Fight 2: Corruption + danger (thermometer appears)
-- [x] Fight 3: Ember management + DEATH WISH chain combo
-- [x] Tooltip overlay system (modal, one tip at a time)
-- [x] Main menu: Start Tutorial / Skip Tutorial buttons
-- [x] Tutorial Complete screen → back to real game
-- [x] Loss during tutorial → auto-restart current fight
-- [x] Progressive UI hiding (corruption/genres hidden until relevant)
-- [x] First-encounter contextual tips (pacts, shop, events, descent)
-
-### 5 QoL UI Improvements ✅
-- [x] #4: Gray borders + dim on unaffordable cards
-- [x] #5: Hide corruption thermometer when corruption = 0%
-- [x] #9: Gold glow + CHAIN badge on playable chain pairs
-- [x] #12: Skip strike animation for 0 ATK members
-- [x] #16: Dim unaffordable shop items to 40% opacity
+- [ ] Boss idle animations (29 bosses)
+- [ ] Boss death animations (29 bosses)
+- [ ] Member attack/strike animations (18 members)
+- [ ] Member "too stoned" animations (18 members)
 
 ---
 
-## COMPLETED — Previous Sessions
+## ✅ COMPLETED — Session 19 (April 14-15, 2026)
 
-### Combat Animations (Session 18)
-- [x] Dramatic 2s per-member strike animation
-- [x] Boss emoji projectile attack (correct targeting)
-- [x] Card fly-and-shrink animation on play
-- [x] Per-member HP drain during strikes
-- [x] HP bar uses scaledMaxHp (drains from first hit)
-- [x] Dice roll removed from boss attack
-- [x] Sound timing fixed (ATK_SND + playHit at IMPACT only)
+### Sprites & Wiring
+- [x] All 18 member sprites (128x128 PixFlux) generated + wired
+- [x] All 29 boss sprites generated + wired
+- [x] All 18 idle GIF animations wired (auto-play idle, static during combat)
+- [x] Lucifer phase swap (P1 Baphomet → P2 Lord of Flies)
+- [x] Grimnir replaces Nott (masked vocalist, DEBUFF)
+- [x] MEMBER_PORTRAITS, STAGE_PORTRAITS, IDLE_PORTRAITS, BOSS_PORTRAITS maps
 
-### Visual Polish (Session 17-18)
-- [x] CRT Scanlines + VHS Effect (toggleable)
-- [x] Vertical corruption thermometer
-- [x] Genre activation visual banner
-- [x] Upgrade indicator (gold pentagram)
-- [x] Chain hints on hover (toggleable)
-- [x] Mastery progress + Trophy progress on end screen
-- [x] Rules screen (35 entries)
-- [x] Options menu cleanup (7 toggles, all functional)
+### Tutorial System
+- [x] 3 scripted fights with predetermined hands + tooltips
+- [x] First-encounter tips (pacts, shop, events, descent)
+- [x] Progressive UI hiding during tutorial
 
-### Balance (Session 18)
-- [x] Full stake rebalance (Bronze 8.7% → Demonic 0.9%)
-- [x] Sim v17.1 synced with game code
-- [x] Only 1 locked member in Opening Night
+### Card Balance
+- [x] Dial to Eleven: +3 ATK base, +4 upgraded (was +2/+3)
+- [x] Smoke Break: draws 1 card after discard
+- [x] CORRUPT keyword: +1 per 12% corruption (was 15%)
+- [x] Sabbath Offering rework: deck thin + all members +1 ATK
 
----
+### Balance & Pacing
+- [x] Circle I HP bump: 50/75/110 → 65/95/140
+- [x] Circle II HP bump: 100/150/220 → 145/210/310
+- [x] Circle III heal buff: 2/3/6 → 3/5/8 per card played
+- [x] 69-card deck: 4 rares moved to shop-only
+- [x] Corruption deck: Dark Whisper (25%), Blood Price (50%), Void Pact (75%)
+- [x] Madness card loss: 15% → 20%
+- [x] Sim v19.1 synced
 
-## IN PROGRESS / NEEDS TESTING
-- [ ] Tutorial flow: needs full playtesting pass for edge cases
-- [ ] First-encounter tips: verify they fire at the right moments
-- [ ] Chain highlight: verify it doesn't create visual noise with many chains
+### UX Improvements (9 items)
+- [x] Genre approaching indicator at 40%
+- [x] Boss info: tagline shown, hover for passive
+- [x] Best run tracking + descent map marker
+- [x] Death screen: boss passive + run summary stats
+- [x] Speed toggle (⚡2X) synced with localStorage
+- [x] Collapsible stats footer
+- [x] Progressive rules (NEW badges)
+- [x] Tabbed shop (All/Cards/Packs/Gear)
+- [x] Deck peek by type columns (RIFF/CORRUPT/UTILITY/EMBER)
 
----
+### Visual Overhaul
+- [x] Circle-themed battle backgrounds (9 unique color themes)
+- [x] Corruption vignette (blood red edges, pulses at 75%+)
+- [x] Chain pulse (golden burst on Riff Chain)
+- [x] Boss near-death fracture (<10% HP)
+- [x] Member card borders softened (shadows, not borders)
+- [x] Ghost preview on drag ("+1 ATK" shown before dropping)
 
-## REMAINING TODO
+### Layout Refactors
+- [x] Parchment background removed → dark transparent battle area
+- [x] Stage divider removed
+- [x] Cockpit layout: discard left, strike right, cards center
+- [x] All info moved to left panel, strike-only right panel
 
-### High Priority
-- [ ] Corruption thermometer tuning (player feedback)
-- [ ] Event choice audit — Sabbath Offering useless on low stakes
-- [ ] Early game pacing — Circles I-IV are too safe (2.1% of deaths)
-
-### Card Balance (from Deep Audit)
-- [ ] Buff Dial to Eleven: +3 ATK (was +2)
-- [ ] Buff Setlist: reduce to 1 Ember (was 2)
-- [ ] Buff Smoke Break: add "Draw 1 card"
-- [ ] Rework Record Deal: sacrifice HP, not the whole member
-- [ ] Buff CORRUPT keyword: +1 ATK per 12% (was 15%)
-- [ ] Fix Sabbath Offering event (rework reward)
-
-### UX Ideas to Consider (from brainstorm list)
-- [ ] Collapse stats footer into expandable tray
-- [ ] Fade out idle/unbuffed members during card phase
-- [ ] Simplify boss info box (details behind hover)
-- [ ] Delay genre banner until 40%+ threshold
-- [ ] Show chain hints only after first chain discovered
-- [ ] Progressive rules screen (show only encountered rules)
-- [ ] Auto-highlight playable combos with connecting line
-- [ ] Card type grouping toggle in pause menu
-- [ ] Quick-play (tap card then tap member, no drag needed)
-- [ ] Combine damage breakdown with strike animation
-- [ ] "Hold to speed up" on Strike button
-- [ ] Highlight "best value" shop items
-- [ ] Compact tabbed shop layout
-- [ ] Run summary toast on death
-- [ ] "What killed you" highlight on death screen
-- [ ] Persistent "best run" marker on descent map
-- [ ] Show boss HP as fraction ("52/60 HP")
-- [ ] Corruption deck — corruption-only cards at thresholds
+### Polish
+- [x] Fade unbuffed members during card phase (70% opacity)
+- [x] Chain hints only after first chain discovered
+- [x] Quick-play (tap card then tap member)
+- [x] Damage breakdown auto-dismiss (1.5s)
+- [x] Hand card portrait area enlarged (75→100px, emoji 40→52)
+- [x] Stage slot sprite scaled up (85%/95%)
 
 ---
 
-## WIN RATES (10K each, Sim v17.1)
+## SIM DATA (v19.1, 10K Bronze)
+
 | Stake | Win Rate | Avg Fight |
 |-------|----------|-----------|
-| Bronze | 8.45% | 19.87/26 |
-| Silver | 7.14% | 17.49/26 |
-| Gold | 6.72% | 16.89/26 |
-| Obsidian | 3.90% | 14.76/26 |
-| Blood | 1.84% | 8.45/26 |
-| Demonic | 0.87% | 2.65/26 |
+| Bronze | 9.67% | 18.81/26 |
+| Silver | 9.96% | 15.64/26 |
+| Gold | 9.06% | 14.87/26 |
+| Obsidian | 9.60% | 17.03/26 |
+| Blood | 7.06% | 7.74/26 |
+| Demonic | 0.38% | 1.66/26 |
+
+### Survival Curve (Bronze)
+- C1: 9.0% deaths (healthy)
+- C2: 0.9% deaths
+- C3: 0.1% deaths
+- C4: 0.7% deaths
+- C5: 2.6% deaths
+- C6: 13.9% deaths (the wall)
+- C7: 30.3% deaths
+- C8-9: steep ramp to Lucifer
+
+### Card Balance
+All 69 starter cards SOLID or STRONG. No dead cards.
+Lowest: Smoke Break 1.99/g, Setlist 1.96/g.
+Record Deal (0.20/g) is a boss mechanic, not player card.
