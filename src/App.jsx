@@ -2110,7 +2110,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   )
 }
 
-function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption}){
+function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption,animPhase}){
   const [over,setOver]=useState(false)
   const [showTip,setShowTip]=useState(false)
   if(!member){
@@ -6735,6 +6735,7 @@ function App(){
                 animation:'cardAbsorbFlash 0.5s ease-out forwards',
                 boxShadow:'0 0 30px '+cardAbsorb.color+', inset 0 0 20px '+cardAbsorb.color}}/>}
               <StageSlot member={m} slotIdx={i}
+                animPhase={animPhase}
                 isAttacking={animPhase==='attacking'&&m&&!m.tooStoned}
                 isStriking={typeof strikingMemberIdx!=='undefined'&&strikingMemberIdx===i}
                 strikeAnim={strikeAnim&&strikeAnim.slotIdx===i?strikeAnim:null}
