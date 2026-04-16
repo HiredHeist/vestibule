@@ -7081,10 +7081,10 @@ function App(){
       <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 20%,rgba(60,0,0,0.5) 100%)',pointerEvents:'none',zIndex:2}}/>
       {/* Skip hint */}
       <div style={{position:'absolute',bottom:30,right:40,zIndex:3,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:3,opacity:0.5}}>CLICK TO SKIP</div>
-      {/* Scrolling credits container */}
-      <div style={{position:'absolute',left:'50%',transform:'translateX(-50%)',bottom:0,width:800,animation:'creditsScroll 45s linear forwards',zIndex:1}}>
+      {/* Scrolling credits container — starts below viewport, scrolls up */}
+      <div style={{position:'absolute',left:'50%',top:1080,width:800,animation:'creditsScroll 45s linear forwards',zIndex:1}}>
         {/* Game title */}
-        <div style={{textAlign:'center',marginBottom:80,paddingTop:1100}}>
+        <div style={{textAlign:'center',marginBottom:80,paddingTop:40}}>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:120,color:'var(--blood)',textShadow:'0 0 60px rgba(196,30,58,0.8),4px 4px 0 #000',letterSpacing:8,lineHeight:1}}>Vestibule</div>
           <svg width="500" height="8" viewBox="0 0 500 8" style={{margin:'16px auto'}}><path d="M 8 4 Q 125 1, 250 4 T 492 4" stroke="var(--blood)" strokeWidth="1.5" fill="none" opacity="0.7"/></svg>
           <div style={{fontFamily:"'ScratchFont',serif",fontSize:24,color:'var(--ink-dim)',fontStyle:'italic',marginTop:8}}>A Doom Metal Roguelite Deckbuilder</div>
@@ -7152,7 +7152,7 @@ function App(){
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',letterSpacing:8,marginTop:12,textTransform:'uppercase'}}>Will Return</div>
         </div>
       </div>
-      <style>{`@keyframes creditsScroll{0%{transform:translate(-50%,0)}100%{transform:translate(-50%,-100%)}}`}</style>
+      <style>{`@keyframes creditsScroll{0%{transform:translateX(-50%) translateY(0)}100%{transform:translateX(-50%) translateY(calc(-100% - 1080px))}}`}</style>
     </div>
   )
 
