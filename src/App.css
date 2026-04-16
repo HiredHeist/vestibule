@@ -165,6 +165,13 @@ body {
   100% { transform: scale(1) translate(0,0); filter: brightness(1); }
 }
 
+/* Beast tier entry pulse — full-screen red wash on first cross of ×3.0 multiplier */
+@keyframes beastPulse {
+  0%   { opacity: 0; }
+  20%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 /* Slow breathing — for atmospheric backgrounds */
 @keyframes altarBreath {
   0%, 100% { opacity: 1; }

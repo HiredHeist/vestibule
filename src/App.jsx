@@ -4983,6 +4983,21 @@ function App(){
     prevEmbersRef.current=embers
   },[embers,gameState,strikesLeft,fightMaxStrikes,maxEmbers])
 
+  // ── 3.0× BEAST TIER ENTRY — first cross above 3.0 each strike triggers shake + red overlay
+  const [beastTierFlash,setBeastTierFlash]=useState(false)
+  const prevMultRef=useRef(1.0)
+  useEffect(()=>{
+    if(gameState!=='playing'){prevMultRef.current=strikeMult;return}
+    // Crossed 3.0 going up
+    if(prevMultRef.current<3.0&&strikeMult>=3.0&&strikeMult<6.66){
+      setBeastTierFlash(true)
+      playSfx('big_hit');triggerShake(20,800)
+      addLog('⛧ BEAST UNLEASHED! ×'+strikeMult.toFixed(2)+' multiplier!')
+      setTimeout(()=>setBeastTierFlash(false),700)
+    }
+    prevMultRef.current=strikeMult
+  },[strikeMult,gameState])
+
   // ── 6.66 MULTIPLIER FLASH ──
   const [beastFlash,setBeastFlash]=useState(false)
   useEffect(()=>{
@@ -5061,6 +5076,31 @@ function App(){
         setGameState('end')
       }
       if(e.key==='Escape'){setShowPauseOptions(p=>!p)}
+
+      // ── PLAYER KEYBOARD SHORTCUTS — only during combat, no modifiers, not while typing
+      if(gameState!=='playing')return
+      if(e.shiftKey||e.ctrlKey||e.metaKey||e.altKey)return
+      if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return
+      const k=e.key.toLowerCase()
+      // S = STRIKE
+      if(k==='s'&&canStrikeRef.current){e.preventDefault();handleStrikeRef.current&&handleStrikeRef.current()}
+      // D = DISCARD (requires selection)
+      else if(k==='d'&&canDiscardRef.current&&selectedRef.current.length>0){e.preventDefault();handleDiscardRef.current&&handleDiscardRef.current()}
+      // 1-6 = toggle selection on card by index (or quick-play if it's a no-target card)
+      else if(/^[1-6]$/.test(e.key)){
+        const idx=parseInt(e.key,10)-1
+        const h=handRef.current
+        if(idx<h.length){
+          const card=h[idx]
+          if(!card)return
+          // Skip used Stage Dive
+          if(card.id==='stagedive'&&stageDiveUsedRef.current)return
+          e.preventDefault()
+          playSfxRef.current&&playSfxRef.current('select',0.5)
+          setSelected(p=>p.includes(card.uid)?p.filter(x=>x!==card.uid):[...p,card.uid])
+          setQuickPlayCardUid(p=>p===card.uid?null:card.uid)
+        }
+      }
     }
     window.addEventListener('keydown',onKey,true)
     return function(){window.removeEventListener('keydown',onKey,true)}
@@ -6128,6 +6168,15 @@ function App(){
 
   const canStrike=animPhase==='idle'&&strikesLeft>0&&enemyHp>0&&stage.some(m=>m&&!m.tooStoned)
   const canDiscard=animPhase==='idle'&&discardsLeft>0&&selected.length>0
+
+  // ── KEYBOARD SHORTCUT REFS — keep in sync each render so handler reads current values
+  const canStrikeRef=useRef(canStrike);canStrikeRef.current=canStrike
+  const canDiscardRef=useRef(canDiscard);canDiscardRef.current=canDiscard
+  const selectedRef=useRef(selected);selectedRef.current=selected
+  const stageDiveUsedRef=useRef(stageDiveUsed);stageDiveUsedRef.current=stageDiveUsed
+  const handleStrikeRef=useRef(null);handleStrikeRef.current=handleStrike
+  const handleDiscardRef=useRef(null);handleDiscardRef.current=handleDiscard
+  const playSfxRef=useRef(null);playSfxRef.current=playSfx
   const won=fightIndex>=26&&enemyHp<=0
   // Corruption visual escalation
   const corruptLow=corruption>=40&&corruption<70
@@ -6863,6 +6912,13 @@ function App(){
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#ff0000',textShadow:'0 0 40px rgba(255,0,0,0.9),0 0 80px rgba(200,0,0,0.6),-3px 0 rgba(255,0,0,0.5),3px 0 rgba(200,0,0,0.5),3px 3px 0 #000',letterSpacing:6,animation:'throb 0.4s ease-in-out infinite'}}>⛧ 6.66 ⛧</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#ff4444',letterSpacing:8,textTransform:'uppercase',marginTop:4,textShadow:'0 0 20px rgba(255,0,0,0.7)'}}>MARK OF THE BEAST</div>
       </div>}
+      {/* BEAST TIER ENTRY (3.0+) — red radial pulse + center text */}
+      {beastTierFlash&&<>
+        <div style={{position:'fixed',inset:0,zIndex:9000,pointerEvents:'none',background:'radial-gradient(ellipse at center, transparent 25%, rgba(196,30,58,0.55) 100%)',animation:'beastPulse 0.7s ease-out forwards'}}/>
+        <div style={{position:'absolute',top:'40%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9100,pointerEvents:'none',textAlign:'center'}}>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#fff',textShadow:'0 0 30px var(--blood),0 0 60px rgba(196,30,58,0.7),3px 3px 0 #000',letterSpacing:8,animation:'popFloat 0.7s ease-out forwards'}}>⛧ BEAST UNLEASHED ⛧</div>
+        </div>
+      </>}
       
       {showCombatLog&&<CombatLogViewer log={fullRunLogRef.current} onClose={()=>setShowCombatLog(false)}/>}
       {corruptionFlash&&<div style={{position:'absolute',top:'35%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9600,textAlign:'center',animation:'fadeIn 0.3s ease',pointerEvents:'none'}}>
