@@ -1202,7 +1202,7 @@ function DiceRoll({target,onDone}){
 
 function EmberDisplayLarge({current,max}){
   return(
-    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
+    <div data-ember-display="1" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Embers</div>
       <div style={{display:'flex',gap:3,justifyContent:'center'}}>
         {Array.from({length:max}).map((_,i)=>(
@@ -2209,7 +2209,7 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
         transition:strikeAnim?'transform 0.25s cubic-bezier(0.2,0.8,0.3,1.2), border 0.2s, box-shadow 0.2s, opacity 0.3s':'border 0.2s, box-shadow 0.2s, opacity 0.3s, transform 0.3s',
         cursor:'grab',position:'relative'}}>
       {/* Keyword tooltip */}
-      {showTip&&member&&KEYWORD_DESC[member.keyword]&&<div style={{position:'absolute',bottom:'105%',left:'50%',transform:'translateX(-50%)',background:'rgba(8,4,2,0.97)',border:'1px solid rgba(160,100,25,0.6)',borderRadius:6,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:200,maxWidth:260,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'#e8a820',letterSpacing:2,textTransform:'uppercase',marginBottom:5}}>{member.keyword}</div><div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#c8b080',lineHeight:1.5,fontStyle:'italic'}}>{KEYWORD_DESC[member.keyword]}</div></div>}
+      {showTip&&member&&KEYWORD_DESC[member.keyword]&&<div style={{position:'absolute',top:'calc(100% + 6px)',left:'50%',transform:'translateX(-50%)',background:'rgba(8,4,2,0.97)',border:'1px solid rgba(196,30,58,0.5)',borderRadius:3,padding:'8px 12px',zIndex:9999,pointerEvents:'none',minWidth:180,maxWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'var(--gold)',letterSpacing:2,textTransform:'uppercase',marginBottom:4}}>{member.keyword}</div><div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'var(--ink-bone)',lineHeight:1.4,fontStyle:'italic'}}>{KEYWORD_DESC[member.keyword]}</div></div>}
       {buffCount>0&&<div style={{position:'absolute',top:6,left:6,background:buffCount>=3?'#aa1111':'#9933cc',borderRadius:10,padding:'1px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#fff',zIndex:10,boxShadow:'0 0 8px rgba(0,0,0,0.6)'}}>+{buffCount}</div>}
       {isDiceTarget&&<div style={{position:'absolute',top:-16,left:'50%',transform:'translateX(-50%)',fontSize:20}}>🎯</div>}
       {mentorState==='active'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:18,textShadow:'0 0 12px #ffd700',zIndex:12,animation:'mentorPulse 1.5s ease-in-out infinite'}}>⛓</div>}
@@ -4952,6 +4952,37 @@ function App(){
     return()=>document.head.removeChild(el)
   },[])
 
+  // ── STASH CHANGE FLOATS — every +X 🌿 / -X 🌿 gets a juicy floating number ──
+  const prevStashRef=useRef(stash)
+  useEffect(()=>{
+    const prev=prevStashRef.current
+    const delta=stash-prev
+    if(delta!==0&&gameState==='playing'){
+      const stashEl=document.querySelector('[data-stash-label]')
+      const x=stashEl?stashEl.getBoundingClientRect().left+50:380
+      const y=stashEl?stashEl.getBoundingClientRect().top:1000
+      const sign=delta>0?'+':''
+      addFloat(sign+delta+' 🌿',x,y,delta>0?'#c89838':'#c41e3a',delta>0?false:true)
+    }
+    prevStashRef.current=stash
+  },[stash,gameState])
+
+  // ── EMBER CHANGE FLOATS — skip on strike resets (whole-hand refresh) ──
+  const prevEmbersRef=useRef(embers)
+  useEffect(()=>{
+    const prev=prevEmbersRef.current
+    const delta=embers-prev
+    // Skip big +maxEmbers refreshes (e.g. new turn), only show smaller discrete changes
+    if(delta!==0&&Math.abs(delta)<=maxEmbers&&gameState==='playing'&&strikesLeft<fightMaxStrikes){
+      const ember=document.querySelector('[data-ember-display]')
+      const x=ember?ember.getBoundingClientRect().left+50:320
+      const y=ember?ember.getBoundingClientRect().top:950
+      const sign=delta>0?'+':''
+      addFloat(sign+delta+' 🔥',x,y,delta>0?'#ff8800':'#c41e3a',false)
+    }
+    prevEmbersRef.current=embers
+  },[embers,gameState,strikesLeft,fightMaxStrikes,maxEmbers])
+
   // ── 6.66 MULTIPLIER FLASH ──
   const [beastFlash,setBeastFlash]=useState(false)
   useEffect(()=>{
@@ -7174,7 +7205,7 @@ function App(){
           <EmberDisplayLarge current={embers} max={maxEmbers}/>
           <div style={{display:'flex',gap:18,justifyContent:'center',width:'100%',marginTop:4}}>
             {[['Fight',(fightIndex%3+1)+'/3','var(--blood)'],['Stash',stash,'var(--gold)']].map(function(item){return(
-              <div key={item[0]} style={{textAlign:'center'}}>
+              <div key={item[0]} data-stash-label={item[0]==='Stash'?'1':null} style={{textAlign:'center'}}>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',fontWeight:900,marginBottom:2}}>{item[0]}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:item[2],lineHeight:1,textShadow:'0 0 8px '+(item[2]==='var(--blood)'?'rgba(196,30,58,0.4)':'rgba(200,152,56,0.4)')}}><span key={item[0]+'-'+item[1]} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{item[1]}</span></div>
               </div>
