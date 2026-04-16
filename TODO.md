@@ -26,7 +26,7 @@
 Ranked by ship-impact per line of code:
 
 ### Tier 1
-- [ ] 🎤 **Pre-fight loading screen** w/ random tour quote ("Last seen playing a basement in Cleveland for $40 and a case of beer")
+- [x] 🎤 **Pre-fight loading screen** w/ random tour quote — 30 quotes, 2.2s overlay, enemy name + passive + circle + quote
 - [ ] 🎵 ~~Diegetic music tied to game state~~ — **JV's lane (audio)**
 
 ### Tier 2

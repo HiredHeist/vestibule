@@ -847,6 +847,40 @@ function LogLine({text}){
 }
 
 
+// ═══ TOUR QUOTES — pre-fight loading screen flavor ═══════════════════════
+const TOUR_QUOTES=[
+  "Last seen playing a basement in Cleveland for $40 and a case of beer.",
+  "The van broke down outside Tulsa. We hitched a ride in a hearse.",
+  "Banned from every venue in Reno. Worth it.",
+  "Our rider says 'no brown M&Ms.' We've never had a rider.",
+  "Soundcheck? We don't do soundcheck. We do shots.",
+  "The opening act quit after hearing us tune up.",
+  "Someone threw a shoe. We kept it. It's on the merch table now.",
+  "Three cities. Two flat tires. One pair of clean socks between us.",
+  "We got lost in Detroit. Found ourselves in the process.",
+  "The bartender said we were 'aggressively loud.' We took it as a compliment.",
+  "Hotel? We sleep in the van. The van sleeps in the Walmart parking lot.",
+  "Played a biker bar in Sturgis. They asked us to turn DOWN.",
+  "Our bass player pawned his shoes for gas money. Played barefoot in Omaha.",
+  "The venue had a 'no moshing' sign. We used it as a setlist.",
+  "Got paid in beer and cigarettes. Honestly? Fair deal.",
+  "Somebody called the cops. Turns out the drummer's uncle IS the cops.",
+  "The floor caved in during the encore. Nobody stopped playing.",
+  "We opened for a polka band once. Converted three of them.",
+  "Our merch guy is also our driver, our cook, and our bail fund.",
+  "The monitor guy hated us so much he gave us perfect sound out of spite.",
+  "Slept on a stranger's floor in Memphis. Woke up with a new guitarist.",
+  "The AC broke mid-set. Sweat baptism for everyone in the front row.",
+  "We don't have fans. We have co-conspirators.",
+  "Someone bootlegged our set. It sounds better than the studio album.",
+  "The green room was a broom closet. We've had worse.",
+  "Promoter promised $200. We got $60 and a 'maybe next time, guys.'",
+  "The drummer's kick pedal broke. He finished the set stomping the floor.",
+  "Our t-shirts are printed on stolen blanks. Allegedly.",
+  "Last tour we played 47 shows in 50 days. The other 3 we were lost.",
+  "The venue marquee misspelled our name. We liked their version better.",
+]
+
 // ═══ TUTORIAL SYSTEM ═══════════════════════════════════════════════════════
 const TUTORIAL_ENEMIES=[
   {id:'tut_shade',name:'The Shade',circle:'TUTORIAL',subtitle:'Fight 1 of 3',maxHp:30,baseDmg:2,emoji:'👤',passive:'A weak spirit. An easy first kill.',passiveId:null},
@@ -4081,6 +4115,7 @@ function App(){
   const [circlePreview,setCirclePreview]=useState(null) // next circle preview data
   const [collectedLoot,setCollectedLoot]=useState([]) // boss loot IDs collected this run
   const [circleSplash,setCircleSplash]=useState(null)
+  const [preFightSplash,setPreFightSplash]=useState(null) // {enemy,circle,quote}
   const [pendingEvent,setPendingEvent]=useState(null)
   const [possessionFired,setPossessionFired]=useState(false)
   const corruptCardsGivenRef=useRef([]) // track which thresholds have given cards (ref to avoid React 18 double-fire)
@@ -6139,6 +6174,11 @@ function App(){
     setEnemy(nextEnemy);const _sHp=Math.ceil(nextEnemy.maxHp*activeStake.hpMult*(encoreMode?2.0:1.0));setEnemyHp(_sHp);setScaledMaxHp(_sHp)
     // per-fight tracking resets
     fightStartTimeRef.current=Date.now()
+    // ── PRE-FIGHT SPLASH — tour quote loading screen ──
+    if(tutorialFight===0){
+      setPreFightSplash({enemy:nextEnemy,circle:nextEnemy.circle||('Circle '+(Math.floor(nextIdx/3)+1)),quote:TOUR_QUOTES[Math.floor(Math.random()*TOUR_QUOTES.length)]})
+      setTimeout(()=>setPreFightSplash(null),2200)
+    }
     corruptionAtFightStartRef.current=corruption
     cardsPlayedThisFightRef.current=0
     highestStrikeThisFightRef.current=0
@@ -7942,6 +7982,20 @@ function App(){
       </div>}
 
       {/* ═══ TUTORIAL OVERLAYS ═══ */}
+      {/* PRE-FIGHT SPLASH — tour quote loading screen */}
+      {preFightSplash&&<div style={{position:'absolute',inset:0,zIndex:9998,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,
+        background:'radial-gradient(ellipse at center, rgba(10,4,2,0.97) 0%, rgba(0,0,0,0.99) 100%)',
+        animation:'fadeIn 0.3s ease',pointerEvents:'none'}}>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'var(--ink-dim)',letterSpacing:6,textTransform:'uppercase',fontStyle:'italic',opacity:0.7}}>{preFightSplash.circle}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'var(--ink-bone)',textShadow:'0 0 40px rgba(196,30,58,0.5), 3px 3px 0 #000',letterSpacing:4,textAlign:'center',transform:'rotate(-1.5deg)',lineHeight:1}}>{preFightSplash.enemy.name}</div>
+        <svg width="400" height="6" viewBox="0 0 400 6" style={{marginTop:-4}}>
+          <path d="M 12 3 Q 100 1, 200 3 T 388 3" stroke="var(--blood)" strokeWidth="1" fill="none" opacity="0.6"/>
+        </svg>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-rust)',fontWeight:900,letterSpacing:3,textTransform:'uppercase',marginTop:8}}>{preFightSplash.enemy.emoji} {preFightSplash.enemy.passive}</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'var(--ink-dim)',fontStyle:'italic',maxWidth:600,textAlign:'center',lineHeight:1.5,marginTop:24,padding:'0 40px',opacity:0.65}}>"{preFightSplash.quote}"</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'var(--rot)',letterSpacing:8,textTransform:'uppercase',marginTop:24,animation:'pulse 1s ease infinite alternate'}}>entering the pit...</div>
+      </div>}
+
       {tutorialFight>0&&TUTORIAL_TIPS[tutorialFight]&&tutorialTipIdx<TUTORIAL_TIPS[tutorialFight].length&&
         <TutorialTooltip tip={TUTORIAL_TIPS[tutorialFight][tutorialTipIdx]} onDismiss={()=>setTutorialTipIdx(p=>p+1)}/>}
       {showTutorialMsg&&<TutorialMessage text={showTutorialMsg} isFinal={showTutorialMsg==='TUTORIAL COMPLETE'} onContinue={handleTutorialContinue}/>}
