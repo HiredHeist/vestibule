@@ -154,6 +154,17 @@ body {
   100% { transform: scale(1); filter: brightness(1); }
 }
 
+/* Damage stamp — number SLAMS down over previous, with shake recovery */
+@keyframes damageStamp {
+  0%   { transform: scale(1.6) translateY(-8px); filter: brightness(2) drop-shadow(0 0 24px var(--blood)); opacity: 0.7; }
+  20%  { transform: scale(0.85) translateY(2px); filter: brightness(1.4); opacity: 1; }
+  35%  { transform: scale(1.08) translateX(-3px); filter: brightness(1.2); }
+  50%  { transform: scale(0.97) translateX(3px); filter: brightness(1.1); }
+  65%  { transform: scale(1.04) translateX(-2px); filter: brightness(1.05); }
+  80%  { transform: scale(0.99) translateX(1px); filter: brightness(1.02); }
+  100% { transform: scale(1) translate(0,0); filter: brightness(1); }
+}
+
 /* Slow breathing — for atmospheric backgrounds */
 @keyframes altarBreath {
   0%, 100% { opacity: 1; }

@@ -1203,7 +1203,7 @@ function DiceRoll({target,onDone}){
 function EmberDisplayLarge({current,max}){
   return(
     <div data-ember-display="1" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Embers</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Embers</div>
       <div style={{display:'flex',gap:3,justifyContent:'center'}}>
         {Array.from({length:max}).map((_,i)=>(
           <div key={i} style={{fontSize:i>=(max-current)?20:15,opacity:i>=(max-current)?1:0.2,filter:i>=(max-current)?'drop-shadow(0 0 6px rgba(200,152,56,0.7))':'grayscale(1)',transition:'all 0.25s'}}>🔥</div>
@@ -7044,32 +7044,35 @@ function App(){
             ))}
           </div>
         </div>
-        {/* ═══ GENRE RIBBON — unfurled banner ═══ */}
+        {/* ═══ GENRE RIBBON — unfurled banner (centered, 50% width so thermometer & deck don't crowd) ═══ */}
         {activeGenre&&(()=>{const gc=activeGenre==='RIFF_METAL'?'#b478e8':activeGenre==='BLACK_METAL'?'#e8405c':activeGenre==='PROG_ROCK'?'#5ac878':'#8888cc';const gbg=activeGenre==='RIFF_METAL'?'rgba(40,10,60,0.75)':activeGenre==='BLACK_METAL'?'rgba(60,0,15,0.75)':activeGenre==='PROG_ROCK'?'rgba(8,40,18,0.75)':'rgba(20,20,50,0.75)';return(
-        <div style={{position:'relative',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,zIndex:6,padding:'2px 60px 2px',animation:'fadeIn 0.4s ease'}}>
-          {/* Ribbon SVG — shaped tail ends */}
-          <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:0}} preserveAspectRatio="none" viewBox="0 0 1920 36">
-            {/* Main banner body with forked ends */}
-            <path d={`M 0 18 L 40 4 L 80 12 L 1840 12 L 1880 4 L 1920 18 L 1880 32 L 1840 24 L 80 24 L 40 32 Z`} fill={gbg} stroke={gc} strokeWidth="0.8" opacity="0.9"/>
-            {/* Top hand-drawn line */}
-            <path d="M 80 12 Q 480 10, 960 12 T 1840 12" stroke={gc} strokeWidth="0.6" fill="none" opacity="0.5"/>
-            {/* Bottom hand-drawn line */}
-            <path d="M 80 24 Q 480 26, 960 24 T 1840 24" stroke={gc} strokeWidth="0.6" fill="none" opacity="0.5"/>
-          </svg>
-          {/* Content */}
-          <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:14,position:'relative',zIndex:1,padding:'4px 20px'}}>
-            <span style={{fontSize:16,filter:'drop-shadow(0 0 8px '+gc+')'}}>
-              {activeGenre==='RIFF_METAL'?'⚡':activeGenre==='BLACK_METAL'?'🔥':activeGenre==='PROG_ROCK'?'🌿':'🌑'}
-            </span>
-            <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:20,letterSpacing:5,color:gc,textShadow:'0 0 12px '+gc+'80, 0 1px 2px rgba(0,0,0,0.9)',textTransform:'uppercase'}}>
-              {activeGenre==='RIFF_METAL'?'Thrash Metal':activeGenre==='BLACK_METAL'?'Black Metal':activeGenre==='PROG_ROCK'?'Stoner Rock':'Doom Metal'}
-            </span>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-bone)',letterSpacing:2,textTransform:'uppercase',fontWeight:900}}>
-              {activeGenre==='RIFF_METAL'?'+15% Strike':activeGenre==='BLACK_METAL'?'+25% Corruption':activeGenre==='PROG_ROCK'?'+1 Card Draw':'+2 ATK/Member · Max Discards'}
-            </span>
-            <span style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'var(--ink-dim)',fontStyle:'italic'}}>
-              ({activeGenre==='RIFF_METAL'?genreCounts.RIFF+' Riff':activeGenre==='BLACK_METAL'?genreCounts.CORRUPT+' Corrupt':activeGenre==='PROG_ROCK'?genreCounts.UTILITY+' Utility':genreCounts.EMBER+' Ember'} cards)
-            </span>
+        <div style={{position:'relative',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,zIndex:6,padding:'12px 0',animation:'fadeIn 0.4s ease'}}>
+          {/* Inner wrapper — constrains the ribbon to 50% of screen width, centered */}
+          <div style={{position:'relative',width:'50%',minWidth:560,maxWidth:960,height:54,display:'flex',alignItems:'center',justifyContent:'center'}}>
+            {/* Ribbon SVG — shaped tail ends, sized to inner wrapper */}
+            <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:0}} preserveAspectRatio="none" viewBox="0 0 960 54">
+              {/* Main banner body with forked ends */}
+              <path d={`M 0 27 L 30 6 L 60 18 L 900 18 L 930 6 L 960 27 L 930 48 L 900 36 L 60 36 L 30 48 Z`} fill={gbg} stroke={gc} strokeWidth="0.8" opacity="0.92"/>
+              {/* Top hand-drawn line */}
+              <path d="M 60 18 Q 240 15, 480 18 T 900 18" stroke={gc} strokeWidth="0.7" fill="none" opacity="0.55"/>
+              {/* Bottom hand-drawn line */}
+              <path d="M 60 36 Q 240 39, 480 36 T 900 36" stroke={gc} strokeWidth="0.7" fill="none" opacity="0.55"/>
+            </svg>
+            {/* Content — vertically stacked title row + effect row so nothing overlaps */}
+            <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:14,position:'relative',zIndex:1,padding:'4px 40px',flexWrap:'nowrap'}}>
+              <span style={{fontSize:18,filter:'drop-shadow(0 0 8px '+gc+')'}}>
+                {activeGenre==='RIFF_METAL'?'⚡':activeGenre==='BLACK_METAL'?'🔥':activeGenre==='PROG_ROCK'?'🌿':'🌑'}
+              </span>
+              <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,letterSpacing:5,color:gc,textShadow:'0 0 12px '+gc+'80, 0 1px 2px rgba(0,0,0,0.9)',textTransform:'uppercase',whiteSpace:'nowrap'}}>
+                {activeGenre==='RIFF_METAL'?'Thrash Metal':activeGenre==='BLACK_METAL'?'Black Metal':activeGenre==='PROG_ROCK'?'Stoner Rock':'Doom Metal'}
+              </span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-bone)',letterSpacing:2,textTransform:'uppercase',fontWeight:900,whiteSpace:'nowrap'}}>
+                {activeGenre==='RIFF_METAL'?'+15% Strike':activeGenre==='BLACK_METAL'?'+25% Corruption':activeGenre==='PROG_ROCK'?'+1 Card Draw':'+2 ATK/Member · Max Discards'}
+              </span>
+              <span style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'var(--ink-dim)',fontStyle:'italic',whiteSpace:'nowrap'}}>
+                ({activeGenre==='RIFF_METAL'?genreCounts.RIFF+' Riff':activeGenre==='BLACK_METAL'?genreCounts.CORRUPT+' Corrupt':activeGenre==='PROG_ROCK'?genreCounts.UTILITY+' Utility':genreCounts.EMBER+' Ember'})
+              </span>
+            </div>
           </div>
         </div>
         )})()}
@@ -7093,43 +7096,18 @@ function App(){
             transition:'color 0.2s',opacity:phaseBanner==='play'?0.7:0.95}}>
             {phaseBanner==='play'?'⛧ Play Cards':phaseBanner==='strike'?'⚔ Striking!':'👿 Boss Attacks'}
           </div>
-          {(()=>{
-            const act=stage.filter(m=>m&&!m.tooStoned)
-            let dmg=act.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
-              let effAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
-              if(chosenPacts.includes('clean_living')&&corruption<15)effAtk+=3
-              if(m.encoreReady)effAtk*=2
-              return s+effAtk
-            },0)
-            for(let _mi=0;_mi<stage.length-1;_mi++){const _mn=stage[_mi],_bs=stage[_mi+1];if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue;if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){const _em=_bs.mentorMult+(activeStake.mentorBonus||0);const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/12):_mn.atk;const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/12):_bs.atk;dmg+=Math.round((_ma+_ba)*(_em-1))}}
-            const dbl=act.some(m=>m.role==='Drummer')
-            if(dbl)dmg*=2
-            const buf=act.filter(m=>(m.buffCount||0)>0).length
-            const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1
-            dmg=Math.floor(dmg*bon)
-            if(activeGenre==='RIFF_METAL')dmg=Math.round(dmg*1.15)
-            if(activeGenre==='DOOM_METAL'&&discardsLeft>=MAX_DISCARDS)dmg+=act.length*2
-            const fin=strikeMult>1.0?Math.round(dmg*strikeMult):dmg
-            return <>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',fontWeight:900,letterSpacing:3,textTransform:'uppercase'}}>Combined Attack</span>
-              <span key={fin} style={{fontFamily:"'MBScribblesFont',serif",fontSize:44,fontWeight:900,color:'var(--blood)',textShadow:'0 0 24px rgba(196,30,58,0.9), 0 2px 4px rgba(0,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block',lineHeight:1}}>{fin}</span>
-              {bon>1&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'var(--gold)',letterSpacing:2,textTransform:'uppercase',fontWeight:900}}>+{Math.round((bon-1)*100)}% Synergy</span>}
-              <span style={{color:'var(--ink-rust)',fontSize:18}}>⟶</span>
-              <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,color:'var(--ink-bone)',fontWeight:700,textShadow:'0 1px 4px rgba(0,0,0,0.8)'}}>{enemy.name}</span>
-
-              {chosenPacts.length>0&&<div style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',display:'flex',gap:4}}>
-                {chosenPacts.filter(Boolean).map(pid=>{const p=PACT_REWARDS.find(r=>r.id===pid);return p?<div key={pid} style={{position:'relative',cursor:'help'}}
-                  onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='block'}}
-                  onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='none'}}>
-                  <div style={{width:24,height:24,borderRadius:4,background:p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')?'rgba(60,30,30,0.8)':'rgba(0,0,0,0.6)',border:`1px solid ${p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')?'#ff000066':p.color+'66'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,position:'relative'}}>{p.emoji}{p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')&&<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.6)',borderRadius:4,fontSize:7,color:'#ff4444',fontWeight:900,letterSpacing:1}}>🔒</div>}</div>
-                  <div data-pacttip="" style={{display:'none',position:'absolute',bottom:'120%',right:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 12px',zIndex:9999,pointerEvents:'none',minWidth:180,boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
-                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:p.color,marginBottom:3}}>{p.emoji} {p.name}</div>
-                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8b080',lineHeight:1.4}}>{p.desc}</div>
-                  </div>
-                </div>:null})}
-              </div>}
-            </>
-          })()}
+          {/* PACT ICONS — keep the hover tooltips, remove redundant Combined Attack readout (DEALS X DMG covers that now) */}
+          {chosenPacts.length>0&&<div style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',display:'flex',gap:4}}>
+            {chosenPacts.filter(Boolean).map(pid=>{const p=PACT_REWARDS.find(r=>r.id===pid);return p?<div key={pid} style={{position:'relative',cursor:'help'}}
+              onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='block'}}
+              onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='none'}}>
+              <div style={{width:24,height:24,borderRadius:4,background:p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')?'rgba(60,30,30,0.8)':'rgba(0,0,0,0.6)',border:`1px solid ${p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')?'#ff000066':p.color+'66'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,position:'relative'}}>{p.emoji}{p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')&&<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.6)',borderRadius:4,fontSize:7,color:'#ff4444',fontWeight:900,letterSpacing:1}}>🔒</div>}</div>
+              <div data-pacttip="" style={{display:'none',position:'absolute',bottom:'120%',right:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 12px',zIndex:9999,pointerEvents:'none',minWidth:180,boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:p.color,marginBottom:3}}>{p.emoji} {p.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8b080',lineHeight:1.4}}>{p.desc}</div>
+              </div>
+            </div>:null})}
+          </div>}
         </div>
       </div>
 
@@ -7222,7 +7200,7 @@ function App(){
         </div>
 
                 {/* RIGHT PANEL: Strike seal — sits on altar */}
-        <div style={{position:'absolute',right:12,top:24,bottom:12,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,padding:'8px 8px',width:140}}>
+        <div style={{position:'absolute',right:8,top:24,bottom:12,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:10,padding:'8px 4px',width:160}}>
           {(() => {
             const m = strikeMult || 1.0;
             const tier = m >= 3.0 ? 4 : m >= 2.0 ? 3 : m >= 1.5 ? 2 : m > 1.0 ? 1 : 0;
@@ -7239,38 +7217,67 @@ function App(){
               </div>
             );
           })()}
-          <button onClick={()=>setSpeedMode(p=>{const nv=!p;localStorage.setItem('vst_speed',nv?'fast':'normal');return nv})} style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:speedMode?'var(--gold)':'var(--ink-dim)',background:speedMode?'linear-gradient(180deg, rgba(200,152,56,0.20), rgba(200,152,56,0.05))':'transparent',border:'1px solid '+(speedMode?'var(--gold)':'var(--rot)'),borderRadius:3,padding:'4px 10px',cursor:'pointer',letterSpacing:3,textTransform:'uppercase'}}>{speedMode?'⚡ 2x':'1x'}</button>
+          {/* STRIKE button — wider so pentagrams don't clip */}
           <button onClick={handleStrike} disabled={!canStrike}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,letterSpacing:3,textTransform:'uppercase',whiteSpace:'nowrap',padding:'18px 8px',background:canStrike?'linear-gradient(180deg, rgba(196,30,58,0.55), rgba(122,15,31,0.3))':'rgba(25,12,5,0.4)',border:canStrike?'2px solid var(--blood)':'1px solid var(--rot)',borderRadius:3,color:canStrike?'var(--ink-bone)':'var(--rot)',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 20px rgba(196,30,58,0.9), 0 2px 4px rgba(0,0,0,0.6)':'none',boxShadow:canStrike?'inset 0 0 32px rgba(196,30,58,0.25), 0 0 24px rgba(196,30,58,0.35)':'none',transition:'all 0.15s',width:'100%',animation:canStrike?'altarBreath 3s ease-in-out infinite':'none'}}>⛧ STRIKE ⛧</button>
-          {/* DAMAGE PREVIEW — sits directly under strike, hypes up every mult tick */}
-          {(()=>{
-            const act=stage.filter(m=>m&&!m.tooStoned)
-            let dmg=act.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
-              let effAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
-              if(chosenPacts.includes('clean_living')&&corruption<15)effAtk+=3
-              if(m.encoreReady)effAtk*=2
-              return s+effAtk
-            },0)
-            for(let _mi=0;_mi<stage.length-1;_mi++){const _mn=stage[_mi],_bs=stage[_mi+1];if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue;if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){const _em=_bs.mentorMult+(activeStake.mentorBonus||0);const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/12):_mn.atk;const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/12):_bs.atk;dmg+=Math.round((_ma+_ba)*(_em-1))}}
-            if(act.some(m=>m.role==='Drummer'))dmg*=2
-            const buf=act.filter(m=>(m.buffCount||0)>0).length
-            const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1
-            dmg=Math.floor(dmg*bon)
-            if(activeGenre==='RIFF_METAL')dmg=Math.round(dmg*1.15)
-            if(activeGenre==='DOOM_METAL'&&discardsLeft>=fightMaxDiscards)dmg+=act.length*2
-            const fin=strikeMult>1.0?Math.round(dmg*strikeMult):dmg
-            if(fin<=0||!canStrike)return null
-            return (
-              <div style={{fontFamily:"'MBScribblesFont',serif",textAlign:'center',marginTop:-4}}>
-                <div style={{fontSize:9,color:'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Deals</div>
-                <div key={'preview-'+fin} style={{fontSize:26,fontWeight:900,color:'var(--blood)',textShadow:'0 0 12px rgba(196,30,58,0.7)',lineHeight:1,animation:'inkStamp 0.3s ease-out',display:'inline-block'}}>{fin}<span style={{fontSize:12,color:'var(--ink-bone)',marginLeft:3}}>DMG</span></div>
-              </div>
-            )
-          })()}
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:19,fontWeight:900,letterSpacing:2,textTransform:'uppercase',whiteSpace:'nowrap',padding:'18px 6px',background:canStrike?'linear-gradient(180deg, rgba(196,30,58,0.55), rgba(122,15,31,0.3))':'rgba(25,12,5,0.4)',border:canStrike?'2px solid var(--blood)':'1px solid var(--rot)',borderRadius:3,color:canStrike?'var(--ink-bone)':'var(--rot)',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 20px rgba(196,30,58,0.9), 0 2px 4px rgba(0,0,0,0.6)':'none',boxShadow:canStrike?'inset 0 0 32px rgba(196,30,58,0.25), 0 0 24px rgba(196,30,58,0.35)':'none',transition:'all 0.15s',width:'100%',animation:canStrike?'altarBreath 3s ease-in-out infinite':'none'}}>⛧ STRIKE ⛧</button>
+          {/* Strike pips — directly under STRIKE button */}
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'center'}}>
             <PhaseDots left={strikesLeft} total={fightMaxStrikes} color='#c41e3a' wide={true}/>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:strikesLeft>0?'var(--blood)':'var(--rot)',letterSpacing:1}}><span key={'sl-'+strikesLeft} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{strikesLeft}/{fightMaxStrikes}</span></span>
           </div>
+          {/* DAMAGE PREVIEW — below pips, big stamp animation */}
+          {(()=>{
+            // ═══ MIRRORS handleStrike formula EXACTLY (line 5147+) ═══
+            const actives=stage.filter(m=>m&&!m.tooStoned)
+            // 1) base sum (non-Drummer; paranoia is random so excluded from preview)
+            const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===fightMaxStrikes?10:0
+            let dmg=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
+              const effAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
+              const cleanLivingBonus=(chosenPacts.includes('clean_living')&&corruption<15)?3:0
+              return s+effAtk+cleanLivingBonus
+            },0)+p10Bonus
+            // 2) Drummer × dblMult (NOT always ×2 — depends on dblRoll: ≤2=1×, 3-4=1.5×, 5-6=2×)
+            const hasDbl=actives.some(m=>m.role==='Drummer')
+            if(hasDbl&&dblRoll!==null){
+              const dblMult=dblRoll<=2?1.0:dblRoll<=4?1.5:2.0
+              dmg=Math.round(dmg*dblMult)
+            }
+            // 3) Encore: members with encoreReady get a SECOND attack (added separately)
+            const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer').reduce((s,m)=>{
+              const ea=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
+              return s+ea
+            },0)
+            dmg+=encDmg
+            // 4) Band synergy
+            const buf=actives.filter(m=>(m.buffCount||0)>0).length
+            const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1
+            dmg=Math.round(dmg*bon)
+            // 5) Mentor link bonus
+            for(let _mi=0;_mi<stage.length-1;_mi++){
+              const _mn=stage[_mi],_bs=stage[_mi+1]
+              if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue
+              if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){
+                const _em=_bs.mentorMult+(activeStake.mentorBonus||0)
+                const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/12):_mn.atk
+                const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/12):_bs.atk
+                dmg+=Math.round((_ma+_ba)*(_em-1))
+              }
+            }
+            // 6) Wailing Guitar artifact: ×2 on first strike
+            if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===fightMaxStrikes)dmg*=2
+            // 7) Genre bonuses
+            if(activeGenre==='RIFF_METAL')dmg=Math.round(dmg*1.15)
+            if(activeGenre==='DOOM_METAL'&&discardsLeft>=fightMaxDiscards)dmg+=actives.length*2
+            // 8) Strike multiplier
+            const fin=strikeMult>1.0?Math.round(dmg*strikeMult):dmg
+            if(fin<=0||!canStrike)return null
+            return (
+              <div style={{fontFamily:"'MBScribblesFont',serif",textAlign:'center',marginTop:6}}>
+                <div style={{fontSize:11,color:'var(--ink-dim)',letterSpacing:4,textTransform:'uppercase',fontWeight:900}}>Deals</div>
+                <div key={'preview-'+fin} style={{fontSize:42,fontWeight:900,color:'var(--blood)',textShadow:'0 0 18px rgba(196,30,58,0.85), 0 2px 4px rgba(0,0,0,0.7)',lineHeight:1,animation:'damageStamp 0.35s cubic-bezier(0.4,1.6,0.5,1)',display:'inline-block',marginTop:2}}>{fin}<span style={{fontSize:14,color:'var(--ink-bone)',marginLeft:4,letterSpacing:2}}>DMG</span></div>
+              </div>
+            )
+          })()}
         </div>
 
         {/* CARD FAN — centered between panels */}
