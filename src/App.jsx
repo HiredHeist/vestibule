@@ -3008,9 +3008,9 @@ function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chr
   const eMaxHp=scaledMaxHp||enemy.maxHp
   const pct=Math.max(0,(currentHp/eMaxHp)*100),isLow=currentHp<eMaxHp*.35,isCritical=currentHp>0&&currentHp<eMaxHp*.20
   return(
-    <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:200,position:'relative',overflow:bossStrikeAnim?'visible':'hidden',zIndex:bossStrikeAnim?300:1,alignItems:'center'}}>
+    <div style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:200,position:'relative',overflow:bossStrikeAnim?'visible':'hidden',zIndex:bossStrikeAnim?300:1,alignItems:'center'}}>
       {/* BOSS PORTRAIT — circular ritual frame */}
-      <div data-boss-emoji="1" style={{width:200,height:200,flexShrink:0,position:'relative',display:'flex',alignItems:'center',justifyContent:'center',fontSize:90,
+      <div ref={innerRef} data-boss-emoji="1" style={{width:200,height:200,flexShrink:0,position:'relative',display:'flex',alignItems:'center',justifyContent:'center',fontSize:90,
         transform:bossStrikeAnim?bossStrikeAnim.phase==='windup'?'translateY(15px) scale(1.08) rotate(-3deg)':bossStrikeAnim.phase==='launch'?'translateY(-10px) scale(1.15)':bossStrikeAnim.phase==='impact'?'translateY(8px) scale(0.95)':bossStrikeAnim.phase==='return'?'translateY(0px) scale(1.0)':'none':'none',
         transition:bossStrikeAnim?'transform 0.35s cubic-bezier(0.2,0.8,0.3,1.2)':'all 0.5s',
         zIndex:bossStrikeAnim?500:1,
