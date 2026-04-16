@@ -1508,6 +1508,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     "Half off if you don't ask where it came from."
   ]
   const [slyQuoteIndex,setSlyQuoteIndex]=useState(()=>Math.floor(Math.random()*SLY_QUOTES.length))
+  const [tearingPack,setTearingPack]=useState(null) // pack object while tear animation plays
+  const [tearPhase,setTearPhase]=useState(0) // 0=anticipate, 1=rip, 2=fan, 3=sparks
   useEffect(()=>{setBoughtIds([]);setBoughtPackIds([]);setPacksBoughtThisVisit(0);setSlyQuoteIndex(Math.floor(Math.random()*SLY_QUOTES.length))},[shopCards])
   const [openPackModal,setOpenPackModal]=useState(null) // {pack, cards, picksLeft, picked}
   const circleNum=Math.floor(fightIndex/3)+1
@@ -1609,8 +1611,17 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   function handleOpenPack(pack){
     if(!can(pack.cost))return
     if(packsBoughtThisVisit>=1){addLog&&addLog('🛑 Already bought a pack this visit. Come back next time.');return}
-    const {cards,picks}=genPackCards(pack)
-    setOpenPackModal({pack,cards,picksLeft:picks,picked:[]})
+    if(tearingPack)return // guard: already tearing one
+    setTearingPack(pack)
+    setTearPhase(0)
+    setTimeout(()=>setTearPhase(1),200)  // start rip
+    setTimeout(()=>setTearPhase(2),500)  // cards fan
+    setTimeout(()=>setTearPhase(3),800)  // sparks burst
+    setTimeout(()=>{
+      setTearingPack(null);setTearPhase(0)
+      const {cards,picks}=genPackCards(pack)
+      setOpenPackModal({pack,cards,picksLeft:picks,picked:[]})
+    },1000)
   }
 
   function handlePickCard(card){
@@ -2002,9 +2013,77 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     )
   }
 
+  // ── TEARING PACK OVERLAY — Pokemon-style 1s reveal before the picker ──
+  const TearingPackOverlay=()=>{
+    if(!tearingPack)return null
+    const pack=tearingPack
+    const packAc={cassette:'#c87820',cdr:'#6688cc',vinyl:'#cc44ff',rarevinyl:'#ffdd44',cursed:'#cc2222',ritual:'#8844cc',hellforged:'#ff6600',garage:'#44aa44',touring:'#44aacc',demonic:'#cc44ff'}
+    const ac=packAc[pack.id]||'#c87820'
+    const fanTargets=[
+      {dx:-200,dy:30,drot:-18},
+      {dx:-100,dy:6,drot:-9},
+      {dx:0,dy:-4,drot:0},
+      {dx:100,dy:6,drot:9},
+      {dx:200,dy:30,drot:18},
+    ]
+    const sparks=Array.from({length:8},(_,i)=>{
+      const a=(i/8)*Math.PI*2
+      return{sx:Math.cos(a)*170,sy:Math.sin(a)*170}
+    })
+    return(
+      <div style={{position:'absolute',inset:0,zIndex:9700,pointerEvents:'none',
+        display:'flex',alignItems:'center',justifyContent:'center',
+        background:'rgba(0,0,0,0.55)',backdropFilter:'blur(3px)'}}>
+        <div style={{position:'relative',width:260,height:340}}>
+          {/* Pack body — anticipate then rip */}
+          <div style={{position:'absolute',inset:0,
+            background:'linear-gradient(160deg,#12100a 0%,#1e1a0e 40%,#120e08 100%)',
+            border:'3px solid '+ac,borderRadius:10,overflow:'hidden',
+            display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,
+            boxShadow:'0 0 48px '+ac+'cc, inset 0 0 30px rgba(0,0,0,0.5)',
+            animation:tearPhase===0?'packAnticipate 200ms ease-out forwards':'none',
+            transform:tearPhase>=1?'scale(1.12)':undefined,
+            clipPath:tearPhase>=1?'polygon(0 0, 100% 0, 92% 12%, 78% 22%, 86% 36%, 72% 50%, 84% 64%, 70% 78%, 88% 90%, 100% 100%, 0 100%)':'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
+            transition:'clip-path 300ms ease-out'}}>
+            <div style={{fontSize:96,filter:'drop-shadow(0 0 16px '+ac+'99)'}}>{pack.emoji}</div>
+            <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,color:ac,textShadow:'0 0 14px '+ac+'99',letterSpacing:2,textAlign:'center',padding:'0 8px'}}>{pack.name}</div>
+          </div>
+          {/* Foil flash overlay during rip */}
+          {tearPhase===1&&<div style={{position:'absolute',inset:-20,pointerEvents:'none',
+            background:'radial-gradient(circle at 50% 50%, rgba(255,230,120,0.95) 0%, rgba(255,180,50,0.45) 38%, transparent 72%)',
+            animation:'packTearFlash 300ms ease-out forwards',mixBlendMode:'screen'}}/>}
+          {/* Cards fan out */}
+          {tearPhase>=2&&fanTargets.map((t,i)=>(
+            <div key={i} style={{position:'absolute',top:'50%',left:'50%',width:92,height:130,
+              marginLeft:-46,marginTop:-65,
+              background:'linear-gradient(180deg,#2a1408,#0a0604)',
+              border:'2px solid '+ac,borderRadius:6,
+              ['--dx']:t.dx+'px',['--dy']:t.dy+'px',
+              ['--drot']:t.drot+'deg',['--drot-start']:(t.drot*0.3-30)+'deg',
+              animation:'packCardFan 320ms cubic-bezier(0.34,1.56,0.64,1) forwards',
+              animationDelay:(i*50)+'ms',animationFillMode:'both',
+              boxShadow:'0 8px 20px rgba(0,0,0,0.85), 0 0 16px '+ac+'55',
+              display:'flex',alignItems:'center',justifyContent:'center',
+              fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:ac+'cc'}}>⛧</div>
+          ))}
+          {/* Spark particles */}
+          {tearPhase>=3&&sparks.map((s,i)=>(
+            <div key={i} style={{position:'absolute',top:'50%',left:'50%',width:12,height:12,
+              marginLeft:-6,marginTop:-6,borderRadius:'50%',
+              background:'radial-gradient(circle, #ffffff 0%, rgba(255,220,120,0.85) 40%, transparent 70%)',
+              ['--sx']:s.sx+'px',['--sy']:s.sy+'px',
+              animation:'packSparkBurst 220ms ease-out forwards',
+              boxShadow:'0 0 12px rgba(255,230,140,0.9)'}}/>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return(
     <>
     <PackModal/>
+    <TearingPackOverlay/>
     <div style={{position:'absolute',inset:0,zIndex:9500,
       background:'radial-gradient(ellipse at 50% 0%,rgba(28,18,4,1) 0%,rgba(6,4,1,1) 100%)',
       overflow:'hidden',boxSizing:'border-box',height:1080}}>
@@ -2024,8 +2103,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
       <div style={{position:'absolute',top:'62%',left:'30%',width:140,height:140,pointerEvents:'none',zIndex:0,
         background:'radial-gradient(circle, rgba(220,200,180,0.4) 0%, transparent 70%)',
         filter:'blur(6px)',animation:'dustDrift 46s ease-in-out infinite reverse'}}/>
-      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',gap:10,padding:12,
-        fontFamily:"'MBScribblesFont',serif",height:'100%',boxSizing:'border-box'}}>
+      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',gap:8,padding:'10px 12px',
+        fontFamily:"'MBScribblesFont',serif",height:'100%',boxSizing:'border-box',
+        overflowY:'auto',overflowX:'hidden',
+        boxShadow:'inset 0 12px 16px -8px rgba(0,0,0,0.7), inset 0 -12px 16px -8px rgba(0,0,0,0.7)'}}>
 
       {/* ORNAMENTAL FRIEZE — TOP */}
       <div style={{flexShrink:0,height:18,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:16,textAlign:'center',lineHeight:'18px',textTransform:'uppercase',opacity:0.85,userSelect:'none',textShadow:'0 0 8px rgba(196,30,58,0.3)',borderBottom:'1px solid rgba(196,30,58,0.35)',background:'linear-gradient(180deg, rgba(196,30,58,0.18) 0%, transparent 100%)'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧</div>
@@ -2104,7 +2185,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
       </div>
 
       {/* MAIN */}
-      <div style={{flex:1,display:'flex',gap:10,overflow:'hidden',minHeight:0}}>
+      <div style={{flex:'1 0 auto',display:'flex',gap:10,minHeight:0}}>
 
         {/* LEFT COLUMN — gear (FROM THE BACK ROOM) */}
         <div style={{width:240,flexShrink:0,display:shopTab==='cards'||shopTab==='packs'?'none':'flex',flexDirection:'column',gap:6}}>
