@@ -7037,13 +7037,13 @@ function App(){
                 {footerCollapsed&&<div onClick={()=>setFooterCollapsed(false)} style={{display:'flex',alignItems:'center',justifyContent:'center',padding:'2px 20px',flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)',cursor:'pointer'}}><span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#665544',letterSpacing:2}}>▲ SHOW STATS</span></div>}
                 <div style={{display:footerCollapsed?'none':'flex',alignItems:'center',justifyContent:'center',gap:10,padding:'1px 20px 2px',position:'relative',zIndex:5,flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)'}}>
           {/* FOOTER COLLAPSE TOGGLE */}
-          <div onClick={()=>setFooterCollapsed(p=>!p)} style={{position:'absolute',right:8,top:-14,zIndex:10,cursor:'pointer',fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#665544',background:'rgba(20,12,4,0.8)',border:'1px solid rgba(100,80,40,0.2)',borderRadius:3,padding:'1px 8px',letterSpacing:1}}>{'▼ HIDE'}</div>
+          <div onClick={()=>setFooterCollapsed(p=>!p)} style={{position:'absolute',right:8,top:-14,zIndex:10,cursor:'pointer',fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'var(--ink-dim)',background:'rgba(20,12,4,0.85)',border:'1px solid rgba(138,117,96,0.25)',borderRadius:2,padding:'2px 10px',letterSpacing:3,textTransform:'uppercase',transition:'color 0.2s'}} onMouseEnter={e=>e.currentTarget.style.color='var(--ink-bone)'} onMouseLeave={e=>e.currentTarget.style.color='var(--ink-dim)'}>{'▼ Hide'}</div>
           {/* PHASE BANNER — left side, absolute so it never shifts center content */}
-          <div style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:3,textTransform:'uppercase',
-            color:phaseBanner==='play'?'#c8a040':phaseBanner==='strike'?'#ee2222':'#ff4444',
-            textShadow:phaseBanner==='play'?'none':'0 0 12px '+(phaseBanner==='strike'?'rgba(220,0,0,0.6)':'rgba(255,60,60,0.6)'),
-            transition:'color 0.2s',opacity:0.9}}>
-            {phaseBanner==='play'?'⚔ PLAY CARDS':phaseBanner==='strike'?'💥 STRIKING!':'👿 BOSS ATTACKS'}
+          <div style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:4,textTransform:'uppercase',
+            color:phaseBanner==='play'?'var(--ink-dim)':phaseBanner==='strike'?'var(--blood)':'var(--blood)',
+            textShadow:phaseBanner==='play'?'none':'0 0 12px '+(phaseBanner==='strike'?'rgba(196,30,58,0.6)':'rgba(196,30,58,0.6)'),
+            transition:'color 0.2s',opacity:phaseBanner==='play'?0.7:0.95}}>
+            {phaseBanner==='play'?'⛧ Play Cards':phaseBanner==='strike'?'⚔ Striking!':'👿 Boss Attacks'}
           </div>
           {(()=>{
             const act=stage.filter(m=>m&&!m.tooStoned)
@@ -7063,11 +7063,11 @@ function App(){
             if(activeGenre==='DOOM_METAL'&&discardsLeft>=MAX_DISCARDS)dmg+=act.length*2
             const fin=strikeMult>1.0?Math.round(dmg*strikeMult):dmg
             return <>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:27,color:'#c8a060',fontWeight:900,textShadow:'0 0 10px rgba(200,160,60,0.6)'}}>Combined Attack</span>
-              <span key={fin} style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,color:'#cc1111',textShadow:'0 0 20px rgba(180,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block'}}>{fin}</span>
-              {bon>1&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#e8a820',letterSpacing:1}}>+{Math.round((bon-1)*100)}% SYNERGY</span>}
-              <span style={{color:'#e8a820',fontSize:18,textShadow:'0 0 8px rgba(200,160,60,0.5)'}}>⟶</span>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:27,color:'#c8a060',fontWeight:700}}>{enemy.name}</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',fontWeight:900,letterSpacing:3,textTransform:'uppercase'}}>Combined Attack</span>
+              <span key={fin} style={{fontFamily:"'MBScribblesFont',serif",fontSize:44,fontWeight:900,color:'var(--blood)',textShadow:'0 0 24px rgba(196,30,58,0.9), 0 2px 4px rgba(0,0,0,0.8)',animation:'attackPulse 0.5s ease-out',display:'inline-block',lineHeight:1}}>{fin}</span>
+              {bon>1&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'var(--gold)',letterSpacing:2,textTransform:'uppercase',fontWeight:900}}>+{Math.round((bon-1)*100)}% Synergy</span>}
+              <span style={{color:'var(--ink-rust)',fontSize:18}}>⟶</span>
+              <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,color:'var(--ink-bone)',fontWeight:700,textShadow:'0 1px 4px rgba(0,0,0,0.8)'}}>{enemy.name}</span>
 
               {chosenPacts.length>0&&<div style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',display:'flex',gap:4}}>
                 {chosenPacts.filter(Boolean).map(pid=>{const p=PACT_REWARDS.find(r=>r.id===pid);return p?<div key={pid} style={{position:'relative',cursor:'help'}}
@@ -7088,7 +7088,7 @@ function App(){
       {/* ═══ THE ALTAR (cockpit) — unified panel ═══ */}
       <div className="photocopy altar-grain" style={{flex:'0 0 340px',width:1920,maxWidth:1920,background:'linear-gradient(180deg, var(--altar-raised) 0%, var(--altar) 40%, var(--altar) 100%)',position:'relative',zIndex:30}}>
         {/* Ornamental top frieze — runs full width */}
-        <div style={{position:'absolute',top:0,left:0,right:0,height:14,background:'linear-gradient(180deg, rgba(196,30,58,0.25) 0%, transparent 100%)',borderBottom:'1px solid rgba(196,30,58,0.4)',pointerEvents:'none',zIndex:1,fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'var(--ink-rust)',letterSpacing:18,textAlign:'center',lineHeight:'14px',textTransform:'uppercase',opacity:0.7,userSelect:'none'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧</div>
+        <div style={{position:'absolute',top:0,left:0,right:0,height:18,background:'linear-gradient(180deg, rgba(196,30,58,0.35) 0%, rgba(196,30,58,0.08) 70%, transparent 100%)',borderBottom:'1px solid rgba(196,30,58,0.55)',pointerEvents:'none',zIndex:1,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:16,textAlign:'center',lineHeight:'18px',textTransform:'uppercase',opacity:0.85,userSelect:'none',textShadow:'0 0 8px rgba(196,30,58,0.3)'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧</div>
 
         {/* Header: pending embers indicator */}
         <div style={{textAlign:'center',padding:'16px 0 0',position:'relative',zIndex:3,minHeight:20}}>
@@ -7096,13 +7096,13 @@ function App(){
         </div>
 
         {/* LEFT COLUMN: Deck/Discard — transparent, sits on altar */}
-        <div style={{position:'absolute',left:0,top:14,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:10,alignItems:'center',justifyContent:'center',padding:'8px 14px',width:100}}>
+        <div style={{position:'absolute',left:0,top:24,bottom:8,zIndex:60,display:'flex',flexDirection:'column',gap:12,alignItems:'center',justifyContent:'center',padding:'6px 14px',width:100}}>
           <DeckPile count={deck.length} label="Deck" onClick={()=>setDeckViewOpen(true)} cards={deck}/>
           <DeckPile count={discardPile.length} label="Discard" onClick={()=>setDiscardViewOpen(true)} cards={discardPile}/>
         </div>
 
         {/* DRUG PINS — small artifact tiles on altar */}
-        <div style={{position:'absolute',left:110,top:22,bottom:10,zIndex:60,display:'flex',flexDirection:'column',gap:8,alignItems:'center',justifyContent:'center',width:90}}>
+        <div style={{position:'absolute',left:110,top:24,bottom:12,zIndex:60,display:'flex',flexDirection:'column',gap:10,alignItems:'center',justifyContent:'center',width:90}}>
           {/* Shrooms tile */}
           <div style={{position:'relative'}}
             onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='block'}}
@@ -7114,8 +7114,8 @@ function App(){
                 borderRadius:2,color:heldShrooms&&!tripUsedThisFight?'var(--gold)':'var(--rot)',
                 cursor:heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'pointer':'not-allowed',
                 opacity:heldShrooms?1:0.5,textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
-              <span style={{fontSize:22,lineHeight:1}}>🍄</span>
-              <span style={{fontSize:9,letterSpacing:2}}>{heldShrooms?'USE':'—'}</span>
+              <span style={{fontSize:22,lineHeight:1,opacity:heldShrooms?1:0.35,filter:heldShrooms?'none':'grayscale(1)'}}>🍄</span>
+              <span style={{fontSize:9,letterSpacing:2}}>{heldShrooms?'USE':'⛧'}</span>
             </button>
             <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(200,152,56,0.6)',borderRadius:3,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--gold)',marginBottom:6,letterSpacing:2,textTransform:'uppercase'}}>🍄 Magic Mushrooms</div>
@@ -7133,8 +7133,8 @@ function App(){
                 borderRadius:2,color:heldAcid&&!tripUsedThisFight?'#cc88ff':'var(--rot)',
                 cursor:heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'pointer':'not-allowed',
                 opacity:heldAcid?1:0.5,textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
-              <span style={{fontSize:22,lineHeight:1}}>🧪</span>
-              <span style={{fontSize:9,letterSpacing:2}}>{heldAcid?'USE':'—'}</span>
+              <span style={{fontSize:22,lineHeight:1,opacity:heldAcid?1:0.35,filter:heldAcid?'none':'grayscale(1)'}}>🧪</span>
+              <span style={{fontSize:9,letterSpacing:2}}>{heldAcid?'USE':'⛧'}</span>
             </button>
             <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(180,80,220,0.6)',borderRadius:3,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#cc88ff',marginBottom:6,letterSpacing:2,textTransform:'uppercase'}}>🧪 Blotter Acid</div>
@@ -7152,9 +7152,9 @@ function App(){
 
 
         {/* LEFT PANEL: Discard + Embers + Stats — sits on altar */}
-        <div style={{position:'absolute',left:210,top:20,bottom:8,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-evenly',gap:6,padding:'8px 14px',width:190}}>
+        <div style={{position:'absolute',left:210,top:24,bottom:12,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-between',gap:8,padding:'4px 14px 8px',width:190}}>
           <button onClick={handleDiscard} disabled={!canDiscard}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 10px',background:canDiscard?'linear-gradient(180deg, rgba(200,152,56,0.20), rgba(200,152,56,0.08))':'rgba(25,15,5,0.3)',border:canDiscard?'1px solid var(--gold)':'1px solid var(--rot)',borderRadius:3,color:canDiscard?'var(--gold)':'var(--rot)',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(200,152,56,0.5)':'none',transition:'all 0.15s',width:'100%',letterSpacing:4}}>{String.fromCharCode(8595)} DISCARD</button>
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'9px 10px',background:canDiscard?'linear-gradient(180deg, rgba(200,152,56,0.25), rgba(200,152,56,0.08))':'linear-gradient(180deg, rgba(138,117,96,0.08), rgba(138,117,96,0.03))',border:canDiscard?'1px solid var(--gold)':'1px solid rgba(138,117,96,0.35)',borderRadius:3,color:canDiscard?'var(--gold)':'var(--ink-dim)',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(200,152,56,0.5)':'none',transition:'all 0.15s',width:'100%',opacity:canDiscard?1:0.5}}>{String.fromCharCode(8595)} DISCARD</button>
           <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center'}}>
             <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#c89838' wide={true}/>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:discardsLeft>0?'var(--gold)':'var(--rot)'}}>{discardsLeft}/{MAX_DISCARDS}</span>
@@ -7171,7 +7171,7 @@ function App(){
         </div>
 
                 {/* RIGHT PANEL: Strike seal — sits on altar */}
-        <div style={{position:'absolute',right:0,top:20,bottom:8,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:10,padding:'8px 14px',width:140}}>
+        <div style={{position:'absolute',right:12,top:24,bottom:12,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,padding:'8px 8px',width:140}}>
           {strikeMult>1.0&&<div style={{textAlign:'center',padding:'6px 8px',background:strikeMult>=3.0?'linear-gradient(180deg, rgba(196,30,58,0.35), rgba(196,30,58,0.15))':'linear-gradient(180deg, rgba(196,30,58,0.20), rgba(196,30,58,0.08))',border:'1px solid '+(strikeMult>=3.0?'var(--blood)':'rgba(196,30,58,0.5)'),borderRadius:3,width:'100%'}}>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'var(--ink-dim)',letterSpacing:2,textTransform:'uppercase',marginBottom:2}}>Multiplier</div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:strikeMult>=3.0?30:24,fontWeight:900,color:strikeMult>=3.0?'var(--blood)':'var(--ink-bone)',textShadow:strikeMult>=3.0?'0 0 20px rgba(196,30,58,0.9)':'0 0 12px rgba(200,30,60,0.4)',lineHeight:1}}>×{strikeMult.toFixed(2)}</div>
