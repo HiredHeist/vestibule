@@ -54,9 +54,9 @@ Ranked by ship-impact per line of code:
 - [ ] **Fast-forward HOLD spacebar** — speed up while held
 
 ### Visual Feedback (juice)
-- [ ] **Victory fanfare** — golden burst + "VICTORY" slam when boss dies
+- [x] **Victory fanfare — clutchFlash system: "⛧ VICTORY ⛧" / "SOLO VICTORY" / "BY THE SKIN"**
 - [ ] **Boss HP drain animation** — smooth countdown, not instant jump
-- [ ] **Card upgrade shimmer** — persistent golden pulse on upgraded card borders
+- [x] **Card upgrade shimmer — upgradeShimmer keyframe on upgraded cards**
 - [ ] **Member portrait shake** on hit
 - [ ] **Boss low-HP desperation glow**
 - [ ] **Mentor link visual chain**
@@ -64,7 +64,7 @@ Ranked by ship-impact per line of code:
 - [x] **"+×3 ATK active" badge** — shows ×X.XX CHAIN (gold) and/or +N TEMP ATK (purple) above damage preview when live
 
 ### Information & Clarity
-- [ ] **Pact icons in combat** — small row of active pact icons visible
+- [x] **Pact icons in combat — footer row with hover tooltips**
 - [x] **Boss telegraph** — "NEXT: X DMG → target" + special effects, live-calculated under boss name
 - [ ] **Card count remaining** — "2 left in deck" on hover
 - [ ] **Discard pile preview** — click/hover to see what's in there

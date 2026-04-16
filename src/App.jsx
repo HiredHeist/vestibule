@@ -737,6 +737,16 @@ const SQUIGGLE_CSS=`
   0%{transform:translate(0,0) scale(1);opacity:1}
   100%{transform:translate(var(--vfx-dx),var(--vfx-dy)) scale(0);opacity:0}
 }
+@keyframes upgradeShimmer{
+  0%,100%{box-shadow:2px 4px 16px rgba(0,0,0,0.75),0 0 8px rgba(255,200,0,0.2)}
+  50%{box-shadow:2px 4px 16px rgba(0,0,0,0.75),0 0 18px rgba(255,200,0,0.5),0 0 36px rgba(255,200,0,0.15)}
+}
+@keyframes polaroidSlide{
+  0%{transform:translateX(400px) rotate(8deg);opacity:0}
+  15%{transform:translateX(0px) rotate(-3deg);opacity:1}
+  85%{transform:translateX(0px) rotate(-3deg);opacity:1}
+  100%{transform:translateX(400px) rotate(8deg);opacity:0}
+}
 `
 function MemberPortrait({id,size,style,noSquiggle}){
   const src=MEMBER_PORTRAITS[id]
@@ -2516,7 +2526,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
   const bc=card.type==='CORRUPT'?'#aa1111':card.type==='UTILITY'?'#22aa44':card.type==='EMBER'?'#c87820':'#9933cc'
   const glow=card.type==='CORRUPT'?'rgba(170,0,0,0.5)':card.type==='UTILITY'?'rgba(30,160,50,0.5)':card.type==='EMBER'?'rgba(200,120,20,0.5)':'rgba(140,40,200,0.5)'
   const unaffordable=!canAfford&&card.embers>0
-  const shimmerAnim=card.rarity==='Rare'?'holoShimmer 3s ease-in-out infinite':card.rarity==='Uncommon'?'uncommonGlow 2s ease-in-out infinite':''
+  const shimmerAnim=card.upgraded?'upgradeShimmer 2s ease-in-out infinite':card.rarity==='Rare'?'holoShimmer 3s ease-in-out infinite':card.rarity==='Uncommon'?'uncommonGlow 2s ease-in-out infinite':''
   const masteryBorder=mastery.border?{borderTop:'2px solid '+mastery.border,boxShadow:'inset 0 2px 8px '+mastery.glow}:{}
   return(
     <div draggable
@@ -4035,7 +4045,7 @@ function App(){
   const [dragOverSlotIdx,setDragOverSlotIdx]=useState(null) // ghost preview
   const [dragHandIdx,setDragHandIdx]=useState(null)
   const [dragOverHandIdx,setDragOverHandIdx]=useState(null)
-  const [handSort,setHandSort]=useState('none') // 'none'|'embers'|'rarity'
+  const [handSort,setHandSort]=useState(()=>localStorage.getItem('vst_handsort')||'none') // 'none'|'embers'|'rarity'
   const [log,setLog]=useState(['⛧ The gig begins.'])
   const fullRunLogRef=useRef(['⛧ The gig begins.'])
   const [showCombatLog,setShowCombatLog]=useState(false)
@@ -4171,6 +4181,7 @@ function App(){
   const [activeArtifacts,setActiveArtifacts]=useState([]) // max 3
   const [discovered,setDiscovered]=useState(new Set())
   const [newAchievements,setNewAchievements]=useState([])
+  const [polaroidNotif,setPolaroidNotif]=useState(null)
   const [menuView,setMenuView]=useState(null) // null, 'unlocks', 'rules', 'options'
   const [unlockTab,setUnlockTab_]=useState('milestones')
   const [unlockPage,setUnlockPage_]=useState(0)
@@ -4200,8 +4211,7 @@ function App(){
       a.play().catch(()=>{})
     }catch(e){}
   },[sfxVol])
-  const tryAchieve=useCallback((id)=>{if(unlockAchievement(id))setNewAchievements(p=>[...p,id])},[])
-
+  const tryAchieve=useCallback((id)=>{if(unlockAchievement(id)){setNewAchievements(p=>[...p,id]);const a=ACHIEVEMENTS.find(x=>x.id===id);if(a){setPolaroidNotif({emoji:a.emoji,label:a.label});setTimeout(()=>setPolaroidNotif(null),3500)}}},[])
   // ── MUSIC SYSTEM ─────────────────────────────────────────────
   const audioRef=useRef({})
   const currentTrackRef=useRef(null)
@@ -5195,6 +5205,9 @@ function App(){
     const aliveCount=stage.filter(m=>m&&!m.tooStoned).length
     if(aliveCount===1){setClutchFlash({text:'SOLO VICTORY!',color:'#ffd700'});playSfx('big_hit');triggerShake(8,300);setTimeout(()=>setClutchFlash(null),2500)}
     else if(strikesLeft<=0){setClutchFlash({text:'BY THE SKIN OF YOUR TEETH!',color:'#ff4400'});playSfx('big_hit');triggerShake(6,250);setTimeout(()=>setClutchFlash(null),2500)}
+    else{setClutchFlash({text:'⛧ VICTORY ⛧',color:'#ffd700'});triggerShake(6,200);setTimeout(()=>setClutchFlash(null),2000)}
+    // Golden burst particles at boss position
+    const bpos=getCenter(bossRef);spawnParticles(bpos.x,bpos.y,20,'#ffd700',120);spawnParticles(bpos.x,bpos.y,12,'#ff8800',80)
     setStage(function(prev){
       return prev.map(function(m){
         if(m&&!m.tooStoned&&m.keyword==='FRENZIED'){
@@ -7554,6 +7567,16 @@ function App(){
       })()}
       {floats.filter(Boolean).map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
       {vfxParticles.map(p=><div key={p.id} className="vfx-particle" style={{left:p.x,top:p.y,width:p.size,height:p.size,background:p.color,boxShadow:'0 0 '+(p.size*2)+'px '+p.color,animation:'vfxDrift '+p.dur+'ms ease-out forwards','--vfx-dx':p.dx+'px','--vfx-dy':p.dy+'px'}}/>)}
+      {/* ACHIEVEMENT POLAROID — slides in from right */}
+      {polaroidNotif&&<div style={{position:'absolute',top:120,right:40,zIndex:9800,animation:'polaroidSlide 3.5s ease-in-out forwards',pointerEvents:'none'}}>
+        <div style={{width:220,background:'#f5f0e8',padding:'12px 12px 40px',borderRadius:2,boxShadow:'0 8px 40px rgba(0,0,0,0.8),0 0 20px rgba(200,152,56,0.3)',transform:'rotate(-3deg)'}}>
+          <div style={{background:'linear-gradient(180deg,#1a1008,#0a0604)',width:'100%',height:140,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:1}}>
+            <span style={{fontSize:64}}>{polaroidNotif.emoji}</span>
+          </div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'#2a1a0a',textAlign:'center',marginTop:12,fontStyle:'italic',lineHeight:1.3,fontWeight:700}}>{polaroidNotif.label}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#8a7040',textAlign:'center',marginTop:4,letterSpacing:3,textTransform:'uppercase'}}>Achievement Unlocked</div>
+        </div>
+      </div>}
       {projectiles.filter(Boolean).map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))} isBoss={p.isBoss}/>)}
       {dmgBreakdown&&<DamageBreakdown data={dmgBreakdown} onDone={()=>setDmgBreakdown(null)}/>}
 
@@ -7927,9 +7950,9 @@ function App(){
           </div>
           {/* Sort buttons — tight labels with clear hit targets */}
           <div style={{display:'flex',flexDirection:'column',gap:5,marginTop:8,width:'100%'}}>
-            <button onClick={()=>setHandSort(p=>p==='embers'?'none':'embers')}
+            <button onClick={()=>setHandSort(p=>{const n=p==='embers'?'none':'embers';localStorage.setItem('vst_handsort',n);return n})}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,letterSpacing:2.5,textTransform:'uppercase',padding:'6px 8px',background:handSort==='embers'?'linear-gradient(180deg, rgba(200,152,56,0.22), rgba(200,152,56,0.06))':'rgba(15,10,6,0.4)',border:handSort==='embers'?'1px solid var(--gold)':'1px solid rgba(138,117,96,0.25)',borderRadius:2,color:handSort==='embers'?'var(--gold)':'var(--ink-dim)',cursor:'pointer',textAlign:'center',transition:'all 0.15s'}}>⚡ Cost</button>
-            <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
+            <button onClick={()=>setHandSort(p=>{const n=p==='rarity'?'none':'rarity';localStorage.setItem('vst_handsort',n);return n})}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,letterSpacing:2.5,textTransform:'uppercase',padding:'6px 8px',background:handSort==='rarity'?'linear-gradient(180deg, rgba(200,152,56,0.22), rgba(200,152,56,0.06))':'rgba(15,10,6,0.4)',border:handSort==='rarity'?'1px solid var(--gold)':'1px solid rgba(138,117,96,0.25)',borderRadius:2,color:handSort==='rarity'?'var(--gold)':'var(--ink-dim)',cursor:'pointer',textAlign:'center',transition:'all 0.15s'}}>✦ Rarity</button>
           </div>
         </div>
