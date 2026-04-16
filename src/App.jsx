@@ -1988,18 +1988,18 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     const canBuy=can(price)&&!sold&&!visitLocked
     const ac=accent||'#c87820'
     return(
-      <div style={{flex:'1 1 0',display:'flex',flexDirection:'column',paddingTop:12,position:'relative',minHeight:0}}
+      <div style={{flex:'1 1 0',display:'flex',flexDirection:'column',paddingTop:8,position:'relative',minHeight:0,maxHeight:200}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
         {/* Pawn-shop price tag — pinned to top-right, tied by string */}
-        <div style={{position:'absolute',top:-4,right:6,zIndex:15,pointerEvents:'none',transform:hov&&canBuy?'scale(1.08)':'none',transition:'transform 0.12s'}}>
+        <div style={{position:'absolute',top:-6,right:6,zIndex:15,pointerEvents:'none',transform:hov&&canBuy?'scale(1.08)':'none',transition:'transform 0.12s'}}>
           <div style={{position:'absolute',top:6,right:-10,width:12,height:1,background:'#000',opacity:0.8,transform:'rotate(18deg)'}}/>
           <div style={{transform:'rotate('+((id.charCodeAt(0)%7)-3)+'deg)',
             background:canBuy?'#d4b830':'#6a5a18',
             border:'1.5px solid #000',boxShadow:'2px 3px 5px rgba(0,0,0,0.6)',
-            padding:'3px 9px 4px',borderRadius:2,whiteSpace:'nowrap',minWidth:52,textAlign:'center',
+            padding:'2px 8px 3px',borderRadius:2,whiteSpace:'nowrap',minWidth:48,textAlign:'center',
             position:'relative'}}>
-            <div style={{position:'absolute',top:3,left:3,width:5,height:5,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
-            <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:11}}>{price}</span> <WeedLeaf size={12}/>{realPrice(price)}</>:<><WeedLeaf size={12}/> {price}</>}</div>
+            <div style={{position:'absolute',top:3,left:3,width:4,height:4,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:10}}>{price}</span> <WeedLeaf size={11}/>{realPrice(price)}</>:<><WeedLeaf size={11}/> {price}</>}</div>
           </div>
         </div>
         <div onClick={()=>canBuy&&onBuy()}
@@ -2014,18 +2014,18 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             animation:'throbLeft 4.5s ease-in-out infinite'}}>
           {sold&&<SoldOverlay/>}
           {visitLocked&&!sold&&<SoldOverlay label="SOLD OUT THIS VISIT"/>}
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:2,
-            color:ac,textAlign:'center',padding:'6px 4px 0',
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,letterSpacing:2,
+            color:ac,textAlign:'center',padding:'4px 4px 0',
             textTransform:'uppercase',opacity:1,flexShrink:0}}>{label}</div>
-          <div style={{flex:'0 0 28%',display:'flex',alignItems:'center',justifyContent:'center',
-            fontSize:48,filter:hov&&canBuy?'drop-shadow(0 0 12px '+ac+')':'none',
+          <div style={{flex:'0 0 auto',display:'flex',alignItems:'center',justifyContent:'center',padding:'4px 0',
+            fontSize:36,filter:hov&&canBuy?'drop-shadow(0 0 12px '+ac+')':'none',
             transition:'filter 0.15s'}}>{item.emoji}</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:700,
-            color:'#ffe8a0',textAlign:'center',padding:'2px 8px 0',
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,
+            color:'#ffe8a0',textAlign:'center',padding:'0 6px',
             lineHeight:1.2,flexShrink:0}}>{item.name}</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,
-            color:'#d0b880',textAlign:'center',padding:'4px 8px 6px',
-            lineHeight:1.3,flex:1,overflow:'hidden'}}>{item.effect||item.desc||''}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,
+            color:'#d0b880',textAlign:'center',padding:'2px 6px 4px',
+            lineHeight:1.25,flex:1,overflow:'hidden'}}>{item.effect||item.desc||''}</div>
         </div>
       </div>
     )
