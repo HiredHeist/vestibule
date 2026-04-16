@@ -2185,9 +2185,13 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
   const [showTip,setShowTip]=useState(false)
   if(!member){
     return <div ref={innerRef} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}}
-      style={{width:240,height:300,border:`1px dashed ${over?'rgba(232,168,32,0.6)':'rgba(160,100,30,0.22)'}`,borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,background:over?'rgba(100,70,15,0.18)':'rgba(28,16,4,0.14)',transition:'all 0.2s'}}>
-      <div style={{fontSize:28,opacity:.1}}>⛧</div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'rgba(160,100,30,0.28)',fontStyle:'italic'}}>empty</div>
+      style={{width:240,height:340,border:over?'1px dashed rgba(232,168,32,0.5)':'1px dashed rgba(90,56,32,0.18)',borderRadius:4,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,background:over?'rgba(100,70,15,0.10)':'transparent',transition:'all 0.2s',position:'relative'}}>
+      {/* Faint pentagram seal */}
+      <svg width="80" height="80" viewBox="0 0 80 80" style={{opacity:over?0.35:0.12}}>
+        <circle cx="40" cy="40" r="32" fill="none" stroke="var(--ink-rust)" strokeWidth="0.8"/>
+        <path d="M 40 12 L 65 58 L 16 30 L 64 30 L 15 58 Z" fill="none" stroke="var(--ink-rust)" strokeWidth="0.8"/>
+      </svg>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,letterSpacing:4,color:'var(--ink-rust)',textTransform:'uppercase',opacity:over?0.7:0.25}}>Empty</div>
     </div>
   }
   const st=member.tooStoned
@@ -2195,7 +2199,7 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
   const buffCount=member.buffCount||0
   return(
     <div ref={innerRef} draggable onDragStart={onDragStart} onClick={onQuickPlay} onDragOver={e=>{e.preventDefault();setOver(true)}} onDragLeave={()=>setOver(false)} onDrop={e=>{setOver(false);onDrop&&onDrop(e)}} onMouseEnter={()=>setShowTip(true)} onMouseLeave={()=>setShowTip(false)}
-      style={{width:290,height:360,display:'flex',flexDirection:'column',background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg,#1c1208,#0a0704)',
+      style={{width:240,height:340,display:'flex',flexDirection:'column',background:st?'linear-gradient(180deg,#1a1a1a,#0a0a0a)':'linear-gradient(180deg, var(--altar-raised), var(--altar-recess))',
         border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':mentorState==='active'?'3px solid #ffd700':mentorState==='broken'?'2px solid #555':mentorState==='mentor'?'2px solid #ffd700':bondColor?'2px solid '+bondColor:over?'2px solid #e8a820':st?'1px solid #333':member.demonic?'2px solid #ffd700':member.mythic?'2px solid #cc44ff':member.foil?'2px solid #88ccff':'1px solid rgba(190,120,25,0.08)',
         borderRadius:6,
         boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':mentorState==='active'&&!st?'0 0 40px rgba(255,215,0,0.9),0 6px 24px rgba(0,0,0,0.85)':mentorState==='mentor'&&!st?'0 0 22px rgba(255,215,0,0.5),0 6px 24px rgba(0,0,0,0.85)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':!st&&member.demonic?'0 0 25px rgba(255,200,0,0.5),0 6px 24px rgba(0,0,0,0.85)':!st&&member.mythic?'0 0 25px rgba(200,0,255,0.4),0 6px 24px rgba(0,0,0,0.85)':!st&&member.foil?'0 0 20px rgba(100,180,255,0.35),0 6px 24px rgba(0,0,0,0.85)':'0 4px 20px rgba(0,0,0,0.9),0 0 1px rgba(190,120,25,0.3)',
@@ -2221,37 +2225,40 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
         textShadow:member.demonic?'0 0 8px rgba(255,200,0,0.9)':member.mythic?'0 0 8px rgba(200,0,255,0.9)':'0 0 8px rgba(100,180,255,0.9)'}}>
         {member.demonic?'⛧ DEMONIC':member.mythic?'✦ MYTHIC':'✨ FOIL'}
       </div>}
-      <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative',minHeight:120,overflow:'hidden'}}>
-        {STAGE_PORTRAITS[member.id]?<img className={animPhase==='idle'?'':'squiggle'} src={animPhase==='idle'&&IDLE_PORTRAITS[member.id]?IDLE_PORTRAITS[member.id]:STAGE_PORTRAITS[member.id]} alt={member.id} style={{width:'85%',height:'95%',objectFit:'contain',objectPosition:'center center',imageRendering:'pixelated'}}/>:member.emoji}
+      <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:68,background:'linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.45))',position:'relative',minHeight:200,overflow:'hidden'}}>
+        {STAGE_PORTRAITS[member.id]?<img className={animPhase==='idle'?'':'squiggle'} src={animPhase==='idle'&&IDLE_PORTRAITS[member.id]?IDLE_PORTRAITS[member.id]:STAGE_PORTRAITS[member.id]} alt={member.id} style={{width:'95%',height:'95%',objectFit:'contain',objectPosition:'center center',imageRendering:'pixelated'}}/>:member.emoji}
         {st&&<div style={{position:'absolute',top:4,right:4,fontSize:22}}>💨</div>}
-        {isAttacking&&<div style={{position:'absolute',inset:0,background:strikeAnim?'rgba(255,80,0,0.3)':'rgba(255,50,0,0.12)',animation:strikeAnim?'pulse 0.15s ease infinite alternate':'pulse 0.4s ease infinite alternate'}}/>}
+        {isAttacking&&<div style={{position:'absolute',inset:0,background:strikeAnim?'rgba(196,30,58,0.3)':'rgba(196,30,58,0.12)',animation:strikeAnim?'pulse 0.15s ease infinite alternate':'pulse 0.4s ease infinite alternate'}}/>}
+        {/* Name overlay on portrait bottom */}
+        <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'6px 6px 4px',background:'linear-gradient(180deg, transparent, rgba(10,6,8,0.9))',fontFamily:"'BogartsMetalFont',cursive",fontSize:26,color:st?'var(--rot)':'var(--ink-bone)',textAlign:'center',lineHeight:1,textShadow:'0 2px 6px rgba(0,0,0,0.9)'}}>{member.name}</div>
       </div>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:st?'#555':'#e8d8a0',textAlign:'center',padding:'8px 6px 3px',lineHeight:1}}>{member.name}</div>
-      {ghostCard&&!st&&<div style={{position:'absolute',top:4,left:'50%',transform:'translateX(-50%)',zIndex:30,fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#44ff44',background:'rgba(0,40,0,0.9)',border:'1px solid #44ff44',borderRadius:4,padding:'2px 8px',whiteSpace:'nowrap',animation:'fadeIn 0.15s ease'}}>
-        {ghostCard.id==='battlecry'||ghostCard.id==='heavyriff'?'+1 ATK':ghostCard.id==='amp'?'x2 ATK':ghostCard.id==='newstrings'?'+2 HP':ghostCard.id==='roadie'?'+Shield':ghostCard.id==='encore'?'Encore!':ghostCard.id==='darktuning'?'+ATK(corr)':ghostCard.id==='crowdsurf'?'Draw+ATK':ghostCard.id==='wakeup'?'+2 HP all':ghostCard.effect?ghostCard.effect.slice(0,25)+'...':'PLAY'}
+      {ghostCard&&!st&&<div style={{position:'absolute',top:4,left:'50%',transform:'translateX(-50%)',zIndex:30,fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:'var(--ink-bone)',background:'rgba(10,40,10,0.92)',border:'1px solid #44ff44',borderRadius:3,padding:'3px 8px',whiteSpace:'nowrap',animation:'fadeIn 0.15s ease',letterSpacing:2,textTransform:'uppercase'}}>
+        {ghostCard.id==='battlecry'||ghostCard.id==='heavyriff'?'+1 ATK':ghostCard.id==='amp'?'×2 ATK':ghostCard.id==='newstrings'?'+2 HP':ghostCard.id==='roadie'?'+ Shield':ghostCard.id==='encore'?'Encore!':ghostCard.id==='darktuning'?'+ATK (corr)':ghostCard.id==='crowdsurf'?'Draw + ATK':ghostCard.id==='wakeup'?'+2 HP all':ghostCard.effect?ghostCard.effect.slice(0,22)+'…':'Play'}
       </div>}
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,letterSpacing:1.5,color:st?'#444':'#8a7a50',textAlign:'center',padding:'4px 4px 8px',textTransform:'uppercase'}}>{member.role}</div>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 16px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
-        <div style={{textAlign:'center'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:st?'#555':'#ee2222',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>ATK</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,lineHeight:1,color:st?'#555':'#ee2222',textShadow:st?'none':'0 0 12px rgba(200,0,0,0.6)'}}>{(()=>{
+      {/* Role strip — tight */}
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,letterSpacing:3,color:st?'var(--rot)':'var(--ink-dim)',textAlign:'center',padding:'4px 4px 2px',textTransform:'uppercase',background:'rgba(10,6,8,0.6)',borderTop:'1px solid rgba(90,56,32,0.25)'}}>{member.role}</div>
+      {/* Footer — single compact row */}
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 12px',background:'rgba(10,6,8,0.85)',borderTop:'1px solid rgba(90,56,32,0.3)'}}>
+        <div style={{textAlign:'center',minWidth:32}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:st?'var(--rot)':'var(--blood)',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>ATK</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:26,fontWeight:900,lineHeight:1,color:st?'var(--rot)':'var(--blood)',textShadow:st?'none':'0 0 10px rgba(196,30,58,0.5)'}}>{(()=>{
             if(st)return member.atk
             const base=ALL_MUSICIANS.find(mu=>mu.id===member.id)
             const baseAtk=base?base.atk+(member.demonic?4:member.mythic?2:member.foil?1:0):member.atk
             const permBonus=member.atk-baseAtk
             const corrBonus=member.keyword==='CORRUPT'&&corruption>0?Math.floor(corruption/12):0
             const totalBonus=permBonus+corrBonus
-            if(totalBonus>0)return <>{baseAtk}<span style={{fontSize:22,color:'#ff8800'}}>+{totalBonus}</span></>
+            if(totalBonus>0)return <>{baseAtk}<span style={{fontSize:18,color:'var(--gold)'}}>+{totalBonus}</span></>
             return member.atk
           })()}</div>
         </div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:st?'#555':'#e8a820',fontWeight:700,letterSpacing:1,textAlign:'center'}}>{member.keyword}</div>
-        <div style={{textAlign:'center'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:st?'#555':nearDeath?'#ff2200':'#33dd33',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>HP</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:36,fontWeight:900,lineHeight:1,color:st?'#555':nearDeath?'#ff2200':'#33dd33',textShadow:st?'none':nearDeath?'0 0 16px rgba(255,0,0,0.8)':'0 0 12px rgba(0,190,0,0.5)'}}>{member.hp}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:st?'var(--rot)':'var(--gold)',fontWeight:900,letterSpacing:2,textAlign:'center',textTransform:'uppercase'}}>{member.keyword}</div>
+        <div style={{textAlign:'center',minWidth:32}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:st?'var(--rot)':nearDeath?'var(--blood)':'#33dd33',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>HP</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,lineHeight:1,color:st?'var(--rot)':nearDeath?'var(--blood)':'#33dd33',textShadow:st?'none':nearDeath?'0 0 12px rgba(196,30,58,0.7)':'0 0 10px rgba(0,190,0,0.4)'}}>{member.hp}</div>
         </div>
       </div>
-      <div style={{height:5,background:'rgba(0,0,0,0.5)',borderRadius:'0 0 6px 6px'}}><div style={{height:'100%',borderRadius:'0 0 6px 6px',background:st?'#333':'linear-gradient(90deg,#003800,#33dd33)',width:`${(member.hp/member.maxHp)*100}%`,transition:'width 0.4s ease'}}/></div>
+      <div style={{height:4,background:'rgba(0,0,0,0.7)',borderRadius:'0 0 4px 4px'}}><div style={{height:'100%',borderRadius:'0 0 4px 4px',background:st?'var(--rot)':'linear-gradient(90deg,#003800,#33dd33)',width:`${(member.hp/member.maxHp)*100}%`,transition:'width 0.4s ease'}}/></div>
     </div>
   )
 }
@@ -2665,30 +2672,66 @@ function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chr
   const eMaxHp=scaledMaxHp||enemy.maxHp
   const pct=Math.max(0,(currentHp/eMaxHp)*100),isLow=currentHp<eMaxHp*.35,isCritical=currentHp>0&&currentHp<eMaxHp*.20
   return(
-    <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:180,position:'relative',overflow:bossStrikeAnim?'visible':'hidden',zIndex:bossStrikeAnim?300:1}}>
-      <div data-boss-emoji="1" style={{width:180,flexShrink:0,background:'radial-gradient(circle at 40% 35%,#3a0000,#080000)',border:`3px solid ${isLow?'#ff2222':'rgba(140,40,15,0.85)'}`,borderRadius:'6px 0 0 6px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:90,boxShadow:isLow?'0 0 40px rgba(220,0,0,0.7),0 0 80px rgba(150,0,0,0.3)':'0 0 20px rgba(120,0,0,0.5),0 0 40px rgba(80,0,0,0.2)',position:'relative',overflow:bossStrikeAnim?'visible':'hidden',
+    <div ref={innerRef} style={{display:'flex',gap:0,animation:isWiggling?'wiggle 0.45s ease':'none',width:'100%',minHeight:200,position:'relative',overflow:bossStrikeAnim?'visible':'hidden',zIndex:bossStrikeAnim?300:1,alignItems:'center'}}>
+      {/* BOSS PORTRAIT — circular ritual frame */}
+      <div data-boss-emoji="1" style={{width:200,height:200,flexShrink:0,position:'relative',display:'flex',alignItems:'center',justifyContent:'center',fontSize:90,
         transform:bossStrikeAnim?bossStrikeAnim.phase==='windup'?'translateY(15px) scale(1.08) rotate(-3deg)':bossStrikeAnim.phase==='launch'?'translateY(-10px) scale(1.15)':bossStrikeAnim.phase==='impact'?'translateY(8px) scale(0.95)':bossStrikeAnim.phase==='return'?'translateY(0px) scale(1.0)':'none':'none',
-        transition:bossStrikeAnim?'transform 0.35s cubic-bezier(0.2,0.8,0.3,1.2), box-shadow 0.3s':'all 0.5s',
+        transition:bossStrikeAnim?'transform 0.35s cubic-bezier(0.2,0.8,0.3,1.2)':'all 0.5s',
         zIndex:bossStrikeAnim?500:1,
-        filter:bossStrikeAnim&&(bossStrikeAnim.phase==='launch'||bossStrikeAnim.phase==='impact')?'drop-shadow(0 0 40px rgba(255,0,0,0.9))':'none',
-        alignSelf:'stretch'}}>
-        {BOSS_PORTRAITS[enemy.id]?<img src={enemy.id==='lucifer'&&luciferPhase===2?'/vestibule/bosses/lucifer_p2.png':BOSS_PORTRAITS[enemy.id]} alt={enemy.name} style={{width:120,height:120,objectFit:'contain',imageRendering:'pixelated'}}/>:enemy.emoji}
-        {isLow&&<div style={{position:'absolute',inset:0,background:'rgba(120,0,0,0.2)',animation:'pulse 1.2s ease infinite alternate'}}/>}
-        {debuff>0&&<div style={{position:'absolute',bottom:4,right:4,background:'rgba(0,80,160,0.9)',border:'1px solid #4488ff',borderRadius:4,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#88aaff'}}>-{debuff}dmg</div>}
+        filter:bossStrikeAnim&&(bossStrikeAnim.phase==='launch'||bossStrikeAnim.phase==='impact')?'drop-shadow(0 0 40px rgba(255,0,0,0.9))':'drop-shadow(0 0 24px rgba(196,30,58,'+(isLow?'0.7':'0.4')+'))'}}>
+        {/* Outer rune circle — ritualistic blood-red */}
+        <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',animation:isLow?'altarBreath 1.5s ease-in-out infinite':'altarBreath 6s ease-in-out infinite'}} viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="94" fill="none" stroke={isLow?'#c41e3a':'rgba(196,30,58,0.55)'} strokeWidth="1" strokeDasharray="3 2"/>
+          <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(196,30,58,0.35)" strokeWidth="0.6"/>
+          {/* Cardinal sigil marks at 12/3/6/9 */}
+          <text x="100" y="14" textAnchor="middle" fontFamily="MBScribblesFont" fontSize="14" fill="rgba(196,30,58,0.7)">⛧</text>
+          <text x="192" y="104" textAnchor="middle" fontFamily="MBScribblesFont" fontSize="12" fill="rgba(196,30,58,0.5)">✠</text>
+          <text x="100" y="194" textAnchor="middle" fontFamily="MBScribblesFont" fontSize="14" fill="rgba(196,30,58,0.7)">⛧</text>
+          <text x="8" y="104" textAnchor="middle" fontFamily="MBScribblesFont" fontSize="12" fill="rgba(196,30,58,0.5)">✠</text>
+        </svg>
+        {/* Inner portrait area */}
+        <div style={{width:150,height:150,borderRadius:'50%',background:'radial-gradient(circle at 40% 35%, #2a0408, #080204)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',position:'relative',boxShadow:isLow?'inset 0 0 30px rgba(196,30,58,0.4), 0 0 30px rgba(196,30,58,0.5)':'inset 0 0 20px rgba(0,0,0,0.8)'}}>
+          {BOSS_PORTRAITS[enemy.id]?<img src={enemy.id==='lucifer'&&luciferPhase===2?'/vestibule/bosses/lucifer_p2.png':BOSS_PORTRAITS[enemy.id]} alt={enemy.name} style={{width:130,height:130,objectFit:'contain',imageRendering:'pixelated'}}/>:<span style={{fontSize:80}}>{enemy.emoji}</span>}
+          {isLow&&<div style={{position:'absolute',inset:0,background:'rgba(196,30,58,0.15)',animation:'pulse 1.2s ease infinite alternate'}}/>}
+        </div>
+        {debuff>0&&<div style={{position:'absolute',bottom:4,right:4,background:'rgba(0,80,160,0.9)',border:'1px solid #4488ff',borderRadius:4,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#88aaff',zIndex:3}}>-{debuff}dmg</div>}
       </div>
-      <div style={{flex:1,padding:'10px 24px',display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',gap:2}}>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,letterSpacing:4,color:'#ff4422',textTransform:'uppercase',fontWeight:900,textShadow:'0 0 18px rgba(255,60,20,0.9),0 0 40px rgba(200,30,0,0.6)',textAlign:'center'}}>{enemy.circle} · {enemy.subtitle}</div>
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#120804',lineHeight:1,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 1px 1px 0 rgba(0,0,0,0.5)`:'1px 1px 0 rgba(0,0,0,0.5)',textAlign:'center',marginTop:10}}>{enemy.name}</div>
-        <div style={{fontFamily:"'ScratchFont',serif",fontSize:35,color:'#4a0808',fontStyle:'italic',lineHeight:1.2,fontWeight:900,textAlign:'center',marginTop:2,cursor:'help'}} title={enemy.passive}>{enemy.tagline||enemy.passive}</div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#3a0606',letterSpacing:1,fontWeight:900,textAlign:'center'}}>Base damage: {enemy.baseDmg} per Strike</div>
-        <div style={{width:'100%',marginTop:4}}>
-          <div style={{width:'100%',height:26,background:'rgba(50,25,8,0.75)',border:'1px solid rgba(100,55,15,0.6)',borderRadius:2,overflow:'hidden',boxShadow:'inset 0 2px 6px rgba(0,0,0,0.7)',position:'relative'}}>
-            {[25,50,75].map(pp=><div key={pp} style={{position:'absolute',top:0,bottom:0,left:`${pp}%`,width:1,background:'rgba(0,0,0,0.35)',zIndex:2}}/>)}
-            <div style={{height:'100%',background:isLow?'linear-gradient(90deg,#660000,#cc0000,#ff2200)':'linear-gradient(90deg,#7a0000,#aa1100,#cc2200)',width:`${pct}%`,transition:'width 0.7s cubic-bezier(0.4,0,0.2,1)',animation:isCritical?'bossHpCritical 0.5s ease-in-out infinite':'none'}}/>
-            <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'rgba(255,230,180,1)',letterSpacing:3,textShadow:'0 0 8px rgba(0,0,0,0.99),0 1px 3px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)}/{eMaxHp} HP</div>
+
+      {/* BOSS INFO — stripped of parchment backing */}
+      <div style={{flex:1,padding:'10px 24px',display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',gap:6}}>
+        {/* Circle badge */}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,letterSpacing:5,color:'var(--ink-rust)',textTransform:'uppercase',fontWeight:900,textAlign:'center',opacity:0.85}}>{enemy.circle} · {enemy.subtitle}</div>
+
+        {/* Boss name — oversized BogartsMetalFont, bone-white, slight shadow */}
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:54,color:'var(--ink-bone)',lineHeight:1,textShadow:chromaStr>0?`-${chromaStr}px 0 rgba(255,0,0,0.5), ${chromaStr}px 0 rgba(0,80,255,0.4), 0 2px 8px rgba(0,0,0,0.9)`:'0 2px 8px rgba(0,0,0,0.9), 0 0 40px rgba(196,30,58,0.3)',textAlign:'center',transform:'rotate(-0.3deg)'}}>{enemy.name}</div>
+
+        {/* Underline — hand-drawn effect */}
+        <svg width="280" height="6" viewBox="0 0 280 6" style={{marginTop:-2}}>
+          <path d="M 8 3 Q 70 1, 140 3 T 272 3" stroke="var(--blood)" strokeWidth="1" fill="none" opacity="0.6"/>
+          <path d="M 12 4 Q 70 5, 140 4 T 268 4" stroke="var(--blood-deep)" strokeWidth="0.6" fill="none" opacity="0.4"/>
+        </svg>
+
+        {/* Tagline — ScratchFont italic, like a marginalia scribble */}
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'var(--ink-dim)',fontStyle:'italic',lineHeight:1.2,fontWeight:700,textAlign:'center',cursor:'help',maxWidth:520}} title={enemy.passive}>"{enemy.tagline||enemy.passive}"</div>
+
+        {/* Base damage — small MBScribbles */}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'var(--ink-rust)',letterSpacing:3,fontWeight:900,textAlign:'center',textTransform:'uppercase'}}>Base Damage · {enemy.baseDmg} per Strike</div>
+
+        {/* HP SCROLL — hand-drawn ribbon with stamped fraction */}
+        <div style={{width:'100%',maxWidth:540,marginTop:6,position:'relative'}}>
+          {/* Scroll ends — left */}
+          <div style={{position:'absolute',left:-8,top:'50%',transform:'translateY(-50%)',width:16,height:30,background:'linear-gradient(180deg, var(--ink-rust), var(--altar))',border:'1px solid var(--blood-deep)',borderRadius:'3px 1px 1px 3px',zIndex:2,boxShadow:'0 0 6px rgba(0,0,0,0.6)'}}/>
+          {/* Scroll ends — right */}
+          <div style={{position:'absolute',right:-8,top:'50%',transform:'translateY(-50%)',width:16,height:30,background:'linear-gradient(180deg, var(--ink-rust), var(--altar))',border:'1px solid var(--blood-deep)',borderRadius:'1px 3px 3px 1px',zIndex:2,boxShadow:'0 0 6px rgba(0,0,0,0.6)'}}/>
+          {/* Scroll body */}
+          <div style={{width:'100%',height:26,background:'linear-gradient(180deg, #1a0608, #0f0406)',border:'1px solid var(--blood-deep)',borderRadius:2,overflow:'hidden',position:'relative',boxShadow:'inset 0 2px 4px rgba(0,0,0,0.8), 0 1px 4px rgba(0,0,0,0.6)'}}>
+            {[25,50,75].map(pp=><div key={pp} style={{position:'absolute',top:0,bottom:0,left:`${pp}%`,width:1,background:'rgba(196,30,58,0.25)',zIndex:2}}/>)}
+            {/* HP fill — blood red with ink texture */}
+            <div style={{height:'100%',background:isLow?'linear-gradient(90deg,#660000,#c41e3a,#ff2200)':'linear-gradient(90deg,#7a0f1f,#a41528,#c41e3a)',width:`${pct}%`,transition:'width 0.7s cubic-bezier(0.4,0,0.2,1)',animation:isCritical?'bossHpCritical 0.5s ease-in-out infinite':'none',boxShadow:'inset 0 0 8px rgba(100,0,0,0.5)'}}/>
+            {/* Stamped fraction */}
+            <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--ink-bone)',letterSpacing:3,textShadow:'0 0 6px rgba(0,0,0,0.99),0 1px 2px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)} / {eMaxHp} HP</div>
           </div>
         </div>
-
       </div>
     </div>
   )
@@ -6885,9 +6928,9 @@ function App(){
         addLog('📋 Setlist locked in.')
       }} onClose={()=>setSetlistOpen(false)}/>}
       {/* BATTLE AREA — unified dark zone */}
-      <div style={{flex:1,margin:'0',borderRadius:'4px 4px 0 0',position:'relative',overflow:'visible',zIndex:10,background:'rgba(4,2,6,0.6)',border:'none',boxShadow:'inset 0 0 80px rgba(0,0,0,0.5)',display:'flex',flexDirection:'column'}}>
-        <div style={{padding:'6px 16px 4px',position:'relative',zIndex:bossStrikeAnim?300:5,display:'flex',justifyContent:'center',flexShrink:0,overflow:'visible'}}>
-          <div style={{width:'100%',maxWidth:950,background:'rgba(8,0,0,0.45)',border:'1px solid rgba(160,20,0,0.5)',borderRadius:8,padding:'0',overflow:bossStrikeAnim?'visible':'hidden',boxShadow:'0 0 20px rgba(150,0,0,0.3)',position:'relative',zIndex:bossStrikeAnim?300:1}}>
+      <div style={{flex:1,margin:'0',position:'relative',overflow:'visible',zIndex:10,background:'transparent',border:'none',display:'flex',flexDirection:'column'}}>
+        <div style={{padding:'10px 16px 4px',position:'relative',zIndex:bossStrikeAnim?300:5,display:'flex',justifyContent:'center',flexShrink:0,overflow:'visible'}}>
+          <div style={{width:'100%',maxWidth:1000,padding:'0',overflow:bossStrikeAnim?'visible':'hidden',position:'relative',zIndex:bossStrikeAnim?300:1}}>
             <BossSection enemy={enemy} bossStrikeAnim={bossStrikeAnim} currentHp={enemyHp} scaledMaxHp={scaledMaxHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll} luciferPhase={luciferPhase}/>
           </div>
         </div>
