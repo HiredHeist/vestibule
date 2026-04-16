@@ -1497,7 +1497,18 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   const [boughtPackIds,setBoughtPackIds]=useState([])
   const [packsBoughtThisVisit,setPacksBoughtThisVisit]=useState(0)
   const [shopTab,setShopTab]=useState('all') // all, cards, packs, gear
-  useEffect(()=>{setBoughtIds([]);setBoughtPackIds([]);setPacksBoughtThisVisit(0)},[shopCards])
+  const SLY_QUOTES=[
+    "Five-finger discount on everything tonight.",
+    "Don't ask, don't tell, don't bring cops.",
+    "Got these off a guy who 'doesn't need em anymore'.",
+    "You buy, you walk, you forget you saw me.",
+    "I take stash, herb, blood — your call, kid.",
+    "Cash only. And by cash I mean stash.",
+    "My cousin works at the venue. Don't worry about it.",
+    "Half off if you don't ask where it came from."
+  ]
+  const [slyQuoteIndex,setSlyQuoteIndex]=useState(()=>Math.floor(Math.random()*SLY_QUOTES.length))
+  useEffect(()=>{setBoughtIds([]);setBoughtPackIds([]);setPacksBoughtThisVisit(0);setSlyQuoteIndex(Math.floor(Math.random()*SLY_QUOTES.length))},[shopCards])
   const [openPackModal,setOpenPackModal]=useState(null) // {pack, cards, picksLeft, picked}
   const circleNum=Math.floor(fightIndex/3)+1
   const hungerActive=corruption>=50
@@ -1620,19 +1631,32 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   function SoldOverlay({label}){
     const long=!!label&&label.length>5
     const txt=label||'SOLD!'
+    const stampColor='#b81818'
     return(
       <div style={{position:'absolute',inset:0,zIndex:10,
         background:'rgba(0,0,0,0.55)',borderRadius:8,
         display:'flex',alignItems:'center',justifyContent:'center',
-        pointerEvents:'none'}}>
+        pointerEvents:'none',overflow:'hidden'}}>
+        {/* ink splatter — low-opacity red dots scattered around */}
+        {long&&<div style={{position:'absolute',inset:0,pointerEvents:'none',
+          background:'radial-gradient(circle at 22% 38%, rgba(184,24,24,0.28) 0 2px, transparent 3px),'+
+            'radial-gradient(circle at 78% 28%, rgba(184,24,24,0.22) 0 3px, transparent 4px),'+
+            'radial-gradient(circle at 18% 72%, rgba(184,24,24,0.20) 0 2px, transparent 3px),'+
+            'radial-gradient(circle at 82% 74%, rgba(184,24,24,0.25) 0 4px, transparent 5px),'+
+            'radial-gradient(circle at 52% 18%, rgba(184,24,24,0.18) 0 2px, transparent 3px),'+
+            'radial-gradient(circle at 46% 88%, rgba(184,24,24,0.22) 0 3px, transparent 4px)'}}/>}
         <div style={{
-          fontFamily:"'MBScribblesFont',serif",fontSize:long?20:38,fontWeight:900,
-          color:'#cc1111',letterSpacing:long?2:4,
-          textShadow:'0 0 20px rgba(200,0,0,0.8),2px 2px 0 rgba(0,0,0,0.9)',
-          transform:long?'rotate(-18deg)':'rotate(-45deg)',
-          border:'4px solid #cc1111',padding:long?'6px 12px':'6px 14px',
-          borderRadius:4,background:'rgba(0,0,0,0.4)',
-          whiteSpace:'nowrap'}}>{txt}</div>
+          fontFamily:"'MBScribblesFont',serif",
+          fontSize:long?28:38,fontWeight:900,
+          color:stampColor,letterSpacing:long?3:4,
+          textShadow:'1px 1px 0 rgba(120,12,12,0.85), -1px 0 2px rgba(184,24,24,0.7), 2px 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(184,24,24,0.5)',
+          transform:long?'rotate(-15deg) translate(-4px,3px)':'rotate(-45deg)',
+          border:'4px solid '+stampColor,padding:long?'8px 16px':'6px 14px',
+          borderRadius:4,background:'rgba(0,0,0,0.35)',
+          filter:'blur(0.3px) contrast(1.15)',
+          whiteSpace:long?'normal':'nowrap',
+          maxWidth:long?'82%':'auto',textAlign:'center',lineHeight:1.05,
+          boxShadow:'0 0 0 1px rgba(184,24,24,0.3), inset 0 0 8px rgba(184,24,24,0.2)'}}>{txt}</div>
       </div>
     )
   }
@@ -1792,14 +1816,20 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     return(
       <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',position:'relative',paddingTop:24}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
-        <div style={{position:'absolute',top:0,left:'50%',transform:'translateX(-50%)',zIndex:15,display:'flex',flexDirection:'column',alignItems:'center'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,letterSpacing:3,color:'var(--ink-dim)',textTransform:'uppercase',marginBottom:-2,opacity:0.8}}>Price</div>
-          <div style={{background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
-            border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
-            padding:'4px 16px',whiteSpace:'nowrap',
-            fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-            color:canBuy?'#55ee55':'#554428',
-            boxShadow:canBuy?'0 2px 16px rgba(50,200,50,0.4)':'none'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.5,fontSize:12}}>{price}</span> 🌿 {realPrice(price)}</>:<>🌿 {price}</>}{hungerActive&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#ff6644',letterSpacing:1,marginTop:-2}}>⚠ HUNGER +25%</div>}</div>
+        {/* Pawn-shop price tag — pinned to top-right corner, tied by string */}
+        <div style={{position:'absolute',top:-6,right:10,zIndex:15,pointerEvents:'none'}}>
+          {/* string from tag to card edge */}
+          <div style={{position:'absolute',top:8,right:-12,width:14,height:1,background:'#000',opacity:0.8,transform:'rotate(18deg)'}}/>
+          <div style={{transform:'rotate('+(((idx*7)%7)-3)+'deg)',
+            background:canBuy?'#d4b830':'#6a5a18',
+            border:'1.5px solid #000',boxShadow:'2px 3px 6px rgba(0,0,0,0.65)',
+            padding:'3px 10px 4px',borderRadius:2,whiteSpace:'nowrap',minWidth:58,textAlign:'center',
+            position:'relative'}}>
+            {/* hole + string knot */}
+            <div style={{position:'absolute',top:3,left:4,width:6,height:6,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{price}</span> 🌿{realPrice(price)}</>:<>🌿 {price}</>}</div>
+            {hungerActive&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:9,color:'#8a1010',fontWeight:900,letterSpacing:0.5,marginTop:-1}}>⚠ HUNGER +25%</div>}
+          </div>
         </div>
         <div onClick={()=>canBuy&&!bought&&buyCard(card)}
           style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',position:'relative',
@@ -1870,14 +1900,18 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     return(
       <div style={{flex:1,display:'flex',flexDirection:'column',paddingTop:20,position:'relative'}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
-        <div style={{position:'absolute',top:0,left:'50%',
-          transform:'translateX(-50%)'+(hov&&canBuy?' scale(1.08)':''),
-          background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
-          border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
-          padding:'3px 14px',zIndex:15,whiteSpace:'nowrap',
-          fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,
-          color:canBuy?'#55ee55':'#554428',
-          transition:'transform 0.12s'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:10}}>{price}</span> 🌿 {realPrice(price)}</>:<>🌿 {price}</>}</div>
+        {/* Pawn-shop price tag — pinned to top-right, tied by string */}
+        <div style={{position:'absolute',top:-4,right:6,zIndex:15,pointerEvents:'none',transform:hov&&canBuy?'scale(1.08)':'none',transition:'transform 0.12s'}}>
+          <div style={{position:'absolute',top:6,right:-10,width:12,height:1,background:'#000',opacity:0.8,transform:'rotate(18deg)'}}/>
+          <div style={{transform:'rotate('+((id.charCodeAt(0)%7)-3)+'deg)',
+            background:canBuy?'#d4b830':'#6a5a18',
+            border:'1.5px solid #000',boxShadow:'2px 3px 5px rgba(0,0,0,0.6)',
+            padding:'3px 9px 4px',borderRadius:2,whiteSpace:'nowrap',minWidth:52,textAlign:'center',
+            position:'relative'}}>
+            <div style={{position:'absolute',top:3,left:3,width:5,height:5,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:11}}>{price}</span> 🌿{realPrice(price)}</>:<>🌿 {price}</>}</div>
+          </div>
+        </div>
         <div onClick={()=>canBuy&&onBuy()}
           style={{flex:1,position:'relative',display:'flex',flexDirection:'column',
             background:'linear-gradient(180deg,#1c1408,#0e0a04)',
@@ -1919,15 +1953,17 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     return(
       <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',paddingTop:24,position:'relative'}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
-        <div style={{position:'absolute',top:0,left:'50%',
-          transform:'translateX(-50%)'+(hov&&canBuy?' scale(1.08)':''),zIndex:15,
-          transition:'transform 0.12s',display:'flex',flexDirection:'column',alignItems:'center'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,letterSpacing:3,color:'var(--ink-dim)',textTransform:'uppercase',marginBottom:-2,opacity:0.8}}>Price</div>
-          <div style={{background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
-            border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
-            padding:'4px 16px',whiteSpace:'nowrap',
-            fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-            color:canBuy?'#55ee55':'#554428'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:10}}>{pack.cost}</span> 🌿 {realPrice(pack.cost)}</>:<>🌿 {pack.cost}</>}</div>
+        {/* Pawn-shop price tag — pinned to top-right, tied by string */}
+        <div style={{position:'absolute',top:-6,right:10,zIndex:15,pointerEvents:'none',transform:hov&&canBuy?'scale(1.08)':'none',transition:'transform 0.12s'}}>
+          <div style={{position:'absolute',top:8,right:-12,width:14,height:1,background:'#000',opacity:0.8,transform:'rotate(18deg)'}}/>
+          <div style={{transform:'rotate('+(((idx*5)%7)-3)+'deg)',
+            background:canBuy?'#d4b830':'#6a5a18',
+            border:'1.5px solid #000',boxShadow:'2px 3px 6px rgba(0,0,0,0.65)',
+            padding:'3px 10px 4px',borderRadius:2,whiteSpace:'nowrap',minWidth:58,textAlign:'center',
+            position:'relative'}}>
+            <div style={{position:'absolute',top:3,left:4,width:6,height:6,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:12}}>{pack.cost}</span> 🌿{realPrice(pack.cost)}</>:<>🌿 {pack.cost}</>}</div>
+          </div>
         </div>
         <div onClick={()=>canBuy&&handleOpenPack(pack)}
           style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',alignItems:'center',
@@ -1971,25 +2007,47 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     <PackModal/>
     <div style={{position:'absolute',inset:0,zIndex:9500,
       background:'radial-gradient(ellipse at 50% 0%,rgba(28,18,4,1) 0%,rgba(6,4,1,1) 100%)',
-      display:'flex',flexDirection:'column',gap:10,padding:12,
-      fontFamily:"'MBScribblesFont',serif",overflow:'hidden',
-      boxSizing:'border-box',height:1080}}>
+      overflow:'hidden',boxSizing:'border-box',height:1080}}>
+      {/* BACKGROUND ATMOSPHERE — dirty brick stripes, streetlight corners, drifting dust */}
+      <div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:0,
+        backgroundImage:'repeating-linear-gradient(0deg, rgba(80,40,20,0.06) 0 22px, transparent 22px 24px, rgba(60,30,15,0.05) 24px 46px, transparent 46px 48px),'+
+          'repeating-linear-gradient(90deg, rgba(40,20,10,0.07) 0 62px, transparent 62px 64px)',
+        opacity:0.45}}/>
+      <div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:0,
+        background:'radial-gradient(ellipse at 0% 0%, rgba(220,170,60,0.09) 0%, transparent 30%),'+
+          'radial-gradient(ellipse at 100% 0%, rgba(220,170,60,0.08) 0%, transparent 32%),'+
+          'radial-gradient(ellipse at 0% 100%, rgba(180,120,30,0.06) 0%, transparent 34%),'+
+          'radial-gradient(ellipse at 100% 100%, rgba(180,120,30,0.06) 0%, transparent 34%)'}}/>
+      <div style={{position:'absolute',top:'18%',left:'-8%',width:180,height:180,pointerEvents:'none',zIndex:0,
+        background:'radial-gradient(circle, rgba(220,200,180,0.5) 0%, transparent 70%)',
+        filter:'blur(6px)',animation:'dustDrift 32s ease-in-out infinite'}}/>
+      <div style={{position:'absolute',top:'62%',left:'30%',width:140,height:140,pointerEvents:'none',zIndex:0,
+        background:'radial-gradient(circle, rgba(220,200,180,0.4) 0%, transparent 70%)',
+        filter:'blur(6px)',animation:'dustDrift 46s ease-in-out infinite reverse'}}/>
+      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',gap:10,padding:12,
+        fontFamily:"'MBScribblesFont',serif",height:'100%',boxSizing:'border-box'}}>
 
       {/* ORNAMENTAL FRIEZE — TOP */}
       <div style={{flexShrink:0,height:18,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:16,textAlign:'center',lineHeight:'18px',textTransform:'uppercase',opacity:0.85,userSelect:'none',textShadow:'0 0 8px rgba(196,30,58,0.3)',borderBottom:'1px solid rgba(196,30,58,0.35)',background:'linear-gradient(180deg, rgba(196,30,58,0.18) 0%, transparent 100%)'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧</div>
 
-      {/* TOP BAR — STASH · RIBBON+TAGLINE · REROLL · NEXT FIGHT */}
+      {/* TOP BAR — STASH · RIBBON+TAGLINE+SLY · REROLL · NEXT FIGHT */}
       <div style={{flexShrink:0,display:'flex',gap:10,alignItems:'center',padding:'2px 4px'}}>
-        {/* STASH — wax-sealed coin pouch */}
-        <div style={{width:150,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2,padding:'8px 10px',background:'rgba(10,20,10,0.88)',border:'2px solid var(--gold)',borderRadius:8,boxShadow:'0 0 16px rgba(200,160,40,0.28), inset 0 0 12px rgba(60,40,0,0.4)'}}>
+        {/* STASH — crumpled bills (slapped-on sticker, -2deg) */}
+        <div title="Your dirty money."
+          style={{width:150,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2,padding:'8px 10px',
+            background:'linear-gradient(160deg,#1a2010,#0c1408)',
+            border:'2px solid var(--gold)',borderRadius:6,
+            transform:'rotate(-2deg)',
+            boxShadow:'0 0 16px rgba(200,160,40,0.28), inset 0 0 12px rgba(60,40,0,0.4), 2px 3px 8px rgba(0,0,0,0.6)'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'var(--gold)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Stash</div>
           <div style={{display:'flex',alignItems:'center',gap:6}}>
-            <span style={{fontSize:22}}>🌿</span>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:34,fontWeight:900,color:stashColor,lineHeight:1,textShadow:'0 0 10px '+stashColor+'55'}}>{stash}</span>
+            <span style={{fontSize:20}}>💵</span>
+            <span style={{fontSize:16,marginLeft:-2}}>🌿</span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,color:stashColor,lineHeight:1,textShadow:'0 0 10px '+stashColor+'55'}}>{stash}</span>
           </div>
         </div>
 
-        {/* RIBBON + TAGLINE */}
+        {/* RIBBON + TAGLINE + SLY QUOTE */}
         <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2}}>
           <div style={{position:'relative',width:'94%',minWidth:420,maxWidth:820,height:54,display:'flex',alignItems:'center',justifyContent:'center'}}>
             <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:0}} preserveAspectRatio="none" viewBox="0 0 960 54">
@@ -1997,36 +2055,37 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
               <path d="M 60 18 Q 240 15, 480 18 T 900 18" stroke="var(--blood)" strokeWidth="0.7" fill="none" opacity="0.55"/>
               <path d="M 60 36 Q 240 39, 480 36 T 900 36" stroke="var(--blood)" strokeWidth="0.7" fill="none" opacity="0.55"/>
             </svg>
-            <span style={{position:'relative',zIndex:1,fontFamily:"'BogartsMetalFont',cursive",fontSize:34,color:'var(--blood)',letterSpacing:4,textShadow:'0 0 16px rgba(196,30,58,0.95),0 0 40px rgba(150,0,0,0.5)',textTransform:'uppercase',whiteSpace:'nowrap'}}>⚰ The Black Market ⚰</span>
+            <span style={{position:'relative',zIndex:1,fontFamily:"'BogartsMetalFont',cursive",fontSize:34,color:'var(--blood)',letterSpacing:4,textTransform:'uppercase',whiteSpace:'nowrap',animation:'neonFlicker 4.5s ease-in-out infinite'}}>🚬 SLY'S MERCH 🚬</span>
           </div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'var(--ink-dim)',fontStyle:'italic',letterSpacing:1}}>Cards, gear, and questionable substances.</div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'var(--ink-dim)',fontStyle:'italic',letterSpacing:0.5,transform:'rotate(-1deg)'}}>Hey kid... wanna see what fell off the truck?</div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:12,color:'var(--ink-rust)',fontStyle:'italic',letterSpacing:0.3,marginTop:1}}>"{SLY_QUOTES[slyQuoteIndex]}" —Sly</div>
         </div>
 
-        {/* REROLL — pill badge */}
-        <div onClick={onReroll}
+        {/* ANOTHER LOOK (reroll) — pill badge */}
+        <div onClick={onReroll} title="Sly shuffles the merch."
           onMouseEnter={e=>{e.currentTarget.style.animation='none';e.currentTarget.style.background='rgba(55,40,8,0.95)'}}
           onMouseLeave={e=>{e.currentTarget.style.animation='rerollWiggle 3s ease-in-out infinite';e.currentTarget.style.background='rgba(25,18,4,0.92)'}}
-          style={{width:112,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2,padding:'8px 6px',
+          style={{width:128,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2,padding:'8px 6px',
             background:'rgba(25,18,4,0.92)',border:'2px solid rgba(200,150,30,0.85)',borderRadius:8,cursor:'pointer',
             boxShadow:'0 0 16px rgba(180,130,20,0.3)',animation:'rerollWiggle 3s ease-in-out infinite'}}>
-          <span style={{fontSize:20}}>🔄</span>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#e8c040',letterSpacing:2,textTransform:'uppercase'}}>Re-Roll</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'#e8c040',letterSpacing:2,textTransform:'uppercase'}}>🎲 Another Look</span>
           <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'#e8c040',lineHeight:1}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:12}}>{rerollCost}</span> 🌿 {realPrice(rerollCost)}</>:<>🌿 {rerollCost}</>}</span>
         </div>
 
-        {/* NEXT FIGHT — STRIKE-style */}
+        {/* BACK TO THE PIT — blood-dripping */}
         <button onClick={onLeave}
           onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,15,15,0.55)'}}
           onMouseLeave={e=>{e.currentTarget.style.background='rgba(120,8,8,0.35)'}}
-          style={{width:160,flexShrink:0,height:80,
-            fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,
+          style={{width:176,flexShrink:0,height:80,
+            fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:2,
             background:'rgba(120,8,8,0.35)',border:'3px solid var(--blood)',borderRadius:8,
             color:'var(--ink-bone)',cursor:'pointer',textTransform:'uppercase',
             transition:'background 0.15s',
             display:'flex',alignItems:'center',justifyContent:'center',gap:6,
-            boxShadow:'0 0 24px rgba(196,30,58,0.5), inset 0 0 18px rgba(150,0,20,0.25)'}}>
+            animation:'dripGlow 2.2s ease-in-out infinite',
+            boxShadow:'0 0 24px rgba(196,30,58,0.5), 0 6px 18px rgba(120,0,10,0.45), inset 0 0 18px rgba(150,0,20,0.25)'}}>
           <span style={{fontSize:18,color:'var(--blood)',textShadow:'0 0 10px rgba(196,30,58,0.8)'}}>⛧</span>
-          <span>Next Fight</span>
+          <span>🚪 Back to the Pit</span>
           <span style={{fontSize:18,color:'var(--blood)',textShadow:'0 0 10px rgba(196,30,58,0.8)'}}>⛧</span>
         </button>
       </div>
@@ -2047,9 +2106,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
       {/* MAIN */}
       <div style={{flex:1,display:'flex',gap:10,overflow:'hidden',minHeight:0}}>
 
-        {/* LEFT COLUMN — gear (FEATURED SHELVES) */}
-        <div style={{width:240,flexShrink:0,display:shopTab==='cards'||shopTab==='packs'?'none':'flex',flexDirection:'column',gap:8}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:4,color:'var(--gold)',textAlign:'center',textTransform:'uppercase',fontWeight:900,padding:'4px 0 2px',borderBottom:'1px solid rgba(200,152,56,0.35)',textShadow:'0 0 8px rgba(200,152,56,0.4)'}}>⚜ Featured Shelves ⚜</div>
+        {/* LEFT COLUMN — gear (FROM THE BACK ROOM) */}
+        <div style={{width:240,flexShrink:0,display:shopTab==='cards'||shopTab==='packs'?'none':'flex',flexDirection:'column',gap:6}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,letterSpacing:3,color:'var(--gold)',textAlign:'center',textTransform:'uppercase',fontWeight:900,padding:'4px 0 0',textShadow:'0 0 8px rgba(200,152,56,0.4)'}}>🔦 From the Back Room</div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',padding:'0 0 4px',borderBottom:'1px solid rgba(200,152,56,0.35)'}}>(Don't tell the boss.)</div>
           <LeftCard item={recruitPack} price={recruitPack.cost}
             label="Band Recruitment" accent='#e8a820' id='rec' sold={leftBought.rec===true}
             visitLocked={packsBoughtThisVisit>=1&&leftBought.rec!==true}
@@ -2086,8 +2146,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 <div style={{height:7,flexShrink:0,background:'linear-gradient(90deg,#22882244,#44cc44ee,#22882244)',boxShadow:'0 0 12px rgba(40,200,40,0.5)'}}/> 
                 <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,
                   color:'#44cc44',textAlign:'center',marginTop:8,
-                  textShadow:'0 0 18px rgba(60,200,60,0.8)'}}>🌿 The Dealer</div>
-                <div style={{fontFamily:"'ScratchFont',serif",fontSize:12,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',padding:'2px 6px 6px',letterSpacing:0.5}}>"Watch out for the bad batches, kid."</div>
+                  textShadow:'0 0 18px rgba(60,200,60,0.8)'}}>🌿 Sly's Stash</div>
+                <div style={{fontFamily:"'ScratchFont',serif",fontSize:12,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',padding:'2px 6px 6px',letterSpacing:0.5}}>"The good shit. Don't ask where it came from."</div>
                 {/* Mushrooms */}
                 <div onClick={()=>{if(shroomsInStock&&heldShrooms<drugMax&&can(6)){onSpend(6,'dealer',null);onBuyShrooms()}}}
                   style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
@@ -2124,7 +2184,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                     padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
                     fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
                     color:acidInStock&&heldAcid<drugMax&&can(12)?'#55ee55':'#554428'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:9}}>12</span> 🌿 {realPrice(12)}</>:'🌿 12'}</div>
-                  <div style={{fontSize:72}}>🧪</div>
+                  <div style={{fontSize:72,filter:acidInStock&&heldAcid<drugMax?'drop-shadow(0 0 10px rgba(150,50,220,0.6))':'none',animation:acidInStock&&heldAcid<drugMax?'shroomPulse 2.4s ease-in-out infinite':'none'}}>🧪</div>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
                     color:acidInStock?'#cc44ff':'#4a2a6a',marginTop:4}}>
                     {heldAcid>=drugMax?'HOLDING'+(heldAcid>1?' ×'+heldAcid:''):acidInStock?'Blotter Acid':'DRY'}</div>
@@ -2153,10 +2213,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
               justifyContent:'space-between',
               boxShadow:'0 0 30px rgba(130,50,200,0.2)'}}>
               <div>
-                <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:30,
-                  color:'#9944dd',textAlign:'center',marginBottom:8,
-                  textShadow:'0 0 18px rgba(160,80,240,0.8)'}}>🪙 Pawn Shop</div>
-                <div style={{fontSize:36,textAlign:'center',margin:'2px 0 6px'}}>🏧</div>
+                <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,
+                  color:'#9944dd',textAlign:'center',marginBottom:4,
+                  textShadow:'0 0 18px rgba(160,80,240,0.8)'}}>💸 Sly's Buyback</div>
+                <div style={{fontSize:32,textAlign:'center',margin:'2px 0 4px'}}>🏧</div>
                 {/* 2-column rate sheet */}
                 <div style={{padding:'6px 22px',fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#cc88ff',letterSpacing:1}}>
                   {[['Common','1🌿'],['Uncommon','2🌿'],['Rare','4🌿'],['Foil','+3🌿'],['Mythic','+8🌿'],['Member','5🌿'],['Artifact','50% buyback']].map(([k,v])=>(
@@ -2166,7 +2226,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                     </div>
                   ))}
                 </div>
-                <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',marginTop:8,letterSpacing:0.5,padding:'0 12px'}}>
+                <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',marginTop:6,letterSpacing:0.5,padding:'0 12px'}}>
+                  —No questions asked. Sly takes a cut.
+                </div>
+                <div style={{fontFamily:"'ScratchFont',serif",fontSize:10,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',marginTop:2,letterSpacing:0.5,padding:'0 12px',opacity:0.8}}>
                   Max 2 sales per visit · Cannot sell last 2 members
                 </div>
               </div>
@@ -2181,7 +2244,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                   color:pawnSalesLeft>0?'#cc88ff':'#4a2a6a',cursor:pawnSalesLeft>0?'pointer':'not-allowed',textTransform:'uppercase',
                   transition:'background 0.15s',opacity:pawnSalesLeft>0?1:0.5,
                   boxShadow:pawnSalesLeft>0?'0 0 18px rgba(140,60,220,0.3)':'none'}}>
-                💰 Open Pawn Shop ({pawnSalesLeft} left)
+                💸 Sell Your Shit ({pawnSalesLeft} left)
               </button>
             </div>
               {pawnOpen&&<PawnShopModal
@@ -2208,6 +2271,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
 
       {/* ORNAMENTAL FRIEZE — BOTTOM */}
       <div style={{flexShrink:0,height:16,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:16,textAlign:'center',lineHeight:'16px',textTransform:'uppercase',opacity:0.7,userSelect:'none',textShadow:'0 0 8px rgba(196,30,58,0.3)',borderTop:'1px solid rgba(196,30,58,0.35)',background:'linear-gradient(0deg, rgba(196,30,58,0.18) 0%, transparent 100%)'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧</div>
+      </div>
     </div>
     </>
   )
