@@ -737,6 +737,7 @@ const SQUIGGLE_CSS=`
   0%{transform:translate(0,0) scale(1);opacity:1}
   100%{transform:translate(var(--vfx-dx),var(--vfx-dy)) scale(0);opacity:0}
 }
+@keyframes screenFadeFlash{0%{opacity:0}30%{opacity:0.7}100%{opacity:0}}
 @keyframes upgradeShimmer{
   0%,100%{box-shadow:2px 4px 16px rgba(0,0,0,0.75),0 0 8px rgba(255,200,0,0.2)}
   50%{box-shadow:2px 4px 16px rgba(0,0,0,0.75),0 0 18px rgba(255,200,0,0.5),0 0 36px rgba(255,200,0,0.15)}
@@ -1265,16 +1266,19 @@ function DiceRoll({target,onDone}){
   )
 }
 
-function EmberDisplayLarge({current,max}){
+function EmberDisplayLarge({current,max,forecast}){
+  const afterCast=forecast?Math.max(0,current-forecast):current
   return(
     <div data-ember-display="1" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Embers</div>
       <div style={{display:'flex',gap:3,justifyContent:'center'}}>
-        {Array.from({length:max}).map((_,i)=>(
-          <div key={i} style={{fontSize:i>=(max-current)?20:15,opacity:i>=(max-current)?1:0.2,filter:i>=(max-current)?'drop-shadow(0 0 6px rgba(200,152,56,0.7))':'grayscale(1)',transition:'all 0.25s'}}>🔥</div>
-        ))}
+        {Array.from({length:max}).map((_,i)=>{
+          const filled=i>=(max-current)
+          const wouldSpend=forecast&&filled&&i<(max-afterCast)
+          return <div key={i} style={{fontSize:filled?20:15,opacity:wouldSpend?0.4:filled?1:0.2,filter:wouldSpend?'grayscale(0.5) brightness(1.5)':filled?'drop-shadow(0 0 6px rgba(200,152,56,0.7))':'grayscale(1)',transition:'all 0.25s'}}>{wouldSpend?'💨':'🔥'}</div>
+        })}
       </div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:current>0?'var(--gold)':'var(--rot)',lineHeight:1}}><span key={'e-'+current} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{current}/{max}</span></div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:current>0?'var(--gold)':'var(--rot)',lineHeight:1}}><span key={'e-'+current} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{forecast&&forecast>0?afterCast+'/'+max:current+'/'+max}</span></div>
     </div>
   )
 }
@@ -4029,6 +4033,15 @@ function TutorialMessage({text,onContinue,isFinal}){
 
 function App(){
   const [gameState,setGameState]=useState('menu')
+  const [screenFade,setScreenFade]=useState(false)
+  const prevGameStateRef=useRef('menu')
+  useEffect(()=>{
+    if(gameState!==prevGameStateRef.current&&gameState!=='playing'){
+      setScreenFade(true)
+      setTimeout(()=>setScreenFade(false),350)
+    }
+    prevGameStateRef.current=gameState
+  },[gameState])
   const [bootScreen,setBootScreen]=useState(true) // venue marquee on every load
   const [coldOpenPhase,setColdOpenPhase]=useState(()=>typeof window!=='undefined'&&!localStorage.getItem('vst_seen_intro')?0:null)
   const [tutorialFight,setTutorialFight]=useState(0)
@@ -4072,6 +4085,7 @@ function App(){
   const [log,setLog]=useState(['⛧ The gig begins.'])
   const fullRunLogRef=useRef(['⛧ The gig begins.'])
   const [showCombatLog,setShowCombatLog]=useState(false)
+  const [showDiscardPreview,setShowDiscardPreview]=useState(false)
   const [damageFlash,setDamageFlash]=useState(false)
   const [animPhase,setAnimPhase]=useState('idle')
   const [speedMode,setSpeedMode]=useState(()=>localStorage.getItem('vst_speed')==='fast')
@@ -5553,6 +5567,16 @@ function App(){
   },[corruption,gameState])
 
   // ── CORRUPTION 100% POSSESSION — one-time +3 ATK for CORRUPT members ──
+
+  // ── HOLD SPACEBAR — fast-forward while held during combat ──────
+  const spaceHeldRef=useRef(false)
+  useEffect(()=>{
+    const down=e=>{if(e.code==='Space'&&gameStateRef.current==='playing'&&!spaceHeldRef.current&&!(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))){e.preventDefault();spaceHeldRef.current=true;setSpeedMode(true)}}
+    const up=e=>{if(e.code==='Space'&&spaceHeldRef.current){spaceHeldRef.current=false;setSpeedMode(localStorage.getItem('vst_speed')==='fast')}}
+    window.addEventListener('keydown',down);window.addEventListener('keyup',up)
+    return()=>{window.removeEventListener('keydown',down);window.removeEventListener('keyup',up)}
+  },[])
+
   useEffect(()=>{
     if(corruption>=100&&!possessionFired&&gameState==='playing'){
       setPossessionFired(true)
@@ -7992,7 +8016,7 @@ function App(){
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:discardsLeft>0?'var(--gold)':'var(--rot)',letterSpacing:1}}><span key={'dl-'+discardsLeft} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{discardsLeft}/{fightMaxDiscards}</span></span>
             </div>
           </div>
-          <EmberDisplayLarge current={embers} max={maxEmbers}/>
+          <EmberDisplayLarge current={embers} max={maxEmbers} forecast={hovered!==null&&hand[hovered]&&hand[hovered].embers>0&&!allCardsFree&&!nextCardFree?hand[hovered].embers:0}/>
           <div style={{display:'flex',gap:18,justifyContent:'center',width:'100%',marginTop:4}}>
             {[['Fight',(fightIndex%3+1)+'/3','var(--blood)'],['Stash',stash,'var(--gold)']].map(function(item){return(
               <div key={item[0]} data-stash-label={item[0]==='Stash'?'1':null} style={{textAlign:'center'}}>
@@ -8102,7 +8126,11 @@ function App(){
             <div style={{position:'absolute',top:-2,left:'50%',transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:over?'var(--gold)':'var(--ink-dim)',textShadow:over?'0 0 8px rgba(200,152,56,0.6)':'none',animation:over?'handOvercapPulse 1.2s ease-in-out infinite':'none',pointerEvents:'none',zIndex:51,fontWeight:900}}>
               {hand.length}/{tgt}
             </div>
-            <div style={{position:'absolute',top:-2,right:8,fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:1,color:'var(--ink-dim)',pointerEvents:'none',zIndex:51,fontWeight:900}}>DISC {discardPile.length}</div>
+            <div onClick={()=>setShowDiscardPreview(p=>!p)} style={{position:'absolute',top:-2,right:8,fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:1,color:'var(--ink-dim)',cursor:'pointer',zIndex:51,fontWeight:900,padding:'2px 6px',borderRadius:3,background:showDiscardPreview?'rgba(200,152,56,0.2)':'transparent',border:showDiscardPreview?'1px solid rgba(200,152,56,0.3)':'1px solid transparent'}}>DISC {discardPile.length}</div>
+            {showDiscardPreview&&discardPile.length>0&&<div style={{position:'absolute',top:16,right:0,zIndex:9999,background:'rgba(10,6,2,0.97)',border:'1px solid rgba(200,152,56,0.4)',borderRadius:6,padding:'12px',maxHeight:300,overflowY:'auto',minWidth:200,maxWidth:320,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'var(--gold)',letterSpacing:3,textTransform:'uppercase',fontWeight:900,marginBottom:8}}>Discard Pile ({discardPile.length})</div>
+              {Object.entries(discardPile.reduce((acc,c)=>{acc[c.name]=(acc[c.name]||0)+1;return acc},{})).sort((a,b)=>b[1]-a[1]).map(([name,count])=><div key={name} style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'var(--ink-bone)',padding:'2px 0',borderBottom:'1px solid rgba(80,50,10,0.15)',display:'flex',justifyContent:'space-between'}}><span>{name}</span><span style={{color:'var(--ink-dim)'}}>{count>1?'×'+count:''}</span></div>)}
+            </div>}
           </>)})()}
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).filter(Boolean).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} chainReady={RIFF_CHAINS.some(ch=>ch.cards.includes(card.id)&&hand.some(c2=>c2.uid!==card.uid&&ch.cards.includes(c2.id)))} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
@@ -8204,6 +8232,7 @@ function App(){
       {tutorialFight>0&&<div style={{position:'absolute',top:8,left:'50%',transform:'translateX(-50%)',zIndex:9990,fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#e8a820',letterSpacing:4,textTransform:'uppercase',background:'rgba(10,6,2,0.85)',border:'1px solid rgba(232,168,32,0.4)',borderRadius:6,padding:'6px 24px'}}>
         TUTORIAL — Fight {tutorialFight} of 3
       </div>}
+      {screenFade&&<div style={{position:'absolute',inset:0,zIndex:99990,background:'#000',animation:'screenFadeFlash 350ms ease-out forwards',pointerEvents:'none'}}/>}
 
     </div>
   )
