@@ -17,6 +17,7 @@
 - [ ] **Weed leaf PNG** — spot-check it renders everywhere 🌿 used to (shop, stash counter, drug pins, card effects)
 - [ ] **Strike fly-to-boss animation** — confirm card travels cleanly to boss on STRIKE
 - [ ] **Shop bottom-of-list items** — verify no cutoff after pack tear animation fix (b2ad579)
+- [ ] **Deck = 69** — verify draw 6 hand + 63 remaining (or +unlocks: 66 base, 69 full)
 
 ---
 
@@ -105,6 +106,18 @@ Ranked by ship-impact per line of code:
 ---
 
 ## ✅ COMPLETED (recent — post-Session 19)
+
+### Bug fixes + polish (Roadie session, April 17)
+- [x] 🔴 BUG: `copies||2` treated `copies:0` as falsy — corruption threshold cards (Dark Whisper, Hungering Flame, Madness Unleashed) got 2 copies in starter deck instead of 0. Deck was 73, now 69 with all unlocks.
+- [x] Demo Tape copies 1→2, Soundboard copies 1→2 to hit 69 target (base 66 + 3 unlockable)
+- [x] Member keyword tooltip + recruit/shop desc: ScratchFont → MBScribblesFont for readability
+- [x] Hand size indicator (X/Y pill, gold pulse at overcap)
+- [x] Boss telegraph (live NEXT: X DMG → target + special effects)
+- [x] Run timer (MM:SS on end screen)
+- [x] Active buff badges (×CHAIN gold + +TEMP ATK purple above damage preview)
+- [x] JV's lanes declared (audio + PixelLab anims — do not touch from chat)
+- [x] TODO + CLAUDE.md synced to reality + doc-on-every-commit rule
+- [x] Sim banner v17.1→v19.1
 
 ### Cold open + polish pass (51f819e)
 - [x] Cold open splash screen

@@ -42,8 +42,8 @@
 //     list of cards played and discarded this fight. Most recent at top.
 //     Labels: "Played on Strike 2" / "Discarded on Strike 1"
 //     Helps players track what they have used and learn their patterns.
-// [ ] CARD BALANCE + 69-CARD DECK (sim-tested at 7.68% Bronze, matches current 7.74%):
-//     DECK: 69 cards (RIFF:32 EMBER:9 CORRUPT:15 UTIL:11)
+// [x] CARD BALANCE + 69-CARD DECK (all unlockables):
+//     DECK: 69 cards (RIFF:32 CORRUPT:18 UTILITY:10 EMBER:9) — base 66 + 3 from unlockables
 //     Move to shop-only: Sabbath Sigil, Overdrive, Going Broke, Remaster,
 //       Controlled Feedback, Amp the Static, Feedback Loop, Double Down,
 //       Stage Dive, Record Deal (rework to deck thinning)
@@ -507,7 +507,7 @@ const ALL_CARDS=[
   {id:'roadie',name:'Roadie',type:'UTILITY',rarity:'Common',emoji:'🛡',embers:1,effect:'+2 HP. Immune to Too Stoned (2 Strikes).',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'setlist',name:'Setlist',type:'UTILITY',rarity:'Common',emoji:'📋',embers:0,effect:'Draw 3. Discard 1 of choice.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'groupie',name:'Groupie',type:'EMBER',rarity:'Uncommon',emoji:'🍯',embers:1,effect:'+2 Embers. Draw 1.',color:'#c87820',typeColor:'#a05a10',copies:2},
-  {id:'demotape',name:'Demo Tape',type:'RIFF',rarity:'Common',emoji:'📼',embers:1,effect:'Copy the last Riff played, cast it free.',color:'#9933cc',typeColor:'#7722aa',copies:1},
+  {id:'demotape',name:'Demo Tape',type:'RIFF',rarity:'Common',emoji:'📼',embers:1,effect:'Copy the last Riff played, cast it free.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'newstrings',name:'New Strings',type:'RIFF',rarity:'Uncommon',emoji:'🎸',embers:2,effect:'+2 ATK permanent to target.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'encore',name:'Encore',type:'RIFF',rarity:'Uncommon',emoji:'🔁',embers:2,effect:'Target attacks again this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:3},
   {id:'wakeup',name:'Wake Up Call',type:'UTILITY',rarity:'Uncommon',emoji:'☕',embers:1,effect:'All +2 HP. Revives Too Stoned.',color:'#22aa44',typeColor:'#118833',copies:2},
@@ -536,7 +536,7 @@ const ALL_CARDS=[
   {id:'staticcharge',name:'Static Charge',type:'CORRUPT',rarity:'Common',emoji:'⚡',embers:0,effect:'Gain 2 Embers. Gain 4 instead if Corruption is 0%.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'darktuning',name:'Dark Tuning',type:'CORRUPT',rarity:'Uncommon',emoji:'🌑',embers:3,effect:'+1 ATK permanent to 1 random per 15% Corruption.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'powertap',name:'Power Tap',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'Gain 2 Embers.',color:'#c87820',typeColor:'#a05a10',copies:2},
-  {id:'soundboard',name:'Soundboard',type:'EMBER',rarity:'Uncommon',emoji:'🎛',embers:1,effect:'Gain 2 Embers. Draw 1 extra card at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:1},
+  {id:'soundboard',name:'Soundboard',type:'EMBER',rarity:'Uncommon',emoji:'🎛',embers:1,effect:'Gain 2 Embers. Draw 1 extra card at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'setbreak',name:'Smoke Break',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Select 1 card first, then play to discard it. Gain 2 Embers. -15% Corruption. Draw 1 card. (Random if no selection)',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'heavyriff',name:'Heavy Riff',type:'RIFF',rarity:'Uncommon',emoji:'🥊',embers:2,effect:'Deal stage ATK ÷ 2 to boss.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'resonancecard',name:'Resonance',type:'RIFF',rarity:'Uncommon',emoji:'🌀',embers:1,effect:'Target member ATK becomes equal to highest ATK on stage.',color:'#9933cc',typeColor:'#7722aa',copies:3},
@@ -821,7 +821,7 @@ function buildDeck(seed){
   const rng=seededRng(seed)
   const deck=[]
   getUnlockedCards().filter(c=>!c.shopOnly).forEach(function(c){
-    const n=c.copies||2
+    const n=c.copies!=null?c.copies:2
     for(let i=0;i<n;i++){deck.push(Object.assign({},c,{uid:uid()}))}
   })
   for(let i=deck.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
@@ -2416,7 +2416,7 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
         transition:strikeAnim?'transform 0.25s cubic-bezier(0.2,0.8,0.3,1.2), border 0.2s, box-shadow 0.2s, opacity 0.3s':'border 0.2s, box-shadow 0.2s, opacity 0.3s, transform 0.3s',
         cursor:'grab',position:'relative'}}>
       {/* Keyword tooltip */}
-      {showTip&&member&&KEYWORD_DESC[member.keyword]&&<div style={{position:'absolute',top:'calc(100% + 6px)',left:'50%',transform:'translateX(-50%)',background:'rgba(8,4,2,0.97)',border:'1px solid rgba(196,30,58,0.5)',borderRadius:3,padding:'8px 12px',zIndex:9999,pointerEvents:'none',minWidth:180,maxWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'var(--gold)',letterSpacing:2,textTransform:'uppercase',marginBottom:4}}>{member.keyword}</div><div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'var(--ink-bone)',lineHeight:1.4,fontStyle:'italic'}}>{KEYWORD_DESC[member.keyword]}</div></div>}
+      {showTip&&member&&KEYWORD_DESC[member.keyword]&&<div style={{position:'absolute',top:'calc(100% + 6px)',left:'50%',transform:'translateX(-50%)',background:'rgba(8,4,2,0.97)',border:'1px solid rgba(196,30,58,0.5)',borderRadius:3,padding:'8px 12px',zIndex:9999,pointerEvents:'none',minWidth:180,maxWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'var(--gold)',letterSpacing:2,textTransform:'uppercase',marginBottom:4}}>{member.keyword}</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'var(--ink-bone)',lineHeight:1.4}}>{KEYWORD_DESC[member.keyword]}</div></div>}
       {buffCount>0&&<div style={{position:'absolute',top:6,left:6,background:buffCount>=3?'#aa1111':'#9933cc',borderRadius:10,padding:'1px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#fff',zIndex:10,boxShadow:'0 0 8px rgba(0,0,0,0.6)'}}>+{buffCount}</div>}
       {isDiceTarget&&<div style={{position:'absolute',top:-16,left:'50%',transform:'translateX(-50%)',fontSize:20}}>🎯</div>}
       {mentorState==='active'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:18,textShadow:'0 0 12px #ffd700',zIndex:12,animation:'mentorPulse 1.5s ease-in-out infinite'}}>⛓</div>}
@@ -3713,7 +3713,7 @@ function DemonicConflictScreen({conflict,onChoice}){
             <div style={{textAlign:'center',alignSelf:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:bc,fontWeight:700}}>{m.keyword}</div></div>
             <div style={{textAlign:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#33dd33',fontWeight:900}}>HP</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,color:'#33dd33'}}>{m.hp}</div></div>
           </div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'#8a7040',textAlign:'center',fontStyle:'italic'}}>{m.desc}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#8a7040',textAlign:'center'}}>{m.desc}</div>
           {m.roleBondBonus>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#e8a820',textAlign:'center',marginTop:8}}>🔗 +{m.roleBondBonus} ATK Bond</div>}
         </div>
         <div style={{background:'rgba(232,168,32,0.15)',padding:'12px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:'#e8a820',letterSpacing:2}}>KEEP THIS ONE</div>
@@ -3777,7 +3777,7 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
                   </div>
                 </div>
-                <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'#8a7040',textAlign:'center',fontStyle:'italic',lineHeight:1.3}}>{m.desc}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#8a7040',textAlign:'center',lineHeight:1.3}}>{m.desc}</div>
                 {isDblTime&&hasDblTime&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#ff8800',textAlign:'center',marginTop:6,letterSpacing:1}}>ONLY ONE DRUMMER</div>}
                 {emptySlot===-1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#aa2200',textAlign:'center',marginTop:6,letterSpacing:1}}>STAGE FULL</div>}
               </div>
