@@ -2793,6 +2793,83 @@ function MasteryGallery({onClose}){
   </div>)
 }
 
+// ═══════════════════════════════════════════════════════════
+// VICTORY SUMMARY — 3s pause-and-celebrate after non-boss fight wins
+// ═══════════════════════════════════════════════════════════
+function VictorySummaryScreen({summary,onContinue}){
+  if(!summary)return null
+  const s=summary
+  const mins=Math.floor(s.timeMs/60000)
+  const secs=Math.floor((s.timeMs%60000)/1000)
+  const timeStr=mins+':'+String(secs).padStart(2,'0')
+  const rows=[
+    ['Damage Dealt',s.damageDealt.toLocaleString(),'var(--blood)'],
+    ['Strikes Used',s.strikesUsed+' / '+s.strikesMax,'var(--gold)'],
+    ['Cards Played',s.cardsPlayed,'var(--gold)'],
+    ['Highest Strike',s.highestStrike.toLocaleString(),'var(--blood)'],
+    ['Embers Spent',s.embersSpent,'var(--gold)'],
+    ['Corruption Gained','+'+s.corruptionGained+'%','#cc44ff'],
+    ['Time Taken',timeStr,'var(--ink-bone)'],
+    ['Riff Chains',s.riffChains,'var(--gold)'],
+  ]
+  return(
+    <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(8,4,2,0.92)',
+      display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:14,
+      padding:40,overflow:'hidden'}}>
+      {/* Frieze top */}
+      <div style={{position:'absolute',top:0,left:0,right:0,height:18,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:16,textAlign:'center',lineHeight:'18px',textTransform:'uppercase',opacity:0.85,userSelect:'none',textShadow:'0 0 8px rgba(196,30,58,0.3)',borderBottom:'1px solid rgba(196,30,58,0.35)',background:'linear-gradient(180deg, rgba(196,30,58,0.18) 0%, transparent 100%)'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧</div>
+      {/* Corruption mercury vignette */}
+      <div style={{position:'absolute',inset:0,pointerEvents:'none',background:'radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(60,0,15,0.35) 100%)'}}/>
+      {/* VICTORY stamp (double-stamp effect) */}
+      <div style={{position:'relative',marginTop:10}}>
+        <span style={{position:'absolute',inset:0,fontFamily:"'BogartsMetalFont',cursive",fontSize:84,color:'#7a0f1f',letterSpacing:8,textShadow:'3px 4px 0 rgba(0,0,0,0.85)',transform:'translate(4px,5px) rotate(-3deg)',whiteSpace:'nowrap',opacity:0.85}}>VICTORY</span>
+        <span style={{position:'relative',fontFamily:"'BogartsMetalFont',cursive",fontSize:84,color:'var(--blood)',letterSpacing:8,textShadow:'0 0 28px rgba(196,30,58,0.85), 2px 2px 0 rgba(0,0,0,0.85)',transform:'rotate(-3deg)',display:'inline-block',whiteSpace:'nowrap'}}>VICTORY</span>
+      </div>
+      {/* Enemy name with SVG underline */}
+      <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:2,marginTop:18}}>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:'var(--ink-bone)',letterSpacing:4,textShadow:'0 0 18px rgba(232,216,184,0.4)',textTransform:'uppercase'}}>
+          {s.enemy?s.enemy.name:'Enemy'} Destroyed
+        </div>
+        <svg width="520" height="10" viewBox="0 0 520 10" style={{display:'block'}}>
+          <path d="M 10 5 Q 130 2, 260 5 T 510 5" stroke="var(--blood)" strokeWidth="1.4" fill="none" opacity="0.75"/>
+          <path d="M 20 7 Q 150 9, 260 7 T 500 7" stroke="var(--blood)" strokeWidth="0.7" fill="none" opacity="0.5"/>
+        </svg>
+      </div>
+      {/* Stats grid — 2 col × 4 rows */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px 80px',marginTop:14,
+        padding:'22px 42px',background:'rgba(20,10,6,0.55)',border:'1px solid rgba(90,56,32,0.55)',borderRadius:6,
+        boxShadow:'inset 0 0 40px rgba(0,0,0,0.55)'}}>
+        {rows.map(([label,value,color])=>(
+          <div key={label} style={{display:'flex',flexDirection:'column',alignItems:'flex-start',minWidth:260}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,color:'var(--ink-dim)',textTransform:'uppercase',fontWeight:900}}>{label}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,fontWeight:900,color:color,lineHeight:1.1,animation:'inkStamp 0.4s ease-out',marginTop:2}}>{value}</div>
+          </div>
+        ))}
+      </div>
+      {/* MVP */}
+      {s.mvp&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'var(--ink-bone)',fontStyle:'italic',letterSpacing:1,marginTop:8}}>
+        MVP: {s.mvp.emoji||'🎸'} {s.mvp.name}
+      </div>}
+      {/* Continue button */}
+      <button onClick={onContinue}
+        style={{marginTop:12,fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,letterSpacing:4,
+          padding:'14px 44px',background:'rgba(120,8,8,0.35)',border:'3px solid var(--blood)',borderRadius:8,
+          color:'var(--ink-bone)',cursor:'pointer',textTransform:'uppercase',
+          display:'flex',alignItems:'center',gap:10,
+          boxShadow:'0 0 24px rgba(196,30,58,0.5), inset 0 0 18px rgba(150,0,20,0.25)'}}
+        onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,15,15,0.55)'}}
+        onMouseLeave={e=>{e.currentTarget.style.background='rgba(120,8,8,0.35)'}}>
+        <span style={{color:'var(--blood)',fontSize:22,textShadow:'0 0 10px rgba(196,30,58,0.8)'}}>⛧</span>
+        Continue
+        <span style={{color:'var(--blood)',fontSize:22,textShadow:'0 0 10px rgba(196,30,58,0.8)'}}>⛧</span>
+      </button>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'var(--ink-dim)',fontStyle:'italic',marginTop:4,opacity:0.7}}>Press SPACE or ENTER</div>
+      {/* Frieze bottom */}
+      <div style={{position:'absolute',bottom:0,left:0,right:0,height:18,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:16,textAlign:'center',lineHeight:'18px',textTransform:'uppercase',opacity:0.7,userSelect:'none',textShadow:'0 0 8px rgba(196,30,58,0.3)',borderTop:'1px solid rgba(196,30,58,0.35)',background:'linear-gradient(0deg, rgba(196,30,58,0.18) 0%, transparent 100%)'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧</div>
+    </div>
+  )
+}
+
 function EventScreen({event,onChoose}){
   const [chosen,setChosen]=useState(null)
   const [resultText,setResultText]=useState(null)
@@ -4104,7 +4181,20 @@ function App(){
   }
   const addFloat=(v,x,y,color,big)=>{big=big||false;const id=fid.current++;if(localStorage.getItem('vst_dmgnums')==='off')return;setFloats(p=>[...p,{id,v,x,y,color:color||'#dd2222',big}])}
   const remFloat=id=>setFloats(p=>p.filter(f=>f.id!==id))
-  const updStat=(key,val,isMax)=>{isMax=isMax||false;setStats(p=>Object.assign({},p,{[key]:isMax?Math.max(p[key],val):p[key]+val}))}
+  const fightStartTimeRef=useRef(0)
+  const corruptionAtFightStartRef=useRef(0)
+  const cardsPlayedThisFightRef=useRef(0)
+  const highestStrikeThisFightRef=useRef(0)
+  const damageThisFightRef=useRef(0)
+  const embersSpentThisFightRef=useRef(0)
+  const [victorySummary,setVictorySummary]=useState(null)
+  const updStat=(key,val,isMax)=>{
+    isMax=isMax||false
+    setStats(p=>Object.assign({},p,{[key]:isMax?Math.max(p[key],val):p[key]+val}))
+    if(key==='cardsPlayed')cardsPlayedThisFightRef.current+=val
+    else if(key==='highestStrike')highestStrikeThisFightRef.current=Math.max(highestStrikeThisFightRef.current,val)
+    else if(key==='totalDamage')damageThisFightRef.current+=val
+  }
   const discover=(mechanic,label)=>{
     if(discoveredRef.current.has(mechanic))return
     discoveredRef.current.add(mechanic)
@@ -4639,7 +4729,7 @@ function App(){
     }
 
     setStage(ns)
-    if(spent>0)setEmbers(function(p){return p-spent})
+    if(spent>0){setEmbers(function(p){return p-spent});embersSpentThisFightRef.current+=spent}
     if(msg)addLog(msg)
     updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
     if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
@@ -4742,7 +4832,7 @@ function App(){
       setHand(drawRes.h);setDeck(drawRes.d);setDiscardPile(drawRes.disc)
       setSetlistCards(drawRes.h)
       setSetlistOpen(true)
-      if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
+      if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
       addLog('📋 Setlist! Drew 2 cards — now pick 1 to discard.')
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -4763,7 +4853,7 @@ function App(){
       const res=drawUpTo(remainingHand,deckRef.current,[...discRef.current,card,...discarded],remainingHand.length+drawCount)
       setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
       setSelected([])
-      if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
+      if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
       addLog('🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+drawCount+'.'+(discardCount===0?' (Tip: select cards before playing)':''))
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       setLastRiffPlayed(card)
@@ -4784,7 +4874,7 @@ function App(){
       const res=drawUpTo(handAfterDelete,deckRef.current,[...discRef.current,card,toDelete],handAfterDelete.length+3)
       setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
       setSelected([])
-      if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
+      if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
       addLog('🎙 Remastered! Deleted '+toDelete.name+', drew 3.')
       addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
@@ -4822,7 +4912,7 @@ function App(){
         addLog('📡 Signal Decay! Discarded '+victim.name+', drew 2 cards.')
       }
       setSelected([])
-      if(effectiveEmbers>0)setEmbers(p=>p-effectiveEmbers)
+      if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
@@ -5068,22 +5158,61 @@ function App(){
         } else {
           setTimeout(()=>{
             setCircleClearedData(null)
-            // 30% chance of random event between non-boss fights
+            // Decide next screen now so the summary can dispatch to it on continue
             const availEvents=HELL_EVENTS.filter(e=>!eventsSeenThisRun.includes(e.id))
+            let nextScreen={type:'shop'}
             if(availEvents.length>0&&Math.random()<0.30){
               const evt=availEvents[Math.floor(Math.random()*availEvents.length)]
-              setPendingEvent(evt)
               setEventsSeenThisRun(p=>[...p,evt.id])
-              setGameState('event')
-            } else {
-              setGameState('shop')
+              nextScreen={type:'event',evt}
             }
+            // Build victory summary payload
+            const dur=Date.now()-(fightStartTimeRef.current||Date.now())
+            const startHp=Math.ceil((enemy?enemy.maxHp:0)*((activeStake&&activeStake.hpMult)||1))
+            const damageShown=Math.max(damageThisFightRef.current,startHp)
+            // MVP = band member with highest effective ATK this fight (best proxy we have)
+            const aliveStage=stage.filter(m=>m&&!m.tooStoned)
+            const mvp=aliveStage.length?aliveStage.reduce((a,b)=>(b.atk+(b.permAtkBonus||0))>(a.atk+(a.permAtkBonus||0))?b:a):null
+            setVictorySummary({
+              enemy,
+              damageDealt:damageShown,
+              strikesUsed:((activeStake&&activeStake.maxStrikes)||MAX_STRIKES)-strikesLeft,
+              strikesMax:(activeStake&&activeStake.maxStrikes)||MAX_STRIKES,
+              cardsPlayed:cardsPlayedThisFightRef.current,
+              highestStrike:highestStrikeThisFightRef.current,
+              embersSpent:embersSpentThisFightRef.current,
+              corruptionGained:Math.max(0,corruption-corruptionAtFightStartRef.current),
+              timeMs:dur,
+              riffChains:(combosFiredRef.current||[]).length,
+              mvp,
+              next:nextScreen
+            })
           },1800)
         }
       }
     },1000)
   },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake,stage,hand,enemy,enemyHp,embers,maxEmbers,activeArtifacts,activePassives,chosenPacts,activeGenre,animPhase,discardsLeft,deck,discardPile,fightTripBuff,luciferPhase,welcomeToHell,eventsSeenThisRun])
   triggerVictoryRef.current=triggerVictory
+
+  // ── VICTORY SUMMARY — dismiss + transition ───────────────────
+  const continueVictorySummary=useCallback(()=>{
+    setVictorySummary(cur=>{
+      if(!cur)return cur
+      const next=cur.next||{type:'shop'}
+      if(next.type==='event'&&next.evt){setPendingEvent(next.evt);setGameState('event')}
+      else setGameState('shop')
+      return null
+    })
+  },[])
+  useEffect(()=>{
+    if(!victorySummary)return
+    function onKey(e){
+      if(e.key===' '||e.key==='Enter'||e.key==='Spacebar'){e.preventDefault();continueVictorySummary()}
+    }
+    window.addEventListener('keydown',onKey)
+    const auto=setTimeout(continueVictorySummary,8000)
+    return()=>{window.removeEventListener('keydown',onKey);clearTimeout(auto)}
+  },[victorySummary,continueVictorySummary])
 
 
 
@@ -5901,6 +6030,13 @@ function App(){
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
     setEnemy(nextEnemy);const _sHp=Math.ceil(nextEnemy.maxHp*activeStake.hpMult*(encoreMode?2.0:1.0));setEnemyHp(_sHp);setScaledMaxHp(_sHp)
+    // per-fight tracking resets
+    fightStartTimeRef.current=Date.now()
+    corruptionAtFightStartRef.current=corruption
+    cardsPlayedThisFightRef.current=0
+    highestStrikeThisFightRef.current=0
+    damageThisFightRef.current=0
+    embersSpentThisFightRef.current=0
     addLog('══════ FIGHT '+(nextIdx+1)+': '+nextEnemy.name+' ('+Math.ceil(nextEnemy.maxHp*activeStake.hpMult*(encoreMode?2.0:1.0))+' HP) ══════')
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
@@ -6802,17 +6938,45 @@ function App(){
   )
 
   if(gameState==='descent'&&descentData)return(
-    <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,overflow:'hidden'}}>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>⛧ The Descent ⛧</div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:39,color:'#e8d090',fontStyle:'italic'}}>Circle {descentData.circleName} {descentData.circleEmoji}</div>
-        {bestRunCircle>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#886644',letterSpacing:2}}>PERSONAL BEST: Circle {bestRunCircle} {Math.floor(fightIndex/3)+1>bestRunCircle?' \u2714':''}  </div>}
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#e8d090',letterSpacing:2,fontWeight:900}}>Choose your path. Skipping a fight forfeits its shop.</div>
-      <div style={{display:'flex',gap:30,marginTop:10}}>
+    <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'radial-gradient(ellipse at 50% 0%, #16090a 0%, #040201 72%)',display:'flex',flexDirection:'column',alignItems:'center',gap:8,overflow:'hidden',padding:'36px 20px 26px'}}>
+      {/* Frieze top */}
+      <div style={{position:'absolute',top:0,left:0,right:0,height:18,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:16,textAlign:'center',lineHeight:'18px',textTransform:'uppercase',opacity:0.85,userSelect:'none',textShadow:'0 0 8px rgba(196,30,58,0.3)',borderBottom:'1px solid rgba(196,30,58,0.35)',background:'linear-gradient(180deg, rgba(196,30,58,0.18) 0%, transparent 100%)'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧</div>
+      {/* Spiral staircase SVG (faint) */}
+      <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:0,opacity:0.08}} viewBox="0 0 800 1000" preserveAspectRatio="xMidYMid slice">
+        {Array.from({length:18}).map((_,k)=>{
+          const angle=(k/18)*Math.PI*5;const scale=1-k/20
+          const w=360*scale,x=400-w/2+Math.cos(angle)*20,y=80+k*48
+          return <rect key={k} x={x} y={y} width={w} height={14} fill="none" stroke="var(--ink-rust)" strokeWidth="1.2" transform={`rotate(${angle*6},${x+w/2},${y+7})`}/>
+        })}
+        <path d="M 400 80 Q 380 400, 420 620 T 400 950" stroke="var(--blood-deep)" strokeWidth="1.5" fill="none" opacity="0.55"/>
+      </svg>
+      {/* Scanline overlay */}
+      <div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:0,
+        background:'repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1px, transparent 1px, transparent 3px)',
+        opacity:0.45}}/>
+      {/* Corruption-like vignette */}
+      <div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:0,background:'radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(60,0,15,0.4) 100%)'}}/>
+
+      {/* HEADER — content container */}
+      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4,marginTop:4}}>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:'var(--ink-bone)',letterSpacing:8,textShadow:'0 0 28px rgba(196,30,58,0.55), 0 0 60px rgba(120,0,20,0.35), 3px 3px 0 rgba(0,0,0,0.85)',transform:'rotate(-1deg)',textTransform:'uppercase'}}>⛧ The Descent ⛧</div>
+        <svg width="540" height="10" viewBox="0 0 540 10">
+          <path d="M 10 5 Q 140 2, 270 5 T 530 5" stroke="var(--blood)" strokeWidth="1.4" fill="none" opacity="0.75"/>
+          <path d="M 20 7 Q 150 9, 270 7 T 520 7" stroke="var(--blood)" strokeWidth="0.7" fill="none" opacity="0.5"/>
+        </svg>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'var(--ink-rust)',fontStyle:'italic',letterSpacing:1,marginTop:6}}>Circle {descentData.circleName} {descentData.circleEmoji}</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'var(--ink-dim)',fontStyle:'italic',letterSpacing:0.5,marginTop:2}}>Choose your path. Skipping a fight forfeits its shop.</div>
+        {bestRunCircle>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'var(--ink-dim)',letterSpacing:3,marginTop:2,textTransform:'uppercase'}}>Personal Best: Circle {bestRunCircle} {Math.floor(fightIndex/3)+1>bestRunCircle?'✔':''}</div>}
+      </div>
+
+      {/* FIGHT CARDS — tarot row */}
+      <div style={{position:'relative',zIndex:1,display:'flex',gap:36,marginTop:18,alignItems:'flex-start'}}>
         {descentData.fights.map((enemy,i)=>{
           const isBoss=i===2
           const isSkipped=descentData.skips.includes(i)
           const reward=i===0?descentData.reward1:i===1?descentData.reward2:null
           const canSkip=!isBoss
+          const envelopeRot=[-2,1,-3][i]||0
           const triggerDescend=()=>{playSfx('descent');
             const addToDeck=(card)=>{setDeck(p=>[...p,card])}
             const deleteRandomCommon=()=>{setDeck(p=>{const commons=p.filter(c=>c.rarity==='Common');if(commons.length===0){addLog('🗑 No common cards in deck to delete.');return p};const victim=commons[Math.floor(Math.random()*commons.length)];addLog('🗑 Skipped fight: Deleted '+victim.name+' from deck');return p.filter(c=>c.uid!==victim.uid)})}
@@ -6831,55 +6995,79 @@ function App(){
             setTimeout(()=>{handleShopLeave();skipDescentRef.current=false},50)
           }
           return(
-            <div key={i} style={{width:300,display:'flex',flexDirection:'column',gap:0,transition:'all 0.25s',opacity:isSkipped?0.5:1}}>
-              {/* FIGHT label — clickable to proceed */}
+            <div key={i} style={{width:300,display:'flex',flexDirection:'column',position:'relative',transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',opacity:isSkipped?0.55:1,transform:isBoss?'scale(1.05)':'none'}}>
+              {/* Tarot-style enemy card */}
               <div onClick={isSkipped?undefined:triggerDescend}
-                style={{background:isSkipped?'rgba(40,80,20,0.3)':isBoss?'rgba(160,0,0,0.4)':'rgba(130,0,0,0.3)',border:isSkipped?'2px solid #44aa44':isBoss?'2px solid #cc1111':'2px solid rgba(200,80,80,0.5)',borderBottom:'none',borderRadius:'10px 10px 0 0',padding:'10px 16px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',color:isSkipped?'#44aa44':isBoss?'#ff4444':'#ee4444',textShadow:isBoss?'0 0 14px rgba(200,0,0,0.6)':'none',cursor:isSkipped?'default':'pointer'}}>{isSkipped?'✓ SKIPPED':isBoss?'★ BOSS FIGHT':'⚔ FIGHT'}</div>
-              {/* Enemy card — clickable to proceed */}
-              <div onClick={isSkipped?undefined:triggerDescend}
-                style={{background:isBoss?'linear-gradient(180deg,#2a0a0a,#140404)':'linear-gradient(180deg,#1a1008,#0a0604)',
-                border:isSkipped?'2px solid #44aa44':isBoss?'2px solid #cc1111':'2px solid rgba(200,80,80,0.5)',borderTop:'1px solid rgba(255,255,255,0.05)',borderBottom:canSkip&&!isSkipped?'none':isBoss?'none':'2px solid rgba(200,80,80,0.5)',
-                borderRadius:(!canSkip&&!isBoss)||(isSkipped&&!canSkip)?'0 0 10px 10px':0,padding:'16px 20px',display:'flex',flexDirection:'column',alignItems:'center',gap:6,
-                cursor:isSkipped?'default':'pointer',transition:'all 0.15s'}}
-                onMouseEnter={e=>{if(!isSkipped)e.currentTarget.style.background=isBoss?'linear-gradient(180deg,#3a1010,#1a0808)':'linear-gradient(180deg,#2a1810,#140c08)'}}
-                onMouseLeave={e=>{e.currentTarget.style.background=isBoss?'linear-gradient(180deg,#2a0a0a,#140404)':'linear-gradient(180deg,#1a1008,#0a0604)'}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:isBoss?'#cc1111':'#c8a040',letterSpacing:3,textTransform:'uppercase'}}>{isBoss?'CIRCLE BOSS':'FIGHT '+(i+1)+' OF 3'}</div>
-                <div style={{fontSize:48}}>{BOSS_PORTRAITS[enemy.id]?<img src={BOSS_PORTRAITS[enemy.id]} alt={enemy.name} style={{width:48,height:48,objectFit:'contain',imageRendering:'pixelated'}}/>:enemy.emoji}</div>
-                <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:isBoss?'#ee2222':'#e8d090',textShadow:isBoss?'0 0 20px rgba(200,0,0,0.5)':'none',letterSpacing:2}}>{enemy.name}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#aa8040'}}>{Math.ceil(enemy.maxHp*activeStake.hpMult)} HP</div>
-                {isSkipped&&reward&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#88dd88',marginTop:4}}>{reward.emoji} {reward.name}</div>}
+                onMouseEnter={e=>{if(isSkipped)return;const tip=e.currentTarget.querySelector('[data-pathtip]');if(tip)tip.style.opacity='1';e.currentTarget.style.transform='translateY(-8px)';e.currentTarget.style.boxShadow=isBoss?'0 20px 60px rgba(196,30,58,0.55), 0 0 40px rgba(196,30,58,0.35), inset 0 0 18px rgba(90,0,10,0.35)':'0 20px 60px rgba(0,0,0,0.9), 0 0 32px rgba(200,152,56,0.55), inset 0 0 12px rgba(120,80,20,0.35)'}}
+                onMouseLeave={e=>{const tip=e.currentTarget.querySelector('[data-pathtip]');if(tip)tip.style.opacity='0';e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow=isBoss?'0 0 24px rgba(196,30,58,0.4), inset 0 0 18px rgba(90,0,10,0.35)':'0 8px 24px rgba(0,0,0,0.75), inset 0 0 12px rgba(60,35,20,0.35)'}}
+                style={{position:'relative',
+                  background:isBoss?'linear-gradient(180deg,#2a0a0c,#140406)':'linear-gradient(180deg, var(--altar-raised), var(--altar-recess))',
+                  border:'2px solid '+(isSkipped?'#44aa44':isBoss?'var(--blood)':'var(--ink-rust)'),
+                  outline:'1px solid '+(isSkipped?'rgba(68,170,68,0.4)':isBoss?'rgba(196,30,58,0.45)':'var(--gold-deep)'),
+                  outlineOffset:'-5px',
+                  borderRadius:6,padding:'16px 20px 18px',display:'flex',flexDirection:'column',alignItems:'center',gap:8,
+                  cursor:isSkipped?'default':'pointer',transition:'transform 0.22s, box-shadow 0.22s',
+                  boxShadow:isBoss?'0 0 24px rgba(196,30,58,0.4), inset 0 0 18px rgba(90,0,10,0.35)':'0 8px 24px rgba(0,0,0,0.75), inset 0 0 12px rgba(60,35,20,0.35)',
+                  animation:isBoss?'bossGlow 2.4s ease-in-out infinite':'none'}}>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,letterSpacing:4,textTransform:'uppercase',color:isSkipped?'#88dd88':isBoss?'var(--blood)':'var(--gold)',textShadow:isBoss?'0 0 12px rgba(196,30,58,0.6)':'none'}}>{isSkipped?'✓ Skipped':isBoss?'⛧ Boss Fight ⛧':'Fight '+(i+1)+' of 3'}</div>
+                <div style={{fontSize:56,marginTop:2,filter:isBoss?'drop-shadow(0 0 14px rgba(196,30,58,0.55))':'drop-shadow(0 0 10px rgba(200,152,56,0.3))'}}>{BOSS_PORTRAITS[enemy.id]?<img src={BOSS_PORTRAITS[enemy.id]} alt={enemy.name} style={{width:56,height:56,objectFit:'contain',imageRendering:'pixelated'}}/>:enemy.emoji}</div>
+                <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:isBoss?'var(--blood)':'var(--ink-bone)',textShadow:isBoss?'0 0 18px rgba(196,30,58,0.6)':'0 0 12px rgba(232,216,184,0.3)',letterSpacing:2,textAlign:'center'}}>{enemy.name}</div>
+                <svg width="220" height="8" viewBox="0 0 220 8">
+                  <path d="M 8 4 Q 60 1, 110 4 T 212 4" stroke={isBoss?'var(--blood)':'var(--gold)'} strokeWidth="1.1" fill="none" opacity="0.7"/>
+                </svg>
+                {/* HP parchment scroll */}
+                <div style={{position:'relative',padding:'4px 18px',background:'linear-gradient(180deg, rgba(60,35,10,0.6), rgba(30,18,5,0.75))',border:'1px solid var(--gold-deep)',borderRadius:3,
+                  boxShadow:'inset 0 0 8px rgba(0,0,0,0.5)'}}>
+                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--gold)',letterSpacing:2}}>{Math.ceil(enemy.maxHp*activeStake.hpMult)} HP</span>
+                </div>
+                {isSkipped&&reward&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'#88dd88',marginTop:2,fontStyle:'italic'}}>{reward.emoji} {reward.name}</div>}
+                {/* Select-this-path tooltip */}
+                {!isSkipped&&<div data-pathtip="" style={{position:'absolute',bottom:-22,left:'50%',transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'var(--gold)',letterSpacing:3,textTransform:'uppercase',opacity:0,transition:'opacity 0.18s',pointerEvents:'none',whiteSpace:'nowrap',textShadow:'0 0 10px rgba(200,152,56,0.8)'}}>↓ Select This Path</div>}
               </div>
-              {/* SKIP button — stopPropagation so it doesn't trigger fight */}
+
+              {/* WAX-SEAL ENVELOPE — skip reward */}
               {canSkip&&!isSkipped&&reward&&(
                 <div onClick={(e)=>{e.stopPropagation();setDescentData(p=>({...p,skips:[...p.skips,i]}))}}
-                  style={{background:'rgba(40,80,20,0.3)',border:'2px solid #44aa44',borderTop:'none',borderRadius:'0 0 10px 10px',padding:'12px 16px',cursor:'pointer',textAlign:'center',transition:'all 0.2s',position:'relative'}}
-                  onMouseEnter={e=>{e.currentTarget.style.background='rgba(60,120,30,0.5)';e.currentTarget.style.transform='scale(1.02)'}}
-                  onMouseLeave={e=>{e.currentTarget.style.background='rgba(40,80,20,0.3)';e.currentTarget.style.transform='none'}}>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#44aa44',letterSpacing:3,textTransform:'uppercase'}}>SKIP AND TAKE REWARD</div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#88dd88',marginTop:4}}>{reward.emoji} {reward.name}</div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#66aa66',marginTop:4,fontStyle:'italic',lineHeight:1.3}}>{REWARD_TIPS[reward.id]||''}</div>
+                  style={{position:'relative',marginTop:10,
+                    transform:'rotate('+envelopeRot+'deg)',
+                    background:'linear-gradient(180deg,#1c2a10,#0c1808)',
+                    border:'2px solid rgba(120,170,80,0.65)',borderRadius:'3px 3px 10px 10px',
+                    padding:'10px 16px 14px',cursor:'pointer',textAlign:'center',
+                    boxShadow:'0 8px 18px rgba(0,0,0,0.7), inset 0 0 12px rgba(40,60,20,0.4)',transition:'transform 0.2s, box-shadow 0.2s'}}
+                  onMouseEnter={e=>{e.currentTarget.style.transform='rotate(0deg) translateY(-4px)';e.currentTarget.style.boxShadow='0 14px 26px rgba(0,0,0,0.8), 0 0 18px rgba(120,200,60,0.35), inset 0 0 12px rgba(40,60,20,0.4)'}}
+                  onMouseLeave={e=>{e.currentTarget.style.transform='rotate('+envelopeRot+'deg)';e.currentTarget.style.boxShadow='0 8px 18px rgba(0,0,0,0.7), inset 0 0 12px rgba(40,60,20,0.4)'}}>
+                  {/* Wax seal dot */}
+                  <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',width:26,height:26,borderRadius:'50%',background:'radial-gradient(circle at 30% 30%, #d83030, #8a0818 60%, #4a0610)',border:'1px solid rgba(0,0,0,0.7)',boxShadow:'0 2px 4px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,150,140,0.3)',fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:'rgba(30,5,5,0.85)',display:'flex',alignItems:'center',justifyContent:'center'}}>⛧</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'var(--gold)',letterSpacing:3,textTransform:'uppercase',marginTop:4}}>Skip & Take Reward</div>
+                  <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'var(--ink-bone)',fontStyle:'italic',marginTop:2}}>{reward.emoji} {reward.name}</div>
+                  <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'var(--ink-dim)',fontStyle:'italic',marginTop:3,lineHeight:1.3}}>{REWARD_TIPS[reward.id]||''}</div>
                 </div>
               )}
               {canSkip&&isSkipped&&(
                 <div onClick={(e)=>{e.stopPropagation();setDescentData(p=>({...p,skips:p.skips.filter(s=>s!==i)}))}}
-                  style={{background:'rgba(40,80,20,0.15)',border:'2px solid #44aa44',borderTop:'none',borderRadius:'0 0 10px 10px',padding:'8px 16px',cursor:'pointer',textAlign:'center'}}
+                  style={{marginTop:10,transform:'rotate('+envelopeRot+'deg)',
+                    background:'rgba(40,80,20,0.15)',border:'2px solid rgba(120,170,80,0.5)',borderRadius:'3px 3px 10px 10px',padding:'8px 16px',cursor:'pointer',textAlign:'center'}}
                   onMouseEnter={e=>{e.currentTarget.style.background='rgba(80,40,20,0.3)'}}
                   onMouseLeave={e=>{e.currentTarget.style.background='rgba(40,80,20,0.15)'}}>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#886644',letterSpacing:2}}>UNDO SKIP</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'var(--ink-dim)',letterSpacing:2,textTransform:'uppercase'}}>Undo Skip</div>
                 </div>
               )}
               {isBoss&&(
                 <div onClick={triggerDescend}
-                  style={{background:'rgba(130,0,0,0.35)',border:'2px solid #cc1111',borderTop:'none',borderRadius:'0 0 10px 10px',padding:'12px 16px',textAlign:'center',cursor:'pointer',transition:'all 0.2s',boxShadow:'0 0 15px rgba(180,0,0,0.3)'}}
-                  onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,0,0,0.5)';e.currentTarget.style.boxShadow='0 0 30px rgba(200,0,0,0.6)'}}
-                  onMouseLeave={e=>{e.currentTarget.style.background='rgba(130,0,0,0.35)';e.currentTarget.style.boxShadow='0 0 15px rgba(180,0,0,0.3)'}}>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#ee2222',letterSpacing:4,textShadow:'0 0 14px rgba(200,0,0,0.6)'}}>⛧ DESCEND ⛧</div>
+                  style={{marginTop:10,
+                    background:'rgba(130,0,0,0.4)',border:'2px solid var(--blood)',borderRadius:'3px 3px 10px 10px',padding:'12px 16px',textAlign:'center',cursor:'pointer',transition:'all 0.2s',boxShadow:'0 0 18px rgba(196,30,58,0.4)'}}
+                  onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,0,0,0.55)';e.currentTarget.style.boxShadow='0 0 34px rgba(196,30,58,0.75)'}}
+                  onMouseLeave={e=>{e.currentTarget.style.background='rgba(130,0,0,0.4)';e.currentTarget.style.boxShadow='0 0 18px rgba(196,30,58,0.4)'}}>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'var(--ink-bone)',letterSpacing:4,textShadow:'0 0 14px rgba(196,30,58,0.75)'}}>⛧ DESCEND ⛧</div>
                 </div>
               )}
             </div>
           )
         })}
       </div>
+
+      {/* Frieze bottom */}
+      <div style={{position:'absolute',bottom:0,left:0,right:0,height:18,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:16,textAlign:'center',lineHeight:'18px',textTransform:'uppercase',opacity:0.7,userSelect:'none',textShadow:'0 0 8px rgba(196,30,58,0.3)',borderTop:'1px solid rgba(196,30,58,0.35)',background:'linear-gradient(0deg, rgba(196,30,58,0.18) 0%, transparent 100%)'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧</div>
     </div>
   )
   if(gameState==='pact')return(
@@ -6964,6 +7152,7 @@ function App(){
         Skip Upgrade</button>
     </div>
   )}
+  if(victorySummary)return <VictorySummaryScreen summary={victorySummary} onContinue={continueVictorySummary}/>
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
