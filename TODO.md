@@ -48,10 +48,10 @@ Ranked by ship-impact per line of code:
 ## 🟡 QoL QUEUE (open items — impact-ordered)
 
 ### Combat Flow
-- [ ] **Ember forecast** — hovering card dims pips to show remaining
+- [x] **Ember forecast — hover dims pips to show remaining (already shipped)**
 - [ ] **Undo last card play** — one-step within same strike
 - [x] **Hand size indicator** — "X/Y" at top of card fan, gold pulse at overcap
-- [ ] **Fast-forward HOLD spacebar** — speed up while held
+- [x] **Fast-forward HOLD spacebar — already shipped (space key held = fast mode)**
 
 ### Visual Feedback (juice)
 - [x] **Victory fanfare — clutchFlash system: "⛧ VICTORY ⛧" / "SOLO VICTORY" / "BY THE SKIN"**
@@ -66,16 +66,16 @@ Ranked by ship-impact per line of code:
 ### Information & Clarity
 - [x] **Pact icons in combat — footer row with hover tooltips**
 - [x] **Boss telegraph** — "NEXT: X DMG → target" + special effects, live-calculated under boss name
-- [ ] **Card count remaining** — "2 left in deck" on hover
-- [ ] **Discard pile preview** — click/hover to see what's in there
+- [x] **Card count remaining — DECK/DISC counters above card fan** — "2 left in deck" on hover
+- [x] **Discard pile preview — click DISC counter to see pile (already shipped)**
 - [ ] **Drug pin tape marks** — zine-feel attachment detail
 
 ### Quality of Life
-- [ ] **Auto-sort preference** — persist hand sort in localStorage
-- [ ] **Bulk discard** — select multiple then discard all at once
+- [x] **Auto-sort preference persists to localStorage**
+- [x] **Bulk discard — select multiple then discard all (already shipped)**
 - [x] **Run timer** — MM:SS elapsed time on end screen stats grid
 - [ ] **"Why did I die?" tooltip** — brief analysis on death screen
-- [ ] **Screen transitions** — 0.3s crossfade between fight/shop/event/descent
+- [x] **Screen transitions — 350ms fade flash on state changes (already shipped)**
 - [ ] ~~Mute hotkey (M)~~ — **JV's lane (audio)**
 - [ ] ~~Corruption milestone audio~~ — **JV's lane (audio)**
 
