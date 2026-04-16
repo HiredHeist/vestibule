@@ -3457,6 +3457,26 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
     </div>
   )
 
+  // ── "WHY DID I DIE?" — brief death analysis based on run stats ──
+  const DeathAnalysis=()=>{
+    if(isVictory)return null
+    const tips=[]
+    if(stats.maxCorruption>=80)tips.push('Corruption hit '+stats.maxCorruption+'%. The darkness consumed your band.')
+    if(stats.tooStonedCount>=3)tips.push(stats.tooStonedCount+' members went Too Stoned. Consider more healing cards or Roadie shields.')
+    if(circleReached<=2&&stats.highestStrike<30)tips.push('Low damage output. Buff your members with Battle Cry and Amp before striking.')
+    if(circleReached>=4&&stats.highestStrike<80)tips.push('Damage didn\'t scale into late game. Look for Riff Chains and strike multipliers.')
+    if(stats.strikesThrown>0&&stats.totalDamage/stats.strikesThrown<20)tips.push('Average strike was only '+Math.round(stats.totalDamage/stats.strikesThrown)+' damage. Stack more buffs before each strike.')
+    if(chosenPacts.includes('corruption_engine'))tips.push('Corruption Engine pact added +5% corruption every fight. Risky choice.')
+    if(stats.cardsPlayed<stats.strikesThrown*3)tips.push('Only '+stats.cardsPlayed+' cards played across '+stats.strikesThrown+' strikes. Play more cards to build stronger strikes.')
+    if(tips.length===0)tips.push(enemy?enemy.name+' got the best of you. Adapt your strategy and try again.':'Sometimes Hell wins. Try again.')
+    return(
+      <div style={{maxWidth:780,width:'100%',padding:'12px 24px',background:'rgba(60,0,0,0.2)',border:'1px solid rgba(196,30,58,0.3)',borderRadius:6,marginTop:4}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--blood)',letterSpacing:3,textTransform:'uppercase',fontWeight:900,marginBottom:6}}>💀 What Went Wrong</div>
+        {tips.slice(0,2).map((t,i)=><div key={i} style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'#aa8060',fontStyle:'italic',lineHeight:1.5,padding:'2px 0'}}>{t}</div>)}
+      </div>
+    )
+  }
+
   // Shared bottom row
   // ── RUN HISTORY ─────────────────────────────────────────────
   const [showHistory,setShowHistory]=useState(false)
@@ -3586,6 +3606,9 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         <div style={{display:'flex',alignItems:'center',gap:20,marginTop:4,width:'100%',justifyContent:'center'}}>
           <NearMiss/>
         </div>
+
+        {/* ROW 2.5: Death Analysis — why did I die? */}
+        <DeathAnalysis/>
 
         {/* ROW 3: Score + Play Again */}
         <div style={{display:'flex',alignItems:'center',gap:40,marginTop:4}}>
@@ -8074,11 +8097,13 @@ function App(){
         {/* CARD FAN — centered between panels */}
         <div style={{position:'absolute',left:410,right:150,top:22,bottom:0,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:10,overflow:'visible',zIndex:50}}>
           {/* HAND SIZE INDICATOR — gold pulse at overcap */}
-          {(()=>{const tgt=handTargetRef.current||HAND_SIZE;const over=hand.length>tgt;return (
+          {(()=>{const tgt=handTargetRef.current||HAND_SIZE;const over=hand.length>tgt;return (<>
+            <div style={{position:'absolute',top:-2,left:8,fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:1,color:'var(--ink-dim)',pointerEvents:'none',zIndex:51,fontWeight:900}}>DECK {deck.length}</div>
             <div style={{position:'absolute',top:-2,left:'50%',transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:over?'var(--gold)':'var(--ink-dim)',textShadow:over?'0 0 8px rgba(200,152,56,0.6)':'none',animation:over?'handOvercapPulse 1.2s ease-in-out infinite':'none',pointerEvents:'none',zIndex:51,fontWeight:900}}>
               {hand.length}/{tgt}
             </div>
-          )})()}
+            <div style={{position:'absolute',top:-2,right:8,fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:1,color:'var(--ink-dim)',pointerEvents:'none',zIndex:51,fontWeight:900}}>DISC {discardPile.length}</div>
+          </>)})()}
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).filter(Boolean).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} chainReady={RIFF_CHAINS.some(ch=>ch.cards.includes(card.id)&&hand.some(c2=>c2.uid!==card.uid&&ch.cards.includes(c2.id)))} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
               isHovered={hovered===i} isSelected={selected.includes(card.uid)||quickPlayCardUid===card.uid}
