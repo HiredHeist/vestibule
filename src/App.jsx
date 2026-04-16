@@ -301,7 +301,7 @@ const REWARD_TIPS={
   'm_stash40':'Adds 40 to your permanent stash balance.',
   'm_delete':'Permanently removes a random Common card from your deck. Thins your deck!',
   'm_free':'The first card you play next fight costs 0 embers.',
-  'm_stonewall':'All members are shielded from Too Stoned for 2 strikes next fight.',
+  'm_stonewall':'All are shielded from Too Stoned for 2 strikes next fight.',
 }
 
 const DESCENT_REWARDS_1=[ // Fight 1 skip rewards (small) — 9 options
@@ -413,8 +413,8 @@ const STREAK_BONUSES=[
 
 const PACT_REWARDS=[
   {id:'ember_surge',name:'Ember Surge',emoji:'🔥',desc:'+1 max Embers permanently.',color:'#ff6600'},
-  {id:'iron_strings',name:'Iron Strings',emoji:'🎸',desc:'All members +1 ATK permanently.',color:'#ee2222'},
-  {id:'thick_skin',name:'Thick Skin',emoji:'🛡',desc:'All members +3 max HP permanently.',color:'#33dd33'},
+  {id:'iron_strings',name:'Iron Strings',emoji:'🎸',desc:'All +1 ATK permanently.',color:'#ee2222'},
+  {id:'thick_skin',name:'Thick Skin',emoji:'🛡',desc:'All +3 max HP permanently.',color:'#33dd33'},
   {id:'dark_bargain',name:'Dark Bargain',emoji:'🌑',desc:'All CORRUPT cards cost 1 less Ember.',color:'#cc44ff'},
   {id:'speed_demon',name:'Speed Demon',emoji:'⚡',desc:'Draw 1 extra card per Strike.',color:'#ffdd00'},
   {id:'blood_price',name:'Blood Price',emoji:'🩸',desc:'Blood Ritual deals 9× instead of 6×.',color:'#cc0000'},
@@ -499,24 +499,24 @@ function getChainHints(cardId){
 }
 
 const ALL_CARDS=[
-  {id:'amp',name:'Amp It Up',type:'RIFF',rarity:'Common',emoji:'⚡',embers:2,effect:'Target member deals double ATK this turn.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:0,effect:'+10% Corruption. All members +3 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:2},
-  {id:'soundcheck',name:'Sound Check',type:'UTILITY',rarity:'Common',emoji:'🔊',embers:2,effect:'All members +4 HP. Injured members also gain +1 ATK this Strike.',color:'#22aa44',typeColor:'#118833',copies:2},
+  {id:'amp',name:'Amp It Up',type:'RIFF',rarity:'Common',emoji:'⚡',embers:2,effect:'Target deals ×2 ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:2},
+  {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:0,effect:'+10% Corruption. All +3 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:2},
+  {id:'soundcheck',name:'Sound Check',type:'UTILITY',rarity:'Common',emoji:'🔊',embers:2,effect:'All +4 HP. Injured: +1 ATK this Strike.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'sigdecay',name:'Signal Decay',type:'CORRUPT',rarity:'Common',emoji:'📡',embers:1,effect:'Discard 1 card from hand. Draw 2 cards.',color:'#aa1111',typeColor:'#880000',copies:1},
-  {id:'battlecry',name:'Battle Cry',type:'RIFF',rarity:'Common',emoji:'🤘',embers:2,effect:'Target member +1 ATK permanently.',color:'#9933cc',typeColor:'#7722aa',copies:4},
-  {id:'roadie',name:'Roadie',type:'UTILITY',rarity:'Common',emoji:'🛡',embers:1,effect:'Target cannot go Too Stoned for 2 Strikes. Heals 2 HP.',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'setlist',name:'Setlist',type:'UTILITY',rarity:'Common',emoji:'📋',embers:0,effect:'Draw 3 cards. Then discard 1 card of your choice.',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'groupie',name:'Groupie',type:'EMBER',rarity:'Uncommon',emoji:'🍯',embers:1,effect:'Gain 2 Embers. Draw 1 card immediately.',color:'#c87820',typeColor:'#a05a10',copies:2},
+  {id:'battlecry',name:'Battle Cry',type:'RIFF',rarity:'Common',emoji:'🤘',embers:2,effect:'Target: +1 ATK permanent.',color:'#9933cc',typeColor:'#7722aa',copies:4},
+  {id:'roadie',name:'Roadie',type:'UTILITY',rarity:'Common',emoji:'🛡',embers:1,effect:'+2 HP. Immune to Too Stoned (2 Strikes).',color:'#22aa44',typeColor:'#118833',copies:2},
+  {id:'setlist',name:'Setlist',type:'UTILITY',rarity:'Common',emoji:'📋',embers:0,effect:'Draw 3. Discard 1 of choice.',color:'#22aa44',typeColor:'#118833',copies:2},
+  {id:'groupie',name:'Groupie',type:'EMBER',rarity:'Uncommon',emoji:'🍯',embers:1,effect:'+2 Embers. Draw 1.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'demotape',name:'Demo Tape',type:'RIFF',rarity:'Common',emoji:'📼',embers:1,effect:'Copy the last Riff played, cast it free.',color:'#9933cc',typeColor:'#7722aa',copies:1},
-  {id:'newstrings',name:'New Strings',type:'RIFF',rarity:'Uncommon',emoji:'🎸',embers:2,effect:'+2 ATK permanently to target member.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'encore',name:'Encore',type:'RIFF',rarity:'Uncommon',emoji:'🔁',embers:2,effect:'Target member attacks again this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:3},
-  {id:'wakeup',name:'Wake Up Call',type:'UTILITY',rarity:'Uncommon',emoji:'☕',embers:1,effect:'Heal all members 2 HP. If any member is Too Stoned, revive them.',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'feedbackloop',name:'Feedback Loop',type:'CORRUPT',rarity:'Uncommon',emoji:'🎛',embers:3,effect:'Deal damage equal to Corruption ÷ 2.',color:'#aa1111',typeColor:'#880000',copies:1},
+  {id:'newstrings',name:'New Strings',type:'RIFF',rarity:'Uncommon',emoji:'🎸',embers:2,effect:'+2 ATK permanent to target.',color:'#9933cc',typeColor:'#7722aa',copies:2},
+  {id:'encore',name:'Encore',type:'RIFF',rarity:'Uncommon',emoji:'🔁',embers:2,effect:'Target attacks again this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:3},
+  {id:'wakeup',name:'Wake Up Call',type:'UTILITY',rarity:'Uncommon',emoji:'☕',embers:1,effect:'All +2 HP. Revives Too Stoned.',color:'#22aa44',typeColor:'#118833',copies:2},
+  {id:'feedbackloop',name:'Feedback Loop',type:'CORRUPT',rarity:'Uncommon',emoji:'🎛',embers:3,effect:'Deal damage = Corruption ÷ 2.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'tappedout',name:'Tapped Out',type:'EMBER',rarity:'Uncommon',emoji:'🪙',embers:0,effect:'Gain 5 Embers at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'controlfeedback',name:'Controlled Feedback',type:'CORRUPT',rarity:'Uncommon',emoji:'🎚',embers:2,effect:'Set Corruption to 50%. Heal target member to full HP.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:0,effect:'Select up to 3 cards first, then play this to discard them and draw that many +1. (No selection = draw 1 card.)',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:2,effect:'Direct damage: 5 (C1-3), 8 (C4-6), 12 (C7-9). Bypasses boss passive.',color:'#9933cc',typeColor:'#7722aa',copies:1},
-  {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:4,effect:'Damage = target HP to boss. Once per round.',color:'#9933cc',typeColor:'#7722aa',copies:2},
+  {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:4,effect:'Deal target HP to boss. 1/round.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'If Corruption >=60%, double ALL ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:0,shopOnly:true},
   {id:'infencore',name:'Infernal Encore',type:'RIFF',rarity:'Rare',emoji:'👿',embers:3,effect:'ALL members attack again simultaneously.',color:'#9933cc',typeColor:'#7722aa',copies:3},
   {id:'remaster',name:'The Remaster',type:'UTILITY',rarity:'Rare',emoji:'🎙',embers:0,effect:'Select 1 card in hand, then play this to delete it and draw 3 cards.',color:'#22aa44',typeColor:'#118833',copies:0,shopOnly:true},
@@ -524,23 +524,23 @@ const ALL_CARDS=[
   {id:'hungercard',name:'Hungering Flame',type:'CORRUPT',rarity:'Rare',emoji:'🔥',embers:0,effect:'FREE. All members +1 ATK this Strike. Draw 2 cards. Corruption gift at 50%.',color:'#aa1111',typeColor:'#880000',copies:0},
   {id:'madnesscard',name:'Madness Unleashed',type:'CORRUPT',rarity:'Rare',emoji:'💀',embers:0,effect:'FREE. Deal 15% of enemy max HP as direct damage. Corruption gift at 75%.',color:'#aa1111',typeColor:'#880000',copies:0},
   {id:'sabbathsigil',name:'Black Sabbath Sigil',type:'CORRUPT',rarity:'Rare',emoji:'⛧',embers:2,effect:'CONSUMABLE. Corruption → 100%. Hellquake d10. Card is destroyed after use.',color:'#aa1111',typeColor:'#880000',copies:0,consumable:true,shopCost:42,shopOnly:true},
-  {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:4,effect:'All members deal triple ATK this Strike only.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'crowdsurf',name:'Crowd Surf',type:'RIFF',rarity:'Common',emoji:'🏄',embers:2,effect:'Deal damage equal to cards in hand × 3.',color:'#9933cc',typeColor:'#7722aa',copies:2},
+  {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:4,effect:'All deal ×3 ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:2},
+  {id:'crowdsurf',name:'Crowd Surf',type:'RIFF',rarity:'Common',emoji:'🏄',embers:2,effect:'Deal cards in hand × 3.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'doubledown',name:'Double Down',type:'RIFF',rarity:'Uncommon',emoji:'🎰',embers:1,effect:'The next card played this Strike costs 0 Embers.',color:'#9933cc',typeColor:'#7722aa',copies:2,shopOnly:true},
-  {id:'deathriff',name:'Death Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'💀',embers:1,effect:'Deal 60 damage, reduced by your Corruption%. Best at 0%, weakest at 100%. Corruption +10%.',color:'#aa1111',typeColor:'#880000',copies:2},
-  {id:'ampoverload',name:'Amp Overload',type:'EMBER',rarity:'Uncommon',emoji:'🔋',embers:0,effect:'Gain 3 Embers. Costs 1 Discard. Unplayable with 0 discards remaining.',color:'#c87820',typeColor:'#a06010',copies:1},
-  {id:'ampstatic',name:'Amp the Static',type:'CORRUPT',rarity:'Uncommon',emoji:'📶',embers:3,effect:'Target member gains ATK = Corruption ÷ 10 this Strike. Requires Corruption > 0.',color:'#aa1111',typeColor:'#880000',copies:2},
+  {id:'deathriff',name:'Death Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'💀',embers:1,effect:'60 DMG scaled by clarity (low corruption = more). +10% Corruption.',color:'#aa1111',typeColor:'#880000',copies:2},
+  {id:'ampoverload',name:'Amp Overload',type:'EMBER',rarity:'Uncommon',emoji:'🔋',embers:0,effect:'+3 Embers. Costs 1 Discard.',color:'#c87820',typeColor:'#a06010',copies:1},
+  {id:'ampstatic',name:'Amp the Static',type:'CORRUPT',rarity:'Uncommon',emoji:'📶',embers:3,effect:'Target: +ATK = Corruption ÷ 10 this Strike.',color:'#aa1111',typeColor:'#880000',copies:2},
   // ── NEW CARDS ──────────────────────────────────────────────────
   {id:'distortion',name:'Distortion',type:'CORRUPT',rarity:'Common',emoji:'🎸',embers:1,effect:'Corruption +15%. All members +1 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:3},
   {id:'seance',name:'Séance',type:'CORRUPT',rarity:'Uncommon',emoji:'🔮',embers:1,effect:'Heal all members HP equal to Corruption ÷ 4. Rewards high corruption.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'staticcharge',name:'Static Charge',type:'CORRUPT',rarity:'Common',emoji:'⚡',embers:0,effect:'Gain 2 Embers. Gain 4 instead if Corruption is 0%.',color:'#aa1111',typeColor:'#880000',copies:2},
-  {id:'darktuning',name:'Dark Tuning',type:'CORRUPT',rarity:'Uncommon',emoji:'🌑',embers:3,effect:'For each 15% Corruption, one random member gains +1 ATK permanently.',color:'#aa1111',typeColor:'#880000',copies:2},
+  {id:'darktuning',name:'Dark Tuning',type:'CORRUPT',rarity:'Uncommon',emoji:'🌑',embers:3,effect:'+1 ATK permanent to 1 random per 15% Corruption.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'powertap',name:'Power Tap',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'Gain 2 Embers.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'soundboard',name:'Soundboard',type:'EMBER',rarity:'Uncommon',emoji:'🎛',embers:1,effect:'Gain 2 Embers. Draw 1 extra card at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:1},
   {id:'setbreak',name:'Smoke Break',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Select 1 card first, then play to discard it. Gain 2 Embers. -15% Corruption. Draw 1 card. (Random if no selection)',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'heavyriff',name:'Heavy Riff',type:'RIFF',rarity:'Uncommon',emoji:'🥊',embers:2,effect:'Deal damage = stage total ATK ÷ 2, direct to boss.',color:'#9933cc',typeColor:'#7722aa',copies:2},
+  {id:'heavyriff',name:'Heavy Riff',type:'RIFF',rarity:'Uncommon',emoji:'🥊',embers:2,effect:'Deal stage ATK ÷ 2 to boss.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'resonancecard',name:'Resonance',type:'RIFF',rarity:'Uncommon',emoji:'🌀',embers:1,effect:'Target member ATK becomes equal to highest ATK on stage.',color:'#9933cc',typeColor:'#7722aa',copies:3},
-  {id:'herbmoney',name:'Herb Money',type:'RIFF',rarity:'Uncommon',emoji:'🌿',embers:1,effect:'Deal damage equal to your current Stash. Keep your Stash. -15% Corruption.',color:'#9933cc',typeColor:'#7722aa',copies:1},
+  {id:'herbmoney',name:'Herb Money',type:'RIFF',rarity:'Uncommon',emoji:'🌿',embers:1,effect:'Deal = your current Stash. Keep your Stash. -15% Corruption.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'goingbroke',name:'Going Broke',type:'RIFF',rarity:'Rare',emoji:'💸',embers:0,effect:'Spend ALL your Stash. Deal that much damage to the boss.',color:'#9933cc',typeColor:'#7722aa',copies:0,shopOnly:true},
   // ── UNLOCKABLE CARDS ───────────────────────────────────────────
   {id:'moshpit',name:'Mosh Pit',type:'RIFF',rarity:'Uncommon',emoji:'🤘',embers:1,effect:'Deal 3 damage per alive member on stage.',color:'#9933cc',typeColor:'#7722aa',copies:2,locked:true,unlockAt:1000},
@@ -942,7 +942,7 @@ function getUnlockedDecks(){
 const HELL_EVENTS=[
   {id:'mosh_pit',name:'The Mosh Pit',emoji:'🤘',
     flavor:'A pit of tortured souls writhes before you. Your band could join the fray...',
-    choiceA:{label:'Jump In',desc:'All members take 4 damage. Survivors gain +1 ATK permanently.',emoji:'💥'},
+    choiceA:{label:'Jump In',desc:'All take 4 damage. Survivors gain +1 ATK permanently.',emoji:'💥'},
     choiceB:{label:'Walk Away',desc:'Lose 15 Stash. The crowd boos.',emoji:'🚶'}},
   {id:'cursed_amp',name:'Cursed Amplifier',emoji:'🔊',
     flavor:'A blood-red amp hums with infernal energy. Its knobs are set to 11...',
@@ -2321,7 +2321,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       </div>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,fontWeight:700,color:'var(--ink-bone)',textAlign:'center',padding:'6px 5px 2px',letterSpacing:.4,lineHeight:1,flexShrink:0}}>{card.name}</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:bc,textAlign:'center',padding:'2px 4px',letterSpacing:2.5,textTransform:'uppercase',flexShrink:0,opacity:0.9}}>{card.type}</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'var(--ink-dim)',textAlign:'center',padding:'4px 8px 8px',lineHeight:1.4,flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>{card.id==='demotape'?(lastRiffPlayed?'📼 Will replay: '+lastRiffPlayed.name+' (free)':'📼 No riff recorded yet — play a RIFF card first'):(<>{card.effect||card.desc||''}{card.upgraded&&CARD_UPGRADES[card.id]&&<div style={{marginTop:4,padding:'3px 8px',background:'rgba(200,152,56,0.12)',border:'1px solid rgba(200,152,56,0.35)',borderRadius:2,color:'var(--gold)',fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase'}}>⛧ {CARD_UPGRADES[card.id].desc}</div>}</>)}
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:700,color:'var(--ink-bone)',textAlign:'center',padding:'6px 10px 10px',lineHeight:1.25,flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>{card.id==='demotape'?(lastRiffPlayed?'📼 Will replay: '+lastRiffPlayed.name+' (free)':'📼 No riff recorded yet — play a RIFF card first'):(<>{card.effect||card.desc||''}{card.upgraded&&CARD_UPGRADES[card.id]&&<div style={{marginTop:6,padding:'3px 8px',background:'rgba(200,152,56,0.15)',border:'1px solid rgba(200,152,56,0.4)',borderRadius:2,color:'var(--gold)',fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase'}}>⛧ {CARD_UPGRADES[card.id].desc}</div>}</>)}
         {isHovered&&chainHintsOn&&(()=>{const hints=getChainHints(card.id);return hints.length>0?<div style={{marginTop:4,width:'100%'}}>{hints.map((h,i)=><div key={i} style={{padding:'3px 6px',background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:3,marginTop:2,fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ffffff',fontWeight:700,textAlign:'center',textShadow:'0 0 6px rgba(255,255,255,0.4)'}}>⛧ {h.name} — needs {h.partnerName}</div>)}</div>:null})()}</div>
     </div>
   )
@@ -2747,15 +2747,15 @@ function DeckPile({count,label,onClick,cards}){
   const [tipOpen,setTipOpen]=useState(false)
   const dist=cards?{RIFF:cards.filter(c=>c.type==='RIFF').length,CORRUPT:cards.filter(c=>c.type==='CORRUPT').length,UTILITY:cards.filter(c=>c.type==='UTILITY').length,EMBER:cards.filter(c=>c.type==='EMBER').length}:null
   return(
-    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,cursor:onClick?'pointer':'default',position:'relative'}} onClick={onClick}
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:3,cursor:onClick?'pointer':'default',position:'relative',paddingBottom:4}} onClick={onClick}
       onMouseEnter={()=>setTipOpen(true)} onMouseLeave={()=>setTipOpen(false)}>
-      <div style={{position:'relative',width:90,height:112}}>
+      <div style={{position:'relative',width:90,height:110}}>
         {[2,1,0].map(i=><div key={i} style={{position:'absolute',width:80,height:100,background:i===0?'linear-gradient(135deg,#1e1408,#0a0804)':`rgba(15,10,4,${.7-i*.2})`,border:'1px solid rgba(160,110,35,0.55)',borderRadius:4,top:i*3,left:i*3}}>
           {i===0&&<div style={{width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,opacity:.2,color:'#c8a060'}}>⛧</div>}
         </div>)}
       </div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:26,fontWeight:900,color:'#c8a060'}}>{count}</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,letterSpacing:2,color:'#c8a040',textTransform:'uppercase'}}>{label}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,color:'var(--gold)',lineHeight:1}}>{count}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,letterSpacing:3,color:'var(--ink-dim)',textTransform:'uppercase',lineHeight:1}}>{label}</div>
       {tipOpen&&dist&&count>0&&<div style={{position:'absolute',bottom:'105%',left:'50%',transform:'translateX(-50%)',zIndex:9999,background:'rgba(10,6,2,0.97)',border:'1px solid rgba(160,110,35,0.6)',borderRadius:6,padding:'8px 12px',pointerEvents:'none',minWidth:140,boxShadow:'0 4px 16px rgba(0,0,0,0.8)'}}>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#c8a040',letterSpacing:2,textAlign:'center',marginBottom:4}}>{label.toUpperCase()}</div>
         {[['RIFF','#9933cc'],['CORRUPT','#aa1111'],['UTILITY','#22aa44'],['EMBER','#c87820']].map(([t,c])=>
@@ -3234,7 +3234,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
             {isVictory&&<button onClick={()=>{/* Encore: restart with scaled enemies */
               setEncoreMode(true);setEncoreCircle(p=>p+10)
               setFightIndex(0);setEnemy(ENEMIES[0]);const _wHp=Math.round(ENEMIES[0].maxHp*activeStake.hpMult*2.0);setEnemyHp(_wHp);setScaledMaxHp(_wHp)
-              setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(4)
+              setStrikesLeft(activeStake.maxStrikes);setFightMaxStrikes(activeStake.maxStrikes);setDiscardsLeft(4);setFightMaxDiscards(4)
               setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
               setGameState('playing');setAnimPhase('idle');setDeathCause(null)
               setVictoryFired(false);if(victoryFiredRef)victoryFiredRef.current=false
@@ -3642,6 +3642,8 @@ function App(){
   const [stash,setStash]=useState(3)
   const [strikesLeft,setStrikesLeft]=useState(MAX_STRIKES)
   const [discardsLeft,setDiscardsLeft]=useState(MAX_DISCARDS)
+  const [fightMaxStrikes,setFightMaxStrikes]=useState(MAX_STRIKES) // dynamic — includes pact bonuses, card effects
+  const [fightMaxDiscards,setFightMaxDiscards]=useState(MAX_DISCARDS) // dynamic — includes bonusDiscards, card effects
   const [isWiggling,setIsWiggling]=useState(false)
   const [dmgBreakdown,setDmgBreakdown]=useState(null) // {lines:[], total:0, showing:true}
   const [projectiles,setProjectiles]=useState([])
@@ -3972,7 +3974,9 @@ function App(){
     setDeck(deckCards)
     setDiscardPile([])
     setStrikesLeft(4)
+    setFightMaxStrikes(4)
     setDiscardsLeft(4)
+    setFightMaxDiscards(4)
     setEmbers(5)
     setMaxEmbers(5)
     setCorruption(fightNum>=2?10:0) // Fight 2+ starts with some corruption
@@ -4399,7 +4403,7 @@ function App(){
       } else if(roll===3){
         // 3: RESONANCE — all members +3 ATK permanently (positive)
         ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3}):m)
-        hqMsg='⛧ HELLQUAKE: RESONANCE! All members +3 ATK forever!';hqFloat='RESONANCE!';hqColor='#ff6600';hqDesc='All members gain +3 ATK permanently.'
+        hqMsg='⛧ HELLQUAKE: RESONANCE! All members +3 ATK forever!';hqFloat='RESONANCE!';hqColor='#ff6600';hqDesc='All gain +3 ATK permanently.'
       } else if(roll===4){
         // 4: RITUAL — boss HP halved (positive)
         const ritualHp=Math.max(1,Math.floor(enemyHp/2));setEnemyHp(ritualHp)
@@ -5054,19 +5058,19 @@ function App(){
         // 90% good trip — roll d4
         const d4=Math.floor(Math.random()*4)
         if(d4===0){
-          effectName='EGO DEATH';effectDesc='All members +2 ATK this fight!';effectColor='#ffdd44'
+          effectName='EGO DEATH';effectDesc='All +2 ATK this fight!';effectColor='#ffdd44'
           setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+2}):m))
           addLog('🍄 EGO DEATH! All members +3 ATK!')
         } else if(d4===1){
           effectName='TIME DILATION';effectDesc='+1 bonus Strike this fight!';effectColor='#ff8800'
-          setStrikesLeft(p=>p+1)
+          setStrikesLeft(p=>p+1);setFightMaxStrikes(p=>p+1)
           addLog('🍄 TIME DILATION! +1 Strike this fight!')
         } else if(d4===2){
           effectName='SYNESTHESIA';effectDesc='All cards cost 1 less ember this fight!';effectColor='#cc44ff'
           // Handled via activeTripEffect check in card cost calculation
           addLog('🍄 SYNESTHESIA! All cards cost 1 less ember!')
         } else {
-          effectName='COSMIC UNITY';effectDesc='All members healed to full HP + Stonewall!';effectColor='#44ddaa'
+          effectName='COSMIC UNITY';effectDesc='All healed to full HP + Stonewall!';effectColor='#44ddaa'
           setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp,stoneShield:2}):m))
           addLog('🍄 COSMIC UNITY! Full HP + Stonewall for all!')
         }
@@ -5098,7 +5102,7 @@ function App(){
           setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3}):m))
           addLog('🧪 EGO DISSOLUTION! Corruption → 69%. All +3 ATK!')
         } else {
-          effectName='ASTRAL PROJECTION';effectDesc='All members immune to boss damage this fight!';effectColor='#44ddff'
+          effectName='ASTRAL PROJECTION';effectDesc='All immune to boss damage this fight!';effectColor='#44ddff'
           addLog('🧪 ASTRAL PROJECTION! Band is untouchable!')
         }
       }
@@ -5325,7 +5329,9 @@ function App(){
           setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,stoneShield:false,tempBuff:false,encoreReady:false,ampedThisStrike:false}):null))
           setEmbers(maxEmbers)
           setStrikesLeft(activeStake.maxStrikes)
+          setFightMaxStrikes(activeStake.maxStrikes)
           setDiscardsLeft(MAX_DISCARDS)
+          setFightMaxDiscards(MAX_DISCARDS)
           setTripUsedThisFight(false)
           setFightTripBuff(null)
           setActiveTripEffect(null)
@@ -5604,7 +5610,8 @@ function App(){
       setTimeout(()=>{
         setEnemy(AR_EXECUTIVE)
         setEnemyHp(AR_EXECUTIVE.maxHp)
-        setEmbers(maxEmbers);setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS)
+        const _fmS=activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0);
+        setEmbers(maxEmbers);setStrikesLeft(_fmS);setFightMaxStrikes(_fmS);setDiscardsLeft(MAX_DISCARDS);setFightMaxDiscards(MAX_DISCARDS)
         setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setLastRiffPlayed(null)
         setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
         setContractsPlayed(0);setPendingDraw(0);wthStrikesRef.current=0
@@ -5653,7 +5660,9 @@ function App(){
       setStage(p=>{const alive=p.filter(m=>m&&!m.tooStoned);if(alive.length===0)return p;const weakest=alive.reduce((a,b)=>a.hp<b.hp?a:b);return p.map(m=>m&&m.uid===weakest.uid?Object.assign({},m,{hp:Math.max(1,m.hp-1)}):m)})
       addLog('🔮 The Whispers... '+corruption+'% corruption gnaws at your weakest.')
     }
-    setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0));setDiscardsLeft(MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0));setPendingDraw(0)
+    const _fmStrikes = activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0);
+    const _fmDiscards = MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0);
+    setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
     setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({});victoryFiredRef.current=false
     // BOSS LOOT effects at fight start
@@ -5760,7 +5769,7 @@ function App(){
       setDblRoll(null)
     }
     // War Drums: +1 Strike
-    if(activeArtifacts.some(a=>a.id==='wardrums')){setStrikesLeft(p=>p+1);addLog('🪘 War Drums! +1 Strike this fight.')}
+    if(activeArtifacts.some(a=>a.id==='wardrums')){setStrikesLeft(p=>p+1);setFightMaxStrikes(p=>p+1);addLog('🪘 War Drums! +1 Strike this fight.')}
     setGameState('playing')
   },[fightIndex,maxEmbers,stage])
 
@@ -6061,7 +6070,7 @@ function App(){
     if(deckDef?.startStash)setStash(p=>p+(deckDef.startStash||0))
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
-    setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
+    setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setFightMaxStrikes(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setFightMaxDiscards(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
     setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
     setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
@@ -7141,30 +7150,33 @@ function App(){
               <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'var(--ink-bone)',lineHeight:1.5,fontStyle:'italic'}}>{heldAcid?'Use before your first Strike. 90% chance of a game-changing effect — double damage, cards fire twice, +3 ATK all, or total immunity. 5% nothing. 5% Hellquake.':'Buy from The Dealer in the shop.'}</div>
             </div>
           </div>
-          {/* Sort buttons — tiny text links */}
-          <div style={{display:'flex',flexDirection:'column',gap:4,marginTop:6}}>
+          {/* Sort buttons — tight labels with clear hit targets */}
+          <div style={{display:'flex',flexDirection:'column',gap:5,marginTop:8,width:'100%'}}>
             <button onClick={()=>setHandSort(p=>p==='embers'?'none':'embers')}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,letterSpacing:2,textTransform:'uppercase',padding:'3px 6px',background:'transparent',border:'none',borderBottom:handSort==='embers'?'1px solid var(--gold)':'1px solid transparent',color:handSort==='embers'?'var(--gold)':'var(--ink-dim)',cursor:'pointer',textAlign:'center'}}>⚡ COST</button>
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,letterSpacing:2.5,textTransform:'uppercase',padding:'6px 8px',background:handSort==='embers'?'linear-gradient(180deg, rgba(200,152,56,0.22), rgba(200,152,56,0.06))':'rgba(15,10,6,0.4)',border:handSort==='embers'?'1px solid var(--gold)':'1px solid rgba(138,117,96,0.25)',borderRadius:2,color:handSort==='embers'?'var(--gold)':'var(--ink-dim)',cursor:'pointer',textAlign:'center',transition:'all 0.15s'}}>⚡ Cost</button>
             <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,letterSpacing:2,textTransform:'uppercase',padding:'3px 6px',background:'transparent',border:'none',borderBottom:handSort==='rarity'?'1px solid var(--gold)':'1px solid transparent',color:handSort==='rarity'?'var(--gold)':'var(--ink-dim)',cursor:'pointer',textAlign:'center'}}>✦ RARITY</button>
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,letterSpacing:2.5,textTransform:'uppercase',padding:'6px 8px',background:handSort==='rarity'?'linear-gradient(180deg, rgba(200,152,56,0.22), rgba(200,152,56,0.06))':'rgba(15,10,6,0.4)',border:handSort==='rarity'?'1px solid var(--gold)':'1px solid rgba(138,117,96,0.25)',borderRadius:2,color:handSort==='rarity'?'var(--gold)':'var(--ink-dim)',cursor:'pointer',textAlign:'center',transition:'all 0.15s'}}>✦ Rarity</button>
           </div>
         </div>
 
 
         {/* LEFT PANEL: Discard + Embers + Stats — sits on altar */}
         <div style={{position:'absolute',left:210,top:24,bottom:12,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-between',gap:8,padding:'4px 14px 8px',width:190}}>
-          <button onClick={handleDiscard} disabled={!canDiscard}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'9px 10px',background:canDiscard?'linear-gradient(180deg, rgba(200,152,56,0.25), rgba(200,152,56,0.08))':'linear-gradient(180deg, rgba(138,117,96,0.08), rgba(138,117,96,0.03))',border:canDiscard?'1px solid var(--gold)':'1px solid rgba(138,117,96,0.35)',borderRadius:3,color:canDiscard?'var(--gold)':'var(--ink-dim)',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(200,152,56,0.5)':'none',transition:'all 0.15s',width:'100%',opacity:canDiscard?1:0.5}}>{String.fromCharCode(8595)} DISCARD</button>
-          <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center'}}>
-            <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#c89838' wide={true}/>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:discardsLeft>0?'var(--gold)':'var(--rot)'}}>{discardsLeft}/{MAX_DISCARDS}</span>
+          {/* DISCARD group: button + pips as tight unit */}
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,width:'100%'}}>
+            <button onClick={handleDiscard} disabled={!canDiscard}
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'9px 10px',background:canDiscard?'linear-gradient(180deg, rgba(200,152,56,0.25), rgba(200,152,56,0.08))':'linear-gradient(180deg, rgba(138,117,96,0.08), rgba(138,117,96,0.03))',border:canDiscard?'1px solid var(--gold)':'1px solid rgba(138,117,96,0.35)',borderRadius:3,color:canDiscard?'var(--gold)':'var(--ink-dim)',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(200,152,56,0.5)':'none',transition:'all 0.15s',width:'100%',opacity:canDiscard?1:0.5}}>{String.fromCharCode(8595)} DISCARD</button>
+            <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'center'}}>
+              <PhaseDots left={discardsLeft} total={fightMaxDiscards} color='#c89838' wide={true}/>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:discardsLeft>0?'var(--gold)':'var(--rot)',letterSpacing:1}}><span key={'dl-'+discardsLeft} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{discardsLeft}/{fightMaxDiscards}</span></span>
+            </div>
           </div>
           <EmberDisplayLarge current={embers} max={maxEmbers}/>
-          <div style={{display:'flex',gap:14,justifyContent:'center',width:'100%'}}>
+          <div style={{display:'flex',gap:18,justifyContent:'center',width:'100%',marginTop:4}}>
             {[['Fight',(fightIndex%3+1)+'/3','var(--blood)'],['Stash',stash,'var(--gold)']].map(function(item){return(
               <div key={item[0]} style={{textAlign:'center'}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'var(--ink-dim)',letterSpacing:2,textTransform:'uppercase'}}>{item[0]}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:item[2],lineHeight:1}}><span key={item[0]+'-'+item[1]} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{item[1]}</span></div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',fontWeight:900,marginBottom:2}}>{item[0]}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:item[2],lineHeight:1,textShadow:'0 0 8px '+(item[2]==='var(--blood)'?'rgba(196,30,58,0.4)':'rgba(200,152,56,0.4)')}}><span key={item[0]+'-'+item[1]} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{item[1]}</span></div>
               </div>
             )})}
           </div>
@@ -7172,16 +7184,28 @@ function App(){
 
                 {/* RIGHT PANEL: Strike seal — sits on altar */}
         <div style={{position:'absolute',right:12,top:24,bottom:12,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,padding:'8px 8px',width:140}}>
-          {strikeMult>1.0&&<div style={{textAlign:'center',padding:'6px 8px',background:strikeMult>=3.0?'linear-gradient(180deg, rgba(196,30,58,0.35), rgba(196,30,58,0.15))':'linear-gradient(180deg, rgba(196,30,58,0.20), rgba(196,30,58,0.08))',border:'1px solid '+(strikeMult>=3.0?'var(--blood)':'rgba(196,30,58,0.5)'),borderRadius:3,width:'100%'}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'var(--ink-dim)',letterSpacing:2,textTransform:'uppercase',marginBottom:2}}>Multiplier</div>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:strikeMult>=3.0?30:24,fontWeight:900,color:strikeMult>=3.0?'var(--blood)':'var(--ink-bone)',textShadow:strikeMult>=3.0?'0 0 20px rgba(196,30,58,0.9)':'0 0 12px rgba(200,30,60,0.4)',lineHeight:1}}>×{strikeMult.toFixed(2)}</div>
-          </div>}
+          {(() => {
+            const m = strikeMult || 1.0;
+            const tier = m >= 3.0 ? 4 : m >= 2.0 ? 3 : m >= 1.5 ? 2 : m > 1.0 ? 1 : 0;
+            const size = tier === 4 ? 62 : tier === 3 ? 52 : tier === 2 ? 44 : tier === 1 ? 38 : 34;
+            const color = tier === 4 ? '#ffffff' : tier === 3 ? 'var(--blood)' : tier === 2 ? '#ff6b6b' : tier === 1 ? 'var(--gold)' : 'var(--ink-dim)';
+            const bgOpacity = tier === 4 ? 0.55 : tier === 3 ? 0.4 : tier === 2 ? 0.3 : tier === 1 ? 0.2 : 0.08;
+            const borderColor = tier >= 3 ? 'var(--blood)' : tier === 2 ? 'rgba(255,107,107,0.6)' : tier === 1 ? 'var(--gold)' : 'rgba(138,117,96,0.25)';
+            const glow = tier === 4 ? '0 0 40px #fff, 0 0 80px var(--blood)' : tier === 3 ? '0 0 30px var(--blood), 0 0 60px rgba(196,30,58,0.5)' : tier === 2 ? '0 0 20px rgba(255,107,107,0.7)' : tier === 1 ? '0 0 16px rgba(200,152,56,0.5)' : 'none';
+            return (
+              <div style={{textAlign:'center',padding:'10px 8px',background:`linear-gradient(180deg, rgba(196,30,58,${bgOpacity}), rgba(196,30,58,${bgOpacity*0.3}))`,border:'1px solid '+borderColor,borderRadius:3,width:'100%',transition:'all 0.3s'}}>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',marginBottom:2}}>Multiplier</div>
+                <div key={'mult-'+m.toFixed(2)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:size,fontWeight:900,color:color,textShadow:glow,lineHeight:1,transition:'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',animation:tier>0?'inkStamp 0.4s ease-out':'none',display:'inline-block'}}>×{m.toFixed(2)}</div>
+                {tier >= 3 && <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:11,color:'var(--blood)',letterSpacing:4,marginTop:2,textTransform:'uppercase',textShadow:'0 0 8px var(--blood)'}}>{tier===4?'⛧ BEAST ⛧':'INFERNAL'}</div>}
+              </div>
+            );
+          })()}
           <button onClick={()=>setSpeedMode(p=>{const nv=!p;localStorage.setItem('vst_speed',nv?'fast':'normal');return nv})} style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:speedMode?'var(--gold)':'var(--ink-dim)',background:speedMode?'linear-gradient(180deg, rgba(200,152,56,0.20), rgba(200,152,56,0.05))':'transparent',border:'1px solid '+(speedMode?'var(--gold)':'var(--rot)'),borderRadius:3,padding:'4px 10px',cursor:'pointer',letterSpacing:3,textTransform:'uppercase'}}>{speedMode?'⚡ 2x':'1x'}</button>
           <button onClick={handleStrike} disabled={!canStrike}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,fontWeight:900,letterSpacing:5,textTransform:'uppercase',padding:'14px 14px',background:canStrike?'linear-gradient(180deg, rgba(196,30,58,0.45), rgba(122,15,31,0.25))':'rgba(25,12,5,0.4)',border:canStrike?'1px solid var(--blood)':'1px solid var(--rot)',borderRadius:3,color:canStrike?'var(--blood)':'var(--rot)',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 18px rgba(196,30,58,0.8)':'none',boxShadow:canStrike?'inset 0 0 24px rgba(196,30,58,0.15), 0 0 16px rgba(196,30,58,0.25)':'none',transition:'all 0.15s',width:'100%',animation:canStrike?'altarBreath 3s ease-in-out infinite':'none'}}>⛧ STRIKE ⛧</button>
-          <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center'}}>
-            <PhaseDots left={strikesLeft} total={activeStake.maxStrikes} color='#c41e3a' wide={true}/>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:strikesLeft>0?'var(--blood)':'var(--rot)'}}>{strikesLeft}/{activeStake.maxStrikes}</span>
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,letterSpacing:3,textTransform:'uppercase',whiteSpace:'nowrap',padding:'18px 8px',background:canStrike?'linear-gradient(180deg, rgba(196,30,58,0.55), rgba(122,15,31,0.3))':'rgba(25,12,5,0.4)',border:canStrike?'2px solid var(--blood)':'1px solid var(--rot)',borderRadius:3,color:canStrike?'var(--ink-bone)':'var(--rot)',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 20px rgba(196,30,58,0.9), 0 2px 4px rgba(0,0,0,0.6)':'none',boxShadow:canStrike?'inset 0 0 32px rgba(196,30,58,0.25), 0 0 24px rgba(196,30,58,0.35)':'none',transition:'all 0.15s',width:'100%',animation:canStrike?'altarBreath 3s ease-in-out infinite':'none'}}>⛧ STRIKE ⛧</button>
+          <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'center'}}>
+            <PhaseDots left={strikesLeft} total={fightMaxStrikes} color='#c41e3a' wide={true}/>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:strikesLeft>0?'var(--blood)':'var(--rot)',letterSpacing:1}}><span key={'sl-'+strikesLeft} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{strikesLeft}/{fightMaxStrikes}</span></span>
           </div>
         </div>
 
