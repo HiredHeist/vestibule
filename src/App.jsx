@@ -4116,6 +4116,7 @@ function App(){
   const [collectedLoot,setCollectedLoot]=useState([]) // boss loot IDs collected this run
   const [circleSplash,setCircleSplash]=useState(null)
   const [preFightSplash,setPreFightSplash]=useState(null) // {enemy,circle,quote}
+  const [showCredits,setShowCredits]=useState(false)
   const [pendingEvent,setPendingEvent]=useState(null)
   const [possessionFired,setPossessionFired]=useState(false)
   const corruptCardsGivenRef=useRef([]) // track which thresholds have given cards (ref to avoid React 18 double-fire)
@@ -4273,6 +4274,7 @@ function App(){
   const [luciferPhase,setLuciferPhase]=useState(0) // 0=not lucifer, 1=phase1 ice, 2=phase2 satan
   const [luciferCinematic,setLuciferCinematic]=useState(null) // {text,hpSteps} for HP melt animation
   const [victoryCinematic,setVictoryCinematic]=useState(null) // {phase,stage} for kill cinematic
+  const [creditsRoll,setCreditsRoll]=useState(false) // full credits after beating Lucifer
   const [welcomeToHell,setWelcomeToHell]=useState(null) // 'choice','cutscene','fighting','won','lost'
   const [contractsPlayed,setContractsPlayed]=useState(0)
   const wthStrikesRef=useRef(0)
@@ -5253,7 +5255,7 @@ function App(){
       setTimeout(()=>{setVictoryCinematic(p=>p?{...p,phase:2}:null);playSfx('devil_dead');triggerShake(16,700)},2000) // THE DEVIL IS DEAD
       setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:3}:null),4500) // band members rise
       setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:4}:null),7000) // stake unlocked
-      setTimeout(()=>{setVictoryCinematic(null);setWelcomeToHell('choice')},10000) // WTH choice
+      setTimeout(()=>{setVictoryCinematic(null);setCreditsRoll(true)},10000) // credits roll
     }
       else{
         const nextCn=Math.floor((fightIndex+1)/3)+1
@@ -5517,7 +5519,7 @@ function App(){
         setTimeout(()=>{setVictoryCinematic(p=>p?{...p,phase:2}:null);playSfx('devil_dead')},2000)
         setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:3}:null),4500)
         setTimeout(()=>setVictoryCinematic(p=>p?{...p,phase:4}:null),7000)
-        setTimeout(()=>{setVictoryCinematic(null);setWelcomeToHell('choice')},10000)
+        setTimeout(()=>{setVictoryCinematic(null);setCreditsRoll(true)},10000)
       }
       if(e.shiftKey&&(e.key==='D'||e.key==='d')){
         setDeathCause('stoned')
@@ -6605,7 +6607,7 @@ function App(){
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setFightMaxStrikes(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setFightMaxDiscards(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
     setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
-    setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
+    setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
     setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
@@ -6998,9 +7000,92 @@ function App(){
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:32,color:STAKE_UNLOCKS[victoryCinematic.stakeId].color,marginTop:4,textShadow:'0 0 20px '+STAKE_UNLOCKS[victoryCinematic.stakeId].color+'66'}}>{STAKE_UNLOCKS[victoryCinematic.stakeId].name}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#c8a060',marginTop:6,fontStyle:'italic'}}>{STAKE_UNLOCKS[victoryCinematic.stakeId].desc}</div>
         </div>}
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#c8a040',marginTop:16,fontStyle:'italic',cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setWelcomeToHell('choice')}}>Click anywhere to continue</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#c8a040',marginTop:16,fontStyle:'italic',cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setCreditsRoll(true)}}>Click anywhere to continue</div>
       </div>}
-      {victoryCinematic.phase>=4&&<div style={{position:'absolute',inset:0,cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setWelcomeToHell('choice')}}/>}
+      {victoryCinematic.phase>=4&&<div style={{position:'absolute',inset:0,cursor:'pointer'}} onClick={()=>{setVictoryCinematic(null);setCreditsRoll(true)}}/>}
+    </div>
+  )
+
+  // ═══ CREDITS ROLL — full cinema credits after beating Lucifer ═══════════
+  if(creditsRoll)return(
+    <div style={{width:1920,height:1080,position:'relative',background:'#000',overflow:'hidden',cursor:'pointer'}}
+      onClick={()=>{setCreditsRoll(false);setWelcomeToHell('choice')}}>
+      {/* Vignette */}
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 20%,rgba(60,0,0,0.5) 100%)',pointerEvents:'none',zIndex:2}}/>
+      {/* Skip hint */}
+      <div style={{position:'absolute',bottom:30,right:40,zIndex:3,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:3,opacity:0.5}}>CLICK TO SKIP</div>
+      {/* Scrolling credits container */}
+      <div style={{position:'absolute',left:'50%',transform:'translateX(-50%)',bottom:0,width:800,animation:'creditsScroll 45s linear forwards',zIndex:1}}>
+        {/* Game title */}
+        <div style={{textAlign:'center',marginBottom:80,paddingTop:1100}}>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:120,color:'var(--blood)',textShadow:'0 0 60px rgba(196,30,58,0.8),4px 4px 0 #000',letterSpacing:8,lineHeight:1}}>Vestibule</div>
+          <svg width="500" height="8" viewBox="0 0 500 8" style={{margin:'16px auto'}}><path d="M 8 4 Q 125 1, 250 4 T 492 4" stroke="var(--blood)" strokeWidth="1.5" fill="none" opacity="0.7"/></svg>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:24,color:'var(--ink-dim)',fontStyle:'italic',marginTop:8}}>A Doom Metal Roguelite Deckbuilder</div>
+        </div>
+        {/* Credits entries */}
+        {[
+          {role:'Director',name:'Hired Heist'},
+          {role:'Lead Game Designer',name:'Hired Heist'},
+          {role:'Lead Programmer',name:'Hired Heist'},
+          {role:'Technical Director',name:'Hired Heist'},
+          {role:'Art Director',name:'Hired Heist'},
+          {role:'Character Designer',name:'Hired Heist'},
+          {role:'UI / UX Designer',name:'Hired Heist'},
+          {role:'Visual Effects Artist',name:'Hired Heist'},
+          {role:'Animation Director',name:'Hired Heist'},
+          {role:'Concept Artist',name:'Hired Heist'},
+          {role:'Sound Designer',name:'Hired Heist'},
+          {role:'Music Composer',name:'Hired Heist'},
+          {role:'Audio Engineer',name:'Hired Heist'},
+          {role:'Narrative Designer',name:'Hired Heist'},
+          {role:'Lore Architect',name:'Hired Heist'},
+          {role:'Level Designer',name:'Hired Heist'},
+          {role:'Systems Designer',name:'Hired Heist'},
+          {role:'Balance Engineer',name:'Hired Heist'},
+          {role:'Producer',name:'Hired Heist'},
+          {role:'Executive Producer',name:'Hired Heist'},
+          {role:'QA Lead',name:'Hired Heist'},
+          {role:'QA Tester',name:'Hired Heist'},
+          {role:'Community Manager',name:'Hired Heist'},
+          {role:'Marketing Director',name:'Hired Heist'},
+          {role:'Business Development',name:'Hired Heist'},
+          {role:'Localization',name:'Hired Heist'},
+          {role:'IT Support',name:'Hired Heist'},
+          {role:'Catering',name:'Hired Heist'},
+          {role:'Tour Bus Driver',name:'Hired Heist'},
+          {role:'Guy Who Sleeps in the Van',name:'Hired Heist'},
+          {role:'Merch Table',name:'Sly the Fence'},
+        ].map((c,i)=>(
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'12px 60px',borderBottom:'1px solid rgba(196,30,58,0.12)'}}>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--ink-dim)',letterSpacing:2,textTransform:'uppercase',fontWeight:900}}>{c.role}</span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--ink-bone)',letterSpacing:1,fontWeight:900}}>{c.name}</span>
+          </div>
+        ))}
+        {/* Divider */}
+        <div style={{textAlign:'center',padding:'60px 0 40px'}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',letterSpacing:16}}>⛧ · ✠ · ⛧ · ☥ · ⛧</div>
+        </div>
+        {/* Special thanks */}
+        <div style={{textAlign:'center',marginBottom:20}}>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'var(--gold)',textShadow:'0 0 20px rgba(200,152,56,0.5)',letterSpacing:6}}>Special Thanks</div>
+        </div>
+        {['The basement venues that let us play','Every band that ever split gas money','The bartenders who looked the other way','Anyone who bought a demo tape out of the van','The guy who loaned us his PA system in \'04','Coffee, beer, and whatever Sly keeps in that stash','Claude — the roadie who never sleeps','You, for descending into Hell with us'].map((t,i)=>(
+          <div key={i} style={{textAlign:'center',padding:'8px 0',fontFamily:"'ScratchFont',serif",fontSize:18,color:'var(--ink-dim)',fontStyle:'italic',lineHeight:1.6}}>{t}</div>
+        ))}
+        {/* Sly quote */}
+        <div style={{textAlign:'center',padding:'60px 0'}}>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'var(--ink-rust)',fontStyle:'italic',lineHeight:1.5}}>
+            "Got these off a guy who doesn't need em anymore."
+          </div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',letterSpacing:3,marginTop:8}}>— SLY THE FENCE</div>
+        </div>
+        {/* Final title */}
+        <div style={{textAlign:'center',padding:'80px 0 400px'}}>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'var(--blood)',textShadow:'0 0 40px rgba(196,30,58,0.6),3px 3px 0 #000',letterSpacing:6}}>Vestibule</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',letterSpacing:8,marginTop:12,textTransform:'uppercase'}}>Will Return</div>
+        </div>
+      </div>
+      <style>{`@keyframes creditsScroll{0%{transform:translate(-50%,0)}100%{transform:translate(-50%,-100%)}}`}</style>
     </div>
   )
 

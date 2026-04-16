@@ -41,7 +41,7 @@ Ranked by ship-impact per line of code:
 
 ### Tier 4
 - [ ] 🎫 **"Press any key" boot screen** — flickering venue marquee ("VESTIBULE TONIGHT — DOORS 8PM")
-- [ ] 🎬 **Tour-finale credits roll** — band-poster typography, dimming venue
+- [x] 🎬 **Credits roll** — full cinema scroll after Lucifer kill, every role by Hired Heist, Sly on merch, click to skip
 
 ---
 
