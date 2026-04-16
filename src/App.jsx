@@ -2280,9 +2280,11 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       onDrop={e=>{e.stopPropagation();onHandDrop&&onHandDrop()}}
       onMouseEnter={onHover} onMouseLeave={onLeave} onClick={e=>{e.stopPropagation();onClick()}}
       style={{width:210,height:310,flexShrink:0,position:'relative',display:'flex',flexDirection:'column',
-        background:isSelected?'linear-gradient(180deg,#2a1a0a,#160e05)':'linear-gradient(180deg,#201408,#100804)',
-        border:isSelected?`2px solid #cc0000`:unaffordable?'1px solid #333':isHovered?`2px solid ${bc}`:`1px solid ${bc}${isShopBought?'cc':'55'}`,
-        borderRadius:7,cursor:'grab',position:'relative',
+        background:isSelected?'linear-gradient(180deg, #2a0c10, #160608)':'linear-gradient(180deg, var(--altar-raised), var(--altar-recess))',
+        border:isSelected?'2px solid var(--blood)':unaffordable?'1px solid var(--rot)':isHovered?'1px solid var(--ink-bone)':'1px solid var(--ink-rust)',
+        borderRadius:4,cursor:'grab',position:'relative',
+        outline:isHovered||isSelected?'1px solid rgba(232,216,184,0.2)':'1px solid rgba(232,216,184,0.06)',
+        outlineOffset:'-5px',
         transformOrigin:'bottom center',
         transform:isDragging?'scale(0.85) rotate(5deg)':isHovered?(hoverZoomOn?'translateY(-80px) scale(1.5) rotate(0deg)':'translateY(-40px) scale(1.0) rotate(0deg)'):isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
@@ -2291,31 +2293,35 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         opacity:isDragging?0.4:unaffordable?0.55:1,
         animation:shimmerAnim,
         margin:total>HAND_SIZE?'0 -28px':'0 -22px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
-      <div style={{height:6,flexShrink:0,borderRadius:'7px 7px 0 0',background:unaffordable?'#333':bc,boxShadow:unaffordable?'none':`0 0 14px ${glow}`}}/>
+      {/* Hand-drawn top stripe — SVG path with wobble */}
+      <svg style={{position:'absolute',top:0,left:0,right:0,width:'100%',height:8,pointerEvents:'none',zIndex:2}} viewBox="0 0 210 8" preserveAspectRatio="none">
+        <path d="M 0 0 L 210 0 L 210 4 Q 160 6, 105 4 T 0 4 Z" fill={unaffordable?'var(--rot)':bc} opacity="0.9"/>
+        <path d="M 2 5 Q 52 3, 105 5 T 208 5" stroke={unaffordable?'var(--rot)':bc} strokeWidth="0.8" fill="none" opacity="0.4"/>
+      </svg>
       {isUsed&&<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',background:'rgba(0,0,0,0.85)',border:'2px solid #888',borderRadius:6,padding:'6px 14px',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#888',letterSpacing:4,zIndex:20,pointerEvents:'none'}}>USED</div>}
       {card.embers>0?(
-        <div style={{position:'absolute',top:8,right:8,display:'flex',flexDirection:'column',alignItems:'center',gap:1}}>
-          <div style={{width:28,height:28,borderRadius:'50%',background:canAfford?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'rgba(40,20,5,0.9)',border:`2px solid ${canAfford?'#ff6600':'#4a2a10'}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:canAfford?'#fff':'#5a3a10',boxShadow:canAfford?'0 0 10px rgba(255,100,0,0.6)':'none'}}>{card.embers}</div>
-          {!canAfford&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#ff4400',letterSpacing:0.5,whiteSpace:'nowrap',textShadow:'0 0 8px rgba(255,60,0,0.9)',background:'rgba(0,0,0,0.8)',borderRadius:3,padding:'1px 4px',marginTop:2}}>NEED {card.embers}🔥</div>}
+        <div style={{position:'absolute',top:10,right:10,display:'flex',flexDirection:'column',alignItems:'center',gap:2,zIndex:3}}>
+          <div style={{width:30,height:30,borderRadius:'50%',background:canAfford?'radial-gradient(circle at 30% 30%, #e8402f, #8a0c14 60%, #5c0810)':'radial-gradient(circle at 30% 30%, #3a1f18, #1a0c08)',border:canAfford?'1px solid var(--blood)':'1px solid var(--rot)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:canAfford?'var(--ink-bone)':'var(--rot)',boxShadow:canAfford?'0 2px 4px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,150,140,0.3)':'none'}}>{card.embers}</div>
+          {!canAfford&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:'var(--blood)',letterSpacing:1,whiteSpace:'nowrap',textShadow:'0 0 8px rgba(196,30,58,0.9)',background:'rgba(0,0,0,0.85)',borderRadius:2,padding:'1px 4px'}}>NEED {card.embers}</div>}
         </div>
       ):(
-        <div style={{position:'absolute',top:8,right:8}}>
-          <div style={{width:28,height:28,borderRadius:'50%',background:'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)',border:'2px solid #ff6600',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'#fff',boxShadow:'0 0 10px rgba(255,100,0,0.6)'}}>0</div>
+        <div style={{position:'absolute',top:10,right:10,zIndex:3}}>
+          <div style={{width:30,height:30,borderRadius:'50%',background:'radial-gradient(circle at 30% 30%, #3a2818, #1c1208 60%, #0a0604)',border:'1px solid var(--ink-dim)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'var(--ink-dim)',boxShadow:'0 2px 4px rgba(0,0,0,0.6), inset 0 1px 2px rgba(100,80,60,0.2)'}}>0</div>
         </div>
       )}
-      {card.foil&&<div style={{position:'absolute',top:8,left:28,padding:'2px 5px',borderRadius:3,background:'rgba(255,215,0,0.3)',border:'1px solid rgba(255,215,0,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#ffd700',letterSpacing:1}}>✨FOIL</div>}
-      {card.mythic&&<div style={{position:'absolute',top:8,left:28,padding:'2px 5px',borderRadius:3,background:'rgba(120,0,180,0.4)',border:'1px solid rgba(180,0,255,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#cc44ff',letterSpacing:1}}>⛧MYTHIC</div>}
-      {chainReady&&canAfford&&<div style={{position:'absolute',top:-4,left:'50%',transform:'translateX(-50%)',padding:'2px 8px',borderRadius:4,background:'rgba(255,200,0,0.2)',border:'1px solid rgba(255,220,50,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:8,fontWeight:900,color:'#ffdd44',letterSpacing:1,zIndex:20,whiteSpace:'nowrap'}}>⛧ CHAIN</div>}
-      {card.rarity==='Rare'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(200,160,20,0.28)',border:'1px solid rgba(255,220,50,0.4)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#ffdd44',letterSpacing:1}}>RARE</div>}
-      {card.rarity==='Uncommon'&&<div style={{position:'absolute',top:8,left:8,padding:'2px 5px',borderRadius:3,background:'rgba(100,150,200,0.18)',border:'1px solid rgba(150,200,255,0.28)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:700,color:'#aaddff',letterSpacing:1}}>✦</div>}
+      {card.foil&&<div style={{position:'absolute',top:12,left:10,padding:'2px 5px',borderRadius:2,background:'rgba(200,152,56,0.3)',border:'1px solid var(--gold)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:900,color:'var(--gold)',letterSpacing:2,zIndex:3,textTransform:'uppercase'}}>✨ Foil</div>}
+      {card.mythic&&<div style={{position:'absolute',top:12,left:10,padding:'2px 5px',borderRadius:2,background:'rgba(120,0,180,0.4)',border:'1px solid #cc44ff',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:900,color:'#cc44ff',letterSpacing:2,zIndex:3,textTransform:'uppercase'}}>⛧ Mythic</div>}
+      {chainReady&&canAfford&&<div style={{position:'absolute',top:-6,left:'50%',transform:'translateX(-50%)',padding:'2px 10px',borderRadius:3,background:'rgba(200,152,56,0.3)',border:'1px solid var(--gold)',fontFamily:"'MBScribblesFont',serif",fontSize:8,fontWeight:900,color:'var(--gold)',letterSpacing:3,zIndex:20,whiteSpace:'nowrap',textTransform:'uppercase'}}>⛧ Chain</div>}
+      {card.rarity==='Rare'&&!card.foil&&!card.mythic&&<div style={{position:'absolute',top:12,left:10,padding:'2px 5px',borderRadius:2,background:'rgba(200,152,56,0.18)',border:'1px solid rgba(200,152,56,0.4)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:900,color:'var(--gold)',letterSpacing:2,zIndex:3,textTransform:'uppercase'}}>Rare</div>}
+      {card.rarity==='Uncommon'&&!card.foil&&!card.mythic&&<div style={{position:'absolute',top:12,left:10,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'var(--ink-dim)',letterSpacing:2,zIndex:3}}>✦</div>}
       {mastery.border&&<div style={{position:'absolute',bottom:4,left:4,padding:'1px 5px',borderRadius:2,background:'rgba(0,0,0,0.75)',border:'1px solid '+mastery.border+'88',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:900,color:mastery.color,letterSpacing:1,textTransform:'uppercase',zIndex:5}}>{mastery.name}</div>}
-      <div style={{height:100,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:52,background:'rgba(0,0,0,0.35)',position:'relative'}}>
-        <div style={{position:'absolute',inset:0,background:`radial-gradient(circle at center,${bc}18,transparent 70%)`}}/>
+      <div style={{height:100,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:52,background:'linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.15))',position:'relative',marginTop:8}}>
+        <div style={{position:'absolute',inset:0,background:`radial-gradient(circle at center,${bc}22,transparent 70%)`}}/>
         {card.emoji}
       </div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'5px 5px 2px',letterSpacing:.4,lineHeight:1.2,borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:bc,textAlign:'center',padding:'3px 4px',letterSpacing:1.8,textTransform:'uppercase',flexShrink:0,textShadow:'0 0 8px '+bc+'88'}}>{card.type}</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#d0b888',textAlign:'center',padding:'2px 6px 5px',lineHeight:1.4,flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>{card.effect}
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,fontWeight:700,color:'var(--ink-bone)',textAlign:'center',padding:'6px 5px 2px',letterSpacing:.4,lineHeight:1,flexShrink:0}}>{card.name}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:bc,textAlign:'center',padding:'2px 4px',letterSpacing:2.5,textTransform:'uppercase',flexShrink:0,opacity:0.9}}>{card.type}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'var(--ink-dim)',textAlign:'center',padding:'4px 8px 8px',lineHeight:1.4,flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>{card.id==='demotape'?(lastRiffPlayed?'📼 Will replay: '+lastRiffPlayed.name+' (free)':'📼 No riff recorded yet — play a RIFF card first'):(<>{card.effect||card.desc||''}{card.upgraded&&CARD_UPGRADES[card.id]&&<div style={{marginTop:4,padding:'3px 8px',background:'rgba(200,152,56,0.12)',border:'1px solid rgba(200,152,56,0.35)',borderRadius:2,color:'var(--gold)',fontSize:11,fontWeight:900,letterSpacing:1,textTransform:'uppercase'}}>⛧ {CARD_UPGRADES[card.id].desc}</div>}</>)}
         {isHovered&&chainHintsOn&&(()=>{const hints=getChainHints(card.id);return hints.length>0?<div style={{marginTop:4,width:'100%'}}>{hints.map((h,i)=><div key={i} style={{padding:'3px 6px',background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:3,marginTop:2,fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ffffff',fontWeight:700,textAlign:'center',textShadow:'0 0 6px rgba(255,255,255,0.4)'}}>⛧ {h.name} — needs {h.partnerName}</div>)}</div>:null})()}</div>
     </div>
   )
