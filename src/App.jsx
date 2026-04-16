@@ -3004,7 +3004,7 @@ function EventScreen({event,onChoose}){
   </div>)
 }
 
-function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chromaStr,dblRoll,bossStrikeAnim,luciferPhase}){
+function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chromaStr,dblRoll,bossStrikeAnim,luciferPhase,telegraph}){
   const eMaxHp=scaledMaxHp||enemy.maxHp
   const pct=Math.max(0,(currentHp/eMaxHp)*100),isLow=currentHp<eMaxHp*.35,isCritical=currentHp>0&&currentHp<eMaxHp*.20
   return(
@@ -3052,6 +3052,13 @@ function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chr
 
         {/* Base damage — small MBScribbles */}
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'var(--ink-rust)',letterSpacing:3,fontWeight:900,textAlign:'center',textTransform:'uppercase'}}>Base Damage · {enemy.baseDmg} per Strike</div>
+
+        {/* BOSS TELEGRAPH — dynamic next-strike preview */}
+        {telegraph&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,textAlign:'center',marginTop:2,letterSpacing:2,display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>
+          <span style={{color:telegraph.dmg===0?'#44aa44':'var(--blood)',textShadow:telegraph.dmg>0?'0 0 6px rgba(196,30,58,0.4)':'none'}}>{telegraph.dmg===0?'BLOCKED':'NEXT: '+telegraph.dmg+' DMG'}</span>
+          <span style={{color:'var(--ink-dim)',fontSize:10}}>→ {telegraph.target}</span>
+          {telegraph.special&&<span style={{color:'#cc6600',fontSize:10,border:'1px solid rgba(204,102,0,0.4)',borderRadius:3,padding:'0 4px'}}>+ {telegraph.special}</span>}
+        </div>}
 
         {/* HP SCROLL — hand-drawn ribbon with stamped fraction */}
         <div style={{width:'100%',maxWidth:540,marginTop:6,position:'relative'}}>
@@ -7523,7 +7530,35 @@ function App(){
       <div style={{flex:1,margin:'0',position:'relative',overflow:'visible',zIndex:10,background:'transparent',border:'none',display:'flex',flexDirection:'column'}}>
         <div style={{padding:'10px 16px 4px',position:'relative',zIndex:bossStrikeAnim?300:5,display:'flex',justifyContent:'center',flexShrink:0,overflow:'visible'}}>
           <div style={{width:'100%',maxWidth:1000,padding:'0',overflow:bossStrikeAnim?'visible':'hidden',position:'relative',zIndex:bossStrikeAnim?300:1}}>
-            <BossSection enemy={enemy} bossStrikeAnim={bossStrikeAnim} currentHp={enemyHp} scaledMaxHp={scaledMaxHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll} luciferPhase={luciferPhase}/>
+            {(()=>{
+              // ── BOSS TELEGRAPH — compute expected next-strike damage + targeting ──
+              let telegraph=null
+              if(enemy&&enemyHp>0&&gameState==='playing'){
+                const base=enemy.baseDmg+(activeStake.dmgAdd||0)
+                let dmg=base,target='random',special=null
+                const pid=enemy.passiveId||''
+                if(pid.startsWith('targetHighestHp'))target='strongest'
+                if(pid==='luciferBoss'&&luciferPhase===2)target='ALL'
+                if(pid==='selfbuff')dmg=base+(strikesLeft||0)
+                else if(pid==='selfbuff2')dmg=base+((activeStake.maxStrikes||4)-(strikesLeft||0))*2
+                else if(pid==='rageScale1')dmg=base+stage.filter(m=>m&&(m.buffCount||0)>0).length
+                else if(pid==='rageScale2')dmg=base+stage.filter(m=>m&&(m.buffCount||0)>0).length*2
+                else if(pid==='soulThief'){dmg=base+(stolenAtkPool||0);special='steals ATK'}
+                else if(pid==='luciferBoss'||pid.startsWith('damageScaleAtk'))dmg=base+(bossRageAtk||0)
+                if(pid==='corruptPlayer'||pid==='corruptPlayer10tut')special='+10% corrupt'
+                else if(pid==='corruptPlayer15')special='+15% corrupt'
+                else if(pid==='corruptPlayer20')special='+20% corrupt'
+                else if(pid==='stashSteal')special='steals 1🌿'
+                else if(pid==='stashSteal2')special='steals 2🌿'
+                else if(pid==='stashSteal3')special='steals 3🌿'
+                if(chosenPacts.includes('stone_wall'))dmg=Math.max(1,dmg-1)
+                dmg=Math.max(1,dmg-(bossDebuff||0))
+                if(corruption>=100)dmg+=3
+                if(fightTripBuff==='ASTRAL PROJECTION'){dmg=0;special='BLOCKED'}
+                telegraph={dmg,target,special}
+              }
+              return <BossSection enemy={enemy} bossStrikeAnim={bossStrikeAnim} currentHp={enemyHp} scaledMaxHp={scaledMaxHp} isWiggling={isWiggling} innerRef={bossRef} debuff={bossDebuff} chromaStr={chromaStr} dblRoll={dblRoll} luciferPhase={luciferPhase} telegraph={telegraph}/>
+            })()}
           </div>
         </div>
         <div style={{position:'relative',zIndex:5,overflow:'visible',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>

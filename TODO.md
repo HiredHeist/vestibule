@@ -64,7 +64,7 @@ Ranked by ship-impact per line of code:
 
 ### Information & Clarity
 - [ ] **Pact icons in combat** — small row of active pact icons visible
-- [ ] **Boss telegraph** — "NEXT: 6 DMG to weakest" shown on boss
+- [x] **Boss telegraph** — "NEXT: X DMG → target" + special effects, live-calculated under boss name
 - [ ] **Card count remaining** — "2 left in deck" on hover
 - [ ] **Discard pile preview** — click/hover to see what's in there
 - [ ] **Drug pin tape marks** — zine-feel attachment detail
