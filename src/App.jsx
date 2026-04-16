@@ -2266,10 +2266,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
       </div>
 
       {/* MAIN */}
-      <div style={{flex:'1 0 auto',display:'flex',gap:10,minHeight:0}}>
+      <div style={{flex:'1 1 0',display:'flex',gap:10,minHeight:0,overflow:'hidden'}}>
 
         {/* LEFT COLUMN — gear (FROM THE BACK ROOM) */}
-        <div style={{width:240,flexShrink:0,display:shopTab==='cards'||shopTab==='packs'?'none':'flex',flexDirection:'column',gap:6}}>
+        <div style={{width:240,flexShrink:0,display:shopTab==='cards'||shopTab==='packs'?'none':'flex',flexDirection:'column',gap:6,overflowY:'auto',overflowX:'hidden'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,letterSpacing:3,color:'var(--gold)',textAlign:'center',textTransform:'uppercase',fontWeight:900,padding:'4px 0 0',textShadow:'0 0 8px rgba(200,152,56,0.4)'}}>🔦 From the Back Room</div>
           <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',padding:'0 0 4px',borderBottom:'1px solid rgba(200,152,56,0.35)'}}>(Don't tell the boss.)</div>
           <LeftCard item={recruitPack} price={recruitPack.cost}
@@ -2292,7 +2292,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         </div>
 
         {/* CENTER */}
-        <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'visible',minHeight:0}}>
+        <div style={{flex:1,display:'flex',flexDirection:'column',overflowY:'auto',overflowX:'hidden',minHeight:0}}>
 
           {/* CARDS ROW */}
           <div style={{display:shopTab==='packs'||shopTab==='gear'?'none':'block',border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
