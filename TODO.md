@@ -40,7 +40,7 @@ Ranked by ship-impact per line of code:
 - [ ] ⏸️ **Real pause menu** — Cmd+P drawer, vinyl-warp audio ducking
 
 ### Tier 4
-- [ ] 🎫 **"Press any key" boot screen** — flickering venue marquee ("VESTIBULE TONIGHT — DOORS 8PM")
+- [x] 🎫 **"Press any key" boot screen** — flickering venue marquee, light bulbs, auto-dismiss 4s or any key
 - [x] 🎬 **Credits roll** — full cinema scroll after Lucifer kill, every role by Hired Heist, Sly on merch, click to skip
 
 ---

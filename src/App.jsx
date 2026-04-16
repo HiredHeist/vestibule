@@ -3991,6 +3991,7 @@ function TutorialMessage({text,onContinue,isFinal}){
 
 function App(){
   const [gameState,setGameState]=useState('menu')
+  const [bootScreen,setBootScreen]=useState(true) // venue marquee on every load
   const [coldOpenPhase,setColdOpenPhase]=useState(()=>typeof window!=='undefined'&&!localStorage.getItem('vst_seen_intro')?0:null)
   const [tutorialFight,setTutorialFight]=useState(0)
   const [firstTip,setFirstTip]=useState(null) // {id, text} for first-encounter tips // 0=not in tutorial, 1/2/3=tutorial fight
@@ -4302,6 +4303,16 @@ function App(){
   }
   const addFloat=(v,x,y,color,big)=>{big=big||false;const id=fid.current++;if(localStorage.getItem('vst_dmgnums')==='off')return;setFloats(p=>[...p,{id,v,x,y,color:color||'#dd2222',big}])}
   const remFloat=id=>setFloats(p=>p.filter(f=>f.id!==id))
+  // ── BOOT SCREEN — venue marquee, dismiss on any key/click ──────
+  useEffect(()=>{
+    if(!bootScreen)return
+    const dismiss=()=>setBootScreen(false)
+    const auto=setTimeout(dismiss,4000)
+    window.addEventListener('keydown',dismiss)
+    window.addEventListener('click',dismiss)
+    return()=>{clearTimeout(auto);window.removeEventListener('keydown',dismiss);window.removeEventListener('click',dismiss)}
+  },[bootScreen])
+
   // ── COLD OPEN SPLASH — first-launch cinematic ──────────────
   useEffect(()=>{
     if(coldOpenPhase===null)return
@@ -6963,6 +6974,37 @@ function App(){
       </>
     )
   }
+
+  // ═══ BOOT SCREEN — flickering venue marquee ═══════════════════
+  if(bootScreen)return(
+    <div style={{width:1920,height:1080,position:'relative',background:'#000',overflow:'hidden',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',cursor:'pointer'}}
+      onClick={()=>setBootScreen(false)}>
+      {/* Dim venue glow */}
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 50% 40%,rgba(80,20,5,0.25),transparent 60%)',pointerEvents:'none'}}/>
+      {/* Marquee frame */}
+      <div style={{position:'relative',border:'3px solid rgba(200,152,56,0.4)',borderRadius:8,padding:'60px 100px',background:'rgba(10,6,2,0.9)',boxShadow:'0 0 80px rgba(200,152,56,0.15), inset 0 0 60px rgba(0,0,0,0.9)'}}>
+        {/* Light bulbs around frame */}
+        {Array.from({length:24}).map((_,i)=>{
+          const total=24,angle=(i/total)*Math.PI*2
+          const w=520,h=280,cx=w/2,cy=h/2
+          const x=cx+Math.cos(angle)*(w/2+8)-4
+          const y=cy+Math.sin(angle)*(h/2+8)-4
+          return <div key={i} style={{position:'absolute',left:x-40,top:y-40,width:8,height:8,borderRadius:'50%',background:i%3===0?'#ffd700':'#cc8800',boxShadow:'0 0 '+(i%3===0?12:6)+'px '+(i%3===0?'#ffd700':'#cc8800'),animation:'marqueeBulb 1.2s ease-in-out '+(i*0.1)+'s infinite alternate',opacity:0.8}}/>
+        })}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:8,color:'var(--ink-dim)',textTransform:'uppercase',textAlign:'center',marginBottom:8}}>Tonight Only</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:96,color:'var(--blood)',textShadow:'0 0 40px rgba(196,30,58,0.7),0 0 80px rgba(150,0,0,0.4),3px 3px 0 #000',letterSpacing:6,textAlign:'center',lineHeight:1,animation:'marqueeFlicker 3s ease-in-out infinite'}}>Vestibule</div>
+        <svg width="400" height="6" viewBox="0 0 400 6" style={{margin:'12px auto',display:'block'}}><path d="M 8 3 Q 100 1, 200 3 T 392 3" stroke="var(--gold)" strokeWidth="0.8" fill="none" opacity="0.5"/></svg>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,letterSpacing:6,color:'var(--gold)',textTransform:'uppercase',textAlign:'center',fontWeight:900,textShadow:'0 0 12px rgba(200,152,56,0.5)'}}>Doors 8PM · All Ages · No Refunds</div>
+      </div>
+      {/* Press any key */}
+      <div style={{marginTop:60,fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:8,color:'var(--ink-dim)',textTransform:'uppercase',animation:'marqueeBlink 1.5s ease-in-out infinite'}}>Press Any Key</div>
+      <style>{`
+        @keyframes marqueeFlicker{0%,95%,100%{opacity:1;text-shadow:0 0 40px rgba(196,30,58,0.7),0 0 80px rgba(150,0,0,0.4),3px 3px 0 #000}96%{opacity:0.7;text-shadow:0 0 20px rgba(196,30,58,0.3)}97%{opacity:1}98%{opacity:0.6}}
+        @keyframes marqueeBlink{0%,100%{opacity:0.4}50%{opacity:1}}
+        @keyframes marqueeBulb{0%{opacity:0.4;transform:scale(0.8)}100%{opacity:1;transform:scale(1.1)}}
+      `}</style>
+    </div>
+  )
 
   // VICTORY CINEMATIC — renders above ALL screens
   if(victoryCinematic)return(
