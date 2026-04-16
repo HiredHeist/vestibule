@@ -72,7 +72,7 @@ Ranked by ship-impact per line of code:
 ### Quality of Life
 - [ ] **Auto-sort preference** — persist hand sort in localStorage
 - [ ] **Bulk discard** — select multiple then discard all at once
-- [ ] **Run timer** — elapsed time on death/victory screen
+- [x] **Run timer** — MM:SS elapsed time on end screen stats grid
 - [ ] **"Why did I die?" tooltip** — brief analysis on death screen
 - [ ] **Screen transitions** — 0.3s crossfade between fight/shop/event/descent
 - [ ] ~~Mute hotkey (M)~~ — **JV's lane (audio)**
