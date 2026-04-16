@@ -1202,14 +1202,14 @@ function DiceRoll({target,onDone}){
 
 function EmberDisplayLarge({current,max}){
   return(
-    <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:5}}>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#aa5820',letterSpacing:3,textTransform:'uppercase',fontWeight:700}}>Embers</div>
-      <div style={{display:'flex',gap:5}}>
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Embers</div>
+      <div style={{display:'flex',gap:3,justifyContent:'center'}}>
         {Array.from({length:max}).map((_,i)=>(
-          <div key={i} style={{fontSize:i>=(max-current)?22:18,opacity:i>=(max-current)?1:0.18,filter:i>=(max-current)?'drop-shadow(0 0 8px rgba(255,120,0,0.9))':'grayscale(1)',transition:'all 0.25s'}}>🔥</div>
+          <div key={i} style={{fontSize:i>=(max-current)?20:15,opacity:i>=(max-current)?1:0.2,filter:i>=(max-current)?'drop-shadow(0 0 6px rgba(200,152,56,0.7))':'grayscale(1)',transition:'all 0.25s'}}>🔥</div>
         ))}
       </div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:current>0?'#ff6600':'#444',lineHeight:1}}>{current}/{max}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:current>0?'var(--gold)':'var(--rot)',lineHeight:1}}><span key={'e-'+current} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{current}/{max}</span></div>
     </div>
   )
 }
@@ -2241,7 +2241,7 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 12px',background:'rgba(10,6,8,0.85)',borderTop:'1px solid rgba(90,56,32,0.3)'}}>
         <div style={{textAlign:'center',minWidth:32}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:st?'var(--rot)':'var(--blood)',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>ATK</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:26,fontWeight:900,lineHeight:1,color:st?'var(--rot)':'var(--blood)',textShadow:st?'none':'0 0 10px rgba(196,30,58,0.5)'}}>{(()=>{
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:26,fontWeight:900,lineHeight:1,color:st?'var(--rot)':'var(--blood)',textShadow:st?'none':'0 0 10px rgba(196,30,58,0.5)'}}><span key={'atk-'+member.atk} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{(()=>{
             if(st)return member.atk
             const base=ALL_MUSICIANS.find(mu=>mu.id===member.id)
             const baseAtk=base?base.atk+(member.demonic?4:member.mythic?2:member.foil?1:0):member.atk
@@ -2250,12 +2250,12 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
             const totalBonus=permBonus+corrBonus
             if(totalBonus>0)return <>{baseAtk}<span style={{fontSize:18,color:'var(--gold)'}}>+{totalBonus}</span></>
             return member.atk
-          })()}</div>
+          })()}</span></div>
         </div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:st?'var(--rot)':'var(--gold)',fontWeight:900,letterSpacing:2,textAlign:'center',textTransform:'uppercase'}}>{member.keyword}</div>
         <div style={{textAlign:'center',minWidth:32}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:st?'var(--rot)':nearDeath?'var(--blood)':'#33dd33',textTransform:'uppercase',fontWeight:900,letterSpacing:1}}>HP</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,lineHeight:1,color:st?'var(--rot)':nearDeath?'var(--blood)':'#33dd33',textShadow:st?'none':nearDeath?'0 0 12px rgba(196,30,58,0.7)':'0 0 10px rgba(0,190,0,0.4)'}}>{member.hp}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,lineHeight:1,color:st?'var(--rot)':nearDeath?'var(--blood)':'#33dd33',textShadow:st?'none':nearDeath?'0 0 12px rgba(196,30,58,0.7)':'0 0 10px rgba(0,190,0,0.4)'}}><span key={'hp-'+member.hp} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{member.hp}</span></div>
         </div>
       </div>
       <div style={{height:4,background:'rgba(0,0,0,0.7)',borderRadius:'0 0 4px 4px'}}><div style={{height:'100%',borderRadius:'0 0 4px 4px',background:st?'var(--rot)':'linear-gradient(90deg,#003800,#33dd33)',width:`${(member.hp/member.maxHp)*100}%`,transition:'width 0.4s ease'}}/></div>
@@ -7164,7 +7164,7 @@ function App(){
             {[['Fight',(fightIndex%3+1)+'/3','var(--blood)'],['Stash',stash,'var(--gold)']].map(function(item){return(
               <div key={item[0]} style={{textAlign:'center'}}>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'var(--ink-dim)',letterSpacing:2,textTransform:'uppercase'}}>{item[0]}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:item[2],lineHeight:1}}><span key={item[0]+'-'+item[1]} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{item[1]}</span></div>
               </div>
             )})}
           </div>
