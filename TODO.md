@@ -60,7 +60,7 @@ Ranked by ship-impact per line of code:
 - [ ] **Boss low-HP desperation glow**
 - [ ] **Mentor link visual chain**
 - [ ] **Riff chain warning glow** on hand cards about to chain
-- [ ] **"+×3 ATK active" badge** near multiplier when temp ATK buffs are live
+- [x] **"+×3 ATK active" badge** — shows ×X.XX CHAIN (gold) and/or +N TEMP ATK (purple) above damage preview when live
 
 ### Information & Clarity
 - [ ] **Pact icons in combat** — small row of active pact icons visible

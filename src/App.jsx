@@ -7791,6 +7791,16 @@ function App(){
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:strikesLeft>0?'var(--blood)':'var(--rot)',letterSpacing:1}}><span key={'sl-'+strikesLeft} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{strikesLeft}/{fightMaxStrikes}</span></span>
           </div>
           {/* DAMAGE PREVIEW — below pips, big stamp animation */}
+          {/* ACTIVE BUFF BADGES — show when multiplier or temp ATK buffs are live */}
+          {(()=>{
+            const tempTotal=stage.filter(m=>m&&!m.tooStoned).reduce((s,m)=>s+(m.tempAtkBonus||0),0)
+            const hasMult=strikeMult>1.0
+            if(!tempTotal&&!hasMult)return null
+            return <div style={{display:'flex',gap:6,justifyContent:'center',flexWrap:'wrap',marginTop:2}}>
+              {hasMult&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'#ffd700',background:'rgba(200,152,56,0.15)',border:'1px solid rgba(200,152,56,0.5)',borderRadius:3,padding:'1px 6px',letterSpacing:1,animation:'handOvercapPulse 1.5s ease-in-out infinite'}}>×{strikeMult.toFixed(2)} CHAIN</span>}
+              {tempTotal>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'#cc44ff',background:'rgba(153,51,204,0.15)',border:'1px solid rgba(153,51,204,0.5)',borderRadius:3,padding:'1px 6px',letterSpacing:1,animation:'handOvercapPulse 1.5s ease-in-out infinite'}}>+{tempTotal} TEMP ATK</span>}
+            </div>
+          })()}
           {(()=>{
             // ═══ MIRRORS handleStrike formula EXACTLY (line 5147+) ═══
             const actives=stage.filter(m=>m&&!m.tooStoned)
