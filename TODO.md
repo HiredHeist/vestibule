@@ -7,6 +7,8 @@
 
 > 🔒 **DOC RULE:** Every commit that changes code MUST update TODO.md (and CLAUDE.md if rules/architecture change) in the SAME commit. No exceptions. Stale docs = wasted sessions re-discovering what's done.
 
+> 🎸 **JV'S LANES (Claude: DO NOT TOUCH):** All audio work (diegetic music system, victory sfx, corruption milestone audio stings, mute controls, SFX balance) + all PixelLab animations (boss idle/death, member attack/"too stoned"). These ship last, by JV, on original music. If people want to mute, they can fuck themselves.
+
 ---
 
 ## 🔴 UNVERIFIED — confirm before building on top
@@ -23,8 +25,8 @@
 Ranked by ship-impact per line of code:
 
 ### Tier 1
-- [ ] 🎵 **Diegetic music tied to game state** — bass drone on full embers, detuned gtr at 50%+ corruption, double-time drums at boss ≤25% HP, full band slam on STRIKE. Biggest perceived-budget item on the board.
 - [ ] 🎤 **Pre-fight loading screen** w/ random tour quote ("Last seen playing a basement in Cleveland for $40 and a case of beer")
+- [ ] 🎵 ~~Diegetic music tied to game state~~ — **JV's lane (audio)**
 
 ### Tier 2
 - [ ] 📖 **Character bios on hover** — musicians + bosses get backstory blurbs
@@ -68,13 +70,13 @@ Ranked by ship-impact per line of code:
 - [ ] **Drug pin tape marks** — zine-feel attachment detail
 
 ### Quality of Life
-- [ ] **Mute hotkey (M)**
 - [ ] **Auto-sort preference** — persist hand sort in localStorage
 - [ ] **Bulk discard** — select multiple then discard all at once
 - [ ] **Run timer** — elapsed time on death/victory screen
-- [ ] **Corruption milestone audio** — dark tones at 25/50/75/100%
 - [ ] **"Why did I die?" tooltip** — brief analysis on death screen
 - [ ] **Screen transitions** — 0.3s crossfade between fight/shop/event/descent
+- [ ] ~~Mute hotkey (M)~~ — **JV's lane (audio)**
+- [ ] ~~Corruption milestone audio~~ — **JV's lane (audio)**
 
 ---
 
