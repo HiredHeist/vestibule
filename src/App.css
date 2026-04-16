@@ -485,3 +485,9 @@ body {
   0% { opacity: 0.4; }
   100% { opacity: 1; }
 }
+
+/* Dealer mushroom pulse — subtle glow breathing when in stock */
+@keyframes shroomPulse {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(200,150,50,0.4)); transform: scale(1); }
+  50%      { filter: drop-shadow(0 0 18px rgba(220,170,70,0.85)); transform: scale(1.04); }
+}

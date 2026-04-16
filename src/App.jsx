@@ -1487,7 +1487,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
   )
 }
 
-function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,shroomsInStock,acidInStock,onBuyShrooms,onBuyAcid,corruption,chosenPacts}){
+function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,shroomsInStock,acidInStock,onBuyShrooms,onBuyAcid,corruption,chosenPacts,addLog}){
   const drugMax=isUnlocked('double_dealer')?2:1
   const [hovId,setHovId]=useState(null)
   const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
@@ -1495,8 +1495,9 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   const [boughtIds,setBoughtIds]=useState([])
   const [leftBought,setLeftBought]=useState({cart:false,cpas:false,rec:false})
   const [boughtPackIds,setBoughtPackIds]=useState([])
+  const [packsBoughtThisVisit,setPacksBoughtThisVisit]=useState(0)
   const [shopTab,setShopTab]=useState('all') // all, cards, packs, gear
-  useEffect(()=>{setBoughtIds([]);setBoughtPackIds([])},[shopCards])
+  useEffect(()=>{setBoughtIds([]);setBoughtPackIds([]);setPacksBoughtThisVisit(0)},[shopCards])
   const [openPackModal,setOpenPackModal]=useState(null) // {pack, cards, picksLeft, picked}
   const circleNum=Math.floor(fightIndex/3)+1
   const hungerActive=corruption>=50
@@ -1596,6 +1597,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
 
   function handleOpenPack(pack){
     if(!can(pack.cost))return
+    if(packsBoughtThisVisit>=1){addLog&&addLog('🛑 Already bought a pack this visit. Come back next time.');return}
     const {cards,picks}=genPackCards(pack)
     setOpenPackModal({pack,cards,picksLeft:picks,picked:[]})
   }
@@ -1607,6 +1609,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
       // Finalize — add picked cards and pay
       onSpend(openPackModal.pack.cost,'pack',{...openPackModal.pack,pickedCards:newPicked})
       setBoughtPackIds(p=>[...p,openPackModal.pack.id])
+      setPacksBoughtThisVisit(1)
       setOpenPackModal(null)
     } else {
       setOpenPackModal(p=>({...p,picked:newPicked}))
@@ -1614,20 +1617,22 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   }
 
   // ── SOLD OVERLAY ──
-  function SoldOverlay(){
+  function SoldOverlay({label}){
+    const long=!!label&&label.length>5
+    const txt=label||'SOLD!'
     return(
       <div style={{position:'absolute',inset:0,zIndex:10,
         background:'rgba(0,0,0,0.55)',borderRadius:8,
         display:'flex',alignItems:'center',justifyContent:'center',
         pointerEvents:'none'}}>
         <div style={{
-          fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,
-          color:'#cc1111',letterSpacing:4,
+          fontFamily:"'MBScribblesFont',serif",fontSize:long?20:38,fontWeight:900,
+          color:'#cc1111',letterSpacing:long?2:4,
           textShadow:'0 0 20px rgba(200,0,0,0.8),2px 2px 0 rgba(0,0,0,0.9)',
-          transform:'rotate(-45deg)',
-          border:'4px solid #cc1111',padding:'6px 14px',
+          transform:long?'rotate(-18deg)':'rotate(-45deg)',
+          border:'4px solid #cc1111',padding:long?'6px 12px':'6px 14px',
           borderRadius:4,background:'rgba(0,0,0,0.4)',
-          whiteSpace:'nowrap'}}>SOLD!</div>
+          whiteSpace:'nowrap'}}>{txt}</div>
       </div>
     )
   }
@@ -1787,13 +1792,15 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     return(
       <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',position:'relative',paddingTop:24}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
-        <div style={{position:'absolute',top:0,left:'50%',transform:'translateX(-50%)',
-          background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
-          border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
-          padding:'4px 16px',zIndex:15,whiteSpace:'nowrap',
-          fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-          color:canBuy?'#55ee55':'#554428',
-          boxShadow:canBuy?'0 2px 16px rgba(50,200,50,0.4)':'none'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.5,fontSize:12}}>{price}</span> 🌿 {realPrice(price)}</>:<>🌿 {price}</>}{hungerActive&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#ff6644',letterSpacing:1,marginTop:-2}}>⚠ HUNGER +25%</div>}</div>
+        <div style={{position:'absolute',top:0,left:'50%',transform:'translateX(-50%)',zIndex:15,display:'flex',flexDirection:'column',alignItems:'center'}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,letterSpacing:3,color:'var(--ink-dim)',textTransform:'uppercase',marginBottom:-2,opacity:0.8}}>Price</div>
+          <div style={{background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
+            border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
+            padding:'4px 16px',whiteSpace:'nowrap',
+            fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
+            color:canBuy?'#55ee55':'#554428',
+            boxShadow:canBuy?'0 2px 16px rgba(50,200,50,0.4)':'none'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.5,fontSize:12}}>{price}</span> 🌿 {realPrice(price)}</>:<>🌿 {price}</>}{hungerActive&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#ff6644',letterSpacing:1,marginTop:-2}}>⚠ HUNGER +25%</div>}</div>
+        </div>
         <div onClick={()=>canBuy&&!bought&&buyCard(card)}
           style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',position:'relative',
             background:'linear-gradient(180deg,#201408,#100804)',
@@ -1856,9 +1863,9 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   }
 
   // ── LEFT COLUMN ITEM ──
-  function LeftCard({item,price,label,accent,id,onBuy,sold}){
+  function LeftCard({item,price,label,accent,id,onBuy,sold,visitLocked}){
     const hov=hovId===id
-    const canBuy=can(price)&&!sold
+    const canBuy=can(price)&&!sold&&!visitLocked
     const ac=accent||'#c87820'
     return(
       <div style={{flex:1,display:'flex',flexDirection:'column',paddingTop:20,position:'relative'}}
@@ -1882,6 +1889,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             boxShadow:hov&&canBuy?'0 10px 30px rgba(0,0,0,0.8),0 0 16px '+ac+'44':'2px 4px 14px rgba(0,0,0,0.6)',
             animation:'throbLeft 4.5s ease-in-out infinite'}}>
           {sold&&<SoldOverlay/>}
+          {visitLocked&&!sold&&<SoldOverlay label="SOLD OUT THIS VISIT"/>}
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:2,
             color:ac,textAlign:'center',padding:'6px 4px 0',
             textTransform:'uppercase',opacity:1,flexShrink:0}}>{label}</div>
@@ -1904,20 +1912,23 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     const id='bp'+idx
     const hov=hovId===id
     const bought=boughtPackIds.includes(pack.id)
-    const canBuy=can(pack.cost)&&!bought
+    const visitLocked=!bought&&packsBoughtThisVisit>=1
+    const canBuy=can(pack.cost)&&!bought&&!visitLocked
     const packAc={cassette:'#c87820',cdr:'#6688cc',vinyl:'#cc44ff',rarevinyl:'#ffdd44',cursed:'#cc2222',ritual:'#8844cc',hellforged:'#ff6600',garage:'#44aa44',touring:'#44aacc',demonic:'#cc44ff'}
     const ac=packAc[pack.id]||'#c87820'
     return(
       <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',paddingTop:24,position:'relative'}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
         <div style={{position:'absolute',top:0,left:'50%',
-          transform:'translateX(-50%)'+(hov&&canBuy?' scale(1.08)':''),
-          background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
-          border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
-          padding:'4px 16px',zIndex:15,whiteSpace:'nowrap',
-          fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-          color:canBuy?'#55ee55':'#554428',
-          transition:'transform 0.12s'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:10}}>{pack.cost}</span> 🌿 {realPrice(pack.cost)}</>:<>🌿 {pack.cost}</>}</div>
+          transform:'translateX(-50%)'+(hov&&canBuy?' scale(1.08)':''),zIndex:15,
+          transition:'transform 0.12s',display:'flex',flexDirection:'column',alignItems:'center'}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,letterSpacing:3,color:'var(--ink-dim)',textTransform:'uppercase',marginBottom:-2,opacity:0.8}}>Price</div>
+          <div style={{background:canBuy?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
+            border:'2px solid '+(canBuy?'#44bb44':'#4a3318'),borderRadius:20,
+            padding:'4px 16px',whiteSpace:'nowrap',
+            fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
+            color:canBuy?'#55ee55':'#554428'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:10}}>{pack.cost}</span> 🌿 {realPrice(pack.cost)}</>:<>🌿 {pack.cost}</>}</div>
+        </div>
         <div onClick={()=>canBuy&&handleOpenPack(pack)}
           style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',alignItems:'center',
             background:'linear-gradient(160deg,#12100a 0%,#1e1a0e 40%,#120e08 100%)',
@@ -1928,8 +1939,9 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             transition:'transform 0.18s,box-shadow 0.15s,border-color 0.15s',
             boxShadow:hov&&canBuy?'0 16px 48px rgba(0,0,0,0.95),0 0 32px '+ac+'55':'2px 6px 20px rgba(0,0,0,0.7)',
             position:'relative',padding:'0 14px 18px',
-            animation:bought?'':'throbShop 4.5s ease-in-out infinite',opacity:!canBuy&&!bought?0.4:1}}>
+            animation:bought||visitLocked?'':'throbShop 4.5s ease-in-out infinite',opacity:!canBuy&&!bought&&!visitLocked?0.4:visitLocked?0.55:1}}>
           {bought&&<SoldOverlay/>}
+          {visitLocked&&<SoldOverlay label="SOLD OUT THIS VISIT"/>}
           <div style={{width:'100%',height:8,flexShrink:0,
             background:'linear-gradient(90deg,'+ac+'44,'+ac+'ee,'+ac+'44)',
             boxShadow:'0 0 16px '+ac+'99'}}/>
@@ -1941,9 +1953,12 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:40,
             color:ac,textAlign:'center',lineHeight:1.2,
             textShadow:'0 0 16px '+ac+'99',flexShrink:0,padding:'4px 4px'}}>{pack.name}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,letterSpacing:3,
+            color:'var(--ink-dim)',textTransform:'uppercase',textAlign:'center',
+            padding:'6px 10px 0',flexShrink:0}}>⛧ Contains ⛧</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,
             color:'#c8a878',textAlign:'center',
-            lineHeight:1.4,padding:'8px 10px 0',flex:1}}>{pack.desc}</div>
+            lineHeight:1.4,padding:'4px 10px 0',flex:1}}>{pack.desc}</div>
           <div style={{position:'absolute',bottom:0,left:0,right:0,height:6,
             background:'linear-gradient(90deg,'+ac+'44,'+ac+'ee,'+ac+'44)'}}/>
         </div>
@@ -1960,56 +1975,94 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
       fontFamily:"'MBScribblesFont',serif",overflow:'hidden',
       boxSizing:'border-box',height:1080}}>
 
-      {/* TOP BAR */}
-      <div style={{flexShrink:0,height:72,display:'flex',gap:10,alignItems:'stretch'}}>
-        <div style={{width:240,flexShrink:0}}/>
-        <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',
-          background:'rgba(8,4,1,0.85)',border:'1px solid rgba(180,20,20,0.3)',borderRadius:8,
-          boxShadow:'0 0 30px rgba(160,10,10,0.2)'}}>
-          <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:38,color:'#cc1111',letterSpacing:2,
-            textShadow:'0 0 20px rgba(220,10,10,0.95),0 0 40px rgba(190,0,0,0.7),0 0 80px rgba(150,0,0,0.4)'}}>
-            ⚰ The Black Market
-          </span>
+      {/* ORNAMENTAL FRIEZE — TOP */}
+      <div style={{flexShrink:0,height:18,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:16,textAlign:'center',lineHeight:'18px',textTransform:'uppercase',opacity:0.85,userSelect:'none',textShadow:'0 0 8px rgba(196,30,58,0.3)',borderBottom:'1px solid rgba(196,30,58,0.35)',background:'linear-gradient(180deg, rgba(196,30,58,0.18) 0%, transparent 100%)'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧</div>
+
+      {/* TOP BAR — STASH · RIBBON+TAGLINE · REROLL · NEXT FIGHT */}
+      <div style={{flexShrink:0,display:'flex',gap:10,alignItems:'center',padding:'2px 4px'}}>
+        {/* STASH — wax-sealed coin pouch */}
+        <div style={{width:150,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2,padding:'8px 10px',background:'rgba(10,20,10,0.88)',border:'2px solid var(--gold)',borderRadius:8,boxShadow:'0 0 16px rgba(200,160,40,0.28), inset 0 0 12px rgba(60,40,0,0.4)'}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'var(--gold)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Stash</div>
+          <div style={{display:'flex',alignItems:'center',gap:6}}>
+            <span style={{fontSize:22}}>🌿</span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:34,fontWeight:900,color:stashColor,lineHeight:1,textShadow:'0 0 10px '+stashColor+'55'}}>{stash}</span>
+          </div>
         </div>
+
+        {/* RIBBON + TAGLINE */}
+        <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2}}>
+          <div style={{position:'relative',width:'94%',minWidth:420,maxWidth:820,height:54,display:'flex',alignItems:'center',justifyContent:'center'}}>
+            <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:0}} preserveAspectRatio="none" viewBox="0 0 960 54">
+              <path d="M 0 27 L 30 6 L 60 18 L 900 18 L 930 6 L 960 27 L 930 48 L 900 36 L 60 36 L 30 48 Z" fill="rgba(60,0,15,0.82)" stroke="var(--blood)" strokeWidth="0.8" opacity="0.95"/>
+              <path d="M 60 18 Q 240 15, 480 18 T 900 18" stroke="var(--blood)" strokeWidth="0.7" fill="none" opacity="0.55"/>
+              <path d="M 60 36 Q 240 39, 480 36 T 900 36" stroke="var(--blood)" strokeWidth="0.7" fill="none" opacity="0.55"/>
+            </svg>
+            <span style={{position:'relative',zIndex:1,fontFamily:"'BogartsMetalFont',cursive",fontSize:34,color:'var(--blood)',letterSpacing:4,textShadow:'0 0 16px rgba(196,30,58,0.95),0 0 40px rgba(150,0,0,0.5)',textTransform:'uppercase',whiteSpace:'nowrap'}}>⚰ The Black Market ⚰</span>
+          </div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'var(--ink-dim)',fontStyle:'italic',letterSpacing:1}}>Cards, gear, and questionable substances.</div>
+        </div>
+
+        {/* REROLL — pill badge */}
+        <div onClick={onReroll}
+          onMouseEnter={e=>{e.currentTarget.style.animation='none';e.currentTarget.style.background='rgba(55,40,8,0.95)'}}
+          onMouseLeave={e=>{e.currentTarget.style.animation='rerollWiggle 3s ease-in-out infinite';e.currentTarget.style.background='rgba(25,18,4,0.92)'}}
+          style={{width:112,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2,padding:'8px 6px',
+            background:'rgba(25,18,4,0.92)',border:'2px solid rgba(200,150,30,0.85)',borderRadius:8,cursor:'pointer',
+            boxShadow:'0 0 16px rgba(180,130,20,0.3)',animation:'rerollWiggle 3s ease-in-out infinite'}}>
+          <span style={{fontSize:20}}>🔄</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#e8c040',letterSpacing:2,textTransform:'uppercase'}}>Re-Roll</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'#e8c040',lineHeight:1}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:12}}>{rerollCost}</span> 🌿 {realPrice(rerollCost)}</>:<>🌿 {rerollCost}</>}</span>
+        </div>
+
+        {/* NEXT FIGHT — STRIKE-style */}
         <button onClick={onLeave}
-          onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,15,15,0.5)'}}
-          onMouseLeave={e=>{e.currentTarget.style.background='rgba(120,8,8,0.3)'}}
-          style={{width:130,flexShrink:0,
-            fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:700,letterSpacing:2,
-            background:'rgba(120,8,8,0.3)',border:'2px solid #991010',borderRadius:8,
-            color:'#ee2222',cursor:'pointer',textTransform:'uppercase',
+          onMouseEnter={e=>{e.currentTarget.style.background='rgba(180,15,15,0.55)'}}
+          onMouseLeave={e=>{e.currentTarget.style.background='rgba(120,8,8,0.35)'}}
+          style={{width:160,flexShrink:0,height:80,
+            fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,
+            background:'rgba(120,8,8,0.35)',border:'3px solid var(--blood)',borderRadius:8,
+            color:'var(--ink-bone)',cursor:'pointer',textTransform:'uppercase',
             transition:'background 0.15s',
-            display:'flex',alignItems:'center',justifyContent:'center',
-            flexDirection:'column',gap:4}}>
-          <span style={{fontSize:20}}>⛧</span>
+            display:'flex',alignItems:'center',justifyContent:'center',gap:6,
+            boxShadow:'0 0 24px rgba(196,30,58,0.5), inset 0 0 18px rgba(150,0,20,0.25)'}}>
+          <span style={{fontSize:18,color:'var(--blood)',textShadow:'0 0 10px rgba(196,30,58,0.8)'}}>⛧</span>
           <span>Next Fight</span>
+          <span style={{fontSize:18,color:'var(--blood)',textShadow:'0 0 10px rgba(196,30,58,0.8)'}}>⛧</span>
         </button>
       </div>
 
-      {/* SHOP TABS */}
-      <div style={{flexShrink:0,display:'flex',gap:6,justifyContent:'center',padding:'0 12px'}}>
+      {/* SHOP TABS — bigger, gold underline on active */}
+      <div style={{flexShrink:0,display:'flex',gap:4,justifyContent:'center',padding:'0 12px',borderBottom:'1px solid rgba(100,80,40,0.2)'}}>
         {[['all','All'],['cards','Cards'],['packs','Packs'],['gear','Gear']].map(([id,label])=>
           <button key={id} onClick={()=>setShopTab(id)}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:2,
-              color:shopTab===id?'#e8a820':'#665544',
-              background:shopTab===id?'rgba(232,168,32,0.12)':'rgba(20,12,4,0.3)',
-              border:'1px solid '+(shopTab===id?'rgba(232,168,32,0.4)':'rgba(100,80,40,0.15)'),
-              borderRadius:4,padding:'4px 16px',cursor:'pointer',textTransform:'uppercase',
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,letterSpacing:3,
+              color:shopTab===id?'var(--ink-bone)':'var(--ink-dim)',
+              background:'transparent',
+              border:'none',
+              borderBottom:shopTab===id?'3px solid var(--gold)':'3px solid transparent',
+              padding:'8px 22px 6px',cursor:'pointer',textTransform:'uppercase',
               transition:'all 0.15s'}}>{label}</button>)}
       </div>
 
       {/* MAIN */}
       <div style={{flex:1,display:'flex',gap:10,overflow:'hidden',minHeight:0}}>
 
-        {/* LEFT COLUMN — gear */}
-        <div style={{width:240,flexShrink:0,display:shopTab==='cards'||shopTab==='packs'?'none':'flex',flexDirection:'column',gap:14}}>
+        {/* LEFT COLUMN — gear (FEATURED SHELVES) */}
+        <div style={{width:240,flexShrink:0,display:shopTab==='cards'||shopTab==='packs'?'none':'flex',flexDirection:'column',gap:8}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:4,color:'var(--gold)',textAlign:'center',textTransform:'uppercase',fontWeight:900,padding:'4px 0 2px',borderBottom:'1px solid rgba(200,152,56,0.35)',textShadow:'0 0 8px rgba(200,152,56,0.4)'}}>⚜ Featured Shelves ⚜</div>
           <LeftCard item={recruitPack} price={recruitPack.cost}
             label="Band Recruitment" accent='#e8a820' id='rec' sold={leftBought.rec===true}
-            onBuy={()=>{if(can(recruitPack.cost)){onSpend(recruitPack.cost,'recruit',recruitPack);setLeftBought(p=>({...p,rec:true}))}}} />
+            visitLocked={packsBoughtThisVisit>=1&&leftBought.rec!==true}
+            onBuy={()=>{
+              if(packsBoughtThisVisit>=1){addLog&&addLog('🛑 Already bought a pack this visit. Come back next time.');return}
+              if(can(recruitPack.cost)){onSpend(recruitPack.cost,'recruit',recruitPack);setLeftBought(p=>({...p,rec:true}));setPacksBoughtThisVisit(1)}
+            }} />
+          {circleArtifact&&<div className="sigil-divider" style={{fontSize:11}}>· ⛧ ·</div>}
           {circleArtifact&&<LeftCard item={circleArtifact} price={circleArtifact.cost}
             label={'Vintage Amp · C'+circleNum} accent='#c87820' id='cart'
             sold={leftBought.cart||!!circleCartBought||activeArtifacts.some(a=>a.id===circleArtifact.id)||(soldIds||[]).includes(circleArtifact.id)}
             onBuy={()=>buyLeft('cart',circleArtifact.cost,'artifact',circleArtifact)} />}
+          {circlePassive&&<div className="sigil-divider" style={{fontSize:11}}>· ⛧ ·</div>}
           {circlePassive&&<LeftCard item={circlePassive} price={circlePassive.cost}
             label={'Effect Pedal · C'+circleNum} accent='#9933cc' id='cpas'
             sold={leftBought.cpas||!!circleCpasBought||activePassives.some(p=>p.id===circlePassive.id)||(soldIds||[]).includes(circlePassive.id)}
@@ -2034,6 +2087,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,
                   color:'#44cc44',textAlign:'center',marginTop:8,
                   textShadow:'0 0 18px rgba(60,200,60,0.8)'}}>🌿 The Dealer</div>
+                <div style={{fontFamily:"'ScratchFont',serif",fontSize:12,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',padding:'2px 6px 6px',letterSpacing:0.5}}>"Watch out for the bad batches, kid."</div>
                 {/* Mushrooms */}
                 <div onClick={()=>{if(shroomsInStock&&heldShrooms<drugMax&&can(6)){onSpend(6,'dealer',null);onBuyShrooms()}}}
                   style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
@@ -2049,7 +2103,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                     padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
                     fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
                     color:shroomsInStock&&heldShrooms<drugMax&&can(6)?'#55ee55':'#554428'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:9}}>6</span> 🌿 {realPrice(6)}</>:'🌿 6'}</div>
-                  <div style={{fontSize:72}}>🍄</div>
+                  <div style={{fontSize:72,filter:shroomsInStock&&heldShrooms<drugMax?'drop-shadow(0 0 10px rgba(200,150,50,0.6))':'none',animation:shroomsInStock&&heldShrooms<drugMax?'shroomPulse 2.4s ease-in-out infinite':'none'}}>🍄</div>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
                     color:shroomsInStock?'#e8a820':'#554428',marginTop:4}}>
                     {heldShrooms>=drugMax?'HOLDING'+(heldShrooms>1?' ×'+heldShrooms:''):shroomsInStock?'Magic Mushrooms':'DRY'}</div>
@@ -2100,17 +2154,19 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
               boxShadow:'0 0 30px rgba(130,50,200,0.2)'}}>
               <div>
                 <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:30,
-                  color:'#9944dd',textAlign:'center',marginBottom:14,
+                  color:'#9944dd',textAlign:'center',marginBottom:8,
                   textShadow:'0 0 18px rgba(160,80,240,0.8)'}}>🪙 Pawn Shop</div>
-                <div style={{fontSize:44,textAlign:'center',margin:'6px 0'}}>🏧</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,
-                  color:'#cc88ff',letterSpacing:1,lineHeight:2.2,textAlign:'center'}}>
-                  Common 1🌿 · Uncommon 2🌿 · Rare 4🌿<br/>
-                  Foil +3🌿 · Mythic +8🌿 · Member 5🌿<br/>
-                  Artifact = 50% of buy price back
+                <div style={{fontSize:36,textAlign:'center',margin:'2px 0 6px'}}>🏧</div>
+                {/* 2-column rate sheet */}
+                <div style={{padding:'6px 22px',fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#cc88ff',letterSpacing:1}}>
+                  {[['Common','1🌿'],['Uncommon','2🌿'],['Rare','4🌿'],['Foil','+3🌿'],['Mythic','+8🌿'],['Member','5🌿'],['Artifact','50% buyback']].map(([k,v])=>(
+                    <div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',padding:'2px 0',borderBottom:'1px dashed rgba(200,140,255,0.18)'}}>
+                      <span style={{fontWeight:700}}>{k}</span>
+                      <span style={{fontWeight:900,color:'#e8aaff',fontVariantNumeric:'tabular-nums'}}>{v}</span>
+                    </div>
+                  ))}
                 </div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,
-                  color:'#cc88ff',textAlign:'center',marginTop:8,letterSpacing:1}}>
+                <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',marginTop:8,letterSpacing:0.5,padding:'0 12px'}}>
                   Max 2 sales per visit · Cannot sell last 2 members
                 </div>
               </div>
@@ -2143,38 +2199,15 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 onClose={()=>setPawnOpen(false)}
               />}
             </div>
-            {/* REROLL + STASH — stacked, centered with pawn shop */}
-            <div style={{display:'flex',flexDirection:'column',gap:12,justifyContent:'center'}}>
-              <div style={{width:140,height:140,
-                display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:6,
-                background:'rgba(25,18,4,0.92)',
-                border:'3px solid rgba(200,150,30,0.85)',
-                borderRadius:8,cursor:'pointer',
-                boxShadow:'0 0 16px rgba(180,130,20,0.3)',
-                animation:'rerollWiggle 3s ease-in-out infinite'}}
-                onClick={onReroll}
-                onMouseEnter={e=>{e.currentTarget.style.animation='none';e.currentTarget.style.background='rgba(55,40,8,0.95)'}}
-                onMouseLeave={e=>{e.currentTarget.style.animation='rerollWiggle 3s ease-in-out infinite';e.currentTarget.style.background='rgba(25,18,4,0.92)'}}>
-                <span style={{fontSize:28}}>🔄</span>
-                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#e8c040',letterSpacing:2,textTransform:'uppercase'}}>Re-Roll</span>
-                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:25,fontWeight:900,color:'#e8c040'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:16}}>{rerollCost}</span> 🌿 {realPrice(rerollCost)}</>:<>🌿 {rerollCost}</>}</span>
-              </div>
-              <div style={{width:140,height:140,
-                display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:6,
-                background:'rgba(5,15,5,0.92)',
-                border:'2px solid #44cc44',
-                borderRadius:8}}>
-                <span style={{fontSize:28}}>🌿</span>
-                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:39,fontWeight:900,color:'#44cc44',lineHeight:1}}>{stash}</span>
-                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#44cc44',letterSpacing:2,textTransform:'uppercase',fontWeight:900}}>Stash</span>
-              </div>
-            </div>
           </div>
           </div>
 
         </div>
 
       </div>
+
+      {/* ORNAMENTAL FRIEZE — BOTTOM */}
+      <div style={{flexShrink:0,height:16,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:16,textAlign:'center',lineHeight:'16px',textTransform:'uppercase',opacity:0.7,userSelect:'none',textShadow:'0 0 8px rgba(196,30,58,0.3)',borderTop:'1px solid rgba(196,30,58,0.35)',background:'linear-gradient(0deg, rgba(196,30,58,0.18) 0%, transparent 100%)'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧</div>
     </div>
     </>
   )
@@ -6788,7 +6821,7 @@ function App(){
   )}
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} chosenPacts={chosenPacts} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
   if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
 
   return(
