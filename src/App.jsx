@@ -728,6 +728,10 @@ const SQUIGGLE_CSS=`
 .squiggle{animation:squiggle1 0.38s steps(3) infinite}
 .squiggle:nth-child(2n){animation-name:squiggle2;animation-duration:0.45s}
 .squiggle:nth-child(3n){animation-name:squiggle3;animation-duration:0.33s}
+@keyframes handOvercapPulse{
+  0%,100%{transform:translateX(-50%) scale(1);text-shadow:0 0 8px rgba(200,152,56,0.5)}
+  50%{transform:translateX(-50%) scale(1.15);text-shadow:0 0 14px rgba(200,152,56,0.95)}
+}
 `
 function MemberPortrait({id,size,style,noSquiggle}){
   const src=MEMBER_PORTRAITS[id]
@@ -7805,6 +7809,12 @@ function App(){
 
         {/* CARD FAN — centered between panels */}
         <div style={{position:'absolute',left:410,right:150,top:22,bottom:0,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:10,overflow:'visible',zIndex:50}}>
+          {/* HAND SIZE INDICATOR — gold pulse at overcap */}
+          {(()=>{const tgt=handTargetRef.current||HAND_SIZE;const over=hand.length>tgt;return (
+            <div style={{position:'absolute',top:-2,left:'50%',transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:over?'var(--gold)':'var(--ink-dim)',textShadow:over?'0 0 8px rgba(200,152,56,0.6)':'none',animation:over?'handOvercapPulse 1.2s ease-in-out infinite':'none',pointerEvents:'none',zIndex:51,fontWeight:900}}>
+              {hand.length}/{tgt}
+            </div>
+          )})()}
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).filter(Boolean).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} chainReady={RIFF_CHAINS.some(ch=>ch.cards.includes(card.id)&&hand.some(c2=>c2.uid!==card.uid&&ch.cards.includes(c2.id)))} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
               isHovered={hovered===i} isSelected={selected.includes(card.uid)||quickPlayCardUid===card.uid}

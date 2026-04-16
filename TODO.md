@@ -49,7 +49,7 @@ Ranked by ship-impact per line of code:
 ### Combat Flow
 - [ ] **Ember forecast** — hovering card dims pips to show remaining
 - [ ] **Undo last card play** — one-step within same strike
-- [ ] **Hand size indicator** — "6/6" turns gold at overcap
+- [x] **Hand size indicator** — "X/Y" at top of card fan, gold pulse at overcap
 - [ ] **Fast-forward HOLD spacebar** — speed up while held
 
 ### Visual Feedback (juice)
