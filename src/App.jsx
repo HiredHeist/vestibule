@@ -7019,94 +7019,108 @@ function App(){
         </div>
       </div>
 
-      {/* HAND AREA */}
-      <div style={{flex:'0 0 340px',width:1920,maxWidth:1920,background:'rgba(0,0,0,0.90)',borderTop:'1px solid rgba(100,55,10,0.5)',position:'relative',zIndex:30}}>
-        {/* Header */}
-        <div style={{textAlign:'center',padding:'3px 0 0',position:'relative',zIndex:1,minHeight:16}}>
-          {pendingEmbers>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#ff6600'}}>+{pendingEmbers} 🔥 pending</span>}
+      {/* ═══ THE ALTAR (cockpit) — unified panel ═══ */}
+      <div className="photocopy altar-grain" style={{flex:'0 0 340px',width:1920,maxWidth:1920,background:'linear-gradient(180deg, var(--altar-raised) 0%, var(--altar) 40%, var(--altar) 100%)',position:'relative',zIndex:30}}>
+        {/* Ornamental top frieze — runs full width */}
+        <div style={{position:'absolute',top:0,left:0,right:0,height:14,background:'linear-gradient(180deg, rgba(196,30,58,0.25) 0%, transparent 100%)',borderBottom:'1px solid rgba(196,30,58,0.4)',pointerEvents:'none',zIndex:1,fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'var(--ink-rust)',letterSpacing:18,textAlign:'center',lineHeight:'14px',textTransform:'uppercase',opacity:0.7,userSelect:'none'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧</div>
+
+        {/* Header: pending embers indicator */}
+        <div style={{textAlign:'center',padding:'16px 0 0',position:'relative',zIndex:3,minHeight:20}}>
+          {pendingEmbers>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'var(--gold)',letterSpacing:2,textTransform:'uppercase'}}>+{pendingEmbers} Embers pending</span>}
         </div>
 
-        {/* LEFT COLUMN: Deck/Discard — absolute */}
-        <div style={{position:'absolute',left:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:6,alignItems:'center',justifyContent:'center',background:'rgba(20,12,4,0.7)',borderRadius:'0 6px 6px 0',padding:'8px 10px',border:'1px solid rgba(100,65,15,0.3)',borderLeft:'none',width:100}}>
+        {/* LEFT COLUMN: Deck/Discard — transparent, sits on altar */}
+        <div style={{position:'absolute',left:0,top:14,bottom:0,zIndex:60,display:'flex',flexDirection:'column',gap:10,alignItems:'center',justifyContent:'center',padding:'8px 14px',width:100}}>
           <DeckPile count={deck.length} label="Deck" onClick={()=>setDeckViewOpen(true)} cards={deck}/>
           <DeckPile count={discardPile.length} label="Discard" onClick={()=>setDiscardViewOpen(true)} cards={discardPile}/>
         </div>
 
-        {/* SORT + DEALER — beside left column */}
-        <div style={{position:'absolute',left:108,top:8,bottom:8,zIndex:60,display:'flex',flexDirection:'column',gap:3,alignItems:'center',justifyContent:'center'}}>
+        {/* DRUG PINS — small artifact tiles on altar */}
+        <div style={{position:'absolute',left:110,top:22,bottom:10,zIndex:60,display:'flex',flexDirection:'column',gap:8,alignItems:'center',justifyContent:'center',width:90}}>
+          {/* Shrooms tile */}
           <div style={{position:'relative'}}
             onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='block'}}
             onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='none'}}>
             <button onClick={()=>{if(heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight)activateTrip('shrooms')}}
-              style={{width:90,padding:'5px 8px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',
-                background:heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'rgba(80,40,10,0.7)':'rgba(10,6,2,0.85)',
-                border:heldShrooms&&!tripUsedThisFight?'2px solid #cc8800':'1px solid rgba(100,65,15,0.3)',
-                borderRadius:3,color:heldShrooms&&!tripUsedThisFight?'#ffcc44':'#4a3018',
+              style={{width:86,padding:'10px 4px',fontFamily:"'MBScribblesFont',serif",fontWeight:900,letterSpacing:2,textTransform:'uppercase',
+                background:heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'linear-gradient(180deg, rgba(200,152,56,0.25), rgba(200,152,56,0.08))':'linear-gradient(180deg, rgba(30,18,12,0.5), rgba(15,10,6,0.5))',
+                border:heldShrooms&&!tripUsedThisFight?'1px solid var(--gold)':'1px solid var(--rot)',
+                borderRadius:2,color:heldShrooms&&!tripUsedThisFight?'var(--gold)':'var(--rot)',
                 cursor:heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'pointer':'not-allowed',
-                opacity:heldShrooms?1:0.4,textAlign:'center'}}>🍄 {heldShrooms?'USE':'—'}</button>
-            <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(200,150,50,0.6)',borderRadius:6,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#e8a820',marginBottom:6}}>🍄 Magic Mushrooms</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#c8b080',lineHeight:1.5}}>{heldShrooms?'Use before your first Strike. 90% chance of a powerful buff — +2 ATK all, bonus Strike, cheaper cards, or full heal. 5% nothing. 5% bad trip.':'Buy from The Dealer in the shop.'}</div>
+                opacity:heldShrooms?1:0.5,textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
+              <span style={{fontSize:22,lineHeight:1}}>🍄</span>
+              <span style={{fontSize:9,letterSpacing:2}}>{heldShrooms?'USE':'—'}</span>
+            </button>
+            <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(200,152,56,0.6)',borderRadius:3,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--gold)',marginBottom:6,letterSpacing:2,textTransform:'uppercase'}}>🍄 Magic Mushrooms</div>
+              <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'var(--ink-bone)',lineHeight:1.5,fontStyle:'italic'}}>{heldShrooms?'Use before your first Strike. 90% chance of a powerful buff — +2 ATK all, bonus Strike, cheaper cards, or full heal. 5% nothing. 5% bad trip.':'Buy from The Dealer in the shop.'}</div>
             </div>
           </div>
+          {/* Acid tile */}
           <div style={{position:'relative'}}
             onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='block'}}
             onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='none'}}>
             <button onClick={()=>{if(heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight)activateTrip('acid')}}
-              style={{width:90,padding:'5px 8px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',
-                background:heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'rgba(40,10,80,0.7)':'rgba(10,6,2,0.85)',
-                border:heldAcid&&!tripUsedThisFight?'2px solid #aa44ff':'1px solid rgba(100,65,15,0.3)',
-                borderRadius:3,color:heldAcid&&!tripUsedThisFight?'#cc88ff':'#4a2a6a',
+              style={{width:86,padding:'10px 4px',fontFamily:"'MBScribblesFont',serif",fontWeight:900,letterSpacing:2,textTransform:'uppercase',
+                background:heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'linear-gradient(180deg, rgba(180,80,220,0.25), rgba(180,80,220,0.08))':'linear-gradient(180deg, rgba(30,18,12,0.5), rgba(15,10,6,0.5))',
+                border:heldAcid&&!tripUsedThisFight?'1px solid #cc88ff':'1px solid var(--rot)',
+                borderRadius:2,color:heldAcid&&!tripUsedThisFight?'#cc88ff':'var(--rot)',
                 cursor:heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'pointer':'not-allowed',
-                opacity:heldAcid?1:0.4,textAlign:'center'}}>🧪 {heldAcid?'USE':'—'}</button>
-            <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(150,50,220,0.6)',borderRadius:6,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#cc44ff',marginBottom:6}}>🧪 Blotter Acid</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#c8b080',lineHeight:1.5}}>{heldAcid?'Use before your first Strike. 90% chance of a game-changing effect — double damage, cards fire twice, +3 ATK all, or total immunity. 5% nothing. 5% Hellquake.':'Buy from The Dealer in the shop.'}</div>
+                opacity:heldAcid?1:0.5,textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
+              <span style={{fontSize:22,lineHeight:1}}>🧪</span>
+              <span style={{fontSize:9,letterSpacing:2}}>{heldAcid?'USE':'—'}</span>
+            </button>
+            <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(180,80,220,0.6)',borderRadius:3,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#cc88ff',marginBottom:6,letterSpacing:2,textTransform:'uppercase'}}>🧪 Blotter Acid</div>
+              <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'var(--ink-bone)',lineHeight:1.5,fontStyle:'italic'}}>{heldAcid?'Use before your first Strike. 90% chance of a game-changing effect — double damage, cards fire twice, +3 ATK all, or total immunity. 5% nothing. 5% Hellquake.':'Buy from The Dealer in the shop.'}</div>
             </div>
           </div>
-          <div style={{flex:1,minHeight:20}}/>
-          <button onClick={()=>setHandSort(p=>p==='embers'?'none':'embers')}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'5px 8px',width:90,background:handSort==='embers'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='embers'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='embers'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>🔥 COST</button>
-          <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:1,textTransform:'uppercase',padding:'5px 8px',width:90,background:handSort==='rarity'?'rgba(200,120,20,0.45)':'rgba(10,6,2,0.85)',border:handSort==='rarity'?'1px solid #e8a820':'1px solid rgba(100,65,15,0.5)',borderRadius:3,color:handSort==='rarity'?'#e8a820':'#7a5a30',cursor:'pointer',textAlign:'center'}}>⭐ RARITY</button>
+          {/* Sort buttons — tiny text links */}
+          <div style={{display:'flex',flexDirection:'column',gap:4,marginTop:6}}>
+            <button onClick={()=>setHandSort(p=>p==='embers'?'none':'embers')}
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,letterSpacing:2,textTransform:'uppercase',padding:'3px 6px',background:'transparent',border:'none',borderBottom:handSort==='embers'?'1px solid var(--gold)':'1px solid transparent',color:handSort==='embers'?'var(--gold)':'var(--ink-dim)',cursor:'pointer',textAlign:'center'}}>⚡ COST</button>
+            <button onClick={()=>setHandSort(p=>p==='rarity'?'none':'rarity')}
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,letterSpacing:2,textTransform:'uppercase',padding:'3px 6px',background:'transparent',border:'none',borderBottom:handSort==='rarity'?'1px solid var(--gold)':'1px solid transparent',color:handSort==='rarity'?'var(--gold)':'var(--ink-dim)',cursor:'pointer',textAlign:'center'}}>✦ RARITY</button>
+          </div>
         </div>
 
 
-        {/* LEFT PANEL: Discard + Embers + Stats */}
-        <div style={{position:'absolute',left:110,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-evenly',gap:4,padding:'6px 10px',background:'rgba(10,5,2,0.75)',borderRadius:'0 6px 6px 0',border:'1px solid rgba(100,65,15,0.3)',borderLeft:'none',width:180}}>
+        {/* LEFT PANEL: Discard + Embers + Stats — sits on altar */}
+        <div style={{position:'absolute',left:210,top:20,bottom:8,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-evenly',gap:6,padding:'8px 14px',width:190}}>
           <button onClick={handleDiscard} disabled={!canDiscard}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'8px 10px',background:canDiscard?'rgba(100,70,0,0.5)':'rgba(25,15,5,0.3)',border:'2px solid '+(canDiscard?'#cc9900':'#2a1a05'),borderRadius:4,color:canDiscard?'#f0c030':'#4a3010',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(220,160,0,0.6)':'none',transition:'all 0.15s',width:'100%'}}>{String.fromCharCode(8595)} DISCARD</button>
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'9px 10px',background:canDiscard?'linear-gradient(180deg, rgba(200,152,56,0.20), rgba(200,152,56,0.08))':'rgba(25,15,5,0.3)',border:canDiscard?'1px solid var(--gold)':'1px solid var(--rot)',borderRadius:3,color:canDiscard?'var(--gold)':'var(--rot)',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(200,152,56,0.5)':'none',transition:'all 0.15s',width:'100%',letterSpacing:4}}>{String.fromCharCode(8595)} DISCARD</button>
           <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center'}}>
-            <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#e8a820' wide={true}/>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:discardsLeft>0?'#e8a820':'#555'}}>{discardsLeft}/{MAX_DISCARDS}</span>
+            <PhaseDots left={discardsLeft} total={MAX_DISCARDS} color='#c89838' wide={true}/>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:discardsLeft>0?'var(--gold)':'var(--rot)'}}>{discardsLeft}/{MAX_DISCARDS}</span>
           </div>
           <EmberDisplayLarge current={embers} max={maxEmbers}/>
-          <div style={{display:'flex',gap:10,justifyContent:'center',width:'100%'}}>
-            {[['Fight',(fightIndex%3+1)+'/3','#dd2222'],['Stash',stash,'#44cc44']].map(function(item){return(
+          <div style={{display:'flex',gap:14,justifyContent:'center',width:'100%'}}>
+            {[['Fight',(fightIndex%3+1)+'/3','var(--blood)'],['Stash',stash,'var(--gold)']].map(function(item){return(
               <div key={item[0]} style={{textAlign:'center'}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#9a7a40',letterSpacing:1,textTransform:'uppercase'}}>{item[0]}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'var(--ink-dim)',letterSpacing:2,textTransform:'uppercase'}}>{item[0]}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:item[2],lineHeight:1}}>{item[1]}</div>
               </div>
             )})}
           </div>
         </div>
 
-                {/* RIGHT PANEL: Strike only */}
-        <div style={{position:'absolute',right:0,top:0,bottom:0,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,padding:'8px 14px',background:'rgba(10,5,2,0.75)',borderRadius:'6px 0 0 6px',border:'1px solid rgba(100,65,15,0.3)',borderRight:'none',width:140}}>
-          {strikeMult>1.0&&<div style={{textAlign:'center',padding:'4px 0',background:strikeMult>=3.0?'rgba(255,50,0,0.3)':'rgba(255,100,0,0.15)',border:'1px solid '+(strikeMult>=3.0?'#ff4400':'rgba(255,100,0,0.5)'),borderRadius:4,width:'100%'}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:strikeMult>=3.0?28:22,fontWeight:900,color:strikeMult>=3.0?'#ff4400':'#ff8800',textShadow:'0 0 16px rgba(255,100,0,0.6)',lineHeight:1}}>x{strikeMult.toFixed(2)}</div>
+                {/* RIGHT PANEL: Strike seal — sits on altar */}
+        <div style={{position:'absolute',right:0,top:20,bottom:8,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:10,padding:'8px 14px',width:140}}>
+          {strikeMult>1.0&&<div style={{textAlign:'center',padding:'6px 8px',background:strikeMult>=3.0?'linear-gradient(180deg, rgba(196,30,58,0.35), rgba(196,30,58,0.15))':'linear-gradient(180deg, rgba(196,30,58,0.20), rgba(196,30,58,0.08))',border:'1px solid '+(strikeMult>=3.0?'var(--blood)':'rgba(196,30,58,0.5)'),borderRadius:3,width:'100%'}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'var(--ink-dim)',letterSpacing:2,textTransform:'uppercase',marginBottom:2}}>Multiplier</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:strikeMult>=3.0?30:24,fontWeight:900,color:strikeMult>=3.0?'var(--blood)':'var(--ink-bone)',textShadow:strikeMult>=3.0?'0 0 20px rgba(196,30,58,0.9)':'0 0 12px rgba(200,30,60,0.4)',lineHeight:1}}>×{strikeMult.toFixed(2)}</div>
           </div>}
-          <button onClick={()=>setSpeedMode(p=>{const nv=!p;localStorage.setItem('vst_speed',nv?'fast':'normal');return nv})} style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:speedMode?'#ff8800':'#665544',background:speedMode?'rgba(255,136,0,0.15)':'rgba(40,25,5,0.5)',border:'1px solid '+(speedMode?'#ff8800':'rgba(100,80,40,0.3)'),borderRadius:4,padding:'4px 8px',cursor:'pointer',letterSpacing:1}}>{speedMode?'⚡ 2X':'1X'}</button>
+          <button onClick={()=>setSpeedMode(p=>{const nv=!p;localStorage.setItem('vst_speed',nv?'fast':'normal');return nv})} style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:speedMode?'var(--gold)':'var(--ink-dim)',background:speedMode?'linear-gradient(180deg, rgba(200,152,56,0.20), rgba(200,152,56,0.05))':'transparent',border:'1px solid '+(speedMode?'var(--gold)':'var(--rot)'),borderRadius:3,padding:'4px 10px',cursor:'pointer',letterSpacing:3,textTransform:'uppercase'}}>{speedMode?'⚡ 2x':'1x'}</button>
           <button onClick={handleStrike} disabled={!canStrike}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'10px 12px',background:canStrike?'rgba(130,0,0,0.45)':'rgba(25,12,5,0.4)',border:'2px solid '+(canStrike?'#cc1111':'#2a1508'),borderRadius:4,color:canStrike?'#ee2222':'#3a1a08',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 14px rgba(200,0,0,0.6)':'none',transition:'all 0.15s',width:'100%'}}>{String.fromCharCode(9876)} STRIKE</button>
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,fontWeight:900,letterSpacing:5,textTransform:'uppercase',padding:'14px 14px',background:canStrike?'linear-gradient(180deg, rgba(196,30,58,0.45), rgba(122,15,31,0.25))':'rgba(25,12,5,0.4)',border:canStrike?'1px solid var(--blood)':'1px solid var(--rot)',borderRadius:3,color:canStrike?'var(--blood)':'var(--rot)',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 18px rgba(196,30,58,0.8)':'none',boxShadow:canStrike?'inset 0 0 24px rgba(196,30,58,0.15), 0 0 16px rgba(196,30,58,0.25)':'none',transition:'all 0.15s',width:'100%',animation:canStrike?'altarBreath 3s ease-in-out infinite':'none'}}>⛧ STRIKE ⛧</button>
           <div style={{display:'flex',alignItems:'center',gap:5,justifyContent:'center'}}>
-            <PhaseDots left={strikesLeft} total={activeStake.maxStrikes} color='#dd2222' wide={true}/>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:strikesLeft>0?'#dd2222':'#555'}}>{strikesLeft}/{activeStake.maxStrikes}</span>
+            <PhaseDots left={strikesLeft} total={activeStake.maxStrikes} color='#c41e3a' wide={true}/>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:strikesLeft>0?'var(--blood)':'var(--rot)'}}>{strikesLeft}/{activeStake.maxStrikes}</span>
           </div>
         </div>
 
-        {/* CARD FAN — centered, padded to avoid columns */}
-        <div style={{position:'absolute',left:300,right:160,top:18,bottom:0,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:10,overflow:'visible',zIndex:50}}>
+        {/* CARD FAN — centered between panels */}
+        <div style={{position:'absolute',left:410,right:150,top:22,bottom:0,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:10,overflow:'visible',zIndex:50}}>
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).filter(Boolean).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} chainReady={RIFF_CHAINS.some(ch=>ch.cards.includes(card.id)&&hand.some(c2=>c2.uid!==card.uid&&ch.cards.includes(c2.id)))} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
               isHovered={hovered===i} isSelected={selected.includes(card.uid)||quickPlayCardUid===card.uid}
