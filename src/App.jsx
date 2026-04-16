@@ -5537,6 +5537,7 @@ function App(){
         setStats({fightsSurvived:6,strikesThrown:24,totalDamage:420,highestStrike:69,tooStonedCount:2,maxCorruption:66,stashEarned:42,cardsPlayed:99})
         setGameState('end')
       }
+      if(e.shiftKey&&(e.key==='H'||e.key==='h')){setCreditsRoll(true)}
       if(e.key==='Escape'){setShowPauseOptions(p=>!p)}
 
       // ── PLAYER KEYBOARD SHORTCUTS — only during combat, no modifiers, not while typing
