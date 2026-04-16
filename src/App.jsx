@@ -2735,7 +2735,7 @@ function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chr
             {/* HP fill — blood red with ink texture */}
             <div style={{height:'100%',background:isLow?'linear-gradient(90deg,#660000,#c41e3a,#ff2200)':'linear-gradient(90deg,#7a0f1f,#a41528,#c41e3a)',width:`${pct}%`,transition:'width 0.7s cubic-bezier(0.4,0,0.2,1)',animation:isCritical?'bossHpCritical 0.5s ease-in-out infinite':'none',boxShadow:'inset 0 0 8px rgba(100,0,0,0.5)'}}/>
             {/* Stamped fraction */}
-            <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--ink-bone)',letterSpacing:3,textShadow:'0 0 6px rgba(0,0,0,0.99),0 1px 2px rgba(0,0,0,0.99)'}}>{Math.max(0,currentHp)} / {eMaxHp} HP</div>
+            <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--ink-bone)',letterSpacing:3,textShadow:'0 0 6px rgba(0,0,0,0.99),0 1px 2px rgba(0,0,0,0.99)'}}><span key={'hp-'+currentHp} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{Math.max(0,currentHp)} / {eMaxHp} HP</span></div>
           </div>
         </div>
       </div>
@@ -6694,55 +6694,66 @@ function App(){
   if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage}/></div>
 
   return(
-    <div style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:`${(()=>{const cn=Math.floor(fightIndex/3)+1;const ct=CIRCLE_BG[cn]||CIRCLE_BG[1];return 'radial-gradient(ellipse at 50% 20%, '+ct.glow+', '+ct.base+')'})()}`,overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
+    <div key={'play-'+fightIndex} className="page-transition-in" style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:`${(()=>{const cn=Math.floor(fightIndex/3)+1;const ct=CIRCLE_BG[cn]||CIRCLE_BG[1];return 'radial-gradient(ellipse at 50% 20%, '+ct.glow+', '+ct.base+')'})()}`,overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
 
       {/* ═══ CORRUPTION VIGNETTE — dark blood edges ═══ */}
       {corruption>15&&<div style={{position:'absolute',inset:0,zIndex:1,pointerEvents:'none',
         background:`radial-gradient(ellipse at 50% 50%, transparent ${corruption>=75?'20%':corruption>=50?'35%':'50%'}, rgba(${corruption>=75?'80,0,10':corruption>=50?'60,0,15':'40,0,10'},${corruption>=75?'0.45':corruption>=50?'0.25':'0.12'}) 100%)`,
         transition:'background 2s ease',
         animation:corruption>=75?'vignettePulse 3s ease-in-out infinite':'none'}}/>}
-      {/* ═══ CORRUPTION THERMOMETER — right edge ═══ */}
+      {/* ═══ CORRUPTION TUBE — mercury ritual vessel, right edge ═══ */}
       {corruption>0&&tutorialFight!==1&&
-      <div style={{position:'absolute',right:12,top:20,bottom:360,width:48,zIndex:50,display:'flex',flexDirection:'column',alignItems:'center',gap:0}}>
-        {/* Percentage at top */}
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,
-          color:corruption>=100?'#ff4466':corruption>=75?'#ee3355':corruption>=50?'#cc2244':'#e8c040',
-          textShadow:corruption>=75?'0 0 12px rgba(255,0,60,0.8)':'0 0 8px rgba(200,160,40,0.5)',
-          marginBottom:4,letterSpacing:2}}>{corruption}%</div>
-        {/* Thermometer body */}
-        <div style={{flex:1,width:32,background:'rgba(15,5,10,0.9)',border:'2px solid '+(corruption>=75?'rgba(200,0,60,0.7)':corruption>=50?'rgba(150,0,40,0.5)':'rgba(80,30,20,0.5)'),
-          borderRadius:16,overflow:'hidden',position:'relative',
-          boxShadow:corruption>=75?'0 0 20px rgba(200,0,60,0.4),inset 0 0 15px rgba(100,0,30,0.3)':corruption>=50?'0 0 10px rgba(150,0,40,0.2)':'none',
+      <div style={{position:'absolute',right:14,top:20,bottom:360,width:56,zIndex:50,display:'flex',flexDirection:'column',alignItems:'center',gap:0}}>
+        {/* Percentage stamp at top */}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,fontWeight:900,
+          color:corruption>=75?'var(--blood)':corruption>=50?'#c41e3a':'var(--gold)',
+          textShadow:corruption>=75?'0 0 12px rgba(196,30,58,0.8)':'0 0 8px rgba(200,152,56,0.4)',
+          marginBottom:6,letterSpacing:2}}><span key={'c-'+corruption} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{corruption}%</span></div>
+
+        {/* Tube cap — top */}
+        <div style={{width:30,height:6,background:'linear-gradient(180deg, var(--ink-rust), var(--altar))',border:'1px solid var(--blood-deep)',borderBottom:'none',borderRadius:'3px 3px 0 0',zIndex:4}}/>
+
+        {/* Tube body */}
+        <div style={{flex:1,width:26,background:'linear-gradient(90deg, rgba(10,5,8,0.95), rgba(20,8,12,0.9), rgba(10,5,8,0.95))',
+          border:'1px solid '+(corruption>=75?'var(--blood)':corruption>=50?'rgba(196,30,58,0.55)':'var(--ink-rust)'),
+          borderRadius:3,overflow:'hidden',position:'relative',
+          boxShadow:corruption>=75?'0 0 20px rgba(196,30,58,0.5), inset 0 0 12px rgba(100,0,20,0.4)':corruption>=50?'0 0 10px rgba(196,30,58,0.25), inset 0 0 8px rgba(0,0,0,0.6)':'inset 0 0 6px rgba(0,0,0,0.7)',
           transition:'border-color 0.5s, box-shadow 0.5s'}}>
+          {/* Rune etchings down the tube (SVG) */}
+          <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:6,opacity:0.3}}>
+            <text x="50%" y="15%" textAnchor="middle" fontFamily="MBScribblesFont" fontSize="10" fill="var(--ink-bone)">⛧</text>
+            <text x="50%" y="35%" textAnchor="middle" fontFamily="MBScribblesFont" fontSize="10" fill="var(--ink-bone)">✠</text>
+            <text x="50%" y="55%" textAnchor="middle" fontFamily="MBScribblesFont" fontSize="10" fill="var(--ink-bone)">⛧</text>
+            <text x="50%" y="75%" textAnchor="middle" fontFamily="MBScribblesFont" fontSize="10" fill="var(--ink-bone)">✠</text>
+            <text x="50%" y="95%" textAnchor="middle" fontFamily="MBScribblesFont" fontSize="10" fill="var(--ink-bone)">⛧</text>
+          </svg>
           {/* Threshold markers */}
-          {[25,50,75].map(t=><div key={t} style={{position:'absolute',left:0,right:0,bottom:t+'%',height:2,
-            background:corruption>=t?'rgba(255,200,60,0.4)':'rgba(255,255,255,0.08)',zIndex:3}}>
-            <div style={{position:'absolute',right:-2,top:-6,fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,
-              color:corruption>=t?'#e8c040':'#554430',textShadow:'0 0 4px rgba(0,0,0,0.9)',
-              transform:'translateX(100%)',paddingLeft:4,whiteSpace:'nowrap'}}>
-              {t===25?'⚠':t===50?'🔥':t===75?'💀':''}
+          {[25,50,75].map(t=><div key={t} style={{position:'absolute',left:-3,right:-3,bottom:t+'%',height:1,
+            background:corruption>=t?'var(--blood)':'rgba(90,56,32,0.3)',zIndex:3}}>
+            <div style={{position:'absolute',right:'100%',top:-8,fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,
+              color:corruption>=t?'var(--blood)':'var(--rot)',textShadow:'0 0 4px rgba(0,0,0,0.9)',paddingRight:6,whiteSpace:'nowrap'}}>
+              {t===25?'⚠':t===50?'🔥':'💀'}
             </div>
           </div>)}
-          {/* Fill — rises from bottom */}
+          {/* Mercury fill — rises from bottom with meniscus curve at top */}
           <div style={{position:'absolute',bottom:0,left:0,right:0,
             height:Math.min(100,corruption)+'%',
-            transition:'height 0.7s ease',
-            animation:(corruption%25>=20&&corruption%25<=24&&corruption<100)?'corruptPulse 0.8s ease-in-out infinite':'none',
-            background:corruption>=100?'linear-gradient(0deg,#440022,#cc0055,#ff0077)':corruption>=75?'linear-gradient(0deg,#330018,#990044,#cc0055)':corruption>=50?'linear-gradient(0deg,#220010,#770033,#990044)':corruption>=25?'linear-gradient(0deg,#1a000a,#550022,#770033)':'linear-gradient(0deg,#110005,#330011,#440018)',
-            boxShadow:corruption>=75?'0 0 16px rgba(255,0,80,0.6), inset 0 -8px 20px rgba(255,0,80,0.3)':corruption>=50?'0 0 8px rgba(200,0,60,0.3)':'none'}}/>
-          {/* Vertical text — C O R R U P T I O N */}
-          <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',zIndex:5,gap:0}}>
-            {'CORRUPTION'.split('').map((ch,i)=><span key={i} style={{
-              fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,lineHeight:1.15,
-              color:'#e8c040',textShadow:'0 0 6px rgba(0,0,0,0.95), 0 0 3px rgba(0,0,0,1)',
-              letterSpacing:0}}>{ch}</span>)}
+            transition:'height 0.7s cubic-bezier(0.4, 0.0, 0.2, 1)',
+            background:corruption>=100?'linear-gradient(0deg,#440022,#c41e3a,#ff4466)':corruption>=75?'linear-gradient(0deg,#330018,#a41528,#c41e3a)':corruption>=50?'linear-gradient(0deg,#220010,#7a0f1f,#a41528)':corruption>=25?'linear-gradient(0deg,#1a000a,#550022,#7a0f1f)':'linear-gradient(0deg,#110005,#330011,#550022)',
+            boxShadow:corruption>=75?'0 0 12px rgba(196,30,58,0.7), inset 0 -8px 16px rgba(196,30,58,0.4)':corruption>=50?'0 0 6px rgba(196,30,58,0.3)':'none'}}>
+            {/* Meniscus curve — top edge of fill */}
+            <div style={{position:'absolute',top:-2,left:0,right:0,height:4,background:'radial-gradient(ellipse at center top, rgba(255,100,140,0.6), transparent 60%)',borderRadius:'50% 50% 0 0'}}/>
           </div>
         </div>
+
+        {/* Tube cap — bottom with bulbous reservoir */}
+        <div style={{width:36,height:16,marginTop:-1,background:'radial-gradient(ellipse at 50% 30%, '+(corruption>=50?'#a41528':'var(--altar-raised)')+', var(--altar))',border:'1px solid '+(corruption>=75?'var(--blood)':'var(--blood-deep)'),borderTop:'none',borderRadius:'3px 3px 50% 50%',zIndex:4,boxShadow:corruption>=75?'0 0 16px rgba(196,30,58,0.6)':'none'}}/>
+
         {/* Active threshold label at bottom */}
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,marginTop:4,textAlign:'center',
-          color:corruption>=100?'#ff4466':corruption>=75?'#ee3355':corruption>=50?'#cc2244':corruption>=25?'#aa3344':'#554430',
-          textShadow:corruption>=50?'0 0 8px rgba(200,0,60,0.6)':'none',letterSpacing:1,lineHeight:1.2}}>
-          {corruption>=100?'☠ POSSESSED':corruption>=75?'💀 MADNESS':corruption>=50?'🔥 HUNGER':corruption>=25?'⚠ WHISPERS':''}
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,marginTop:6,textAlign:'center',
+          color:corruption>=100?'var(--blood)':corruption>=75?'var(--blood)':corruption>=50?'#c41e3a':corruption>=25?'var(--ink-rust)':'transparent',
+          textShadow:corruption>=50?'0 0 6px rgba(196,30,58,0.6)':'none',letterSpacing:2,lineHeight:1.2,textTransform:'uppercase'}}>
+          {corruption>=100?'☠ Possessed':corruption>=75?'Madness':corruption>=50?'Hunger':corruption>=25?'Whispers':''}
         </div>
       </div>}
 
@@ -6985,29 +6996,35 @@ function App(){
             ))}
           </div>
         </div>
-        {/* ═══ GENRE ACTIVATION INDICATOR ═══ */}
-        {activeGenre&&<div style={{
-          display:'flex',alignItems:'center',justifyContent:'center',gap:12,
-          padding:'6px 20px',flexShrink:0,
-          background:activeGenre==='RIFF_METAL'?'rgba(40,10,60,0.85)':activeGenre==='BLACK_METAL'?'rgba(60,0,15,0.85)':activeGenre==='PROG_ROCK'?'rgba(8,40,18,0.85)':'rgba(20,20,50,0.85)',
-          borderTop:'2px solid '+(activeGenre==='RIFF_METAL'?'#9933cc':activeGenre==='BLACK_METAL'?'#cc1144':activeGenre==='PROG_ROCK'?'#22aa44':'#6666aa'),
-          borderBottom:'1px solid '+(activeGenre==='RIFF_METAL'?'#9933cc44':activeGenre==='BLACK_METAL'?'#cc114444':activeGenre==='PROG_ROCK'?'#22aa4444':'#6666aa44'),
-          animation:'fadeIn 0.3s ease',zIndex:6}}>
-          <span style={{fontSize:20}}>
-            {activeGenre==='RIFF_METAL'?'⚡':activeGenre==='BLACK_METAL'?'🔥':activeGenre==='PROG_ROCK'?'🌿':'🌑'}
-          </span>
-          <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,letterSpacing:4,
-            color:activeGenre==='RIFF_METAL'?'#cc66ff':activeGenre==='BLACK_METAL'?'#ff3366':activeGenre==='PROG_ROCK'?'#44dd66':'#8888cc',
-            textShadow:'0 0 12px '+(activeGenre==='RIFF_METAL'?'rgba(150,50,200,0.6)':activeGenre==='BLACK_METAL'?'rgba(200,0,60,0.6)':activeGenre==='PROG_ROCK'?'rgba(30,180,60,0.6)':'rgba(80,80,160,0.6)')}}>
-            {activeGenre==='RIFF_METAL'?'THRASH METAL':activeGenre==='BLACK_METAL'?'BLACK METAL':activeGenre==='PROG_ROCK'?'STONER ROCK':'DOOM METAL'}
-          </span>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#c8b080',letterSpacing:1}}>
-            {activeGenre==='RIFF_METAL'?'+15% Strike Damage':activeGenre==='BLACK_METAL'?'+25% Corruption Damage':activeGenre==='PROG_ROCK'?'+1 Card Draw Next Strike':'Max Discards? +2 DMG Per Member'}
-          </span>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#887755',fontStyle:'italic'}}>
-            (played {activeGenre==='RIFF_METAL'?genreCounts.RIFF+' Riff':activeGenre==='BLACK_METAL'?genreCounts.CORRUPT+' Corrupt':activeGenre==='PROG_ROCK'?genreCounts.UTILITY+' Utility':genreCounts.EMBER+' Ember'} cards)
-          </span>
-        </div>}
+        {/* ═══ GENRE RIBBON — unfurled banner ═══ */}
+        {activeGenre&&(()=>{const gc=activeGenre==='RIFF_METAL'?'#b478e8':activeGenre==='BLACK_METAL'?'#e8405c':activeGenre==='PROG_ROCK'?'#5ac878':'#8888cc';const gbg=activeGenre==='RIFF_METAL'?'rgba(40,10,60,0.75)':activeGenre==='BLACK_METAL'?'rgba(60,0,15,0.75)':activeGenre==='PROG_ROCK'?'rgba(8,40,18,0.75)':'rgba(20,20,50,0.75)';return(
+        <div style={{position:'relative',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,zIndex:6,padding:'2px 60px 2px',animation:'fadeIn 0.4s ease'}}>
+          {/* Ribbon SVG — shaped tail ends */}
+          <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:0}} preserveAspectRatio="none" viewBox="0 0 1920 36">
+            {/* Main banner body with forked ends */}
+            <path d={`M 0 18 L 40 4 L 80 12 L 1840 12 L 1880 4 L 1920 18 L 1880 32 L 1840 24 L 80 24 L 40 32 Z`} fill={gbg} stroke={gc} strokeWidth="0.8" opacity="0.9"/>
+            {/* Top hand-drawn line */}
+            <path d="M 80 12 Q 480 10, 960 12 T 1840 12" stroke={gc} strokeWidth="0.6" fill="none" opacity="0.5"/>
+            {/* Bottom hand-drawn line */}
+            <path d="M 80 24 Q 480 26, 960 24 T 1840 24" stroke={gc} strokeWidth="0.6" fill="none" opacity="0.5"/>
+          </svg>
+          {/* Content */}
+          <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:14,position:'relative',zIndex:1,padding:'4px 20px'}}>
+            <span style={{fontSize:16,filter:'drop-shadow(0 0 8px '+gc+')'}}>
+              {activeGenre==='RIFF_METAL'?'⚡':activeGenre==='BLACK_METAL'?'🔥':activeGenre==='PROG_ROCK'?'🌿':'🌑'}
+            </span>
+            <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:20,letterSpacing:5,color:gc,textShadow:'0 0 12px '+gc+'80, 0 1px 2px rgba(0,0,0,0.9)',textTransform:'uppercase'}}>
+              {activeGenre==='RIFF_METAL'?'Thrash Metal':activeGenre==='BLACK_METAL'?'Black Metal':activeGenre==='PROG_ROCK'?'Stoner Rock':'Doom Metal'}
+            </span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-bone)',letterSpacing:2,textTransform:'uppercase',fontWeight:900}}>
+              {activeGenre==='RIFF_METAL'?'+15% Strike':activeGenre==='BLACK_METAL'?'+25% Corruption':activeGenre==='PROG_ROCK'?'+1 Card Draw':'+2 ATK/Member · Max Discards'}
+            </span>
+            <span style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'var(--ink-dim)',fontStyle:'italic'}}>
+              ({activeGenre==='RIFF_METAL'?genreCounts.RIFF+' Riff':activeGenre==='BLACK_METAL'?genreCounts.CORRUPT+' Corrupt':activeGenre==='PROG_ROCK'?genreCounts.UTILITY+' Utility':genreCounts.EMBER+' Ember'} cards)
+            </span>
+          </div>
+        </div>
+        )})()}
         {!activeGenre&&approachingGenre&&tutorialFight===0&&<div style={{
           display:'flex',alignItems:'center',justifyContent:'center',gap:8,
           padding:'4px 16px',flexShrink:0,opacity:0.6,
