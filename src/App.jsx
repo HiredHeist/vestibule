@@ -6549,14 +6549,22 @@ function App(){
   )
   if(gameState==='booster')return <BoosterScreen onComplete={startGame} seed={runSeed}/>
   if(gameState==='circleSplash'&&circleSplash)return(
-    <div style={{width:1920,height:1080,position:'relative',background:'#020100',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,overflow:'hidden'}}>
-      
-      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 30%,rgba(80,0,0,0.4) 100%)',pointerEvents:'none'}}/>
-      <div style={{fontSize:120,filter:'drop-shadow(0 0 40px rgba(200,0,0,0.6))',animation:'throb 1s ease-in-out infinite'}}>{circleSplash.circleEmoji}</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#cc4444',letterSpacing:6,textTransform:'uppercase',animation:'fadeIn 0.5s ease'}}>Entering</div>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#cc1111',textShadow:'0 0 40px rgba(200,0,0,0.7),0 0 80px rgba(150,0,0,0.4),3px 3px 0 #000',letterSpacing:6,animation:'fadeIn 0.8s ease',textAlign:'center'}}>Circle {circleSplash.circleName}</div>
-      <div style={{width:200,height:2,background:'linear-gradient(90deg,transparent,#cc2222,transparent)',animation:'fadeIn 1.2s ease'}}/>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'#aa6644',fontStyle:'italic',animation:'fadeIn 1.5s ease'}}>Descend deeper into Hell...</div>
+    <div style={{width:1920,height:1080,position:'relative',background:'var(--void)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,overflow:'hidden'}}>
+      {/* Ornamental frieze top */}
+      <div style={{position:'absolute',top:0,left:0,right:0,height:24,background:'linear-gradient(180deg, rgba(196,30,58,0.45) 0%, transparent 100%)',borderBottom:'1px solid rgba(196,30,58,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',letterSpacing:18,textAlign:'center',lineHeight:'24px',textTransform:'uppercase',opacity:0.85,textShadow:'0 0 10px rgba(196,30,58,0.4)'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧</div>
+      {/* Ornamental frieze bottom */}
+      <div style={{position:'absolute',bottom:0,left:0,right:0,height:24,background:'linear-gradient(0deg, rgba(196,30,58,0.45) 0%, transparent 100%)',borderTop:'1px solid rgba(196,30,58,0.6)',fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',letterSpacing:18,textAlign:'center',lineHeight:'24px',textTransform:'uppercase',opacity:0.85,textShadow:'0 0 10px rgba(196,30,58,0.4)'}}>⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧</div>
+      {/* Vignette */}
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center,transparent 30%,rgba(80,0,0,0.55) 100%)',pointerEvents:'none'}}/>
+      <div style={{fontSize:140,filter:'drop-shadow(0 0 60px rgba(196,30,58,0.8))',animation:'throb 1.2s ease-in-out infinite'}}>{circleSplash.circleEmoji}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--ink-rust)',letterSpacing:8,textTransform:'uppercase',animation:'fadeIn 0.5s ease',fontWeight:900}}>⛧ Entering ⛧</div>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:96,color:'var(--ink-bone)',textShadow:'0 0 40px rgba(196,30,58,0.8),0 0 80px rgba(150,0,0,0.5),0 4px 12px rgba(0,0,0,0.9)',letterSpacing:8,animation:'fadeIn 0.9s ease',textAlign:'center',transform:'rotate(-0.4deg)'}}>Circle {circleSplash.circleName}</div>
+      {/* Hand-drawn underline */}
+      <svg width="420" height="8" viewBox="0 0 420 8" style={{animation:'fadeIn 1.2s ease'}}>
+        <path d="M 8 4 Q 110 1, 210 4 T 412 4" stroke="var(--blood)" strokeWidth="1.5" fill="none" opacity="0.8"/>
+        <path d="M 12 6 Q 110 7, 210 6 T 408 6" stroke="var(--blood-deep)" strokeWidth="1" fill="none" opacity="0.5"/>
+      </svg>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:26,color:'var(--ink-dim)',fontStyle:'italic',animation:'fadeIn 1.5s ease'}}>"Descend deeper into Hell..."</div>
     </div>
   )
   if(gameState==='event'&&pendingEvent)return(
