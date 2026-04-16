@@ -1988,7 +1988,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     const canBuy=can(price)&&!sold&&!visitLocked
     const ac=accent||'#c87820'
     return(
-      <div style={{flex:1,display:'flex',flexDirection:'column',paddingTop:20,position:'relative'}}
+      <div style={{flex:'1 1 0',display:'flex',flexDirection:'column',paddingTop:12,position:'relative',minHeight:0}}
         onMouseEnter={()=>setHovId(id)} onMouseLeave={()=>setHovId(null)}>
         {/* Pawn-shop price tag — pinned to top-right, tied by string */}
         <div style={{position:'absolute',top:-4,right:6,zIndex:15,pointerEvents:'none',transform:hov&&canBuy?'scale(1.08)':'none',transition:'transform 0.12s'}}>
@@ -2017,15 +2017,15 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,letterSpacing:2,
             color:ac,textAlign:'center',padding:'6px 4px 0',
             textTransform:'uppercase',opacity:1,flexShrink:0}}>{label}</div>
-          <div style={{flex:'0 0 36%',display:'flex',alignItems:'center',justifyContent:'center',
-            fontSize:72,filter:hov&&canBuy?'drop-shadow(0 0 12px '+ac+')':'none',
+          <div style={{flex:'0 0 28%',display:'flex',alignItems:'center',justifyContent:'center',
+            fontSize:48,filter:hov&&canBuy?'drop-shadow(0 0 12px '+ac+')':'none',
             transition:'filter 0.15s'}}>{item.emoji}</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:700,
-            color:'#ffe8a0',textAlign:'center',padding:'4px 8px 2px',
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:700,
+            color:'#ffe8a0',textAlign:'center',padding:'2px 8px 0',
             lineHeight:1.2,flexShrink:0}}>{item.name}</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,
-            color:'#d0b880',textAlign:'center',padding:'6px 10px 8px',
-            lineHeight:1.4,flex:1,overflow:'hidden'}}>{item.effect||item.desc||''}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,
+            color:'#d0b880',textAlign:'center',padding:'4px 8px 6px',
+            lineHeight:1.3,flex:1,overflow:'hidden'}}>{item.effect||item.desc||''}</div>
         </div>
       </div>
     )
@@ -2269,7 +2269,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
       <div style={{flex:'1 1 0',display:'flex',gap:10,minHeight:0,overflow:'hidden'}}>
 
         {/* LEFT COLUMN — gear (FROM THE BACK ROOM) */}
-        <div style={{width:240,flexShrink:0,display:shopTab==='cards'||shopTab==='packs'?'none':'flex',flexDirection:'column',gap:6,overflowY:'auto',overflowX:'hidden'}}>
+        <div style={{width:240,flexShrink:0,display:shopTab==='cards'||shopTab==='packs'?'none':'flex',flexDirection:'column',gap:4,minHeight:0}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,letterSpacing:3,color:'var(--gold)',textAlign:'center',textTransform:'uppercase',fontWeight:900,padding:'4px 0 0',textShadow:'0 0 8px rgba(200,152,56,0.4)'}}>🔦 From the Back Room</div>
           <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',padding:'0 0 4px',borderBottom:'1px solid rgba(200,152,56,0.35)'}}>(Don't tell the boss.)</div>
           <LeftCard item={recruitPack} price={recruitPack.cost}
@@ -2292,7 +2292,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         </div>
 
         {/* CENTER */}
-        <div style={{flex:1,display:'flex',flexDirection:'column',overflowY:'auto',overflowX:'hidden',minHeight:0}}>
+        <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',minHeight:0}}>
 
           {/* CARDS ROW */}
           <div style={{display:shopTab==='packs'||shopTab==='gear'?'none':'block',border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
