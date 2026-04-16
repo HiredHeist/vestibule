@@ -830,6 +830,18 @@ function getCenter(ref){
   return{x:r.left+r.width/2,y:r.top+r.height/2}
 }
 
+// Custom weed-leaf icon — drop-in replacement for the 🌿 emoji
+function WeedLeaf({size=16,style}){
+  return <img src={(import.meta.env.BASE_URL||'/')+'weed_leaf.png'} alt="🌿" draggable={false}
+    style={Object.assign({width:size,height:size,display:'inline-block',verticalAlign:'middle',objectFit:'contain',pointerEvents:'none',userSelect:'none'},style||{})}/>
+}
+// Log line renderer — splits on 🌿 so the emoji becomes inline WeedLeaf images
+function LogLine({text}){
+  if(typeof text!=='string'||text.indexOf('\uD83C\uDF3F')===-1)return <>{text}</>
+  const parts=text.split('\uD83C\uDF3F')
+  return <>{parts.map((p,i)=>(<React.Fragment key={i}>{p}{i<parts.length-1?<WeedLeaf size={12} style={{margin:'0 1px'}}/>:null}</React.Fragment>))}</>
+}
+
 
 // ═══ TUTORIAL SYSTEM ═══════════════════════════════════════════════════════
 const TUTORIAL_ENEMIES=[
@@ -1374,7 +1386,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#33aa44',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Stash</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,color:'#55ee66',lineHeight:1,
           textShadow:'0 0 20px rgba(60,220,80,0.8)'}}>{stash}</div>
-        <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'#33aa44',fontStyle:'italic'}}>🌿</div>
+        <WeedLeaf size={16}/>
       </div>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'#cc88ff',textShadow:'0 0 30px rgba(180,60,255,0.6)',marginBottom:6}}>🪙 Pawn Shop</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:25,color:'#c8a0ee',fontStyle:'italic',marginBottom:6}}>
@@ -1420,7 +1432,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
                     border:'1px solid '+(canSell&&!cantSell?'#44cc44':'rgba(60,100,30,0.3)'),
                     borderRadius:4,color:canSell&&!cantSell?'#55ee55':'#3a5a2a',cursor:canSell&&!cantSell?'pointer':'not-allowed',boxShadow:canSell&&!cantSell?'0 0 8px rgba(60,200,60,0.3)':'none',
                     textTransform:'uppercase'}}>
-                  {cantSell?'Need 2+ members':'Sell for '+price+' 🌿'}
+                  {cantSell?'Need 2+ members':<span style={{display:'inline-flex',alignItems:'center',gap:4}}>Sell for {price} <WeedLeaf size={13}/></span>}
                 </button>
               </div>
             </div>
@@ -1450,7 +1462,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
                     border:'1px solid '+(canSell?'#44cc44':'rgba(60,100,30,0.3)'),
                     borderRadius:4,color:canSell?'#55ee55':'#3a5a2a',cursor:canSell?'pointer':'not-allowed',
                     textTransform:'uppercase',boxShadow:canSell?'0 0 8px rgba(60,200,60,0.3)':'none'}}>
-                  Sell for {price} 🌿
+                  <span style={{display:'inline-flex',alignItems:'center',gap:4}}>Sell for {price} <WeedLeaf size={13}/></span>
                 </button>
                 <button
                   onClick={()=>{onBurnCard(c)}}
@@ -1510,6 +1522,16 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   const [slyQuoteIndex,setSlyQuoteIndex]=useState(()=>Math.floor(Math.random()*SLY_QUOTES.length))
   const [tearingPack,setTearingPack]=useState(null) // pack object while tear animation plays
   const [tearPhase,setTearPhase]=useState(0) // 0=anticipate, 1=rip, 2=fan, 3=sparks
+  // Stash pulse — track direction of last change so the counter pops green (gain) or shakes red (loss)
+  const [stashPulse,setStashPulse]=useState('')
+  const prevStashRef=useRef(stash)
+  useEffect(()=>{
+    const prev=prevStashRef.current
+    if(stash>prev)setStashPulse('gain')
+    else if(stash<prev)setStashPulse('loss')
+    prevStashRef.current=stash
+    if(stash!==prev){const t=setTimeout(()=>setStashPulse(''),520);return()=>clearTimeout(t)}
+  },[stash])
   useEffect(()=>{setBoughtIds([]);setBoughtPackIds([]);setPacksBoughtThisVisit(0);setSlyQuoteIndex(Math.floor(Math.random()*SLY_QUOTES.length))},[shopCards])
   const [openPackModal,setOpenPackModal]=useState(null) // {pack, cards, picksLeft, picked}
   const circleNum=Math.floor(fightIndex/3)+1
@@ -1838,7 +1860,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             position:'relative'}}>
             {/* hole + string knot */}
             <div style={{position:'absolute',top:3,left:4,width:6,height:6,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
-            <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{price}</span> 🌿{realPrice(price)}</>:<>🌿 {price}</>}</div>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{price}</span> <WeedLeaf size={14}/>{realPrice(price)}</>:<><WeedLeaf size={14}/> {price}</>}</div>
             {hungerActive&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:9,color:'#8a1010',fontWeight:900,letterSpacing:0.5,marginTop:-1}}>⚠ HUNGER +25%</div>}
           </div>
         </div>
@@ -1920,7 +1942,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             padding:'3px 9px 4px',borderRadius:2,whiteSpace:'nowrap',minWidth:52,textAlign:'center',
             position:'relative'}}>
             <div style={{position:'absolute',top:3,left:3,width:5,height:5,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
-            <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:11}}>{price}</span> 🌿{realPrice(price)}</>:<>🌿 {price}</>}</div>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:11}}>{price}</span> <WeedLeaf size={12}/>{realPrice(price)}</>:<><WeedLeaf size={12}/> {price}</>}</div>
           </div>
         </div>
         <div onClick={()=>canBuy&&onBuy()}
@@ -1973,7 +1995,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             padding:'3px 10px 4px',borderRadius:2,whiteSpace:'nowrap',minWidth:58,textAlign:'center',
             position:'relative'}}>
             <div style={{position:'absolute',top:3,left:4,width:6,height:6,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
-            <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:12}}>{pack.cost}</span> 🌿{realPrice(pack.cost)}</>:<>🌿 {pack.cost}</>}</div>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:12}}>{pack.cost}</span> <WeedLeaf size={14}/>{realPrice(pack.cost)}</>:<><WeedLeaf size={14}/> {pack.cost}</>}</div>
           </div>
         </div>
         <div onClick={()=>canBuy&&handleOpenPack(pack)}
@@ -2123,8 +2145,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'var(--gold)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Stash</div>
           <div style={{display:'flex',alignItems:'center',gap:6}}>
             <span style={{fontSize:20}}>💵</span>
-            <span style={{fontSize:16,marginLeft:-2}}>🌿</span>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,color:stashColor,lineHeight:1,textShadow:'0 0 10px '+stashColor+'55'}}>{stash}</span>
+            <WeedLeaf size={28} style={{marginLeft:-2}}/>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,color:stashColor,lineHeight:1,display:'inline-block',
+              textShadow:stashPulse==='gain'?'0 0 22px rgba(80,220,100,1),0 0 40px rgba(80,220,100,0.5)':stashPulse==='loss'?'0 0 14px rgba(220,60,60,0.85)':'0 0 10px '+stashColor+'55',
+              animation:stashPulse==='gain'?'stashGain 520ms ease-out':stashPulse==='loss'?'stashLoss 420ms ease-out':'none'}}>{stash}</span>
           </div>
         </div>
 
@@ -2150,7 +2174,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             background:'rgba(25,18,4,0.92)',border:'2px solid rgba(200,150,30,0.85)',borderRadius:8,cursor:'pointer',
             boxShadow:'0 0 16px rgba(180,130,20,0.3)',animation:'rerollWiggle 3s ease-in-out infinite'}}>
           <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'#e8c040',letterSpacing:2,textTransform:'uppercase'}}>🎲 Another Look</span>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'#e8c040',lineHeight:1}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:12}}>{rerollCost}</span> 🌿 {realPrice(rerollCost)}</>:<>🌿 {rerollCost}</>}</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'#e8c040',lineHeight:1}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:12}}>{rerollCost}</span> <WeedLeaf size={14}/> {realPrice(rerollCost)}</>:<><WeedLeaf size={14}/> {rerollCost}</>}</span>
         </div>
 
         {/* BACK TO THE PIT — blood-dripping */}
@@ -2227,7 +2251,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 <div style={{height:7,flexShrink:0,background:'linear-gradient(90deg,#22882244,#44cc44ee,#22882244)',boxShadow:'0 0 12px rgba(40,200,40,0.5)'}}/> 
                 <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,
                   color:'#44cc44',textAlign:'center',marginTop:8,
-                  textShadow:'0 0 18px rgba(60,200,60,0.8)'}}>🌿 Sly's Stash</div>
+                  textShadow:'0 0 18px rgba(60,200,60,0.8)',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}><WeedLeaf size={26}/> Sly's Stash</div>
                 <div style={{fontFamily:"'ScratchFont',serif",fontSize:12,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',padding:'2px 6px 6px',letterSpacing:0.5}}>"The good shit. Don't ask where it came from."</div>
                 {/* Mushrooms */}
                 <div onClick={()=>{if(shroomsInStock&&heldShrooms<drugMax&&can(6)){onSpend(6,'dealer',null);onBuyShrooms()}}}
@@ -2243,7 +2267,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                     border:'2px solid '+(shroomsInStock&&heldShrooms<drugMax&&can(6)?'#44bb44':'#4a3318'),borderRadius:20,
                     padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
                     fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-                    color:shroomsInStock&&heldShrooms<drugMax&&can(6)?'#55ee55':'#554428'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:9}}>6</span> 🌿 {realPrice(6)}</>:'🌿 6'}</div>
+                    color:shroomsInStock&&heldShrooms<drugMax&&can(6)?'#55ee55':'#554428',display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:9}}>6</span> <WeedLeaf size={12}/> {realPrice(6)}</>:<><WeedLeaf size={12}/> 6</>}</div>
                   <div style={{fontSize:72,filter:shroomsInStock&&heldShrooms<drugMax?'drop-shadow(0 0 10px rgba(200,150,50,0.6))':'none',animation:shroomsInStock&&heldShrooms<drugMax?'shroomPulse 2.4s ease-in-out infinite':'none'}}>🍄</div>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
                     color:shroomsInStock?'#e8a820':'#554428',marginTop:4}}>
@@ -2264,7 +2288,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                     border:'2px solid '+(acidInStock&&heldAcid<drugMax&&can(12)?'#44bb44':'#4a3318'),borderRadius:20,
                     padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
                     fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-                    color:acidInStock&&heldAcid<drugMax&&can(12)?'#55ee55':'#554428'}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:9}}>12</span> 🌿 {realPrice(12)}</>:'🌿 12'}</div>
+                    color:acidInStock&&heldAcid<drugMax&&can(12)?'#55ee55':'#554428',display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:9}}>12</span> <WeedLeaf size={12}/> {realPrice(12)}</>:<><WeedLeaf size={12}/> 12</>}</div>
                   <div style={{fontSize:72,filter:acidInStock&&heldAcid<drugMax?'drop-shadow(0 0 10px rgba(150,50,220,0.6))':'none',animation:acidInStock&&heldAcid<drugMax?'shroomPulse 2.4s ease-in-out infinite':'none'}}>🧪</div>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
                     color:acidInStock?'#cc44ff':'#4a2a6a',marginTop:4}}>
@@ -2300,10 +2324,10 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 <div style={{fontSize:32,textAlign:'center',margin:'2px 0 4px'}}>🏧</div>
                 {/* 2-column rate sheet */}
                 <div style={{padding:'6px 22px',fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#cc88ff',letterSpacing:1}}>
-                  {[['Common','1🌿'],['Uncommon','2🌿'],['Rare','4🌿'],['Foil','+3🌿'],['Mythic','+8🌿'],['Member','5🌿'],['Artifact','50% buyback']].map(([k,v])=>(
-                    <div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',padding:'2px 0',borderBottom:'1px dashed rgba(200,140,255,0.18)'}}>
+                  {[['Common','1',true],['Uncommon','2',true],['Rare','4',true],['Foil','+3',true],['Mythic','+8',true],['Member','5',true],['Artifact','50% buyback',false]].map(([k,v,leaf])=>(
+                    <div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'2px 0',borderBottom:'1px dashed rgba(200,140,255,0.18)'}}>
                       <span style={{fontWeight:700}}>{k}</span>
-                      <span style={{fontWeight:900,color:'#e8aaff',fontVariantNumeric:'tabular-nums'}}>{v}</span>
+                      <span style={{fontWeight:900,color:'#e8aaff',fontVariantNumeric:'tabular-nums',display:'inline-flex',alignItems:'center',gap:3}}>{v}{leaf&&<WeedLeaf size={14}/>}</span>
                     </div>
                   ))}
                 </div>
@@ -2382,6 +2406,7 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
         borderRadius:6,
         boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':mentorState==='active'&&!st?'0 0 40px rgba(255,215,0,0.9),0 6px 24px rgba(0,0,0,0.85)':mentorState==='mentor'&&!st?'0 0 22px rgba(255,215,0,0.5),0 6px 24px rgba(0,0,0,0.85)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':!st&&member.demonic?'0 0 25px rgba(255,200,0,0.5),0 6px 24px rgba(0,0,0,0.85)':!st&&member.mythic?'0 0 25px rgba(200,0,255,0.4),0 6px 24px rgba(0,0,0,0.85)':!st&&member.foil?'0 0 20px rgba(100,180,255,0.35),0 6px 24px rgba(0,0,0,0.85)':'0 4px 20px rgba(0,0,0,0.9),0 0 1px rgba(190,120,25,0.3)',
         transform:st?'rotate(15deg) scale(0.95)':strikeAnim&&strikeAnim.phase==='dip'?'translateY(20px) scale(0.95) rotate(-3deg)':strikeAnim&&strikeAnim.phase==='wiggle'?'translateY(12px) scale(0.97) rotate(4deg)':strikeAnim&&strikeAnim.phase==='launch'?'translate('+strikeAnim.dx+'px,'+(strikeAnim.dy-80)+'px) scale(0.7) rotate(-5deg)':strikeAnim&&strikeAnim.phase==='impact'?'translate('+strikeAnim.dx+'px,'+strikeAnim.dy+'px) scale(1.15) rotate(0deg)':strikeAnim&&strikeAnim.phase==='return'?'translate(0px,-30px) scale(1.05)':'none',
+        filter:strikeAnim&&strikeAnim.phase==='launch'?'blur(1.5px) drop-shadow(0 0 18px rgba(255,80,0,0.6))':'none',
         opacity:st?0.5:animPhase==='idle'&&!isAttacking&&buffCount===0?0.7:1,
         animation:(!st&&!isAttacking&&!isDiceTarget&&!isStriking)?(nearDeath?'nearDeathPulse 0.8s ease-in-out infinite':'throb 3s ease-in-out infinite'):'none',
         transition:strikeAnim?'transform 0.25s cubic-bezier(0.2,0.8,0.3,1.2), border 0.2s, box-shadow 0.2s, opacity 0.3s':'border 0.2s, box-shadow 0.2s, opacity 0.3s, transform 0.3s',
@@ -2794,6 +2819,52 @@ function MasteryGallery({onClose}){
 }
 
 // ═══════════════════════════════════════════════════════════
+// COLD OPEN SPLASH — first-launch 3s cinematic, skippable
+// ═══════════════════════════════════════════════════════════
+function ColdOpenScreen({phase}){
+  const showPresents=phase>=1&&phase<=2
+  const showLogo=phase>=2&&phase<=4
+  const showTagline=phase>=3&&phase<=4
+  const fadingOut=phase===4
+  return(
+    <div style={{position:'fixed',inset:0,zIndex:99999,background:'#000',
+      display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+      overflow:'hidden',pointerEvents:'none',
+      opacity:fadingOut?0:1,transition:fadingOut?'opacity 450ms ease-in':'none'}}>
+      {/* VESTIBULE PRESENTS */}
+      {showPresents&&<div style={{position:'absolute',
+        fontFamily:"'BogartsMetalFont',cursive",fontSize:32,color:'var(--ink-rust)',
+        letterSpacing:6,textTransform:'uppercase',transform:'rotate(-1deg)',
+        opacity:phase===1?1:0,
+        transition:'opacity 380ms ease',
+        textShadow:'0 0 16px rgba(90,56,32,0.6)'}}>Vestibule Presents</div>}
+      {/* VESTIBULE logo stamp with radial pulses */}
+      {showLogo&&<div style={{position:'absolute',display:'flex',flexDirection:'column',alignItems:'center',gap:14}}>
+        <div style={{position:'relative',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          {/* 3 emanating blood pulses */}
+          {[0,260,520].map(d=>(
+            <div key={d} style={{position:'absolute',width:320,height:320,borderRadius:'50%',
+              background:'radial-gradient(circle, rgba(196,30,58,0.4) 0%, rgba(196,30,58,0.08) 40%, transparent 70%)',
+              animation:'coldOpenPulse 800ms ease-out '+d+'ms forwards',opacity:0,pointerEvents:'none'}}/>
+          ))}
+          <div style={{position:'relative',fontFamily:"'BogartsMetalFont',cursive",fontSize:120,color:'var(--blood)',
+            letterSpacing:10,textTransform:'uppercase',whiteSpace:'nowrap',
+            textShadow:'0 0 28px rgba(196,30,58,0.95), 0 0 70px rgba(150,0,20,0.55), 4px 4px 0 rgba(0,0,0,0.9)',
+            animation:'coldOpenStamp 420ms cubic-bezier(0.34,1.56,0.64,1) forwards'}}>Vestibule</div>
+        </div>
+        {showTagline&&<div style={{marginTop:8,fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-bone)',
+          letterSpacing:6,textTransform:'uppercase',opacity:0,
+          animation:'coldOpenFadeIn 560ms ease-out forwards'}}>A Doomguelite Descent Through the 9 Circles of Hell</div>}
+      </div>}
+      {/* Skip hint */}
+      {phase>=1&&phase<=3&&<div style={{position:'absolute',bottom:30,right:30,
+        fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'var(--ink-rust)',letterSpacing:3,
+        textTransform:'uppercase',opacity:0.55}}>SPACE to skip</div>}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
 // VICTORY SUMMARY — 3s pause-and-celebrate after non-boss fight wins
 // ═══════════════════════════════════════════════════════════
 function VictorySummaryScreen({summary,onContinue}){
@@ -3068,7 +3139,7 @@ function CombatLogViewer({log,onClose}){
             letterSpacing:isFightHeader?2:0,
             lineHeight:1.5,
             opacity:isFightHeader?1:0.9
-          }}>{entry}</div>
+          }}><LogLine text={entry}/></div>
         })}
       </div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#665533',marginTop:8}}>{log.length} entries this run</div>
@@ -3728,11 +3799,11 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
                 style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:1,padding:'10px 16px',background:'rgba(160,30,10,0.4)',border:'2px solid rgba(220,60,20,0.6)',borderRadius:6,color:'#ff6644',cursor:'pointer',whiteSpace:'nowrap',flexShrink:0,marginLeft:14}}
                 onMouseEnter={e=>{e.currentTarget.style.background='rgba(200,40,10,0.65)'}}
                 onMouseLeave={e=>{e.currentTarget.style.background='rgba(160,30,10,0.4)'}}>
-                🔥 {fireSellPrice(m)}🌿
+                <span style={{display:'inline-flex',alignItems:'center',gap:4}}>🔥 {fireSellPrice(m)}<WeedLeaf size={14}/></span>
               </button>
             </div>
           ))}
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#aa7744',textAlign:'center',marginTop:10,letterSpacing:1}}>Stash: {stash}🌿 · Refund shown per member</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#aa7744',textAlign:'center',marginTop:10,letterSpacing:1,display:'flex',alignItems:'center',justifyContent:'center',gap:4}}>Stash: {stash}<WeedLeaf size={14}/> · Refund shown per member</div>
         </div>
       )}
     </div>
@@ -3874,6 +3945,7 @@ function TutorialMessage({text,onContinue,isFinal}){
 
 function App(){
   const [gameState,setGameState]=useState('menu')
+  const [coldOpenPhase,setColdOpenPhase]=useState(()=>typeof window!=='undefined'&&!localStorage.getItem('vst_seen_intro')?0:null)
   const [tutorialFight,setTutorialFight]=useState(0)
   const [firstTip,setFirstTip]=useState(null) // {id, text} for first-encounter tips // 0=not in tutorial, 1/2/3=tutorial fight
   const [tutorialTipIdx,setTutorialTipIdx]=useState(0) // which tooltip in current fight's sequence
@@ -4181,6 +4253,28 @@ function App(){
   }
   const addFloat=(v,x,y,color,big)=>{big=big||false;const id=fid.current++;if(localStorage.getItem('vst_dmgnums')==='off')return;setFloats(p=>[...p,{id,v,x,y,color:color||'#dd2222',big}])}
   const remFloat=id=>setFloats(p=>p.filter(f=>f.id!==id))
+  // ── COLD OPEN SPLASH — first-launch cinematic ──────────────
+  useEffect(()=>{
+    if(coldOpenPhase===null)return
+    if(coldOpenPhase===5){localStorage.setItem('vst_seen_intro','1');setColdOpenPhase(null);return}
+    // Only auto-advance while on menu — gameplay overrides splash
+    if(gameState!=='menu')return
+    const timings={0:300,1:400,2:800,3:1000,4:500}
+    const ms=timings[coldOpenPhase]||500
+    const t=setTimeout(()=>setColdOpenPhase(p=>(p===null?null:p+1)),ms)
+    return()=>clearTimeout(t)
+  },[coldOpenPhase,gameState])
+  useEffect(()=>{
+    if(coldOpenPhase===null)return
+    function onKey(e){
+      if(e.key===' '||e.key==='Enter'||e.key==='Escape'||e.key==='Spacebar'){
+        e.preventDefault()
+        setColdOpenPhase(5)
+      }
+    }
+    window.addEventListener('keydown',onKey)
+    return()=>window.removeEventListener('keydown',onKey)
+  },[coldOpenPhase])
   const fightStartTimeRef=useRef(0)
   const corruptionAtFightStartRef=useRef(0)
   const cardsPlayedThisFightRef=useRef(0)
@@ -5629,9 +5723,9 @@ function App(){
       const from=getCenter(stageRefs.current[si])
       const curDelay=delay
       // Calculate offset from member to boss
-      // Compensate for ScaleRoot scaling
-      const scaleEl2=document.querySelector('[style*="transform: scale"]')
-      const gs2=scaleEl2?parseFloat(scaleEl2.style.transform.match(/scale\(([\d.]+)\)/)?.[1]||1):1
+      // Compensate for ScaleRoot scaling (query by ID so we don't match nested cards with scale transforms)
+      const scaleEl2=document.getElementById('vst-scale-root')
+      const gs2=scaleEl2?parseFloat((scaleEl2.style.transform.match(/scale\(([\d.]+)\)/)||[])[1])||1:1
       const dx=(bc.x-from.x)/gs2
       const dy=(bc.y-from.y)/gs2
       // Phase 1: DIP (0ms) — card dips down
@@ -5747,10 +5841,10 @@ function App(){
           const targetPos=getCenter(stageRefs.current[targetSlotIdx])
           // Compensate for ScaleRoot scaling — getBoundingClientRect is in screen coords
           // but CSS transforms are in game coords (1920x1080)
-          const scaleEl=document.querySelector('[style*="transform: scale"]')
-          const gameScale=scaleEl?parseFloat(scaleEl.style.transform.match(/scale\(([\d.]+)\)/)?.[1]||1):1
-          const bdx=targetPos.x-bossPos.x
-          const bdy=targetPos.y-bossPos.y
+          const scaleEl=document.getElementById('vst-scale-root')
+          const gameScale=scaleEl?parseFloat((scaleEl.style.transform.match(/scale\(([\d.]+)\)/)||[])[1])||1:1
+          const bdx=(targetPos.x-bossPos.x)/gameScale
+          const bdy=(targetPos.y-bossPos.y)/gameScale
           // Phase 1: WINDUP — boss dips
           setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'windup',dx:bdx,dy:bdy})
           // Phase 2: LAUNCH — boss flies toward member
@@ -6505,6 +6599,8 @@ function App(){
   if(showTrophies&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><TrophyWall onClose={()=>setShowTrophies(false)}/></div>)
   if(showMastery&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><MasteryGallery onClose={()=>setShowMastery(false)}/></div>)
 
+  // ── COLD OPEN SPLASH — overlays menu on first ever launch
+  const ColdOpenOverlay=coldOpenPhase!==null&&coldOpenPhase<5?<ColdOpenScreen phase={coldOpenPhase}/>:null
   // ── MAIN MENU ──────────────────────────────────────────────
   if(gameState==='menu'){
     const lt=lifetimeScore||0
@@ -6694,6 +6790,8 @@ function App(){
 
     // Main menu
     return(
+      <>
+      {ColdOpenOverlay}
       <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(2,1,0,0.99)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:0,overflow:'hidden'}}>
         {/* Background logo — large, subtle */}
         <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',opacity:0.08}}>
@@ -6806,6 +6904,7 @@ function App(){
           </div>
         </div>
       </div>
+      </>
     )
   }
 
@@ -7020,7 +7119,7 @@ function App(){
                   boxShadow:'inset 0 0 8px rgba(0,0,0,0.5)'}}>
                   <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--gold)',letterSpacing:2}}>{Math.ceil(enemy.maxHp*activeStake.hpMult)} HP</span>
                 </div>
-                {isSkipped&&reward&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'#88dd88',marginTop:2,fontStyle:'italic'}}>{reward.emoji} {reward.name}</div>}
+                {isSkipped&&reward&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'#88dd88',marginTop:2,fontStyle:'italic',display:'flex',alignItems:'center',justifyContent:'center',gap:4}}>{reward.emoji==='🌿'?<WeedLeaf size={18}/>:reward.emoji} {reward.name}</div>}
                 {/* Select-this-path tooltip */}
                 {!isSkipped&&<div data-pathtip="" style={{position:'absolute',bottom:-22,left:'50%',transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'var(--gold)',letterSpacing:3,textTransform:'uppercase',opacity:0,transition:'opacity 0.18s',pointerEvents:'none',whiteSpace:'nowrap',textShadow:'0 0 10px rgba(200,152,56,0.8)'}}>↓ Select This Path</div>}
               </div>
@@ -7039,7 +7138,7 @@ function App(){
                   {/* Wax seal dot */}
                   <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',width:26,height:26,borderRadius:'50%',background:'radial-gradient(circle at 30% 30%, #d83030, #8a0818 60%, #4a0610)',border:'1px solid rgba(0,0,0,0.7)',boxShadow:'0 2px 4px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,150,140,0.3)',fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:'rgba(30,5,5,0.85)',display:'flex',alignItems:'center',justifyContent:'center'}}>⛧</div>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'var(--gold)',letterSpacing:3,textTransform:'uppercase',marginTop:4}}>Skip & Take Reward</div>
-                  <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'var(--ink-bone)',fontStyle:'italic',marginTop:2}}>{reward.emoji} {reward.name}</div>
+                  <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'var(--ink-bone)',fontStyle:'italic',marginTop:2,display:'flex',alignItems:'center',justifyContent:'center',gap:4}}>{reward.emoji==='🌿'?<WeedLeaf size={18}/>:reward.emoji} {reward.name}</div>
                   <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'var(--ink-dim)',fontStyle:'italic',marginTop:3,lineHeight:1.3}}>{REWARD_TIPS[reward.id]||''}</div>
                 </div>
               )}
@@ -7825,7 +7924,7 @@ function ScaleRoot(){
   },[])
   return(
     <div style={{width:'100vw',height:'100vh',overflow:'hidden',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}>
-      <div style={{width:DESIGN_W,height:DESIGN_H,transform:`scale(${scale})`,transformOrigin:'center center',position:'relative'}}>
+      <div id="vst-scale-root" style={{width:DESIGN_W,height:DESIGN_H,transform:`scale(${scale})`,transformOrigin:'center center',position:'relative'}}>
         <ErrorBoundary><App/></ErrorBoundary>
       </div>
     </div>
