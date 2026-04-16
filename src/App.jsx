@@ -4086,6 +4086,7 @@ function App(){
   const fullRunLogRef=useRef(['⛧ The gig begins.'])
   const [showCombatLog,setShowCombatLog]=useState(false)
   const [showDiscardPreview,setShowDiscardPreview]=useState(false)
+  const [undoSnapshot,setUndoSnapshot]=useState(null) // one-step undo for last card play
   const [damageFlash,setDamageFlash]=useState(false)
   const [animPhase,setAnimPhase]=useState('idle')
   const [speedMode,setSpeedMode]=useState(()=>localStorage.getItem('vst_speed')==='fast')
@@ -4999,6 +5000,8 @@ function App(){
     setQuickPlayCardUid(null)
     const card=hand.find(c=>c.uid===dragCardUid)
     if(!card)return
+    // ── UNDO SNAPSHOT — save state before card play ──
+    setUndoSnapshot({hand:[...hand],deck:[...deckRef.current],disc:[...discRef.current],stage:stage.map(m=>m?Object.assign({},m):null),embers,corruption,strikeMult:strikeMultRef.current,selected:[...selected],shredderUsed,nextCardFree:nextCardFreeRef.current})
 
     // ── SMOKE BREAK: handle entirely here to avoid double setHand race ──
     if(card.id==='setbreak'){
@@ -5223,9 +5226,21 @@ function App(){
     const rem=hand.filter(c=>!selected.includes(c.uid))
     const res=drawUpTo(rem,deckRef.current,[...discRef.current,...toDisc],HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0))
     setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
-    playSfx('discard');setDiscardsLeft(p=>p-1);setSelected([])
+    playSfx('discard');setDiscardsLeft(p=>p-1);setSelected([]);setUndoSnapshot(null)
     addLog('🗑 '+toDisc.length+' discarded & replaced.')
   },[selected,discardsLeft,animPhase,hand,deck,discardPile,drawUpTo])
+
+  // ── UNDO LAST CARD PLAY — one-step restore ──
+  const handleUndo=useCallback(()=>{
+    if(!undoSnapshot||animPhase!=='idle')return
+    setHand(undoSnapshot.hand);setDeck(undoSnapshot.deck);setDiscardPile(undoSnapshot.disc)
+    setStage(undoSnapshot.stage);setEmbers(undoSnapshot.embers);setCorruption(undoSnapshot.corruption)
+    setStrikeMult(undoSnapshot.strikeMult);strikeMultRef.current=undoSnapshot.strikeMult
+    setSelected(undoSnapshot.selected);setShredderUsed(undoSnapshot.shredderUsed)
+    if(undoSnapshot.nextCardFree){setNextCardFree(true);nextCardFreeRef.current=true}
+    setUndoSnapshot(null)
+    playSfx('discard');addLog('↩ Undo — last card play reversed.')
+  },[undoSnapshot,animPhase])
 
   const victoryFiredRef=useRef(false)
   const triggerVictoryRef=useRef(null)
@@ -5622,6 +5637,8 @@ function App(){
         setGameState('end')
       }
       if(e.shiftKey&&(e.key==='H'||e.key==='h')){setCreditsRoll(true)}
+      // Ctrl+Z = Undo last card play
+      if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();handleUndoRef.current&&handleUndoRef.current();return}
       if(e.key==='Escape'){setShowPauseOptions(p=>!p)}
 
       // ── PLAYER KEYBOARD SHORTCUTS — only during combat, no modifiers, not while typing
@@ -5732,6 +5749,7 @@ function App(){
   },[tripUsedThisFight,strikesLeft])
 
   const handleStrike=useCallback(()=>{
+    setUndoSnapshot(null) // can't undo after striking
     // CORRUPTION THRESHOLD: 75% — The Madness (15% chance discard random card)
     if(corruption>=75&&Math.random()<0.15&&handRef.current.length>1){
       const idx=Math.floor(Math.random()*handRef.current.length)
@@ -6736,6 +6754,7 @@ function App(){
   const stageDiveUsedRef=useRef(stageDiveUsed);stageDiveUsedRef.current=stageDiveUsed
   const handleStrikeRef=useRef(null);handleStrikeRef.current=handleStrike
   const handleDiscardRef=useRef(null);handleDiscardRef.current=handleDiscard
+  const handleUndoRef=useRef(null);handleUndoRef.current=handleUndo
   const playSfxRef=useRef(null);playSfxRef.current=playSfx
   const gameStateRef=useRef(gameState);gameStateRef.current=gameState
   const won=fightIndex>=26&&enemyHp<=0
@@ -8011,6 +8030,7 @@ function App(){
           <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,width:'100%'}}>
             <button onClick={handleDiscard} disabled={!canDiscard}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,letterSpacing:4,textTransform:'uppercase',padding:'9px 10px',background:canDiscard?'linear-gradient(180deg, rgba(200,152,56,0.25), rgba(200,152,56,0.08))':'linear-gradient(180deg, rgba(138,117,96,0.08), rgba(138,117,96,0.03))',border:canDiscard?'1px solid var(--gold)':'1px solid rgba(138,117,96,0.35)',borderRadius:3,color:canDiscard?'var(--gold)':'var(--ink-dim)',cursor:canDiscard?'pointer':'not-allowed',textShadow:canDiscard?'0 0 14px rgba(200,152,56,0.5)':'none',transition:'all 0.15s',width:'100%',opacity:canDiscard?1:0.5}}>{String.fromCharCode(8595)} DISCARD</button>
+            {undoSnapshot&&<button onClick={handleUndo} style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,letterSpacing:2,padding:'4px 8px',background:'rgba(100,60,20,0.3)',border:'1px solid rgba(200,152,56,0.35)',borderRadius:2,color:'var(--gold)',cursor:'pointer',width:'100%',opacity:0.7,transition:'opacity 0.15s'}} onMouseEnter={e=>e.currentTarget.style.opacity='1'} onMouseLeave={e=>e.currentTarget.style.opacity='0.7'}>↩ UNDO (Ctrl+Z)</button>}
             <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'center'}}>
               <PhaseDots left={discardsLeft} total={fightMaxDiscards} color='#c89838' wide={true}/>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:discardsLeft>0?'var(--gold)':'var(--rot)',letterSpacing:1}}><span key={'dl-'+discardsLeft} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{discardsLeft}/{fightMaxDiscards}</span></span>
