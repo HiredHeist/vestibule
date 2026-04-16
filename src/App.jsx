@@ -732,6 +732,11 @@ const SQUIGGLE_CSS=`
   0%,100%{transform:translateX(-50%) scale(1);text-shadow:0 0 8px rgba(200,152,56,0.5)}
   50%{transform:translateX(-50%) scale(1.15);text-shadow:0 0 14px rgba(200,152,56,0.95)}
 }
+.vfx-particle{position:absolute;border-radius:50%;pointer-events:none;z-index:9500;will-change:transform,opacity}
+@keyframes vfxDrift{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  100%{transform:translate(var(--vfx-dx),var(--vfx-dy)) scale(0);opacity:0}
+}
 `
 function MemberPortrait({id,size,style,noSquiggle}){
   const src=MEMBER_PORTRAITS[id]
@@ -4073,6 +4078,25 @@ function App(){
   const [stageDiveUsed,setStageDiveUsed]=useState(false)
   const [diceTarget,setDiceTarget]=useState(null)
   const [showDice,setShowDice]=useState(false)
+
+  // ── PARTICLE SYSTEM — lightweight CSS-animated particles ──────
+  const [vfxParticles,setVfxParticles]=useState([])
+  const pidRef=useRef(0)
+  const spawnParticles=useCallback((x,y,count,color,spread)=>{
+    spread=spread||60
+    const ps=Array.from({length:count},()=>{
+      const id=pidRef.current++
+      const angle=Math.random()*Math.PI*2
+      const dist=Math.random()*spread+10
+      const dx=Math.cos(angle)*dist
+      const dy=Math.sin(angle)*dist-(spread*0.5) // bias upward
+      const size=Math.random()*5+2
+      const dur=Math.random()*600+400
+      return{id,x,y,dx,dy,size,dur,color:color||'#ff4400'}
+    })
+    setVfxParticles(p=>[...p,...ps].slice(-80)) // cap at 80
+    setTimeout(()=>setVfxParticles(p=>p.filter(pp=>!ps.some(n=>n.id===pp.id))),1200)
+  },[])
   const [pendingEmbers,setPendingEmbers]=useState(0)
   const [pendingDraw,setPendingDraw]=useState(0)
   const [bonusDiscards,setBonusDiscards]=useState(0) // extra discards next fight from descent
@@ -4301,7 +4325,7 @@ function App(){
     fullRunLogRef.current=[m,...fullRunLogRef.current]
     setLog(p=>[m,...p.slice(0,99)])
   }
-  const addFloat=(v,x,y,color,big)=>{big=big||false;const id=fid.current++;if(localStorage.getItem('vst_dmgnums')==='off')return;setFloats(p=>[...p,{id,v,x,y,color:color||'#dd2222',big}])}
+  const addFloat=(v,x,y,color,big)=>{big=big||false;const id=fid.current++;if(localStorage.getItem('vst_dmgnums')==='off')return;setFloats(p=>[...p,{id,v,x,y,color:color||'#dd2222',big}]);spawnParticles(x,y,big?12:5,color||'#dd2222',big?80:40)}
   const remFloat=id=>setFloats(p=>p.filter(f=>f.id!==id))
   // ── BOOT SCREEN — venue marquee, dismiss on any key/click ──────
   useEffect(()=>{
@@ -7529,6 +7553,7 @@ function App(){
         </div>
       })()}
       {floats.filter(Boolean).map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
+      {vfxParticles.map(p=><div key={p.id} className="vfx-particle" style={{left:p.x,top:p.y,width:p.size,height:p.size,background:p.color,boxShadow:'0 0 '+(p.size*2)+'px '+p.color,animation:'vfxDrift '+p.dur+'ms ease-out forwards','--vfx-dx':p.dx+'px','--vfx-dy':p.dy+'px'}}/>)}
       {projectiles.filter(Boolean).map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))} isBoss={p.isBoss}/>)}
       {dmgBreakdown&&<DamageBreakdown data={dmgBreakdown} onDone={()=>setDmgBreakdown(null)}/>}
 
