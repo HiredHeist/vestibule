@@ -1,71 +1,93 @@
 # VESTIBULE — TODO & STATUS
 
-## Latest Session: April 15, 2026
-**Latest commit:** 4acd218
-**Sim version:** v19.1 (synced with game code)
+**Latest commit:** 51f819e (cold open splash + weed leaf PNG + strike fly-to-boss fix)
+**Sim version:** v19.1 (10K Bronze: 9.67% win rate)
+**App.jsx:** 7,935 lines
+**Last doc refresh:** post-51f819e
+
+> 🔒 **DOC RULE:** Every commit that changes code MUST update TODO.md (and CLAUDE.md if rules/architecture change) in the SAME commit. No exceptions. Stale docs = wasted sessions re-discovering what's done.
 
 ---
 
-## 🔴 PRIORITY 1 — UI CLEANUP (must fix before anything else)
+## 🔴 UNVERIFIED — confirm before building on top
 
-The cockpit layout is functional but needs design polish to feel clean and professional.
-
-### Battle Area
-- [ ] Background needs more visual life — animated gradient shift, subtle particle/fog effects
-- [ ] Boss section could be more compact / concert-poster style
-- [ ] Stage slot member cards need design pass — sprite should dominate, text minimal at bottom
-- [ ] Empty stage slots look barren — subtle placeholder art or darker treatment
-- [ ] Artifact tray on left feels disconnected from the battle area
-
-### Hand Area / Cockpit
-- [ ] Left panel (discard + stats) spacing and alignment needs polish
-- [ ] Right panel (strike) sizing and centering needs tuning
-- [ ] Card fan overlap/spacing — cards feel cramped with the panels
-- [ ] Card portrait area still has dead space below emoji — effect text too tall
-- [ ] Hover zoom on cards may clip behind panels
-- [ ] Corruption/genre indicators between battle and hand need cleaner positioning
-
-### General
-- [ ] Screen transitions between fight/shop/event/descent (currently instant swap)
-- [ ] Font sizing consistency pass across all UI elements
-- [ ] Color consistency — too many slightly-different gold/amber shades
-- [ ] Mobile/touch considerations for quick-play
+- [ ] **Cold open splash** — clear localStorage, hard reload, confirm splash fires on first boot (shipped in 51f819e)
+- [ ] **Weed leaf PNG** — spot-check it renders everywhere 🌿 used to (shop, stash counter, drug pins, card effects)
+- [ ] **Strike fly-to-boss animation** — confirm card travels cleanly to boss on STRIKE
+- [ ] **Shop bottom-of-list items** — verify no cutoff after pack tear animation fix (b2ad579)
 
 ---
 
-## 🟡 PRIORITY 2 — 20 QoL Improvements (impact-ordered)
+## 🎸 ROCKSTAR POLISH (top-priority pass — "make it feel published by Rockstar")
+
+Ranked by ship-impact per line of code:
+
+### Tier 1
+- [ ] 🎵 **Diegetic music tied to game state** — bass drone on full embers, detuned gtr at 50%+ corruption, double-time drums at boss ≤25% HP, full band slam on STRIKE. Biggest perceived-budget item on the board.
+- [ ] 🎤 **Pre-fight loading screen** w/ random tour quote ("Last seen playing a basement in Cleveland for $40 and a case of beer")
+
+### Tier 2
+- [ ] 📖 **Character bios on hover** — musicians + bosses get backstory blurbs
+- [ ] 📓 **TOUR DIARY tab** on main menu — cumulative stats styled as hand-written tour journal
+- [ ] 🎞️ **Run replay system** — 30s timelapse of key moments at game end
+
+### Tier 3
+- [ ] ✨ **Particle physics everywhere** — ember trails, damage splatter, card-shuffle dust
+- [ ] 📸 **Achievement Polaroids** — slide in from edge, hand-scrawled, vinyl-skip SFX
+- [ ] ⏸️ **Real pause menu** — Cmd+P drawer, vinyl-warp audio ducking
+
+### Tier 4
+- [ ] 🎫 **"Press any key" boot screen** — flickering venue marquee ("VESTIBULE TONIGHT — DOORS 8PM")
+- [ ] 🎬 **Tour-finale credits roll** — band-poster typography, dimming venue
+
+---
+
+## 🟡 QoL QUEUE (open items — impact-ordered)
 
 ### Combat Flow
-- [ ] 1. **Damage preview on Strike button** — show estimated total live as you buff
-- [ ] 2. **Ember forecast** — hovering card dims pips to show remaining
-- [ ] 3. **Fight intro splash** — "CIRCLE V — ANGER" + enemy name slam (1s)
-- [ ] 4. **Keyboard shortcuts** — S=Strike, D=Discard, 1-6=select cards, Space=speed
-- [ ] 5. **Undo last card play** — one-step within same strike
-- [ ] 6. **Hand size indicator** — "6/6" turns gold at overcap
+- [ ] **Ember forecast** — hovering card dims pips to show remaining
+- [ ] **Undo last card play** — one-step within same strike
+- [ ] **Hand size indicator** — "6/6" turns gold at overcap
+- [ ] **Fast-forward HOLD spacebar** — speed up while held
 
 ### Visual Feedback (juice)
-- [ ] 7. **Victory fanfare** — golden burst + "VICTORY" slam when boss dies
-- [ ] 8. **Boss HP drain animation** — smooth countdown, not instant jump
-- [ ] 9. **Stash change floats** — "+5 🌿" / "-3 🌿" on stash changes
-- [ ] 10. **Screen transitions** — 0.3s crossfade between game states
-- [ ] 11. **Card upgrade shimmer** — persistent golden pulse on upgraded card borders
+- [ ] **Victory fanfare** — golden burst + "VICTORY" slam when boss dies
+- [ ] **Boss HP drain animation** — smooth countdown, not instant jump
+- [ ] **Card upgrade shimmer** — persistent golden pulse on upgraded card borders
+- [ ] **Member portrait shake** on hit
+- [ ] **Boss low-HP desperation glow**
+- [ ] **Mentor link visual chain**
+- [ ] **Riff chain warning glow** on hand cards about to chain
+- [ ] **"+×3 ATK active" badge** near multiplier when temp ATK buffs are live
 
 ### Information & Clarity
-- [ ] 12. **Pact icons in combat** — small row of active pact icons visible
-- [ ] 13. **Boss telegraph** — "NEXT: 6 DMG to weakest" shown on boss
-- [ ] 14. **Card count remaining** — "2 left in deck" on hover
-- [ ] 15. **End-of-fight summary** — 2s popup: damage dealt, cards played, chains
+- [ ] **Pact icons in combat** — small row of active pact icons visible
+- [ ] **Boss telegraph** — "NEXT: 6 DMG to weakest" shown on boss
+- [ ] **Card count remaining** — "2 left in deck" on hover
+- [ ] **Discard pile preview** — click/hover to see what's in there
+- [ ] **Drug pin tape marks** — zine-feel attachment detail
 
 ### Quality of Life
-- [ ] 16. **Auto-sort preference** — persist hand sort in localStorage
-- [ ] 17. **Bulk discard** — select multiple then discard all at once
-- [ ] 18. **Run timer** — elapsed time on death/victory screen
-- [ ] 19. **Corruption milestone audio** — dark tones at 25/50/75/100%
-- [ ] 20. **"Why did I die?" tooltip** — brief analysis on death screen
+- [ ] **Mute hotkey (M)**
+- [ ] **Auto-sort preference** — persist hand sort in localStorage
+- [ ] **Bulk discard** — select multiple then discard all at once
+- [ ] **Run timer** — elapsed time on death/victory screen
+- [ ] **Corruption milestone audio** — dark tones at 25/50/75/100%
+- [ ] **"Why did I die?" tooltip** — brief analysis on death screen
+- [ ] **Screen transitions** — 0.3s crossfade between fight/shop/event/descent
 
 ---
 
-## 🟢 PRIORITY 3 — Animations (PixelLab, separate chat)
+## 🟠 UI / DESIGN REMAINING
+
+- [ ] Font sizing consistency pass across all UI
+- [ ] Color consistency — too many slightly-different gold/amber shades
+- [ ] Mobile/touch considerations for quick-play
+- [ ] Artifact tray on left — verify it feels connected to battle area post-cockpit-refactor
+
+---
+
+## 🟢 ANIMATIONS (PixelLab, separate workflow)
 
 - [ ] Boss idle animations (29 bosses)
 - [ ] Boss death animations (29 bosses)
@@ -74,68 +96,65 @@ The cockpit layout is functional but needs design polish to feel clean and profe
 
 ---
 
-## ✅ COMPLETED — Session 19 (April 14-15, 2026)
+## 🧹 TRIVIAL CLEANUP
 
-### Sprites & Wiring
-- [x] All 18 member sprites (128x128 PixFlux) generated + wired
-- [x] All 29 boss sprites generated + wired
-- [x] All 18 idle GIF animations wired (auto-play idle, static during combat)
+- [ ] `vestibule-sim.js` console banner still prints "v17.1" — header comment says v19.1. Sync the banner string.
+
+---
+
+## ✅ COMPLETED (recent — post-Session 19)
+
+### Cold open + polish pass (51f819e)
+- [x] Cold open splash screen
+- [x] Weed leaf PNG component (replaces 🌿 emoji)
+- [x] Strike fly-to-boss animation fix
+
+### Victory + map (56d0b8e)
+- [x] End-of-fight summary popup
+- [x] DESCENT: tarot-card map redesign
+
+### Shop (b2ad579, 51d5a07, df0621b)
+- [x] Pokemon-style pack tear-open animation
+- [x] Shop layout overflow fix
+- [x] Sly the Fence pass 2 (porn-stache energy)
+- [x] Pack purchase limit + full shop redesign
+
+### Keyboard shortcuts (d73e78e, 13e19bb)
+- [x] S / D / 1-6 hotkeys firing correctly (stale closure fix via refs)
+- [x] Tier 4 BEAST tier hype visuals
+
+### Strike panel (96654db, d8c7224, b05dac3)
+- [x] Damage preview correctness fix
+- [x] Live damage preview under STRIKE (every mult tick visible)
+- [x] Layout restructure, BLACK METAL banner, EMBERS label
+- [x] Dynamic pips, card legibility pass
+
+### Ritual altar design system (a103d00 → 5b4c456, ~12 commits)
+- [x] Unified cockpit altar panel
+- [x] Rune-circle boss + ritual platform stage slots
+- [x] Tarot treatment cards w/ wax seal embers
+- [x] Mercury tube thermometer + ribbon banner
+- [x] Frieze visibility + panel spacing + Combined Attack
+- [x] Ink stamp flashes + bone-white ember display
+- [x] Circle splash design pass
+- [x] Stash/ember floats
+- [x] Keyword tooltip fix
+
+### Session 19 (Apr 14-15) — sprites, balance, tutorial
+- [x] All 18 member sprites + 29 boss sprites wired
+- [x] All 18 idle GIF animations wired
 - [x] Lucifer phase swap (P1 Baphomet → P2 Lord of Flies)
 - [x] Grimnir replaces Nott (masked vocalist, DEBUFF)
-- [x] MEMBER_PORTRAITS, STAGE_PORTRAITS, IDLE_PORTRAITS, BOSS_PORTRAITS maps
-
-### Tutorial System
-- [x] 3 scripted fights with predetermined hands + tooltips
-- [x] First-encounter tips (pacts, shop, events, descent)
-- [x] Progressive UI hiding during tutorial
-
-### Card Balance
-- [x] Dial to Eleven: +3 ATK base, +4 upgraded (was +2/+3)
-- [x] Smoke Break: draws 1 card after discard
-- [x] CORRUPT keyword: +1 per 12% corruption (was 15%)
-- [x] Sabbath Offering rework: deck thin + all members +1 ATK
-
-### Balance & Pacing
-- [x] Circle I HP bump: 50/75/110 → 65/95/140
-- [x] Circle II HP bump: 100/150/220 → 145/210/310
-- [x] Circle III heal buff: 2/3/6 → 3/5/8 per card played
-- [x] 69-card deck: 4 rares moved to shop-only
-- [x] Corruption deck: Dark Whisper (25%), Blood Price (50%), Void Pact (75%)
-- [x] Madness card loss: 15% → 20%
+- [x] 3 scripted tutorial fights + first-encounter tips
+- [x] Card balance: Dial to Eleven, Smoke Break, CORRUPT, Sabbath Offering
+- [x] Circle I/II HP bumps, Circle III heal buff
+- [x] 69-card deck + Corruption deck (Dark Whisper, Blood Price, Void Pact)
+- [x] Madness card loss 15% → 20%
 - [x] Sim v19.1 synced
-
-### UX Improvements (9 items)
-- [x] Genre approaching indicator at 40%
-- [x] Boss info: tagline shown, hover for passive
-- [x] Best run tracking + descent map marker
-- [x] Death screen: boss passive + run summary stats
-- [x] Speed toggle (⚡2X) synced with localStorage
-- [x] Collapsible stats footer
-- [x] Progressive rules (NEW badges)
-- [x] Tabbed shop (All/Cards/Packs/Gear)
-- [x] Deck peek by type columns (RIFF/CORRUPT/UTILITY/EMBER)
-
-### Visual Overhaul
-- [x] Circle-themed battle backgrounds (9 unique color themes)
-- [x] Corruption vignette (blood red edges, pulses at 75%+)
-- [x] Chain pulse (golden burst on Riff Chain)
-- [x] Boss near-death fracture (<10% HP)
-- [x] Member card borders softened (shadows, not borders)
-- [x] Ghost preview on drag ("+1 ATK" shown before dropping)
-
-### Layout Refactors
-- [x] Parchment background removed → dark transparent battle area
-- [x] Stage divider removed
-- [x] Cockpit layout: discard left, strike right, cards center
-- [x] All info moved to left panel, strike-only right panel
-
-### Polish
-- [x] Fade unbuffed members during card phase (70% opacity)
-- [x] Chain hints only after first chain discovered
-- [x] Quick-play (tap card then tap member)
-- [x] Damage breakdown auto-dismiss (1.5s)
-- [x] Hand card portrait area enlarged (75→100px, emoji 40→52)
-- [x] Stage slot sprite scaled up (85%/95%)
+- [x] 9 UX items: genre approaching, boss tagline, best run, death screen stats, speed toggle, collapsible footer, progressive rules, tabbed shop, deck peek
+- [x] Circle-themed backgrounds (9 unique)
+- [x] Corruption vignette, chain pulse, boss fracture
+- [x] Ghost preview on drag
 
 ---
 
@@ -152,13 +171,11 @@ The cockpit layout is functional but needs design polish to feel clean and profe
 
 ### Survival Curve (Bronze)
 - C1: 9.0% deaths (healthy)
-- C2: 0.9% deaths
-- C3: 0.1% deaths
-- C4: 0.7% deaths
-- C5: 2.6% deaths
-- C6: 13.9% deaths (the wall)
-- C7: 30.3% deaths
-- C8-9: steep ramp to Lucifer
+- C2–C4: <1% each
+- C5: 2.6%
+- C6: 13.9% (the wall)
+- C7: 30.3%
+- C8–9: steep ramp to Lucifer
 
 ### Card Balance
 All 69 starter cards SOLID or STRONG. No dead cards.

@@ -1,5 +1,8 @@
 # VESTIBULE — Developer Notes (Claude)
-**Last updated: March 25, 2026 | Commit: 10c798c**
+**Last updated: April 17, 2026 | Commit: 51f819e (HEAD)**
+
+## 🔒 WORKFLOW RULE (read first, every session)
+**Every commit that changes code MUST update TODO.md in the same commit.** If rules, architecture, file structure, or key code locations change, CLAUDE.md updates in the same commit too. No separate "docs" commits — they rot. Stale docs = wasted sessions re-discovering what's done.
 
 ## Critical Rules
 1. NEVER put setHand inside setDeck — React Strict Mode double-fires
@@ -14,12 +17,12 @@
 10. NEVER navigate user's browser tab while they're playing
 
 ## File Structure
-- `src/App.jsx` — 6351 lines, single-file architecture
+- `src/App.jsx` — 7,935 lines, single-file architecture
 - `public/members/` — 18 PNG portraits (9 small + 9 stage)
-- `public/fonts/` — 5 custom fonts
+- `public/fonts/` — 5 custom fonts (BogartsMetalFont display only — NO numbers)
 - `public/sfx/` — 30 sound effects
 - `public/music/` — 11 music tracks
-- `vestibule-sim.js` — Simulation engine v17.0
+- `vestibule-sim.js` — Simulation engine v19.1
 
 ## Key Code Locations (approximate line numbers)
 - MEMBER_PORTRAITS + STAGE_PORTRAITS maps: ~490-520
@@ -62,8 +65,8 @@
 - `vst_scanlines`, `vst_speed` — Options
 
 ## Simulation
-- File: `/home/claude/vestibule-sim.js` v17.0
+- File: `vestibule-sim.js` v19.1
 - Usage: `node vestibule-sim.js [numGames] [stake]`
 - Models: All cards, passives, artifacts, pacts, loot, combos, mentor links,
   drugs, genres, hellquakes, corruption thresholds, random events, blood oath
-- Latest results: Bronze 9.28%, proper descending curve across all stakes
+- Latest results (10K Bronze): 9.67% win rate, proper descending curve across all stakes
