@@ -5078,7 +5078,7 @@ function App(){
       if(e.key==='Escape'){setShowPauseOptions(p=>!p)}
 
       // ── PLAYER KEYBOARD SHORTCUTS — only during combat, no modifiers, not while typing
-      if(gameState!=='playing')return
+      if(gameStateRef.current!=='playing')return
       if(e.shiftKey||e.ctrlKey||e.metaKey||e.altKey)return
       if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return
       const k=e.key.toLowerCase()
@@ -6177,6 +6177,7 @@ function App(){
   const handleStrikeRef=useRef(null);handleStrikeRef.current=handleStrike
   const handleDiscardRef=useRef(null);handleDiscardRef.current=handleDiscard
   const playSfxRef=useRef(null);playSfxRef.current=playSfx
+  const gameStateRef=useRef(gameState);gameStateRef.current=gameState
   const won=fightIndex>=26&&enemyHp<=0
   // Corruption visual escalation
   const corruptLow=corruption>=40&&corruption<70
