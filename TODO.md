@@ -196,3 +196,73 @@ Ranked by ship-impact per line of code:
 All 69 starter cards SOLID or STRONG. No dead cards.
 Lowest: Smoke Break 1.99/g, Setlist 1.96/g.
 Record Deal (0.20/g) is a boss mechanic, not player card.
+
+---
+
+## 🃏 CARD RETHINK (review CARD_IDEAS.md)
+
+**Core problem:** Ember cards dominate. Playing "generate embers → spend embers" is the only viable strategy. Ember generation has zero cost — Tapped Out is literally free money.
+
+**Fix direction:** Ember generation needs REAL costs (HP, corruption, tempo, card disadvantage). Non-ember strategies need to be viable.
+
+### New Cards to Review (52 in CARD_IDEAS.md)
+- [ ] 12 RIFF cards — damage scaling, keyword synergy, combo rewards
+- [ ] 12 CORRUPT cards — high risk/reward, corruption-as-weapon, revival
+- [ ] 12 UTILITY cards — card advantage, positioning, flexibility
+- [ ] 8 EMBER cards — reworked with meaningful costs (HP, corruption, max ember loss, tempo)
+- [ ] 5 RITUAL cards — NEW TYPE: multi-turn setups, countdowns, delayed nukes
+- [ ] 3 GAMBLE cards — NEW TYPE: d6 RNG with big swings
+
+### Ember Economy Redesign
+- [ ] Audit current ember cards: Tapped Out, Power Tap, Static Charge, Groupie, Soundboard
+- [ ] Add costs to each: corruption tax, HP sacrifice, max ember shrink, or tempo delay
+- [ ] Test: "running out on strike 3 sucks" — generation must exist but feel like a CHOICE
+- [ ] Diminishing returns? First ember card per strike = full value, second = half?
+- [ ] Target: 9-10% Bronze win rate after changes
+
+### Weak Cards to Buff or Replace
+- [ ] Dial to Eleven (0.99/copy) — corruption cost too scary for +3 ATK
+- [ ] Setlist (0.99/copy) — niche, rarely worth the slot
+- [ ] Smoke Break (0.99/copy) — card loss too punishing for +3 embers
+
+### Potential New Card Types
+- [ ] RITUAL type — multi-turn investments (Summoning Circle, Blood Tithe, Doom Clock)
+- [ ] GAMBLE type — d6 rolls with exciting variance (Devil's Dice, Russian Roulette)
+- [ ] Should these be subtypes of existing types or standalone?
+
+---
+
+## 💎 NEW QoL IDEAS (Roadie brainstorm)
+
+### Combat Feel
+- [ ] Damage number size scales with damage amount (10 = small, 100+ = HUGE)
+- [ ] Strike counter typography gets more dramatic each strike (bigger, redder, shakier)
+- [ ] Cards played this strike shown as ghostly trail/stack near strike button
+- [ ] Brief screen dim between strikes for dramatic beat/pacing
+- [ ] Boss kill quote appears with typewriter effect instead of instant
+- [ ] Visible deck reshuffle animation when draw pile empties
+
+### Information
+- [ ] Corruption trajectory warning ("at this rate, 100% in 2 fights")
+- [ ] Deck viewer button during combat (see full deck contents sorted by type)
+- [ ] Card compare tooltip in shop (this card vs what's in your deck)
+- [ ] Combo discovery log (list of chains found this run, visible in pause menu)
+- [ ] Boss kill counter visible during fight ("3rd time fighting The Shade")
+
+### Shop / Meta
+- [ ] Quick-restart button on death screen (skip stats, straight to new run)
+- [ ] "Last run" comparison on end screen (did better/worse than previous)
+- [ ] Win streak fire border on main menu
+- [ ] Daily challenge mini-leaderboard
+
+### Visual Flair
+- [ ] Card foil holographic shimmer on hover (enhanced version of current)
+- [ ] Enemy intro animation (portrait slides in from side with name slam)
+- [ ] Member death: dramatic fade + skull icon + brief slow-mo
+- [ ] Corruption visual escalation: screen edges redden, text starts glitching at 80%+
+- [ ] Boss portrait cracks deepen as HP drops (expand existing fracture system)
+- [ ] Combo name display scales with chain multiplier (bigger chains = BIGGER text)
+- [ ] Card shuffle dust puff when deck reshuffles
+- [ ] Stash earned sparkle trail when gaining stash
+- [ ] Victory screen confetti/embers rain
+- [ ] Pact selection: dramatic reveal with smoke/ember effect
