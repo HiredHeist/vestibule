@@ -887,7 +887,7 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
   return{won:gs.won,wthWon,deathFight,deathCause,fightsSurvived:gs.fightsSurvived,totalDamage:gs.totalDamage,highestStrike:gs.highestStrike,stageSize:gs.stage.length,mentorLinks:gs.mentorLinks.length,pacts:gs._pacts.length,upgrades:gs._upgradedCards.length}}
 
 // ── RUN SIMULATION ──
-console.log(`\n⛧ VESTIBULE SIM v17.1 [${STAKE.name}] — ${NUM_GAMES.toLocaleString()} games\n`);
+console.log(`\n⛧ VESTIBULE SIM v19.1 [${STAKE.name}] — ${NUM_GAMES.toLocaleString()} games\n`);
 const t0=Date.now();
 TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,

@@ -98,7 +98,7 @@ Ranked by ship-impact per line of code:
 
 ## 🧹 TRIVIAL CLEANUP
 
-- [ ] `vestibule-sim.js` console banner still prints "v17.1" — header comment says v19.1. Sync the banner string.
+- [x] `vestibule-sim.js` console banner prints v19.1 (synced with header) — done in 3cd795f→next
 
 ---
 
