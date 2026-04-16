@@ -7203,6 +7203,31 @@ function App(){
           <button onClick={()=>setSpeedMode(p=>{const nv=!p;localStorage.setItem('vst_speed',nv?'fast':'normal');return nv})} style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:speedMode?'var(--gold)':'var(--ink-dim)',background:speedMode?'linear-gradient(180deg, rgba(200,152,56,0.20), rgba(200,152,56,0.05))':'transparent',border:'1px solid '+(speedMode?'var(--gold)':'var(--rot)'),borderRadius:3,padding:'4px 10px',cursor:'pointer',letterSpacing:3,textTransform:'uppercase'}}>{speedMode?'⚡ 2x':'1x'}</button>
           <button onClick={handleStrike} disabled={!canStrike}
             style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,letterSpacing:3,textTransform:'uppercase',whiteSpace:'nowrap',padding:'18px 8px',background:canStrike?'linear-gradient(180deg, rgba(196,30,58,0.55), rgba(122,15,31,0.3))':'rgba(25,12,5,0.4)',border:canStrike?'2px solid var(--blood)':'1px solid var(--rot)',borderRadius:3,color:canStrike?'var(--ink-bone)':'var(--rot)',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 20px rgba(196,30,58,0.9), 0 2px 4px rgba(0,0,0,0.6)':'none',boxShadow:canStrike?'inset 0 0 32px rgba(196,30,58,0.25), 0 0 24px rgba(196,30,58,0.35)':'none',transition:'all 0.15s',width:'100%',animation:canStrike?'altarBreath 3s ease-in-out infinite':'none'}}>⛧ STRIKE ⛧</button>
+          {/* DAMAGE PREVIEW — sits directly under strike, hypes up every mult tick */}
+          {(()=>{
+            const act=stage.filter(m=>m&&!m.tooStoned)
+            let dmg=act.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
+              let effAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
+              if(chosenPacts.includes('clean_living')&&corruption<15)effAtk+=3
+              if(m.encoreReady)effAtk*=2
+              return s+effAtk
+            },0)
+            for(let _mi=0;_mi<stage.length-1;_mi++){const _mn=stage[_mi],_bs=stage[_mi+1];if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue;if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){const _em=_bs.mentorMult+(activeStake.mentorBonus||0);const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/12):_mn.atk;const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/12):_bs.atk;dmg+=Math.round((_ma+_ba)*(_em-1))}}
+            if(act.some(m=>m.role==='Drummer'))dmg*=2
+            const buf=act.filter(m=>(m.buffCount||0)>0).length
+            const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1
+            dmg=Math.floor(dmg*bon)
+            if(activeGenre==='RIFF_METAL')dmg=Math.round(dmg*1.15)
+            if(activeGenre==='DOOM_METAL'&&discardsLeft>=fightMaxDiscards)dmg+=act.length*2
+            const fin=strikeMult>1.0?Math.round(dmg*strikeMult):dmg
+            if(fin<=0||!canStrike)return null
+            return (
+              <div style={{fontFamily:"'MBScribblesFont',serif",textAlign:'center',marginTop:-4}}>
+                <div style={{fontSize:9,color:'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Deals</div>
+                <div key={'preview-'+fin} style={{fontSize:26,fontWeight:900,color:'var(--blood)',textShadow:'0 0 12px rgba(196,30,58,0.7)',lineHeight:1,animation:'inkStamp 0.3s ease-out',display:'inline-block'}}>{fin}<span style={{fontSize:12,color:'var(--ink-bone)',marginLeft:3}}>DMG</span></div>
+              </div>
+            )
+          })()}
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'center'}}>
             <PhaseDots left={strikesLeft} total={fightMaxStrikes} color='#c41e3a' wide={true}/>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:strikesLeft>0?'var(--blood)':'var(--rot)',letterSpacing:1}}><span key={'sl-'+strikesLeft} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{strikesLeft}/{fightMaxStrikes}</span></span>
