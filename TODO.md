@@ -266,3 +266,33 @@ Record Deal (0.20/g) is a boss mechanic, not player card.
 - [ ] Stash earned sparkle trail when gaining stash
 - [ ] Victory screen confetti/embers rain
 - [ ] Pact selection: dramatic reveal with smoke/ember effect
+
+---
+
+## 🧠 COMBO SYSTEM OVERHAUL — Balatro-style "break the game" moments
+
+**Current state:** Riff Chains give ×1.78 multiplier. Linear, predictable, no exponential scaling. No "holy shit" moment. No reason to screenshot your run.
+
+**Target:** 5 tiers of combo discovery, each ~3× damage of the last. Players should chase mythic combos across dozens of runs.
+
+### Combo Systems to Implement (details in CARD_IDEAS.md)
+- [ ] **ECHO / REPLAY** — cards that replay previous cards. Echo + Echo + big card = exponential.
+- [ ] **COPY / DUPLICATE** — Bootleg Tape copies cards in hand. Copy the copier = brain melting.
+- [ ] **MULTIPLIER STACKING** — cards that multiply the strike multiplier (currently only chains do this).
+- [ ] **CORRUPTION AS POWER** — 100% corruption should feel GODLIKE not just scary. Dark Crescendo triples mult at 80%+.
+- [ ] **SACRIFICE LOOP** — kill members for power, revive them stronger, repeat.
+- [ ] **EMBER OVERFLOW** — excess embers convert to damage or ATK. Ember decks become a damage strategy.
+- [ ] **MYTHIC INTERACTIONS** — 4-5 card combos that do 200× damage. Extremely rare, endlessly chased.
+
+### Combo Discovery Tiers
+- [ ] Tier 1 (2-card, common): ×1.78 chains — already exists, baseline
+- [ ] Tier 2 (3-card, moderate): ~×5 damage — requires deck building awareness
+- [ ] Tier 3 (4-card, rare): ~×15 damage — requires specific artifacts + cards
+- [ ] Tier 4 (5-card, mythic): ~×50 damage — once-in-50-runs, screenshot-worthy
+- [ ] Tier 5 (god run): ×200+ damage — everything aligns, 10K+ damage single strike, post on Reddit
+
+### Combo Tracking / Reward
+- [ ] Combo discovery log (track what combos players have found)
+- [ ] Hidden achievement per mythic combo discovered
+- [ ] Combo name + damage flash on screen when triggered (bigger = flashier)
+- [ ] End-of-run "Best Combo" stat with replay of the moment

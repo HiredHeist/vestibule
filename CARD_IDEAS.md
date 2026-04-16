@@ -99,3 +99,69 @@
 50. **Devil's Dice** | 1🔥 | Roll d6. 1-2: nothing. 3-4: +3 ATK all. 5-6: +5 ATK all + draw 2.
 51. **Russian Roulette** | 0🔥 | FREE. Roll d6. 1: target Too Stoned. 2-5: +4 ATK. 6: +8 ATK + Shield.
 52. **Crowd Lottery** | 1🔥 | Roll d6. Gain that many Embers. (Average 3.5 — sometimes amazing, sometimes trash.)
+
+---
+
+## 🧠 BALATRO-STYLE COMBO SYSTEMS — "Holy Shit" Moments
+
+**What makes Balatro addictive:** You don't just play good cards. You BREAK THE GAME. You find interactions the designer maybe didn't intend. You see numbers go from 200 to 2,000 to 200,000. You tell your friends "dude I found this insane combo."
+
+**What Vestibule is missing:** Riff Chains are nice but they're LINEAR (×1.78 per chain). There's no exponential scaling. No "I cracked the code" moment. No reason to screenshot your run and post it.
+
+### COMBO SYSTEM 1: ECHO / REPLAY
+Cards that replay previous cards. Stack echoes = exponential.
+- **Echo Pedal** | 1🔥 | Replay the last card you played this strike (for free).
+- **Loop Station** | 2🔥 | Replay the last TWO cards played this strike.
+- **Infinite Sustain** (Rare) | 3🔥 | Every card played this strike triggers TWICE.
+- THE COMBO: Play buff → Echo → Echo = buff fires 3 times. Play ×3 ATK → Echo = ×9 ATK.
+
+### COMBO SYSTEM 2: COPY + DUPLICATE
+Cards that create copies of other cards. Copy the copier = exponential.
+- **Bootleg Tape** | 1🔥 | Add a copy of target hand card to your hand (temporary, gone after strike).
+- **Pirate Press** | 2🔥 | Add 2 copies of a random card from your discard pile to your hand.
+- **Mirror Rig** (Mythic) | 3🔥 | All cards in hand are treated as copies of the BEST card in hand.
+- THE COMBO: Bootleg a Bootleg = 3 copies. Bootleg an Echo Pedal = replay everything. Bootleg a ×3 ATK = multiple ×3 buffs.
+
+### COMBO SYSTEM 3: MULTIPLIER STACKING
+Currently chain mult caps at ×6.66. But what if cards could MULTIPLY the multiplier?
+- **Overdrive Pedal** | 2🔥 | Strike multiplier ×1.5 (stacks multiplicatively, not additively).
+- **Gain Staging** | 1🔥 | If strike mult is already above ×2, add another ×1.5.
+- **Feedback Loop v2** | 0🔥 | FREE. Strike mult += number of RIFF cards played ÷ 10.
+- THE COMBO: Chain (×1.78) → Overdrive (×2.67) → Chain again (×4.75) → Gain Staging (×7.13). One strike doing 7× damage.
+
+### COMBO SYSTEM 4: CORRUPTION AS POWER SOURCE
+High corruption should feel DANGEROUS but GODLIKE, not just scary.
+- **Necrotic Amp** | 0🔥 | All +1 ATK per 20% corruption (at 100% = +5 each).
+- **Possession** already gives +3 ATK all at 100%.
+- **Dark Crescendo** | 0🔥 | FREE. If corruption ≥80%, TRIPLE your strike multiplier.
+- **Embrace the Void** | 0🔥 | FREE. Set corruption to 100%. All members gain +10 ATK. Cannot be healed.
+- THE COMBO: Dial to Eleven (corruption +10%) × 5 cards → hit 100% → Possession (+3 all) → Necrotic Amp (+5 all) → Dark Crescendo (×3 mult) → single strike = 500+ damage. But you're at 100% corruption so one wrong move = death.
+
+### COMBO SYSTEM 5: SACRIFICE LOOP
+Kill your own members for power, bring them back, do it again.
+- **Blood Offering** | 2🔥 | Kill target member. All other members gain their ATK.
+- **Carrion Call** | 1🔥 | Revive stoned member at 1 HP with +5 ATK. Corruption +20%.
+- **Phoenix Riff** | 3🔥 | Revive ALL stoned members at full HP. They all gain +3 ATK permanently.
+- THE COMBO: Buff one member to 30 ATK → Blood Offering (kill them, +30 to everyone else) → Carrion Call (revive at 1 HP with +5 bonus = 35 ATK now) → do it again next strike. Each cycle your band gets stronger.
+
+### COMBO SYSTEM 6: EMBER OVERFLOW
+What if gaining embers past max DID something instead of wasting?
+- Overflow embers convert to direct boss damage (1 ember = 2 damage)
+- OR: overflow embers become temporary +ATK for all members
+- THE COMBO: Stack ember generation + max ember artifacts → play 5 ember cards in one strike → overflow 15 embers → 30 direct damage + your normal strike. Ember decks become a DAMAGE strategy, not just resource management.
+
+### COMBO SYSTEM 7: THE MYTHIC INTERACTIONS
+Pre-designed "secret" combos that are extremely rare to pull off:
+- **Possessed Performance (×3) + Encore (2× attack) + Chain (×1.78) + Wailing Guitar (×2 first strike)** = single member does 3×2×1.78×2 = **21.4× their ATK**. A 10 ATK member deals 214 damage.
+- **Full CORRUPT band (5 members) + 100% corruption + Necrotic Amp + Possession** = each member has +8 bonus ATK. Five 15-ATK members = 75 base damage × multipliers.
+- **Echo Pedal + Bootleg Tape + Possessed Performance** = ×3 ATK fires 3 times = ×27 ATK on one member. One member with 10 base ATK hits for 270.
+- **Meltdown (spend all embers as damage) + max embers 8 + ember overflow** = 24 direct + 8 overflow × 2 = 40 bonus damage on top of normal strike.
+
+### THE DOPAMINE LOOP
+1. Player discovers a 2-card combo (easy, happens naturally): "oh cool"
+2. Player discovers a 3-card combo (moderate, requires deck building): "wait that's sick"
+3. Player discovers a 4-card combo (rare, requires specific artifacts + cards): "HOLY SHIT"
+4. Player discovers a 5+ card combo (mythic, once-in-50-runs): screenshots, tells friends, posts online
+5. Player comes back to chase the next mythic combo
+
+**Each combo tier should roughly 3× the damage of the previous tier.**
