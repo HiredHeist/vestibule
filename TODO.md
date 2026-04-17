@@ -1,9 +1,9 @@
 # VESTIBULE — TODO & STATUS
 
-**Latest commit:** 75e190b (30 new cards + 5 decks + calibrated boss HP)
-**Sim version:** v19.1 (5 decks calibrated: 10%/8%/7%/6%/5%)
-**App.jsx:** ~8,500 lines
-**Last doc refresh:** post-75e190b
+**Latest commit:** 2b94c35 (Pyromaniac trigger + recalibrated HP scales)
+**Sim version:** v19.1 (5 decks recalibrated post-card-rewrites)
+**App.jsx:** ~8,530 lines
+**Last doc refresh:** post-2b94c35
 
 > 🔒 **DOC RULE:** Every commit that changes code MUST update TODO.md (and CLAUDE.md if rules/architecture change) in the SAME commit. No exceptions. Stale docs = wasted sessions re-discovering what's done.
 
@@ -11,20 +11,14 @@
 
 ---
 
-## 🔴 UNVERIFIED — confirm before building on top
+## 🔴 UNVERIFIED — playtest needed
 
 - [ ] **30 new cards** — playtest each in alternate decks, verify apply logic + floats + logs
-- [ ] **Deck selection UI** — verify all 5 decks appear, unlock gates work, deck manifests build correctly
-- [ ] **Per-deck boss HP** — verify hpScale applies correctly to all fights (regular + boss + WTH + Lucifer)
-- [ ] **Echo Pedal / Riff Thief** — these replay last card but current impl only logs, doesn't actually replay card effect (needs recursive applyCard)
-- [ ] **Slow Burn** — +1 ember per strike for 2 strikes needs fight-state tracking (not yet wired)
-- [ ] **Venom Riff DOT** — boss DOT per strike needs fight-state tracking (not yet wired)
-- [ ] **Pyromaniac** — "spend all embers = +3 ATK all" trigger needs end-of-card-play detection
-- [ ] **Amp Feedback** — "next RIFF costs -1" needs state tracking like shredder discount
-- [ ] **P5 passive desc** — references "Sound Wall +4 dmg" but Sound Wall is now +1 ATK perm
-- [ ] **Cold open splash** — clear localStorage, hard reload, confirm splash fires on first boot (shipped in 51f819e)
+- [ ] **Deck selection UI** — verify all 5 decks appear on menu, unlock gates work correctly
+- [ ] **Per-deck boss HP** — verify hpScale applies to ALL fight types (regular, boss, WTH, Lucifer phases)
+- [ ] **Deck = 69** — verify all 5 decks build at exactly 69 cards in-game
+- [ ] **Cold open splash** — clear localStorage, hard reload, confirm splash fires on first boot
 - [ ] **Weed leaf PNG** — spot-check it renders everywhere 🌿 used to
-- [ ] **Deck = 69** — verify all 5 decks build at exactly 69 cards
 
 ---
 
@@ -55,6 +49,27 @@
 - [x] Per-deck HP scaling via hpScale factor
 - [x] Lucifer fix: was unkillable (hardcoded HP bypassed override), now 100K HP
 - [x] 41% of arrivals beat Lucifer at 100K (reaching him is an achievement)
+
+### Card Math Cleanup (no more weird division)
+- [x] Death Riff: 60×(1-corr/100) dmg → ALL +2 ATK perm, +10% corruption
+- [x] Feedback Loop: corr÷2 dmg → +2 ATK perm (+4 at ≥50% corruption)
+- [x] Dark Tuning: corr÷12 → 2 random +1 perm (3 at ≥70% corruption)
+- [x] Amp the Static: corr÷12 → +2 temp ATK (+4 at ≥50% corruption)
+- [x] Seance: corr÷4 heal → heal 3 (heal 6 at ≥50% corruption)
+- [x] Feedback Scream: HP loss based → +4 ATK perm, -2 HP
+- [x] Possession Riff: corr÷10 → +20 ATK this strike, +10% corruption
+- [x] Venom Riff: DOT tracking → +3 ATK perm, +5% corruption
+
+### State Tracking + Polish
+- [x] Echo Pedal / Riff Thief: adds card copy to hand for free play
+- [x] Slow Burn: slowBurnStrikes per-strike ember tracking
+- [x] Amp Feedback: ampFeedbackDiscount, next RIFF costs -1
+- [x] Pyromaniac: spend all embers = +3 ATK all at strike time
+- [x] Per-fight state reset (slowBurn, ampFeedback, pyromaniac)
+- [x] Deck unlock achievements (beat_standard, beat_shredder, etc.)
+- [x] P5 passive description updated for new Sound Wall/Heavy Riff mechanics
+- [x] Scratch files removed (7 files, -2,704 lines)
+- [x] .gitignore updated for sim scratch patterns
 
 ---
 
@@ -210,62 +225,33 @@ Ranked by ship-impact per line of code:
 
 ---
 
-## SIM DATA (v19.1, 10K Bronze)
+## SIM DATA (post-rewrite calibration, 5K per deck)
 
-| Stake | Win Rate | Avg Fight |
-|-------|----------|-----------|
-| Bronze | 9.67% | 18.81/26 |
-| Silver | 9.96% | 15.64/26 |
-| Gold | 9.06% | 14.87/26 |
-| Obsidian | 9.60% | 17.03/26 |
-| Blood | 7.06% | 7.74/26 |
-| Demonic | 0.38% | 1.66/26 |
+| Deck | hpScale | Win Rate | Target |
+|------|---------|----------|--------|
+| ⛧ Standard | 0.74 | 10.60% | 10% |
+| 🎸 Shredder | 0.79 | 8.06% | 8% |
+| 💀 Ritualist | 0.81 | 7.48% | 7% |
+| 🔧 Engineer | 0.85 | 5.52% | 6% |
+| 🛡️ Survivor | 0.88 | 4.68% | 5% |
 
-### Survival Curve (Bronze)
-- C1: 9.0% deaths (healthy)
-- C2–C4: <1% each
-- C5: 2.6%
-- C6: 13.9% (the wall)
-- C7: 30.3%
-- C8–9: steep ramp to Lucifer
-
-### Card Balance
-All 69 starter cards SOLID or STRONG. No dead cards.
-Lowest: Smoke Break 1.99/g, Setlist 1.96/g.
-Record Deal (0.20/g) is a boss mechanic, not player card.
+### Card Design Rules (established this session)
+- Permanent ATK buffs > direct damage (creates member attachment, compounds, scales)
+- No division math in card effects (use thresholds: ≥40%, ≥50%, ≥70%)
+- Every card does ONE thing simply
+- Ember generation needs REAL costs (corruption, HP, tempo)
+- 420 (stash cap, card height) and 69 (deck size) are sacred numbers
 
 ---
 
-## 🃏 CARD RETHINK (review CARD_IDEAS.md)
+## 🃏 CARD RETHINK — MOSTLY ADDRESSED
 
-**Core problem:** Ember cards dominate. Playing "generate embers → spend embers" is the only viable strategy. Ember generation has zero cost — Tapped Out is literally free money.
+**Status:** 30 new cards shipped, 8 cards rewritten to remove math, perm-buff philosophy established. Ember cards now have real costs (Corruption Siphon +8% corr, Drain the Crowd -2 HP, Pyromaniac conditional).
 
-**Fix direction:** Ember generation needs REAL costs (HP, corruption, tempo, card disadvantage). Non-ember strategies need to be viable.
-
-### New Cards to Review (52 in CARD_IDEAS.md)
-- [ ] 12 RIFF cards — damage scaling, keyword synergy, combo rewards
-- [ ] 12 CORRUPT cards — high risk/reward, corruption-as-weapon, revival
-- [ ] 12 UTILITY cards — card advantage, positioning, flexibility
-- [ ] 8 EMBER cards — reworked with meaningful costs (HP, corruption, max ember loss, tempo)
-- [ ] 5 RITUAL cards — NEW TYPE: multi-turn setups, countdowns, delayed nukes
-- [ ] 3 GAMBLE cards — NEW TYPE: d6 RNG with big swings
-
-### Ember Economy Redesign
-- [ ] Audit current ember cards: Tapped Out, Power Tap, Static Charge, Groupie, Soundboard
-- [ ] Add costs to each: corruption tax, HP sacrifice, max ember shrink, or tempo delay
-- [ ] Test: "running out on strike 3 sucks" — generation must exist but feel like a CHOICE
-- [ ] Diminishing returns? First ember card per strike = full value, second = half?
-- [ ] Target: 9-10% Bronze win rate after changes
-
-### Weak Cards to Buff or Replace
-- [ ] Dial to Eleven (0.99/copy) — corruption cost too scary for +3 ATK
-- [ ] Setlist (0.99/copy) — niche, rarely worth the slot
-- [ ] Smoke Break (0.99/copy) — card loss too punishing for +3 embers
-
-### Potential New Card Types
-- [ ] RITUAL type — multi-turn investments (Summoning Circle, Blood Tithe, Doom Clock)
-- [ ] GAMBLE type — d6 rolls with exciting variance (Devil's Dice, Russian Roulette)
-- [ ] Should these be subtypes of existing types or standalone?
+### Remaining Ideas (from CARD_IDEAS.md)
+- [ ] RITUAL card type — multi-turn setups, countdowns, delayed nukes (not yet implemented)
+- [ ] EMBER OVERFLOW — excess embers convert to damage (not yet implemented)
+- [ ] MYTHIC INTERACTIONS — 4-5 card combos for ×50+ damage (partially via Echo Pedal chains)
 
 ---
 
