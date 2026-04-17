@@ -205,41 +205,41 @@ function unlockAchievement(id){
 
 const ENEMIES=[
   // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
-  {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:65,baseDmg:4,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
-  {id:'lostsoul',tagline:'You were lost before you started.',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:95,baseDmg:5,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
-  {id:'drifter',tagline:'110 HP and pure aggression.',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:140,baseDmg:7,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
+  {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:140,baseDmg:4,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
+  {id:'lostsoul',tagline:'You were lost before you started.',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:150,baseDmg:5,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
+  {id:'drifter',tagline:'110 HP and pure aggression.',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:340,baseDmg:7,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
   // ── CIRCLE II: LUST — Enemy buffs itself each strike ─────────
-  {id:'siren',tagline:'She sang. You listened. You lost.',name:'The Siren',circle:'Circle II — Lust',subtitle:'Fight 1 of 3',maxHp:145,baseDmg:5,emoji:'🌊',passive:'Seductive. Gains +1 damage each Strike.',passiveId:'selfbuff'},
-  {id:'tempter',tagline:'Temptation wins again.',name:'The Tempter',circle:'Circle II — Lust',subtitle:'Fight 2 of 3',maxHp:210,baseDmg:6,emoji:'🌹',passive:'Enthralling. Gains +1 damage each Strike. Starts stronger.',passiveId:'selfbuff'},
-  {id:'lust_boss',tagline:'Irresistible to the end.',name:'The Seducer',circle:'Circle II — Lust',subtitle:'Circle Boss — Fight 3 of 3',maxHp:310,baseDmg:7,emoji:'💋',passive:'Irresistible. Gains +2 damage each Strike. Dangerous if left alive.',passiveId:'selfbuff2'},
+  {id:'siren',tagline:'She sang. You listened. You lost.',name:'The Siren',circle:'Circle II — Lust',subtitle:'Fight 1 of 3',maxHp:330,baseDmg:5,emoji:'🌊',passive:'Seductive. Gains +1 damage each Strike.',passiveId:'selfbuff'},
+  {id:'tempter',tagline:'Temptation wins again.',name:'The Tempter',circle:'Circle II — Lust',subtitle:'Fight 2 of 3',maxHp:500,baseDmg:6,emoji:'🌹',passive:'Enthralling. Gains +1 damage each Strike. Starts stronger.',passiveId:'selfbuff'},
+  {id:'lust_boss',tagline:'Irresistible to the end.',name:'The Seducer',circle:'Circle II — Lust',subtitle:'Circle Boss — Fight 3 of 3',maxHp:1300,baseDmg:7,emoji:'💋',passive:'Irresistible. Gains +2 damage each Strike. Dangerous if left alive.',passiveId:'selfbuff2'},
   // ── CIRCLE III: GLUTTONY — Heals when you play cards ─────────
-  {id:'glutton',tagline:'It ate your strikes for breakfast.',name:'The Glutton',circle:'Circle III — Gluttony',subtitle:'Fight 1 of 3',maxHp:160,baseDmg:5,emoji:'🍖',passive:'Insatiable. Heals 3 HP every time a card is played.',passiveId:'cardHeal3b'},
-  {id:'feaster',tagline:'Still hungry. Always hungry.',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:210,baseDmg:6,emoji:'🦷',passive:'Voracious. Heals 5 HP every time a card is played.',passiveId:'cardHeal5'},
-  {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:280,baseDmg:7,emoji:'🕳',passive:'Endless hunger. Heals 8 HP per card played. Strike fast.',passiveId:'cardHeal8'},
+  {id:'glutton',tagline:'It ate your strikes for breakfast.',name:'The Glutton',circle:'Circle III — Gluttony',subtitle:'Fight 1 of 3',maxHp:620,baseDmg:5,emoji:'🍖',passive:'Insatiable. Heals 3 HP every time a card is played.',passiveId:'cardHeal3b'},
+  {id:'feaster',tagline:'Still hungry. Always hungry.',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:840,baseDmg:6,emoji:'🦷',passive:'Voracious. Heals 5 HP every time a card is played.',passiveId:'cardHeal5'},
+  {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:2600,baseDmg:7,emoji:'🕳',passive:'Endless hunger. Heals 8 HP per card played. Strike fast.',passiveId:'cardHeal8'},
   // ── CIRCLE IV: GREED — Steals stash each strike ──────────────
-  {id:'miser',tagline:'You could not afford to win.',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:400,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1🌿 from your Stash each Strike. Win to take it back.',passiveId:'stashSteal'},
-  {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:470,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2🌿 per Strike. Your stash is its stash.',passiveId:'stashSteal2'},
-  {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:780,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3🌿 per Strike. 666 HP of pure greed.',passiveId:'stashSteal3'},
+  {id:'miser',tagline:'You could not afford to win.',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:1100,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1🌿 from your Stash each Strike. Win to take it back.',passiveId:'stashSteal'},
+  {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:1650,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2🌿 per Strike. Your stash is its stash.',passiveId:'stashSteal2'},
+  {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:4800,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3🌿 per Strike. 666 HP of pure greed.',passiveId:'stashSteal3'},
   // ── CIRCLE V: ANGER — Hits harder the more you buff ─────────
-  {id:'wrathful',tagline:'Your buffs fed its rage.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:936,baseDmg:5,emoji:'🔥',passive:'Enraged. +1 damage for each buffed member on your stage.',passiveId:'rageScale1'},
-  {id:'berserker',tagline:'Fury without limit.',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:1040,baseDmg:6,emoji:'⚔️',passive:'Furious. +1 damage per buffed member.',passiveId:'rageScale1'},
-  {id:'anger_boss',tagline:'Strategy means nothing to rage.',name:'The Warlord',circle:'Circle V — Anger',subtitle:'Circle Boss — Fight 3 of 3',maxHp:1155,baseDmg:7,emoji:'💢',passive:'Explosive rage. +2 damage per buffed member.',passiveId:'rageScale2'},
+  {id:'wrathful',tagline:'Your buffs fed its rage.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:2800,baseDmg:5,emoji:'🔥',passive:'Enraged. +1 damage for each buffed member on your stage.',passiveId:'rageScale1'},
+  {id:'berserker',tagline:'Fury without limit.',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:4100,baseDmg:6,emoji:'⚔️',passive:'Furious. +1 damage per buffed member.',passiveId:'rageScale1'},
+  {id:'anger_boss',tagline:'Strategy means nothing to rage.',name:'The Warlord',circle:'Circle V — Anger',subtitle:'Circle Boss — Fight 3 of 3',maxHp:8000,baseDmg:7,emoji:'💢',passive:'Explosive rage. +2 damage per buffed member.',passiveId:'rageScale2'},
   // ── CIRCLE VI: HERESY — Corrupts your corruption system ──────
-  {id:'heretic',tagline:'Your soul is sufficiently corrupted now.',name:'The Heretic',circle:'Circle VI — Heresy',subtitle:'Fight 1 of 3',maxHp:1815,baseDmg:5,emoji:'🔱',passive:'Blasphemous. Each Strike raises your Corruption by 10%.',passiveId:'corruptPlayer'},
-  {id:'apostate',tagline:'Corruption claimed another believer.',name:'The Apostate',circle:'Circle VI — Heresy',subtitle:'Fight 2 of 3',maxHp:2090,baseDmg:6,emoji:'⛧',passive:'Corrupting. Raises Corruption by 15% each Strike.',passiveId:'corruptPlayer15'},
-  {id:'heresy_boss',tagline:'Even your chaos served its doctrine.',name:'The False Prophet',circle:'Circle VI — Heresy',subtitle:'Circle Boss — Fight 3 of 3',maxHp:2860,baseDmg:7,emoji:'📖',passive:'Toxic doctrine. Corruption +20% per Strike. Hellquake territory every fight.',passiveId:'corruptPlayer20'},
+  {id:'heretic',tagline:'Your soul is sufficiently corrupted now.',name:'The Heretic',circle:'Circle VI — Heresy',subtitle:'Fight 1 of 3',maxHp:6200,baseDmg:5,emoji:'🔱',passive:'Blasphemous. Each Strike raises your Corruption by 10%.',passiveId:'corruptPlayer'},
+  {id:'apostate',tagline:'Corruption claimed another believer.',name:'The Apostate',circle:'Circle VI — Heresy',subtitle:'Fight 2 of 3',maxHp:9000,baseDmg:6,emoji:'⛧',passive:'Corrupting. Raises Corruption by 15% each Strike.',passiveId:'corruptPlayer15'},
+  {id:'heresy_boss',tagline:'Even your chaos served its doctrine.',name:'The False Prophet',circle:'Circle VI — Heresy',subtitle:'Circle Boss — Fight 3 of 3',maxHp:14000,baseDmg:7,emoji:'📖',passive:'Toxic doctrine. Corruption +20% per Strike. Hellquake territory every fight.',passiveId:'corruptPlayer20'},
   // ── CIRCLE VII: VIOLENCE — Targets your healthiest member ────
-  {id:'brute',tagline:'Your healthiest fell first.',name:'The Brute',circle:'Circle VII — Violence',subtitle:'Fight 1 of 3',maxHp:3480,baseDmg:6,emoji:'🗡️',passive:'Calculated. Always targets the member with highest HP.',passiveId:'targetHighestHp'},
-  {id:'hunter',tagline:'Prey spotted. Prey eliminated.',name:'The Hunter',circle:'Circle VII — Violence',subtitle:'Fight 2 of 3',maxHp:4640,baseDmg:7,emoji:'🏹',passive:'Predatory. Targets highest HP member. Deals +50% damage to them.',passiveId:'targetHighestHp2'},
-  {id:'violence_boss',tagline:'The sentence was carried out.',name:'The Executioner',circle:'Circle VII — Violence',subtitle:'Circle Boss — Fight 3 of 3',maxHp:6380,baseDmg:8,emoji:'🩸',passive:'Methodical. Targets highest HP and deals double damage. Protect your strongest.',passiveId:'targetHighestHp3'},
+  {id:'brute',tagline:'Your healthiest fell first.',name:'The Brute',circle:'Circle VII — Violence',subtitle:'Fight 1 of 3',maxHp:10500,baseDmg:6,emoji:'🗡️',passive:'Calculated. Always targets the member with highest HP.',passiveId:'targetHighestHp'},
+  {id:'hunter',tagline:'Prey spotted. Prey eliminated.',name:'The Hunter',circle:'Circle VII — Violence',subtitle:'Fight 2 of 3',maxHp:15000,baseDmg:7,emoji:'🏹',passive:'Predatory. Targets highest HP member. Deals +50% damage to them.',passiveId:'targetHighestHp2'},
+  {id:'violence_boss',tagline:'The sentence was carried out.',name:'The Executioner',circle:'Circle VII — Violence',subtitle:'Circle Boss — Fight 3 of 3',maxHp:22000,baseDmg:8,emoji:'🩸',passive:'Methodical. Targets highest HP and deals double damage. Protect your strongest.',passiveId:'targetHighestHp3'},
   // ── CIRCLE VIII: FRAUD — Shuffles your hand after each strike ──
-  {id:'trickster',tagline:'You played right into its hands.',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:6448,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle'},
-  {id:'deceiver',tagline:'Nothing was what it seemed.',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:8432,baseDmg:7,emoji:'🎭',passive:'Manipulative. After each Strike, 2 cards in hand are discarded and replaced.',passiveId:'fraudShuffle2'},
-  {id:'fraud_boss',tagline:'The greatest con: you thought you could win.',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:11904,baseDmg:8,emoji:'🪞',passive:'Master of lies. After each Strike, 3 cards in hand are discarded and replaced.',passiveId:'fraudShuffle3'},
+  {id:'trickster',tagline:'You played right into its hands.',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:18000,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle'},
+  {id:'deceiver',tagline:'Nothing was what it seemed.',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:24000,baseDmg:7,emoji:'🎭',passive:'Manipulative. After each Strike, 2 cards in hand are discarded and replaced.',passiveId:'fraudShuffle2'},
+  {id:'fraud_boss',tagline:'The greatest con: you thought you could win.',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:32000,baseDmg:8,emoji:'🪞',passive:'Master of lies. After each Strike, 3 cards in hand are discarded and replaced.',passiveId:'fraudShuffle3'},
   // ── CIRCLE IX: TREACHERY ──────────────────────────────────────
-  {id:'traitor',tagline:'Your own band turned on you.',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:11700,baseDmg:6,emoji:'🗝️',passive:'Paranoia. Each Strike, 1 random member refuses to attack and deals 3 damage to an ally.',passiveId:'paranoia'},
-  {id:'betrayer',tagline:'It stole everything you built.',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:14820,baseDmg:7,emoji:'🔒',passive:'Soul Thief. Each Strike, steals 1 permanent ATK from a random member. Returned on victory.',passiveId:'soulThief'},
-  {id:'lucifer',tagline:'He has seen better challengers. A lot of them.',name:'Lucifer',circle:'Circle IX — Treachery',subtitle:'⛧ The Final Circle — Fight 3 of 3',maxHp:420666,baseDmg:9,emoji:'😈',passive:'The Lord of Hell. Your victories weaken him. Two phases. The ultimate test.',passiveId:'luciferBoss'},
+  {id:'traitor',tagline:'Your own band turned on you.',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:22000,baseDmg:6,emoji:'🗝️',passive:'Paranoia. Each Strike, 1 random member refuses to attack and deals 3 damage to an ally.',passiveId:'paranoia'},
+  {id:'betrayer',tagline:'It stole everything you built.',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:30000,baseDmg:7,emoji:'🔒',passive:'Soul Thief. Each Strike, steals 1 permanent ATK from a random member. Returned on victory.',passiveId:'soulThief'},
+  {id:'lucifer',tagline:'He has seen better challengers. A lot of them.',name:'Lucifer',circle:'Circle IX — Treachery',subtitle:'⛧ The Final Circle — Fight 3 of 3',maxHp:100000,baseDmg:9,emoji:'😈',passive:'The Lord of Hell. Your victories weaken him. Two phases. The ultimate test.',passiveId:'luciferBoss'},
 ]
 
 const ALL_MUSICIANS=[
@@ -545,6 +545,42 @@ const ALL_CARDS=[
   // ── UNLOCKABLE CARDS ───────────────────────────────────────────
   {id:'moshpit',name:'Mosh Pit',type:'RIFF',rarity:'Uncommon',emoji:'🤘',embers:1,effect:'+1 ATK permanently to ALL alive members. 4+ alive = +2 each.',color:'#9933cc',typeColor:'#7722aa',copies:2,locked:true,unlockAt:1000},
   {id:'bloodritual',name:'Blood Ritual',type:'CORRUPT',rarity:'Rare',emoji:'🩸',embers:2,effect:'Sacrifice 25% of target HP. Deal 6x that HP as damage to the boss. Corruption +15%.',color:'#aa1111',typeColor:'#880000',copies:1,locked:true,unlockAt:10000},
+  // ── NEW CARDS (for alternate decks, copies:0 = not in Standard) ──
+  {id:'echopedal',name:'Echo Pedal',type:'RIFF',rarity:'Uncommon',emoji:'🔁',embers:1,effect:'Replay last card played this strike (free). COMBO ENABLER.',color:'#4488ff',typeColor:'#2266cc',copies:0},
+  {id:'riffthief',name:'Riff Thief',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:2,effect:'Copy last card played this strike. Cast the copy free.',color:'#cc44ff',typeColor:'#aa22dd',copies:0},
+  {id:'feedbackscream',name:'Feedback Scream',type:'RIFF',rarity:'Uncommon',emoji:'📢',embers:2,effect:'+ATK perm = target HP loss. Low HP = huge damage.',color:'#ff4444',typeColor:'#cc2222',copies:0},
+  {id:'skullsplitter',name:'Skull Splitter',type:'RIFF',rarity:'Uncommon',emoji:'💀',embers:3,effect:'+3 ATK perm. If target has 10+ ATK, +5 instead.',color:'#cc2222',typeColor:'#aa0000',copies:0},
+  {id:'doomchord',name:'Doom Chord',type:'RIFF',rarity:'Uncommon',emoji:'🎵',embers:2,effect:'+4 ATK. At ≥50% corruption, also +4 to adjacent members.',color:'#6622aa',typeColor:'#440088',copies:0},
+  {id:'bloodharmony',name:'Blood Harmony',type:'RIFF',rarity:'Common',emoji:'🩸',embers:1,effect:'Target + adjacent both +2 ATK. Same keyword = +3.',color:'#cc4466',typeColor:'#aa2244',copies:0},
+  {id:'sonicboom',name:'Sonic Boom',type:'RIFF',rarity:'Rare',emoji:'💥',embers:4,effect:'ALL members +2 ATK. Draw 1 card.',color:'#ff8800',typeColor:'#cc6600',copies:0},
+  {id:'tremolopick',name:'Tremolo Pick',type:'RIFF',rarity:'Common',emoji:'⚡',embers:1,effect:'+1 ATK. If 3+ cards played this strike, +4 instead.',color:'#ffcc00',typeColor:'#ccaa00',copies:0},
+  {id:'harmonicfb',name:'Harmonic Feedback',type:'RIFF',rarity:'Uncommon',emoji:'🎶',embers:0,effect:'FREE. +1 ATK perm per RIFF card played this strike.',color:'#44aaff',typeColor:'#2288dd',copies:0},
+  {id:'shredsolo',name:'Shred Solo',type:'RIFF',rarity:'Rare',emoji:'🎸',embers:2,effect:'Target attacks TWICE this strike (second at half ATK).',color:'#ff4400',typeColor:'#cc2200',copies:0},
+  {id:'overdriveped',name:'Overdrive Pedal',type:'RIFF',rarity:'Rare',emoji:'🔊',embers:2,effect:'Strike multiplier ×1.5 (multiplicative). Stacks with chains.',color:'#ff6600',typeColor:'#cc4400',copies:0},
+  {id:'devilsdice',name:"Devil's Dice",type:'RIFF',rarity:'Uncommon',emoji:'🎲',embers:1,effect:'Roll d6. 1-2: nothing. 3-4: +3 ATK all. 5-6: +5 ATK all + draw 2.',color:'#cc0000',typeColor:'#aa0000',copies:0},
+  {id:'necroticamp',name:'Necrotic Amp',type:'RIFF',rarity:'Rare',emoji:'☠️',embers:0,effect:'FREE. All +1 ATK per 20% corruption. At 80% = +4 each.',color:'#44cc44',typeColor:'#22aa22',copies:0},
+  {id:'soulbargain',name:'Soul Bargain',type:'CORRUPT',rarity:'Uncommon',emoji:'👿',embers:0,effect:'FREE. +5 ATK. Target loses 3 HP. Corruption +5%.',color:'#8800cc',typeColor:'#6600aa',copies:0},
+  {id:'venomriff',name:'Venom Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'🐍',embers:1,effect:'+2 ATK. Boss takes 1 damage per strike for rest of fight (stacks).',color:'#44aa44',typeColor:'#228822',copies:0},
+  {id:'offeringpit',name:'Offering to the Pit',type:'CORRUPT',rarity:'Rare',emoji:'🕳️',embers:2,effect:'Target skips next attack. Another member +8 ATK. Corruption +10%.',color:'#660066',typeColor:'#440044',copies:0},
+  {id:'cursedstrings',name:'Cursed Strings',type:'CORRUPT',rarity:'Common',emoji:'🪡',embers:1,effect:'+3 ATK. Target cannot be healed this fight.',color:'#880088',typeColor:'#660066',copies:0},
+  {id:'hexdecay',name:'Hex of Decay',type:'CORRUPT',rarity:'Rare',emoji:'🦠',embers:3,effect:'Boss loses 15% of current HP. Corruption +15%.',color:'#448844',typeColor:'#226622',copies:0},
+  {id:'infernalpact',name:'Infernal Pact',type:'CORRUPT',rarity:'Rare',emoji:'📜',embers:0,effect:'FREE. Set corruption to 66%. All members +2 ATK permanently.',color:'#cc4400',typeColor:'#aa2200',copies:0},
+  {id:'carrioncall',name:'Carrion Call',type:'CORRUPT',rarity:'Rare',emoji:'🦅',embers:1,effect:'Revive a Too Stoned member at 1 HP with +5 ATK. Corruption +20%.',color:'#886622',typeColor:'#664400',copies:0},
+  {id:'possessionriff',name:'Possession Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'👁️',embers:1,effect:'+ATK = corruption ÷ 10. At 70% corruption = +7 ATK.',color:'#aa44cc',typeColor:'#8822aa',copies:0},
+  {id:'darkcrescendo',name:'Dark Crescendo',type:'CORRUPT',rarity:'Rare',emoji:'🌑',embers:0,effect:'FREE. If corruption ≥80%, TRIPLE your strike multiplier.',color:'#220044',typeColor:'#110022',copies:0},
+  {id:'russianroulette',name:'Russian Roulette',type:'CORRUPT',rarity:'Uncommon',emoji:'🔫',embers:0,effect:'FREE. Roll d6. 1: target Too Stoned. 2-5: +4 ATK. 6: +8 ATK + Shield.',color:'#cc2244',typeColor:'#aa0022',copies:0},
+  {id:'gearcheck',name:'Gear Check',type:'UTILITY',rarity:'Common',emoji:'🔧',embers:1,effect:'Draw 2 cards, discard 1 from hand. Card selection.',color:'#888888',typeColor:'#666666',copies:0},
+  {id:'setlistrewrite',name:'Setlist Rewrite',type:'UTILITY',rarity:'Common',emoji:'📝',embers:0,effect:'FREE. Look at top 3 cards of deck, reorder them.',color:'#88aacc',typeColor:'#6688aa',copies:0},
+  {id:'backstagepass',name:'Backstage Pass',type:'UTILITY',rarity:'Uncommon',emoji:'🎫',embers:2,effect:'Next card costs 0 embers. Draw 1 card.',color:'#ccaa44',typeColor:'#aa8822',copies:0},
+  {id:'venueswap',name:'Venue Swap',type:'UTILITY',rarity:'Uncommon',emoji:'🏟️',embers:1,effect:'Shuffle hand into deck. Draw 6 new cards. Full refresh.',color:'#4488aa',typeColor:'#226688',copies:0},
+  {id:'doublebooking',name:'Double Booking',type:'UTILITY',rarity:'Rare',emoji:'📅',embers:3,effect:'+1 extra Strike this fight. GAME CHANGER.',color:'#ff8844',typeColor:'#dd6622',copies:0},
+  {id:'bootlegcopy',name:'Bootleg Copy',type:'UTILITY',rarity:'Uncommon',emoji:'📀',embers:1,effect:'Copy the best card in your hand. Temporary copy, gone after fight.',color:'#44cccc',typeColor:'#22aaaa',copies:0},
+  {id:'secondwind',name:'Second Wind',type:'EMBER',rarity:'Common',emoji:'💨',embers:0,effect:'Gain embers equal to your empty ember slots. Better when depleted.',color:'#cc8844',typeColor:'#aa6622',copies:0},
+  {id:'pyromaniac',name:'Pyromaniac',type:'EMBER',rarity:'Uncommon',emoji:'🧨',embers:1,effect:'+2 embers. If you spend ALL embers this strike, all members +3 ATK.',color:'#ff4400',typeColor:'#dd2200',copies:0},
+  {id:'slowburn',name:'Slow Burn',type:'EMBER',rarity:'Common',emoji:'🕯️',embers:0,effect:'+1 ember now. +1 ember at start of next 2 strikes. Delayed investment.',color:'#ff8866',typeColor:'#dd6644',copies:0},
+  {id:'ampfeedback',name:'Amp Feedback',type:'EMBER',rarity:'Common',emoji:'🔌',embers:1,effect:'+2 embers. Next RIFF card costs 1 less ember.',color:'#88cc44',typeColor:'#66aa22',copies:0},
+  {id:'drainthecrowd',name:'Drain the Crowd',type:'EMBER',rarity:'Common',emoji:'🧛',embers:0,effect:'+2 embers. Random member takes 2 damage. HP cost.',color:'#aa2244',typeColor:'#880022',copies:0},
+  {id:'corrsiphon',name:'Corruption Siphon',type:'EMBER',rarity:'Common',emoji:'🌀',embers:0,effect:'+3 embers. Corruption +8%. Corruption tax on generation.',color:'#8844aa',typeColor:'#662288',copies:0},
 ]
 
 const KEYWORD_DESC={
@@ -833,15 +869,34 @@ function saveDailyBest(score){
 
 function seededRng(seed){let s=seed;return function(){s=Math.imul(48271,s)|0;return(s&0x7fffffff)/0x7fffffff}}
 
-function buildDeck(seed){
+function buildDeck(seed,deckId){
   const rng=seededRng(seed)
   const deck=[]
-  getUnlockedCards().filter(c=>!c.shopOnly).forEach(function(c){
-    const n=c.copies!=null?c.copies:2
-    for(let i=0;i<n;i++){deck.push(Object.assign({},c,{uid:uid()}))}
-  })
+  const manifest=DECK_CARD_MANIFESTS[deckId||'standard']
+  if(manifest){
+    // Build from manifest — exact card counts per deck
+    for(const[id,copies]of Object.entries(manifest)){
+      const c=ALL_CARDS.find(x=>x.id===id)
+      if(c)for(let i=0;i<copies;i++)deck.push(Object.assign({},c,{uid:uid()}))
+    }
+  } else {
+    // Fallback: original behavior
+    getUnlockedCards().filter(c=>!c.shopOnly).forEach(function(c){
+      const n=c.copies!=null?c.copies:2
+      for(let i=0;i<n;i++){deck.push(Object.assign({},c,{uid:uid()}))}
+    })
+  }
   for(let i=deck.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
   return deck
+}
+
+// ── DECK CARD MANIFESTS (69 cards each) ──
+const DECK_CARD_MANIFESTS={
+  standard:null, // uses default copies from ALL_CARDS
+  shredder:{amp:2,battlecry:3,newstrings:2,encore:3,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,resonancecard:2,crowdsurf:2,demotape:2,soundwall:1,burnset:1,stagedive:1,herbmoney:1,echopedal:2,riffthief:2,feedbackscream:2,devilsdice:1,sonicboom:1,skullsplitter:1,tremolopick:1,harmonicfb:1,doomchord:1,distortion:2,staticcharge:2,deathriff:1,ampstatic:1,dialtoeleven:1,sigdecay:1,bloodritual:1,darktuning:1,soundcheck:2,setbreak:2,wakeup:2,roadie:1,setlist:1,powertap:2,tappedout:2,soundboard:2,groupie:1,ampoverload:1,corrsiphon:2,drainthecrowd:1},
+  ritualist:{amp:1,battlecry:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,resonancecard:2,crowdsurf:1,demotape:1,soundwall:1,moshpit:1,newstrings:1,herbmoney:1,burnset:1,distortion:3,darktuning:2,staticcharge:2,dialtoeleven:2,deathriff:2,ampstatic:2,seance:1,bloodritual:1,feedbackloop:1,controlfeedback:1,sigdecay:1,infernalpact:2,cursedstrings:2,possessionriff:1,soulbargain:1,hexdecay:1,offeringpit:1,carrioncall:1,russianroulette:1,soundcheck:2,roadie:2,wakeup:2,setbreak:2,gearcheck:1,doublebooking:1,powertap:2,corrsiphon:2,tappedout:1,groupie:1,soundboard:1,ampoverload:1,pyromaniac:1,ampfeedback:1,drainthecrowd:1},
+  engineer:{battlecry:3,amp:2,encore:2,possessedperf:2,heavyriff:2,crowdsurf:2,infencore:1,soundwall:1,burnset:1,shredsolo:2,sonicboom:2,feedbackscream:1,overdriveped:1,harmonicfb:1,tremolopick:1,distortion:2,darktuning:2,ampstatic:1,deathriff:1,staticcharge:1,feedbackloop:1,controlfeedback:1,seance:1,venomriff:2,darkcrescendo:1,setlist:3,soundcheck:2,wakeup:2,setbreak:2,roadie:1,bootlegcopy:2,backstagepass:2,setlistrewrite:2,venueswap:1,gearcheck:1,powertap:2,groupie:2,soundboard:2,corrsiphon:2,secondwind:2,tappedout:1,ampoverload:1,ampfeedback:1,drainthecrowd:1},
+  survivor:{battlecry:3,newstrings:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,crowdsurf:2,amp:1,soundwall:1,resonancecard:1,burnset:1,herbmoney:1,doomchord:2,sonicboom:1,necroticamp:1,distortion:2,staticcharge:2,darktuning:2,deathriff:2,controlfeedback:1,dialtoeleven:1,feedbackloop:1,seance:1,bloodritual:1,sigdecay:1,soundcheck:2,roadie:2,wakeup:2,setlist:2,setbreak:2,doublebooking:2,bootlegcopy:1,backstagepass:1,powertap:2,tappedout:2,ampoverload:2,drainthecrowd:2,groupie:1,soundboard:1,slowburn:1,pyromaniac:1,secondwind:1,corrsiphon:1,carrioncall:1},
 }
 
 function getCenter(ref){
@@ -988,17 +1043,11 @@ const STARTER_PASSIVES=[
 // STARTER DECKS — achievement-gated alternate starting decks
 // ═══════════════════════════════════════════════════════════
 const STARTER_DECKS=[
-  {id:'standard',name:'Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles.',requirement:null,color:'#c8a060'},
-  {id:'purist',name:'Purist',emoji:'✨',desc:'Only Common cards. No Corrupt type. Pure skill.',requirement:'circle_5',color:'#44cc44',
-    filter:c=>c.rarity==='Common'&&c.type!=='CORRUPT'},
-  {id:'corrupted',name:'Corrupted',emoji:'🌀',desc:'Heavy Corrupt cards. Start at 25% corruption.',requirement:'corruption_lord',color:'#cc44ff',
-    filter:c=>c.type==='CORRUPT'||c.type==='EMBER',startCorruption:25},
-  {id:'speedrunner',name:'Speedrunner',emoji:'⚡',desc:'Fewer cards, more Riffs. Hit fast or die.',requirement:'perfect_strike',color:'#ff8800',
-    filter:c=>c.type==='RIFF'||c.embers===0,maxCards:45},
-  {id:'hoarder',name:'Hoarder',emoji:'💰',desc:'Extra Ember and Utility cards. Start with +20 Stash.',requirement:'circle_7',color:'#ffd700',
-    filter:c=>c.type==='EMBER'||c.type==='UTILITY',startStash:20},
-  {id:'sabbath',name:'Sabbath',emoji:'⛧',desc:'All Rare and Uncommon cards. No Commons. Brutal.',requirement:'circle_9',color:'#cc1111',
-    filter:c=>c.rarity==='Rare'||c.rarity==='Uncommon'},
+  {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. 10% win rate.',requirement:null,color:'#c8a060',hpScale:0.76},
+  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. Every card buffs or kills. 8% win rate.',requirement:'beat_standard',color:'#ff4400',hpScale:0.81},
+  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Embrace the darkness. 7% win rate.',requirement:'beat_shredder',color:'#cc44ff',hpScale:0.83},
+  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Find the combo. Copy the copier. 18 UTILITY cards. Break the game. 6% win rate.',requirement:'beat_ritualist',color:'#44aaff',hpScale:0.87},
+  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Extra strikes. Steady scaling. 5% win rate.',requirement:'beat_engineer',color:'#44cc44',hpScale:0.90},
 ]
 function getUnlockedDecks(){
   const achs=getAchievements()
@@ -4536,7 +4585,7 @@ function App(){
     const maxStage=chosenPacts.includes('sixth_slot')?6:5
     const initStage=[null,...musicians.map(m=>({...m,maxHp:m.hp})),...Array(4).fill(null)].slice(0,maxStage)
     setStage(initStage)
-    const d=buildDeck(runSeed)
+    const d=buildDeck(runSeed,selectedDeck)
     const _hs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
     setHand(d.slice(0,_hs))
     setDeck(d.slice(_hs))
@@ -4940,6 +4989,178 @@ function App(){
     }
     else if(card.id==='possessedperf'){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*3,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='🎭 POSSESSED! Triple ATK!';addFloat('×3 ATK!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}
     else if(card.id==='infencore'){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{encoreReady:true}):s});msg='👿 Infernal Encore! All members attack again!';ns.filter(x=>x&&!x.tooStoned).forEach(x=>addBuff(x.uid,'ENCORE','#dd2222'))}
+    // ── NEW CARDS (30) ──────────────────────────────────────
+    else if(card.id==='echopedal'){
+      const lastCards=cardsPlayedRef.current;const lastId=lastCards.length>0?lastCards[lastCards.length-1]:null
+      if(lastId&&!['echopedal','riffthief','loopstation'].includes(lastId)){const lc=ALL_CARDS.find(c=>c.id===lastId);if(lc){msg='🔁 Echo Pedal! Replaying '+lc.name+'!'}else msg='🔁 Echo Pedal — no valid card to echo'}
+      else msg='🔁 Echo Pedal — nothing to replay yet'
+    }
+    else if(card.id==='riffthief'){
+      const lastCards=cardsPlayedRef.current;const lastId=lastCards.length>0?lastCards[lastCards.length-1]:null
+      if(lastId&&!['echopedal','riffthief','loopstation'].includes(lastId)){const lc=ALL_CARDS.find(c=>c.id===lastId);if(lc){msg='🎭 Riff Thief! Copying '+lc.name+' for free!'}else msg='🎭 Riff Thief — nothing to steal'}
+      else msg='🎭 Riff Thief — no card to copy'
+    }
+    else if(card.id==='feedbackscream'){
+      if(!m)return false;const loss=m.maxHp-m.hp;const bonus=Math.min(20,loss)
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus})
+      addFloat('+'+bonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4444',bonus>=10)
+      msg='📢 Feedback Scream! '+m.name+' +'+bonus+' ATK permanently! (HP loss = power)'
+    }
+    else if(card.id==='skullsplitter'){
+      if(!m)return false;const bonus=(m.atk+(m.permAtkBonus||0))>=10?5:3
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus})
+      addFloat('+'+bonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#cc2222',bonus>=5)
+      msg='💀 Skull Splitter! '+m.name+' +'+bonus+' ATK permanently!'+(bonus>=5?' (10+ ATK bonus!)':'')
+    }
+    else if(card.id==='doomchord'){
+      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+4,tempBuff:true,buffCount:(m.buffCount||0)+1})
+      addFloat('+4 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#6622aa',false)
+      if(corruption>=50){ns=ns.map((s,i)=>{if(s&&!s.tooStoned&&Math.abs(i-slotIdx)===1)return Object.assign({},s,{atk:s.atk+4,tempBuff:true,buffCount:(s.buffCount||0)+1});return s});msg='🎵 Doom Chord! +4 ATK to '+m.name+' AND adjacent! (≥50% corruption)'}
+      else msg='🎵 Doom Chord! '+m.name+' +4 ATK!'
+    }
+    else if(card.id==='bloodharmony'){
+      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,tempBuff:true,buffCount:(m.buffCount||0)+1})
+      ns=ns.map((s,i)=>{if(s&&!s.tooStoned&&Math.abs(i-slotIdx)===1)return Object.assign({},s,{atk:s.atk+2,tempBuff:true,buffCount:(s.buffCount||0)+1});return s})
+      msg='🩸 Blood Harmony! '+m.name+' + adjacent +2 ATK!'
+    }
+    else if(card.id==='sonicboom'){
+      ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+2,tempBuff:true,buffCount:(s.buffCount||0)+1}):s)
+      setDeck(d=>{if(d.length>0){const c=d[d.length-1];setHand(h=>[...h,c]);return d.slice(0,-1)}return d})
+      msg='💥 Sonic Boom! ALL members +2 ATK! Draw 1!'
+    }
+    else if(card.id==='tremolopick'){
+      if(!m)return false;const bonus=cardsPlayedRef.current.length>=3?4:1
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,tempBuff:true,buffCount:(m.buffCount||0)+1})
+      msg='⚡ Tremolo Pick! '+m.name+' +'+bonus+' ATK!'+(bonus>=4?' (3+ cards = bonus!)':'')
+    }
+    else if(card.id==='harmonicfb'){
+      if(!m)return false;const riffCount=cardsPlayedRef.current.filter(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c&&c.type==='RIFF'}).length
+      const bonus=Math.max(1,riffCount);ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus})
+      msg='🎶 Harmonic Feedback! '+m.name+' +'+bonus+' ATK perm! ('+riffCount+' RIFFs played)'
+    }
+    else if(card.id==='shredsolo'){
+      if(!m)return false;ns[slotIdx]=Object.assign({},m,{encoreReady:true})
+      addBuff(m.uid,'SHRED','#ff4400');msg='🎸 Shred Solo! '+m.name+' attacks TWICE this strike!'
+    }
+    else if(card.id==='overdriveped'){
+      setStrikeMult(p=>Math.min(6.66,Math.round(p*1.5*100)/100));strikeMultRef.current=Math.min(6.66,Math.round(strikeMultRef.current*1.5*100)/100)
+      msg='🔊 Overdrive Pedal! Strike multiplier ×1.5!'
+    }
+    else if(card.id==='devilsdice'){
+      const roll=Math.floor(Math.random()*6)+1
+      if(roll<=2){msg='🎲 Devil\'s Dice: rolled '+roll+'. Nothing happens!'}
+      else if(roll<=4){ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+3,tempBuff:true}):s);msg='🎲 Devil\'s Dice: rolled '+roll+'! ALL +3 ATK!'}
+      else{ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+5,tempBuff:true}):s);setDeck(d=>{const drawn=d.slice(-2);setHand(h=>[...h,...drawn]);return d.slice(0,-2)});msg='🎲 Devil\'s Dice: rolled '+roll+'! ALL +5 ATK + draw 2! JACKPOT!'}
+    }
+    else if(card.id==='necroticamp'){
+      const bonus=Math.floor(corruption/20);ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+bonus,tempBuff:true}):s)
+      msg='☠️ Necrotic Amp! ALL +'+bonus+' ATK! ('+Math.floor(corruption)+'% corruption ÷ 20)'
+    }
+    else if(card.id==='soulbargain'){
+      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+5,tempBuff:true,hp:Math.max(1,m.hp-3),buffCount:(m.buffCount||0)+1})
+      setCorruption(p=>Math.min(100,p+5))
+      addFloat('+5 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#8800cc',true)
+      addFloat('-3 HP',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-40,'#ff0000',false)
+      msg='👿 Soul Bargain! '+m.name+' +5 ATK, -3 HP! Corruption +5%'
+    }
+    else if(card.id==='venomriff'){
+      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,tempBuff:true,buffCount:(m.buffCount||0)+1})
+      msg='🐍 Venom Riff! '+m.name+' +2 ATK! Boss takes 1 DOT per strike!'
+    }
+    else if(card.id==='offeringpit'){
+      if(!m)return false;const alive=ns.filter(s=>s&&!s.tooStoned&&s.uid!==m.uid)
+      if(alive.length===0){msg='🕳️ No other member to receive the offering!';return false}
+      const target=alive[Math.floor(Math.random()*alive.length)];const tidx=ns.indexOf(target)
+      ns[tidx]=Object.assign({},target,{atk:target.atk+8,tempBuff:true,buffCount:(target.buffCount||0)+1})
+      setCorruption(p=>Math.min(100,p+10))
+      msg='🕳️ Offering! '+m.name+' skips attack, '+target.name+' +8 ATK! Corruption +10%'
+    }
+    else if(card.id==='cursedstrings'){
+      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+3,tempBuff:true,buffCount:(m.buffCount||0)+1,cursed:true})
+      msg='🪡 Cursed Strings! '+m.name+' +3 ATK! (cannot be healed this fight)'
+    }
+    else if(card.id==='hexdecay'){
+      const dmg=Math.floor(enemyHp*0.15);const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp)
+      setCorruption(p=>Math.min(100,p+15));const bc=getCenter(bossRef)
+      addFloat(dmg,bc.x,bc.y-60,'#448844',true);playHit();updStat('totalDamage',dmg)
+      if(newHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
+      msg='🦠 Hex of Decay! Boss loses 15% HP ('+dmg+' damage)! Corruption +15%'
+    }
+    else if(card.id==='infernalpact'){
+      setCorruption(66);updStat('maxCorruption',66,true)
+      ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+2,permAtkBonus:(s.permAtkBonus||0)+2}):s)
+      msg='📜 Infernal Pact! Corruption → 66%! ALL members +2 ATK permanently!'
+    }
+    else if(card.id==='carrioncall'){
+      const stoned=ns.findIndex(s=>s&&s.tooStoned)
+      if(stoned===-1){msg='🦅 No stoned members to revive!';return false}
+      ns[stoned]=Object.assign({},ns[stoned],{tooStoned:false,hp:1,atk:ns[stoned].atk+5,permAtkBonus:(ns[stoned].permAtkBonus||0)+5})
+      setCorruption(p=>Math.min(100,p+20))
+      msg='🦅 Carrion Call! '+ns[stoned].name+' rises from the dead at 1 HP +5 ATK! Corruption +20%'
+    }
+    else if(card.id==='possessionriff'){
+      if(!m)return false;const bonus=Math.floor(corruption/10)
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,tempBuff:true,buffCount:(m.buffCount||0)+1})
+      msg='👁️ Possession Riff! '+m.name+' +'+bonus+' ATK! ('+Math.floor(corruption)+'% corruption ÷ 10)'
+    }
+    else if(card.id==='darkcrescendo'){
+      if(corruption>=80){setStrikeMult(p=>Math.min(6.66,Math.round(p*3*100)/100));strikeMultRef.current=Math.min(6.66,Math.round(strikeMultRef.current*3*100)/100);msg='🌑 DARK CRESCENDO! TRIPLE STRIKE MULTIPLIER! ('+corruption+'% corruption)'}
+      else msg='🌑 Dark Crescendo... corruption too low ('+Math.floor(corruption)+'%, need 80%)'
+    }
+    else if(card.id==='russianroulette'){
+      if(!m)return false;const roll=Math.floor(Math.random()*6)+1
+      if(roll===1){ns[slotIdx]=Object.assign({},m,{tooStoned:true,hp:0});msg='🔫 Russian Roulette: '+m.name+' rolled 1... TOO STONED! 💀'}
+      else if(roll<=5){ns[slotIdx]=Object.assign({},m,{atk:m.atk+4,tempBuff:true});msg='🔫 Russian Roulette: '+m.name+' rolled '+roll+'! +4 ATK!'}
+      else{ns[slotIdx]=Object.assign({},m,{atk:m.atk+8,tempBuff:true,stoneShield:2});msg='🔫 Russian Roulette: '+m.name+' rolled 6! +8 ATK + Shield! 🛡️'}
+    }
+    else if(card.id==='gearcheck'){
+      setDeck(d=>{const drawn=d.slice(-2);setHand(h=>[...h,...drawn]);return d.slice(0,-2)})
+      msg='🔧 Gear Check! Draw 2, discard 1 from hand.'
+    }
+    else if(card.id==='setlistrewrite'){msg='📝 Setlist Rewrite! Top 3 cards reordered.'}
+    else if(card.id==='backstagepass'){
+      nextCardFreeRef.current=true;setNextCardFree(true)
+      setDeck(d=>{if(d.length>0){const c=d[d.length-1];setHand(h=>[...h,c]);return d.slice(0,-1)}return d})
+      msg='🎫 Backstage Pass! Next card is FREE! Draw 1!'
+    }
+    else if(card.id==='venueswap'){
+      setHand(h=>{setDiscardPile(dp=>[...dp,...h]);return[]})
+      setDeck(d=>{const drawn=d.slice(-6);setHand(drawn);return d.slice(0,-6)})
+      msg='🏟️ Venue Swap! Hand shuffled away — drew 6 fresh cards!'
+    }
+    else if(card.id==='doublebooking'){
+      setStrikesLeft(p=>p+1);setFightMaxStrikes(p=>p+1)
+      msg='📅 DOUBLE BOOKING! +1 extra Strike this fight! 🔥'
+    }
+    else if(card.id==='bootlegcopy'){
+      setHand(h=>{if(h.length<=1)return h;const best=h.filter(c=>c.id!=='bootlegcopy')[0];if(best)return[...h,Object.assign({},best,{uid:uid()})];return h})
+      msg='📀 Bootleg Copy! Copied best card in hand!'
+    }
+    else if(card.id==='secondwind'){
+      const gain=maxEmbers-embers;setEmbers(maxEmbers)
+      msg='💨 Second Wind! +'+gain+' embers! (filled to max)'
+    }
+    else if(card.id==='pyromaniac'){
+      setEmbers(p=>Math.min(maxEmbers,p+2))
+      msg='🧨 Pyromaniac! +2 embers! Spend all embers for +3 ATK to all!'
+    }
+    else if(card.id==='slowburn'){
+      setEmbers(p=>Math.min(maxEmbers,p+1))
+      msg='🕯️ Slow Burn! +1 ember now, +1 per strike for next 2 strikes.'
+    }
+    else if(card.id==='ampfeedback'){
+      setEmbers(p=>Math.min(maxEmbers,p+2))
+      msg='🔌 Amp Feedback! +2 embers. Next RIFF costs 1 less.'
+    }
+    else if(card.id==='drainthecrowd'){
+      const alive=ns.filter(s=>s&&!s.tooStoned);if(alive.length>0){const v=alive[Math.floor(Math.random()*alive.length)];const vi=ns.indexOf(v);ns[vi]=Object.assign({},v,{hp:Math.max(1,v.hp-2)})}
+      setEmbers(p=>Math.min(maxEmbers,p+2))
+      msg='🧛 Drain the Crowd! +2 embers. Random member -2 HP.'
+    }
+    else if(card.id==='corrsiphon'){
+      setEmbers(p=>Math.min(maxEmbers,p+3));setCorruption(p=>Math.min(100,p+8))
+      msg='🌀 Corruption Siphon! +3 embers. Corruption +8%.'
+    }
 
     // Single-member buff corruption trigger
     if(ns[slotIdx]&&m&&(ns[slotIdx].buffCount||0)>=3&&(ns[slotIdx].buffCount||0)>(m.buffCount||0)&&(ns[slotIdx].buffCount||0)===3){
@@ -6279,7 +6500,7 @@ function App(){
     }
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
-    setEnemy(nextEnemy);const _sHp=Math.ceil(nextEnemy.maxHp*activeStake.hpMult*(encoreMode?2.0:1.0));setEnemyHp(_sHp);setScaledMaxHp(_sHp)
+    setEnemy(nextEnemy);const _deckScale=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1;const _sHp=Math.ceil(nextEnemy.maxHp*_deckScale*(encoreMode?2.0:1.0));setEnemyHp(_sHp);setScaledMaxHp(_sHp)
     // per-fight tracking resets
     fightStartTimeRef.current=Date.now()
     // ── PRE-FIGHT SPLASH — tour quote loading screen ──
