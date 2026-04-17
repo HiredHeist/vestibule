@@ -359,7 +359,7 @@ function applyCard(card,gs,enemy){
     case 'possessedperf':alive.forEach(m=>{m.tempAtkBonus+=(m.atk*2);m.atk*=3});break;
     case 'stagedive':gs._directDmg=(gs._directDmg||0)+target.hp;break;
     case 'crowdsurf':{const b=gs.hand.length;target.atk+=b;target.permAtkBonus+=b;break}
-    case 'heavyriff':{const b=Math.max(1,target.permAtkBonus||0);target.atk+=b;target.permAtkBonus+=b;break}
+    case 'heavyriff':{const b=Math.min(20,Math.ceil((target.atk+(target.permAtkBonus||0)+(target.tempAtkBonus||0))/2));target.atk+=b;target.permAtkBonus+=b;break}
     case 'soundwall':alive.forEach(m=>{m.atk+=1;m.permAtkBonus+=1});break;
     case 'deathriff':gs._directDmg=(gs._directDmg||0)+Math.floor(60*(1-gs.corruption/100));gs.corruption=Math.min(100,gs.corruption+10);break;
     case 'moshpit':{const b=alive.length>=4?2:1;alive.forEach(m=>{m.atk+=b;m.permAtkBonus+=b});break}

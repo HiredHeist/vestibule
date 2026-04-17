@@ -2,9 +2,12 @@
 // vestibule-sim.js v19.1 — Expert AI Simulator for Vestibule
 // Session 16 — +Immediate draws, 15-card loop — +Events, Corruption Thresholds, Blood Oath: ALL mechanics (artifacts, passives, loot, combos, multiplier, hellquake)
 // Usage: node vestibule-sim.js [numGames] [stake]  (default 5000 bronze)
+import{readFileSync}from'fs'
 
 const NUM_GAMES=parseInt(process.argv[2])||5000;
 const STAKE_ID=process.argv[3]||'bronze';
+const HP_OVERRIDE=parseFloat(process.argv[4])||0;
+let BOSS_HP_OVERRIDE=null;try{BOSS_HP_OVERRIDE=JSON.parse(readFileSync('/tmp/boss_hp_override.json','utf8'))}catch(e){}
 const STAKES={
   bronze:{id:'bronze',name:'Bronze',hpMult:1.30,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.0,mentorBonus:0},
   silver:{id:'silver',name:'Silver',hpMult:1.30,dmgAdd:2,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.5,mentorBonus:0.05},
@@ -14,6 +17,7 @@ const STAKES={
   demonic:{id:'demonic',name:'Demonic ⛧',hpMult:1.8,dmgAdd:4,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,scoreMult:4.0,mentorBonus:0.75}
 };
 const STAKE=STAKES[STAKE_ID]||STAKES.bronze;
+if(HP_OVERRIDE>0)STAKE.hpMult=HP_OVERRIDE;
 
 const ENEMIES=[
   {id:'wanderer',name:'Wanderer',maxHp:65,baseDmg:4,passiveId:null},
@@ -353,9 +357,9 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
     case 'tappedout':return strikeNum<3?78:18;case 'ampoverload':return(gs._discardsLeft>0&&embers<=2)?81:5;
     case 'groupie':return embers<=3?62:28;
     case 'soundboard':return embers<=3?60:28;case 'setbreak':return embers<=2?52:14;
-    case 'soundwall':return 64;case 'heavyriff':return totalAtk>=10?62:33;case 'crowdsurf':return hand.length>=5?57:28;
+    case 'soundwall':return 70;case 'heavyriff':{const best=alive.reduce((a,b)=>(a.permAtkBonus||0)>(b.permAtkBonus||0)?a:b);return(best.permAtkBonus||0)>=3?78:55};case 'crowdsurf':return hand.length>=5?74:hand.length>=3?55:30;
     case 'deathriff':return corruption<50?52:18;case 'feedbackloop':return corruption>=40?57:18;
-    case 'herbmoney':return stash>=30?52:10;case 'goingbroke':return stash>=50?62:5;
+    case 'herbmoney':return stash>=10?65:0;case 'goingbroke':return stash>=50?62:5;
     case 'resonancecard':return highestAtk>=5?54:24;case 'ampstatic':return corruption>=30?50:10;
     case 'doubledown':return cardsPlayed===0&&embers>=3?74:28;
     case 'distortion':return 57;case 'dialtoeleven':return corruption<50?44:14;
@@ -368,7 +372,7 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
     case 'seance':{const h=Math.floor(corruption/4);return h>=10?60:h>=5?42:15}
     case 'demotape':return cardsPlayed>0?52:0;case 'burnset':return hand.length>=5?42:15;
     case 'remaster':return hand.length>=4?44:10;
-    case 'moshpit':{const al=alive.length;return al>=4?65:al>=3?50:30}
+    case 'moshpit':{const al=alive.length;return al>=4?74:al>=3?60:38}
     case 'bloodritual':{const hp=alive.reduce((a,b)=>a.hp>b.hp?a:b).hp;return hp>=8?58:30}
     default:return 5;
   }
@@ -394,9 +398,9 @@ function applyCardSim(card,gs,enemy){
     case 'controlfeedback':{gs.corruption=50;const ht=alive.reduce((a,b)=>a.hp/a.maxHp<b.hp/b.maxHp?a:b);ht.hp=ht.maxHp;break}
     case 'sigdecay':{if(gs.hand.length>0){const vi=rand(gs.hand.length);gs.discard.push(gs.hand.splice(vi,1)[0])};drawCards(gs,2);break}
     case 'feedbackloop':{let d=Math.floor(gs.corruption/(card.upgraded?1.5:2));if(gs._activeGenre==='BLACK_METAL')d=Math.round(d*1.25);gs._directDmg=(gs._directDmg||0)+d;break}
-    case 'soundwall':{const cn=Math.floor(gs.fightIndex/3)+1;const sw=cn<=3?5:cn<=6?8:12;gs._directDmg=(gs._directDmg||0)+sw+(gs.passives.some(p=>p.id==='p5')?4:0)+(card.upgraded?4:0);break}
-    case 'heavyriff':{const ta=alive.reduce((s,m)=>s+m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0),0);gs._directDmg=(gs._directDmg||0)+Math.floor(ta*(card.upgraded?0.6:0.5));break}
-    case 'crowdsurf':gs._directDmg=(gs._directDmg||0)+gs.hand.length*(card.upgraded?4:3);break;
+    case 'soundwall':{const b=1+(gs.passives.some(p=>p.id==='p5')?1:0)+(card.upgraded?1:0);alive.forEach(m=>{m.atk+=b;m.permAtkBonus=(m.permAtkBonus||0)+b});break}
+    case 'heavyriff':{const b=Math.min(20,Math.ceil((target.atk+(target.permAtkBonus||0)+(target.tempAtkBonus||0))/2))+(card.upgraded?2:0);target.atk+=b;target.permAtkBonus=(target.permAtkBonus||0)+b;break}
+    case 'crowdsurf':{const b=Math.max(1,gs.hand.length)+(card.upgraded?1:0);target.atk+=b;target.permAtkBonus=(target.permAtkBonus||0)+b;break}
     case 'deathriff':gs._directDmg=(gs._directDmg||0)+Math.floor((card.upgraded?80:60)*(1-gs.corruption/100));gs.corruption=Math.min(100,gs.corruption+10);break;
     case 'stagedive':gs._directDmg=(gs._directDmg||0)+target.hp;break;
     case 'overdrive':if(gs.corruption>=(card.upgraded?50:60))gs._overdriveActive=true;break;
@@ -416,12 +420,12 @@ function applyCardSim(card,gs,enemy){
     case 'resonancecard':target.tempAtkBonus=(target.tempAtkBonus||0)+Math.max(0,highestAtk-(target.atk+(target.permAtkBonus||0)+(target.tempAtkBonus||0)));break;
     case 'ampstatic':{let b=Math.floor(gs.corruption/12);if(gs._activeGenre==='BLACK_METAL')b=Math.round(b*1.25);target.tempAtkBonus=(target.tempAtkBonus||0)+b;break}
     case 'darktuning':{const bu=Math.floor(gs.corruption/12);for(let i=0;i<bu;i++){const t=pick(alive);t.atk+=1;t.permAtkBonus=(t.permAtkBonus||0)+1}break}
-    case 'herbmoney':{gs._directDmg=(gs._directDmg||0)+gs.stash;break}
+    case 'herbmoney':{if(gs.stash>=10){gs.stash-=10;target.atk+=3;target.permAtkBonus=(target.permAtkBonus||0)+3};break}
     case 'goingbroke':gs._directDmg=(gs._directDmg||0)+gs.stash;gs.stash=0;break;
     case 'burnset':drawCards(gs,1);break;
     case 'remaster':drawCards(gs,3);break;
     case 'seance':{const h=Math.max(1,Math.floor(gs.corruption/4));alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+h));break}
-    case 'moshpit':{gs._directDmg=(gs._directDmg||0)+alive.length*(card.upgraded?5:3);break}
+    case 'moshpit':{const b=alive.length>=4?2:1;alive.forEach(m=>{m.atk+=b;m.permAtkBonus=(m.permAtkBonus||0)+b});break}
     case 'bloodritual':{const t=alive.reduce((a,b)=>a.hp>b.hp?a:b);const sac=Math.floor(t.hp*0.25);t.hp-=sac;gs._directDmg=(gs._directDmg||0)+sac*(card.upgraded?8:6);gs.corruption=Math.min(100,gs.corruption+15);break}
     case 'sabbathsigil':gs.corruption=100;if(!gs._hellquakeFired){gs._hellquakeFired=true;rollHellquake(gs);TRACK.hellquakesFired=(TRACK.hellquakesFired||0)+1};alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));gs._directDmg=(gs._directDmg||0)+15;gs._consumeCard=true;break;
   }
@@ -448,7 +452,15 @@ function computeGenre(gs){
 function simFight(gs,phaseHp,luciferPhase){
   const fightIdx=gs.fightIndex
   const baseEnemy=gs._wthFight?{id:'ar_exec',name:'The Executive',maxHp:69000,baseDmg:8,passiveId:'corporate'}:ENEMIES[fightIdx]
-  const effectiveMaxHp=phaseHp||Math.ceil(baseEnemy.maxHp*STAKE.hpMult)
+  // Progressive HP scaling — per-boss calibrated values or circle-based fallback
+  let effectiveMaxHp
+  if(BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE[fightIdx]){
+    effectiveMaxHp=phaseHp||BOSS_HP_OVERRIDE[fightIdx]
+  } else {
+    const CIRCLE_HP_SCALE=[1.5, 3.5, 7.0, 14.0, 25.0, 40.0, 60.0, 85.0, 120.0]
+    const circleScale=CIRCLE_HP_SCALE[Math.min(8,Math.floor(fightIdx/3))]
+    effectiveMaxHp=phaseHp||Math.ceil(baseEnemy.maxHp*circleScale)
+  }
   const enemy={...baseEnemy,maxHp:effectiveMaxHp,_hp:effectiveMaxHp,_atkBuff:0}
   const circleNum=Math.floor(fightIdx/3)+1,isBoss=(fightIdx+1)%3===0
   gs.embers=gs.maxEmbers;gs._tappedOutNext=false;gs._drawNextStrike=0;gs._discardsLeft=MAX_DISCARDS;gs.stashStolen=0;gs._tripBuff=null;gs._corruptCardsGiven=[]
@@ -798,7 +810,7 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
 
     if(f===26){
       TRACK.luciferReached++
-      const actualHp=Math.ceil(Math.max(666,420666-8*51750)*STAKE.hpMult)
+      const actualHp=BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE[26]?BOSS_HP_OVERRIDE[26]:Math.ceil(Math.max(666,420666-8*51750)*STAKE.hpMult)
       const phase1Hp=Math.ceil(actualHp/2)
       const phase2Hp=actualHp-phase1Hp
       const r1=simFight(gs,phase1Hp,1)
@@ -906,9 +918,14 @@ console.log('SURVIVAL CURVE:');console.log('─'.repeat(80));
 const fightNames=ENEMIES.map(e=>e.name);
 for(let f=0;f<27;f++){const survPct=(surviveByFight[f]/NUM_GAMES*100).toFixed(1),deathPct=(deathsByFight[f]/NUM_GAMES*100).toFixed(1);
   const bar='█'.repeat(Math.round(surviveByFight[f]/NUM_GAMES*40)),circle=Math.floor(f/3)+1,boss=(f+1)%3===0?' ★':'  ';
-  const nameStr=`F${String(f).padStart(2,'0')} ${fightNames[f]}`.padEnd(22),hpStr=f===26?Math.ceil(6666*STAKE.hpMult)+'HP':Math.ceil(ENEMIES[f].maxHp*STAKE.hpMult)+'HP';
+  const nameStr=`F${String(f).padStart(2,'0')} ${fightNames[f]}`.padEnd(22)
+  let hpVal
+  if(BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE[f])hpVal=BOSS_HP_OVERRIDE[f]
+  else{const CS=[1.5,3.5,7.0,14.0,25.0,40.0,60.0,85.0,120.0];hpVal=Math.ceil(ENEMIES[f].maxHp*CS[Math.min(8,Math.floor(f/3))])}
+  const hpStr=hpVal>=1e6?(hpVal/1e6).toFixed(1)+'M':hpVal>=1000?(hpVal/1000).toFixed(1)+'K':hpVal+'';
+  const hpDisp=(hpStr+'HP').padStart(10)
   const wall=deathsByFight[f]/NUM_GAMES>0.15?' ← WALL':'';
-  console.log(`C${circle}${boss} ${nameStr}${hpStr.padStart(8)} | ${survPct.padStart(5)}% survive | ${deathPct.padStart(5)}% die here ${bar}${wall}`)}
+  console.log(`C${circle}${boss} ${nameStr}${hpDisp} | ${survPct.padStart(5)}% survive | ${deathPct.padStart(5)}% die here ${bar}${wall}`)}
 console.log('─'.repeat(80));
 console.log(`\nDeath distribution by circle:`);
 for(let c=1;c<=9;c++){let d=0;for(let f=(c-1)*3;f<c*3;f++)d+=deathsByFight[f];console.log(`  Circle ${c}: ${(d/NUM_GAMES*100).toFixed(1)}% of runs end here`)}

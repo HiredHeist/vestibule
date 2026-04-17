@@ -515,7 +515,7 @@ const ALL_CARDS=[
   {id:'tappedout',name:'Tapped Out',type:'EMBER',rarity:'Uncommon',emoji:'🪙',embers:0,effect:'Gain 5 Embers at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'controlfeedback',name:'Controlled Feedback',type:'CORRUPT',rarity:'Uncommon',emoji:'🎚',embers:2,effect:'Set Corruption to 50%. Heal target member to full HP.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:0,effect:'Select up to 3 cards first, then play this to discard them and draw that many +1. (No selection = draw 1 card.)',color:'#9933cc',typeColor:'#7722aa',copies:1},
-  {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:2,effect:'Direct damage: 5 (C1-3), 8 (C4-6), 12 (C7-9). Bypasses boss passive.',color:'#9933cc',typeColor:'#7722aa',copies:1},
+  {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:2,effect:'+1 ATK permanently to ALL alive members. The whole band gets louder.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:4,effect:'Deal target HP to boss. 1/round.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'If Corruption >=60%, double ALL ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:0,shopOnly:true},
   {id:'infencore',name:'Infernal Encore',type:'RIFF',rarity:'Rare',emoji:'👿',embers:3,effect:'ALL members attack again simultaneously.',color:'#9933cc',typeColor:'#7722aa',copies:3},
@@ -525,7 +525,7 @@ const ALL_CARDS=[
   {id:'madnesscard',name:'Madness Unleashed',type:'CORRUPT',rarity:'Rare',emoji:'💀',embers:0,effect:'FREE. Deal 15% of enemy max HP as direct damage. Corruption gift at 75%.',color:'#aa1111',typeColor:'#880000',copies:0},
   {id:'sabbathsigil',name:'Black Sabbath Sigil',type:'CORRUPT',rarity:'Rare',emoji:'⛧',embers:2,effect:'CONSUMABLE. Corruption → 100%. Hellquake d10. Card is destroyed after use.',color:'#aa1111',typeColor:'#880000',copies:0,consumable:true,shopCost:42,shopOnly:true},
   {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:4,effect:'All deal ×3 ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'crowdsurf',name:'Crowd Surf',type:'RIFF',rarity:'Common',emoji:'🏄',embers:2,effect:'Deal cards in hand × 3.',color:'#9933cc',typeColor:'#7722aa',copies:2},
+  {id:'crowdsurf',name:'Crowd Surf',type:'RIFF',rarity:'Common',emoji:'🏄',embers:2,effect:'Target gains +1 ATK permanently per card in hand. Big hands = big gains.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'doubledown',name:'Double Down',type:'RIFF',rarity:'Uncommon',emoji:'🎰',embers:1,effect:'The next card played this Strike costs 0 Embers.',color:'#9933cc',typeColor:'#7722aa',copies:2,shopOnly:true},
   {id:'deathriff',name:'Death Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'💀',embers:1,effect:'60 DMG scaled by clarity (low corruption = more). +10% Corruption.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'ampoverload',name:'Amp Overload',type:'EMBER',rarity:'Uncommon',emoji:'🔋',embers:0,effect:'+3 Embers. Costs 1 Discard.',color:'#c87820',typeColor:'#a06010',copies:1},
@@ -538,12 +538,12 @@ const ALL_CARDS=[
   {id:'powertap',name:'Power Tap',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'Gain 2 Embers.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'soundboard',name:'Soundboard',type:'EMBER',rarity:'Uncommon',emoji:'🎛',embers:1,effect:'Gain 2 Embers. Draw 1 extra card at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'setbreak',name:'Smoke Break',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Select 1 card first, then play to discard it. Gain 2 Embers. -15% Corruption. Draw 1 card. (Random if no selection)',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'heavyriff',name:'Heavy Riff',type:'RIFF',rarity:'Uncommon',emoji:'🥊',embers:2,effect:'Deal stage ATK ÷ 2 to boss.',color:'#9933cc',typeColor:'#7722aa',copies:2},
+  {id:'heavyriff',name:'Heavy Riff',type:'RIFF',rarity:'Uncommon',emoji:'🥊',embers:2,effect:'Target gains +ATK perm equal to HALF target current ATK (max +20). The stronger they are, the harder this hits.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'resonancecard',name:'Resonance',type:'RIFF',rarity:'Uncommon',emoji:'🌀',embers:1,effect:'Target member ATK becomes equal to highest ATK on stage.',color:'#9933cc',typeColor:'#7722aa',copies:3},
-  {id:'herbmoney',name:'Herb Money',type:'RIFF',rarity:'Uncommon',emoji:'🌿',embers:1,effect:'Deal = your current Stash. Keep your Stash. -15% Corruption.',color:'#9933cc',typeColor:'#7722aa',copies:1},
+  {id:'herbmoney',name:'Herb Money',type:'RIFF',rarity:'Uncommon',emoji:'🌿',embers:1,effect:'Spend 10 Stash. Target +3 ATK permanently. Cash into power.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'goingbroke',name:'Going Broke',type:'RIFF',rarity:'Rare',emoji:'💸',embers:0,effect:'Spend ALL your Stash. Deal that much damage to the boss.',color:'#9933cc',typeColor:'#7722aa',copies:0,shopOnly:true},
   // ── UNLOCKABLE CARDS ───────────────────────────────────────────
-  {id:'moshpit',name:'Mosh Pit',type:'RIFF',rarity:'Uncommon',emoji:'🤘',embers:1,effect:'Deal 3 damage per alive member on stage.',color:'#9933cc',typeColor:'#7722aa',copies:2,locked:true,unlockAt:1000},
+  {id:'moshpit',name:'Mosh Pit',type:'RIFF',rarity:'Uncommon',emoji:'🤘',embers:1,effect:'+1 ATK permanently to ALL alive members. 4+ alive = +2 each.',color:'#9933cc',typeColor:'#7722aa',copies:2,locked:true,unlockAt:1000},
   {id:'bloodritual',name:'Blood Ritual',type:'CORRUPT',rarity:'Rare',emoji:'🩸',embers:2,effect:'Sacrifice 25% of target HP. Deal 6x that HP as damage to the boss. Corruption +15%.',color:'#aa1111',typeColor:'#880000',copies:1,locked:true,unlockAt:10000},
 ]
 
@@ -4672,7 +4672,7 @@ function App(){
       }
     }
     else if(card.id==='feedbackloop'){let dmg=Math.floor(corruption/(card.upgraded?1.5:2));if(collectedLoot.includes('heretics_brand'))dmg=Math.round(dmg*1.25);if(activeGenre==='BLACK_METAL')dmg=Math.round(dmg*1.25);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);if(flHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'+(activeGenre==='BLACK_METAL'?' [Black Metal +25%]':'')}
-    else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?4:0;const circleNum=Math.floor(fightIndex/3)+1;const swDmg=(circleNum<=3?5:circleNum<=6?8:12)+p5Bonus+(card.upgraded?4:0);const bc3=getCenter(bossRef);const swHp=Math.max(0,enemyHp-swDmg);setEnemyHp(swHp);if(swHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);addFloat(swDmg,bc3.x,bc3.y-60,'#dd2222');playHit();if(swHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);msg='🔈 Sound Wall! '+swDmg+' direct damage.';updStat('totalDamage',swDmg)}
+    else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?1:0;const buff=1+p5Bonus+(card.upgraded?1:0);ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+buff,permAtkBonus:(m.permAtkBonus||0)+buff,buffCount:(m.buffCount||0)+1}):m);msg='🔈 Sound Wall! All members +'+buff+' ATK permanently!'+(p5Bonus?' (Amp Stack bonus!)':'')}
     else if(card.id==='groupie'){
       // Handled entirely in handleDropOnStage to avoid double setHand
       return false
@@ -4732,12 +4732,11 @@ function App(){
     }
     else if(card.id==='overdrive'){if(corruption>=(card.upgraded?50:60)){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{addLog('⚠ Need >=60% Corruption.');return false}}
     else if(card.id==='crowdsurf'){
-      const dmg=hand.length*(card.upgraded?4:3)
-      const bc=getCenter(bossRef)
-      const csHp=Math.max(0,enemyHp-dmg);setEnemyHp(csHp);if(csHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
-      addFloat(dmg,bc.x,bc.y-60,'#9933cc',dmg>=10);playHit();updStat('totalDamage',dmg)
-      if(csHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
-      msg='🏄 Crowd Surf! '+hand.length+' cards × 3 = '+dmg+' damage!'
+      if(!m)return false
+      const buff=Math.max(1,hand.length-1)+(card.upgraded?1:0) // -1 because crowdsurf itself is leaving hand
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+buff,permAtkBonus:(m.permAtkBonus||0)+buff,buffCount:(m.buffCount||0)+1})
+      addBuff(m.uid,'+'+buff+' ATK','#9933cc');addFloat('+'+buff+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#9933cc')
+      msg='🏄 Crowd Surf! '+m.name+' +'+buff+' ATK permanently! ('+hand.length+' cards in hand)'
     }
     else if(card.id==='doubledown'){
       setNextCardFree(true)
@@ -4819,24 +4818,20 @@ function App(){
       return false
     }
     else if(card.id==='heavyriff'){
-      const p5HeavyBonus=activePassives.some(p=>p.id==='p5')?2:0
-      const activeAtk=stage.filter(m=>m&&!m.tooStoned).reduce((sum,m)=>sum+m.atk,0)
-      const dmg=Math.floor(activeAtk*(card.upgraded?0.6:0.5))+p5HeavyBonus
-      const bc=getCenter(bossRef)
-      const hrHp=Math.max(0,enemyHp-dmg);setEnemyHp(hrHp);if(hrHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
-      addFloat(dmg,bc.x,bc.y-60,'#9933cc',dmg>=10);playHit();updStat('totalDamage',dmg)
-      if(hrHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
-      msg='🥊 Heavy Riff! Stage ATK ÷ 2 = '+dmg+' direct damage!'
+      if(!m)return false
+      const bonus=Math.min(20,Math.ceil((m.atk+(m.permAtkBonus||0))/2))+(card.upgraded?2:0)
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus,buffCount:(m.buffCount||0)+1})
+      addBuff(m.uid,'+'+bonus+' ATK','#9933cc');addFloat('+'+bonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#9933cc')
+      msg='🥊 Heavy Riff! '+m.name+' +'+bonus+' ATK permanently! (half ATK, max +20)'
     }
     else if(card.id==='herbmoney'){
-      const herbDmg=stash
-      if(herbDmg<=0){addLog('🌿 No Stash to power this!');return false}
-      const bc=getCenter(bossRef)
-      const hmHp=Math.max(0,enemyHp-herbDmg);setEnemyHp(hmHp);if(hmHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
-      addFloat(herbDmg,bc.x,bc.y-60,'#22aa44',herbDmg>=20);playHit();updStat('totalDamage',herbDmg)
-      if(hmHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
-      setCorruption(p=>Math.max(0,p-15))
-      msg='🌿 Herb Money! '+herbDmg+' damage ('+stash+'🌿 Stash). Stash kept. -15% Corruption.'
+      if(!m)return false
+      if(stash<10){addLog('🌿 Need 10 Stash! (have '+stash+')');return false}
+      setStash(p=>p-10)
+      const buff=card.upgraded?4:3
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+buff,permAtkBonus:(m.permAtkBonus||0)+buff,buffCount:(m.buffCount||0)+1})
+      addBuff(m.uid,'+'+buff+' ATK','#22aa44');addFloat('+'+buff+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#22aa44')
+      msg='🌿 Herb Money! Spent 10🌿 — '+m.name+' +'+buff+' ATK permanently!'
     }
     else if(card.id==='goingbroke'){
       if(stash<=0){addLog('💸 You are already broke!');return false}
@@ -4852,12 +4847,9 @@ function App(){
     // ── UNLOCKABLE CARDS ─────────────────────────────────────────
     else if(card.id==='moshpit'){
       const alive=ns.filter(m=>m&&!m.tooStoned).length
-      const mpDmg=alive*3
-      const bc=getCenter(bossRef)
-      const mpHp=Math.max(0,enemyHp-mpDmg);setEnemyHp(mpHp);if(mpHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
-      addFloat(mpDmg,bc.x,bc.y-60,'#cc44ff',mpDmg>=10);playHit();updStat('totalDamage',mpDmg)
-      if(mpHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
-      msg='🤘 Mosh Pit! '+alive+' members × 3 = '+mpDmg+' damage!'
+      const buff=alive>=4?2:1
+      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+buff,permAtkBonus:(m.permAtkBonus||0)+buff,buffCount:(m.buffCount||0)+1}):m)
+      msg='🤘 Mosh Pit! '+alive+' members — all gain +'+buff+' ATK permanently!'+(alive>=4?' (Full pit bonus!)':'')
     }
     else if(card.id==='bloodritual'){
       if(!m)return false
