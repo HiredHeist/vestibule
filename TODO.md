@@ -1,149 +1,104 @@
 # VESTIBULE — TODO & STATUS
 
-**Latest commit:** 2b94c35 (Pyromaniac trigger + recalibrated HP scales)
-**Sim version:** v19.1 (5 decks recalibrated post-card-rewrites)
-**App.jsx:** ~8,530 lines
-**Last doc refresh:** post-2b94c35
+**Latest commit:** a602191 (QoL: drug pin tape marks + member shake + chain glow)
+**Sim version:** v19.1 (5 decks recalibrated: 10.6%/8.1%/7.5%/5.5%/4.7%)
+**App.jsx:** ~8,540 lines
+**Last doc refresh:** post-a602191 (end of April 17 megasession)
 
 > 🔒 **DOC RULE:** Every commit that changes code MUST update TODO.md (and CLAUDE.md if rules/architecture change) in the SAME commit. No exceptions. Stale docs = wasted sessions re-discovering what's done.
 
-> 🎸 **JV'S LANES (Claude: DO NOT TOUCH):** All audio work (diegetic music system, victory sfx, corruption milestone audio stings, mute controls, SFX balance) + all PixelLab animations (boss idle/death, member attack/"too stoned"). These ship last, by JV, on original music. If people want to mute, they can fuck themselves.
+> 🎸 **JV'S LANES (Claude: DO NOT TOUCH):** All audio work (diegetic music system, victory sfx, corruption milestone audio stings, mute controls, SFX balance) + all PixelLab animations (boss idle/death, member attack/"too stoned"). These ship last, by JV, on original music.
 
 ---
 
-## 🔴 UNVERIFIED — playtest needed
+## 🔴 PLAYTEST NEEDED — verify before building on top
 
 - [ ] **30 new cards** — playtest each in alternate decks, verify apply logic + floats + logs
-- [ ] **Deck selection UI** — verify all 5 decks appear on menu, unlock gates work correctly
-- [ ] **Per-deck boss HP** — verify hpScale applies to ALL fight types (regular, boss, WTH, Lucifer phases)
+- [ ] **Deck selection UI** — verify all 5 decks appear on menu, unlock gates work
+- [ ] **Per-deck boss HP** — verify hpScale applies to ALL fights (regular, boss, WTH, Lucifer)
 - [ ] **Deck = 69** — verify all 5 decks build at exactly 69 cards in-game
-- [ ] **Cold open splash** — clear localStorage, hard reload, confirm splash fires on first boot
+- [ ] **Cold open splash** — clear localStorage, hard reload, confirm splash fires
 - [ ] **Weed leaf PNG** — spot-check it renders everywhere 🌿 used to
 
 ---
 
-## ✅ SHIPPED THIS SESSION (April 17 2026)
+## 🟠 NEXT UP — priority work for next session
 
-### Card Rebalance — Direct Damage → Permanent ATK Buffs
-- [x] Sound Wall: flat dmg → +1 ATK perm ALL members
-- [x] Mosh Pit: per-member dmg → +1/+2 ATK perm all (4+ alive = +2)
-- [x] Crowd Surf: hand×3 dmg → +1 ATK perm per card in hand
-- [x] Heavy Riff: 50% ATK dmg → half target ATK perm, MAX +20
-- [x] Herb Money: deal stash dmg → spend 10 stash, +3 ATK perm
-
-### 30 New Cards (for alternate decks)
-- [x] RIFF: Echo Pedal, Riff Thief, Feedback Scream, Skull Splitter, Doom Chord, Blood Harmony, Sonic Boom, Tremolo Pick, Harmonic FB, Shred Solo, Overdrive Pedal, Devil's Dice, Necrotic Amp
-- [x] CORRUPT: Soul Bargain, Venom Riff, Offering Pit, Cursed Strings, Hex of Decay, Infernal Pact, Carrion Call, Possession Riff, Dark Crescendo, Russian Roulette
-- [x] UTILITY: Gear Check, Setlist Rewrite, Backstage Pass, Venue Swap, Double Booking, Bootleg Copy
-- [x] EMBER: Second Wind, Pyromaniac, Slow Burn, Amp Feedback, Drain the Crowd, Corruption Siphon
-
-### 5 Decks (69 cards each, calibrated)
-- [x] ⛧ Standard: 32 RIFF / 18 CORRUPT / 10 UTIL / 9 EMBER → 10.66% WR
-- [x] 🎸 Shredder: 38 RIFF / 10 CORRUPT / 8 UTIL / 13 EMBER → 8.06% WR
-- [x] 💀 Ritualist: 21 RIFF / 26 CORRUPT / 11 UTIL / 11 EMBER → 7.16% WR
-- [x] 🔧 Engineer: 24 RIFF / 13 CORRUPT / 18 UTIL / 14 EMBER → 5.22% WR
-- [x] 🛡️ Survivor: 25 RIFF / 15 CORRUPT / 15 UTIL / 14 EMBER → 4.88% WR
-
-### Boss HP Calibration (27 bosses individually tuned)
-- [x] Per-boss HP from 50K simulation
-- [x] Per-deck HP scaling via hpScale factor
-- [x] Lucifer fix: was unkillable (hardcoded HP bypassed override), now 100K HP
-- [x] 41% of arrivals beat Lucifer at 100K (reaching him is an achievement)
-
-### Card Math Cleanup (no more weird division)
-- [x] Death Riff: 60×(1-corr/100) dmg → ALL +2 ATK perm, +10% corruption
-- [x] Feedback Loop: corr÷2 dmg → +2 ATK perm (+4 at ≥50% corruption)
-- [x] Dark Tuning: corr÷12 → 2 random +1 perm (3 at ≥70% corruption)
-- [x] Amp the Static: corr÷12 → +2 temp ATK (+4 at ≥50% corruption)
-- [x] Seance: corr÷4 heal → heal 3 (heal 6 at ≥50% corruption)
-- [x] Feedback Scream: HP loss based → +4 ATK perm, -2 HP
-- [x] Possession Riff: corr÷10 → +20 ATK this strike, +10% corruption
-- [x] Venom Riff: DOT tracking → +3 ATK perm, +5% corruption
-
-### State Tracking + Polish
-- [x] Echo Pedal / Riff Thief: adds card copy to hand for free play
-- [x] Slow Burn: slowBurnStrikes per-strike ember tracking
-- [x] Amp Feedback: ampFeedbackDiscount, next RIFF costs -1
-- [x] Pyromaniac: spend all embers = +3 ATK all at strike time
-- [x] Per-fight state reset (slowBurn, ampFeedback, pyromaniac)
-- [x] Deck unlock achievements (beat_standard, beat_shredder, etc.)
-- [x] P5 passive description updated for new Sound Wall/Heavy Riff mechanics
-- [x] Scratch files removed (7 files, -2,704 lines)
-- [x] .gitignore updated for sim scratch patterns
-
----
-
-## 🎸 ROCKSTAR POLISH (top-priority pass — "make it feel published by Rockstar")
-
-Ranked by ship-impact per line of code:
-
-### Tier 1
-- [x] 🎤 **Pre-fight loading screen** w/ random tour quote — 30 quotes, 2.2s overlay, enemy name + passive + circle + quote
-- [ ] 🎵 ~~Diegetic music tied to game state~~ — **JV's lane (audio)**
-
-### Tier 2
-- [ ] 📖 **Character bios on hover** — musicians + bosses get backstory blurbs
-- [ ] 📓 **TOUR DIARY tab** on main menu — cumulative stats styled as hand-written tour journal
-- [ ] 🎞️ **Run replay system** — 30s timelapse of key moments at game end
-
-### Tier 3
-- [ ] ✨ **Particle physics everywhere** — ember trails, damage splatter, card-shuffle dust
-- [ ] 📸 **Achievement Polaroids** — slide in from edge, hand-scrawled, vinyl-skip SFX
-- [ ] ⏸️ **Real pause menu** — Cmd+P drawer, vinyl-warp audio ducking
-
-### Tier 4
-- [x] 🎫 **"Press any key" boot screen** — flickering venue marquee, light bulbs, auto-dismiss 4s or any key
-- [x] 🎬 **Credits roll** — full cinema scroll after Lucifer kill, every role by Hired Heist, Sly on merch, click to skip
-
----
-
-## 🟡 QoL QUEUE (open items — impact-ordered)
-
-### Combat Flow
-- [x] **Ember forecast — hover dims pips to show remaining (already shipped)**
-- [x] **Undo last card play** — Ctrl+Z + button, one-step within same strike
-- [x] **Hand size indicator** — "X/Y" at top of card fan, gold pulse at overcap
-- [x] **Fast-forward HOLD spacebar — already shipped (space key held = fast mode)**
-
-### Visual Feedback (juice)
-- [x] **Victory fanfare — clutchFlash system: "⛧ VICTORY ⛧" / "SOLO VICTORY" / "BY THE SKIN"**
-- [x] **Boss HP drain animation** — smooth 0.7s cubic-bezier transition on HP bar fill
-- [x] **Card upgrade shimmer — upgradeShimmer keyframe on upgraded cards**
-- [x] **Member portrait shake** on hit — memberHitShake CSS animation triggered on boss impact
-- [x] **Boss low-HP desperation glow** — fracture at 10% + red vignette at 20%
-- [x] **Mentor link visual chain** — gold border, ⛓ pulse, bondColor system
-- [x] **Riff chain warning glow** — pulsing gold glow + ⛧ Chain badge, detects played cards too
-- [x] **"+×3 ATK active" badge** — shows ×X.XX CHAIN (gold) and/or +N TEMP ATK (purple) above damage preview when live
-
-### Information & Clarity
-- [x] **Pact icons in combat — footer row with hover tooltips**
-- [x] **Boss telegraph** — "NEXT: X DMG → target" + special effects, live-calculated under boss name
-- [x] **Card count remaining — DECK/DISC counters above card fan** — "2 left in deck" on hover
-- [x] **Discard pile preview — click DISC counter to see pile (already shipped)**
-- [x] **Drug pin tape marks** — diagonal tape strips on shroom/acid buttons, zine aesthetic
-
-### Quality of Life
-- [x] **Auto-sort preference persists to localStorage**
-- [x] **Bulk discard — select multiple then discard all (already shipped)**
-- [x] **Run timer** — MM:SS elapsed time on end screen stats grid
-- [x] **"Why did I die?" tooltip** — DeathAnalysis component with contextual tips on death screen
-- [x] **Screen transitions — 350ms fade flash on state changes (already shipped)**
-- [ ] ~~Mute hotkey (M)~~ — **JV's lane (audio)**
-- [ ] ~~Corruption milestone audio~~ — **JV's lane (audio)**
-
----
-
-## 🟠 UI / DESIGN REMAINING
-
+### UI / Design Polish
 - [ ] Font sizing consistency pass across all UI
 - [ ] Color consistency — too many slightly-different gold/amber shades
+- [ ] Artifact tray on left — verify it feels connected to battle area
 - [ ] Mobile/touch considerations for quick-play
-- [ ] Artifact tray on left — verify it feels connected to battle area post-cockpit-refactor
+
+### Rockstar Polish (Tier 2-3)
+- [ ] 📖 **Character bios on hover** — musicians + bosses get backstory blurbs
+- [ ] 📓 **TOUR DIARY tab** on main menu — cumulative stats as hand-written tour journal
+- [ ] ⏸️ **Real pause menu** — Cmd+P drawer, vinyl-warp audio ducking
+- [ ] ✨ **Particle physics** — ember trails, damage splatter, card-shuffle dust
+- [ ] 📸 **Achievement Polaroids** — slide in from edge, hand-scrawled
+
+### Combat Feel
+- [ ] Damage number size scales with damage amount (10 = small, 100+ = HUGE)
+- [ ] Strike counter gets more dramatic each strike (bigger, redder, shakier)
+- [ ] Cards played this strike shown as ghostly trail near strike button
+- [ ] Brief screen dim between strikes for dramatic pacing
+- [ ] Boss kill quote with typewriter effect instead of instant
+- [ ] Visible deck reshuffle animation when draw pile empties
+
+### Information & Clarity
+- [ ] Corruption trajectory warning ("at this rate, 100% in 2 fights")
+- [ ] Deck viewer button during combat (full deck contents sorted by type)
+- [ ] Card compare tooltip in shop (this card vs what's in your deck)
+- [ ] Combo discovery log (chains found this run, visible in pause menu)
+- [ ] Boss kill counter visible during fight ("3rd time fighting The Shade")
+
+### Shop / Meta
+- [ ] Quick-restart button on death screen (skip stats, straight to new run)
+- [ ] "Last run" comparison on end screen (better/worse than previous)
+- [ ] Win streak fire border on main menu
+- [ ] Daily challenge mini-leaderboard
+
+### Visual Flair
+- [ ] Card foil holographic shimmer on hover (enhanced)
+- [ ] Enemy intro animation (portrait slides in with name slam)
+- [ ] Member death: dramatic fade + skull icon + brief slow-mo
+- [ ] Corruption visual escalation: edges redden, text glitches at 80%+
+- [ ] Boss portrait cracks deepen as HP drops (expand fracture system)
+- [ ] Combo name display scales with chain multiplier
+- [ ] Card shuffle dust puff when deck reshuffles
+- [ ] Stash earned sparkle trail
+- [ ] Victory screen confetti/embers rain
+- [ ] Pact selection: dramatic reveal with smoke/ember effect
 
 ---
 
-## 🟢 ANIMATIONS (PixelLab, separate workflow)
+## 🔮 FUTURE — bigger features, nice-to-have
 
+### Combo System Overhaul (Balatro-style)
+- [ ] ECHO / REPLAY — Echo + Echo + big card = exponential
+- [ ] COPY / DUPLICATE — Bootleg copies the copier = brain melting
+- [ ] MULTIPLIER STACKING — cards that multiply strike multiplier
+- [ ] CORRUPTION AS POWER — 100% = GODLIKE (Dark Crescendo ×3 exists)
+- [ ] SACRIFICE LOOP — kill members for power, revive stronger, repeat
+- [ ] EMBER OVERFLOW — excess embers convert to damage/ATK
+- [ ] MYTHIC INTERACTIONS — 4-5 card combos for ×50+ damage
+
+### New Card Ideas
+- [ ] RITUAL card type — multi-turn setups, countdowns, delayed nukes
+- [ ] EMBER OVERFLOW mechanic
+- [ ] Combo discovery tiers (×5, ×15, ×50, ×200 damage)
+
+### Other
+- [ ] 🎞️ Run replay system — 30s timelapse at game end
+- [ ] Combo tracking/reward log + hidden achievements
+
+---
+
+## 🎸 JV'S LANES (DO NOT TOUCH)
+
+- [ ] 🎵 Diegetic music tied to game state
+- [ ] Victory SFX + corruption milestone audio stings
+- [ ] Mute hotkey (M) + SFX balance pass
 - [ ] Boss idle animations (29 bosses)
 - [ ] Boss death animations (29 bosses)
 - [ ] Member attack/strike animations (18 members)
@@ -151,81 +106,52 @@ Ranked by ship-impact per line of code:
 
 ---
 
-## 🧹 TRIVIAL CLEANUP
+## ✅ SHIPPED — April 17 2026 Megasession
 
-- [x] `vestibule-sim.js` console banner prints v19.1 (synced with header) — done in 3cd795f→next
+### Card Rebalance — Direct Damage → Permanent ATK Buffs
+- [x] Sound Wall, Mosh Pit, Crowd Surf, Heavy Riff (max +20), Herb Money
 
----
+### Card Math Cleanup (no more weird division)
+- [x] Death Riff, Feedback Loop, Dark Tuning, Amp the Static, Seance
+- [x] Feedback Scream, Possession Riff (+20 ATK burst), Venom Riff (+3 perm)
 
-## ✅ COMPLETED (recent — post-Session 19)
+### 30 New Cards + 5 Decks
+- [x] 13 RIFF, 10 CORRUPT, 6 UTILITY, 6 EMBER — all with apply logic
+- [x] Standard (10.6%), Shredder (8.1%), Ritualist (7.5%), Engineer (5.5%), Survivor (4.7%)
+- [x] DECK_CARD_MANIFESTS, buildDeck with deck selection, STARTER_DECKS with unlock gates
 
-### Bug fixes + polish (Roadie session, April 17)
-- [x] 🔴 BUG: `copies||2` treated `copies:0` as falsy — corruption threshold cards (Dark Whisper, Hungering Flame, Madness Unleashed) got 2 copies in starter deck instead of 0. Deck was 73, now 69 with all unlocks.
-- [x] Demo Tape copies 1→2, Soundboard copies 1→2 to hit 69 target (base 66 + 3 unlockable)
-- [x] Member keyword tooltip + recruit/shop desc: ScratchFont → MBScribblesFont for readability
-- [x] Hand size indicator (X/Y pill, gold pulse at overcap)
-- [x] Boss telegraph (live NEXT: X DMG → target + special effects)
-- [x] Run timer (MM:SS on end screen)
-- [x] Active buff badges (×CHAIN gold + +TEMP ATK purple above damage preview)
-- [x] JV's lanes declared (audio + PixelLab anims — do not touch from chat)
-- [x] TODO + CLAUDE.md synced to reality + doc-on-every-commit rule
-- [x] Sim banner v17.1→v19.1
+### Boss HP + Balance
+- [x] 27 bosses individually tuned via 50K simulation
+- [x] Per-deck hpScale (0.74/0.79/0.81/0.85/0.88)
+- [x] Lucifer 100K HP, 41% of arrivals beat him
 
-### Cold open + polish pass (51f819e)
-- [x] Cold open splash screen
-- [x] Weed leaf PNG component (replaces 🌿 emoji)
-- [x] Strike fly-to-boss animation fix
+### State Tracking
+- [x] Echo Pedal/Riff Thief (card copy to hand), Slow Burn, Amp Feedback discount
+- [x] Pyromaniac (spend all embers = +3 ATK all), per-fight state reset
+- [x] Deck unlock achievements (beat_standard → Shredder, etc.)
 
-### Victory + map (56d0b8e)
-- [x] End-of-fight summary popup
-- [x] DESCENT: tarot-card map redesign
+### QoL (8/8)
+- [x] Undo (Ctrl+Z), Boss HP drain, Member hit shake, Boss desperation glow
+- [x] Mentor link chain, Riff chain glow, Drug pin tape marks, Death analysis
 
-### Shop (b2ad579, 51d5a07, df0621b)
-- [x] Pokemon-style pack tear-open animation
-- [x] Shop layout overflow fix
-- [x] Sly the Fence pass 2 (porn-stache energy)
-- [x] Pack purchase limit + full shop redesign
-
-### Keyboard shortcuts (d73e78e, 13e19bb)
-- [x] S / D / 1-6 hotkeys firing correctly (stale closure fix via refs)
-- [x] Tier 4 BEAST tier hype visuals
-
-### Strike panel (96654db, d8c7224, b05dac3)
-- [x] Damage preview correctness fix
-- [x] Live damage preview under STRIKE (every mult tick visible)
-- [x] Layout restructure, BLACK METAL banner, EMBERS label
-- [x] Dynamic pips, card legibility pass
-
-### Ritual altar design system (a103d00 → 5b4c456, ~12 commits)
-- [x] Unified cockpit altar panel
-- [x] Rune-circle boss + ritual platform stage slots
-- [x] Tarot treatment cards w/ wax seal embers
-- [x] Mercury tube thermometer + ribbon banner
-- [x] Frieze visibility + panel spacing + Combined Attack
-- [x] Ink stamp flashes + bone-white ember display
-- [x] Circle splash design pass
-- [x] Stash/ember floats
-- [x] Keyword tooltip fix
-
-### Session 19 (Apr 14-15) — sprites, balance, tutorial
-- [x] All 18 member sprites + 29 boss sprites wired
-- [x] All 18 idle GIF animations wired
-- [x] Lucifer phase swap (P1 Baphomet → P2 Lord of Flies)
-- [x] Grimnir replaces Nott (masked vocalist, DEBUFF)
-- [x] 3 scripted tutorial fights + first-encounter tips
-- [x] Card balance: Dial to Eleven, Smoke Break, CORRUPT, Sabbath Offering
-- [x] Circle I/II HP bumps, Circle III heal buff
-- [x] 69-card deck + Corruption deck (Dark Whisper, Blood Price, Void Pact)
-- [x] Madness card loss 15% → 20%
-- [x] Sim v19.1 synced
-- [x] 9 UX items: genre approaching, boss tagline, best run, death screen stats, speed toggle, collapsible footer, progressive rules, tabbed shop, deck peek
-- [x] Circle-themed backgrounds (9 unique)
-- [x] Corruption vignette, chain pulse, boss fracture
-- [x] Ghost preview on drag
+### Cleanup
+- [x] 7 scratch files removed (-2,704 lines), .gitignore updated, P5 passive desc fixed
 
 ---
 
-## SIM DATA (post-rewrite calibration, 5K per deck)
+## ✅ SHIPPED — Earlier Sessions
+
+### Session 19 (Apr 14-15)
+- [x] All sprites + idle animations, Lucifer phases, tutorial, 69-card deck
+- [x] 9 UX items, circle backgrounds, corruption vignette, ghost preview
+
+### Earlier
+- [x] Ritual altar design system, shop/victory/UI, keyboard shortcuts
+- [x] Cold open splash, credits roll, boot screen, screen transitions
+
+---
+
+## SIM DATA
 
 | Deck | hpScale | Win Rate | Target |
 |------|---------|----------|--------|
@@ -235,87 +161,9 @@ Ranked by ship-impact per line of code:
 | 🔧 Engineer | 0.85 | 5.52% | 6% |
 | 🛡️ Survivor | 0.88 | 4.68% | 5% |
 
-### Card Design Rules (established this session)
-- Permanent ATK buffs > direct damage (creates member attachment, compounds, scales)
-- No division math in card effects (use thresholds: ≥40%, ≥50%, ≥70%)
+### Card Design Rules
+- Permanent ATK buffs > direct damage
+- No division math (use thresholds: ≥40%, ≥50%, ≥70%)
 - Every card does ONE thing simply
-- Ember generation needs REAL costs (corruption, HP, tempo)
-- 420 (stash cap, card height) and 69 (deck size) are sacred numbers
-
----
-
-## 🃏 CARD RETHINK — MOSTLY ADDRESSED
-
-**Status:** 30 new cards shipped, 8 cards rewritten to remove math, perm-buff philosophy established. Ember cards now have real costs (Corruption Siphon +8% corr, Drain the Crowd -2 HP, Pyromaniac conditional).
-
-### Remaining Ideas (from CARD_IDEAS.md)
-- [ ] RITUAL card type — multi-turn setups, countdowns, delayed nukes (not yet implemented)
-- [ ] EMBER OVERFLOW — excess embers convert to damage (not yet implemented)
-- [ ] MYTHIC INTERACTIONS — 4-5 card combos for ×50+ damage (partially via Echo Pedal chains)
-
----
-
-## 💎 NEW QoL IDEAS (Roadie brainstorm)
-
-### Combat Feel
-- [ ] Damage number size scales with damage amount (10 = small, 100+ = HUGE)
-- [ ] Strike counter typography gets more dramatic each strike (bigger, redder, shakier)
-- [ ] Cards played this strike shown as ghostly trail/stack near strike button
-- [ ] Brief screen dim between strikes for dramatic beat/pacing
-- [ ] Boss kill quote appears with typewriter effect instead of instant
-- [ ] Visible deck reshuffle animation when draw pile empties
-
-### Information
-- [ ] Corruption trajectory warning ("at this rate, 100% in 2 fights")
-- [ ] Deck viewer button during combat (see full deck contents sorted by type)
-- [ ] Card compare tooltip in shop (this card vs what's in your deck)
-- [ ] Combo discovery log (list of chains found this run, visible in pause menu)
-- [ ] Boss kill counter visible during fight ("3rd time fighting The Shade")
-
-### Shop / Meta
-- [ ] Quick-restart button on death screen (skip stats, straight to new run)
-- [ ] "Last run" comparison on end screen (did better/worse than previous)
-- [ ] Win streak fire border on main menu
-- [ ] Daily challenge mini-leaderboard
-
-### Visual Flair
-- [ ] Card foil holographic shimmer on hover (enhanced version of current)
-- [ ] Enemy intro animation (portrait slides in from side with name slam)
-- [ ] Member death: dramatic fade + skull icon + brief slow-mo
-- [ ] Corruption visual escalation: screen edges redden, text starts glitching at 80%+
-- [ ] Boss portrait cracks deepen as HP drops (expand existing fracture system)
-- [ ] Combo name display scales with chain multiplier (bigger chains = BIGGER text)
-- [ ] Card shuffle dust puff when deck reshuffles
-- [ ] Stash earned sparkle trail when gaining stash
-- [ ] Victory screen confetti/embers rain
-- [ ] Pact selection: dramatic reveal with smoke/ember effect
-
----
-
-## 🧠 COMBO SYSTEM OVERHAUL — Balatro-style "break the game" moments
-
-**Current state:** Riff Chains give ×1.78 multiplier. Linear, predictable, no exponential scaling. No "holy shit" moment. No reason to screenshot your run.
-
-**Target:** 5 tiers of combo discovery, each ~3× damage of the last. Players should chase mythic combos across dozens of runs.
-
-### Combo Systems to Implement (details in CARD_IDEAS.md)
-- [ ] **ECHO / REPLAY** — cards that replay previous cards. Echo + Echo + big card = exponential.
-- [ ] **COPY / DUPLICATE** — Bootleg Tape copies cards in hand. Copy the copier = brain melting.
-- [ ] **MULTIPLIER STACKING** — cards that multiply the strike multiplier (currently only chains do this).
-- [ ] **CORRUPTION AS POWER** — 100% corruption should feel GODLIKE not just scary. Dark Crescendo triples mult at 80%+.
-- [ ] **SACRIFICE LOOP** — kill members for power, revive them stronger, repeat.
-- [ ] **EMBER OVERFLOW** — excess embers convert to damage or ATK. Ember decks become a damage strategy.
-- [ ] **MYTHIC INTERACTIONS** — 4-5 card combos that do 200× damage. Extremely rare, endlessly chased.
-
-### Combo Discovery Tiers
-- [ ] Tier 1 (2-card, common): ×1.78 chains — already exists, baseline
-- [ ] Tier 2 (3-card, moderate): ~×5 damage — requires deck building awareness
-- [ ] Tier 3 (4-card, rare): ~×15 damage — requires specific artifacts + cards
-- [ ] Tier 4 (5-card, mythic): ~×50 damage — once-in-50-runs, screenshot-worthy
-- [ ] Tier 5 (god run): ×200+ damage — everything aligns, 10K+ damage single strike, post on Reddit
-
-### Combo Tracking / Reward
-- [ ] Combo discovery log (track what combos players have found)
-- [ ] Hidden achievement per mythic combo discovered
-- [ ] Combo name + damage flash on screen when triggered (bigger = flashier)
-- [ ] End-of-run "Best Combo" stat with replay of the moment
+- Ember generation needs REAL costs
+- 420 (stash cap, card height) and 69 (deck size) are sacred
