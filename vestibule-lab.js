@@ -26,15 +26,15 @@ const CARD_POOL={
   infencore:    {type:'RIFF',rarity:'Rare',embers:3,     desc:'ALL alive members attack twice'},
   possessedperf:{type:'RIFF',rarity:'Rare',embers:4,     desc:'×3 ATK all members this strike'},
   stagedive:    {type:'RIFF',rarity:'Rare',embers:4,     desc:'Deal target HP as direct damage'},
-  crowdsurf:    {type:'RIFF',rarity:'Common',embers:2,   desc:'Deal 3× hand size as damage'},
-  heavyriff:    {type:'RIFF',rarity:'Uncommon',embers:2, desc:'Deal 50% of total ATK as direct'},
-  soundwall:    {type:'RIFF',rarity:'Uncommon',embers:2, desc:'5/8/12 direct damage by circle'},
+  crowdsurf:    {type:'RIFF',rarity:'Common',embers:2,   desc:'+1 ATK perm per card in hand when played.'},
+  heavyriff:    {type:'RIFF',rarity:'Uncommon',embers:2, desc:'Target +ATK perm = number of buffs on them (snowball).'},
+  soundwall:    {type:'RIFF',rarity:'Uncommon',embers:2, desc:'+1 ATK perm to ALL alive members. Upgraded: +2.'},
   deathriff:    {type:'CORRUPT',rarity:'Uncommon',embers:1,desc:'60 × (1 - corruption/100) damage'},
-  moshpit:      {type:'RIFF',rarity:'Uncommon',embers:1, desc:'3 damage per alive member'},
+  moshpit:      {type:'RIFF',rarity:'Uncommon',embers:1, desc:'+1 ATK perm all. 4+ alive = +2 each.'},
   resonancecard:{type:'RIFF',rarity:'Uncommon',embers:1, desc:'Match target ATK to highest'},
   demotape:     {type:'RIFF',rarity:'Common',embers:1,   desc:'Copy last riff played'},
   burnset:      {type:'RIFF',rarity:'Uncommon',embers:0, desc:'Discard up to 3, draw that +1'},
-  herbmoney:    {type:'RIFF',rarity:'Uncommon',embers:1, desc:'Deal stash as damage'},
+  herbmoney:    {type:'RIFF',rarity:'Uncommon',embers:1, desc:'Spend 10 stash. Target +3 ATK permanently.'},
   distortion:   {type:'CORRUPT',rarity:'Common',embers:1,desc:'+15% corruption, all +1 temp ATK'},
   dialtoeleven: {type:'CORRUPT',rarity:'Common',embers:0,desc:'+10% corruption, all +3 temp ATK'},
   sigdecay:     {type:'CORRUPT',rarity:'Common',embers:1,desc:'Discard 1, draw 2'},
@@ -58,16 +58,16 @@ const CARD_POOL={
 
   // ── NEW CARDS — RIFF ────────────────────────────────────────
   feedbackscream:{type:'RIFF',rarity:'Uncommon',embers:2,desc:'Target +ATK equal to HP loss. Low HP = huge.'},
-  skullsplitter:{type:'RIFF',rarity:'Uncommon',embers:3, desc:'8 direct damage. Kill bonus: +10 stash.'},
+  skullsplitter:{type:'RIFF',rarity:'Uncommon',embers:3, desc:'+3 ATK perm. If target 10+ ATK already, +5 instead.'},
   doomchord:    {type:'RIFF',rarity:'Uncommon',embers:2,  desc:'+4 ATK. At ≥50% corruption, +4 adjacent too.'},
   bloodharmony: {type:'RIFF',rarity:'Common',embers:1,    desc:'Target + adjacent +2 ATK. Same keyword = +3.'},
   sonicboom:    {type:'RIFF',rarity:'Rare',embers:4,      desc:'All +2 ATK. Draw 1.'},
   tremolopick:  {type:'RIFF',rarity:'Common',embers:1,    desc:'+1 ATK. If 3+ cards this strike, +4 instead.'},
   powerslide:   {type:'RIFF',rarity:'Common',embers:0,    desc:'FREE. +1 ATK. FRENZIED = +3.'},
-  wallsound:    {type:'RIFF',rarity:'Uncommon',embers:3,  desc:'+3 ATK all. Boss takes 2 per alive member.'},
+  wallsound:    {type:'RIFF',rarity:'Uncommon',embers:3,  desc:'+2 ATK perm all. +1 ATK perm per alive member.'},
   shredsolo:    {type:'RIFF',rarity:'Rare',embers:2,      desc:'Target attacks TWICE (second at half ATK).'},
   breakdown:    {type:'RIFF',rarity:'Common',embers:1,    desc:'+2 ATK. If last card before strike, +4.'},
-  harmonicfb:   {type:'RIFF',rarity:'Uncommon',embers:0,  desc:'FREE. 2× RIFF cards played this strike as dmg.'},
+  harmonicfb:   {type:'RIFF',rarity:'Uncommon',embers:0,  desc:'FREE. +1 ATK perm per RIFF card played this strike.'},
   riffthief:    {type:'RIFF',rarity:'Rare',embers:2,      desc:'Copy last card played this strike. Cast free.'},
 
   // ── NEW CARDS — CORRUPT ─────────────────────────────────────
@@ -263,11 +263,11 @@ function scoreCard(card,gs,enemy,strikeNum,cardsPlayed){
     case 'groupie':return embers<=3?62:28;
     case 'soundboard':return embers<=3?60:28;
     case 'setbreak':return embers<=2?52:14;
-    case 'soundwall':return 64;case 'heavyriff':return totalAtk>=10?62:33;
-    case 'crowdsurf':return hand.length>=5?57:28;
+    case 'soundwall':return 70;case 'heavyriff':{const best=alive.reduce((a,b)=>(a.permAtkBonus||0)>(b.permAtkBonus||0)?a:b);return(best.permAtkBonus||0)>=3?78:55}
+    case 'crowdsurf':return hand.length>=5?74:hand.length>=3?55:30;
     case 'deathriff':return corruption<50?52:18;
     case 'feedbackloop':return corruption>=40?57:18;
-    case 'herbmoney':return gs.stash>=30?52:10;
+    case 'herbmoney':return gs.stash>=10?65:0;
     case 'resonancecard':return highAtk>=5?54:24;
     case 'ampstatic':return corruption>=30?50:10;
     case 'distortion':return 57;case 'dialtoeleven':return corruption<50?44:14;
@@ -279,21 +279,21 @@ function scoreCard(card,gs,enemy,strikeNum,cardsPlayed){
     case 'setlist':return hand.length<=4?47:18;
     case 'seance':return Math.floor(corruption/4)>=10?60:15;
     case 'demotape':return cardsPlayed>0?52:0;case 'burnset':return hand.length>=5?42:15;
-    case 'moshpit':return alive.length>=4?65:alive.length>=3?50:30;
+    case 'moshpit':return alive.length>=4?74:alive.length>=3?60:38;
     case 'bloodritual':return alive.reduce((a,b)=>a.hp>b.hp?a:b).hp>=8?58:30;
 
     // ── NEW RIFF CARDS ──
     case 'feedbackscream':return alive.some(m=>m.hp<m.maxHp*0.6)?68:25;
-    case 'skullsplitter':return enemy._hp<=10?85:55;
+    case 'skullsplitter':return highAtk>=10?80:62;
     case 'doomchord':return corruption>=50?78:55;
     case 'bloodharmony':return 52;
     case 'sonicboom':return 72;
     case 'tremolopick':return cardsPlayed>=3?70:35;
     case 'powerslide':return alive.some(m=>m.keyword==='FRENZIED')?60:35;
-    case 'wallsound':return alive.length>=4?72:55;
+    case 'wallsound':return alive.length>=4?76:60;
     case 'shredsolo':return highAtk>=8?80:50;
-    case 'breakdown':return 50; // AI can't easily be "last card"
-    case 'harmonicfb':return gs._cardsPlayedIds.filter(id=>CARD_POOL[id]?.type==='RIFF').length>=3?75:20;
+    case 'breakdown':return 50;
+    case 'harmonicfb':return gs._cardsPlayedIds.filter(id=>CARD_POOL[id]?.type==='RIFF').length>=3?78:25;
     case 'riffthief':return cardsPlayed>0?70:0;
 
     // ── NEW CORRUPT CARDS ──
@@ -358,15 +358,15 @@ function applyCard(card,gs,enemy){
     case 'infencore':alive.forEach(m=>m._encore=true);break;
     case 'possessedperf':alive.forEach(m=>{m.tempAtkBonus+=(m.atk*2);m.atk*=3});break;
     case 'stagedive':gs._directDmg=(gs._directDmg||0)+target.hp;break;
-    case 'crowdsurf':gs._directDmg=(gs._directDmg||0)+gs.hand.length*3;break;
-    case 'heavyriff':{const ta=alive.reduce((s,m)=>s+m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0),0);gs._directDmg=(gs._directDmg||0)+Math.floor(ta*0.5);break}
-    case 'soundwall':{const cn=Math.floor(gs.fightIndex/3)+1;gs._directDmg=(gs._directDmg||0)+(cn<=3?5:cn<=6?8:12);break}
+    case 'crowdsurf':{const b=gs.hand.length;target.atk+=b;target.permAtkBonus+=b;break}
+    case 'heavyriff':{const b=Math.max(1,target.permAtkBonus||0);target.atk+=b;target.permAtkBonus+=b;break}
+    case 'soundwall':alive.forEach(m=>{m.atk+=1;m.permAtkBonus+=1});break;
     case 'deathriff':gs._directDmg=(gs._directDmg||0)+Math.floor(60*(1-gs.corruption/100));gs.corruption=Math.min(100,gs.corruption+10);break;
-    case 'moshpit':gs._directDmg=(gs._directDmg||0)+alive.length*3;break;
+    case 'moshpit':{const b=alive.length>=4?2:1;alive.forEach(m=>{m.atk+=b;m.permAtkBonus+=b});break}
     case 'resonancecard':target.tempAtkBonus+=(highAtk-(target.atk+(target.permAtkBonus||0)+(target.tempAtkBonus||0)));break;
     case 'demotape':gs._directDmg=(gs._directDmg||0)+Math.floor(target.atk*0.5);break;
     case 'burnset':drawCards(gs,1);break;
-    case 'herbmoney':gs._directDmg=(gs._directDmg||0)+gs.stash;break;
+    case 'herbmoney':{if(gs.stash>=10){gs.stash-=10;target.atk+=3;target.permAtkBonus+=3};break}
     case 'distortion':gs.corruption=Math.min(100,gs.corruption+15);alive.forEach(m=>m.tempAtkBonus+=1);break;
     case 'dialtoeleven':gs.corruption=Math.min(100,gs.corruption+10);alive.forEach(m=>m.tempAtkBonus+=3);break;
     case 'sigdecay':if(gs.hand.length>0)gs.discard.push(gs.hand.splice(rand(gs.hand.length),1)[0]);drawCards(gs,2);break;
@@ -390,16 +390,16 @@ function applyCard(card,gs,enemy){
 
     // ── NEW RIFF ──
     case 'feedbackscream':{const loss=target.maxHp-target.hp;target.tempAtkBonus+=loss;break}
-    case 'skullsplitter':gs._directDmg=(gs._directDmg||0)+8;if(enemy._hp<=8)gs.stash+=10;break;
+    case 'skullsplitter':{const b=(target.atk+(target.permAtkBonus||0))>=10?5:3;target.atk+=b;target.permAtkBonus+=b;break}
     case 'doomchord':target.tempAtkBonus+=4;if(gs.corruption>=50){const idx=stage.indexOf(target);[-1,1].forEach(d=>{const n=stage[idx+d];if(n&&!n.tooStoned)n.tempAtkBonus+=4})};break;
     case 'bloodharmony':{const idx=stage.indexOf(target);target.tempAtkBonus+=2;[-1,1].forEach(d=>{const n=stage[idx+d];if(n&&!n.tooStoned)n.tempAtkBonus+=2});break}
     case 'sonicboom':alive.forEach(m=>m.tempAtkBonus+=2);drawCards(gs,1);break;
     case 'tremolopick':target.tempAtkBonus+=(gs._cardsPlayedIds.length>=3?4:1);break;
     case 'powerslide':target.tempAtkBonus+=(target.keyword==='FRENZIED'?3:1);break;
-    case 'wallsound':alive.forEach(m=>m.tempAtkBonus+=3);gs._directDmg=(gs._directDmg||0)+alive.length*2;break;
+    case 'wallsound':alive.forEach(m=>{const b=2;m.atk+=b;m.permAtkBonus+=b});break;
     case 'shredsolo':target._encore=true;break; // same as encore for sim purposes
     case 'breakdown':target.tempAtkBonus+=2;break; // AI can't reliably be "last card"
-    case 'harmonicfb':gs._directDmg=(gs._directDmg||0)+gs._cardsPlayedIds.filter(id=>CARD_POOL[id]?.type==='RIFF').length*2;break;
+    case 'harmonicfb':{const riffs=gs._cardsPlayedIds.filter(id=>CARD_POOL[id]?.type==='RIFF').length;const b=Math.max(1,riffs);target.atk+=b;target.permAtkBonus+=b;break}
     case 'riffthief':{const last=gs._cardsPlayedIds[gs._cardsPlayedIds.length-1];if(last&&last!=='riffthief'&&last!=='echopedal'&&last!=='loopstation'&&CARD_POOL[last])applyCard({id:last,type:CARD_POOL[last].type,embers:0},gs,enemy);break}
 
     // ── NEW CORRUPT ──

@@ -1,0 +1,229 @@
+
+⛧ DECK OPTIMIZER — searching for 4 optimal decks across 1200 variations...
+
+
+════════════════════════════════════════════════════════════
+  🔍 Searching: THE SHREDDER
+  Aggro riff deck — hit fast, hit hard
+════════════════════════════════════════════════════════════
+  ✅ 10 improvements (iter 163, fitness 49.8, WR 86%)
+  ✅ Done! 16 improvements. WR=85%
+
+════════════════════════════════════════════════════════════
+  🔍 Searching: THE RITUALIST
+  Corruption-as-power — high risk, godlike damage
+════════════════════════════════════════════════════════════
+  ✅ 10 improvements (iter 279, fitness 34.5, WR 84%)
+  ✅ Done! 12 improvements. WR=82%
+
+════════════════════════════════════════════════════════════
+  🔍 Searching: THE ENGINEER
+  Combo deck — echo, copy, multiply, break the game
+════════════════════════════════════════════════════════════
+  ✅ 10 improvements (iter 54, fitness 38.3, WR 86%)
+  ✅ Done! 17 improvements. WR=92%
+
+════════════════════════════════════════════════════════════
+  🔍 Searching: THE SURVIVOR
+  Balanced — steady scaling, survives to late game
+════════════════════════════════════════════════════════════
+  ✅ 10 improvements (iter 268, fitness 40.5, WR 86%)
+  ✅ Done! 12 improvements. WR=81.5%
+
+
+════════════════════════════════════════════════════════════
+⛧ OPTIMIZATION COMPLETE — 4 DECK OPTIONS FOR REVIEW
+════════════════════════════════════════════════════════════
+
+
+── DECK 1: THE SHREDDER ──
+   Aggro riff deck — hit fast, hit hard
+   Win Rate: 85% | Fitness: 55.2
+   Strategy: RIFF 50% / CORRUPT 18% / UTIL 12% / EMBER 20%
+   Cards:
+     battlecry              ×3  RIFF     +1 ATK permanently (Guitar Tech: +2)
+     encore                 ×3  RIFF     Target attacks twice this strike
+     resonancecard          ×3  RIFF     Match target ATK to highest
+     amp                    ×2  RIFF     +ATK to target (amped flag for ×2)
+     newstrings             ×2  RIFF     +2 ATK permanently
+     possessedperf          ×2  RIFF     ×3 ATK all members this strike
+     heavyriff              ×2  RIFF     Target +ATK perm = number of buffs on them (snowba
+     moshpit                ×2  RIFF     +1 ATK perm all. 4+ alive = +2 each.
+     demotape               ×2  RIFF     Copy last riff played
+     distortion             ×2  CORRUPT  +15% corruption, all +1 temp ATK
+     staticcharge           ×2  CORRUPT  +4 embers if 0 corruption, else +2
+     controlfeedback        ×2  CORRUPT  Set corruption=50%, heal weakest full
+     soundcheck             ×2  UTILITY  Heal all 4 HP, hurt ones get +1 ATK
+     roadie                 ×2  UTILITY  Stone Shield + heal 2 HP
+     setlist                ×2  UTILITY  Draw 3 cards
+     setbreak               ×2  UTILITY  Discard 1, +3 embers, draw 1
+     groupie                ×2  EMBER    +2 embers, draw 1
+     powertap               ×2  EMBER    +2 embers
+     tappedout              ×2  EMBER    +5 embers next strike
+     riffthief              ×2  RIFF     Copy last card played this strike. Cast free.
+     devilsdice             ×2  RIFF     Roll d6. 1-2:nothing. 3-4:+3 ATK all. 5-6:+5 ATK +
+     feedbackscream         ×2  RIFF     Target +ATK equal to HP loss. Low HP = huge.
+     stagedive              ×1  RIFF     Deal target HP as direct damage
+     crowdsurf              ×1  RIFF     +1 ATK perm per card in hand when played.
+     soundwall              ×1  RIFF     +1 ATK perm to ALL alive members. Upgraded: +2.
+     deathriff              ×1  CORRUPT  60 × (1 - corruption/100) damage
+     burnset                ×1  RIFF     Discard up to 3, draw that +1
+     herbmoney              ×1  RIFF     Spend 10 stash. Target +3 ATK permanently.
+     dialtoeleven           ×1  CORRUPT  +10% corruption, all +3 temp ATK
+     sigdecay               ×1  CORRUPT  Discard 1, draw 2
+     darktuning             ×1  CORRUPT  corruption÷12 random +1 ATK perm
+     feedbackloop           ×1  CORRUPT  corruption÷2 direct damage
+     wakeup                 ×1  UTILITY  Heal all 2 HP, revive stoned
+     ampoverload            ×1  EMBER    +3 embers, lose 1 discard
+     soundboard             ×1  EMBER    +2 embers, draw 1 next strike
+     russianroulette        ×1  CORRUPT  FREE. d6. 1:stoned. 2-5:+4 ATK. 6:+8 ATK+shield.
+     ampfeedback            ×1  EMBER    +2 embers. Next RIFF costs -1.
+     breakdown              ×1  RIFF     +2 ATK. If last card before strike, +4.
+     loopstation            ×1  RIFF     Replay last TWO cards played this strike.
+     echopedal              ×1  RIFF     Replay last card played this strike (free).
+     bloodharmony           ×1  RIFF     Target + adjacent +2 ATK. Same keyword = +3.
+     powerslide             ×1  RIFF     FREE. +1 ATK. FRENZIED = +3.
+     seance                 ×1  CORRUPT  Heal all corruption÷4 HP
+     slowburn               ×1  EMBER    +1 now. +1 next 2 strikes.
+
+── DECK 2: THE RITUALIST ──
+   Corruption-as-power — high risk, godlike damage
+   Win Rate: 82% | Fitness: 36.2
+   Strategy: RIFF 33% / CORRUPT 36% / UTIL 12% / EMBER 19%
+   Cards:
+     battlecry              ×4  RIFF     +1 ATK permanently (Guitar Tech: +2)
+     encore                 ×3  RIFF     Target attacks twice this strike
+     infencore              ×3  RIFF     ALL alive members attack twice
+     heavyriff              ×3  RIFF     Target +ATK perm = number of buffs on them (snowba
+     resonancecard          ×3  RIFF     Match target ATK to highest
+     distortion             ×3  CORRUPT  +15% corruption, all +1 temp ATK
+     wakeup                 ×3  UTILITY  Heal all 2 HP, revive stoned
+     amp                    ×2  RIFF     +ATK to target (amped flag for ×2)
+     possessedperf          ×2  RIFF     ×3 ATK all members this strike
+     deathriff              ×2  CORRUPT  60 × (1 - corruption/100) damage
+     dialtoeleven           ×2  CORRUPT  +10% corruption, all +3 temp ATK
+     staticcharge           ×2  CORRUPT  +4 embers if 0 corruption, else +2
+     ampstatic              ×2  CORRUPT  +corruption÷12 temp ATK to target
+     seance                 ×2  CORRUPT  Heal all corruption÷4 HP
+     soundcheck             ×2  UTILITY  Heal all 4 HP, hurt ones get +1 ATK
+     setlist                ×2  UTILITY  Draw 3 cards
+     powertap               ×2  EMBER    +2 embers
+     tappedout              ×2  EMBER    +5 embers next strike
+     gearcheck              ×2  UTILITY  Draw 2, discard 1.
+     cursedstrings          ×2  CORRUPT  +3 ATK. Target cant be healed this fight.
+     infernalpact           ×2  CORRUPT  FREE. Corruption→66%. All +2 ATK perm.
+     soundboard             ×2  EMBER    +2 embers, draw 1 next strike
+     newstrings             ×1  RIFF     +2 ATK permanently
+     soundwall              ×1  RIFF     +1 ATK perm to ALL alive members. Upgraded: +2.
+     moshpit                ×1  RIFF     +1 ATK perm all. 4+ alive = +2 each.
+     demotape               ×1  RIFF     Copy last riff played
+     herbmoney              ×1  RIFF     Spend 10 stash. Target +3 ATK permanently.
+     sigdecay               ×1  CORRUPT  Discard 1, draw 2
+     feedbackloop           ×1  CORRUPT  corruption÷2 direct damage
+     controlfeedback        ×1  CORRUPT  Set corruption=50%, heal weakest full
+     bloodritual            ×1  CORRUPT  Sacrifice 25% HP, deal 6× as damage
+     setbreak               ×1  UTILITY  Discard 1, +3 embers, draw 1
+     groupie                ×1  EMBER    +2 embers, draw 1
+     ampoverload            ×1  EMBER    +3 embers, lose 1 discard
+     soulbargain            ×1  CORRUPT  FREE. +5 ATK. Target -3 HP. Corruption +5%.
+     offeringpit            ×1  CORRUPT  Target skips attack. Another +8 ATK. Corr +10%.
+     russianroulette        ×1  CORRUPT  FREE. d6. 1:stoned. 2-5:+4 ATK. 6:+8 ATK+shield.
+     ampfeedback            ×1  EMBER    +2 embers. Next RIFF costs -1.
+     carrioncall            ×1  CORRUPT  Revive stoned at 1 HP +5 ATK. Corr +20%.
+
+── DECK 3: THE ENGINEER ──
+   Combo deck — echo, copy, multiply, break the game
+   Win Rate: 92% | Fitness: 46.3
+   Strategy: RIFF 26% / CORRUPT 22% / UTIL 25% / EMBER 26%
+   Cards:
+     setlist                ×4  UTILITY  Draw 3 cards
+     battlecry              ×3  RIFF     +1 ATK permanently (Guitar Tech: +2)
+     distortion             ×3  CORRUPT  +15% corruption, all +1 temp ATK
+     darktuning             ×3  CORRUPT  corruption÷12 random +1 ATK perm
+     encore                 ×2  RIFF     Target attacks twice this strike
+     possessedperf          ×2  RIFF     ×3 ATK all members this strike
+     crowdsurf              ×2  RIFF     +1 ATK perm per card in hand when played.
+     heavyriff              ×2  RIFF     Target +ATK perm = number of buffs on them (snowba
+     deathriff              ×2  CORRUPT  60 × (1 - corruption/100) damage
+     ampstatic              ×2  CORRUPT  +corruption÷12 temp ATK to target
+     soundcheck             ×2  UTILITY  Heal all 4 HP, hurt ones get +1 ATK
+     roadie                 ×2  UTILITY  Stone Shield + heal 2 HP
+     setbreak               ×2  UTILITY  Discard 1, +3 embers, draw 1
+     wakeup                 ×2  UTILITY  Heal all 2 HP, revive stoned
+     groupie                ×2  EMBER    +2 embers, draw 1
+     powertap               ×2  EMBER    +2 embers
+     ampoverload            ×2  EMBER    +3 embers, lose 1 discard
+     soundboard             ×2  EMBER    +2 embers, draw 1 next strike
+     corrsiphon             ×2  EMBER    +3 embers. Corruption +8%.
+     backstagepass          ×2  UTILITY  Next card free. Draw 1.
+     venomriff              ×2  CORRUPT  +2 ATK. Boss DOT: 1/strike rest of fight.
+     bootlegcopy            ×2  UTILITY  Copy any card in hand. Temp copy.
+     secondwind             ×2  EMBER    Gain embers = empty slots.
+     amp                    ×1  RIFF     +ATK to target (amped flag for ×2)
+     newstrings             ×1  RIFF     +2 ATK permanently
+     infencore              ×1  RIFF     ALL alive members attack twice
+     soundwall              ×1  RIFF     +1 ATK perm to ALL alive members. Upgraded: +2.
+     burnset                ×1  RIFF     Discard up to 3, draw that +1
+     herbmoney              ×1  RIFF     Spend 10 stash. Target +3 ATK permanently.
+     dialtoeleven           ×1  CORRUPT  +10% corruption, all +3 temp ATK
+     sigdecay               ×1  CORRUPT  Discard 1, draw 2
+     staticcharge           ×1  CORRUPT  +4 embers if 0 corruption, else +2
+     controlfeedback        ×1  CORRUPT  Set corruption=50%, heal weakest full
+     bloodritual            ×1  CORRUPT  Sacrifice 25% HP, deal 6× as damage
+     tappedout              ×1  EMBER    +5 embers next strike
+     setlistrewrite         ×1  UTILITY  FREE. Look at top 3 of deck, reorder.
+     tremolopick            ×1  RIFF     +1 ATK. If 3+ cards this strike, +4 instead.
+     harmonicfb             ×1  RIFF     FREE. +1 ATK perm per RIFF card played this strike
+     ampfeedback            ×1  EMBER    +2 embers. Next RIFF costs -1.
+     necroticamp            ×1  CORRUPT  FREE. All +1 ATK per 20% corruption.
+     darkcrescendo          ×1  CORRUPT  FREE. If corr ≥80%, TRIPLE strike mult.
+
+── DECK 4: THE SURVIVOR ──
+   Balanced — steady scaling, survives to late game
+   Win Rate: 81.5% | Fitness: 41.7
+   Strategy: RIFF 35% / CORRUPT 24% / UTIL 16% / EMBER 24%
+   Cards:
+     battlecry              ×4  RIFF     +1 ATK permanently (Guitar Tech: +2)
+     distortion             ×3  CORRUPT  +15% corruption, all +1 temp ATK
+     amp                    ×2  RIFF     +ATK to target (amped flag for ×2)
+     infencore              ×2  RIFF     ALL alive members attack twice
+     possessedperf          ×2  RIFF     ×3 ATK all members this strike
+     stagedive              ×2  RIFF     Deal target HP as direct damage
+     crowdsurf              ×2  RIFF     +1 ATK perm per card in hand when played.
+     heavyriff              ×2  RIFF     Target +ATK perm = number of buffs on them (snowba
+     deathriff              ×2  CORRUPT  60 × (1 - corruption/100) damage
+     demotape               ×2  RIFF     Copy last riff played
+     staticcharge           ×2  CORRUPT  +4 embers if 0 corruption, else +2
+     ampstatic              ×2  CORRUPT  +corruption÷12 temp ATK to target
+     soundcheck             ×2  UTILITY  Heal all 4 HP, hurt ones get +1 ATK
+     roadie                 ×2  UTILITY  Stone Shield + heal 2 HP
+     setlist                ×2  UTILITY  Draw 3 cards
+     setbreak               ×2  UTILITY  Discard 1, +3 embers, draw 1
+     wakeup                 ×2  UTILITY  Heal all 2 HP, revive stoned
+     groupie                ×2  EMBER    +2 embers, draw 1
+     powertap               ×2  EMBER    +2 embers
+     soundboard             ×2  EMBER    +2 embers, draw 1 next strike
+     sonicboom              ×2  RIFF     All +2 ATK. Draw 1.
+     drainthecrowd          ×2  EMBER    +2 embers. Random member -2 HP.
+     encore                 ×1  RIFF     Target attacks twice this strike
+     soundwall              ×1  RIFF     +1 ATK perm to ALL alive members. Upgraded: +2.
+     moshpit                ×1  RIFF     +1 ATK perm all. 4+ alive = +2 each.
+     resonancecard          ×1  RIFF     Match target ATK to highest
+     herbmoney              ×1  RIFF     Spend 10 stash. Target +3 ATK permanently.
+     dialtoeleven           ×1  CORRUPT  +10% corruption, all +3 temp ATK
+     darktuning             ×1  CORRUPT  corruption÷12 random +1 ATK perm
+     feedbackloop           ×1  CORRUPT  corruption÷2 direct damage
+     controlfeedback        ×1  CORRUPT  Set corruption=50%, heal weakest full
+     seance                 ×1  CORRUPT  Heal all corruption÷4 HP
+     bloodritual            ×1  CORRUPT  Sacrifice 25% HP, deal 6× as damage
+     ampoverload            ×1  EMBER    +3 embers, lose 1 discard
+     graverobber            ×1  CORRUPT  Pull 2 from discard to hand. Corr +5%.
+     skullsplitter          ×1  RIFF     +3 ATK perm. If target 10+ ATK already, +5 instead
+     setlistrewrite         ×1  UTILITY  FREE. Look at top 3 of deck, reorder.
+     slowburn               ×1  EMBER    +1 now. +1 next 2 strikes.
+     pyromaniac             ×1  EMBER    +2 embers. Spend all = all +3 ATK.
+     russianroulette        ×1  CORRUPT  FREE. d6. 1:stoned. 2-5:+4 ATK. 6:+8 ATK+shield.
+     corrsiphon             ×1  EMBER    +3 embers. Corruption +8%.
+     venomriff              ×1  CORRUPT  +2 ATK. Boss DOT: 1/strike rest of fight.
+     loopstation            ×1  RIFF     Replay last TWO cards played this strike.
+     offeringpit            ×1  CORRUPT  Target skips attack. Another +8 ATK. Corr +10%.
