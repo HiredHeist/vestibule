@@ -1044,10 +1044,10 @@ const STARTER_PASSIVES=[
 // ═══════════════════════════════════════════════════════════
 const STARTER_DECKS=[
   {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. 10% win rate.',requirement:null,color:'#c8a060',hpScale:0.74},
-  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. Every card buffs or kills. 8% win rate.',requirement:'beat_standard',color:'#ff4400',hpScale:0.78},
+  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. Every card buffs or kills. 8% win rate.',requirement:'beat_standard',color:'#ff4400',hpScale:0.79},
   {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Embrace the darkness. 7% win rate.',requirement:'beat_shredder',color:'#cc44ff',hpScale:0.81},
-  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Find the combo. Copy the copier. 18 UTILITY cards. Break the game. 6% win rate.',requirement:'beat_ritualist',color:'#44aaff',hpScale:0.84},
-  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Extra strikes. Steady scaling. 5% win rate.',requirement:'beat_engineer',color:'#44cc44',hpScale:0.86},
+  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Find the combo. Copy the copier. 18 UTILITY cards. Break the game. 6% win rate.',requirement:'beat_ritualist',color:'#44aaff',hpScale:0.85},
+  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Extra strikes. Steady scaling. 5% win rate.',requirement:'beat_engineer',color:'#44cc44',hpScale:0.88},
 ]
 function getUnlockedDecks(){
   const achs=getAchievements()
