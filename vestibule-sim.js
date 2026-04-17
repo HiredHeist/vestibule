@@ -1,11 +1,12 @@
 #!/usr/bin/env node
+import{readFileSync}from'fs'
 // vestibule-sim.js v19.1 — Expert AI Simulator for Vestibule
 // Session 16 — +Immediate draws, 15-card loop — +Events, Corruption Thresholds, Blood Oath: ALL mechanics (artifacts, passives, loot, combos, multiplier, hellquake)
 // Usage: node vestibule-sim.js [numGames] [stake]  (default 5000 bronze)
-import{readFileSync}from'fs'
 
 const NUM_GAMES=parseInt(process.argv[2])||5000;
 const STAKE_ID=process.argv[3]||'bronze';
+const DECK_ID=process.argv[4]||'standard';
 const HP_OVERRIDE=parseFloat(process.argv[4])||0;
 let BOSS_HP_OVERRIDE=null;try{BOSS_HP_OVERRIDE=JSON.parse(readFileSync('/tmp/boss_hp_override.json','utf8'))}catch(e){}
 const STAKES={
@@ -110,8 +111,57 @@ const ALL_CARDS=[
   {id:'goingbroke',type:'RIFF',rarity:'Rare',embers:0,copies:0,shopOnly:true},
   {id:'moshpit',type:'RIFF',rarity:'Uncommon',embers:1,copies:2},
   {id:'bloodritual',type:'CORRUPT',rarity:'Rare',embers:2,copies:1},
+  // NEW CARDS
+  {id:'echopedal',type:'RIFF',rarity:'Uncommon',embers:1,copies:0},
+  {id:'loopstation',type:'RIFF',rarity:'Rare',embers:2,copies:0},
+  {id:'riffthief',type:'RIFF',rarity:'Rare',embers:2,copies:0},
+  {id:'feedbackscream',type:'RIFF',rarity:'Uncommon',embers:2,copies:0},
+  {id:'skullsplitter',type:'RIFF',rarity:'Uncommon',embers:3,copies:0},
+  {id:'doomchord',type:'RIFF',rarity:'Uncommon',embers:2,copies:0},
+  {id:'bloodharmony',type:'RIFF',rarity:'Common',embers:1,copies:0},
+  {id:'sonicboom',type:'RIFF',rarity:'Rare',embers:4,copies:0},
+  {id:'tremolopick',type:'RIFF',rarity:'Common',embers:1,copies:0},
+  {id:'powerslide',type:'RIFF',rarity:'Common',embers:0,copies:0},
+  {id:'shredsolo',type:'RIFF',rarity:'Rare',embers:2,copies:0},
+  {id:'harmonicfb',type:'RIFF',rarity:'Uncommon',embers:0,copies:0},
+  {id:'overdriveped',type:'RIFF',rarity:'Rare',embers:2,copies:0},
+  {id:'devilsdice',type:'RIFF',rarity:'Uncommon',embers:1,copies:0},
+  {id:'necroticamp',type:'RIFF',rarity:'Rare',embers:0,copies:0},
+  {id:'soulbargain',type:'CORRUPT',rarity:'Uncommon',embers:0,copies:0},
+  {id:'venomriff',type:'CORRUPT',rarity:'Uncommon',embers:1,copies:0},
+  {id:'offeringpit',type:'CORRUPT',rarity:'Rare',embers:2,copies:0},
+  {id:'cursedstrings',type:'CORRUPT',rarity:'Common',embers:1,copies:0},
+  {id:'graverobber',type:'CORRUPT',rarity:'Uncommon',embers:1,copies:0},
+  {id:'hexdecay',type:'CORRUPT',rarity:'Rare',embers:3,copies:0},
+  {id:'infernalpact',type:'CORRUPT',rarity:'Rare',embers:0,copies:0},
+  {id:'carrioncall',type:'CORRUPT',rarity:'Rare',embers:1,copies:0},
+  {id:'possessionriff',type:'CORRUPT',rarity:'Uncommon',embers:1,copies:0},
+  {id:'darkcrescendo',type:'CORRUPT',rarity:'Rare',embers:0,copies:0},
+  {id:'russianroulette',type:'CORRUPT',rarity:'Uncommon',embers:0,copies:0},
+  {id:'gearcheck',type:'UTILITY',rarity:'Common',embers:1,copies:0},
+  {id:'setlistrewrite',type:'UTILITY',rarity:'Common',embers:0,copies:0},
+  {id:'backstagepass',type:'UTILITY',rarity:'Uncommon',embers:2,copies:0},
+  {id:'venueswap',type:'UTILITY',rarity:'Uncommon',embers:1,copies:0},
+  {id:'doublebooking',type:'UTILITY',rarity:'Rare',embers:3,copies:0},
+  {id:'bootlegcopy',type:'UTILITY',rarity:'Uncommon',embers:1,copies:0},
+  {id:'secondwind',type:'EMBER',rarity:'Common',embers:0,copies:0},
+  {id:'pyromaniac',type:'EMBER',rarity:'Uncommon',embers:1,copies:0},
+  {id:'slowburn',type:'EMBER',rarity:'Common',embers:0,copies:0},
+  {id:'ampfeedback',type:'EMBER',rarity:'Common',embers:1,copies:0},
+  {id:'drainthecrowd',type:'EMBER',rarity:'Common',embers:0,copies:0},
+  {id:'corrsiphon',type:'EMBER',rarity:'Common',embers:0,copies:0},
 ];
 
+
+// DECK MANIFESTS
+const DECK_MANIFESTS={
+  standard:{amp:2,battlecry:4,newstrings:2,encore:3,infencore:3,possessedperf:2,stagedive:2,crowdsurf:2,heavyriff:2,soundwall:1,deathriff:2,moshpit:2,resonancecard:3,demotape:2,burnset:1,herbmoney:1,distortion:3,dialtoeleven:2,sigdecay:1,staticcharge:2,darktuning:2,ampstatic:2,feedbackloop:1,controlfeedback:1,seance:1,bloodritual:1,soundcheck:2,roadie:2,setlist:2,setbreak:2,wakeup:2,groupie:2,powertap:2,tappedout:2,ampoverload:1,soundboard:2},
+  shredder:{amp:2,battlecry:3,newstrings:2,encore:3,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,resonancecard:2,crowdsurf:2,demotape:2,soundwall:1,burnset:1,stagedive:1,herbmoney:1,echopedal:2,riffthief:2,feedbackscream:2,devilsdice:1,sonicboom:1,skullsplitter:1,tremolopick:1,harmonicfb:1,doomchord:1,distortion:2,staticcharge:2,deathriff:1,ampstatic:1,dialtoeleven:1,sigdecay:1,bloodritual:1,darktuning:1,soundcheck:2,setbreak:2,wakeup:2,roadie:1,setlist:1,powertap:2,tappedout:2,soundboard:2,groupie:1,ampoverload:1,corrsiphon:2,drainthecrowd:1},
+  ritualist:{amp:1,battlecry:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,resonancecard:2,crowdsurf:1,demotape:1,soundwall:1,moshpit:1,newstrings:1,herbmoney:1,burnset:1,distortion:3,darktuning:2,staticcharge:2,dialtoeleven:2,deathriff:2,ampstatic:2,seance:1,bloodritual:1,feedbackloop:1,controlfeedback:1,sigdecay:1,infernalpact:2,cursedstrings:2,possessionriff:1,soulbargain:1,hexdecay:1,offeringpit:1,carrioncall:1,russianroulette:1,soundcheck:2,roadie:2,wakeup:2,setbreak:2,gearcheck:1,doublebooking:1,powertap:2,corrsiphon:2,tappedout:1,groupie:1,soundboard:1,ampoverload:1,pyromaniac:1,ampfeedback:1,drainthecrowd:1},
+  engineer:{battlecry:3,amp:2,encore:2,possessedperf:2,heavyriff:2,crowdsurf:2,infencore:1,soundwall:1,burnset:1,shredsolo:2,sonicboom:2,feedbackscream:1,overdriveped:1,harmonicfb:1,tremolopick:1,distortion:2,darktuning:2,ampstatic:1,deathriff:1,staticcharge:1,feedbackloop:1,controlfeedback:1,seance:1,venomriff:2,darkcrescendo:1,setlist:3,soundcheck:2,wakeup:2,setbreak:2,roadie:1,bootlegcopy:2,backstagepass:2,setlistrewrite:2,venueswap:1,gearcheck:1,powertap:2,groupie:2,soundboard:2,corrsiphon:2,secondwind:2,tappedout:1,ampoverload:1,ampfeedback:1,drainthecrowd:1},
+  survivor:{battlecry:3,newstrings:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,crowdsurf:2,amp:1,soundwall:1,resonancecard:1,burnset:1,herbmoney:1,doomchord:2,sonicboom:1,necroticamp:1,distortion:2,staticcharge:2,darktuning:2,deathriff:2,controlfeedback:1,dialtoeleven:1,feedbackloop:1,seance:1,bloodritual:1,sigdecay:1,soundcheck:2,roadie:2,wakeup:2,setlist:2,setbreak:2,doublebooking:2,bootlegcopy:1,backstagepass:1,powertap:2,tappedout:2,ampoverload:2,drainthecrowd:2,groupie:1,soundboard:1,slowburn:1,pyromaniac:1,secondwind:1,corrsiphon:1,carrioncall:1},
+}
+const ACTIVE_DECK=DECK_MANIFESTS[DECK_ID]||DECK_MANIFESTS.standard
 // ── PACT REWARDS (12 options, sim picks best 1 of 2 offered) ──
 const PACT_IDS=['ember_surge','iron_strings','thick_skin','dark_bargain','speed_demon','blood_price','clean_living','corruption_engine','merchants_eye','stone_wall','sixth_slot','war_drums'];
 
@@ -221,7 +271,7 @@ function makeMember(base,foil,mythic,demonic){
   if(demonic){m.atk+=4;m.maxHp+=8;m.hp=m.maxHp}else if(mythic){m.atk+=2;m.maxHp+=4;m.hp=m.maxHp}else if(foil){m.atk+=1;m.maxHp+=2;m.hp=m.maxHp}
   return m;
 }
-function buildDeck(){const d=[];for(const c of ALL_CARDS.filter(c=>!c.shopOnly)){for(let i=0;i<(c.copies||2);i++)d.push({...c,uid:Math.random().toString(36).slice(2)})}return shuffle(d)}
+function buildDeck(){const d=[];for(const[id,copies]of Object.entries(ACTIVE_DECK)){const card=ALL_CARDS.find(c=>c.id===id);if(card)for(let i=0;i<copies;i++)d.push({...card,uid:Math.random().toString(36).slice(2)})}return shuffle(d)}
 function pickStartingPair(){const pool=ALL_MUSICIANS.filter(m=>!m.locked);let best=null,bs=-1;for(let i=0;i<40;i++){const a=pick(pool),b=pick(pool);if(a.id===b.id)continue;if(a.keyword==='ANCHOR'&&b.keyword==='ANCHOR')continue;const s=memberScore(a)+memberScore(b);if(s>bs){bs=s;best=[a,b]}}return best.map(b=>makeMember(b,false,false,false))}
 function arrangeStage(stage){
   const alive=stage.filter(m=>!m.tooStoned),stoned=stage.filter(m=>m.tooStoned);if(alive.length<=1)return stage;
@@ -374,6 +424,23 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
     case 'remaster':return hand.length>=4?44:10;
     case 'moshpit':{const al=alive.length;return al>=4?74:al>=3?60:38}
     case 'bloodritual':{const hp=alive.reduce((a,b)=>a.hp>b.hp?a:b).hp;return hp>=8?58:30}
+
+    // NEW CARDS scoring
+    case 'echopedal':return cardsPlayed>0?75:0;case 'loopstation':return cardsPlayed>=2?85:0;case 'riffthief':return cardsPlayed>0?70:0;
+    case 'feedbackscream':return alive.some(m=>m.hp<m.maxHp*0.6)?68:25;case 'skullsplitter':return highestAtk>=10?80:62;
+    case 'doomchord':return corruption>=50?78:55;case 'bloodharmony':return 52;case 'sonicboom':return 72;
+    case 'tremolopick':return cardsPlayed>=3?70:35;case 'powerslide':return alive.some(m=>m.keyword==='FRENZIED')?60:35;
+    case 'shredsolo':return highestAtk>=8?80:50;case 'harmonicfb':return(gs._cardsPlayedIds||[]).filter(x=>ALL_CARDS.find(c=>c.id===x&&c.type==='RIFF')).length>=3?78:25;
+    case 'overdriveped':return gs._strikeMult>=1.5?85:55;case 'devilsdice':return 55;case 'necroticamp':return corruption>=60?85:corruption>=40?60:20;
+    case 'soulbargain':return 72;case 'venomriff':return gs.fightIndex>=9?62:45;case 'offeringpit':return alive.length>=4?65:20;
+    case 'cursedstrings':return 55;case 'graverobber':return gs.discard.length>=4?62:20;case 'hexdecay':return enemy._hp>=500?75:45;
+    case 'infernalpact':return corruption<50?65:10;case 'carrioncall':return stage.some(m=>m.tooStoned)?90:0;
+    case 'possessionriff':return corruption>=50?70:corruption>=30?45:15;case 'darkcrescendo':return corruption>=80?98:0;
+    case 'russianroulette':return alive.length>=4?60:30;case 'gearcheck':return 48;case 'setlistrewrite':return 30;
+    case 'backstagepass':return embers>=2?65:30;case 'venueswap':return hand.length<=3?60:20;case 'doublebooking':return 92;
+    case 'bootlegcopy':return 55;case 'secondwind':return embers===0?90:embers<=2?50:10;case 'pyromaniac':return embers<=2?68:25;
+    case 'slowburn':return strikeNum===0?65:30;case 'ampfeedback':return embers<=2?70:30;
+    case 'drainthecrowd':return embers<=2?65:20;case 'corrsiphon':return embers<=2&&corruption<60?72:15;
     default:return 5;
   }
 }
@@ -428,6 +495,46 @@ function applyCardSim(card,gs,enemy){
     case 'moshpit':{const b=alive.length>=4?2:1;alive.forEach(m=>{m.atk+=b;m.permAtkBonus=(m.permAtkBonus||0)+b});break}
     case 'bloodritual':{const t=alive.reduce((a,b)=>a.hp>b.hp?a:b);const sac=Math.floor(t.hp*0.25);t.hp-=sac;gs._directDmg=(gs._directDmg||0)+sac*(card.upgraded?8:6);gs.corruption=Math.min(100,gs.corruption+15);break}
     case 'sabbathsigil':gs.corruption=100;if(!gs._hellquakeFired){gs._hellquakeFired=true;rollHellquake(gs);TRACK.hellquakesFired=(TRACK.hellquakesFired||0)+1};alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));gs._directDmg=(gs._directDmg||0)+15;gs._consumeCard=true;break;
+
+    // NEW CARDS apply
+    case 'echopedal':{const last=(gs._cardsPlayedIds||[])[gs._cardsPlayedIds.length-1];if(last&&!['echopedal','loopstation','riffthief'].includes(last)){const c=ALL_CARDS.find(x=>x.id===last);if(c)applyCardSim({...c,uid:'echo'},gs,enemy)};break}
+    case 'loopstation':{(gs._cardsPlayedIds||[]).slice(-2).filter(id=>!['echopedal','loopstation','riffthief'].includes(id)).forEach(id=>{const c=ALL_CARDS.find(x=>x.id===id);if(c)applyCardSim({...c,uid:'lp'},gs,enemy)});break}
+    case 'riffthief':{const last=(gs._cardsPlayedIds||[])[gs._cardsPlayedIds.length-1];if(last&&!['echopedal','loopstation','riffthief'].includes(last)){const c=ALL_CARDS.find(x=>x.id===last);if(c)applyCardSim({...c,uid:'rt'},gs,enemy)};break}
+    case 'feedbackscream':{const b=Math.min(20,target.maxHp-target.hp);target.atk+=b;target.permAtkBonus=(target.permAtkBonus||0)+b;break}
+    case 'skullsplitter':{const b=(target.atk+(target.permAtkBonus||0))>=10?5:3;target.atk+=b;target.permAtkBonus=(target.permAtkBonus||0)+b;break}
+    case 'doomchord':target.tempAtkBonus=(target.tempAtkBonus||0)+4;if(gs.corruption>=50){const idx=gs.stage.indexOf(target);[-1,1].forEach(d=>{const n=gs.stage[idx+d];if(n&&!n.tooStoned)n.tempAtkBonus=(n.tempAtkBonus||0)+4})};break;
+    case 'bloodharmony':{const idx=gs.stage.indexOf(target);target.tempAtkBonus=(target.tempAtkBonus||0)+2;[-1,1].forEach(d=>{const n=gs.stage[idx+d];if(n&&!n.tooStoned)n.tempAtkBonus=(n.tempAtkBonus||0)+2});break}
+    case 'sonicboom':alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+2);drawCards(gs,1);break;
+    case 'tremolopick':target.tempAtkBonus=(target.tempAtkBonus||0)+((gs._cardsPlayedIds||[]).length>=3?4:1);break;
+    case 'powerslide':target.tempAtkBonus=(target.tempAtkBonus||0)+(target.keyword==='FRENZIED'?3:1);break;
+    case 'shredsolo':target.encoreThisStrike=true;break;
+    case 'harmonicfb':{const r=(gs._cardsPlayedIds||[]).filter(x=>ALL_CARDS.find(c=>c.id===x&&c.type==='RIFF')).length;const b=Math.max(1,r);target.atk+=b;target.permAtkBonus=(target.permAtkBonus||0)+b;break}
+    case 'overdriveped':gs._strikeMult*=1.5;break;
+    case 'devilsdice':{const r=rand(6)+1;if(r>=3&&r<=4)alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+3);else if(r>=5){alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+5);drawCards(gs,2)};break}
+    case 'necroticamp':{const b=Math.floor(gs.corruption/20);alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+b);break}
+    case 'soulbargain':target.tempAtkBonus=(target.tempAtkBonus||0)+5;target.hp=Math.max(1,target.hp-3);gs.corruption=Math.min(100,gs.corruption+5);break;
+    case 'venomriff':target.tempAtkBonus=(target.tempAtkBonus||0)+2;gs._venomDot=(gs._venomDot||0)+1;break;
+    case 'offeringpit':{const other=alive.filter(m=>m.uid!==target.uid);if(other.length)pick(other).tempAtkBonus=(pick(other).tempAtkBonus||0)+8;gs.corruption=Math.min(100,gs.corruption+10);break}
+    case 'cursedstrings':target.tempAtkBonus=(target.tempAtkBonus||0)+3;break;
+    case 'graverobber':{for(let i=0;i<Math.min(2,gs.discard.length);i++)gs.hand.push(gs.discard.splice(rand(gs.discard.length),1)[0]);gs.corruption=Math.min(100,gs.corruption+5);break}
+    case 'hexdecay':gs._directDmg=(gs._directDmg||0)+Math.floor(enemy._hp*0.15);gs.corruption=Math.min(100,gs.corruption+15);break;
+    case 'infernalpact':gs.corruption=66;alive.forEach(m=>{m.atk+=2;m.permAtkBonus=(m.permAtkBonus||0)+2});break;
+    case 'carrioncall':{const st=gs.stage.find(m=>m.tooStoned);if(st){st.tooStoned=false;st.hp=1;st.atk+=5;st.permAtkBonus=(st.permAtkBonus||0)+5};gs.corruption=Math.min(100,gs.corruption+20);break}
+    case 'possessionriff':target.tempAtkBonus=(target.tempAtkBonus||0)+Math.floor(gs.corruption/10);break;
+    case 'darkcrescendo':if(gs.corruption>=80)gs._strikeMult*=3;break;
+    case 'russianroulette':{const r=rand(6)+1;if(r===1){target.tooStoned=true;target.hp=0}else if(r<=5)target.tempAtkBonus=(target.tempAtkBonus||0)+4;else{target.tempAtkBonus=(target.tempAtkBonus||0)+8;target.stoneShield=2};break}
+    case 'gearcheck':drawCards(gs,2);if(gs.hand.length>0)gs.discard.push(gs.hand.splice(rand(gs.hand.length),1)[0]);break;
+    case 'setlistrewrite':break;
+    case 'backstagepass':gs._nextCardFree=true;drawCards(gs,1);break;
+    case 'venueswap':gs.discard.push(...gs.hand);gs.hand=[];drawCards(gs,6);break;
+    case 'doublebooking':gs._extraStrikes=(gs._extraStrikes||0)+1;break;
+    case 'bootlegcopy':{if(gs.hand.length>0){const best=gs.hand.filter(c=>!['bootlegcopy','echopedal'].includes(c.id))[0];if(best)gs.hand.push({...best,uid:Math.random().toString(36).slice(2)})};break}
+    case 'secondwind':gs.embers=gs.maxEmbers;break;
+    case 'pyromaniac':gs.embers=Math.min(gs.maxEmbers,gs.embers+2);gs._pyromaniacActive=true;break;
+    case 'slowburn':gs.embers=Math.min(gs.maxEmbers,gs.embers+1);gs._slowBurnStrikes=(gs._slowBurnStrikes||0)+2;break;
+    case 'ampfeedback':gs.embers=Math.min(gs.maxEmbers,gs.embers+2);break;
+    case 'drainthecrowd':gs.embers=Math.min(gs.maxEmbers,gs.embers+2);{const v=pick(alive);v.hp=Math.max(1,v.hp-2)};break;
+    case 'corrsiphon':gs.embers=Math.min(gs.maxEmbers,gs.embers+3);gs.corruption=Math.min(100,gs.corruption+8);break;
   }
   if(enemy.passiveId==='cardHeal')enemy._hp=Math.min(enemy.maxHp,enemy._hp+2);
   if(enemy.passiveId==='cardHeal3b')enemy._hp=Math.min(enemy.maxHp,enemy._hp+3);
@@ -464,7 +571,7 @@ function simFight(gs,phaseHp,luciferPhase){
   const enemy={...baseEnemy,maxHp:effectiveMaxHp,_hp:effectiveMaxHp,_atkBuff:0}
   const circleNum=Math.floor(fightIdx/3)+1,isBoss=(fightIdx+1)%3===0
   gs.embers=gs.maxEmbers;gs._tappedOutNext=false;gs._drawNextStrike=0;gs._discardsLeft=MAX_DISCARDS;gs.stashStolen=0;gs._tripBuff=null;gs._corruptCardsGiven=[]
-  let maxStrikes=STAKE.maxStrikes+(gs._warDrums?1:0)
+  let maxStrikes=STAKE.maxStrikes+(gs._warDrums?1:0)+(gs._extraStrikes||0);gs._extraStrikes=0
   gs._strikesLeft=maxStrikes
   gs.stage=arrangeStage(gs.stage)
 
@@ -525,6 +632,7 @@ function simFight(gs,phaseHp,luciferPhase){
     const handSize=HAND_SIZE+(gs._speedDemon?1:0)+(gs._drawNextStrike||0);
     drawCards(gs,Math.max(0,handSize-gs.hand.length));gs._drawNextStrike=0;
     if(gs._tappedOutNext){gs.embers=Math.min(gs.maxEmbers,gs.embers+5);gs._tappedOutNext=false}
+    if(gs._slowBurnStrikes>0){gs.embers=Math.min(gs.maxEmbers,gs.embers+1);gs._slowBurnStrikes--}
     gs.embers=gs.maxEmbers;
     // Genre bonus: PROG_ROCK +1 draw
     gs._activeGenre=computeGenre(gs);
@@ -899,7 +1007,7 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
   return{won:gs.won,wthWon,deathFight,deathCause,fightsSurvived:gs.fightsSurvived,totalDamage:gs.totalDamage,highestStrike:gs.highestStrike,stageSize:gs.stage.length,mentorLinks:gs.mentorLinks.length,pacts:gs._pacts.length,upgrades:gs._upgradedCards.length}}
 
 // ── RUN SIMULATION ──
-console.log(`\n⛧ VESTIBULE SIM v19.1 [${STAKE.name}] — ${NUM_GAMES.toLocaleString()} games\n`);
+console.log(`\n⛧ VESTIBULE SIM v19.1 [${STAKE.name}] [${DECK_ID.toUpperCase()}] — ${NUM_GAMES.toLocaleString()} games\n`);
 const t0=Date.now();
 TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
