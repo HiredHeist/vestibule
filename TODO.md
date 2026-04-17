@@ -120,7 +120,7 @@ Ranked by ship-impact per line of code:
 - [x] **Boss telegraph** — "NEXT: X DMG → target" + special effects, live-calculated under boss name
 - [x] **Card count remaining — DECK/DISC counters above card fan** — "2 left in deck" on hover
 - [x] **Discard pile preview — click DISC counter to see pile (already shipped)**
-- [ ] **Drug pin tape marks** — zine-feel attachment detail
+- [x] **Drug pin tape marks** — diagonal tape strips on shroom/acid buttons, zine aesthetic
 
 ### Quality of Life
 - [x] **Auto-sort preference persists to localStorage**

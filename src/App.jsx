@@ -8224,6 +8224,9 @@ function App(){
                 opacity:heldShrooms?1:0.5,textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
               <span style={{fontSize:22,lineHeight:1,opacity:heldShrooms?1:0.35,filter:heldShrooms?'none':'grayscale(1)'}}>🍄</span>
               <span style={{fontSize:9,letterSpacing:2}}>{heldShrooms?'USE':'⛧'}</span>
+              {/* Tape marks — zine aesthetic */}
+              <div style={{position:'absolute',top:-3,left:8,width:24,height:7,background:'rgba(200,180,140,0.25)',transform:'rotate(-15deg)',borderRadius:1,pointerEvents:'none'}}/>
+              <div style={{position:'absolute',bottom:-3,right:8,width:24,height:7,background:'rgba(200,180,140,0.25)',transform:'rotate(-15deg)',borderRadius:1,pointerEvents:'none'}}/>
             </button>
             <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(200,152,56,0.6)',borderRadius:3,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--gold)',marginBottom:6,letterSpacing:2,textTransform:'uppercase'}}>🍄 Magic Mushrooms</div>
@@ -8243,6 +8246,9 @@ function App(){
                 opacity:heldAcid?1:0.5,textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
               <span style={{fontSize:22,lineHeight:1,opacity:heldAcid?1:0.35,filter:heldAcid?'none':'grayscale(1)'}}>🧪</span>
               <span style={{fontSize:9,letterSpacing:2}}>{heldAcid?'USE':'⛧'}</span>
+              {/* Tape marks — zine aesthetic */}
+              <div style={{position:'absolute',top:-3,right:8,width:24,height:7,background:'rgba(180,160,220,0.25)',transform:'rotate(15deg)',borderRadius:1,pointerEvents:'none'}}/>
+              <div style={{position:'absolute',bottom:-3,left:8,width:24,height:7,background:'rgba(180,160,220,0.25)',transform:'rotate(15deg)',borderRadius:1,pointerEvents:'none'}}/>
             </button>
             <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(180,80,220,0.6)',borderRadius:3,padding:'10px 14px',zIndex:9999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#cc88ff',marginBottom:6,letterSpacing:2,textTransform:'uppercase'}}>🧪 Blotter Acid</div>
