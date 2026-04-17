@@ -474,6 +474,29 @@ body {
   50% { box-shadow: 0 0 28px rgba(255,0,0,0.7), 0 0 60px rgba(200,0,0,0.3), 0 6px 24px rgba(0,0,0,0.85); border-color: rgba(255,80,0,0.9); }
 }
 
+/* Member hit shake — triggered when boss attacks a member */
+@keyframes memberHitShake {
+  0% { transform: translateX(0); }
+  15% { transform: translateX(-12px) rotate(-2deg); }
+  30% { transform: translateX(10px) rotate(1.5deg); }
+  45% { transform: translateX(-8px) rotate(-1deg); }
+  60% { transform: translateX(6px) rotate(0.5deg); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
+/* Boss desperation glow — pulsing red aura when boss below 20% HP */
+@keyframes bossDesperationGlow {
+  0%, 100% { box-shadow: inset 0 0 30px rgba(196,30,58,0.3), 0 0 40px rgba(196,30,58,0.4); }
+  50% { box-shadow: inset 0 0 50px rgba(196,30,58,0.5), 0 0 80px rgba(255,0,0,0.6); }
+}
+
+/* Riff chain warning glow — pulses on cards that could complete a chain */
+@keyframes riffChainGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(255,215,0,0.3), 0 4px 16px rgba(0,0,0,0.7); }
+  50% { box-shadow: 0 0 20px rgba(255,215,0,0.7), 0 0 40px rgba(255,180,0,0.3), 0 4px 16px rgba(0,0,0,0.7); }
+}
+
 /* Boss HP critical — bar pulses red/orange */
 @keyframes bossHpCritical {
   0%, 100% { filter: brightness(1); }

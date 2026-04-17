@@ -101,18 +101,18 @@ Ranked by ship-impact per line of code:
 
 ### Combat Flow
 - [x] **Ember forecast — hover dims pips to show remaining (already shipped)**
-- [ ] **Undo last card play** — one-step within same strike
+- [x] **Undo last card play** — Ctrl+Z + button, one-step within same strike
 - [x] **Hand size indicator** — "X/Y" at top of card fan, gold pulse at overcap
 - [x] **Fast-forward HOLD spacebar — already shipped (space key held = fast mode)**
 
 ### Visual Feedback (juice)
 - [x] **Victory fanfare — clutchFlash system: "⛧ VICTORY ⛧" / "SOLO VICTORY" / "BY THE SKIN"**
-- [ ] **Boss HP drain animation** — smooth countdown, not instant jump
+- [x] **Boss HP drain animation** — smooth 0.7s cubic-bezier transition on HP bar fill
 - [x] **Card upgrade shimmer — upgradeShimmer keyframe on upgraded cards**
-- [ ] **Member portrait shake** on hit
-- [ ] **Boss low-HP desperation glow**
-- [ ] **Mentor link visual chain**
-- [ ] **Riff chain warning glow** on hand cards about to chain
+- [x] **Member portrait shake** on hit — memberHitShake CSS animation triggered on boss impact
+- [x] **Boss low-HP desperation glow** — fracture at 10% + red vignette at 20%
+- [x] **Mentor link visual chain** — gold border, ⛓ pulse, bondColor system
+- [x] **Riff chain warning glow** — pulsing gold glow + ⛧ Chain badge, detects played cards too
 - [x] **"+×3 ATK active" badge** — shows ×X.XX CHAIN (gold) and/or +N TEMP ATK (purple) above damage preview when live
 
 ### Information & Clarity
@@ -126,7 +126,7 @@ Ranked by ship-impact per line of code:
 - [x] **Auto-sort preference persists to localStorage**
 - [x] **Bulk discard — select multiple then discard all (already shipped)**
 - [x] **Run timer** — MM:SS elapsed time on end screen stats grid
-- [ ] **"Why did I die?" tooltip** — brief analysis on death screen
+- [x] **"Why did I die?" tooltip** — DeathAnalysis component with contextual tips on death screen
 - [x] **Screen transitions — 350ms fade flash on state changes (already shipped)**
 - [ ] ~~Mute hotkey (M)~~ — **JV's lane (audio)**
 - [ ] ~~Corruption milestone audio~~ — **JV's lane (audio)**

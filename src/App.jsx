@@ -2488,7 +2488,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   )
 }
 
-function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption,animPhase,ghostCard,onQuickPlay}){
+function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption,animPhase,ghostCard,onQuickPlay}){
   const [over,setOver]=useState(false)
   const [showTip,setShowTip]=useState(false)
   if(!member){
@@ -2514,7 +2514,7 @@ function StageSlot({member,isAttacking,isStriking,strikeAnim,isDiceTarget,onDrop
         transform:st?'rotate(15deg) scale(0.95)':strikeAnim&&strikeAnim.phase==='dip'?'translateY(20px) scale(0.95) rotate(-3deg)':strikeAnim&&strikeAnim.phase==='wiggle'?'translateY(12px) scale(0.97) rotate(4deg)':strikeAnim&&strikeAnim.phase==='launch'?'translate('+strikeAnim.dx+'px,'+(strikeAnim.dy-80)+'px) scale(0.7) rotate(-5deg)':strikeAnim&&strikeAnim.phase==='impact'?'translate('+strikeAnim.dx+'px,'+strikeAnim.dy+'px) scale(1.15) rotate(0deg)':strikeAnim&&strikeAnim.phase==='return'?'translate(0px,-30px) scale(1.05)':'none',
         filter:strikeAnim&&strikeAnim.phase==='launch'?'blur(1.5px) drop-shadow(0 0 18px rgba(255,80,0,0.6))':'none',
         opacity:st?0.5:animPhase==='idle'&&!isAttacking&&buffCount===0?0.7:1,
-        animation:(!st&&!isAttacking&&!isDiceTarget&&!isStriking)?(nearDeath?'nearDeathPulse 0.8s ease-in-out infinite':'throb 3s ease-in-out infinite'):'none',
+        animation:isHit?'memberHitShake 0.4s ease-out':(!st&&!isAttacking&&!isDiceTarget&&!isStriking)?(nearDeath?'nearDeathPulse 0.8s ease-in-out infinite':'throb 3s ease-in-out infinite'):'none',
         transition:strikeAnim?'transform 0.25s cubic-bezier(0.2,0.8,0.3,1.2), border 0.2s, box-shadow 0.2s, opacity 0.3s':'border 0.2s, box-shadow 0.2s, opacity 0.3s, transform 0.3s',
         cursor:'grab',position:'relative'}}>
       {/* Keyword tooltip */}
@@ -2600,7 +2600,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         zIndex:isDragging?0:isHovered?9999:isSelected?50+index:10+index,
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:chainReady&&canAfford?'2px 4px 16px rgba(0,0,0,0.75),0 0 14px rgba(255,220,50,0.5),0 0 28px rgba(255,200,0,0.2)':(mastery.glow?'2px 4px 16px rgba(0,0,0,0.75),0 0 8px '+mastery.glow:'2px 4px 16px rgba(0,0,0,0.75)'),
         opacity:isDragging?0.4:unaffordable?0.55:1,
-        animation:shimmerAnim,
+        animation:chainReady&&canAfford?'riffChainGlow 1.2s ease-in-out infinite':shimmerAnim,
         margin:total>HAND_SIZE?'0 -28px':'0 -22px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
       {/* Hand-drawn top stripe — SVG path with wobble */}
       <svg style={{position:'absolute',top:0,left:0,right:0,width:'100%',height:8,pointerEvents:'none',zIndex:2}} viewBox="0 0 210 8" preserveAspectRatio="none">
@@ -4143,6 +4143,7 @@ function App(){
   const [strikingMemberIdx,setStrikingMemberIdx]=useState(-1)
   const [strikeAnim,setStrikeAnim]=useState(null) // {slotIdx,phase,dx,dy}
   const [bossStrikeAnim,setBossStrikeAnim]=useState(null) // {targetIdx,phase}
+  const [hitMemberIdx,setHitMemberIdx]=useState(-1) // which member is shaking from boss hit
   const [cardAbsorb,setCardAbsorb]=useState(null)
   const [flyingCard,setFlyingCard]=useState(null) // {emoji,type,fromX,fromY,toX,toY,key}
   const [shakeOffset,setShakeOffset]=useState({x:0,y:0})
@@ -6247,6 +6248,8 @@ function App(){
           // Phase 3: IMPACT — boss slams member, sound + shake
           setTimeout(()=>{
             setBossStrikeAnim({targetIdx:targetSlotIdx,phase:'impact',dx:bdx,dy:bdy})
+            setHitMemberIdx(targetSlotIdx)
+            setTimeout(()=>setHitMemberIdx(-1),500)
             playSfx('boss_attack')
             playHit()
             triggerShake(12,350)
@@ -8107,6 +8110,7 @@ function App(){
                 ghostCard={dragOverSlotIdx===i&&dragCardUid?hand.find(c=>c.uid===dragCardUid):null}
                 isAttacking={animPhase==='attacking'&&m&&!m.tooStoned}
                 isStriking={typeof strikingMemberIdx!=='undefined'&&strikingMemberIdx===i}
+                isHit={hitMemberIdx===i}
                 strikeAnim={strikeAnim&&strikeAnim.slotIdx===i?strikeAnim:null}
                 isDiceTarget={false}
                 innerRef={function(el){stageRefs.current[i]={current:el}}}
@@ -8384,7 +8388,7 @@ function App(){
             </div>}
           </>)})()}
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).filter(Boolean).map((card,i)=>(
-            <HandCard key={card.uid} card={card} index={i} total={hand.length} chainReady={RIFF_CHAINS.some(ch=>ch.cards.includes(card.id)&&hand.some(c2=>c2.uid!==card.uid&&ch.cards.includes(c2.id)))} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
+            <HandCard key={card.uid} card={card} index={i} total={hand.length} chainReady={RIFF_CHAINS.some(ch=>ch.cards.includes(card.id)&&(hand.some(c2=>c2.uid!==card.uid&&ch.cards.includes(c2.id))||(cardsPlayedRef.current||[]).some(pid=>ch.cards.includes(pid)&&pid!==card.id)))} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
               isHovered={hovered===i} isSelected={selected.includes(card.uid)||quickPlayCardUid===card.uid}
               anyHovered={hovered!==null}
               canAfford={card.embers===0||embers>=card.embers}
