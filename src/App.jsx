@@ -1043,11 +1043,11 @@ const STARTER_PASSIVES=[
 // STARTER DECKS — achievement-gated alternate starting decks
 // ═══════════════════════════════════════════════════════════
 const STARTER_DECKS=[
-  {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. 10% win rate.',requirement:null,color:'#c8a060',hpScale:0.76},
-  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. Every card buffs or kills. 8% win rate.',requirement:'beat_standard',color:'#ff4400',hpScale:0.81},
-  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Embrace the darkness. 7% win rate.',requirement:'beat_shredder',color:'#cc44ff',hpScale:0.83},
-  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Find the combo. Copy the copier. 18 UTILITY cards. Break the game. 6% win rate.',requirement:'beat_ritualist',color:'#44aaff',hpScale:0.87},
-  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Extra strikes. Steady scaling. 5% win rate.',requirement:'beat_engineer',color:'#44cc44',hpScale:0.90},
+  {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. 10% win rate.',requirement:null,color:'#c8a060',hpScale:0.74},
+  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. Every card buffs or kills. 8% win rate.',requirement:'beat_standard',color:'#ff4400',hpScale:0.78},
+  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Embrace the darkness. 7% win rate.',requirement:'beat_shredder',color:'#cc44ff',hpScale:0.81},
+  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Find the combo. Copy the copier. 18 UTILITY cards. Break the game. 6% win rate.',requirement:'beat_ritualist',color:'#44aaff',hpScale:0.84},
+  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Extra strikes. Steady scaling. 5% win rate.',requirement:'beat_engineer',color:'#44cc44',hpScale:0.86},
 ]
 function getUnlockedDecks(){
   const achs=getAchievements()
@@ -4198,6 +4198,7 @@ function App(){
   const [slowBurnStrikes,setSlowBurnStrikes]=useState(0)
   const [venomDotStacks,setVenomDotStacks]=useState(0)
   const [ampFeedbackDiscount,setAmpFeedbackDiscount]=useState(0)
+  const [pyromaniacActive,setPyromaniacActive]=useState(false)
   const [pendingDraw,setPendingDraw]=useState(0)
   const [bonusDiscards,setBonusDiscards]=useState(0) // extra discards next fight from descent
   const [bonusEmbers,setBonusEmbers]=useState(0) // extra embers next fight from descent
@@ -5154,8 +5155,8 @@ function App(){
       msg='💨 Second Wind! +'+gain+' embers! (filled to max)'
     }
     else if(card.id==='pyromaniac'){
-      setEmbers(p=>Math.min(maxEmbers,p+2))
-      msg='🧨 Pyromaniac! +2 embers! Spend all embers for +3 ATK to all!'
+      setEmbers(p=>Math.min(maxEmbers,p+2));setPyromaniacActive(true)
+      msg='🧨 Pyromaniac! +2 embers! Spend ALL before Strike → +3 ATK to all!'
     }
     else if(card.id==='slowburn'){
       setEmbers(p=>Math.min(maxEmbers,p+1));setSlowBurnStrikes(p=>p+2)
@@ -5992,6 +5993,7 @@ function App(){
 
     if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
     if(slowBurnStrikes>0){setEmbers(p=>Math.min(maxEmbers,p+1));addLog('🕯️ Slow Burn: +1 ember');setSlowBurnStrikes(p=>p-1)}
+    if(pyromaniacActive&&embers===0){setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3,tempBuff:true}):m));addLog('🧨 PYROMANIAC TRIGGERED! ALL +3 ATK! (spent all embers)');setPyromaniacActive(false)}
     if(venomDotStacks>0){const vd=venomDotStacks;setEnemyHp(p=>{const nh=Math.max(0,p-vd);if(nh<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);return nh});addLog('🐍 Venom DOT: boss takes '+vd+' damage')}
     if(pendingDraw>0){
       const _pd=pendingDraw
@@ -6541,7 +6543,7 @@ function App(){
     const _fmDiscards = MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0);
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({});victoryFiredRef.current=false;setSlowBurnStrikes(0);setAmpFeedbackDiscount(0)
+    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({});victoryFiredRef.current=false;setSlowBurnStrikes(0);setAmpFeedbackDiscount(0);setPyromaniacActive(false)
     // BOSS LOOT effects at fight start
     if(collectedLoot.includes('love_letter'))setNextCardFree(true)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
