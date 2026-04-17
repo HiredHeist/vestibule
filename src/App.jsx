@@ -548,7 +548,7 @@ const ALL_CARDS=[
   // ── NEW CARDS (for alternate decks, copies:0 = not in Standard) ──
   {id:'echopedal',name:'Echo Pedal',type:'RIFF',rarity:'Uncommon',emoji:'🔁',embers:1,effect:'Replay last card played this strike (free). COMBO ENABLER.',color:'#4488ff',typeColor:'#2266cc',copies:0},
   {id:'riffthief',name:'Riff Thief',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:2,effect:'Copy last card played this strike. Cast the copy free.',color:'#cc44ff',typeColor:'#aa22dd',copies:0},
-  {id:'feedbackscream',name:'Feedback Scream',type:'RIFF',rarity:'Uncommon',emoji:'📢',embers:2,effect:'+ATK perm = target HP loss. Low HP = huge damage.',color:'#ff4444',typeColor:'#cc2222',copies:0},
+  {id:'feedbackscream',name:'Feedback Scream',type:'RIFF',rarity:'Uncommon',emoji:'📢',embers:2,effect:'+4 ATK permanently. Target loses 2 HP. Power at a cost.',color:'#ff4444',typeColor:'#cc2222',copies:0},
   {id:'skullsplitter',name:'Skull Splitter',type:'RIFF',rarity:'Uncommon',emoji:'💀',embers:3,effect:'+3 ATK perm. If target has 10+ ATK, +5 instead.',color:'#cc2222',typeColor:'#aa0000',copies:0},
   {id:'doomchord',name:'Doom Chord',type:'RIFF',rarity:'Uncommon',emoji:'🎵',embers:2,effect:'+4 ATK. At ≥50% corruption, also +4 to adjacent members.',color:'#6622aa',typeColor:'#440088',copies:0},
   {id:'bloodharmony',name:'Blood Harmony',type:'RIFF',rarity:'Common',emoji:'🩸',embers:1,effect:'Target + adjacent both +2 ATK. Same keyword = +3.',color:'#cc4466',typeColor:'#aa2244',copies:0},
@@ -560,13 +560,13 @@ const ALL_CARDS=[
   {id:'devilsdice',name:"Devil's Dice",type:'RIFF',rarity:'Uncommon',emoji:'🎲',embers:1,effect:'Roll d6. 1-2: nothing. 3-4: +3 ATK all. 5-6: +5 ATK all + draw 2.',color:'#cc0000',typeColor:'#aa0000',copies:0},
   {id:'necroticamp',name:'Necrotic Amp',type:'RIFF',rarity:'Rare',emoji:'☠️',embers:0,effect:'FREE. All +1 ATK per 20% corruption. At 80% = +4 each.',color:'#44cc44',typeColor:'#22aa22',copies:0},
   {id:'soulbargain',name:'Soul Bargain',type:'CORRUPT',rarity:'Uncommon',emoji:'👿',embers:0,effect:'FREE. +5 ATK. Target loses 3 HP. Corruption +5%.',color:'#8800cc',typeColor:'#6600aa',copies:0},
-  {id:'venomriff',name:'Venom Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'🐍',embers:1,effect:'+2 ATK. Boss takes 1 damage per strike for rest of fight (stacks).',color:'#44aa44',typeColor:'#228822',copies:0},
+  {id:'venomriff',name:'Venom Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'🐍',embers:1,effect:'+3 ATK permanently. Corruption +5%.',color:'#44aa44',typeColor:'#228822',copies:0},
   {id:'offeringpit',name:'Offering to the Pit',type:'CORRUPT',rarity:'Rare',emoji:'🕳️',embers:2,effect:'Target skips next attack. Another member +8 ATK. Corruption +10%.',color:'#660066',typeColor:'#440044',copies:0},
   {id:'cursedstrings',name:'Cursed Strings',type:'CORRUPT',rarity:'Common',emoji:'🪡',embers:1,effect:'+3 ATK. Target cannot be healed this fight.',color:'#880088',typeColor:'#660066',copies:0},
   {id:'hexdecay',name:'Hex of Decay',type:'CORRUPT',rarity:'Rare',emoji:'🦠',embers:3,effect:'Boss loses 15% of current HP. Corruption +15%.',color:'#448844',typeColor:'#226622',copies:0},
   {id:'infernalpact',name:'Infernal Pact',type:'CORRUPT',rarity:'Rare',emoji:'📜',embers:0,effect:'FREE. Set corruption to 66%. All members +2 ATK permanently.',color:'#cc4400',typeColor:'#aa2200',copies:0},
   {id:'carrioncall',name:'Carrion Call',type:'CORRUPT',rarity:'Rare',emoji:'🦅',embers:1,effect:'Revive a Too Stoned member at 1 HP with +5 ATK. Corruption +20%.',color:'#886622',typeColor:'#664400',copies:0},
-  {id:'possessionriff',name:'Possession Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'👁️',embers:1,effect:'+ATK = corruption ÷ 10. At 70% corruption = +7 ATK.',color:'#aa44cc',typeColor:'#8822aa',copies:0},
+  {id:'possessionriff',name:'Possession Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'👁️',embers:1,effect:'+20 ATK this strike only. Corruption +10%. Full demon mode.',color:'#aa44cc',typeColor:'#8822aa',copies:0},
   {id:'darkcrescendo',name:'Dark Crescendo',type:'CORRUPT',rarity:'Rare',emoji:'🌑',embers:0,effect:'FREE. If corruption ≥80%, TRIPLE your strike multiplier.',color:'#220044',typeColor:'#110022',copies:0},
   {id:'russianroulette',name:'Russian Roulette',type:'CORRUPT',rarity:'Uncommon',emoji:'🔫',embers:0,effect:'FREE. Roll d6. 1: target Too Stoned. 2-5: +4 ATK. 6: +8 ATK + Shield.',color:'#cc2244',typeColor:'#aa0022',copies:0},
   {id:'gearcheck',name:'Gear Check',type:'UTILITY',rarity:'Common',emoji:'🔧',embers:1,effect:'Draw 2 cards, discard 1 from hand. Card selection.',color:'#888888',typeColor:'#666666',copies:0},
@@ -1026,7 +1026,7 @@ const STARTER_PASSIVES=[
   {id:'p2',name:'Roadie Crew',emoji:'🔧',effect:'At the start of each fight, one random member heals 3 HP.',cost:8},
   {id:'p3',name:'Merch Table',emoji:'👕',effect:'After each fight victory, gain +2 bonus Stash.',cost:6},
   {id:'p4',name:'Feedback Hum',emoji:'🔊',effect:'All EMBER type cards give 1 additional Ember when played.',cost:10},
-  {id:'p5',name:'Amp Stack',emoji:'📻',effect:'Sound Wall deals +4 additional damage. Heavy Riff deals +2 additional damage.',cost:10},
+  {id:'p5',name:'Amp Stack',emoji:'📻',effect:'Sound Wall gives +2 ATK perm to all (instead of +1). Heavy Riff cap raised to +25 (instead of +20).',cost:10},
   {id:'p6',name:'Cult Following',emoji:'🕯',effect:'Each time any member goes Too Stoned, gain 3 Stash.',cost:10},
   {id:'p7',name:'Guitar Tech',emoji:'🎛',effect:'Battle Cry gives +2 ATK permanently instead of +1.',cost:8},
   {id:'p8',name:'Green Room',emoji:'🛋',effect:'At the start of each fight, all members gain Stonewall (immune to first Too Stoned event).',cost:16},
@@ -4195,6 +4195,9 @@ function App(){
     setTimeout(()=>setVfxParticles(p=>p.filter(pp=>!ps.some(n=>n.id===pp.id))),1200)
   },[])
   const [pendingEmbers,setPendingEmbers]=useState(0)
+  const [slowBurnStrikes,setSlowBurnStrikes]=useState(0)
+  const [venomDotStacks,setVenomDotStacks]=useState(0)
+  const [ampFeedbackDiscount,setAmpFeedbackDiscount]=useState(0)
   const [pendingDraw,setPendingDraw]=useState(0)
   const [bonusDiscards,setBonusDiscards]=useState(0) // extra discards next fight from descent
   const [bonusEmbers,setBonusEmbers]=useState(0) // extra embers next fight from descent
@@ -4620,7 +4623,8 @@ function App(){
     const shredderDiscount=(hasShredder&&!shredderUsed&&card.type==='RIFF'&&card.embers>=1)?1:0
     const synesthesiaDiscount=(fightTripBuff==='SYNESTHESIA')?1:0
     const darkBargainDiscount=(chosenPacts.includes('dark_bargain')&&card.type==='CORRUPT'&&card.embers>=1)?1:0
-    const effectiveEmbers=(nextCardFreeRef.current&&card.id!=='doubledown')||allCardsFreeRef.current?0:Math.max(0,card.embers-foilDiscount-shredderDiscount-synesthesiaDiscount-darkBargainDiscount)
+    const ampFbDiscount=(ampFeedbackDiscount>0&&card.type==='RIFF')?1:0
+    const effectiveEmbers=(nextCardFreeRef.current&&card.id!=='doubledown')||allCardsFreeRef.current?0:Math.max(0,card.embers-foilDiscount-shredderDiscount-synesthesiaDiscount-darkBargainDiscount-ampFbDiscount)
   if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers, have '+embers+'.');return false}
   if(nextCardFreeRef.current&&card.id!=='doubledown'){setNextCardFree(false)}
     if(card.id==='stagedive'&&stageDiveUsed){addLog('⚠ Stage Dive once per round only.');return false}
@@ -4720,7 +4724,12 @@ function App(){
         msg='🎚 Corruption set to 50%.'
       }
     }
-    else if(card.id==='feedbackloop'){let dmg=Math.floor(corruption/(card.upgraded?1.5:2));if(collectedLoot.includes('heretics_brand'))dmg=Math.round(dmg*1.25);if(activeGenre==='BLACK_METAL')dmg=Math.round(dmg*1.25);const bc2=getCenter(bossRef);const flHp=Math.max(0,enemyHp-dmg);setEnemyHp(flHp);if(flHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);addFloat(dmg,bc2.x,bc2.y-60,'#aa1111',dmg>=15);playHit();updStat('totalDamage',dmg);if(flHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);msg='🎛 Feedback Loop: '+dmg+' damage! ('+Math.floor(corruption)+'% ÷ 2)'+(activeGenre==='BLACK_METAL'?' [Black Metal +25%]':'')}
+    else if(card.id==='feedbackloop'){
+      if(!m)return false;const bonus=corruption>=50?4:2
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus})
+      addFloat('+'+bonus+' ATK perm',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#aa1111',bonus>=4)
+      msg='🎛 Feedback Loop! '+m.name+' +'+bonus+' ATK permanently!'+(corruption>=50?' (≥50% corruption bonus!)':'')
+    }
     else if(card.id==='soundwall'){const p5Bonus=activePassives.some(p=>p.id==='p5')?1:0;const buff=1+p5Bonus+(card.upgraded?1:0);ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+buff,permAtkBonus:(m.permAtkBonus||0)+buff,buffCount:(m.buffCount||0)+1}):m);msg='🔈 Sound Wall! All members +'+buff+' ATK permanently!'+(p5Bonus?' (Amp Stack bonus!)':'')}
     else if(card.id==='groupie'){
       // Handled entirely in handleDropOnStage to avoid double setHand
@@ -4793,13 +4802,9 @@ function App(){
       addFloat('FREE!',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='deathriff'){
-      const ddmg=Math.min(60,Math.floor(100-corruption))
-      const bc=getCenter(bossRef)
-      const drHp=Math.max(0,enemyHp-ddmg);setEnemyHp(drHp);if(drHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
+      ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+2,permAtkBonus:(s.permAtkBonus||0)+2}):s)
       const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true)
-      addFloat(ddmg,bc.x,bc.y-60,'#880000',ddmg>=30);playHit();updStat('totalDamage',ddmg)
-      if(drHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
-      msg='💀 Death Riff! '+ddmg+' damage. Corruption +10%.'+(ddmg===0?' (maxed corruption)':'')
+      msg='💀 Death Riff! ALL members +2 ATK permanently! Corruption +10%'
     }
     else if(card.id==='ampoverload'){
       if(discardsLeft<=0){addLog('⚠ No discards left to sacrifice!');return false}
@@ -4811,11 +4816,9 @@ function App(){
     }
     else if(card.id==='ampstatic'){
       if(!m)return false
-      let bonus=Math.floor(corruption/10)
-      if(activeGenre==='BLACK_METAL')bonus=Math.round(bonus*1.25)
-      if(bonus===0){addLog('📶 Amp the Static needs Corruption > 0 to deal bonus ATK!');addFloat('Need Corruption!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#cc4400',false);return false}
+      const bonus=corruption>=50?4:2
       ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,tempBuff:true,_origAtk:m._origAtk||m.atk,buffCount:(m.buffCount||0)+1})
-      msg='📶 Amp the Static! '+m.name+' +'+bonus+' ATK this Strike!'
+      msg='📶 Amp the Static! '+m.name+' +'+bonus+' ATK this Strike!'+(corruption>=50?' (≥50% corruption bonus!)':'')
       addFloat('+'+bonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#cc4400',bonus>=4)
     }
     else if(card.id==='distortion'){
@@ -4825,9 +4828,9 @@ function App(){
       addFloat('+1 ATK',getCenter(bossRef).x,getCenter(bossRef).y-70,'#cc4400')
     }
     else if(card.id==='seance'){
-      const healAmt=Math.max(1,Math.floor(corruption/4))
+      const healAmt=corruption>=50?6:3
       ns=ns.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+healAmt)}):m)
-      msg='🔮 Séance! All members +'+healAmt+' HP'+(corruption>0?' ('+Math.floor(corruption)+'% ÷ 4)':' (min 1)')
+      msg='🔮 Séance! All members +'+healAmt+' HP'+(corruption>=50?' (≥50% corruption: bonus heal!)':'')
       addFloat('+'+healAmt+' HP',getCenter(bossRef).x,getCenter(bossRef).y-70,'#22aa44')
     }
     else if(card.id==='staticcharge'){
@@ -4837,18 +4840,16 @@ function App(){
       addFloat('+'+scBonus+' 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='darktuning'){
-      const stacks=Math.floor(corruption/12)
-      if(stacks===0){addLog('🌑 Need 15%+ Corruption!');return false}
-      let remaining=stacks
+      if(corruption<40){addLog('🌑 Need ≥40% Corruption for Dark Tuning!');return false}
+      const memberCount=corruption>=70?3:2
       const activeSlots=ns.map((m,i)=>m&&!m.tooStoned?i:-1).filter(i=>i>=0)
-      while(remaining>0&&activeSlots.length>0){
+      for(let i=0;i<Math.min(memberCount,activeSlots.length);i++){
         const ri=Math.floor(Math.random()*activeSlots.length)
-        const si=activeSlots[ri]
-        ns[si]=Object.assign({},ns[si],{atk:ns[si].atk+1})
-        remaining--
+        const si=activeSlots.splice(ri,1)[0]
+        ns[si]=Object.assign({},ns[si],{atk:ns[si].atk+1,permAtkBonus:(ns[si].permAtkBonus||0)+1})
       }
-      msg='🌑 Dark Tuning! +'+stacks+' ATK spread across the band permanently!'
-      addFloat('+'+stacks+' ATK!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#6600aa',stacks>=3)
+      msg='🌑 Dark Tuning! '+memberCount+' random members +1 ATK permanently!'+(corruption>=70?' (≥70% = 3 members!)':'')
+      addFloat('+1 ATK ×'+memberCount,getCenter(bossRef).x,getCenter(bossRef).y-80,'#6600aa',corruption>=70)
     }
     else if(card.id==='powertap'){
       const ptBonus=activeArtifacts.some(a=>a.id==='a5')?3:2
@@ -4992,19 +4993,26 @@ function App(){
     // ── NEW CARDS (30) ──────────────────────────────────────
     else if(card.id==='echopedal'){
       const lastCards=cardsPlayedRef.current;const lastId=lastCards.length>0?lastCards[lastCards.length-1]:null
-      if(lastId&&!['echopedal','riffthief','loopstation'].includes(lastId)){const lc=ALL_CARDS.find(c=>c.id===lastId);if(lc){msg='🔁 Echo Pedal! Replaying '+lc.name+'!'}else msg='🔁 Echo Pedal — no valid card to echo'}
-      else msg='🔁 Echo Pedal — nothing to replay yet'
+      if(lastId&&!['echopedal','riffthief'].includes(lastId)){
+        const lc=ALL_CARDS.find(c=>c.id===lastId)
+        if(lc){setHand(h=>[...h,Object.assign({},lc,{uid:uid()})]);nextCardFreeRef.current=true;setNextCardFree(true);msg='🔁 Echo Pedal! '+lc.name+' added to hand — play it FREE!'}
+        else msg='🔁 Echo Pedal — no valid card to echo'
+      } else msg='🔁 Echo Pedal — nothing to replay yet'
     }
     else if(card.id==='riffthief'){
       const lastCards=cardsPlayedRef.current;const lastId=lastCards.length>0?lastCards[lastCards.length-1]:null
-      if(lastId&&!['echopedal','riffthief','loopstation'].includes(lastId)){const lc=ALL_CARDS.find(c=>c.id===lastId);if(lc){msg='🎭 Riff Thief! Copying '+lc.name+' for free!'}else msg='🎭 Riff Thief — nothing to steal'}
-      else msg='🎭 Riff Thief — no card to copy'
+      if(lastId&&!['echopedal','riffthief'].includes(lastId)){
+        const lc=ALL_CARDS.find(c=>c.id===lastId)
+        if(lc){setHand(h=>[...h,Object.assign({},lc,{uid:uid()})]);nextCardFreeRef.current=true;setNextCardFree(true);msg='🎭 Riff Thief! Stole '+lc.name+' — play it FREE!'}
+        else msg='🎭 Riff Thief — nothing to steal'
+      } else msg='🎭 Riff Thief — no card to copy'
     }
     else if(card.id==='feedbackscream'){
-      if(!m)return false;const loss=m.maxHp-m.hp;const bonus=Math.min(20,loss)
-      ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus})
-      addFloat('+'+bonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4444',bonus>=10)
-      msg='📢 Feedback Scream! '+m.name+' +'+bonus+' ATK permanently! (HP loss = power)'
+      if(!m)return false
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+4,permAtkBonus:(m.permAtkBonus||0)+4,hp:Math.max(1,m.hp-2)})
+      addFloat('+4 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4444',true)
+      addFloat('-2 HP',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-40,'#ff0000',false)
+      msg='📢 Feedback Scream! '+m.name+' +4 ATK permanently! -2 HP.'
     }
     else if(card.id==='skullsplitter'){
       if(!m)return false;const bonus=(m.atk+(m.permAtkBonus||0))>=10?5:3
@@ -5064,8 +5072,11 @@ function App(){
       msg='👿 Soul Bargain! '+m.name+' +5 ATK, -3 HP! Corruption +5%'
     }
     else if(card.id==='venomriff'){
-      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,tempBuff:true,buffCount:(m.buffCount||0)+1})
-      msg='🐍 Venom Riff! '+m.name+' +2 ATK! Boss takes 1 DOT per strike!'
+      if(!m)return false
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+3,permAtkBonus:(m.permAtkBonus||0)+3})
+      setCorruption(p=>Math.min(100,p+5))
+      addFloat('+3 ATK perm',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#44aa44',false)
+      msg='🐍 Venom Riff! '+m.name+' +3 ATK permanently! Corruption +5%'
     }
     else if(card.id==='offeringpit'){
       if(!m)return false;const alive=ns.filter(s=>s&&!s.tooStoned&&s.uid!==m.uid)
@@ -5099,9 +5110,11 @@ function App(){
       msg='🦅 Carrion Call! '+ns[stoned].name+' rises from the dead at 1 HP +5 ATK! Corruption +20%'
     }
     else if(card.id==='possessionriff'){
-      if(!m)return false;const bonus=Math.floor(corruption/10)
-      ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,tempBuff:true,buffCount:(m.buffCount||0)+1})
-      msg='👁️ Possession Riff! '+m.name+' +'+bonus+' ATK! ('+Math.floor(corruption)+'% corruption ÷ 10)'
+      if(!m)return false
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+20,tempBuff:true,buffCount:(m.buffCount||0)+1})
+      setCorruption(p=>Math.min(100,p+10))
+      addFloat('+20 ATK!',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#aa44cc',true)
+      msg='👁️ POSSESSION! '+m.name+' +20 ATK this strike! Corruption +10%'
     }
     else if(card.id==='darkcrescendo'){
       if(corruption>=80){setStrikeMult(p=>Math.min(6.66,Math.round(p*3*100)/100));strikeMultRef.current=Math.min(6.66,Math.round(strikeMultRef.current*3*100)/100);msg='🌑 DARK CRESCENDO! TRIPLE STRIKE MULTIPLIER! ('+corruption+'% corruption)'}
@@ -5145,11 +5158,11 @@ function App(){
       msg='🧨 Pyromaniac! +2 embers! Spend all embers for +3 ATK to all!'
     }
     else if(card.id==='slowburn'){
-      setEmbers(p=>Math.min(maxEmbers,p+1))
+      setEmbers(p=>Math.min(maxEmbers,p+1));setSlowBurnStrikes(p=>p+2)
       msg='🕯️ Slow Burn! +1 ember now, +1 per strike for next 2 strikes.'
     }
     else if(card.id==='ampfeedback'){
-      setEmbers(p=>Math.min(maxEmbers,p+2))
+      setEmbers(p=>Math.min(maxEmbers,p+2));setAmpFeedbackDiscount(1)
       msg='🔌 Amp Feedback! +2 embers. Next RIFF costs 1 less.'
     }
     else if(card.id==='drainthecrowd'){
@@ -5173,6 +5186,7 @@ function App(){
     if(msg)addLog(msg)
     updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
     if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
+    if(card.type==='RIFF'&&ampFbDiscount>0)setAmpFeedbackDiscount(0)
     if(card.type==='RIFF')setLastRiffPlayed(card)
     // ── RIFF CHAIN COMBO DETECTION ──
     cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -5526,7 +5540,7 @@ function App(){
     if(strikesLeft>=3&&(fightIndex+1)%3===0)tryAchieve('perfect_strike')
     if(corruption>=100)tryAchieve('corruption_lord')
     if(stage.filter(m=>m&&!m.tooStoned).length>=5)tryAchieve('full_band')
-    if(fightIndex===26){tryAchieve('beat_lucifer');beatStake(activeStake.id)}
+    if(fightIndex===26){tryAchieve('beat_lucifer');beatStake(activeStake.id);tryAchieve('beat_'+selectedDeck)}
     const bq=BOSS_QUOTES[enemy&&enemy.id];if(bq)setTimeout(()=>addLog('💀 "'+bq+'"'),600)
     setTimeout(function(){
       const isCircleBoss=(fightIndex+1)%3===0
@@ -5977,6 +5991,8 @@ function App(){
     if(actives.length===0){addLog('⚠ No active members!');return}
 
     if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
+    if(slowBurnStrikes>0){setEmbers(p=>Math.min(maxEmbers,p+1));addLog('🕯️ Slow Burn: +1 ember');setSlowBurnStrikes(p=>p-1)}
+    if(venomDotStacks>0){const vd=venomDotStacks;setEnemyHp(p=>{const nh=Math.max(0,p-vd);if(nh<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);return nh});addLog('🐍 Venom DOT: boss takes '+vd+' damage')}
     if(pendingDraw>0){
       const _pd=pendingDraw
       const pdRes=drawUpTo(handRef.current,deckRef.current,discRef.current,handRef.current.length+_pd)
@@ -6525,7 +6541,7 @@ function App(){
     const _fmDiscards = MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0);
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({});victoryFiredRef.current=false
+    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({});victoryFiredRef.current=false;setSlowBurnStrikes(0);setAmpFeedbackDiscount(0)
     // BOSS LOOT effects at fight start
     if(collectedLoot.includes('love_letter'))setNextCardFree(true)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────

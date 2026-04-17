@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 public/feedback/submit.php
 public/feedback/submissions/
+
+# Sim scratch files
+calibrate-*.js
+deck-*-sim*.js
+vestibule-lab.js
+DECK_OPTIONS*.txt

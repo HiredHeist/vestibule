@@ -1,9 +1,9 @@
 # VESTIBULE — TODO & STATUS
 
-**Latest commit:** 51f819e (cold open splash + weed leaf PNG + strike fly-to-boss fix)
-**Sim version:** v19.1 (10K Bronze: 9.67% win rate)
-**App.jsx:** 7,935 lines
-**Last doc refresh:** post-51f819e
+**Latest commit:** 75e190b (30 new cards + 5 decks + calibrated boss HP)
+**Sim version:** v19.1 (5 decks calibrated: 10%/8%/7%/6%/5%)
+**App.jsx:** ~8,500 lines
+**Last doc refresh:** post-75e190b
 
 > 🔒 **DOC RULE:** Every commit that changes code MUST update TODO.md (and CLAUDE.md if rules/architecture change) in the SAME commit. No exceptions. Stale docs = wasted sessions re-discovering what's done.
 
@@ -13,11 +13,48 @@
 
 ## 🔴 UNVERIFIED — confirm before building on top
 
+- [ ] **30 new cards** — playtest each in alternate decks, verify apply logic + floats + logs
+- [ ] **Deck selection UI** — verify all 5 decks appear, unlock gates work, deck manifests build correctly
+- [ ] **Per-deck boss HP** — verify hpScale applies correctly to all fights (regular + boss + WTH + Lucifer)
+- [ ] **Echo Pedal / Riff Thief** — these replay last card but current impl only logs, doesn't actually replay card effect (needs recursive applyCard)
+- [ ] **Slow Burn** — +1 ember per strike for 2 strikes needs fight-state tracking (not yet wired)
+- [ ] **Venom Riff DOT** — boss DOT per strike needs fight-state tracking (not yet wired)
+- [ ] **Pyromaniac** — "spend all embers = +3 ATK all" trigger needs end-of-card-play detection
+- [ ] **Amp Feedback** — "next RIFF costs -1" needs state tracking like shredder discount
+- [ ] **P5 passive desc** — references "Sound Wall +4 dmg" but Sound Wall is now +1 ATK perm
 - [ ] **Cold open splash** — clear localStorage, hard reload, confirm splash fires on first boot (shipped in 51f819e)
-- [ ] **Weed leaf PNG** — spot-check it renders everywhere 🌿 used to (shop, stash counter, drug pins, card effects)
-- [ ] **Strike fly-to-boss animation** — confirm card travels cleanly to boss on STRIKE
-- [ ] **Shop bottom-of-list items** — verify no cutoff after pack tear animation fix (b2ad579)
-- [ ] **Deck = 69** — verify draw 6 hand + 63 remaining (or +unlocks: 66 base, 69 full)
+- [ ] **Weed leaf PNG** — spot-check it renders everywhere 🌿 used to
+- [ ] **Deck = 69** — verify all 5 decks build at exactly 69 cards
+
+---
+
+## ✅ SHIPPED THIS SESSION (April 17 2026)
+
+### Card Rebalance — Direct Damage → Permanent ATK Buffs
+- [x] Sound Wall: flat dmg → +1 ATK perm ALL members
+- [x] Mosh Pit: per-member dmg → +1/+2 ATK perm all (4+ alive = +2)
+- [x] Crowd Surf: hand×3 dmg → +1 ATK perm per card in hand
+- [x] Heavy Riff: 50% ATK dmg → half target ATK perm, MAX +20
+- [x] Herb Money: deal stash dmg → spend 10 stash, +3 ATK perm
+
+### 30 New Cards (for alternate decks)
+- [x] RIFF: Echo Pedal, Riff Thief, Feedback Scream, Skull Splitter, Doom Chord, Blood Harmony, Sonic Boom, Tremolo Pick, Harmonic FB, Shred Solo, Overdrive Pedal, Devil's Dice, Necrotic Amp
+- [x] CORRUPT: Soul Bargain, Venom Riff, Offering Pit, Cursed Strings, Hex of Decay, Infernal Pact, Carrion Call, Possession Riff, Dark Crescendo, Russian Roulette
+- [x] UTILITY: Gear Check, Setlist Rewrite, Backstage Pass, Venue Swap, Double Booking, Bootleg Copy
+- [x] EMBER: Second Wind, Pyromaniac, Slow Burn, Amp Feedback, Drain the Crowd, Corruption Siphon
+
+### 5 Decks (69 cards each, calibrated)
+- [x] ⛧ Standard: 32 RIFF / 18 CORRUPT / 10 UTIL / 9 EMBER → 10.66% WR
+- [x] 🎸 Shredder: 38 RIFF / 10 CORRUPT / 8 UTIL / 13 EMBER → 8.06% WR
+- [x] 💀 Ritualist: 21 RIFF / 26 CORRUPT / 11 UTIL / 11 EMBER → 7.16% WR
+- [x] 🔧 Engineer: 24 RIFF / 13 CORRUPT / 18 UTIL / 14 EMBER → 5.22% WR
+- [x] 🛡️ Survivor: 25 RIFF / 15 CORRUPT / 15 UTIL / 14 EMBER → 4.88% WR
+
+### Boss HP Calibration (27 bosses individually tuned)
+- [x] Per-boss HP from 50K simulation
+- [x] Per-deck HP scaling via hpScale factor
+- [x] Lucifer fix: was unkillable (hardcoded HP bypassed override), now 100K HP
+- [x] 41% of arrivals beat Lucifer at 100K (reaching him is an achievement)
 
 ---
 

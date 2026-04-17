@@ -415,11 +415,11 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
     case 'distortion':return 57;case 'dialtoeleven':return corruption<50?44:14;
     case 'controlfeedback':{const hpR=lowestHp.hp/lowestHp.maxHp;if(hpR<0.3)return 75;if(hpR<0.5&&corruption>=50)return 60;if(corruption>=70)return 55;if(corruption>=40)return 40;return 15}
     case 'sigdecay':return hand.length>=4?48:20;
-    case 'darktuning':return corruption>=45?57:15;case 'sabbathsigil':return gs.fightIndex>=18?37:10;
+    case 'darktuning':return corruption>=70?68:corruption>=40?55:10;case 'sabbathsigil':return gs.fightIndex>=18?37:10;
     case 'soundcheck':return anyHurt?58:30;case 'roadie':return alive.some(m=>m.hp<=3)?55:20;
     case 'wakeup':return stage.some(m=>m.tooStoned)?90:alive.some(m=>m.hp<m.maxHp*0.5)?30:8;
     case 'setlist':return hand.length<=4?47:18;
-    case 'seance':{const h=Math.floor(corruption/4);return h>=10?60:h>=5?42:15}
+    case 'seance':return corruption>=50?55:35;
     case 'demotape':return cardsPlayed>0?52:0;case 'burnset':return hand.length>=5?42:15;
     case 'remaster':return hand.length>=4?44:10;
     case 'moshpit':{const al=alive.length;return al>=4?74:al>=3?60:38}
@@ -427,15 +427,15 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
 
     // NEW CARDS scoring
     case 'echopedal':return cardsPlayed>0?75:0;case 'loopstation':return cardsPlayed>=2?85:0;case 'riffthief':return cardsPlayed>0?70:0;
-    case 'feedbackscream':return alive.some(m=>m.hp<m.maxHp*0.6)?68:25;case 'skullsplitter':return highestAtk>=10?80:62;
+    case 'feedbackscream':return 65;case 'skullsplitter':return highestAtk>=10?80:62;
     case 'doomchord':return corruption>=50?78:55;case 'bloodharmony':return 52;case 'sonicboom':return 72;
     case 'tremolopick':return cardsPlayed>=3?70:35;case 'powerslide':return alive.some(m=>m.keyword==='FRENZIED')?60:35;
     case 'shredsolo':return highestAtk>=8?80:50;case 'harmonicfb':return(gs._cardsPlayedIds||[]).filter(x=>ALL_CARDS.find(c=>c.id===x&&c.type==='RIFF')).length>=3?78:25;
     case 'overdriveped':return gs._strikeMult>=1.5?85:55;case 'devilsdice':return 55;case 'necroticamp':return corruption>=60?85:corruption>=40?60:20;
-    case 'soulbargain':return 72;case 'venomriff':return gs.fightIndex>=9?62:45;case 'offeringpit':return alive.length>=4?65:20;
+    case 'soulbargain':return 72;case 'venomriff':return 60;case 'offeringpit':return alive.length>=4?65:20;
     case 'cursedstrings':return 55;case 'graverobber':return gs.discard.length>=4?62:20;case 'hexdecay':return enemy._hp>=500?75:45;
     case 'infernalpact':return corruption<50?65:10;case 'carrioncall':return stage.some(m=>m.tooStoned)?90:0;
-    case 'possessionriff':return corruption>=50?70:corruption>=30?45:15;case 'darkcrescendo':return corruption>=80?98:0;
+    case 'possessionriff':return 78;case 'darkcrescendo':return corruption>=80?98:0;
     case 'russianroulette':return alive.length>=4?60:30;case 'gearcheck':return 48;case 'setlistrewrite':return 30;
     case 'backstagepass':return embers>=2?65:30;case 'venueswap':return hand.length<=3?60:20;case 'doublebooking':return 92;
     case 'bootlegcopy':return 55;case 'secondwind':return embers===0?90:embers<=2?50:10;case 'pyromaniac':return embers<=2?68:25;
@@ -486,7 +486,7 @@ function applyCardSim(card,gs,enemy){
     case 'demotape':gs._directDmg=(gs._directDmg||0)+Math.floor((target.atk+(target.permAtkBonus||0))*0.5);break;
     case 'resonancecard':target.tempAtkBonus=(target.tempAtkBonus||0)+Math.max(0,highestAtk-(target.atk+(target.permAtkBonus||0)+(target.tempAtkBonus||0)));break;
     case 'ampstatic':{let b=Math.floor(gs.corruption/12);if(gs._activeGenre==='BLACK_METAL')b=Math.round(b*1.25);target.tempAtkBonus=(target.tempAtkBonus||0)+b;break}
-    case 'darktuning':{const bu=Math.floor(gs.corruption/12);for(let i=0;i<bu;i++){const t=pick(alive);t.atk+=1;t.permAtkBonus=(t.permAtkBonus||0)+1}break}
+    case 'darktuning':{if(gs.corruption<40)break;const n=gs.corruption>=70?3:2;for(let i=0;i<Math.min(n,alive.length);i++){const t=pick(alive);t.atk+=1;t.permAtkBonus=(t.permAtkBonus||0)+1}break}
     case 'herbmoney':{if(gs.stash>=10){gs.stash-=10;target.atk+=3;target.permAtkBonus=(target.permAtkBonus||0)+3};break}
     case 'goingbroke':gs._directDmg=(gs._directDmg||0)+gs.stash;gs.stash=0;break;
     case 'burnset':drawCards(gs,1);break;
@@ -500,7 +500,7 @@ function applyCardSim(card,gs,enemy){
     case 'echopedal':{const last=(gs._cardsPlayedIds||[])[gs._cardsPlayedIds.length-1];if(last&&!['echopedal','loopstation','riffthief'].includes(last)){const c=ALL_CARDS.find(x=>x.id===last);if(c)applyCardSim({...c,uid:'echo'},gs,enemy)};break}
     case 'loopstation':{(gs._cardsPlayedIds||[]).slice(-2).filter(id=>!['echopedal','loopstation','riffthief'].includes(id)).forEach(id=>{const c=ALL_CARDS.find(x=>x.id===id);if(c)applyCardSim({...c,uid:'lp'},gs,enemy)});break}
     case 'riffthief':{const last=(gs._cardsPlayedIds||[])[gs._cardsPlayedIds.length-1];if(last&&!['echopedal','loopstation','riffthief'].includes(last)){const c=ALL_CARDS.find(x=>x.id===last);if(c)applyCardSim({...c,uid:'rt'},gs,enemy)};break}
-    case 'feedbackscream':{const b=Math.min(20,target.maxHp-target.hp);target.atk+=b;target.permAtkBonus=(target.permAtkBonus||0)+b;break}
+    case 'feedbackscream':target.atk+=4;target.permAtkBonus=(target.permAtkBonus||0)+4;target.hp=Math.max(1,target.hp-2);break;
     case 'skullsplitter':{const b=(target.atk+(target.permAtkBonus||0))>=10?5:3;target.atk+=b;target.permAtkBonus=(target.permAtkBonus||0)+b;break}
     case 'doomchord':target.tempAtkBonus=(target.tempAtkBonus||0)+4;if(gs.corruption>=50){const idx=gs.stage.indexOf(target);[-1,1].forEach(d=>{const n=gs.stage[idx+d];if(n&&!n.tooStoned)n.tempAtkBonus=(n.tempAtkBonus||0)+4})};break;
     case 'bloodharmony':{const idx=gs.stage.indexOf(target);target.tempAtkBonus=(target.tempAtkBonus||0)+2;[-1,1].forEach(d=>{const n=gs.stage[idx+d];if(n&&!n.tooStoned)n.tempAtkBonus=(n.tempAtkBonus||0)+2});break}
@@ -513,14 +513,14 @@ function applyCardSim(card,gs,enemy){
     case 'devilsdice':{const r=rand(6)+1;if(r>=3&&r<=4)alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+3);else if(r>=5){alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+5);drawCards(gs,2)};break}
     case 'necroticamp':{const b=Math.floor(gs.corruption/20);alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+b);break}
     case 'soulbargain':target.tempAtkBonus=(target.tempAtkBonus||0)+5;target.hp=Math.max(1,target.hp-3);gs.corruption=Math.min(100,gs.corruption+5);break;
-    case 'venomriff':target.tempAtkBonus=(target.tempAtkBonus||0)+2;gs._venomDot=(gs._venomDot||0)+1;break;
+    case 'venomriff':target.atk+=3;target.permAtkBonus=(target.permAtkBonus||0)+3;gs.corruption=Math.min(100,gs.corruption+5);break;
     case 'offeringpit':{const other=alive.filter(m=>m.uid!==target.uid);if(other.length)pick(other).tempAtkBonus=(pick(other).tempAtkBonus||0)+8;gs.corruption=Math.min(100,gs.corruption+10);break}
     case 'cursedstrings':target.tempAtkBonus=(target.tempAtkBonus||0)+3;break;
     case 'graverobber':{for(let i=0;i<Math.min(2,gs.discard.length);i++)gs.hand.push(gs.discard.splice(rand(gs.discard.length),1)[0]);gs.corruption=Math.min(100,gs.corruption+5);break}
     case 'hexdecay':gs._directDmg=(gs._directDmg||0)+Math.floor(enemy._hp*0.15);gs.corruption=Math.min(100,gs.corruption+15);break;
     case 'infernalpact':gs.corruption=66;alive.forEach(m=>{m.atk+=2;m.permAtkBonus=(m.permAtkBonus||0)+2});break;
     case 'carrioncall':{const st=gs.stage.find(m=>m.tooStoned);if(st){st.tooStoned=false;st.hp=1;st.atk+=5;st.permAtkBonus=(st.permAtkBonus||0)+5};gs.corruption=Math.min(100,gs.corruption+20);break}
-    case 'possessionriff':target.tempAtkBonus=(target.tempAtkBonus||0)+Math.floor(gs.corruption/10);break;
+    case 'possessionriff':target.tempAtkBonus=(target.tempAtkBonus||0)+20;gs.corruption=Math.min(100,gs.corruption+10);break;
     case 'darkcrescendo':if(gs.corruption>=80)gs._strikeMult*=3;break;
     case 'russianroulette':{const r=rand(6)+1;if(r===1){target.tooStoned=true;target.hp=0}else if(r<=5)target.tempAtkBonus=(target.tempAtkBonus||0)+4;else{target.tempAtkBonus=(target.tempAtkBonus||0)+8;target.stoneShield=2};break}
     case 'gearcheck':drawCards(gs,2);if(gs.hand.length>0)gs.discard.push(gs.hand.splice(rand(gs.hand.length),1)[0]);break;
