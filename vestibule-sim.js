@@ -165,7 +165,7 @@ const DECK_MANIFESTS={
   survivor:{battlecry:3,newstrings:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,crowdsurf:2,amp:1,soundwall:1,resonancecard:1,burnset:1,herbmoney:1,doomchord:2,sonicboom:1,necroticamp:1,distortion:2,staticcharge:2,darktuning:2,deathriff:2,controlfeedback:1,dialtoeleven:1,feedbackloop:1,seance:1,bloodritual:1,sigdecay:1,soundcheck:2,roadie:2,wakeup:2,setlist:2,setbreak:2,doublebooking:2,bootlegcopy:1,backstagepass:1,powertap:2,tappedout:2,ampoverload:2,drainthecrowd:2,groupie:1,soundboard:1,slowburn:1,pyromaniac:1,secondwind:1,corrsiphon:1,carrioncall:1},
 }
 const ACTIVE_DECK=DECK_MANIFESTS[DECK_ID]||DECK_MANIFESTS.standard
-const DECK_HP_SCALE={standard:1.65,shredder:1.80,ritualist:1.50,engineer:1.75,survivor:1.60}
+const DECK_HP_SCALE={standard:1.10,shredder:1.20,ritualist:0.95,engineer:1.10,survivor:1.05}
 const HP_SCALE=DECK_HP_SCALE[DECK_ID]||1.0
 // ── PACT REWARDS (12 options, sim picks best 1 of 2 offered) ──
 const PACT_IDS=['ember_surge','iron_strings','thick_skin','dark_bargain','speed_demon','blood_price','clean_living','corruption_engine','merchants_eye','stone_wall','sixth_slot','war_drums'];
@@ -663,7 +663,7 @@ function simFight(gs,phaseHp,luciferPhase){
       cost=Math.max(0,cost)
       gs.embers-=cost;gs.hand.splice(best.idx,1);
       applyCardSim(card,gs,enemy);if(gs._consumeCard){gs._consumeCard=false}else if(card.id!=='contract')gs.discard.push(card);cardsPlayed++;
-      gs._strikeMult=Math.min(66.6,Math.round((gs._strikeMult*1.08)*100)/100)
+      gs._strikeMult=Math.min(66.6,Math.round((gs._strikeMult*1.05)*100)/100)
       gs._cardsPlayedIds.push(card.id)
       if(card.type==='EMBER'&&gs.passives.some(p=>p.id==='p4'))gs.embers=Math.min(gs.maxEmbers,gs.embers+1)
       // Riff chain detection
@@ -704,7 +704,7 @@ function simFight(gs,phaseHp,luciferPhase){
     if(gs._tripBuff==='DIMENSIONAL_RIFT'||gs._tripBuff==='FRACTAL_VISION')strikeDmg*=2;
     // Apply strike multiplier (0.03 per card played + 0.15 per combo)
     // Corruption power multiplier
-    const corrMult=1+Math.floor(gs.corruption/20)*0.2
+    const corrMult=gs.corruption>=40?1+Math.floor((gs.corruption-25)/25)*0.15:1.0
     if(corrMult>1)strikeDmg=Math.round(strikeDmg*corrMult)
     // Artifact multiplier triggers
     let artMult=1.0
@@ -714,9 +714,9 @@ function simFight(gs,phaseHp,luciferPhase){
     for(const art of gs.artifacts){
       if(!art.multTrigger)continue
       let fires=0
-      if(art.multTrigger==='cards3'&&_cpc>=3)fires=1
-      if(art.multTrigger==='cards5'&&_cpc>=5)fires=1
-      if(art.multTrigger==='corrupt50'&&gs.corruption>=50)fires=1
+      if(art.multTrigger==='cards3'&&_cpc>=4)fires=1
+      if(art.multTrigger==='cards5'&&_cpc>=6)fires=1
+      if(art.multTrigger==='corrupt50'&&gs.corruption>=60)fires=1
       if(art.multTrigger==='perChain')fires=_cf
       if(art.multTrigger==='perStoned')fires=_sc
       if(fires>0)artMult*=Math.pow(art.mult,fires)
