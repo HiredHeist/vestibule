@@ -1302,7 +1302,16 @@ function Projectile({from,to,emoji,onDone,isBoss}){
 function Float({v,x,y,color,big,onDone}){
   color=color||'#dd2222';big=big||false
   useEffect(()=>{const t=setTimeout(onDone,1400);return ()=>clearTimeout(t)},[])
-  return <div style={{position:'absolute',left:x,top:y,transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:big?'5rem':'2.8rem',fontWeight:900,color:color,textShadow:`0 0 24px ${color}, 0 0 48px ${color}44`,pointerEvents:'none',zIndex:9000,animation:'popFloat 1.6s ease-out forwards'}}>{typeof v==='number'&&v>0?'-'+v:v}</div>
+  // Scale font size based on damage value — bigger hits = BIGGER numbers
+  let sz=big?'5rem':'2.8rem'
+  if(typeof v==='number'&&v>0){
+    if(v>=500)sz='8rem'
+    else if(v>=200)sz='6.5rem'
+    else if(v>=100)sz='5.5rem'
+    else if(v>=50)sz='4.5rem'
+    else if(v>=20)sz='3.5rem'
+  }
+  return <div style={{position:'absolute',left:x,top:y,transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:sz,fontWeight:900,color:color,textShadow:`0 0 24px ${color}, 0 0 48px ${color}44`,pointerEvents:'none',zIndex:9000,animation:'popFloat 1.6s ease-out forwards'}}>{typeof v==='number'&&v>0?'-'+v:v}</div>
 }
 
 function DiceRoll({target,onDone}){
@@ -3571,6 +3580,15 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         {victory?'⛧ Play Again ⛧':'↺ Play Again'}
       </button>
       <div style={{display:'flex',gap:12}}>
+        {!victory&&<button onClick={()=>{onReset()}}
+          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,
+            color:'#ff4444',background:'rgba(80,0,0,0.4)',
+            border:'1px solid #aa2222',borderRadius:3,
+            padding:'10px 24px',cursor:'pointer',textTransform:'uppercase',transition:'all 0.2s'}}
+          onMouseEnter={e=>e.currentTarget.style.background='rgba(120,0,0,0.6)'}
+          onMouseLeave={e=>e.currentTarget.style.background='rgba(80,0,0,0.4)'}>
+          ⚡ Quick Restart
+        </button>}
         <button onClick={handleShare}
           style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,
             color:copied?'#44cc44':'#e8a820',background:'rgba(50,35,5,0.4)',
@@ -7845,6 +7863,16 @@ function App(){
       {chainFlashActive&&<div style={{position:'absolute',inset:0,zIndex:8400,pointerEvents:'none',background:'radial-gradient(circle at 50% 50%,rgba(255,220,50,0.3),rgba(200,150,0,0.1),transparent)',animation:'chainFlash 0.6s ease-out forwards'}}/>}
       {damageFlash&&<div style={{position:'absolute',inset:0,zIndex:8500,pointerEvents:'none',background:'radial-gradient(ellipse at center,rgba(200,0,0,0.25),rgba(100,0,0,0.4))',animation:'flashFade 0.4s ease-out forwards'}}/>}
       {corruptHigh&&!corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 40%,rgba(100,0,0,0.15) 100%)',animation:bgPulseAnim}}/>}
+      {corruption>=80&&<div style={{position:'absolute',inset:0,zIndex:8001,pointerEvents:'none',
+        background:'radial-gradient(ellipse at center,transparent 30%,rgba(160,0,0,0.25) 100%)',
+        animation:'corruptionGlitch 3s linear infinite',
+        boxShadow:'inset 0 0 120px rgba(120,0,0,0.3)'}}/>}
+      {corruption>=80&&corruption<100&&<div style={{position:'absolute',top:12,left:'50%',transform:'translateX(-50%)',zIndex:8002,pointerEvents:'none',
+        fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,letterSpacing:6,textTransform:'uppercase',
+        color:'rgba(255,0,0,0.6)',textShadow:'0 0 8px rgba(255,0,0,0.4)',
+        animation:'corruptionGlitch 2s linear infinite'}}>
+        ⚠ THE DARKNESS CONSUMES ⚠
+      </div>}
       {corruptMax&&<div style={{position:'absolute',inset:0,zIndex:7999,pointerEvents:'none',background:'radial-gradient(ellipse at center,transparent 20%,rgba(140,0,0,0.3) 100%)',animation:'bgPulse 1s ease-in-out infinite'}}/>}
       {flyingCard&&(()=>{
         const fc=flyingCard
@@ -8476,13 +8504,13 @@ function App(){
       {preFightSplash&&<div style={{position:'absolute',inset:0,zIndex:9998,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,
         background:'radial-gradient(ellipse at center, rgba(10,4,2,0.97) 0%, rgba(0,0,0,0.99) 100%)',
         animation:'fadeIn 0.3s ease',pointerEvents:'none'}}>
-        <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'var(--ink-dim)',letterSpacing:6,textTransform:'uppercase',fontStyle:'italic',opacity:0.7}}>{preFightSplash.circle}</div>
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'var(--ink-bone)',textShadow:'0 0 40px rgba(196,30,58,0.5), 3px 3px 0 #000',letterSpacing:4,textAlign:'center',transform:'rotate(-1.5deg)',lineHeight:1}}>{preFightSplash.enemy.name}</div>
-        <svg width="400" height="6" viewBox="0 0 400 6" style={{marginTop:-4}}>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:16,color:'var(--ink-dim)',letterSpacing:6,textTransform:'uppercase',fontStyle:'italic',opacity:0.7,animation:'slideDown 0.4s ease-out'}}>{preFightSplash.circle}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'var(--ink-bone)',textShadow:'0 0 40px rgba(196,30,58,0.5), 3px 3px 0 #000',letterSpacing:4,textAlign:'center',transform:'rotate(-1.5deg)',lineHeight:1,animation:'nameSlamIn 0.5s cubic-bezier(0.2,0.8,0.3,1.15)'}}>{preFightSplash.enemy.name}</div>
+        <svg width="400" height="6" viewBox="0 0 400 6" style={{marginTop:-4,animation:'lineDrawIn 0.6s ease-out 0.3s both'}}>
           <path d="M 12 3 Q 100 1, 200 3 T 388 3" stroke="var(--blood)" strokeWidth="1" fill="none" opacity="0.6"/>
         </svg>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-rust)',fontWeight:900,letterSpacing:3,textTransform:'uppercase',marginTop:8}}>{preFightSplash.enemy.emoji} {preFightSplash.enemy.passive}</div>
-        <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'var(--ink-dim)',fontStyle:'italic',maxWidth:600,textAlign:'center',lineHeight:1.5,marginTop:24,padding:'0 40px',opacity:0.65}}>"{preFightSplash.quote}"</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-rust)',fontWeight:900,letterSpacing:3,textTransform:'uppercase',marginTop:8,animation:'fadeSlideUp 0.4s ease-out 0.5s both'}}>{preFightSplash.enemy.emoji} {preFightSplash.enemy.passive}</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'var(--ink-dim)',fontStyle:'italic',maxWidth:600,textAlign:'center',lineHeight:1.5,marginTop:24,padding:'0 40px',opacity:0.65,animation:'fadeSlideUp 0.4s ease-out 0.7s both'}}>"{preFightSplash.quote}"</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'var(--rot)',letterSpacing:8,textTransform:'uppercase',marginTop:24,animation:'pulse 1s ease infinite alternate'}}>entering the pit...</div>
       </div>}
 

@@ -38,7 +38,7 @@
 - [ ] 📸 **Achievement Polaroids** — slide in from edge, hand-scrawled
 
 ### Combat Feel
-- [ ] Damage number size scales with damage amount (10 = small, 100+ = HUGE)
+- [x] Damage number size scales with amount (20→3.5rem, 100→5.5rem, 500+→8rem)
 - [ ] Strike counter gets more dramatic each strike (bigger, redder, shakier)
 - [ ] Cards played this strike shown as ghostly trail near strike button
 - [ ] Brief screen dim between strikes for dramatic pacing
@@ -47,22 +47,22 @@
 
 ### Information & Clarity
 - [ ] Corruption trajectory warning ("at this rate, 100% in 2 fights")
-- [ ] Deck viewer button during combat (full deck contents sorted by type)
+- [x] Deck viewer button during combat — click DECK pile, 4 columns by type (already existed)
 - [ ] Card compare tooltip in shop (this card vs what's in your deck)
 - [ ] Combo discovery log (chains found this run, visible in pause menu)
 - [ ] Boss kill counter visible during fight ("3rd time fighting The Shade")
 
 ### Shop / Meta
-- [ ] Quick-restart button on death screen (skip stats, straight to new run)
+- [x] Quick-restart button on death screen — ⚡ Quick Restart on loss
 - [ ] "Last run" comparison on end screen (better/worse than previous)
 - [ ] Win streak fire border on main menu
 - [ ] Daily challenge mini-leaderboard
 
 ### Visual Flair
 - [ ] Card foil holographic shimmer on hover (enhanced)
-- [ ] Enemy intro animation (portrait slides in with name slam)
+- [x] Enemy intro animation — name slams from left, line draws, details stagger in
 - [ ] Member death: dramatic fade + skull icon + brief slow-mo
-- [ ] Corruption visual escalation: edges redden, text glitches at 80%+
+- [x] Corruption visual escalation — red vignette + glitch + THE DARKNESS CONSUMES at 80%+
 - [ ] Boss portrait cracks deepen as HP drops (expand fracture system)
 - [ ] Combo name display scales with chain multiplier
 - [ ] Card shuffle dust puff when deck reshuffles

@@ -491,6 +491,39 @@ body {
   50% { box-shadow: inset 0 0 50px rgba(196,30,58,0.5), 0 0 80px rgba(255,0,0,0.6); }
 }
 
+/* Enemy intro — name slams in from left with overshoot */
+@keyframes nameSlamIn {
+  0% { transform: translateX(-120px) rotate(-1.5deg) scale(0.8); opacity: 0; }
+  60% { transform: translateX(8px) rotate(-1.5deg) scale(1.03); opacity: 1; }
+  100% { transform: translateX(0) rotate(-1.5deg) scale(1); opacity: 1; }
+}
+
+/* Slide down for circle label */
+@keyframes slideDown {
+  0% { transform: translateY(-20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 0.7; }
+}
+
+/* Blood line draws in from center */
+@keyframes lineDrawIn {
+  0% { transform: scaleX(0); opacity: 0; }
+  100% { transform: scaleX(1); opacity: 1; }
+}
+
+/* Fade + slide up for details */
+@keyframes fadeSlideUp {
+  0% { transform: translateY(12px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Corruption escalation — screen edge glitch at 80%+ */
+@keyframes corruptionGlitch {
+  0%, 92%, 100% { opacity: 0.6; transform: translate(0, 0); }
+  93% { opacity: 0.8; transform: translate(-2px, 1px); }
+  95% { opacity: 0.4; transform: translate(1px, -1px); }
+  97% { opacity: 0.9; transform: translate(2px, 0); }
+}
+
 /* Riff chain warning glow — pulses on cards that could complete a chain */
 @keyframes riffChainGlow {
   0%, 100% { box-shadow: 0 0 8px rgba(255,215,0,0.3), 0 4px 16px rgba(0,0,0,0.7); }
