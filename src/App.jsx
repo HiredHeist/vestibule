@@ -285,7 +285,7 @@ const REWARD_TIPS={
   's_stash':'Adds 15 to your permanent stash balance.',
   's_ember':'Permanently increases your max embers by 1 for the rest of the run.',
   's_corrupt':'Reduces your current corruption by 15% immediately.',
-  's_atk':'One random alive band member gains +1 ATK permanentlyanently.',
+  's_atk':'One random alive band member gains +1 ATK permanently.',
   's_draw1':'Draw 1 extra card at the start of your next fight.',
   's_discard':'Start the next fight with 5 discards instead of 4.',
   's_card':'A random Common rarity card is added to your deck permanently.',
@@ -295,7 +295,7 @@ const REWARD_TIPS={
   'm_corrupt':'Resets your corruption to 0% immediately.',
   'm_draw2':'Draw 2 extra cards at the start of your next fight.',
   'm_card':'A random Uncommon rarity card is added to your deck permanently.',
-  'm_allatk':'Every alive band member gains +1 ATK permanentlyanently.',
+  'm_allatk':'Every alive band member gains +1 ATK permanently.',
   'm_stash40':'Adds 40 to your permanent stash balance.',
   'm_delete':'Permanently removes a random Common card from your deck. Thins your deck!',
   'm_free':'The first card you play next fight costs 0 embers.',
@@ -402,7 +402,7 @@ const STREAK_BONUSES=[
 
 const PACT_REWARDS=[
   {id:'ember_surge',name:'Ember Surge',emoji:'🔥',desc:'+1 max Embers permanently.',color:'#ff6600'},
-  {id:'iron_strings',name:'Iron Strings',emoji:'🎸',desc:'All +1 ATK permanentlyanently.',color:'#ee2222'},
+  {id:'iron_strings',name:'Iron Strings',emoji:'🎸',desc:'All +1 ATK permanently.',color:'#ee2222'},
   {id:'thick_skin',name:'Thick Skin',emoji:'🛡',desc:'All +3 max HP permanently.',color:'#33dd33'},
   {id:'dark_bargain',name:'Dark Bargain',emoji:'🌑',desc:'All CORRUPT cards cost 1 less Ember.',color:'#cc44ff'},
   {id:'speed_demon',name:'Speed Demon',emoji:'⚡',desc:'Draw 1 extra card per Strike.',color:'#ffdd00'},
@@ -456,7 +456,7 @@ function beatStake(stakeId){
 // ═══ CORRUPTION DECK — cards added to hand when crossing corruption thresholds ═══
 const CORRUPTION_CARDS={
   25:{id:'dark_whisper',name:'Dark Whisper',type:'CORRUPT',rarity:'Common',emoji:'👁',embers:0,effect:'FREE. Target +2 ATK. +5% Corruption.',color:'#aa1111',typeColor:'#880000'},
-  50:{id:'blood_price',name:'Blood Price',type:'CORRUPT',rarity:'Uncommon',emoji:'🩸',embers:0,effect:'FREE. Target +4 ATK permanentlyanently. -3 HP to that member.',color:'#aa1111',typeColor:'#880000'},
+  50:{id:'blood_price',name:'Blood Price',type:'CORRUPT',rarity:'Uncommon',emoji:'🩸',embers:0,effect:'FREE. Target +4 ATK permanently. -3 HP to that member.',color:'#aa1111',typeColor:'#880000'},
   75:{id:'void_pact',name:'Void Pact',type:'CORRUPT',rarity:'Rare',emoji:'🌀',embers:0,effect:'FREE. All members +2 ATK this Strike. +10% Corruption.',color:'#aa1111',typeColor:'#880000'},
 }
 const RIFF_CHAINS=[
@@ -504,17 +504,17 @@ const ALL_CARDS=[
   {id:'tappedout',name:'Tapped Out',type:'EMBER',rarity:'Uncommon',emoji:'🪙',embers:0,effect:'Gain 5 Embers at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'controlfeedback',name:'Controlled Feedback',type:'CORRUPT',rarity:'Uncommon',emoji:'🎚',embers:2,effect:'Set Corruption to 50%. Heal target member to full HP.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:0,effect:'Select up to 3 cards first, then play this to discard them and draw that many +1. (No selection = draw 1 card.)',color:'#9933cc',typeColor:'#7722aa',copies:1},
-  {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:2,effect:'+1 ATK permanentlyanently to ALL alive members. The whole band gets louder.',color:'#9933cc',typeColor:'#7722aa',copies:1},
+  {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:2,effect:'+1 ATK permanently to ALL alive members. The whole band gets louder.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:4,effect:'Deal target HP to boss. 1/round.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'If Corruption >=60%, double ALL ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:0,shopOnly:true},
   {id:'infencore',name:'Infernal Encore',type:'RIFF',rarity:'Rare',emoji:'👿',embers:3,effect:'ALL members attack again simultaneously.',color:'#9933cc',typeColor:'#7722aa',copies:3},
   {id:'remaster',name:'The Remaster',type:'UTILITY',rarity:'Rare',emoji:'🎙',embers:0,effect:'Select 1 card in hand, then play this to delete it and draw 3 cards.',color:'#22aa44',typeColor:'#118833',copies:0,shopOnly:true},
-  {id:'whispercard',name:'Dark Whisper',type:'CORRUPT',rarity:'Rare',emoji:'🌀',embers:0,effect:'FREE. Target member +2 ATK permanentlyanently. Corruption gift at 25%.',color:'#aa1111',typeColor:'#880000',copies:0},
+  {id:'whispercard',name:'Dark Whisper',type:'CORRUPT',rarity:'Rare',emoji:'🌀',embers:0,effect:'FREE. Target member +2 ATK permanently. Corruption gift at 25%.',color:'#aa1111',typeColor:'#880000',copies:0},
   {id:'hungercard',name:'Hungering Flame',type:'CORRUPT',rarity:'Rare',emoji:'🔥',embers:0,effect:'FREE. All members +1 ATK this Strike. Draw 2 cards. Corruption gift at 50%.',color:'#aa1111',typeColor:'#880000',copies:0},
   {id:'madnesscard',name:'Madness Unleashed',type:'CORRUPT',rarity:'Rare',emoji:'💀',embers:0,effect:'FREE. Deal 15% of enemy max HP as direct damage. Corruption gift at 75%.',color:'#aa1111',typeColor:'#880000',copies:0},
-  {id:'sabbathsigil',name:'Black Sabbath Sigil',type:'CORRUPT',rarity:'Rare',emoji:'⛧',embers:2,effect:'CONSUMABLE. Corruption → 100%. Hellquake d10. Card is destroyed after use.',color:'#aa1111',typeColor:'#880000',copies:0,consumable:true,shopCost:42,shopOnly:true},
+  {id:'sabbathsigil',name:'Black Sabbath Sigil',type:'CORRUPT',rarity:'Rare',emoji:'⛧',embers:0,effect:'FREE. Corruption → 100%. Hellquake d10. Card is destroyed after use. EMBRACE THE VOID.',color:'#aa1111',typeColor:'#880000',copies:0,consumable:true,shopCost:20,shopOnly:true},
   {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:4,effect:'All deal ×3 ATK this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'crowdsurf',name:'Crowd Surf',type:'RIFF',rarity:'Common',emoji:'🏄',embers:2,effect:'Target gains +1 ATK permanentlyanently per card in hand. Big hands = big gains.',color:'#9933cc',typeColor:'#7722aa',copies:2},
+  {id:'crowdsurf',name:'Crowd Surf',type:'RIFF',rarity:'Common',emoji:'🏄',embers:2,effect:'Target gains +1 ATK permanently per card in hand. Big hands = big gains.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'doubledown',name:'Double Down',type:'RIFF',rarity:'Uncommon',emoji:'🎰',embers:1,effect:'The next card played this Strike costs 0 Embers.',color:'#9933cc',typeColor:'#7722aa',copies:2,shopOnly:true},
   {id:'deathriff',name:'Death Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'💀',embers:1,effect:'60 DMG scaled by clarity (low corruption = more). +10% Corruption.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'ampoverload',name:'Amp Overload',type:'EMBER',rarity:'Uncommon',emoji:'🔋',embers:0,effect:'+3 Embers. Costs 1 Discard.',color:'#c87820',typeColor:'#a06010',copies:1},
@@ -529,31 +529,31 @@ const ALL_CARDS=[
   {id:'setbreak',name:'Smoke Break',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Select 1 card first, then play to discard it. Gain 2 Embers. -15% Corruption. Draw 1 card. (Random if no selection)',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'heavyriff',name:'Heavy Riff',type:'RIFF',rarity:'Uncommon',emoji:'🥊',embers:2,effect:'Target gains +ATK perm equal to HALF target current ATK (max +20). The stronger they are, the harder this hits.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'resonancecard',name:'Resonance',type:'RIFF',rarity:'Uncommon',emoji:'🌀',embers:1,effect:'Target member ATK becomes equal to highest ATK on stage.',color:'#9933cc',typeColor:'#7722aa',copies:3},
-  {id:'herbmoney',name:'Herb Money',type:'RIFF',rarity:'Uncommon',emoji:'🌿',embers:1,effect:'Spend 10 Stash. Target +3 ATK permanentlyanently. Cash into power.',color:'#9933cc',typeColor:'#7722aa',copies:1},
+  {id:'herbmoney',name:'Herb Money',type:'RIFF',rarity:'Uncommon',emoji:'🌿',embers:1,effect:'Spend 10 Stash. Target +3 ATK permanently. Cash into power.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'goingbroke',name:'Going Broke',type:'RIFF',rarity:'Rare',emoji:'💸',embers:0,effect:'Spend ALL your Stash. Deal that much damage to the boss.',color:'#9933cc',typeColor:'#7722aa',copies:0,shopOnly:true},
   // ── UNLOCKABLE CARDS ───────────────────────────────────────────
-  {id:'moshpit',name:'Mosh Pit',type:'RIFF',rarity:'Uncommon',emoji:'🤘',embers:1,effect:'+1 ATK permanentlyanently to ALL alive members. 4+ alive = +2 each.',color:'#9933cc',typeColor:'#7722aa',copies:2,locked:true,unlockAt:1000},
+  {id:'moshpit',name:'Mosh Pit',type:'RIFF',rarity:'Uncommon',emoji:'🤘',embers:1,effect:'+1 ATK permanently to ALL alive members. 4+ alive = +2 each.',color:'#9933cc',typeColor:'#7722aa',copies:2,locked:true,unlockAt:1000},
   {id:'bloodritual',name:'Blood Ritual',type:'CORRUPT',rarity:'Rare',emoji:'🩸',embers:2,effect:'Sacrifice 25% of target HP. Deal 6x that HP as damage to the boss. Corruption +15%.',color:'#aa1111',typeColor:'#880000',copies:1,locked:true,unlockAt:10000},
   // ── NEW CARDS (for alternate decks, copies:0 = not in Standard) ──
   {id:'echopedal',name:'Echo Pedal',type:'RIFF',rarity:'Uncommon',emoji:'🔁',embers:1,effect:'Replay last card played this strike (free). COMBO ENABLER.',color:'#4488ff',typeColor:'#2266cc',copies:0},
   {id:'riffthief',name:'Riff Thief',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:2,effect:'Copy last card played this strike. Cast the copy free.',color:'#cc44ff',typeColor:'#aa22dd',copies:0},
-  {id:'feedbackscream',name:'Feedback Scream',type:'RIFF',rarity:'Uncommon',emoji:'📢',embers:2,effect:'+4 ATK permanentlyanently. Target loses 2 HP. Power at a cost.',color:'#ff4444',typeColor:'#cc2222',copies:0},
-  {id:'skullsplitter',name:'Skull Splitter',type:'RIFF',rarity:'Uncommon',emoji:'💀',embers:3,effect:'+3 ATK permanentlyanently. If target has 10+ ATK, +5 instead.',color:'#cc2222',typeColor:'#aa0000',copies:0},
+  {id:'feedbackscream',name:'Feedback Scream',type:'RIFF',rarity:'Uncommon',emoji:'📢',embers:2,effect:'+4 ATK permanently. Target loses 2 HP. Power at a cost.',color:'#ff4444',typeColor:'#cc2222',copies:0},
+  {id:'skullsplitter',name:'Skull Splitter',type:'RIFF',rarity:'Uncommon',emoji:'💀',embers:3,effect:'+3 ATK permanently. If target has 10+ ATK, +5 instead.',color:'#cc2222',typeColor:'#aa0000',copies:0},
   {id:'doomchord',name:'Doom Chord',type:'RIFF',rarity:'Uncommon',emoji:'🎵',embers:2,effect:'+4 ATK. At ≥50% corruption, also +4 to adjacent members.',color:'#6622aa',typeColor:'#440088',copies:0},
   {id:'bloodharmony',name:'Blood Harmony',type:'RIFF',rarity:'Common',emoji:'🩸',embers:1,effect:'Target + adjacent both +2 ATK. Same keyword = +3.',color:'#cc4466',typeColor:'#aa2244',copies:0},
   {id:'sonicboom',name:'Sonic Boom',type:'RIFF',rarity:'Rare',emoji:'💥',embers:4,effect:'ALL members +2 ATK. Draw 1 card.',color:'#ff8800',typeColor:'#cc6600',copies:0},
   {id:'tremolopick',name:'Tremolo Pick',type:'RIFF',rarity:'Common',emoji:'⚡',embers:1,effect:'+1 ATK. If 3+ cards played this strike, +4 instead.',color:'#ffcc00',typeColor:'#ccaa00',copies:0},
-  {id:'harmonicfb',name:'Harmonic Feedback',type:'RIFF',rarity:'Uncommon',emoji:'🎶',embers:0,effect:'FREE. +1 ATK permanentlyanently per RIFF card played this strike.',color:'#44aaff',typeColor:'#2288dd',copies:0},
+  {id:'harmonicfb',name:'Harmonic Feedback',type:'RIFF',rarity:'Uncommon',emoji:'🎶',embers:0,effect:'FREE. +1 ATK permanently per RIFF card played this strike.',color:'#44aaff',typeColor:'#2288dd',copies:0},
   {id:'shredsolo',name:'Shred Solo',type:'RIFF',rarity:'Rare',emoji:'🎸',embers:2,effect:'Target attacks TWICE this strike (second at half ATK).',color:'#ff4400',typeColor:'#cc2200',copies:0},
   {id:'overdriveped',name:'Overdrive Pedal',type:'RIFF',rarity:'Rare',emoji:'🔊',embers:2,effect:'Strike multiplier ×1.5 (multiplicative). Stacks with chains.',color:'#ff6600',typeColor:'#cc4400',copies:0},
   {id:'devilsdice',name:"Devil's Dice",type:'RIFF',rarity:'Uncommon',emoji:'🎲',embers:1,effect:'Roll d6. 1-2: nothing. 3-4: +3 ATK all. 5-6: +5 ATK all + draw 2.',color:'#cc0000',typeColor:'#aa0000',copies:0},
   {id:'necroticamp',name:'Necrotic Amp',type:'RIFF',rarity:'Rare',emoji:'☠️',embers:0,effect:'FREE. All +1 ATK per 20% corruption. At 80% = +4 each.',color:'#44cc44',typeColor:'#22aa22',copies:0},
   {id:'soulbargain',name:'Soul Bargain',type:'CORRUPT',rarity:'Uncommon',emoji:'👿',embers:0,effect:'FREE. +5 ATK. Target loses 3 HP. Corruption +5%.',color:'#8800cc',typeColor:'#6600aa',copies:0},
-  {id:'venomriff',name:'Venom Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'🐍',embers:1,effect:'+3 ATK permanentlyanently. Corruption +5%.',color:'#44aa44',typeColor:'#228822',copies:0},
+  {id:'venomriff',name:'Venom Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'🐍',embers:1,effect:'+3 ATK permanently. Corruption +5%.',color:'#44aa44',typeColor:'#228822',copies:0},
   {id:'offeringpit',name:'Offering to the Pit',type:'CORRUPT',rarity:'Rare',emoji:'🕳️',embers:2,effect:'Target skips next attack. Another member +8 ATK. Corruption +10%.',color:'#660066',typeColor:'#440044',copies:0},
   {id:'cursedstrings',name:'Cursed Strings',type:'CORRUPT',rarity:'Common',emoji:'🪡',embers:1,effect:'+3 ATK. Target cannot be healed this fight.',color:'#880088',typeColor:'#660066',copies:0},
   {id:'hexdecay',name:'Hex of Decay',type:'CORRUPT',rarity:'Rare',emoji:'🦠',embers:3,effect:'Boss loses 15% of current HP. Corruption +15%.',color:'#448844',typeColor:'#226622',copies:0},
-  {id:'infernalpact',name:'Infernal Pact',type:'CORRUPT',rarity:'Rare',emoji:'📜',embers:0,effect:'FREE. Set corruption to 66%. All members +2 ATK permanentlyanently.',color:'#cc4400',typeColor:'#aa2200',copies:0},
+  {id:'infernalpact',name:'Infernal Pact',type:'CORRUPT',rarity:'Rare',emoji:'📜',embers:0,effect:'FREE. Set corruption to 66%. All members +2 ATK permanently.',color:'#cc4400',typeColor:'#aa2200',copies:0},
   {id:'carrioncall',name:'Carrion Call',type:'CORRUPT',rarity:'Rare',emoji:'🦅',embers:1,effect:'Revive a Too Stoned member at 1 HP with +5 ATK. Corruption +20%.',color:'#886622',typeColor:'#664400',copies:0},
   {id:'possessionriff',name:'Possession Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'👁️',embers:1,effect:'+20 ATK this strike only. Corruption +10%. Full demon mode.',color:'#aa44cc',typeColor:'#8822aa',copies:0},
 
@@ -1026,9 +1026,9 @@ const STARTER_PASSIVES=[
   {id:'p2',name:'Roadie Crew',emoji:'🔧',effect:'At the start of each fight, one random member heals 3 HP.',cost:8},
   {id:'p3',name:'Merch Table',emoji:'👕',effect:'After each fight victory, gain +2 bonus Stash.',cost:6},
   {id:'p4',name:'Feedback Hum',emoji:'🔊',effect:'All EMBER type cards give 1 additional Ember when played.',cost:10},
-  {id:'p5',name:'Amp Stack',emoji:'📻',effect:'Sound Wall gives +2 ATK permanentlyanently to all (instead of +1). Heavy Riff cap raised to +25 (instead of +20).',cost:10},
+  {id:'p5',name:'Amp Stack',emoji:'📻',effect:'Sound Wall gives +2 ATK permanently to all (instead of +1). Heavy Riff cap raised to +25 (instead of +20).',cost:10},
   {id:'p6',name:'Cult Following',emoji:'🕯',effect:'Each time any member goes Too Stoned, gain 3 Stash.',cost:10},
-  {id:'p7',name:'Guitar Tech',emoji:'🎛',effect:'Battle Cry gives +2 ATK permanentlyanently instead of +1.',cost:8},
+  {id:'p7',name:'Guitar Tech',emoji:'🎛',effect:'Battle Cry gives +2 ATK permanently instead of +1.',cost:8},
   {id:'p8',name:'Green Room',emoji:'🛋',effect:'At the start of each fight, all members gain Stonewall (immune to first Too Stoned event).',cost:16},
   {id:'p9',name:'Heavy Rotation',emoji:'🎚',effect:'When you draw a duplicate card into your hand, draw 1 extra card next Strike.',cost:10},
   {id:'p10',name:'Stage Fright Reversal',emoji:'🎙',effect:'The first Strike of every fight deals +10 bonus damage.',cost:14},
@@ -1057,7 +1057,7 @@ function getUnlockedDecks(){
 const HELL_EVENTS=[
   {id:'mosh_pit',name:'The Mosh Pit',emoji:'🤘',
     flavor:'A pit of tortured souls writhes before you. Your band could join the fray...',
-    choiceA:{label:'Jump In',desc:'All take 4 damage. Survivors gain +1 ATK permanentlyanently.',emoji:'💥'},
+    choiceA:{label:'Jump In',desc:'All take 4 damage. Survivors gain +1 ATK permanently.',emoji:'💥'},
     choiceB:{label:'Walk Away',desc:'Lose 15 Stash. The crowd boos.',emoji:'🚶'}},
   {id:'cursed_amp',name:'Cursed Amplifier',emoji:'🔊',
     flavor:'A blood-red amp hums with infernal energy. Its knobs are set to 11...',
@@ -1069,7 +1069,7 @@ const HELL_EVENTS=[
     choiceB:{label:'Refuse',desc:'Smart. The figure dissolves into smoke.',emoji:'🚫'}},
   {id:'hellfire_baptism',name:'Hellfire Baptism',emoji:'🔥',
     flavor:'A river of fire blocks your path. The flames whisper: "Let us in."',
-    choiceA:{label:'Walk Through',desc:'Corruption set to 69%. All members gain +2 ATK permanentlyanently.',emoji:'🌊'},
+    choiceA:{label:'Walk Through',desc:'Corruption set to 69%. All members gain +2 ATK permanently.',emoji:'🌊'},
     choiceB:{label:'Find Another Way',desc:'Nothing happens. You press on.',emoji:'↩'}},
   {id:'sabbath_offering',name:'Sabbath Offering',emoji:'⛧',
     flavor:'An altar of black stone demands sacrifice. Three cards, chosen by fate.',
@@ -1496,7 +1496,7 @@ function BoosterScreen({onComplete,seed}){
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'#c8a040',textTransform:'uppercase',textAlign:'center',marginBottom:6}}>⚗ Band Abilities — What Do They Mean?</div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
           {[
-            ['FRENZIED','#ee2222','⚡','Each time the boss is defeated, this member gains +1 ATK permanentlyanently.'],
+            ['FRENZIED','#ee2222','⚡','Each time the boss is defeated, this member gains +1 ATK permanently.'],
             ['DOUBLE TIME','#ff8800','🥁','Rolls d6 each fight: 5-6 doubles ATK (×2), 3-4 gives ×1.5. 1-2 is standard (×1). Never a penalty!'],
             ['ANCHOR','#33dd33','⚓','After every Strike, heals the members next to this one for +1 HP.'],
             ['CORRUPT','#cc44ff','🌀','ATK scales up the higher your Corruption is.'],
@@ -4795,7 +4795,7 @@ function App(){
     }
     else if(card.id==='amp'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk*2,_origAtk:m._origAtk||m.atk,tempBuff:true,buffCount:(m.buffCount||0)+1});msg='⚡ '+m.name+' doubled ATK!';addBuff(m.uid,'×2 ATK','#cc44ff');addFloat('×2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#9933cc')}
     else if(card.id==='battlecry'){if(!m)return false;const bcBonus=(activePassives.some(p=>p.id==='p7')?2:1)+(card.upgraded?1:0);ns[slotIdx]=Object.assign({},m,{atk:m.atk+bcBonus,buffCount:(m.buffCount||0)+1});msg='🤘 '+m.name+' Battle Cry! +'+bcBonus+' ATK forever!';addBuff(m.uid,'+'+bcBonus+' ATK','#ee2222');addFloat('+'+bcBonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4400')}
-    else if(card.id==='newstrings'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,buffCount:(m.buffCount||0)+1});msg='🎸 '+m.name+' +2 ATK permanentlyanently!';addBuff(m.uid,'+2 ATK','#ee2222');addFloat('+2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#e8a820')}
+    else if(card.id==='newstrings'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,buffCount:(m.buffCount||0)+1});msg='🎸 '+m.name+' +2 ATK permanently!';addBuff(m.uid,'+2 ATK','#ee2222');addFloat('+2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#e8a820')}
     else if(card.id==='encore'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{encoreReady:true,buffCount:(m.buffCount||0)+1});msg='🔁 '+m.name+' encores!';addBuff(m.uid,'ENCORE','#dd2222');addFloat('ENCORE!',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#dd2222')}
     else if(card.id==='roadie'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{stoneShield:2,hp:m.keyword==='FALLEN'?m.hp:Math.min(m.maxHp,m.hp+2),buffCount:(m.buffCount||0)+1});msg='🛡 '+m.name+' shielded for 2 Strikes and healed 2 HP!'}
     else if(card.id==='stagedive'){
@@ -4832,7 +4832,7 @@ function App(){
       msg='🔊 Sound Check! All +4 HP'+(injuredCount>0?' + '+injuredCount+' injured member(s) +1 ATK!':'!');stage.filter(x=>x&&!x.tooStoned).forEach(x=>addBuff(x.uid,'+HP','#33dd33'))
       addFloat('+4 HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')
     }
-    else if(card.id==='whispercard'){ns=ns.map((m,mi)=>mi===slotIdx?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2,buffCount:(m.buffCount||0)+1}):m);msg='\u{1F300} Dark Whisper! +2 ATK permanentlyanently.'}
+    else if(card.id==='whispercard'){ns=ns.map((m,mi)=>mi===slotIdx?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2,buffCount:(m.buffCount||0)+1}):m);msg='\u{1F300} Dark Whisper! +2 ATK permanently.'}
     else if(card.id==='hungercard'){ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,tempAtkBonus:(m.tempAtkBonus||0)+1,buffCount:(m.buffCount||0)+1}):m);drawUpTo(hand.filter(c=>c.uid!==card.uid),deckRef.current,[...discRef.current,card],2);msg='\u{1F525} Hungering Flame! All +1 ATK, drew 2 cards.'}
     else if(card.id==='madnesscard'){const maxHp=enemy?Math.ceil(enemy.maxHp*(activeStake.hpMult||1.3)):100;const dmg=Math.floor(maxHp*0.15);const bc2=getCenter(bossRef);const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp);if(newHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);addFloat(dmg,bc2.x,bc2.y-60,'#cc1144',dmg>=20);playHit();updStat('totalDamage',dmg);msg='\u{1F480} Madness Unleashed! '+dmg+' damage (15% of max HP)!'}
     else if(card.id==='dark_whisper'){
@@ -4954,7 +4954,7 @@ function App(){
     else if(card.id==='deathriff'){
       ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+2,permAtkBonus:(s.permAtkBonus||0)+2}):s)
       const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true)
-      msg='💀 Death Riff! ALL members +2 ATK permanentlyanently! Corruption +10%'
+      msg='💀 Death Riff! ALL members +2 ATK permanently! Corruption +10%'
     }
     else if(card.id==='ampoverload'){
       if(discardsLeft<=0){addLog('⚠ No discards left to sacrifice!');return false}
@@ -4998,7 +4998,7 @@ function App(){
         const si=activeSlots.splice(ri,1)[0]
         ns[si]=Object.assign({},ns[si],{atk:ns[si].atk+1,permAtkBonus:(ns[si].permAtkBonus||0)+1})
       }
-      msg='🌑 Dark Tuning! '+memberCount+' random members +1 ATK permanentlyanently!'+(corruption>=70?' (≥70% = 3 members!)':'')
+      msg='🌑 Dark Tuning! '+memberCount+' random members +1 ATK permanently!'+(corruption>=70?' (≥70% = 3 members!)':'')
       addFloat('+1 ATK ×'+memberCount,getCenter(bossRef).x,getCenter(bossRef).y-80,'#6600aa',corruption>=70)
     }
     else if(card.id==='powertap'){
@@ -5088,9 +5088,9 @@ function App(){
         if(oblitHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},2100)
         hqMsg='⛧ HELLQUAKE: OBLITERATION! '+hqDmg+' damage!';hqFloat='OBLITERATION!';hqColor='#ff2200';hqDesc='Total band ATK × 4 — '+hqDmg+' damage dealt to the boss.'
       } else if(roll===3){
-        // 3: RESONANCE — all members +3 ATK permanentlyanently (positive)
+        // 3: RESONANCE — all members +3 ATK permanently (positive)
         ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3}):m)
-        hqMsg='⛧ HELLQUAKE: RESONANCE! All members +3 ATK forever!';hqFloat='RESONANCE!';hqColor='#ff6600';hqDesc='All gain +3 ATK permanentlyanently.'
+        hqMsg='⛧ HELLQUAKE: RESONANCE! All members +3 ATK forever!';hqFloat='RESONANCE!';hqColor='#ff6600';hqDesc='All gain +3 ATK permanently.'
       } else if(roll===4){
         // 4: RITUAL — boss HP halved (positive)
         const ritualHp=Math.max(1,Math.floor(enemyHp/2));setEnemyHp(ritualHp)
@@ -5162,7 +5162,7 @@ function App(){
       ns[slotIdx]=Object.assign({},m,{atk:m.atk+4,permAtkBonus:(m.permAtkBonus||0)+4,hp:Math.max(1,m.hp-2)})
       addFloat('+4 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4444',true)
       addFloat('-2 HP',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-40,'#ff0000',false)
-      msg='📢 Feedback Scream! '+m.name+' +4 ATK permanentlyanently! -2 HP.'
+      msg='📢 Feedback Scream! '+m.name+' +4 ATK permanently! -2 HP.'
     }
     else if(card.id==='skullsplitter'){
       if(!m)return false;const bonus=(m.atk+(m.permAtkBonus||0))>=10?5:3
@@ -5226,7 +5226,7 @@ function App(){
       ns[slotIdx]=Object.assign({},m,{atk:m.atk+3,permAtkBonus:(m.permAtkBonus||0)+3})
       setCorruption(p=>Math.min(100,p+5))
       addFloat('+3 ATK permanently',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#44aa44',false)
-      msg='🐍 Venom Riff! '+m.name+' +3 ATK permanentlyanently! Corruption +5%'
+      msg='🐍 Venom Riff! '+m.name+' +3 ATK permanently! Corruption +5%'
     }
     else if(card.id==='offeringpit'){
       if(!m)return false;const alive=ns.filter(s=>s&&!s.tooStoned&&s.uid!==m.uid)
@@ -5250,7 +5250,7 @@ function App(){
     else if(card.id==='infernalpact'){
       setCorruption(66);updStat('maxCorruption',66,true)
       ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+2,permAtkBonus:(s.permAtkBonus||0)+2}):s)
-      msg='📜 Infernal Pact! Corruption → 66%! ALL members +2 ATK permanentlyanently!'
+      msg='📜 Infernal Pact! Corruption → 66%! ALL members +2 ATK permanently!'
     }
     else if(card.id==='carrioncall'){
       const stoned=ns.findIndex(s=>s&&s.tooStoned)
@@ -6137,7 +6137,7 @@ function App(){
           effectName='DIMENSIONAL RIFT';effectDesc='Boss takes DOUBLE damage this fight!';effectColor='#ff3300'
           addLog('🧪 DIMENSIONAL RIFT! Boss takes double damage!')
         } else if(d4===2){
-          effectName='EGO DISSOLUTION';effectDesc='Corruption → 69%. All members +3 ATK permanentlyanently!';effectColor='#aa44ff'
+          effectName='EGO DISSOLUTION';effectDesc='Corruption → 69%. All members +3 ATK permanently!';effectColor='#aa44ff'
           setCorruption(69)
           setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3}):m))
           addLog('🧪 EGO DISSOLUTION! Corruption → 69%. All +3 ATK!')
@@ -6878,7 +6878,7 @@ function App(){
 
     if(eid==='mosh_pit'){
       if(choice==='A'){
-        // All members take 4 damage. Survivors gain +1 ATK permanentlyanently.
+        // All members take 4 damage. Survivors gain +1 ATK permanently.
         setStage(p=>p.map(m=>{
           if(!m||m.tooStoned)return m
           const newHp=m.hp-4
@@ -6943,7 +6943,7 @@ function App(){
           return sorted.slice(Math.min(3,sorted.length))
         })
         setStage(p=>p.map(m=>m?Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1}):m))
-        addLog('⛧ Sabbath Offering accepted! 3 weakest cards removed. All members +1 ATK permanentlyanently.')
+        addLog('⛧ Sabbath Offering accepted! 3 weakest cards removed. All members +1 ATK permanently.')
       } else {
         addLog('🃏 You keep your cards. The altar crumbles.')
       }

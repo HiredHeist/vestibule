@@ -838,11 +838,10 @@ function simEvent(gs){
     }
   }
   else if(evt==='sabbath_offering'){
-    // AI: take it if HP is low and deck > 50
-    const avgHp=alive.length>0?alive.reduce((s,m)=>s+m.hp/m.maxHp,0)/alive.length:1;
-    if(avgHp<0.6&&gs.deck.length>45){
+    // AI: take it if deck > 40 (deck thinning + ATK buff is always good)
+    if(gs.deck.length>40){
       for(let i=0;i<Math.min(3,gs.deck.length);i++){gs.deck.splice(rand(gs.deck.length),1)}
-      gs.stage.forEach(m=>{if(!m.tooStoned)m.hp=m.maxHp});
+      gs.stage.forEach(m=>{if(!m.tooStoned){m.atk+=1;m.permAtkBonus=(m.permAtkBonus||0)+1}})
       TRACK.eventSabbath++
     }
   }
