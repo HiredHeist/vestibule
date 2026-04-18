@@ -136,6 +136,9 @@ const ALL_CARDS=[
   {id:'infernalpact',type:'CORRUPT',rarity:'Rare',embers:0,copies:0},
   {id:'carrioncall',type:'CORRUPT',rarity:'Rare',embers:1,copies:0},
   {id:'possessionriff',type:'CORRUPT',rarity:'Uncommon',embers:1,copies:0},
+  {id:'hellfirerift',type:'CORRUPT',rarity:'Rare',embers:0,copies:0},
+  {id:'soulsacrifice',type:'CORRUPT',rarity:'Rare',embers:0,copies:0},
+  {id:'voidpact',type:'CORRUPT',rarity:'Rare',embers:0,copies:0},
   {id:'darkcrescendo',type:'CORRUPT',rarity:'Rare',embers:0,copies:0},
   {id:'russianroulette',type:'CORRUPT',rarity:'Uncommon',embers:0,copies:0},
   {id:'gearcheck',type:'UTILITY',rarity:'Common',embers:1,copies:0},
@@ -162,7 +165,7 @@ const DECK_MANIFESTS={
   survivor:{battlecry:3,newstrings:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,crowdsurf:2,amp:1,soundwall:1,resonancecard:1,burnset:1,herbmoney:1,doomchord:2,sonicboom:1,necroticamp:1,distortion:2,staticcharge:2,darktuning:2,deathriff:2,controlfeedback:1,dialtoeleven:1,feedbackloop:1,seance:1,bloodritual:1,sigdecay:1,soundcheck:2,roadie:2,wakeup:2,setlist:2,setbreak:2,doublebooking:2,bootlegcopy:1,backstagepass:1,powertap:2,tappedout:2,ampoverload:2,drainthecrowd:2,groupie:1,soundboard:1,slowburn:1,pyromaniac:1,secondwind:1,corrsiphon:1,carrioncall:1},
 }
 const ACTIVE_DECK=DECK_MANIFESTS[DECK_ID]||DECK_MANIFESTS.standard
-const DECK_HP_SCALE={standard:0.68,shredder:0.73,ritualist:0.52,engineer:0.58,survivor:0.58}
+const DECK_HP_SCALE={standard:1.65,shredder:1.80,ritualist:1.50,engineer:1.75,survivor:1.60}
 const HP_SCALE=DECK_HP_SCALE[DECK_ID]||1.0
 // ── PACT REWARDS (12 options, sim picks best 1 of 2 offered) ──
 const PACT_IDS=['ember_surge','iron_strings','thick_skin','dark_bargain','speed_demon','blood_price','clean_living','corruption_engine','merchants_eye','stone_wall','sixth_slot','war_drums'];
@@ -437,7 +440,7 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
     case 'soulbargain':return 72;case 'venomriff':return 60;case 'offeringpit':return alive.length>=4?65:20;
     case 'cursedstrings':return 55;case 'graverobber':return gs.discard.length>=4?62:20;case 'hexdecay':return enemy._hp>=500?75:45;
     case 'infernalpact':return corruption<50?65:10;case 'carrioncall':return stage.some(m=>m.tooStoned)?90:0;
-    case 'possessionriff':return 78;case 'darkcrescendo':return corruption>=80?98:0;
+    case 'possessionriff':return 78;case 'darkcrescendo':return corruption>=80?98:0;case 'hellfirerift':return corruption<80?90:60;case 'soulsacrifice':return 85;case 'voidpact':return corruption<75?95:50;
     case 'russianroulette':return alive.length>=4?60:30;case 'gearcheck':return 48;case 'setlistrewrite':return 30;
     case 'backstagepass':return embers>=2?65:30;case 'venueswap':return hand.length<=3?60:20;case 'doublebooking':return 92;
     case 'bootlegcopy':return 55;case 'secondwind':return embers===0?90:embers<=2?50:10;case 'pyromaniac':return embers<=2?68:25;
@@ -510,7 +513,7 @@ function applyCardSim(card,gs,enemy){
     case 'powerslide':target.tempAtkBonus=(target.tempAtkBonus||0)+(target.keyword==='FRENZIED'?3:1);break;
     case 'shredsolo':target.encoreThisStrike=true;break;
     case 'harmonicfb':{const r=(gs._cardsPlayedIds||[]).filter(x=>ALL_CARDS.find(c=>c.id===x&&c.type==='RIFF')).length;const b=Math.max(1,r);target.atk+=b;target.permAtkBonus=(target.permAtkBonus||0)+b;break}
-    case 'overdriveped':gs._strikeMult*=1.5;break;
+    case 'overdriveped':gs._strikeMult=Math.min(66.6,gs._strikeMult*1.5);break;
     case 'devilsdice':{const r=rand(6)+1;if(r>=3&&r<=4)alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+3);else if(r>=5){alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+5);drawCards(gs,2)};break}
     case 'necroticamp':{const b=Math.floor(gs.corruption/20);alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+b);break}
     case 'soulbargain':target.tempAtkBonus=(target.tempAtkBonus||0)+5;target.hp=Math.max(1,target.hp-3);gs.corruption=Math.min(100,gs.corruption+5);break;
@@ -660,7 +663,7 @@ function simFight(gs,phaseHp,luciferPhase){
       cost=Math.max(0,cost)
       gs.embers-=cost;gs.hand.splice(best.idx,1);
       applyCardSim(card,gs,enemy);if(gs._consumeCard){gs._consumeCard=false}else if(card.id!=='contract')gs.discard.push(card);cardsPlayed++;
-      gs._strikeMult=Math.min(6.66,Math.round((gs._strikeMult+0.05)*100)/100)
+      gs._strikeMult=Math.min(66.6,Math.round((gs._strikeMult*1.08)*100)/100)
       gs._cardsPlayedIds.push(card.id)
       if(card.type==='EMBER'&&gs.passives.some(p=>p.id==='p4'))gs.embers=Math.min(gs.maxEmbers,gs.embers+1)
       // Riff chain detection
@@ -669,7 +672,7 @@ function simFight(gs,phaseHp,luciferPhase){
           if(!gs._firedChains)gs._firedChains=new Set()
           const ck=chain[0]+'+'+chain[1]
           if(!gs._firedChains.has(ck)){
-            gs._firedChains.add(ck);gs._strikeMult=Math.min(6.66,Math.round((gs._strikeMult*1.78)*100)/100)
+            gs._firedChains.add(ck);gs._strikeMult=Math.min(66.6,Math.round((gs._strikeMult*1.78)*100)/100)
             gs._directDmg=(gs._directDmg||0)+Math.round(gs.stage.filter(m=>!m.tooStoned).reduce((s,m)=>s+m.atk,0)*0.10)
             TRACK.combosTriggered=(TRACK.combosTriggered||0)+1
           }
@@ -700,6 +703,39 @@ function simFight(gs,phaseHp,luciferPhase){
     if(strike===0&&p10)strikeDmg+=10;
     if(gs._tripBuff==='DIMENSIONAL_RIFT'||gs._tripBuff==='FRACTAL_VISION')strikeDmg*=2;
     // Apply strike multiplier (0.03 per card played + 0.15 per combo)
+    // Corruption power multiplier
+    const corrMult=1+Math.floor(gs.corruption/20)*0.2
+    if(corrMult>1)strikeDmg=Math.round(strikeDmg*corrMult)
+    // Artifact multiplier triggers
+    let artMult=1.0
+    const _cpc=(gs._cardsPlayedIds||[]).length
+    const _cf=gs._firedChains?gs._firedChains.size:0
+    const _sc=gs.stage.filter(m=>m.tooStoned).length
+    for(const art of gs.artifacts){
+      if(!art.multTrigger)continue
+      let fires=0
+      if(art.multTrigger==='cards3'&&_cpc>=3)fires=1
+      if(art.multTrigger==='cards5'&&_cpc>=5)fires=1
+      if(art.multTrigger==='corrupt50'&&gs.corruption>=50)fires=1
+      if(art.multTrigger==='perChain')fires=_cf
+      if(art.multTrigger==='perStoned')fires=_sc
+      if(fires>0)artMult*=Math.pow(art.mult,fires)
+    }
+    if(gs.artifacts.some(a=>a.id==='ca1'))artMult*=1.25
+    if(artMult>1)strikeDmg=Math.round(strikeDmg*artMult)
+    // Boss loot multiplier triggers
+    const _lootAlive=gs.stage.filter(m=>!m.tooStoned)
+    for(const lid of(gs.loot||[])){
+      let fires=0
+      if(lid==='limbos_echo')fires=gs._strikesLeft||0
+      if(lid==='endless_hunger'&&_lootAlive.length>=4)fires=1
+      if(lid==='berserker_rage'&&_lootAlive.some(m=>m.atk>=20))fires=1
+      if(lid==='heretics_brand')fires=[25,50,75,100].filter(t=>gs.corruption>=t).length
+      if(lid==='the_blade'&&_cpc===1)fires=1
+      if(lid==='mask_of_lies')fires=new Set(_lootAlive.map(m=>m.keyword)).size
+      const lootDef=[{id:'limbos_echo',mult:1.15},{id:'endless_hunger',mult:1.3},{id:'berserker_rage',mult:1.5},{id:'heretics_brand',mult:1.3},{id:'the_blade',mult:2.0},{id:'mask_of_lies',mult:1.2}].find(l=>l.id===lid)
+      if(fires>0&&lootDef)strikeDmg=Math.round(strikeDmg*Math.pow(lootDef.mult,fires))
+    }
     if(gs._strikeMult>1.0)strikeDmg=Math.round(strikeDmg*gs._strikeMult)
     if(aliveNow.some(m=>m.keyword==='FOLK MAGIC')&&Math.random()<0.2)gs.embers=gs.maxEmbers;
     gs.highestStrike=Math.max(gs.highestStrike,strikeDmg);gs.totalDamage+=strikeDmg;
