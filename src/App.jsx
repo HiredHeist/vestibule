@@ -2582,6 +2582,17 @@ function ArtifactArtImg({id,emoji,size=40,style={}}){
 }
 
 
+
+// ═══ SAVE/RESUME SYSTEM ═══
+function saveGame(state) {
+  try { localStorage.setItem('vst_save', JSON.stringify(state)) } catch(e) {}
+}
+function loadGame() {
+  try { const s = localStorage.getItem('vst_save'); return s ? JSON.parse(s) : null } catch(e) { return null }
+}
+function clearSave() {
+  try { localStorage.removeItem('vst_save') } catch(e) {}
+}
 function showFirstTimeTip(key, msg, addLog, addFloat) {
   const k = 'vst_tip_' + key
   if (localStorage.getItem(k)) return false
@@ -5758,7 +5769,7 @@ function App(){
         // Save second album title
         const stakeUn=getStakeUnlocks();if(!stakeUn.includes('second_album')){stakeUn.push('second_album');localStorage.setItem('vst_stake_unlocks',JSON.stringify(stakeUn))}
         setWelcomeToHell('won')
-        setTimeout(()=>setGameState('end'),3000)
+        setTimeout(()=>{clearSave();setGameState('end')},3000)
       }
       else if(fightIndex>=26){
       playVictory();setDeathCause('victory')
@@ -6072,7 +6083,7 @@ function App(){
       if(e.shiftKey&&(e.key==='D'||e.key==='d')){
         setDeathCause('stoned');setLastKillingBlow('All band members went Too Stoned from corruption damage')
         setStats({fightsSurvived:6,strikesThrown:24,totalDamage:420,highestStrike:69,tooStonedCount:2,maxCorruption:66,stashEarned:42,cardsPlayed:99})
-        setGameState('end')
+        clearSave();setGameState('end')
       }
       if(e.shiftKey&&(e.key==='H'||e.key==='h')){setCreditsRoll(true)}
       // Ctrl+Z = Undo last card play
@@ -6568,7 +6579,7 @@ function App(){
                 else{ns2[ai]=Object.assign({},ns2[ai],{hp:Math.max(0,newHp)})}
               }
               const allStoned=ns2.filter(m=>m).every(m=>m.tooStoned)
-              if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else if(tutorialFight>0){setShowTutorialMsg('You got stoned! No worries, try that one again.');setTimeout(()=>startTutorialFight(tutorialFight),2000);return}else{setDeathCause('stoned');playSfx('defeat')};setTimeout(()=>setGameState('end'),800)}
+              if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else if(tutorialFight>0){setShowTutorialMsg('You got stoned! No worries, try that one again.');setTimeout(()=>startTutorialFight(tutorialFight),2000);return}else{setDeathCause('stoned');playSfx('defeat')};setTimeout(()=>{clearSave();setGameState('end')},800)}
               return ns2
             })
             setDamageFlash(true);triggerShake(10,350);setTimeout(()=>setDamageFlash(false),400)
@@ -6614,7 +6625,7 @@ function App(){
               } // end blood oath else
             }
             const allStoned=ns2.filter(function(m){return m}).every(function(m){return m.tooStoned})
-            if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned');playSfx('defeat')};const _bc=Math.floor(fightIndex/3)+1;if(_bc>bestRunCircle){localStorage.setItem('vst_best_circle',_bc.toString())};recordLegacyRun(stage,stats,false,Math.floor(fightIndex/3)+1);setTimeout(function(){setGameState('end')},800)}
+            if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned');playSfx('defeat')};const _bc=Math.floor(fightIndex/3)+1;if(_bc>bestRunCircle){localStorage.setItem('vst_best_circle',_bc.toString())};recordLegacyRun(stage,stats,false,Math.floor(fightIndex/3)+1);setTimeout(function(){clearSave();setGameState('end')},800)}
             return ns2
           })
           if(stage[stage.indexOf(target)]&&!stage[stage.indexOf(target)].tooStoned&&(stage[stage.indexOf(target)].hp-actualDmg)<=0&&!stage[stage.indexOf(target)].stoneShield)addLog('💨 '+target.name+' is TOO STONED!')
@@ -6674,7 +6685,7 @@ function App(){
                   const newHp=m.hp-1
                   if(newHp<=0){
                     addLog('😈 Lucifer has fallen! The Devil is dead. GAME OVER.')
-                    playSfx('defeat');setTimeout(()=>{setDeathCause('fallen');setGameState('end')},800)
+                    playSfx('defeat');setTimeout(()=>{setDeathCause('fallen');clearSave();setGameState('end')},800)
                     return Object.assign({},m,{hp:0,tooStoned:true,bloodOath:false})
                   }
                   return Object.assign({},m,{hp:newHp})
@@ -6712,7 +6723,7 @@ function App(){
                 if(_rs>=10000)unlockAchievement('high_score_10k')
                 if((totalRunsPlayed+1)>=10)unlockAchievement('ten_runs')
                 const _nr=totalRunsPlayed+1;setTotalRunsPlayed(_nr);localStorage.setItem('vst_runs',_nr);if(_rs>personalBest){setPersonalBest(_rs);localStorage.setItem('vst_best',_rs)}const _nl=lifetimeScore+_rs;setLifetimeScore(_nl);localStorage.setItem('vst_lifetime',_nl);setStreakLosses(p=>p+1);setStreakWins(0);localStorage.setItem('vst_streak_wins','0');const _td=new Date().toISOString().slice(0,10);const _yd=new Date(Date.now()-86400000).toISOString().slice(0,10);const _ns=lastPlayedDate===_yd||lastPlayedDate===_td?dailyStreak+1:1;setDailyStreak(_ns);localStorage.setItem('vst_streak',_ns);setLastPlayedDate(_td);localStorage.setItem('vst_lastdate',_td)}
-                setTimeout(function(){setGameState('end')},800);
+                setTimeout(function(){clearSave();setGameState('end')},800);
               }
               return cur;
             });
@@ -6795,7 +6806,18 @@ function App(){
     const _fmDiscards = MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0);
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);setMemberBuffs({});victoryFiredRef.current=false;setSlowBurnStrikes(0);setAmpFeedbackDiscount(0);setPyromaniacActive(false)
+    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0)
+    // AUTO-SAVE at fight start
+    setTimeout(()=>{try{saveGame({
+      v:1,gs:gameState,fi:fightIndex,seed:runSeed,deck:selectedDeck,
+      stage:stage.map(m=>m?{id:m.id,name:m.name,hp:m.hp,maxHp:m.maxHp,atk:m.atk,role:m.role,keyword:m.keyword,tooStoned:m.tooStoned,uid:m.uid,foil:m.foil,mythic:m.mythic,demonic:m.demonic,permAtkBonus:m.permAtkBonus||0,encoreReady:m.encoreReady,stoneShield:m.stoneShield,isMentor:m.isMentor,mentorMult:m.mentorMult,mentorLinkedToUid:m.mentorLinkedToUid,mentorAlive:m.mentorAlive,buffCount:m.buffCount||0}:null),
+      dk:deck.map(c=>c.id),hand:hand.map(c=>c.id),disc:discardPile.map(c=>c.id),
+      em:embers,mx:maxEmbers,st:stash,co:corruption,
+      sl:strikesLeft,ms:fightMaxStrikes,dl:discardsLeft,
+      pa:chosenPacts,art:activeArtifacts.map(a=>a.id),pas:activePassives.map(p=>p.id),
+      loot:collectedLoot,upg:upgradedCards,stats:stats,
+      shrooms:heldShrooms,acid:heldAcid
+    })}catch(e){}},100);setMemberBuffs({});victoryFiredRef.current=false;setSlowBurnStrikes(0);setAmpFeedbackDiscount(0);setPyromaniacActive(false)
     // BOSS LOOT effects at fight start
     if(collectedLoot.includes('love_letter'))setNextCardFree(true)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
@@ -7191,6 +7213,26 @@ function App(){
     playSfx('reroll');addLog('🔄 Shop rerolled for '+rerollCost+' 🌿')
   },[stash,rerollCost,fightIndex])
 
+  const handleContinueSave=()=>{
+    const sv=loadGame();if(!sv)return
+    setRunSeed(sv.seed);setSelectedDeck(sv.deck);setFightIndex(sv.fi)
+    setStage(sv.stage.map(m=>m?Object.assign({},ALL_MUSICIANS.find(mu=>mu.id===m.id)||{},m):null))
+    setDeck(sv.dk.map(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c?Object.assign({},c,{uid:uid()}):null}).filter(Boolean))
+    setHand(sv.hand.map(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c?Object.assign({},c,{uid:uid()}):null}).filter(Boolean))
+    setDiscardPile(sv.disc.map(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c?Object.assign({},c,{uid:uid()}):null}).filter(Boolean))
+    setEmbers(sv.em);setMaxEmbers(sv.mx);setStash(sv.st);setCorruption(sv.co)
+    setStrikesLeft(sv.sl);setFightMaxStrikes(sv.ms);setDiscardsLeft(sv.dl)
+    setChosenPacts(sv.pa||[]);setCollectedLoot(sv.loot||[]);setUpgradedCards(sv.upg||[])
+    setActiveArtifacts((sv.art||[]).map(id=>[...STARTER_ARTIFACTS,...CIRCLE_ARTIFACTS].find(a=>a.id===id)).filter(Boolean))
+    setActivePassives((sv.pas||[]).map(id=>STARTER_PASSIVES.find(p=>p.id===id)).filter(Boolean))
+    if(sv.stats)setStats(sv.stats)
+    setHeldShrooms(sv.shrooms||0);setHeldAcid(sv.acid||0)
+    const ne=ENEMIES[sv.fi]||ENEMIES[0];setEnemy(ne)
+    const _ds=(STARTER_DECKS.find(d=>d.id===sv.deck)||{}).hpScale||1
+    const _hm=1+(Math.max(0,parseInt(localStorage.getItem('vst_heat')||'1')-1)*0.15)
+    const _hp=Math.ceil(ne.maxHp*_ds*_hm);setEnemyHp(_hp);setScaledMaxHp(_hp)
+    setGameState('playing');addLog('⛧ Run resumed from save...')
+  }
   const handleReset=(retrySeed)=>{
     setRunSeed(retrySeed||Math.floor(Math.random()*0xFFFFFF))
     runStartTimeRef.current=Date.now()
@@ -7202,7 +7244,7 @@ function App(){
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setFightMaxStrikes(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setFightMaxDiscards(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
     setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false
-    setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
+    clearSave();setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
     setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0,overkillDmg:0,bestMultiplier:1.0});setScaledMaxHp(0);setVenomDotStacks(0);setDblRoll(null);setLastKillingBlow('');setCurrentTip('');setBossDebuff(0);setBossRageAtk(0);setSlowBurnStrikes(0);setStashStolenThisFight(0);setShredderUsed(false);corrPowerShownRef.current=false
@@ -7485,7 +7527,7 @@ function App(){
                 Skip Tutorial — I know what I'm doing
               </button>
             </div>
-          ):(
+          ):(<>
             <button onClick={()=>setGameState('booster')}
               style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:63,letterSpacing:10,color:'#ee2222',
                 background:'rgba(120,0,0,0.25)',border:'3px solid #aa0000',borderRadius:10,
@@ -7496,7 +7538,16 @@ function App(){
               {getStakeUnlocks().includes('demonic')&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#ff0044',textShadow:'0 0 20px rgba(255,0,68,0.6),0 0 40px rgba(255,0,68,0.3)',letterSpacing:6,marginBottom:8,animation:'throb 3s ease-in-out infinite'}}>⛧ GOD KILLER ⛧</div>}
               ⛧ Enter the Vestibule ⛧
             </button>
-          )}
+            {loadGame()&&<button onClick={handleContinueSave}
+              style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,letterSpacing:8,color:'#e8a820',
+                background:'rgba(60,40,0,0.3)',border:'2px solid #c8a020',borderRadius:8,
+                padding:'16px 60px',cursor:'pointer',textTransform:'uppercase',
+                textShadow:'0 0 20px rgba(200,150,0,0.5)',
+                boxShadow:'0 0 30px rgba(200,150,0,0.2)',
+                transition:'all 0.2s',marginBottom:8}}>
+              ⛧ Continue Run ⛧
+            </button>}
+          </>)}
 
           {/* Menu buttons row */}
           <div style={{display:'flex',gap:12}}>
@@ -7743,7 +7794,7 @@ function App(){
           onMouseLeave={e=>{e.currentTarget.style.background='rgba(130,0,0,0.4)';e.currentTarget.style.boxShadow='0 0 25px rgba(180,0,0,0.4)'}}>
           ⛧ ENTER WELCOME TO HELL ⛧
         </button>
-        <button onClick={()=>{setWelcomeToHell(null);setGameState('end')}}
+        <button onClick={()=>{setWelcomeToHell(null);clearSave();setGameState('end')}}
           style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:3,padding:'16px 32px',background:'transparent',border:'1px solid #554422',borderRadius:6,color:'#886644',cursor:'pointer',transition:'all 0.2s'}}
           onMouseEnter={e=>{e.currentTarget.style.color='#c8a040';e.currentTarget.style.borderColor='#c8a040'}}
           onMouseLeave={e=>{e.currentTarget.style.color='#886644';e.currentTarget.style.borderColor='#554422'}}>
