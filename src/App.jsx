@@ -1462,7 +1462,7 @@ function BoosterScreen({onComplete,seed}){
                 animation:(!isSel&&!dis&&!m.locked)?'throbSlow 4.5s ease-in-out infinite':'none'}}>
               <div style={{height:5,borderRadius:'7px 7px 0 0',background:isSel?'linear-gradient(90deg,#e8a820,#ffcc44)':kwc+'66'}}/>
               {isSel&&<div style={{position:'absolute',top:8,right:8,width:24,height:24,borderRadius:'50%',background:'#e8a820',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,color:'#000',fontWeight:900}}>✓</div>}
-              <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:48,background:'rgba(0,0,0,0.3)',overflow:'hidden'}}>{MEMBER_PORTRAITS[m.id]?<MemberPortrait id={m.id} size={45} noSquiggle/>:m.emoji}</div>
+              <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:48,background:'rgba(0,0,0,0.3)',overflow:'hidden'}}>{IDLE_PORTRAITS[m.id]?<img src={IDLE_PORTRAITS[m.id]} alt={m.name} style={{width:70,height:70,objectFit:'contain',imageRendering:'pixelated'}}/>:MEMBER_PORTRAITS[m.id]?<MemberPortrait id={m.id} size={45} noSquiggle/>:m.emoji}</div>
               <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,color:isSel?'#e8d090':'#c8b878',textAlign:'center',padding:'2px 4px 0px',lineHeight:1,letterSpacing:2}}>{m.name}</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:2,color:'#c8b878',textAlign:'center',padding:'3px 4px 6px',textTransform:'uppercase'}}>{m.role}</div>
               {/* Stat bar — locked vs normal */}
