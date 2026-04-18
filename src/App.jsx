@@ -1004,16 +1004,16 @@ function markTutorialDone(){localStorage.setItem('vst_tutorial','done')}
 
 // ── STARTER ARTIFACTS A1-A10 ─────────────────────────────────
 const STARTER_ARTIFACTS=[
-  {id:'a1',name:'Vintage Guitar',emoji:'🎸',effect:'Lead guitarist starts every fight with +1 ATK permanently.',cost:10},
-  {id:'a2',name:"Devil's Tuning Fork",emoji:'🔱',effect:'Every fight begins with Corruption already at 15%.',cost:8},
+  {id:'a1',name:'Vintage Guitar',emoji:'🎸',effect:'×1.3 damage when you play 3+ cards before Striking.',cost:10,multTrigger:'cards3',mult:1.3},
+  {id:'a2',name:"Devil's Tuning Fork",emoji:'🔱',effect:'×1.5 damage when Corruption is 50% or higher.',cost:8,multTrigger:'corrupt50',mult:1.5},
   {id:'a3',name:'The Evil Eye',emoji:'🧿',effect:'The first card you play each Strike costs 0 Embers.',cost:20,rare:true},
   {id:'a4',name:"Roadie's Toolbelt",emoji:'🧰',effect:'At the start of each fight, one random member gains Stonewall (immune to Too Stoned once).',cost:6},
-  {id:'a5',name:'Haunted Radio',emoji:'📻',effect:'Tapped Out gives +6 Embers instead of +5. Power Tap gives +2 instead of +1.',cost:8},
-  {id:'a6',name:'Black Candle',emoji:'🕯',effect:'When any band member goes Too Stoned, deal 8 damage to the boss.',cost:12},
+  {id:'a5',name:'Haunted Radio',emoji:'📻',effect:'×1.2 damage for each Riff Chain fired this Strike.',cost:8,multTrigger:'perChain',mult:1.2},
+  {id:'a6',name:'Black Candle',emoji:'🕯',effect:'×1.4 damage for each Too Stoned member.',cost:12,multTrigger:'perStoned',mult:1.4},
   {id:'a7',name:"The Serpent's Kiss",emoji:'🐍',effect:'Start each fight with 1 extra Ember permanently (max 8 total).',cost:18},
   {id:'a8',name:'Stone Tablet',emoji:'🪨',effect:'All band members gain +3 max HP permanently.',cost:12},
-  {id:'a9',name:'Resonance Coil',emoji:'⚙️',effect:'Resonance (duplicate played) refunds 2 Embers instead of 1, and draws 1 card next Strike.',cost:10},
-  {id:'a10',name:'Burning Stage',emoji:'🔥',effect:'Win a fight in 1 Strike: gain 5 Embers at the start of the next fight.',cost:10},
+  {id:'a9',name:'Resonance Coil',emoji:'⚙️',effect:'×1.15 for each duplicate card in your hand when you Strike.',cost:10,multTrigger:'perDupe',mult:1.15},
+  {id:'a10',name:'Burning Stage',emoji:'🔥',effect:'×2.0 damage if you play 5+ cards before Striking. Go all in.',cost:10,multTrigger:'cards5',mult:2.0},
   // ── UNLOCKABLE ARTIFACT ────────────────────────────────────────
   {id:'wardrums',name:'War Drums',emoji:'🪘',effect:'+1 Strike per fight permanently (5 Strikes instead of 4).',cost:30,locked:true,unlockAt:5000},
 ]
@@ -1140,7 +1140,7 @@ const BOSS_BIOS={
 }
 
 const CIRCLE_ARTIFACTS=[
-  {id:'ca1',name:'The Goat of Mendes',emoji:'🐐',effect:'All band members gain +1 ATK permanently.',cost:14},
+  {id:'ca1',name:'The Goat of Mendes',emoji:'🐐',effect:'All Strikes deal ×1.25 damage. Stacks with other multipliers.',cost:14,multTrigger:'always',mult:1.25},
   {id:'ca2',name:'Hellfire Amulet',emoji:'🔮',effect:'Start each fight with +2 bonus Embers.',cost:17},
   {id:'ca3',name:'Sabbath Crown',emoji:'👑',effect:'Too Stoned members revive at 50% HP each round.',cost:22},
   {id:'ca4',name:'Wailing Guitar',emoji:'🎸',effect:'First Strike each fight deals double damage.',cost:16},
@@ -5162,7 +5162,7 @@ function App(){
       addBuff(m.uid,'SHRED','#ff4400');msg='🎸 Shred Solo! '+m.name+' attacks TWICE this strike!'
     }
     else if(card.id==='overdriveped'){
-      setStrikeMult(p=>Math.min(6.66,Math.round(p*1.5*100)/100));strikeMultRef.current=Math.min(6.66,Math.round(strikeMultRef.current*1.5*100)/100)
+      setStrikeMult(p=>Math.min(66.6,Math.round(p*1.5*100)/100));strikeMultRef.current=Math.min(66.6,Math.round(strikeMultRef.current*1.5*100)/100)
       msg='🔊 Overdrive Pedal! Strike multiplier ×1.5!'
     }
     else if(card.id==='devilsdice'){
@@ -5228,7 +5228,7 @@ function App(){
       msg='👁️ POSSESSION! '+m.name+' +20 ATK this strike! Corruption +10%'
     }
     else if(card.id==='darkcrescendo'){
-      if(corruption>=80){setStrikeMult(p=>Math.min(6.66,Math.round(p*3*100)/100));strikeMultRef.current=Math.min(6.66,Math.round(strikeMultRef.current*3*100)/100);msg='🌑 DARK CRESCENDO! TRIPLE STRIKE MULTIPLIER! ('+corruption+'% corruption)'}
+      if(corruption>=80){setStrikeMult(p=>Math.min(66.6,Math.round(p*3*100)/100));strikeMultRef.current=Math.min(66.6,Math.round(strikeMultRef.current*3*100)/100);msg='🌑 DARK CRESCENDO! TRIPLE STRIKE MULTIPLIER! ('+corruption+'% corruption)'}
       else msg='🌑 Dark Crescendo... corruption too low ('+Math.floor(corruption)+'%, need 80%)'
     }
     else if(card.id==='russianroulette'){
@@ -5295,7 +5295,7 @@ function App(){
     setStage(ns)
     if(spent>0){setEmbers(function(p){return p-spent});embersSpentThisFightRef.current+=spent}
     if(msg)addLog(msg)
-    updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+    updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.08)*100)/100))
     if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
     if(card.type==='RIFF'&&ampFbDiscount>0)setAmpFeedbackDiscount(0)
     if(card.type==='RIFF')setLastRiffPlayed(card)
@@ -5360,7 +5360,7 @@ function App(){
       setCorruption(p=>Math.max(0,p-15))
       addLog('🎼 Smoke Break! '+victim.name+' discarded. +3 Embers. -15% Corruption. Drew 1 card.'+(preSelected.length===0?' (tip: select a card first)':''))
       addFloat('+3 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.08)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard']
       drawUpTo(remaining,deckRef.current,[...discRef.current,card,victim],1) // count victim too for refill
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
@@ -5381,7 +5381,7 @@ function App(){
       setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus-effectiveEmbers))
       addLog('🍯 Groupie! +2 Embers, drew 1 card.')
       addFloat('+2 🔥 +1 card',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.08)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -5401,7 +5401,7 @@ function App(){
       setSetlistOpen(true)
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
       addLog('📋 Setlist! Drew 2 cards — now pick 1 to discard.')
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.08)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -5422,7 +5422,7 @@ function App(){
       setSelected([])
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
       addLog('🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+drawCount+'.'+(discardCount===0?' (Tip: select cards before playing)':''))
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.08)*100)/100))
       setLastRiffPlayed(card)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
@@ -5444,7 +5444,7 @@ function App(){
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
       addLog('🎙 Remastered! Deleted '+toDelete.name+', drew 3.')
       addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.08)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       // cardHeal enemy passive
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
@@ -5480,7 +5480,7 @@ function App(){
       }
       setSelected([])
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.08)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
       else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
@@ -6266,8 +6266,35 @@ function App(){
     setTimeout(function(){
       setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
       setProjectiles([])
-      const tripMult=fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION'?2:1;const finalDmg=Math.round(dmg*tripMult*currentMult)
+      const tripMult=fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION'?2:1
+      const corruptionMult=1+Math.floor(corruption/20)*0.2 // 20%=×1.2, 40%=×1.4, 60%=×1.6, 80%=×1.8, 100%=×2.0
+      // ARTIFACT MULTIPLIER TRIGGERS — Balatro-style Jokers
+      let artifactMult=1.0
+      const cardsPlayedCount=cardsPlayedRef.current.length||0
+      const chainsFired=(combosFiredRef.current||[]).length
+      const stonedCount=stage.filter(m=>m&&m.tooStoned).length
+      const handDupes=hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
+      for(const art of activeArtifacts){
+        if(!art.multTrigger)continue
+        let fires=0
+        if(art.multTrigger==='cards3'&&cardsPlayedCount>=3)fires=1
+        if(art.multTrigger==='cards5'&&cardsPlayedCount>=5)fires=1
+        if(art.multTrigger==='corrupt50'&&corruption>=50)fires=1
+        if(art.multTrigger==='perChain')fires=chainsFired
+        if(art.multTrigger==='perStoned')fires=stonedCount
+        if(art.multTrigger==='perDupe')fires=handDupes
+        if(fires>0){
+          const m=Math.pow(art.mult,fires)
+          artifactMult*=m
+          _breakdownLines.push({type:'multiply',label:art.emoji+' '+art.name+' ×'+m.toFixed(2),label2:'',runningAfter:0,color:'#e8a820'})
+          addLog('⛧ '+art.emoji+' '+art.name+' TRIGGERS! ×'+m.toFixed(2))
+        }
+      }
+      // CA1 Goat of Mendes — permanent ×1.25 all strikes
+      if(activeArtifacts.some(a=>a.id==='ca1')){artifactMult*=1.25;_breakdownLines.push({type:'multiply',label:'🐐 Goat of Mendes ×1.25',label2:'',runningAfter:0,color:'#e8a820'})}
+      const finalDmg=Math.round(dmg*tripMult*currentMult*corruptionMult*artifactMult)
       if(tripMult>1){const _tr=Math.round(dmg*tripMult);_breakdownLines.push({type:'multiply',label:(fightTripBuff||'Trip')+' ×'+tripMult,label2:'= '+_tr.toLocaleString(),runningAfter:_tr,color:'#ff44ff'})}
+      if(corruptionMult>1){_breakdownLines.push({type:'multiply',label:'Corruption ×'+corruptionMult.toFixed(1),label2:'= '+Math.round(dmg*tripMult*corruptionMult).toLocaleString(),runningAfter:Math.round(dmg*tripMult*corruptionMult),color:'#cc44ff'})}
       if(currentMult>1.0){_breakdownLines.push({type:'multiply',label:'Strike ×'+currentMult.toFixed(2),label2:'= '+finalDmg.toLocaleString(),runningAfter:finalDmg,color:'#ff4400'})};const newEHp=Math.max(0,startHp-finalDmg)
       setEnemyHp(prev=>Math.min(prev,newEHp))
       // damageScaleAtk: boss gains ATK per 20 damage taken
@@ -6714,10 +6741,7 @@ function App(){
     setStage(prev=>{
       let ns=[...prev]
       // A1: Vintage Guitar — lead guitarist +1 ATK on fight start
-      if(hasVintageGuitar){
-        const li=ns.findIndex(m=>m&&m.role==='Lead Guitarist')
-        if(li>=0)ns[li]=Object.assign({},ns[li],{atk:ns[li].atk+1})
-      }
+      // A1: Vintage Guitar — now ×1.3 mult trigger (applied in damage calc)
       // A4: Roadie's Toolbelt — random member Stonewall
       if(hasToolbelt){
         const actives=ns.map((m,i)=>m?i:-1).filter(i=>i>=0)
@@ -6736,8 +6760,7 @@ function App(){
       }
       // P8: Green Room — all members Stonewall
       if(hasP8){ns=ns.map(m=>m?Object.assign({},m,{stoneShield:true}):null)}
-      // CA1: Goat of Mendes — all members +1 ATK
-      if(hasGoat){ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1}):m);addLog('🐐 Goat of Mendes! All members +1 ATK.')}
+      // CA1: Goat of Mendes — now ×1.25 strike multiplier (applied in damage calc)
       return ns
     })
     // Corruption start (A2)
@@ -7214,9 +7237,10 @@ function App(){
             ['✨ Member Tiers','Members come in tiers: Basic (standard), Foil (+1 ATK/HP, -1 Ember on cards), Mythic (+3 ATK/HP), Demonic (+5 ATK/HP, golden glow). Higher tiers appear in better packs.'],
             ['🃏 Card Types','RIFF (purple): Direct damage and ATK buffs. CORRUPT (red): Corruption-scaling power. UTILITY (green): Healing, draw, and economy. EMBER (orange): Ember management and recovery.'],
             ['⛧ Riff Chains','Playing specific card pairs triggers Riff Chains — massive combo bonuses! Chains multiply your Strike damage (e.g., Battle Cry + Stage Dive = DEATH WISH). 16 chains to discover. The celebration shows which cards triggered it.'],
-            ['×️ Strike Multiplier','Every card played adds +0.05× to your Strike multiplier. Riff Chains add ×1.78 multiplicative. Maximum multiplier: ×6.66 (Mark of the Beast). The multiplier resets each Strike.'],
+            ['×️ Strike Multiplier','Every card played MULTIPLIES your Strike by ×1.08. Riff Chains multiply by ×1.78. Multiple chains stack multiplicatively. 6 cards + 1 chain = ×2.83. The multiplier resets each Strike.'],
             ['🌀 Corruption','A risk/reward axis from 0-100%. Some cards and enemies raise it. CORRUPT keyword members get stronger at high corruption. Overdrive requires 60%+. Feedback Loop and Amp the Static scale with it.'],
             ['⚠ Corruption Thresholds','25% THE WHISPERS: Weakest member takes 1 damage each fight. 50% THE HUNGER: All shop prices +25%. 75% THE MADNESS: 15% chance to lose a random card before each Strike. 100% THE POSSESSION: Boss damage +3, but CORRUPT members get one-time +3 ATK.'],
+            ['💀 Corruption = Power','Corruption is a MULTIPLIER. Every 20% corruption = ×1.2 damage on all Strikes. At 100% you deal ×2.0 damage but the boss hits +3 harder. Risk vs reward — ride the corruption wave.'],
             ['🧹 Reducing Corruption','Smoke Break: -15%. Herb Money: -15%. Controlled Feedback: Sets to 50%. Signal Decay: -15%. Atonement pact: -15% after each boss kill. Some descent rewards also reduce corruption.'],
             ['⛧ Pacts','After each boss kill, choose 1 of 2 pact offers. Pacts are permanent buffs for the rest of the run. 13 pacts total including Ember Surge, Iron Strings, Thick Skin, Clean Living, Corruption Engine, Atonement, and more.'],
             ['🔨 Doom Forge','After choosing a pact, the Doom Forge appears. Upgrade one card in your deck permanently. Upgraded cards have stronger effects and some grant permanent HP buffs.'],
@@ -8442,7 +8466,29 @@ function App(){
             }
             // 6) Wailing Guitar artifact: ×2 on first strike
             if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===fightMaxStrikes)dmg*=2
-            // 7) Strike multiplier
+            // 7) Corruption multiplier
+            const corrMult=1+Math.floor(corruption/20)*0.2
+            dmg=Math.round(dmg*corrMult)
+            // 8) Artifact multiplier triggers
+            let artMult=1.0
+            const _cpc=(cardsPlayedRef.current||[]).length
+            const _cf=(combosFiredRef.current||[]).length
+            const _sc=stage.filter(m=>m&&m.tooStoned).length
+            const _hd=hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
+            for(const art of activeArtifacts){
+              if(!art.multTrigger)continue
+              let fires=0
+              if(art.multTrigger==='cards3'&&_cpc>=3)fires=1
+              if(art.multTrigger==='cards5'&&_cpc>=5)fires=1
+              if(art.multTrigger==='corrupt50'&&corruption>=50)fires=1
+              if(art.multTrigger==='perChain')fires=_cf
+              if(art.multTrigger==='perStoned')fires=_sc
+              if(art.multTrigger==='perDupe')fires=_hd
+              if(fires>0)artMult*=Math.pow(art.mult,fires)
+            }
+            if(activeArtifacts.some(a=>a.id==='ca1'))artMult*=1.25
+            dmg=Math.round(dmg*artMult)
+            // 9) Strike multiplier
             const fin=strikeMult>1.0?Math.round(dmg*strikeMult):dmg
             if(fin<=0||!canStrike)return null
             return (
