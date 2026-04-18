@@ -1393,7 +1393,7 @@ function EmberDisplayLarge({current,max,forecast}){
   const afterCast=forecast?Math.max(0,current-forecast):current
   return(
     <div data-ember-display="1" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Embers</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}} title='Embers = action points. Each card costs embers. You get them back next Strike.'>Embers</div>
       <div style={{display:'flex',gap:3,justifyContent:'center'}}>
         {Array.from({length:max}).map((_,i)=>{
           const filled=i>=(max-current)
@@ -2581,6 +2581,36 @@ function ArtifactArtImg({id,emoji,size=40,style={}}){
   return <span style={{fontSize:size*0.7,...style}}>{emoji}</span>
 }
 
+
+function showFirstTimeTip(key, msg, addLog, addFloat) {
+  const k = 'vst_tip_' + key
+  if (localStorage.getItem(k)) return false
+  localStorage.setItem(k, '1')
+  if (addLog) addLog('💡 TIP: ' + msg)
+  return true
+}
+
+// ═══ LOADING TIPS — doom metal wisdom ═══
+const LOADING_TIPS=[
+  'Corruption above 40% MULTIPLIES your damage. Risk = reward.',
+  'Burning cards from your deck means you draw combos faster.',
+  'Riff Chains fire when you play BOTH cards of a pair. Check the Rules for all 16 chains.',
+  'Artifacts with ×MULT triggers are your Jokers. Stack them for nuclear damage.',
+  'Playing 4+ cards before Striking activates Vintage Guitar (×1.3).',
+  'The Pawn Shop lets you burn bad cards. A 50-card deck beats a 69-card deck.',
+  "Devil's Tuning Fork starts you at 15% corruption AND gives ×1.5 at 60%+. Double value.",
+  'Ctrl+Z undoes your last card play. Use it.',
+  'Boss loot gives permanent multiplier triggers. Each circle boss drops a unique one.',
+  'Mastery grows with every card play. At 100 plays a card becomes Gold (permanently upgraded).',
+  'The Goat of Mendes gives ×1.25 on EVERY strike. Most powerful artifact in the game.',
+  'Gambit cards (Hellfire Rift, Soul Sacrifice, Void Pact) appear rarely in shops. They are nuclear.',
+  'Heat increases after each win. Higher heat = harder bosses + better bragging rights.',
+  'Press S to Strike, D to Discard, 1-6 to select cards, ESC for pause menu.',
+  'Encore members attack TWICE. Look for the 🔁×2 badge.',
+  'Foil members have boosted stats. Mythic members are even stronger.',
+  'Band Synergy: buff 3+ members and your whole band deals bonus damage.',
+  'Corruption Gambit: play Void Pact (×2.5 mult) when corruption is already at 60% for maximum carnage.',
+]
 function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption,animPhase,ghostCard,onQuickPlay}){
   const [over,setOver]=useState(false)
   const [showTip,setShowTip]=useState(false)
@@ -3271,7 +3301,7 @@ function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chr
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'var(--ink-dim)',fontStyle:'italic',lineHeight:1.2,fontWeight:700,textAlign:'center',cursor:'help',maxWidth:520}} title={enemy.passive+(BOSS_BIOS[enemy.id]?'\n\n'+BOSS_BIOS[enemy.id]:'')}>{'"'+((enemy.tagline||enemy.passive))+'"'}</div>
 
         {/* Base damage — small MBScribbles */}
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-rust)',letterSpacing:3,fontWeight:900,textAlign:'center',textTransform:'uppercase'}}>Base Damage · {enemy.baseDmg} per Strike</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-rust)',letterSpacing:3,fontWeight:900,textAlign:'center',textTransform:'uppercase',textShadow:'0 0 6px rgba(196,30,58,0.4)'}}>Base Damage · {enemy.baseDmg} per Strike</div>
 
         {/* BOSS TELEGRAPH — dynamic next-strike preview */}
         {telegraph&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,textAlign:'center',marginTop:2,letterSpacing:2,display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>
@@ -3378,7 +3408,7 @@ function CombatLogViewer({log,onClose}){
   )
 }
 
-function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered,newAchievements,enemyHp,stage,chosenPacts,fullRunLog,newTrophies,runElapsed}){
+function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered,newAchievements,enemyHp,stage,chosenPacts,fullRunLog,newTrophies,runElapsed,lastKillingBlow}){
   const [showEndLog,setShowEndLog]=useState(false)
   const isStoned=cause==='stoned'
   const isBeaten=cause==='beaten'
@@ -3516,6 +3546,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
           </span>
         </div>)}
       </div>}
+      {lastKillingBlow&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#886655',fontStyle:'italic',marginTop:8,opacity:0.8}}>☠ {lastKillingBlow}</div>}
     </div>)
   }
 
@@ -4377,6 +4408,7 @@ function App(){
   const [remasterOpen,setRemasterOpen]=useState(false)
   const [remasterCards,setRemasterCards]=useState([])
   const [deathCause,setDeathCause]=useState('fallen')
+  const [lastKillingBlow,setLastKillingBlow]=useState('')
   const [hellquakeAnim,setHellquakeAnim]=useState(null)
   const [milestoneFlash,setMilestoneFlash]=useState(null) // {text,color} for boss HP milestones
   const [strikeMult,setStrikeMult]=useState(1.0) // score multiplier that builds per card played
@@ -4411,7 +4443,8 @@ function App(){
   const lastCorruptThreshold=useRef(0) // current HELL_EVENT or null
   const [eventsSeenThisRun,setEventsSeenThisRun]=useState([]) // ids of events seen // {circleNum, circleName, circleEmoji} for 3s transition
   const milestonesFiredRef=useRef({half:false,quarter:false,tenth:false})
-  const [phaseBanner,setPhaseBanner]=useState('play') // 'play','strike','boss'
+  const [phaseBanner,setPhaseBanner]=useState('play')
+  const [currentTip,setCurrentTip]=useState('') // 'play','strike','boss'
   const [deckViewOpen,setDeckViewOpen]=useState(false)
   const [discardViewOpen,setDiscardViewOpen]=useState(false)
   const [circleArtifact,setCircleArtifact]=useState(()=>STARTER_ARTIFACTS[Math.floor(Math.random()*STARTER_ARTIFACTS.length)])
@@ -5363,7 +5396,7 @@ function App(){
           if(!disc.includes(chain.id)){disc.push(chain.id);localStorage.setItem('vst_combos_discovered',JSON.stringify(disc))}
         }
         setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.78*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
-        playSfx('chain_combo');triggerShake(18,600);setChainFlashActive(true);setTimeout(()=>setChainFlashActive(false),600);setStrikeMult(p=>Math.min(6.66,Math.round((p*1.78)*100)/100));addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×1.78 MULTIPLIER!')
+        playSfx('chain_combo');triggerShake(18,600);setChainFlashActive(true);setTimeout(()=>setChainFlashActive(false),600);setStrikeMult(p=>Math.min(6.66,Math.round((p*1.78)*100)/100));showFirstTimeTip('chain','Riff Chains fire when you play BOTH cards of a pair in the same Strike. Check Rules for all 16 chains!',addLog);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×1.78 MULTIPLIER!')
         combosFiredRef.current.push(chain.id)
           // #7: Track lifetime chain discovery
           const _allDisc=JSON.parse(localStorage.getItem('vst_chains_discovered')||'[]')
@@ -6037,7 +6070,7 @@ function App(){
         setTimeout(()=>{setVictoryCinematic(null);setCreditsRoll(true)},10000)
       }
       if(e.shiftKey&&(e.key==='D'||e.key==='d')){
-        setDeathCause('stoned')
+        setDeathCause('stoned');setLastKillingBlow('All band members went Too Stoned from corruption damage')
         setStats({fightsSurvived:6,strikesThrown:24,totalDamage:420,highestStrike:69,tooStonedCount:2,maxCorruption:66,stashEarned:42,cardsPlayed:99})
         setGameState('end')
       }
@@ -7145,7 +7178,7 @@ function App(){
   const handlePawnBurnCard=useCallback((card)=>{
     setDeck(p=>{const idx=p.findIndex(c=>c.uid===card.uid);if(idx!==-1){const n=[...p];n.splice(idx,1);return n}return p})
     setDiscardPile(p=>{const idx=p.findIndex(c=>c.uid===card.uid);if(idx!==-1){const n=[...p];n.splice(idx,1);return n}return p})
-    playSfx('burn');addLog('🔥 Burned '+card.name+' — permanently deleted from deck.')
+    playSfx('burn');showFirstTimeTip('burn','Burning cards shrinks your deck. Smaller deck = draw your combos faster = bigger multipliers!',addLog);addLog('🔥 Burned '+card.name+' — permanently deleted from deck.')
   },[])
 
   const handleReroll=useCallback(()=>{
@@ -7919,7 +7952,7 @@ function App(){
             if(pact.id==='thick_skin')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):m))
             if(pact.id==='war_drums')setStrikesLeft(p=>p)  // handled in strike reset via chosenPacts check
             if(pact.id==='sixth_slot')setStage(prev=>prev.length<6?[...prev,null]:prev)
-            playSfx('pact');addLog('⛧ Pact chosen: '+pact.emoji+' '+pact.name)
+            playSfx('pact');showFirstTimeTip('pact','Pacts are permanent buffs. Choose wisely — you only get one per circle boss!',addLog);addLog('⛧ Pact chosen: '+pact.emoji+' '+pact.name)
             setGameState('campfire')
           }}
             style={{width:280,background:'linear-gradient(180deg,#1a1008,#0a0604)',border:'2px solid rgba(200,140,20,0.5)',borderRadius:10,padding:'30px 24px',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:12,
@@ -8373,6 +8406,7 @@ function App(){
             textShadow:phaseBanner==='play'?'none':'0 0 12px '+(phaseBanner==='strike'?'rgba(196,30,58,0.6)':'rgba(196,30,58,0.6)'),
             transition:'color 0.2s',opacity:phaseBanner==='play'?0.7:0.95}}>
             {phaseBanner==='play'?'⛧ Play Cards':phaseBanner==='strike'?'⚔ Striking!':'👿 Boss Attacks'}
+            {currentTip&&phaseBanner==='play'&&<div style={{fontSize:9,color:'var(--ink-dim)',letterSpacing:1,marginTop:2,fontWeight:400,textTransform:'none',opacity:0.6,maxWidth:200}}>💡 {currentTip}</div>}
           </div>
           {/* PACT ICONS — keep the hover tooltips, remove redundant Combined Attack readout (DEALS X DMG covers that now) */}
           {chosenPacts.length>0&&<div style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',display:'flex',gap:4}}>
@@ -8504,7 +8538,7 @@ function App(){
           })()}
           {/* STRIKE button — wider so pentagrams don't clip */}
           <button onClick={handleStrike} disabled={!canStrike}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:19,fontWeight:900,letterSpacing:2,textTransform:'uppercase',whiteSpace:'nowrap',padding:'18px 6px',background:canStrike?'linear-gradient(180deg, rgba(196,30,58,0.55), rgba(122,15,31,0.3))':'rgba(25,12,5,0.4)',border:canStrike?'2px solid var(--blood)':'1px solid var(--rot)',borderRadius:3,color:canStrike?'var(--ink-bone)':'var(--rot)',cursor:canStrike?'pointer':'not-allowed',textShadow:canStrike?'0 0 20px rgba(196,30,58,0.9), 0 2px 4px rgba(0,0,0,0.6)':'none',boxShadow:canStrike?'inset 0 0 32px rgba(196,30,58,0.25), 0 0 24px rgba(196,30,58,0.35)':'none',transition:'all 0.15s',width:'100%',animation:canStrike?'altarBreath 3s ease-in-out infinite':'none'}}>⛧ STRIKE ⛧</button>
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:19,fontWeight:900,letterSpacing:2,textTransform:'uppercase',whiteSpace:'nowrap',padding:'18px 6px',background:canStrike?'linear-gradient(180deg, rgba(196,30,58,0.55), rgba(122,15,31,0.3))':'rgba(25,12,5,0.4)',border:canStrike?'2px solid var(--blood)':'1px solid var(--rot)',borderRadius:3,color:canStrike?'var(--ink-bone)':'var(--rot)',cursor:canStrike?'pointer':'not-allowed',animation:canStrike?'throb 1.5s ease-in-out infinite':'none',textShadow:canStrike?'0 0 20px rgba(196,30,58,0.9), 0 2px 4px rgba(0,0,0,0.6)':'none',boxShadow:canStrike?'inset 0 0 32px rgba(196,30,58,0.25), 0 0 24px rgba(196,30,58,0.35)':'none',transition:'all 0.15s',width:'100%',animation:canStrike?'altarBreath 3s ease-in-out infinite':'none'}}>⛧ STRIKE ⛧</button>
           {/* Strike pips — directly under STRIKE button */}
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'center'}}>
             <PhaseDots left={strikesLeft} total={fightMaxStrikes} color='#c41e3a' wide={true}/>
@@ -8588,7 +8622,7 @@ function App(){
             return (
               <div style={{fontFamily:"'MBScribblesFont',serif",textAlign:'center',marginTop:6}}>
                 <div style={{fontSize:11,color:'var(--ink-dim)',letterSpacing:4,textTransform:'uppercase',fontWeight:900}}>Deals</div>
-                <div key={'preview-'+fin} style={{fontSize:42,fontWeight:900,color:'var(--blood)',textShadow:'0 0 18px rgba(196,30,58,0.85), 0 2px 4px rgba(0,0,0,0.7)',lineHeight:1,animation:'damageStamp 0.35s cubic-bezier(0.4,1.6,0.5,1)',display:'inline-block',marginTop:2}}>{fin}<span style={{fontSize:14,color:'var(--ink-bone)',marginLeft:4,letterSpacing:2}}>DMG</span></div>
+                <div key={'preview-'+fin} style={{fontSize:48,fontWeight:900,color:'var(--blood)',textShadow:'0 0 18px rgba(196,30,58,0.85), 0 2px 4px rgba(0,0,0,0.7)',lineHeight:1,animation:'damageStamp 0.35s cubic-bezier(0.4,1.6,0.5,1)',display:'inline-block',marginTop:2}}>{fin}<span style={{fontSize:14,color:'var(--ink-bone)',marginLeft:4,letterSpacing:2}}>DMG</span></div>
               </div>
             )
           })()}
