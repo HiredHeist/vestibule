@@ -372,33 +372,24 @@ const CARD_UPGRADES={
 
 // -- BOSS LOOT: unique drops per circle boss --
 const BOSS_LOOT=[
-  null, // no boss at index 0
+  null, null,
+  {id:'limbos_echo',name:"Limbo's Echo",emoji:'👁',desc:'×1.15 per Strike remaining when you hit.',effect:'multStrikesLeft',circle:1,mult:1.15,multTrigger:'perStrikesLeft'},
+  null, null,
+  {id:'love_letter',name:'Love Letter',emoji:'💋',desc:'First card each fight is free. ×1.2 if you play it.',effect:'freeFirst',circle:2,mult:1.2,multTrigger:'firstCardFree'},
+  null, null,
+  {id:'endless_hunger',name:'Endless Hunger',emoji:'🕳',desc:'×1.3 when your band has 4+ alive members.',effect:'mult4alive',circle:3,mult:1.3,multTrigger:'alive4'},
+  null, null,
+  {id:'golden_tooth',name:'Golden Tooth',emoji:'🪙',desc:'+5 Stash per boss kill. ×1.1 per 20 Stash.',effect:'stashBoss',circle:4,mult:1.1,multTrigger:'perStash20'},
+  null, null,
+  {id:'berserker_rage',name:"Berserker's Rage",emoji:'🔥',desc:'×1.5 if any member has 20+ ATK.',effect:'atk20mult',circle:5,mult:1.5,multTrigger:'memberAtk20'},
+  null, null,
+  {id:'heretics_brand',name:"Heretic's Brand",emoji:'⛧',desc:'×1.3 per corruption threshold passed (25/50/75/100).',effect:'corrThresholds',circle:6,mult:1.3,multTrigger:'perCorrThreshold'},
+  null, null,
+  {id:'the_blade',name:'The Blade',emoji:'🗡',desc:'×2.0 if you play exactly 1 card then Strike. Surgical.',effect:'singleCard',circle:7,mult:2.0,multTrigger:'cards1'},
+  null, null,
+  {id:'mask_of_lies',name:'Mask of Lies',emoji:'🎭',desc:'×1.2 per member with a different keyword on stage.',effect:'uniqueKeywords',circle:8,mult:1.2,multTrigger:'perUniqueKeyword'},
+  null, null,
   null,
-  {id:'limbos_echo',name:'Limbos Echo',emoji:'👁',desc:'+1 ATK to all members.',effect:'atk1all',circle:1},
-  null,
-  null,
-  {id:'love_letter',name:'Love Letter',emoji:'💋',desc:'First card each fight is free.',effect:'freeFirst',circle:2},
-  null,
-  null,
-  {id:'endless_hunger',name:'Endless Hunger',emoji:'🕳',desc:'+3 max HP to all members.',effect:'hp3all',circle:3},
-  null,
-  null,
-  {id:'golden_tooth',name:'Golden Tooth',emoji:'🪙',desc:'+5 Stash per boss kill.',effect:'stashBoss',circle:4},
-  null,
-  null,
-  {id:'berserker_rage',name:'Berserker Rage',emoji:'🔥',desc:'+2 ATK to strongest member.',effect:'atk2strong',circle:5},
-  null,
-  null,
-  {id:'heretics_brand',name:'Heretics Brand',emoji:'⛧',desc:'Corruption damage +25% permanently.',effect:'corrDmg',circle:6},
-  null,
-  null,
-  {id:'the_blade',name:'The Blade',emoji:'🗡',desc:'+3 ATK to strongest member.',effect:'atk3strong',circle:7},
-  null,
-  null,
-  {id:'mask_of_lies',name:'Mask of Lies',emoji:'🎭',desc:'+4 max HP to all members.',effect:'hp4all',circle:8},
-  null,
-  null,
-  null, // Lucifer - handled by victory cinematic
 ]
 const STREAK_BONUSES=[
   null, // 0 wins
@@ -6335,6 +6326,21 @@ function App(){
       }
       // CA1 Goat of Mendes — permanent ×1.25 all strikes
       if(activeArtifacts.some(a=>a.id==='ca1')){artifactMult*=1.25;_breakdownLines.push({type:'multiply',label:'🐐 Goat of Mendes ×1.25',label2:'',runningAfter:0,color:'#e8a820'})}
+      // BOSS LOOT MULTIPLIER TRIGGERS
+      for(const lootId of collectedLoot){
+        const loot=BOSS_LOOT.find(l=>l&&l.id===lootId)
+        if(!loot||!loot.multTrigger||!loot.mult)continue
+        let fires=0
+        if(loot.multTrigger==='perStrikesLeft')fires=strikesLeft
+        if(loot.multTrigger==='firstCardFree'&&cardsPlayedCount>=1)fires=1
+        if(loot.multTrigger==='alive4'&&actives.length>=4)fires=1
+        if(loot.multTrigger==='perStash20')fires=Math.floor(stash/20)
+        if(loot.multTrigger==='memberAtk20'&&actives.some(m=>m.atk>=20))fires=1
+        if(loot.multTrigger==='perCorrThreshold')fires=[25,50,75,100].filter(t=>corruption>=t).length
+        if(loot.multTrigger==='cards1'&&cardsPlayedCount===1)fires=1
+        if(loot.multTrigger==='perUniqueKeyword')fires=new Set(actives.map(m=>m.keyword)).size
+        if(fires>0){const m=Math.pow(loot.mult,fires);artifactMult*=m;_breakdownLines.push({type:'multiply',label:loot.emoji+' '+loot.name+' ×'+m.toFixed(2),label2:'',runningAfter:0,color:'#44ddff'});addLog('💎 '+loot.emoji+' '+loot.name+' ×'+m.toFixed(2)+'!')}
+      }
       const finalDmg=Math.round(dmg*tripMult*currentMult*corruptionMult*artifactMult)
       if(tripMult>1){const _tr=Math.round(dmg*tripMult);_breakdownLines.push({type:'multiply',label:(fightTripBuff||'Trip')+' ×'+tripMult,label2:'= '+_tr.toLocaleString(),runningAfter:_tr,color:'#ff44ff'})}
       if(corruptionMult>1){_breakdownLines.push({type:'multiply',label:'Corruption ×'+corruptionMult.toFixed(1),label2:'= '+Math.round(dmg*tripMult*corruptionMult).toLocaleString(),runningAfter:Math.round(dmg*tripMult*corruptionMult),color:'#cc44ff'})}
@@ -8276,9 +8282,18 @@ function App(){
                   onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='0'}}>
                   {a?<div style={{width:80,height:105,border:'1px solid rgba(200,140,30,0.65)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 10px rgba(200,140,20,0.25)',cursor:'help'}}><div style={{fontSize:22}}>{a.emoji}</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:6,letterSpacing:0.5,color:'#c8a040',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 3px'}}>{a.name}</div></div>
                   :<div style={{width:80,height:105,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:52,opacity:0.35,textShadow:'0 0 12px rgba(255,180,0,0.4)'}}>⛧</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>}
-                  {a&&<div data-artip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:88,top:0,zIndex:99999,pointerEvents:'none',minWidth:180,maxWidth:240,background:'rgba(12,7,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
+                  {a&&<div data-artip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:88,top:0,zIndex:99999,pointerEvents:'none',minWidth:200,maxWidth:280,background:'rgba(12,7,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:700,color:'#e8c060',marginBottom:4}}>{a.emoji} {a.name}</div>
                     <div style={{fontFamily:"'ScratchFont',serif",fontSize:9,color:'#9a8050',fontStyle:'italic',lineHeight:1.4}}>{a.effect}</div>
+                    {a.mult&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'#ff8800',marginTop:4}}>×{a.mult} MULTIPLIER</div>}
+                    {(()=>{const SYNERGIES={a1:['a10'],a10:['a1'],a2:['a6'],a6:['a2'],a5:['a1','a10'],a9:['a5'],ca1:['a1','a2','a10']}
+                      const syns=(SYNERGIES[a.id]||[]).map(sid=>activeArtifacts.find(x=>x.id===sid)).filter(Boolean)
+                      if(syns.length===0)return null
+                      return <div style={{marginTop:4,paddingTop:4,borderTop:'1px solid rgba(200,140,30,0.3)'}}>
+                        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#44cc44',letterSpacing:2,textTransform:'uppercase',marginBottom:2}}>⛧ SYNERGIZES WITH</div>
+                        {syns.map(s=><div key={s.id} style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#88ff88'}}>{s.emoji} {s.name}</div>)}
+                      </div>
+                    })()}
                   </div>}
                 </div>
               )})}
