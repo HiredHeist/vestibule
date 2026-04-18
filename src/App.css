@@ -55,7 +55,9 @@
   /* Accents (used sparingly) */
   --blood: #c41e3a;
   --blood-deep: #7a0f1f;
-  --gold: #c89838;
+  --gold: #e8a820;
+  --gold-dim: #c8a040;
+  --gold-dark: #c87820;
   --gold-deep: #8a6820;
   --rot: #3a2e20;
 
@@ -528,6 +530,16 @@ body {
 @keyframes confettiFall {
   0% { transform: translateY(-10px) rotate(0deg); opacity: 0.9; }
   100% { transform: translateY(1100px) rotate(720deg); opacity: 0; }
+}
+
+/* Pact selection — drifting smoke layers */
+@keyframes pactSmoke1 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  50% { transform: translate(30px, -20px) scale(1.2); opacity: 1; }
+}
+@keyframes pactSmoke2 {
+  0%, 100% { transform: translate(0, 0) scale(1.1); opacity: 0.4; }
+  50% { transform: translate(-20px, 15px) scale(0.9); opacity: 0.8; }
 }
 
 /* Riff chain warning glow — pulses on cards that could complete a chain */

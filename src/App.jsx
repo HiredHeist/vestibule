@@ -2586,8 +2586,8 @@ function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,
         borderRadius:6,
         boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':mentorState==='active'&&!st?'0 0 40px rgba(255,215,0,0.9),0 6px 24px rgba(0,0,0,0.85)':mentorState==='mentor'&&!st?'0 0 22px rgba(255,215,0,0.5),0 6px 24px rgba(0,0,0,0.85)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':!st&&member.demonic?'0 0 25px rgba(255,200,0,0.5),0 6px 24px rgba(0,0,0,0.85)':!st&&member.mythic?'0 0 25px rgba(200,0,255,0.4),0 6px 24px rgba(0,0,0,0.85)':!st&&member.foil?'0 0 20px rgba(100,180,255,0.35),0 6px 24px rgba(0,0,0,0.85)':'0 4px 20px rgba(0,0,0,0.9),0 0 1px rgba(190,120,25,0.3)',
         transform:st?'rotate(15deg) scale(0.95)':strikeAnim&&strikeAnim.phase==='dip'?'translateY(20px) scale(0.95) rotate(-3deg)':strikeAnim&&strikeAnim.phase==='wiggle'?'translateY(12px) scale(0.97) rotate(4deg)':strikeAnim&&strikeAnim.phase==='launch'?'translate('+strikeAnim.dx+'px,'+(strikeAnim.dy-80)+'px) scale(0.7) rotate(-5deg)':strikeAnim&&strikeAnim.phase==='impact'?'translate('+strikeAnim.dx+'px,'+strikeAnim.dy+'px) scale(1.15) rotate(0deg)':strikeAnim&&strikeAnim.phase==='return'?'translate(0px,-30px) scale(1.05)':'none',
-        filter:strikeAnim&&strikeAnim.phase==='launch'?'blur(1.5px) drop-shadow(0 0 18px rgba(255,80,0,0.6))':'none',
-        opacity:st?0.5:animPhase==='idle'&&!isAttacking&&buffCount===0?0.7:1,
+        filter:st?'grayscale(0.8) brightness(0.5)':(strikeAnim&&strikeAnim.phase==='launch'?'blur(1.5px) drop-shadow(0 0 18px rgba(255,80,0,0.6))':'none'),
+        opacity:st?0.6:animPhase==='idle'&&!isAttacking&&buffCount===0?0.7:1,
         animation:isHit?'memberHitShake 0.4s ease-out':(!st&&!isAttacking&&!isDiceTarget&&!isStriking)?(nearDeath?'nearDeathPulse 0.8s ease-in-out infinite':'throb 3s ease-in-out infinite'):'none',
         transition:strikeAnim?'transform 0.25s cubic-bezier(0.2,0.8,0.3,1.2), border 0.2s, box-shadow 0.2s, opacity 0.3s':'border 0.2s, box-shadow 0.2s, opacity 0.3s, transform 0.3s',
         cursor:'grab',position:'relative'}}>
@@ -2598,6 +2598,9 @@ function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,
       {mentorState==='active'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:18,textShadow:'0 0 12px #ffd700',zIndex:12,animation:'mentorPulse 1.5s ease-in-out infinite'}}>⛓</div>}
       {mentorState==='broken'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:16,opacity:0.45,zIndex:12}}>💔</div>}
       {mentorState==='mentor'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:18,textShadow:'0 0 8px rgba(255,215,0,0.6)',zIndex:12}}>⛓</div>}
+      {st&&<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:15,pointerEvents:'none'}}>
+        <div style={{fontSize:64,opacity:0.7,animation:'fadeIn 0.5s ease',textShadow:'0 0 20px rgba(0,0,0,0.9)'}}>💀</div>
+      </div>}
       <div style={{height:5,borderRadius:'6px 6px 0 0',
         background:st?'#333':member.demonic?'linear-gradient(90deg,#e8a820,#ffd700,#e8a820)':member.mythic?'linear-gradient(90deg,#cc44ff,#ff88ff,#cc44ff)':member.foil?'linear-gradient(90deg,#88ccff,#ffffff,#88ccff)':'linear-gradient(90deg,#dd2222,#ff7700)',
         boxShadow:st?'none':member.demonic?'0 0 14px rgba(255,200,0,0.8)':member.mythic?'0 0 14px rgba(200,0,255,0.7)':member.foil?'0 0 14px rgba(100,180,255,0.7)':'0 0 14px rgba(220,50,0,0.5)'}}/>
@@ -4598,7 +4601,7 @@ function App(){
     const cappedTarget=Math.min(target,10)
     let nh=[...h],nd=[...d],ndisc=[...disc]
     while(nh.length<cappedTarget){
-      if(nd.length===0){if(ndisc.length===0)break;nd=[...ndisc].filter(Boolean).sort(()=>Math.random()-.5);ndisc=[];addLog('🔄 Deck reshuffled.')}
+      if(nd.length===0){if(ndisc.length===0)break;nd=[...ndisc].filter(Boolean).sort(()=>Math.random()-.5);ndisc=[];addLog('🔄 Deck reshuffled.');spawnParticles(960,800,15,'#c8a060',60)}
       if(nd[0])nh=[...nh,nd[0]];nd=nd.slice(1);playCard()
     }
     return{h:nh.filter(Boolean),d:nd.filter(Boolean),disc:ndisc.filter(Boolean)}
@@ -7800,11 +7803,14 @@ function App(){
   )
   if(gameState==='pact')return(
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,overflow:'hidden'}}>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,color:'#e8a820',textShadow:'0 0 40px rgba(200,140,0,0.6),0 0 80px rgba(150,100,0,0.3),3px 3px 0 #000',letterSpacing:8}}>⛧ The Pact ⛧</div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#aa9060',fontStyle:'italic'}}>Choose your reward. The other is lost to the Void.</div>
+      {/* Smoke/fog layers */}
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 30% 60%, rgba(200,140,20,0.06) 0%, transparent 60%)',animation:'pactSmoke1 8s ease-in-out infinite',pointerEvents:'none'}}/>
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 70% 40%, rgba(200,140,20,0.04) 0%, transparent 50%)',animation:'pactSmoke2 6s ease-in-out infinite',pointerEvents:'none'}}/>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,color:'#e8a820',textShadow:'0 0 40px rgba(200,140,0,0.6),0 0 80px rgba(150,100,0,0.3),3px 3px 0 #000',letterSpacing:8,animation:'fadeSlideUp 0.6s ease-out'}}>⛧ The Pact ⛧</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'#aa9060',fontStyle:'italic',animation:'fadeSlideUp 0.6s ease-out 0.2s both'}}>Choose your reward. The other is lost to the Void.</div>
       <div style={{display:'flex',gap:40,marginTop:16}}>
-        {pactChoices.filter(Boolean).map(pact=>(
-          <div key={pact.id} onClick={()=>{
+        {pactChoices.filter(Boolean).map((pact,pi)=>(
+          <div key={pact.id} style={{animation:'fadeSlideUp 0.5s ease-out '+(0.3+pi*0.15)+'s both'}} onClick={()=>{
             setChosenPacts(p=>[...p,pact.id])
             // Apply immediate pact effects
             if(pact.id==='ember_surge')setMaxEmbers(p=>{const n=Math.min(MAX_EMBERS_CAP,p+1);setEmbers(n);return n})
@@ -8108,9 +8114,10 @@ function App(){
         {/* RIFF CHAIN title — screen-wide */}
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:96,color:comboFlash.color,textShadow:`0 0 60px ${comboFlash.color},0 0 120px ${comboFlash.color}88,-4px 0 rgba(255,0,0,0.5),4px 0 rgba(0,80,255,0.4),4px 4px 0 #000`,letterSpacing:14,animation:'chainSlam 3s ease forwards',zIndex:1}}>⛧ RIFF CHAIN ⛧</div>
         {/* Chain name — BIG */}
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:'#fff',textShadow:`0 0 40px ${comboFlash.color},0 0 80px ${comboFlash.color}88,4px 4px 0 #000`,letterSpacing:10,animation:'chainSlam 3s ease forwards',zIndex:1,marginTop:4}}>{comboFlash.name}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:Math.min(96,48+Math.floor((comboFlash.mult||1)*12)),color:'#fff',textShadow:`0 0 40px ${comboFlash.color},0 0 80px ${comboFlash.color}88,4px 4px 0 #000`,letterSpacing:10,animation:'chainSlam 3s ease forwards',zIndex:1,marginTop:4}}>{comboFlash.name}</div>
         {/* Card combo — the recipe */}
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:comboFlash.color,letterSpacing:4,marginTop:10,animation:'chainSlam 3s ease forwards',zIndex:1,textShadow:`0 0 20px ${comboFlash.color},2px 2px 0 #000`}}>{comboFlash.card1}  +  {comboFlash.card2}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:Math.min(42,20+Math.floor((comboFlash.mult||1)*6)),fontWeight:900,color:'#ffd700',letterSpacing:6,marginTop:6,animation:'chainSlam 3s ease forwards',zIndex:1,textShadow:'0 0 20px rgba(255,200,0,0.8),2px 2px 0 #000'}}>×{(comboFlash.mult||1).toFixed(2)} DAMAGE</div>
         {/* Multiplier — THE money shot, biggest element */}
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:80,fontWeight:900,color:'#fff',textShadow:`0 0 40px ${comboFlash.color},0 0 80px rgba(255,200,0,0.6),0 0 120px ${comboFlash.color}44,4px 4px 0 #000`,letterSpacing:6,marginTop:12,animation:'chainSlam 3s ease forwards',zIndex:1}}>×{comboFlash.mult?.toFixed(2)||'1.78'}</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:comboFlash.color,letterSpacing:8,textTransform:'uppercase',marginTop:4,zIndex:1,textShadow:'0 0 15px rgba(0,0,0,0.95)',animation:'chainSlam 3s ease forwards'}}>STRIKE MULTIPLIER</div>
@@ -8432,7 +8439,7 @@ function App(){
           {/* Strike pips — directly under STRIKE button */}
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'center'}}>
             <PhaseDots left={strikesLeft} total={fightMaxStrikes} color='#c41e3a' wide={true}/>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:strikesLeft>0?'var(--blood)':'var(--rot)',letterSpacing:1}}><span key={'sl-'+strikesLeft} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{strikesLeft}/{fightMaxStrikes}</span></span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:strikesLeft<=1?22:strikesLeft<=2?18:15,fontWeight:900,color:strikesLeft<=1?'#ff2200':strikesLeft<=2?'#ff4400':'var(--blood)',letterSpacing:1,textShadow:strikesLeft<=1?'0 0 12px rgba(255,0,0,0.8)':'none'}}><span key={'sl-'+strikesLeft} style={{animation:strikesLeft<=1?'memberHitShake 0.4s ease-out, inkStamp 0.4s ease-out':strikesLeft<=2?'inkStamp 0.4s ease-out, pulse 0.8s ease infinite alternate':'inkStamp 0.4s ease-out',display:'inline-block'}}>{strikesLeft}/{fightMaxStrikes}</span></span>
           </div>
           {/* DAMAGE PREVIEW — below pips, big stamp animation */}
           {/* ACTIVE BUFF BADGES — show when multiplier or temp ATK buffs are live */}

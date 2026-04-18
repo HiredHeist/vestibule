@@ -25,8 +25,8 @@
 ## 🟠 NEXT UP — priority work for next session
 
 ### UI / Design Polish
-- [ ] Font sizing consistency pass across all UI
-- [ ] Color consistency — too many slightly-different gold/amber shades
+- [x] Font sizing — consistent across element types (checked, acceptable)
+- [x] Color consistency — --gold:#e8a820, --gold-dim:#c8a040, --gold-dark:#c87820
 - [ ] Artifact tray on left — verify it feels connected to battle area
 - [ ] Mobile/touch considerations for quick-play
 
@@ -39,7 +39,7 @@
 
 ### Combat Feel
 - [x] Damage number size scales with amount (20→3.5rem, 100→5.5rem, 500+→8rem)
-- [ ] Strike counter gets more dramatic each strike (bigger, redder, shakier)
+- [x] Strike counter dramatic — bigger/redder/shakier at 2 and 1 strikes left
 - [ ] Cards played this strike shown as ghostly trail near strike button
 - [ ] Brief screen dim between strikes for dramatic pacing
 - [x] Boss kill quote typewriter — letter by letter with cursor, fades after 3.5s
@@ -64,11 +64,11 @@
 - [ ] Member death: dramatic fade + skull icon + brief slow-mo
 - [x] Corruption visual escalation — red vignette + glitch + THE DARKNESS CONSUMES at 80%+
 - [x] Boss portrait cracks deepen — SVG cracks at 50%, 35%, 20% HP tiers
-- [ ] Combo name display scales with chain multiplier
-- [ ] Card shuffle dust puff when deck reshuffles
-- [ ] Stash earned sparkle trail
+- [x] Combo name scales with multiplier + shows ×X.XX DAMAGE
+- [x] Card shuffle dust puff — 15 gold particles on reshuffle
+- [x] Stash sparkle — already uses spawnParticles + green glow animation
 - [x] Victory screen confetti/embers — 60 falling particles on every victory
-- [ ] Pact selection: dramatic reveal with smoke/ember effect
+- [x] Pact selection smoke — fog layers + staggered fadeSlideUp on cards
 
 ---
 
