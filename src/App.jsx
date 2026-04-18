@@ -3726,7 +3726,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
         {victory?'⛧ Play Again ⛧':'↺ Play Again'}
       </button>
       <div style={{display:'flex',gap:12}}>
-        {!victory&&<button onClick={()=>{onReset()}}
+        {!isVictory&&<button onClick={()=>{onReset()}}
           style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,
             color:'#ff4444',background:'rgba(80,0,0,0.4)',
             border:'1px solid #aa2222',borderRadius:3,
@@ -3735,7 +3735,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
           onMouseLeave={e=>e.currentTarget.style.background='rgba(80,0,0,0.4)'}>
           ⚡ Quick Restart
         </button>}
-        {!victory&&<button onClick={()=>{onReset(seed)}}
+        {!isVictory&&<button onClick={()=>{onReset(seed)}}
           style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,
             color:'#aa8844',background:'rgba(60,40,10,0.4)',
             border:'1px solid #886622',borderRadius:3,
