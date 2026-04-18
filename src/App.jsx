@@ -407,7 +407,7 @@ const PACT_REWARDS=[
   {id:'dark_bargain',name:'Dark Bargain',emoji:'🌑',desc:'All CORRUPT cards cost 1 less Ember.',color:'#cc44ff'},
   {id:'speed_demon',name:'Speed Demon',emoji:'⚡',desc:'Draw 1 extra card per Strike.',color:'#ffdd00'},
   {id:'blood_price',name:'Blood Price',emoji:'🩸',desc:'Blood Ritual deals 9× instead of 6×.',color:'#cc0000'},
-  {id:'clean_living',name:'Clean Living',emoji:'✨',desc:'While Corruption is below 15%, all members +3 ATK.',color:'#ffffff'},
+  {id:'clean_living',name:'Clean Living',emoji:'✨',desc:'At fight start: all members +2 ATK and +2 HP.',color:'#ffffff'},
   {id:'corruption_engine',name:'Corruption Engine',emoji:'☠',desc:'+5% Corruption at start of each fight.',color:'#aa00ff'},
   {id:'merchants_eye',name:'Merchants Eye',emoji:'💰',desc:'All shop items cost 20% less.',color:'#44cc44'},
   {id:'stone_wall',name:'Stone Wall',emoji:'🧱',desc:'Members take 1 less damage per Strike (min 1).',color:'#8888aa'},
@@ -557,9 +557,9 @@ const ALL_CARDS=[
   {id:'carrioncall',name:'Carrion Call',type:'CORRUPT',rarity:'Rare',emoji:'🦅',embers:1,effect:'Revive a Too Stoned member at 1 HP with +5 ATK. Corruption +20%.',color:'#886622',typeColor:'#664400',copies:0},
   {id:'possessionriff',name:'Possession Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'👁️',embers:1,effect:'+20 ATK this strike only. Corruption +10%. Full demon mode.',color:'#aa44cc',typeColor:'#8822aa',copies:0},
 
-  {id:'hellfirerift',name:'Hellfire Rift',type:'CORRUPT',rarity:'Rare',emoji:'🌋',embers:0,effect:'FREE. ALL members ×2 ATK this strike. +20% corruption. Go nuclear.',color:'#ff2200',typeColor:'#cc0000',copies:0},
-  {id:'soulsacrifice',name:'Soul Sacrifice',type:'CORRUPT',rarity:'Rare',emoji:'⚰️',embers:0,effect:'FREE. +5 ATK perm to ALL. +15% corruption. A deal with the devil.',color:'#880044',typeColor:'#660022',copies:0},
-  {id:'voidpact',name:'Void Pact',type:'CORRUPT',rarity:'Rare',emoji:'🕳',embers:0,effect:'FREE. Strike multiplier ×2.5 this strike ONLY. +25% corruption. Total commitment.',color:'#440088',typeColor:'#220044',copies:0},
+  {id:'hellfirerift',name:'Hellfire Rift',type:'CORRUPT',rarity:'Rare',emoji:'🌋',embers:0,effect:'FREE. ALL members ×2 ATK this strike. +20% corruption. Go nuclear.',color:'#ff2200',typeColor:'#cc0000',copies:0,shopOnly:true},
+  {id:'soulsacrifice',name:'Soul Sacrifice',type:'CORRUPT',rarity:'Rare',emoji:'⚰️',embers:0,effect:'FREE. +5 ATK perm to ALL. +15% corruption. A deal with the devil.',color:'#880044',typeColor:'#660022',copies:0,shopOnly:true},
+  {id:'voidpact',name:'Void Pact',type:'CORRUPT',rarity:'Rare',emoji:'🕳',embers:0,effect:'FREE. Strike multiplier ×2.5 this strike ONLY. +25% corruption. Total commitment.',color:'#440088',typeColor:'#220044',copies:0,shopOnly:true},
   {id:'darkcrescendo',name:'Dark Crescendo',type:'CORRUPT',rarity:'Rare',emoji:'🌑',embers:0,effect:'FREE. If corruption ≥80%, TRIPLE your strike multiplier.',color:'#220044',typeColor:'#110022',copies:0},
   {id:'russianroulette',name:'Russian Roulette',type:'CORRUPT',rarity:'Uncommon',emoji:'🔫',embers:0,effect:'FREE. Roll d6. 1: target Too Stoned. 2-5: +4 ATK. 6: +8 ATK + Shield.',color:'#cc2244',typeColor:'#aa0022',copies:0},
   {id:'gearcheck',name:'Gear Check',type:'UTILITY',rarity:'Common',emoji:'🔧',embers:1,effect:'Draw 2 cards, discard 1 from hand. Card selection.',color:'#888888',typeColor:'#666666',copies:0},
@@ -596,7 +596,7 @@ const MASTERY_TIERS=[
   {name:'Novice',min:10,color:'#cd7f32',border:'#cd7f32',glow:'rgba(205,127,50,0.3)'},
   {name:'Adept',min:50,color:'#c0c0c0',border:'#c0c0c0',glow:'rgba(192,192,192,0.4)'},
   {name:'Master',min:200,color:'#ffd700',border:'#ffd700',glow:'rgba(255,215,0,0.5)'},
-  {name:'Legendary',min:666,color:'#ff44ff',border:'#ff44ff',glow:'rgba(255,68,255,0.6)'},
+  {name:'Legendary',min:100,color:'#ff44ff',border:'#ff44ff',glow:'rgba(255,68,255,0.6)'},
 ]
 function getMasteryData(){try{return JSON.parse(localStorage.getItem('vst_mastery')||'{}')}catch(e){return{}}}
 function saveMasteryData(d){localStorage.setItem('vst_mastery',JSON.stringify(d))}
@@ -883,7 +883,7 @@ function buildDeck(seed,deckId){
   // #9: GOLD CARDS — Legendary mastery (666+ plays) = auto-upgraded in all runs
   const mastery=getMasteryData()
   for(let i=0;i<deck.length;i++){
-    if(mastery[deck[i].id]>=666&&!deck[i].upgraded){
+    if(mastery[deck[i].id]>=100&&!deck[i].upgraded){
       deck[i]=Object.assign({},deck[i],{upgraded:true,gold:true,name:deck[i].name+' ⛧'})
     }
   }
@@ -1007,7 +1007,7 @@ function markTutorialDone(){localStorage.setItem('vst_tutorial','done')}
 // ── STARTER ARTIFACTS A1-A10 ─────────────────────────────────
 const STARTER_ARTIFACTS=[
   {id:'a1',name:'Vintage Guitar',emoji:'🎸',effect:'×1.3 when you play 4+ cards before Striking.',cost:10,multTrigger:'cards3',mult:1.3},
-  {id:'a2',name:"Devil's Tuning Fork",emoji:'🔱',effect:'×1.5 when Corruption hits 60%+. Ride the wave.',cost:8,multTrigger:'corrupt50',mult:1.5},
+  {id:'a2',name:"Devil's Tuning Fork",emoji:'🔱',effect:'Start each fight at 15% Corruption. ×1.5 damage when Corruption hits 60%+.',cost:16,multTrigger:'corrupt50',mult:1.5},
   {id:'a3',name:'The Evil Eye',emoji:'🧿',effect:'The first card you play each Strike costs 0 Embers.',cost:20,rare:true},
   {id:'a4',name:"Roadie's Toolbelt",emoji:'🧰',effect:'At the start of each fight, one random member gains Stonewall (immune to Too Stoned once).',cost:6},
   {id:'a5',name:'Haunted Radio',emoji:'📻',effect:'×1.2 damage for each Riff Chain fired this Strike.',cost:8,multTrigger:'perChain',mult:1.2},
@@ -1015,7 +1015,7 @@ const STARTER_ARTIFACTS=[
   {id:'a7',name:"The Serpent's Kiss",emoji:'🐍',effect:'Start each fight with 1 extra Ember permanently (max 8 total).',cost:18},
   {id:'a8',name:'Stone Tablet',emoji:'🪨',effect:'All band members gain +3 max HP permanently.',cost:12},
   {id:'a9',name:'Resonance Coil',emoji:'⚙️',effect:'×1.15 for each duplicate card in your hand when you Strike.',cost:10,multTrigger:'perDupe',mult:1.15},
-  {id:'a10',name:'Burning Stage',emoji:'🔥',effect:'×2.0 if you play ALL 6 cards before Striking. Total commitment.',cost:10,multTrigger:'cards5',mult:2.0},
+  {id:'a10',name:'Burning Stage',emoji:'🔥',effect:'×2.0 if you play ALL 6 cards before Striking. Total commitment.',cost:22,multTrigger:'cards5',mult:2.0},
   // ── UNLOCKABLE ARTIFACT ────────────────────────────────────────
   {id:'wardrums',name:'War Drums',emoji:'🪘',effect:'+1 Strike per fight permanently (5 Strikes instead of 4).',cost:30,locked:true,unlockAt:5000},
 ]
@@ -1142,7 +1142,7 @@ const BOSS_BIOS={
 }
 
 const CIRCLE_ARTIFACTS=[
-  {id:'ca1',name:'The Goat of Mendes',emoji:'🐐',effect:'All Strikes deal ×1.25 damage. Stacks with other multipliers.',cost:14,multTrigger:'always',mult:1.25},
+  {id:'ca1',name:'The Goat of Mendes',emoji:'🐐',effect:'All Strikes deal ×1.25 damage. Stacks with other multipliers.',cost:28,multTrigger:'always',mult:1.25},
   {id:'ca2',name:'Hellfire Amulet',emoji:'🔮',effect:'Start each fight with +2 bonus Embers.',cost:17},
   {id:'ca3',name:'Sabbath Crown',emoji:'👑',effect:'Too Stoned members revive at 50% HP each round.',cost:22},
   {id:'ca4',name:'Wailing Guitar',emoji:'🎸',effect:'First Strike each fight deals double damage.',cost:16},
@@ -3687,6 +3687,15 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
           onMouseLeave={e=>e.currentTarget.style.background='rgba(80,0,0,0.4)'}>
           ⚡ Quick Restart
         </button>}
+        {!victory&&<button onClick={()=>{onReset(seed)}}
+          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,
+            color:'#aa8844',background:'rgba(60,40,10,0.4)',
+            border:'1px solid #886622',borderRadius:3,
+            padding:'10px 24px',cursor:'pointer',textTransform:'uppercase',transition:'all 0.2s'}}
+          onMouseEnter={e=>e.currentTarget.style.background='rgba(80,50,10,0.6)'}
+          onMouseLeave={e=>e.currentTarget.style.background='rgba(60,40,10,0.4)'}>
+          🔄 Retry Seed
+        </button>}
         <button onClick={handleShare}
           style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:3,
             color:copied?'#44cc44':'#e8a820',background:'rgba(50,35,5,0.4)',
@@ -4716,6 +4725,10 @@ function App(){
     const initStage=[null,...musicians.map(m=>({...m,maxHp:m.hp})),...Array(4).fill(null)].slice(0,maxStage)
     setStage(initStage)
     const d=buildDeck(runSeed,selectedDeck)
+    // STREAK BONUSES
+    const _streakW=parseInt(localStorage.getItem('vst_streak_wins')||'0')
+    if(_streakW>=2){setMaxEmbers(p=>Math.min(MAX_EMBERS_CAP,p+1));setEmbers(p=>p+1);addLog('🔥 Streak bonus: +1 starting Ember!')}
+    if(_streakW>=3){addLog('🔥 Streak bonus: Your next recruit has a Foil upgrade!')}
     const _hs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
     setHand(d.slice(0,_hs))
     setDeck(d.slice(_hs))
@@ -5706,7 +5719,7 @@ function App(){
       }
       else if(fightIndex>=26){
       playVictory();setDeathCause('victory')
-      setStreakWins(p=>p+1);setStreakLosses(0);recordLegacyRun(stage,stats,true,Math.floor(fightIndex/3)+1)
+      setStreakWins(p=>{const nw=p+1;localStorage.setItem('vst_streak_wins',nw);return nw});setStreakLosses(0);recordLegacyRun(stage,stats,true,Math.floor(fightIndex/3)+1)
       const newRuns=totalRunsPlayed+1
       setTotalRunsPlayed(newRuns)
       localStorage.setItem('vst_runs', newRuns)
@@ -5932,6 +5945,16 @@ function App(){
     }
     if(strikeMult<6.66)setBeastFlash(false)
   },[strikeMult])
+
+  // ── CORRUPTION POWER NOTIFICATION — first time hitting 40% ──
+  const corrPowerShownRef=useRef(false)
+  useEffect(()=>{
+    if(gameState==='playing'&&corruption>=40&&!corrPowerShownRef.current){
+      corrPowerShownRef.current=true
+      addFloat('💀 CORRUPTION = POWER!',960,300,'#cc44ff',true)
+      addLog('💀 Corruption reached 40%! Your strikes now deal ×1.15 bonus damage. Higher corruption = bigger multiplier!')
+    }
+  },[corruption,gameState])
 
   // ── CORRUPTION THRESHOLD FLASH NOTIFICATIONS ──
   useEffect(()=>{
@@ -6171,7 +6194,7 @@ function App(){
     const _breakdownLines=[]
     let dmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
       const effectiveAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
-      const cleanLivingBonus=(chosenPacts.includes('clean_living')&&corruption<15)?3:0
+      const cleanLivingBonus=0 /* clean_living now applies at fight start */
       return s+effectiveAtk+cleanLivingBonus
     },0)+p10Bonus
     let _bkRunning=dmg
@@ -6240,7 +6263,7 @@ function App(){
       if(m.role==='Drummer')return
       if(paranoiaVictim&&m.uid===paranoiaVictim.uid)return
       let mAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
-      if(chosenPacts.includes('clean_living')&&corruption<15)mAtk+=3
+      /* clean_living now applies at fight start */
       if(m.encoreReady)mAtk*=2
       memberDmgs.push({m,atk:mAtk})
     })
@@ -6374,7 +6397,7 @@ function App(){
         // LUCIFER PHASE TRANSITION: Phase 1 → Phase 2
         if(enemy.passiveId==='luciferBoss'&&luciferPhase===1){
           setLuciferPhase(2)
-          setEnemyHp(3333);setScaledMaxHp(3333)
+          const _lucP2Hp=Math.ceil(100000*((STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1)*0.5);setEnemyHp(_lucP2Hp);setScaledMaxHp(_lucP2Hp)
           setBossRageAtk(0)
           // Full band reset
           setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,stoneShield:false,tempBuff:false,encoreReady:false,ampedThisStrike:false}):null))
@@ -6645,7 +6668,7 @@ function App(){
                 if(_rs>=5000)unlockAchievement('high_score_5k')
                 if(_rs>=10000)unlockAchievement('high_score_10k')
                 if((totalRunsPlayed+1)>=10)unlockAchievement('ten_runs')
-                const _nr=totalRunsPlayed+1;setTotalRunsPlayed(_nr);localStorage.setItem('vst_runs',_nr);if(_rs>personalBest){setPersonalBest(_rs);localStorage.setItem('vst_best',_rs)}const _nl=lifetimeScore+_rs;setLifetimeScore(_nl);localStorage.setItem('vst_lifetime',_nl);setStreakLosses(p=>p+1);setStreakWins(0);const _td=new Date().toISOString().slice(0,10);const _yd=new Date(Date.now()-86400000).toISOString().slice(0,10);const _ns=lastPlayedDate===_yd||lastPlayedDate===_td?dailyStreak+1:1;setDailyStreak(_ns);localStorage.setItem('vst_streak',_ns);setLastPlayedDate(_td);localStorage.setItem('vst_lastdate',_td)}
+                const _nr=totalRunsPlayed+1;setTotalRunsPlayed(_nr);localStorage.setItem('vst_runs',_nr);if(_rs>personalBest){setPersonalBest(_rs);localStorage.setItem('vst_best',_rs)}const _nl=lifetimeScore+_rs;setLifetimeScore(_nl);localStorage.setItem('vst_lifetime',_nl);setStreakLosses(p=>p+1);setStreakWins(0);localStorage.setItem('vst_streak_wins','0');const _td=new Date().toISOString().slice(0,10);const _yd=new Date(Date.now()-86400000).toISOString().slice(0,10);const _ns=lastPlayedDate===_yd||lastPlayedDate===_td?dailyStreak+1:1;setDailyStreak(_ns);localStorage.setItem('vst_streak',_ns);setLastPlayedDate(_td);localStorage.setItem('vst_lastdate',_td)}
                 setTimeout(function(){setGameState('end')},800);
               }
               return cur;
@@ -6704,7 +6727,7 @@ function App(){
     }
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
-    setEnemy(nextEnemy);const _deckScale=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1;const _sHp=Math.ceil(nextEnemy.maxHp*_deckScale*(encoreMode?2.0:1.0));setEnemyHp(_sHp);setScaledMaxHp(_sHp)
+    setEnemy(nextEnemy);const _deckScale=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1;const _heatLevel=parseInt(localStorage.getItem('vst_heat')||'1');const _heatMult=1+(Math.max(0,_heatLevel-1)*0.15);const _sHp=Math.ceil(nextEnemy.maxHp*_deckScale*_heatMult*(encoreMode?2.0:1.0));setEnemyHp(_sHp);setScaledMaxHp(_sHp)
     // per-fight tracking resets
     fightStartTimeRef.current=Date.now()
     // ── PRE-FIGHT SPLASH — tour quote loading screen ──
@@ -6766,7 +6789,6 @@ function App(){
     addLog('⛧ Fight '+(nextIdx+1)+': '+nextEnemy.name+' awaits!')
     // ── ARTIFACT FIGHT-START EFFECTS ───────────────────────
     // A1: Vintage Guitar — lead guitarist +1 ATK
-    const hasVintageGuitar=activeArtifacts.some(a=>a.id==='a1')
     // A2: Devil's Tuning Fork — start at 15% corruption (applied below)
     const hasDevilsFork=activeArtifacts.some(a=>a.id==='a2')
     // A3: Evil Eye — first card each Strike free (state reset each fight)
@@ -6815,6 +6837,8 @@ function App(){
     })
     // Corruption start (A2)
     if(hasDevilsFork)setCorruption(15)
+    // Clean Living pact: +2 ATK and +2 HP all at fight start
+    if(chosenPacts.includes('clean_living')){setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+2,hp:Math.min(m.maxHp,m.hp+2)}):m));addLog('✨ Clean Living! All members +2 ATK, +2 HP.')}
     // Extra embers from Serpent's Kiss (P1 + burning stage + Hellfire Amulet)
     const extraEm=(hasP1?1:0)+burnBonus+(hasHellfire?2:0)
     setEmbers(p=>Math.min(maxEmbers,p+extraEm))
@@ -8493,7 +8517,7 @@ function App(){
             const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===fightMaxStrikes?10:0
             let dmg=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
               const effAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
-              const cleanLivingBonus=(chosenPacts.includes('clean_living')&&corruption<15)?3:0
+              const cleanLivingBonus=0 /* clean_living now applies at fight start */
               return s+effAtk+cleanLivingBonus
             },0)+p10Bonus
             // 2) Drummer × dblMult (NOT always ×2 — depends on dblRoll: ≤2=1×, 3-4=1.5×, 5-6=2×)
