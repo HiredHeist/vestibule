@@ -1042,10 +1042,10 @@ const STARTER_PASSIVES=[
 // ═══════════════════════════════════════════════════════════
 const STARTER_DECKS=[
   {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. 10% win rate.',requirement:null,color:'#c8a060',hpScale:0.74},
-  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. Every card buffs or kills. 8% win rate.',requirement:'beat_standard',color:'#ff4400',hpScale:0.79},
-  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Embrace the darkness. 7% win rate.',requirement:'beat_shredder',color:'#cc44ff',hpScale:0.81},
-  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Find the combo. Copy the copier. 18 UTILITY cards. Break the game. 6% win rate.',requirement:'beat_ritualist',color:'#44aaff',hpScale:0.85},
-  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Extra strikes. Steady scaling. 5% win rate.',requirement:'beat_engineer',color:'#44cc44',hpScale:0.88},
+  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. Every card buffs or kills. 8% win rate.',requirement:'beat_standard',color:'#ff4400',hpScale:0.73},
+  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Embrace the darkness. 7% win rate.',requirement:'beat_shredder',color:'#cc44ff',hpScale:0.52},
+  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Find the combo. Copy the copier. 18 UTILITY cards. Break the game. 6% win rate.',requirement:'beat_ritualist',color:'#44aaff',hpScale:0.58},
+  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Extra strikes. Steady scaling. 5% win rate.',requirement:'beat_engineer',color:'#44cc44',hpScale:0.58},
 ]
 function getUnlockedDecks(){
   const achs=getAchievements()
@@ -4322,10 +4322,6 @@ function App(){
   const combosFiredRef=useRef([])
   const [comboFlash,setComboFlash]=useState(null) // {name,color,emoji}
   const [combosDiscoveredThisRun,setCombosDiscoveredThisRun]=useState([])
-  const [genreCounts,setGenreCounts]=useState({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
-  const genreTotal=genreCounts.RIFF+genreCounts.CORRUPT+genreCounts.UTILITY+genreCounts.EMBER
-  const activeGenre=genreTotal>=4?(genreCounts.RIFF/genreTotal>=0.5?'RIFF_METAL':genreCounts.CORRUPT/genreTotal>=0.5?'BLACK_METAL':genreCounts.UTILITY/genreTotal>=0.5?'PROG_ROCK':genreCounts.EMBER/genreTotal>=0.5?'DOOM_METAL':null):null
-  const approachingGenre=!activeGenre&&genreTotal>=3?(genreCounts.RIFF/genreTotal>=0.4?'RIFF_METAL':genreCounts.CORRUPT/genreTotal>=0.4?'BLACK_METAL':genreCounts.UTILITY/genreTotal>=0.4?'PROG_ROCK':genreCounts.EMBER/genreTotal>=0.4?'DOOM_METAL':null):null
   const discoveredRef=useRef(new Set())
   const [bossDebuff,setBossDebuff]=useState(0)
   const [bossRageAtk,setBossRageAtk]=useState(0)
@@ -5299,7 +5295,7 @@ function App(){
     setStage(ns)
     if(spent>0){setEmbers(function(p){return p-spent});embersSpentThisFightRef.current+=spent}
     if(msg)addLog(msg)
-    updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+    updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
     if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
     if(card.type==='RIFF'&&ampFbDiscount>0)setAmpFeedbackDiscount(0)
     if(card.type==='RIFF')setLastRiffPlayed(card)
@@ -5335,7 +5331,7 @@ function App(){
     else if(enemy.passiveId==='cardHeal3b')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
     else if(enemy.passiveId==='cardHeal8')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+8))
     return true
-  },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected,fightTripBuff,enemy,enemyHp,maxEmbers,activePassives,activeArtifacts,chosenPacts,activeGenre,fightIndex,shredderUsed,collectedLoot])
+  },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected,fightTripBuff,enemy,enemyHp,maxEmbers,activePassives,activeArtifacts,chosenPacts,fightIndex,shredderUsed,collectedLoot])
 
   const handleDropOnStage=useCallback((slotIdx)=>{
     if(!dragCardUid||animPhase!=='idle')return
@@ -5364,7 +5360,7 @@ function App(){
       setCorruption(p=>Math.max(0,p-15))
       addLog('🎼 Smoke Break! '+victim.name+' discarded. +3 Embers. -15% Corruption. Drew 1 card.'+(preSelected.length===0?' (tip: select a card first)':''))
       addFloat('+3 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard']
       drawUpTo(remaining,deckRef.current,[...discRef.current,card,victim],1) // count victim too for refill
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
@@ -5385,7 +5381,7 @@ function App(){
       setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus-effectiveEmbers))
       addLog('🍯 Groupie! +2 Embers, drew 1 card.')
       addFloat('+2 🔥 +1 card',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -5405,7 +5401,7 @@ function App(){
       setSetlistOpen(true)
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
       addLog('📋 Setlist! Drew 2 cards — now pick 1 to discard.')
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
@@ -5426,7 +5422,7 @@ function App(){
       setSelected([])
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
       addLog('🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+drawCount+'.'+(discardCount===0?' (Tip: select cards before playing)':''))
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       setLastRiffPlayed(card)
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
@@ -5448,7 +5444,7 @@ function App(){
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
       addLog('🎙 Remastered! Deleted '+toDelete.name+', drew 3.')
       addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       // cardHeal enemy passive
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
@@ -5484,7 +5480,7 @@ function App(){
       }
       setSelected([])
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setGenreCounts(p=>({...p,[card.type]:(p[card.type]||0)+1}));setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(6.66,Math.round((p+0.05)*100)/100))
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
       else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
@@ -5777,7 +5773,7 @@ function App(){
         }
       }
     },1000)
-  },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake,stage,hand,enemy,enemyHp,embers,maxEmbers,activeArtifacts,activePassives,chosenPacts,activeGenre,animPhase,discardsLeft,deck,discardPile,fightTripBuff,luciferPhase,welcomeToHell,eventsSeenThisRun])
+  },[strikesLeft,corruption,fightIndex,stolenAtkPool,activeStake,stage,hand,enemy,enemyHp,embers,maxEmbers,activeArtifacts,activePassives,chosenPacts,animPhase,discardsLeft,deck,discardPile,fightTripBuff,luciferPhase,welcomeToHell,eventsSeenThisRun])
   triggerVictoryRef.current=triggerVictory
 
   // ── VICTORY SUMMARY — dismiss + transition ───────────────────
@@ -6120,7 +6116,7 @@ function App(){
     // DEBUFF keyword: Vocalists reduce boss damage each Strike
     const debuffCount=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='DEBUFF').length
     if(debuffCount>0){setBossDebuff(p=>p+debuffCount*2);addLog('🎤 Vocalist debuffs the boss! (-'+(debuffCount*2)+' damage)')}
-    cardsToDrawRef.current=cardsPlayedRef.current.length+(activeGenre==='PROG_ROCK'?1:0)
+    cardsToDrawRef.current=cardsPlayedRef.current.length
     setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
 
     const buffed=actives.filter(m=>(m.buffCount||0)>0)
@@ -6180,9 +6176,6 @@ function App(){
     if(_mlb>0){dmg+=_mlb;_bkRunning=dmg;_breakdownLines.push({type:'add',label:'Mentor Link',emoji:'⛓',value:_mlb,runningAfter:dmg,color:'#ffd700'})}
     // CA4: Wailing Guitar — first Strike deals double damage
     if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===activeStake.maxStrikes){dmg*=2;_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Wailing Guitar ×2',label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff4488'});addLog('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')}
-    // GENRE BONUSES
-    if(activeGenre==='RIFF_METAL'){dmg=Math.round(dmg*1.15);_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Thrash Metal ×1.15',label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#9933cc'});addLog('🎸 Thrash Metal genre! +15% strike damage!')}
-    if(activeGenre==='DOOM_METAL'&&discardsLeft>=MAX_DISCARDS){dmg+=actives.length*2;_bkRunning=dmg;_breakdownLines.push({type:'add',label:'Doom Metal',emoji:'🎵',value:actives.length*2,runningAfter:dmg,color:'#666699'});addLog('🎵 Doom Metal genre! +'+actives.length*2+' ATK (no discards used)')}
     // HEXED: auto-raise corruption +5%, member gains +1 ATK per 10% corruption
     const hexedMembers=actives.filter(m=>m.keyword==='HEXED')
     if(hexedMembers.length>0){
@@ -7067,7 +7060,7 @@ function App(){
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setFightMaxStrikes(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setFightMaxDiscards(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
-    setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;setGenreCounts({RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0})
+    setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false
     setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
     setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
@@ -7222,7 +7215,6 @@ function App(){
             ['🃏 Card Types','RIFF (purple): Direct damage and ATK buffs. CORRUPT (red): Corruption-scaling power. UTILITY (green): Healing, draw, and economy. EMBER (orange): Ember management and recovery.'],
             ['⛧ Riff Chains','Playing specific card pairs triggers Riff Chains — massive combo bonuses! Chains multiply your Strike damage (e.g., Battle Cry + Stage Dive = DEATH WISH). 16 chains to discover. The celebration shows which cards triggered it.'],
             ['×️ Strike Multiplier','Every card played adds +0.05× to your Strike multiplier. Riff Chains add ×1.78 multiplicative. Maximum multiplier: ×6.66 (Mark of the Beast). The multiplier resets each Strike.'],
-            ['🎵 Genre Bonus','If 50%+ of cards played in a Strike are one type, a genre activates: Thrash Metal (RIFF, +15% damage), Black Metal (CORRUPT, +25% corruption damage), Stoner Rock (UTILITY, +1 card draw), Doom Metal (EMBER, +2 damage per member if max discards).'],
             ['🌀 Corruption','A risk/reward axis from 0-100%. Some cards and enemies raise it. CORRUPT keyword members get stronger at high corruption. Overdrive requires 60%+. Feedback Loop and Amp the Static scale with it.'],
             ['⚠ Corruption Thresholds','25% THE WHISPERS: Weakest member takes 1 damage each fight. 50% THE HUNGER: All shop prices +25%. 75% THE MADNESS: 15% chance to lose a random card before each Strike. 100% THE POSSESSION: Boss damage +3, but CORRUPT members get one-time +3 ATK.'],
             ['🧹 Reducing Corruption','Smoke Break: -15%. Herb Money: -15%. Controlled Feedback: Sets to 50%. Signal Decay: -15%. Atonement pact: -15% after each boss kill. Some descent rewards also reduce corruption.'],
@@ -8253,47 +8245,6 @@ function App(){
             ))}
           </div>
         </div>
-        {/* ═══ GENRE RIBBON — unfurled banner (centered, 50% width so thermometer & deck don't crowd) ═══ */}
-        {activeGenre&&(()=>{const gc=activeGenre==='RIFF_METAL'?'#b478e8':activeGenre==='BLACK_METAL'?'#e8405c':activeGenre==='PROG_ROCK'?'#5ac878':'#8888cc';const gbg=activeGenre==='RIFF_METAL'?'rgba(40,10,60,0.75)':activeGenre==='BLACK_METAL'?'rgba(60,0,15,0.75)':activeGenre==='PROG_ROCK'?'rgba(8,40,18,0.75)':'rgba(20,20,50,0.75)';return(
-        <div style={{position:'relative',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,zIndex:6,padding:'12px 0',animation:'fadeIn 0.4s ease'}}>
-          {/* Inner wrapper — constrains the ribbon to 50% of screen width, centered */}
-          <div style={{position:'relative',width:'50%',minWidth:560,maxWidth:960,height:54,display:'flex',alignItems:'center',justifyContent:'center'}}>
-            {/* Ribbon SVG — shaped tail ends, sized to inner wrapper */}
-            <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:0}} preserveAspectRatio="none" viewBox="0 0 960 54">
-              {/* Main banner body with forked ends */}
-              <path d={`M 0 27 L 30 6 L 60 18 L 900 18 L 930 6 L 960 27 L 930 48 L 900 36 L 60 36 L 30 48 Z`} fill={gbg} stroke={gc} strokeWidth="0.8" opacity="0.92"/>
-              {/* Top hand-drawn line */}
-              <path d="M 60 18 Q 240 15, 480 18 T 900 18" stroke={gc} strokeWidth="0.7" fill="none" opacity="0.55"/>
-              {/* Bottom hand-drawn line */}
-              <path d="M 60 36 Q 240 39, 480 36 T 900 36" stroke={gc} strokeWidth="0.7" fill="none" opacity="0.55"/>
-            </svg>
-            {/* Content — vertically stacked title row + effect row so nothing overlaps */}
-            <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:14,position:'relative',zIndex:1,padding:'4px 40px',flexWrap:'nowrap'}}>
-              <span style={{fontSize:18,filter:'drop-shadow(0 0 8px '+gc+')'}}>
-                {activeGenre==='RIFF_METAL'?'⚡':activeGenre==='BLACK_METAL'?'🔥':activeGenre==='PROG_ROCK'?'🌿':'🌑'}
-              </span>
-              <span style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,letterSpacing:5,color:gc,textShadow:'0 0 12px '+gc+'80, 0 1px 2px rgba(0,0,0,0.9)',textTransform:'uppercase',whiteSpace:'nowrap'}}>
-                {activeGenre==='RIFF_METAL'?'Thrash Metal':activeGenre==='BLACK_METAL'?'Black Metal':activeGenre==='PROG_ROCK'?'Stoner Rock':'Doom Metal'}
-              </span>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-bone)',letterSpacing:2,textTransform:'uppercase',fontWeight:900,whiteSpace:'nowrap'}}>
-                {activeGenre==='RIFF_METAL'?'+15% Strike':activeGenre==='BLACK_METAL'?'+25% Corruption':activeGenre==='PROG_ROCK'?'+1 Card Draw':'+2 ATK/Member · Max Discards'}
-              </span>
-              <span style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'var(--ink-dim)',fontStyle:'italic',whiteSpace:'nowrap'}}>
-                ({activeGenre==='RIFF_METAL'?genreCounts.RIFF+' Riff':activeGenre==='BLACK_METAL'?genreCounts.CORRUPT+' Corrupt':activeGenre==='PROG_ROCK'?genreCounts.UTILITY+' Utility':genreCounts.EMBER+' Ember'})
-              </span>
-            </div>
-          </div>
-        </div>
-        )})()}
-        {!activeGenre&&approachingGenre&&tutorialFight===0&&<div style={{
-          display:'flex',alignItems:'center',justifyContent:'center',gap:8,
-          padding:'4px 16px',flexShrink:0,opacity:0.6,
-          background:'rgba(20,15,5,0.5)',borderTop:'1px solid rgba(100,80,40,0.2)',
-          animation:'fadeIn 0.3s ease',zIndex:6}}>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#887755',letterSpacing:2}}>
-            APPROACHING: {approachingGenre==='RIFF_METAL'?'Thrash Metal':approachingGenre==='BLACK_METAL'?'Black Metal':approachingGenre==='PROG_ROCK'?'Stoner Rock':'Doom Metal'} (1-2 more cards)
-          </span>
-        </div>}
                 {footerCollapsed&&<div onClick={()=>setFooterCollapsed(false)} style={{display:'flex',alignItems:'center',justifyContent:'center',padding:'2px 20px',flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)',cursor:'pointer'}}><span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#665544',letterSpacing:2}}>▲ SHOW STATS</span></div>}
                 <div style={{display:footerCollapsed?'none':'flex',alignItems:'center',justifyContent:'center',gap:10,padding:'1px 20px 2px',position:'relative',zIndex:5,flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)'}}>
           {/* FOOTER COLLAPSE TOGGLE */}
@@ -8491,10 +8442,7 @@ function App(){
             }
             // 6) Wailing Guitar artifact: ×2 on first strike
             if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===fightMaxStrikes)dmg*=2
-            // 7) Genre bonuses
-            if(activeGenre==='RIFF_METAL')dmg=Math.round(dmg*1.15)
-            if(activeGenre==='DOOM_METAL'&&discardsLeft>=fightMaxDiscards)dmg+=actives.length*2
-            // 8) Strike multiplier
+            // 7) Strike multiplier
             const fin=strikeMult>1.0?Math.round(dmg*strikeMult):dmg
             if(fin<=0||!canStrike)return null
             return (

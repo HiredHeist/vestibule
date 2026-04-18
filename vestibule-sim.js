@@ -162,6 +162,8 @@ const DECK_MANIFESTS={
   survivor:{battlecry:3,newstrings:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,crowdsurf:2,amp:1,soundwall:1,resonancecard:1,burnset:1,herbmoney:1,doomchord:2,sonicboom:1,necroticamp:1,distortion:2,staticcharge:2,darktuning:2,deathriff:2,controlfeedback:1,dialtoeleven:1,feedbackloop:1,seance:1,bloodritual:1,sigdecay:1,soundcheck:2,roadie:2,wakeup:2,setlist:2,setbreak:2,doublebooking:2,bootlegcopy:1,backstagepass:1,powertap:2,tappedout:2,ampoverload:2,drainthecrowd:2,groupie:1,soundboard:1,slowburn:1,pyromaniac:1,secondwind:1,corrsiphon:1,carrioncall:1},
 }
 const ACTIVE_DECK=DECK_MANIFESTS[DECK_ID]||DECK_MANIFESTS.standard
+const DECK_HP_SCALE={standard:0.68,shredder:0.73,ritualist:0.52,engineer:0.58,survivor:0.58}
+const HP_SCALE=DECK_HP_SCALE[DECK_ID]||1.0
 // ── PACT REWARDS (12 options, sim picks best 1 of 2 offered) ──
 const PACT_IDS=['ember_surge','iron_strings','thick_skin','dark_bargain','speed_demon','blood_price','clean_living','corruption_engine','merchants_eye','stone_wall','sixth_slot','war_drums'];
 
@@ -451,7 +453,6 @@ function applyCardSim(card,gs,enemy){
   const weakest=alive.reduce((a,b)=>a.hp/a.maxHp<b.hp/b.maxHp?a:b);
   const highestAtk=Math.max(...alive.map(m=>m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0)));
   // Genre tracking
-  gs._genreCounts[card.type]=(gs._genreCounts[card.type]||0)+1;
   switch(card.id){
     case 'contract':{const strongest=alive.sort((a,b)=>(b.atk+(b.permAtkBonus||0))-(a.atk+(a.permAtkBonus||0)))[0];strongest.tooStoned=true;strongest.hp=0;gs._contractsPlayed++;TRACK.contractsSigned++;break}
     case 'amp':target.ampedThisStrike=true;break;
@@ -464,7 +465,7 @@ function applyCardSim(card,gs,enemy){
     case 'dialtoeleven':gs.corruption=Math.min(100,gs.corruption+10);gs.stage.forEach(m=>{if(!m.tooStoned){m.atk+=3;m.tempAtkBonus=(m.tempAtkBonus||0)+3}});break;
     case 'controlfeedback':{gs.corruption=50;const ht=alive.reduce((a,b)=>a.hp/a.maxHp<b.hp/b.maxHp?a:b);ht.hp=ht.maxHp;break}
     case 'sigdecay':{if(gs.hand.length>0){const vi=rand(gs.hand.length);gs.discard.push(gs.hand.splice(vi,1)[0])};drawCards(gs,2);break}
-    case 'feedbackloop':{let d=Math.floor(gs.corruption/(card.upgraded?1.5:2));if(gs._activeGenre==='BLACK_METAL')d=Math.round(d*1.25);gs._directDmg=(gs._directDmg||0)+d;break}
+    case 'feedbackloop':{let d=Math.floor(gs.corruption/(card.upgraded?1.5:2));gs._directDmg=(gs._directDmg||0)+d;break}
     case 'soundwall':{const b=1+(gs.passives.some(p=>p.id==='p5')?1:0)+(card.upgraded?1:0);alive.forEach(m=>{m.atk+=b;m.permAtkBonus=(m.permAtkBonus||0)+b});break}
     case 'heavyriff':{const b=Math.min(20,Math.ceil((target.atk+(target.permAtkBonus||0)+(target.tempAtkBonus||0))/2))+(card.upgraded?2:0);target.atk+=b;target.permAtkBonus=(target.permAtkBonus||0)+b;break}
     case 'crowdsurf':{const b=Math.max(1,gs.hand.length)+(card.upgraded?1:0);target.atk+=b;target.permAtkBonus=(target.permAtkBonus||0)+b;break}
@@ -485,7 +486,7 @@ function applyCardSim(card,gs,enemy){
     case 'wakeup':alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));stage.forEach(m=>{if(m.tooStoned){m.tooStoned=false;m.hp=m.maxHp}});break;
     case 'demotape':gs._directDmg=(gs._directDmg||0)+Math.floor((target.atk+(target.permAtkBonus||0))*0.5);break;
     case 'resonancecard':target.tempAtkBonus=(target.tempAtkBonus||0)+Math.max(0,highestAtk-(target.atk+(target.permAtkBonus||0)+(target.tempAtkBonus||0)));break;
-    case 'ampstatic':{let b=Math.floor(gs.corruption/12);if(gs._activeGenre==='BLACK_METAL')b=Math.round(b*1.25);target.tempAtkBonus=(target.tempAtkBonus||0)+b;break}
+    case 'ampstatic':{let b=Math.floor(gs.corruption/12);target.tempAtkBonus=(target.tempAtkBonus||0)+b;break}
     case 'darktuning':{if(gs.corruption<40)break;const n=gs.corruption>=70?3:2;for(let i=0;i<Math.min(n,alive.length);i++){const t=pick(alive);t.atk+=1;t.permAtkBonus=(t.permAtkBonus||0)+1}break}
     case 'herbmoney':{if(gs.stash>=10){gs.stash-=10;target.atk+=3;target.permAtkBonus=(target.permAtkBonus||0)+3};break}
     case 'goingbroke':gs._directDmg=(gs._directDmg||0)+gs.stash;gs.stash=0;break;
@@ -545,16 +546,7 @@ function applyCardSim(card,gs,enemy){
   if(enemy.passiveId==='cardHeal8')enemy._hp=Math.min(enemy.maxHp,enemy._hp+8);
 }
 
-// ── GENRE BONUS COMPUTATION ──
-function computeGenre(gs){
-  const gc=gs._genreCounts,total=gc.RIFF+gc.CORRUPT+gc.UTILITY+gc.EMBER;
-  if(total<4)return null;
-  if(gc.RIFF/total>=0.5)return'RIFF_METAL';
-  if(gc.CORRUPT/total>=0.5)return'BLACK_METAL';
-  if(gc.UTILITY/total>=0.5)return'PROG_ROCK';
-  if(gc.EMBER/total>=0.5)return'DOOM_METAL';
-  return null;
-}
+// Genre system removed — reserved for potential future genre-specific deck
 
 function simFight(gs,phaseHp,luciferPhase){
   const fightIdx=gs.fightIndex
@@ -562,7 +554,7 @@ function simFight(gs,phaseHp,luciferPhase){
   // Progressive HP scaling — per-boss calibrated values or circle-based fallback
   let effectiveMaxHp
   if(BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE[fightIdx]){
-    effectiveMaxHp=phaseHp||BOSS_HP_OVERRIDE[fightIdx]
+    effectiveMaxHp=phaseHp||Math.ceil(BOSS_HP_OVERRIDE[fightIdx]*HP_SCALE)
   } else {
     const CIRCLE_HP_SCALE=[1.5, 3.5, 7.0, 14.0, 25.0, 40.0, 60.0, 85.0, 120.0]
     const circleScale=CIRCLE_HP_SCALE[Math.min(8,Math.floor(fightIdx/3))]
@@ -634,9 +626,6 @@ function simFight(gs,phaseHp,luciferPhase){
     if(gs._tappedOutNext){gs.embers=Math.min(gs.maxEmbers,gs.embers+5);gs._tappedOutNext=false}
     if(gs._slowBurnStrikes>0){gs.embers=Math.min(gs.maxEmbers,gs.embers+1);gs._slowBurnStrikes--}
     gs.embers=gs.maxEmbers;
-    // Genre bonus: PROG_ROCK +1 draw
-    gs._activeGenre=computeGenre(gs);
-    if(gs._activeGenre==='PROG_ROCK')drawCards(gs,1);
 
     // WTH: inject contract every 2 strikes
     if(gs._wthFight){wthStrikeCount++;if(wthStrikeCount%2===0&&wthStrikeCount>0)gs.hand.push({id:'contract',type:'CORRUPT',rarity:'Rare',embers:0,uid:'ctr'+wthStrikeCount})}
@@ -693,6 +682,7 @@ function simFight(gs,phaseHp,luciferPhase){
 
     // STRIKE DAMAGE
     const aliveNow=gs.stage.filter(m=>!m.tooStoned);let strikeDmg=0;
+    if(aliveNow.length===0)break; // all died during card play
     for(const m of aliveNow){
       if(paranoiaVictimUid&&m.uid===paranoiaVictimUid)continue;
       let atk=m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0);
@@ -708,9 +698,6 @@ function simFight(gs,phaseHp,luciferPhase){
     strikeDmg+=gs._directDmg||0;
     if(strike===0&&hasWailing)strikeDmg*=2;
     if(strike===0&&p10)strikeDmg+=10;
-    // Genre bonus: RIFF_METAL +15%, DOOM_METAL +2/member if no discards used
-    if(gs._activeGenre==='RIFF_METAL'){strikeDmg=Math.round(strikeDmg*1.15);TRACK.genreActivations++}
-    if(gs._activeGenre==='DOOM_METAL'&&gs._discardsLeft>=MAX_DISCARDS){strikeDmg+=aliveNow.length*2;TRACK.genreActivations++}
     if(gs._tripBuff==='DIMENSIONAL_RIFT'||gs._tripBuff==='FRACTAL_VISION')strikeDmg*=2;
     // Apply strike multiplier (0.03 per card played + 0.15 per combo)
     if(gs._strikeMult>1.0)strikeDmg=Math.round(strikeDmg*gs._strikeMult)
@@ -918,7 +905,7 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
 
     if(f===26){
       TRACK.luciferReached++
-      const actualHp=BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE[26]?BOSS_HP_OVERRIDE[26]:Math.ceil(Math.max(666,420666-8*51750)*STAKE.hpMult)
+      const actualHp=BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE[26]?Math.ceil(BOSS_HP_OVERRIDE[26]*HP_SCALE):Math.ceil(Math.max(666,420666-8*51750)*STAKE.hpMult)
       const phase1Hp=Math.ceil(actualHp/2)
       const phase2Hp=actualHp-phase1Hp
       const r1=simFight(gs,phase1Hp,1)

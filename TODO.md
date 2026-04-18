@@ -1,7 +1,7 @@
 # VESTIBULE — TODO & STATUS
 
-**Latest commit:** a602191 (QoL: drug pin tape marks + member shake + chain glow)
-**Sim version:** v19.1 (5 decks recalibrated: 10.6%/8.1%/7.5%/5.5%/4.7%)
+**Latest commit:** (genre removal + sim recalibration + Tier 1-3 polish)
+**Sim version:** v19.2 (genre removed, recalibrated: 10%/8%/7%/6%/5%)
 **App.jsx:** ~8,540 lines
 **Last doc refresh:** post-a602191 (end of April 17 megasession)
 
@@ -19,6 +19,22 @@
 - [ ] **Deck = 69** — verify all 5 decks build at exactly 69 cards in-game
 - [ ] **Cold open splash** — clear localStorage, hard reload, confirm splash fires
 - [ ] **Weed leaf PNG** — spot-check it renders everywhere 🌿 used to
+
+---
+
+## 🎯 NEXT MAJOR: Balatro-Style Combo Overhaul
+
+Genre system removed (was noise, not strategy). Next priority is multiplicative combo system:
+
+- [ ] **Artifacts → Jokers** — multiplier-based triggers, not flat stat buffs
+- [ ] **Chain stacking** — fire 2+ chains = multiply (×1.78 × ×1.78 = ×3.17)
+- [ ] **Strike mult scales harder** — ×1.1 per card played, not +0.05
+- [ ] **Corruption = power** — every 20% corruption = ×1.2 base multiplier
+- [ ] **Card types = flavor only** — no mechanical system on top of types
+- [ ] Kill all additive clutter, make everything multiplicative
+
+Goal: experienced players feel like they "broke the game" with the right artifact combo.
+New players struggle to reach Circle 5 until they unlock the cards that enable big combos.
 
 ---
 
@@ -155,11 +171,11 @@
 
 | Deck | hpScale | Win Rate | Target |
 |------|---------|----------|--------|
-| ⛧ Standard | 0.74 | 10.60% | 10% |
-| 🎸 Shredder | 0.79 | 8.06% | 8% |
-| 💀 Ritualist | 0.81 | 7.48% | 7% |
-| 🔧 Engineer | 0.85 | 5.52% | 6% |
-| 🛡️ Survivor | 0.88 | 4.68% | 5% |
+| ⛧ Standard | 0.68 | ~10% | 10% |
+| 🎸 Shredder | 0.73 | ~8% | 8% |
+| 💀 Ritualist | 0.52 | ~7% | 7% |
+| 🔧 Engineer | 0.58 | ~6% | 6% |
+| 🛡️ Survivor | 0.58 | ~5% | 5% |
 
 ### Card Design Rules
 - Permanent ATK buffs > direct damage
