@@ -565,6 +565,10 @@ const ALL_CARDS=[
   {id:'infernalpact',name:'Infernal Pact',type:'CORRUPT',rarity:'Rare',emoji:'📜',embers:0,effect:'FREE. Set corruption to 66%. All members +2 ATK permanently.',color:'#cc4400',typeColor:'#aa2200',copies:0},
   {id:'carrioncall',name:'Carrion Call',type:'CORRUPT',rarity:'Rare',emoji:'🦅',embers:1,effect:'Revive a Too Stoned member at 1 HP with +5 ATK. Corruption +20%.',color:'#886622',typeColor:'#664400',copies:0},
   {id:'possessionriff',name:'Possession Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'👁️',embers:1,effect:'+20 ATK this strike only. Corruption +10%. Full demon mode.',color:'#aa44cc',typeColor:'#8822aa',copies:0},
+
+  {id:'hellfirerift',name:'Hellfire Rift',type:'CORRUPT',rarity:'Rare',emoji:'🌋',embers:0,effect:'FREE. ALL members ×2 ATK this strike. +20% corruption. Go nuclear.',color:'#ff2200',typeColor:'#cc0000',copies:0},
+  {id:'soulsacrifice',name:'Soul Sacrifice',type:'CORRUPT',rarity:'Rare',emoji:'⚰️',embers:0,effect:'FREE. +5 ATK perm to ALL. +15% corruption. A deal with the devil.',color:'#880044',typeColor:'#660022',copies:0},
+  {id:'voidpact',name:'Void Pact',type:'CORRUPT',rarity:'Rare',emoji:'🕳',embers:0,effect:'FREE. Strike multiplier ×2.5 this strike ONLY. +25% corruption. Total commitment.',color:'#440088',typeColor:'#220044',copies:0},
   {id:'darkcrescendo',name:'Dark Crescendo',type:'CORRUPT',rarity:'Rare',emoji:'🌑',embers:0,effect:'FREE. If corruption ≥80%, TRIPLE your strike multiplier.',color:'#220044',typeColor:'#110022',copies:0},
   {id:'russianroulette',name:'Russian Roulette',type:'CORRUPT',rarity:'Uncommon',emoji:'🔫',embers:0,effect:'FREE. Roll d6. 1: target Too Stoned. 2-5: +4 ATK. 6: +8 ATK + Shield.',color:'#cc2244',typeColor:'#aa0022',copies:0},
   {id:'gearcheck',name:'Gear Check',type:'UTILITY',rarity:'Common',emoji:'🔧',embers:1,effect:'Draw 2 cards, discard 1 from hand. Card selection.',color:'#888888',typeColor:'#666666',copies:0},
@@ -2676,7 +2680,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
         zIndex:isDragging?0:isHovered?9999:isSelected?50+index:10+index,
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:chainReady&&canAfford?'2px 4px 16px rgba(0,0,0,0.75),0 0 14px rgba(255,220,50,0.5),0 0 28px rgba(255,200,0,0.2)':(mastery.glow?'2px 4px 16px rgba(0,0,0,0.75),0 0 8px '+mastery.glow:'2px 4px 16px rgba(0,0,0,0.75)'),
-        opacity:isDragging?0.4:unaffordable?0.55:1,
+        opacity:isDragging?0.4:unaffordable?0.55:1,filter:corruption>=80?'hue-rotate(-10deg) saturate(1.4) brightness(0.95)':corruption>=60?'saturate(1.2)':'none',
         animation:chainReady&&canAfford?'riffChainGlow 1.2s ease-in-out infinite':shimmerAnim,
         margin:total>HAND_SIZE?'0 -28px':'0 -22px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
       {/* Hand-drawn top stripe — SVG path with wobble */}
@@ -3359,7 +3363,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   const isBeaten=cause==='beaten'
   const isVictory=cause==='victory'
   const circleReached=Math.floor((stats.fightsSurvived)/3)+1
-  const streakMsg=streakWins>1?'🔥 '+streakWins+' WIN STREAK!':streakLosses>2?'💀 '+streakLosses+' losses in a row...':''
+  const streakMsg=streakWins>1?'🔥 '+streakWins+' WIN STREAK!'+(streakWins>=5?' ⛧ LEGENDARY!':streakWins>=3?' 🎁 BONUS STASH!':''):streakLosses>2?'💀 '+streakLosses+' losses in a row...':''
   const finalScore=calcRunScore(stats,isVictory)
   const grade=getScoreGrade(finalScore,isVictory)
   const streakBonus=dailyStreak>=30?20:dailyStreak>=7?10:dailyStreak>=3?5:0
@@ -3509,6 +3513,12 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
       }
     }
     // Biggest strike — the money stat
+    if(stats.bestMultiplier>2.0){
+      highlights.push({emoji:'⛧',label:'Best Multiplier',value:'×'+stats.bestMultiplier.toFixed(2),color:'#ff4400'})
+    }
+    if(stats.overkillDmg>0){
+      highlights.push({emoji:'💥',label:'Overkill Damage',value:'+'+stats.overkillDmg.toLocaleString(),color:'#ff8800'})
+    }
     if(stats.highestStrike>=100){
       highlights.push({emoji:'⚔',label:'Biggest Strike',value:stats.highestStrike.toLocaleString(),color:'#ff4422',big:true})
     }
@@ -3707,6 +3717,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
     ['Corrupt',stats.maxCorruption+'%'],
     ['Stash',stats.stashEarned+'🌿'],
     ['Run #',totalRuns||1],
+    ['Overkill',stats.overkillDmg>0?'+'+stats.overkillDmg.toLocaleString():'—'],
   ]
 
   // Title section varies by type
@@ -3717,6 +3728,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
     </>)
     if(isBeaten)return(<>
       <div style={{display:'flex',alignItems:'center',gap:20}}>
+        {BOSS_QUOTES[enemy?.id]&&<div style={{position:'absolute',top:12,left:'50%',transform:'translateX(-50%)',fontFamily:"'ScratchFont',serif",fontSize:18,color:'rgba(196,30,58,0.7)',fontStyle:'italic',textShadow:'0 0 12px rgba(196,30,58,0.3)',zIndex:2,whiteSpace:'nowrap'}}>"{BOSS_QUOTES[enemy.id]}"</div>}
         <div style={{fontSize:80,filter:'drop-shadow(0 0 20px rgba(200,0,0,0.5))'}}>{enemy&&BOSS_PORTRAITS[enemy.id]?<img src={BOSS_PORTRAITS[enemy.id]} alt={enemy.name} style={{width:80,height:80,objectFit:'contain',imageRendering:'pixelated'}}/>:enemy?.emoji||'💀'}</div>
         <div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:6,color:'#662222',textTransform:'uppercase'}}>Defeated by</div>
@@ -4516,7 +4528,7 @@ function App(){
   const wthStrikesRef=useRef(0)
   const [stolenAtkPool,setStolenAtkPool]=useState(0) // soulThief: total ATK stolen, returned on win
   const [tripUsedThisFight,setTripUsedThisFight]=useState(false)
-  const [stats,setStats]=useState({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
+  const [stats,setStats]=useState({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0,overkillDmg:0,bestMultiplier:1.0})
 
   
   // Keep refs in sync for use in timeouts
@@ -5231,6 +5243,19 @@ function App(){
       if(corruption>=80){setStrikeMult(p=>Math.min(66.6,Math.round(p*3*100)/100));strikeMultRef.current=Math.min(66.6,Math.round(strikeMultRef.current*3*100)/100);msg='🌑 DARK CRESCENDO! TRIPLE STRIKE MULTIPLIER! ('+corruption+'% corruption)'}
       else msg='🌑 Dark Crescendo... corruption too low ('+Math.floor(corruption)+'%, need 80%)'
     }
+    // ═══ CORRUPTION GAMBIT CARDS — insane power, insane corruption cost ═══
+    else if(card.id==='hellfirerift'){
+      ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true}):s);setCorruption(p=>Math.min(100,p+20))
+      msg='🌋 HELLFIRE RIFT! ALL MEMBERS ×2 ATK! +20% CORRUPTION!';addFloat('×2 ALL ATK!',getCenter(bossRef).x,getCenter(bossRef).y-120,'#ff2200',true)
+    }
+    else if(card.id==='soulsacrifice'){
+      ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+5,permAtkBonus:(s.permAtkBonus||0)+5,buffCount:(s.buffCount||0)+1}):s);setCorruption(p=>Math.min(100,p+15))
+      msg='⚰️ SOUL SACRIFICE! ALL +5 ATK PERMANENT! +15% CORRUPTION!';addFloat('+5 ALL PERM!',getCenter(bossRef).x,getCenter(bossRef).y-120,'#cc0044',true)
+    }
+    else if(card.id==='voidpact'){
+      setStrikeMult(p=>Math.min(66.6,Math.round(p*2.5*100)/100));strikeMultRef.current=Math.min(66.6,Math.round(strikeMultRef.current*2.5*100)/100);setCorruption(p=>Math.min(100,p+25))
+      msg='🕳 VOID PACT! STRIKE MULTIPLIER ×2.5! +25% CORRUPTION!';addFloat('×2.5 MULT!',getCenter(bossRef).x,getCenter(bossRef).y-120,'#8800ff',true)
+    }
     else if(card.id==='russianroulette'){
       if(!m)return false;const roll=Math.floor(Math.random()*6)+1
       if(roll===1){ns[slotIdx]=Object.assign({},m,{tooStoned:true,hp:0});msg='🔫 Russian Roulette: '+m.name+' rolled 1... TOO STONED! 💀'}
@@ -5313,6 +5338,10 @@ function App(){
         setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.78*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
         playSfx('chain_combo');triggerShake(18,600);setChainFlashActive(true);setTimeout(()=>setChainFlashActive(false),600);setStrikeMult(p=>Math.min(6.66,Math.round((p*1.78)*100)/100));addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×1.78 MULTIPLIER!')
         combosFiredRef.current.push(chain.id)
+          // #7: Track lifetime chain discovery
+          const _allDisc=JSON.parse(localStorage.getItem('vst_chains_discovered')||'[]')
+          if(!_allDisc.includes(chain.id)){_allDisc.push(chain.id);localStorage.setItem('vst_chains_discovered',JSON.stringify(_allDisc))
+            addFloat('⛧ NEW CHAIN!',getCenter(bossRef).x,getCenter(bossRef).y-200,'#ffdd00',true)}
         addFloat('⛧ '+chain.name+' ⛧',getCenter(bossRef).x,getCenter(bossRef).y-140,chain.color,true)
         // Apply combo bonus damage = total stage ATK
         const comboBonus=ns.filter(m=>m&&!m.tooStoned).reduce((s,m)=>s+m.atk,0)
@@ -5651,7 +5680,8 @@ function App(){
     if(strikesLeft>=3&&(fightIndex+1)%3===0)tryAchieve('perfect_strike')
     if(corruption>=100)tryAchieve('corruption_lord')
     if(stage.filter(m=>m&&!m.tooStoned).length>=5)tryAchieve('full_band')
-    if(fightIndex===26){tryAchieve('beat_lucifer');beatStake(activeStake.id);tryAchieve('beat_'+selectedDeck)}
+    if(fightIndex===26){tryAchieve('beat_lucifer');beatStake(activeStake.id);tryAchieve('beat_'+selectedDeck)
+      const curHeat=parseInt(localStorage.getItem('vst_heat')||'1');if(curHeat<10){localStorage.setItem('vst_heat',(curHeat+1).toString());addLog('🔥 HEAT LEVEL UP! Heat '+(curHeat+1)+' unlocked!')}}
     const bq=BOSS_QUOTES[enemy&&enemy.id];if(bq){setTimeout(()=>addLog('💀 "'+bq+'"'),600);setBossQuoteTypewriter(bq);setTimeout(()=>setBossQuoteTypewriter(null),3500)}
     setTimeout(function(){
       const isCircleBoss=(fightIndex+1)%3===0
@@ -5881,7 +5911,7 @@ function App(){
     if(prevMultRef.current<3.0&&strikeMult>=3.0&&strikeMult<6.66){
       setBeastTierFlash(true)
       playSfx('big_hit');triggerShake(20,800)
-      addLog('⛧ BEAST UNLEASHED! ×'+strikeMult.toFixed(2)+' multiplier!')
+      addLog('⛧ BEAST UNLEASHED! ×'+strikeMult.toFixed(2)+' multiplier!');updStat('bestMultiplier',strikeMult,true)
       setTimeout(()=>setBeastTierFlash(false),700)
     }
     prevMultRef.current=strikeMult
@@ -6296,6 +6326,7 @@ function App(){
       if(tripMult>1){const _tr=Math.round(dmg*tripMult);_breakdownLines.push({type:'multiply',label:(fightTripBuff||'Trip')+' ×'+tripMult,label2:'= '+_tr.toLocaleString(),runningAfter:_tr,color:'#ff44ff'})}
       if(corruptionMult>1){_breakdownLines.push({type:'multiply',label:'Corruption ×'+corruptionMult.toFixed(1),label2:'= '+Math.round(dmg*tripMult*corruptionMult).toLocaleString(),runningAfter:Math.round(dmg*tripMult*corruptionMult),color:'#cc44ff'})}
       if(currentMult>1.0){_breakdownLines.push({type:'multiply',label:'Strike ×'+currentMult.toFixed(2),label2:'= '+finalDmg.toLocaleString(),runningAfter:finalDmg,color:'#ff4400'})};const newEHp=Math.max(0,startHp-finalDmg)
+      if(newEHp<=0){const _ok=Math.abs(newEHp);updStat('overkillDmg',_ok)}
       setEnemyHp(prev=>Math.min(prev,newEHp))
       // damageScaleAtk: boss gains ATK per 20 damage taken
       if(enemy.passiveId==='luciferBoss'){
@@ -7087,7 +7118,7 @@ function App(){
     setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
     setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
-    setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0})
+    setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0,overkillDmg:0,bestMultiplier:1.0})
   }
 
   // Boss HP milestone detection
