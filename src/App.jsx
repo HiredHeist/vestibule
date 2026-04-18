@@ -6705,7 +6705,7 @@ function App(){
             // Check out-of-strikes death AFTER this strike resolves
             setStrikesLeft(function(cur){
               if(cur<=0){
-                if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins. But you already conquered Hell.')}else{setDeathCause('beaten');playSfx('defeat')};
+                if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins. But you already conquered Hell.')}else{setDeathCause('beaten');setLastKillingBlow((enemy?.name||'The boss')+' hit for '+(enemy?.atk||0)+' damage');playSfx('defeat')};
                 {const _rs=calcRunScore(stats,false);saveRunHistory(stats,false,enemy,runSeed);
                 // Achievement checks at game end
                 if(_rs>=5000)unlockAchievement('high_score_5k')
@@ -7192,6 +7192,7 @@ function App(){
   },[stash,rerollCost,fightIndex])
 
   const handleReset=(retrySeed)=>{
+    setRunSeed(retrySeed||Math.floor(Math.random()*0xFFFFFF))
     runStartTimeRef.current=Date.now()
     // Apply starter deck bonuses
     const deckDef=STARTER_DECKS.find(d=>d.id===selectedDeck)
@@ -7204,7 +7205,7 @@ function App(){
     setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
     setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
-    setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0,overkillDmg:0,bestMultiplier:1.0})
+    setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0,overkillDmg:0,bestMultiplier:1.0});setScaledMaxHp(0);setVenomDotStacks(0);setDblRoll(null);setLastKillingBlow('');setCurrentTip('');setBossDebuff(0);setBossRageAtk(0);setSlowBurnStrikes(0);setStashStolenThisFight(0);setShredderUsed(false);corrPowerShownRef.current=false
   }
 
   // Boss HP milestone detection
@@ -8024,7 +8025,7 @@ function App(){
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
-  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage} runElapsed={Math.floor((Date.now()-runStartTimeRef.current)/1000)}/></div>
+  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage} runElapsed={Math.floor((Date.now()-runStartTimeRef.current)/1000)} lastKillingBlow={lastKillingBlow}/></div>
 
   return(
     <div key={'play-'+fightIndex} className="page-transition-in" style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:`${(()=>{const cn=Math.floor(fightIndex/3)+1;const ct=CIRCLE_BG[cn]||CIRCLE_BG[1];return 'radial-gradient(ellipse at 50% 20%, '+ct.glow+', '+ct.base+')'})()}`,overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
