@@ -1630,7 +1630,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
             <div key={c.uid||c.id} style={{width:180,background:'linear-gradient(180deg,#201408,#100804)',border:'1px solid '+bc+'88',borderRadius:6,position:'relative'}}
               onMouseEnter={()=>setHoverCard({c,ci})} onMouseLeave={()=>setHoverCard(null)}>
               <div style={{height:4,background:bc}}/>
-              <div style={{fontSize:44,textAlign:'center',padding:'12px 0',background:'rgba(0,0,0,0.3)',borderRadius:'6px 6px 0 0'}}>{c.emoji}</div>
+              <div style={{textAlign:'center',padding:'12px 0',background:'rgba(0,0,0,0.3)',borderRadius:'6px 6px 0 0'}}><CardArtImg id={c.id} emoji={c.emoji} size={48}/></div>
               <div style={{padding:'0 10px 12px'}}>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:2}}>{c.name}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#8a6a40',textAlign:'center',marginBottom:6}}>{c.rarity}</div>
@@ -1660,7 +1660,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:bc,fontWeight:900,letterSpacing:1,textTransform:'uppercase'}}>{c.type}</div>
                   <div style={{width:26,height:26,borderRadius:'50%',background:'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)',border:'2px solid #ff6600',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:'#fff'}}>{c.embers}</div>
                 </div>
-                <div style={{fontSize:36,textAlign:'center',marginBottom:6}}>{c.emoji}</div>
+                <div style={{textAlign:'center',marginBottom:6}}><CardArtImg id={c.id} emoji={c.emoji} size={40}/></div>
                 <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:18,color:'#e8d090',textAlign:'center',marginBottom:2,letterSpacing:1}}>{c.name}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:bc,textAlign:'center',letterSpacing:2,marginBottom:6,textTransform:'uppercase'}}>{c.rarity}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#c8b080',textAlign:'center',lineHeight:1.5,fontStyle:'italic'}}>{c.effect}</div>
@@ -2564,6 +2564,23 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   )
 }
 
+
+// ═══ CARD ART — shows pixel art PNG if available, falls back to emoji ═══
+function CardArtImg({id,emoji,size=52,style={}}){
+  const [hasArt,setHasArt]=React.useState(false)
+  const src='/vestibule/cards/'+id+'.png'
+  React.useEffect(()=>{const img=new window.Image();img.onload=()=>setHasArt(true);img.onerror=()=>setHasArt(false);img.src=src},[id])
+  if(hasArt)return <img src={src} alt={id} style={{width:size,height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
+  return <span style={{fontSize:size*0.85,...style}}>{emoji}</span>
+}
+function ArtifactArtImg({id,emoji,size=40,style={}}){
+  const [hasArt,setHasArt]=React.useState(false)
+  const src='/vestibule/artifacts/'+id+'.png'
+  React.useEffect(()=>{const img=new window.Image();img.onload=()=>setHasArt(true);img.onerror=()=>setHasArt(false);img.src=src},[id])
+  if(hasArt)return <img src={src} alt={id} style={{width:size,height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
+  return <span style={{fontSize:size*0.7,...style}}>{emoji}</span>
+}
+
 function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption,animPhase,ghostCard,onQuickPlay}){
   const [over,setOver]=useState(false)
   const [showTip,setShowTip]=useState(false)
@@ -2704,9 +2721,9 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       {card.rarity==='Rare'&&!card.foil&&!card.mythic&&<div style={{position:'absolute',top:12,left:10,padding:'2px 5px',borderRadius:2,background:'rgba(200,152,56,0.18)',border:'1px solid rgba(200,152,56,0.4)',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:900,color:'var(--gold)',letterSpacing:2,zIndex:3,textTransform:'uppercase'}}>Rare</div>}
       {card.rarity==='Uncommon'&&!card.foil&&!card.mythic&&<div style={{position:'absolute',top:12,left:10,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'var(--ink-dim)',letterSpacing:2,zIndex:3}}>✦</div>}
       {mastery.border&&<div style={{position:'absolute',bottom:4,left:4,padding:'1px 5px',borderRadius:2,background:'rgba(0,0,0,0.75)',border:'1px solid '+mastery.border+'88',fontFamily:"'MBScribblesFont',serif",fontSize:7,fontWeight:900,color:mastery.color,letterSpacing:1,textTransform:'uppercase',zIndex:5}}>{mastery.name}</div>}
-      <div style={{height:100,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:52,background:'linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.15))',position:'relative',marginTop:8}}>
+      <div style={{height:100,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',background:'linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.15))',position:'relative',marginTop:8}}>
         <div style={{position:'absolute',inset:0,background:`radial-gradient(circle at center,${bc}22,transparent 70%)`}}/>
-        {card.emoji}
+        <CardArtImg id={card.id} emoji={card.emoji} size={58}/>
       </div>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,fontWeight:700,color:'var(--ink-bone)',textAlign:'center',padding:'6px 5px 2px',letterSpacing:.4,lineHeight:1,flexShrink:0}}>{card.name}</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:bc,textAlign:'center',padding:'2px 4px',letterSpacing:2.5,textTransform:'uppercase',flexShrink:0,opacity:0.9}}>{card.type}</div>
@@ -2978,7 +2995,7 @@ function MasteryGallery({onClose}){
           <div style={{height:3,background:tier.border||bc}}/>
 
           {/* Emoji */}
-          <div style={{fontSize:28,textAlign:'center',padding:'6px 0',background:'rgba(0,0,0,0.3)'}}>{c.emoji}</div>
+          <div style={{textAlign:'center',padding:'6px 0',background:'rgba(0,0,0,0.3)'}}><CardArtImg id={c.id} emoji={c.emoji} size={32}/></div>
 
           {/* Name */}
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'1px 3px',lineHeight:1.1}}>{c.name}</div>
@@ -8298,7 +8315,7 @@ function App(){
                 <div key={i} style={{position:'relative'}}
                   onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='1'}}
                   onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='0'}}>
-                  {a?<div style={{width:80,height:105,border:'1px solid rgba(200,140,30,0.65)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 10px rgba(200,140,20,0.25)',cursor:'help'}}><div style={{fontSize:22}}>{a.emoji}</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:6,letterSpacing:0.5,color:'#c8a040',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 3px'}}>{a.name}</div></div>
+                  {a?<div style={{width:80,height:105,border:'1px solid rgba(200,140,30,0.65)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 10px rgba(200,140,20,0.25)',cursor:'help'}}><ArtifactArtImg id={a.id} emoji={a.emoji} size={28}/><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:6,letterSpacing:0.5,color:'#c8a040',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 3px'}}>{a.name}</div></div>
                   :<div style={{width:80,height:105,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:52,opacity:0.35,textShadow:'0 0 12px rgba(255,180,0,0.4)'}}>⛧</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>}
                   {a&&<div data-artip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:88,top:0,zIndex:99999,pointerEvents:'none',minWidth:200,maxWidth:280,background:'rgba(12,7,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:700,color:'#e8c060',marginBottom:4}}>{a.emoji} {a.name}</div>
