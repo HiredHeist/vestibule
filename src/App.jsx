@@ -6488,7 +6488,7 @@ function App(){
           },speedFast?600:1200) // boss animation delay
           setTimeout(function(){
             let nh=[...handRef.current],nd=[...deckRef.current],ndisc=[...discRef.current];
-            const cardsToReplace=Math.min(cardsToDrawRef.current,10-nh.length);
+            const cardsToReplace=Math.min(cardsToDrawRef.current,Math.max(0,handTargetRef.current-nh.length));
             for(let _r=0;_r<cardsToReplace;_r++){
               if(nd.length===0){
                 if(ndisc.length===0)break;
