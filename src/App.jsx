@@ -2918,9 +2918,12 @@ function MasteryGallery({onClose}){
   const holoAnim='@keyframes holoShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}'
   const tierCounts=MASTERY_TIERS.map(t=>({name:t.name,count:cards.filter(c=>{const p=data[c.id]||0;let tier=MASTERY_TIERS[0];for(const tt of MASTERY_TIERS){if(p>=tt.min)tier=tt};return tier.name===t.name}).length}))
 
-  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.99)',display:'flex',flexDirection:'column',alignItems:'center',padding:'14px 30px',overflow:'hidden'}}>
+  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.99)',display:'flex',flexDirection:'column',alignItems:'center',padding:'14px 30px',overflowY:'auto'}}>
     <style>{holoAnim}</style>
-    <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:46,color:'#c8a040',textShadow:'0 0 30px rgba(200,160,40,0.4),2px 2px 0 #000',letterSpacing:6,marginBottom:2}}>Card Mastery</div>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',width:'100%',maxWidth:1200,marginBottom:2}}>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:46,color:'#c8a040',textShadow:'0 0 30px rgba(200,160,40,0.4),2px 2px 0 #000',letterSpacing:6}}>Card Mastery</div>
+      <button onClick={onClose} style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:'#cc4444',background:'rgba(80,0,0,0.4)',border:'2px solid #aa2222',borderRadius:6,padding:'8px 24px',cursor:'pointer',letterSpacing:3,textTransform:'uppercase'}}>✕ Close</button>
+    </div>
     <div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#a09060',fontStyle:'italic',marginBottom:4}}>Play cards across runs to unlock visual upgrades</div>
 
     {/* Tier summary */}
@@ -2939,7 +2942,7 @@ function MasteryGallery({onClose}){
     </div>
 
     {/* Card grid */}
-    <div style={{display:'grid',gridTemplateColumns:'repeat(9,120px)',gap:8,justifyContent:'center',maxWidth:1200}}>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(9,120px)',gap:8,justifyContent:'center',maxWidth:1200,paddingBottom:40}}>
       {cards.map(c=>{
         const plays=data[c.id]||0
         let tier=MASTERY_TIERS[0]
@@ -7109,7 +7112,7 @@ function App(){
 
   // ── TROPHY WALL / MASTERY GALLERY (overlay from menu) ──
   if(showTrophies&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><TrophyWall onClose={()=>setShowTrophies(false)}/></div>)
-  if(showMastery&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><MasteryGallery onClose={()=>setShowMastery(false)}/></div>)
+  if(showMastery&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'auto'}}><MasteryGallery onClose={()=>setShowMastery(false)}/></div>)
 
   // ── COLD OPEN SPLASH — overlays menu on first ever launch
   const ColdOpenOverlay=coldOpenPhase!==null&&coldOpenPhase<5?<ColdOpenScreen phase={coldOpenPhase}/>:null
