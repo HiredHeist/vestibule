@@ -31,7 +31,7 @@
 - [ ] Mobile/touch considerations for quick-play
 
 ### Rockstar Polish (Tier 2-3)
-- [ ] 📖 **Character bios on hover** — musicians + bosses get backstory blurbs
+- [x] 📖 **Character bios on hover** — 18 musician bios + 27 boss bios in tooltips
 - [ ] 📓 **TOUR DIARY tab** on main menu — cumulative stats as hand-written tour journal
 - [ ] ⏸️ **Real pause menu** — Cmd+P drawer, vinyl-warp audio ducking
 - [ ] ✨ **Particle physics** — ember trails, damage splatter, card-shuffle dust
@@ -42,19 +42,19 @@
 - [ ] Strike counter gets more dramatic each strike (bigger, redder, shakier)
 - [ ] Cards played this strike shown as ghostly trail near strike button
 - [ ] Brief screen dim between strikes for dramatic pacing
-- [ ] Boss kill quote with typewriter effect instead of instant
+- [x] Boss kill quote typewriter — letter by letter with cursor, fades after 3.5s
 - [ ] Visible deck reshuffle animation when draw pile empties
 
 ### Information & Clarity
 - [ ] Corruption trajectory warning ("at this rate, 100% in 2 fights")
 - [x] Deck viewer button during combat — click DECK pile, 4 columns by type (already existed)
-- [ ] Card compare tooltip in shop (this card vs what's in your deck)
+- [x] Card compare in shop (IN DECK: X / NEW CARD badge on shop cards's in your deck)
 - [ ] Combo discovery log (chains found this run, visible in pause menu)
 - [ ] Boss kill counter visible during fight ("3rd time fighting The Shade")
 
 ### Shop / Meta
 - [x] Quick-restart button on death screen — ⚡ Quick Restart on loss
-- [ ] "Last run" comparison on end screen (better/worse than previous)
+- [x] Last run comparison on end screen — VS LAST RUN score/damage diff
 - [ ] Win streak fire border on main menu
 - [ ] Daily challenge mini-leaderboard
 
@@ -63,11 +63,11 @@
 - [x] Enemy intro animation — name slams from left, line draws, details stagger in
 - [ ] Member death: dramatic fade + skull icon + brief slow-mo
 - [x] Corruption visual escalation — red vignette + glitch + THE DARKNESS CONSUMES at 80%+
-- [ ] Boss portrait cracks deepen as HP drops (expand fracture system)
+- [x] Boss portrait cracks deepen — SVG cracks at 50%, 35%, 20% HP tiers
 - [ ] Combo name display scales with chain multiplier
 - [ ] Card shuffle dust puff when deck reshuffles
 - [ ] Stash earned sparkle trail
-- [ ] Victory screen confetti/embers rain
+- [x] Victory screen confetti/embers — 60 falling particles on every victory
 - [ ] Pact selection: dramatic reveal with smoke/ember effect
 
 ---

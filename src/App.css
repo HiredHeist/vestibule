@@ -524,6 +524,12 @@ body {
   97% { opacity: 0.9; transform: translate(2px, 0); }
 }
 
+/* Victory confetti — embers fall from top */
+@keyframes confettiFall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 0.9; }
+  100% { transform: translateY(1100px) rotate(720deg); opacity: 0; }
+}
+
 /* Riff chain warning glow — pulses on cards that could complete a chain */
 @keyframes riffChainGlow {
   0%, 100% { box-shadow: 0 0 8px rgba(255,215,0,0.3), 0 4px 16px rgba(0,0,0,0.7); }

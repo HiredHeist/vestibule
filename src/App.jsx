@@ -243,26 +243,24 @@ const ENEMIES=[
 ]
 
 const ALL_MUSICIANS=[
-  {id:'bjorn',name:'Bjorn',role:'Lead Guitarist',atk:5,hp:6,maxHp:8,emoji:'🎸',keyword:'FRENZIED',desc:'High ATK, fragile. The carry.'},
-  {id:'ragnar',name:'Ragnar',role:'Lead Guitarist',atk:4,hp:7,maxHp:9,emoji:'🎸',keyword:'FRENZIED',desc:'Slightly tankier lead.'},
-  {id:'thor',name:'Thor',role:'Drummer',atk:0,hp:8,maxHp:11,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Attack fires twice per turn.'},
-  {id:'ingrid',name:'Ingrid',role:'Bass Player',atk:3,hp:10,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'High HP. Regen adjacent members.'},
-  {id:'loki',name:'Loki',role:'Synth Player',atk:3,hp:6,maxHp:8,emoji:'🎹',keyword:'CORRUPT',desc:'Damage scales with Corruption.'},
-  {id:'grimnir',name:'Grimnir',role:'Vocalist',atk:2,hp:7,maxHp:9,emoji:'🎤',keyword:'DEBUFF',desc:'The Masked One. Reduces boss passive each turn.'},
-  {id:'dag',name:'Dag',role:'Bass Player',atk:2,hp:12,maxHp:16,emoji:'🎵',keyword:'ANCHOR',desc:'Tankiest member.'},
-  {id:'vitalik',name:'Vitalik',role:'Dark Minstrel',atk:6,hp:9,maxHp:12,emoji:'🪈',keyword:'FOLK MAGIC',desc:'Nobody asked. Nobody complained twice.'},
-  // ── NEW MEMBERS ────────────────────────────────────────────────
-  {id:'sigrid',name:'Sigrid',role:'Rhythm Guitarist',atk:3,hp:8,maxHp:11,emoji:'🎸',keyword:'SHREDDER',desc:'Every riff she plays, the next one comes faster.'},
-  {id:'gunnar',name:'Gunnar',role:'Rhythm Guitarist',atk:4,hp:7,maxHp:9,emoji:'🎸',keyword:'SHREDDER',desc:'Rhythm? He makes the rhythm.'},
-  {id:'astrid',name:'Astrid',role:'Vocalist',atk:3,hp:8,maxHp:11,emoji:'🎤',keyword:'DEBUFF',desc:'Her voice alone can break a curse.'},
-  {id:'freya',name:'Freya',role:'Synth Player',atk:4,hp:5,maxHp:7,emoji:'🎹',keyword:'CORRUPT',desc:'She plays the dark frequencies.'},
-  {id:'ulf',name:'Ulf',role:'Bass Player',atk:4,hp:9,maxHp:12,emoji:'🎵',keyword:'ANCHOR',desc:'The anchor that also bites.'},
-  {id:'brynja',name:'Brynja',role:'Bass Player',atk:1,hp:14,maxHp:19,emoji:'🎵',keyword:'ANCHOR',desc:'An immovable wall. The bass never stops.'},
-  {id:'rolf',name:'Rolf',role:'Drummer',atk:1,hp:9,maxHp:12,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Hits harder than the rest combined. Statistically speaking.'},
-  {id:'orm',name:'Orm',role:'Dark Minstrel',atk:2,hp:11,maxHp:15,emoji:'🪈',keyword:'HEXED',desc:'The longer he plays, the worse it gets. For everyone.'},
-  // ── UNLOCKABLE MEMBERS (locked until lifetime score milestone) ──
-  {id:'tanuki',name:'Tanuki',role:'Bass Player',atk:8,hp:8,maxHp:11,emoji:'🦝',keyword:'ANCHOR',desc:'The heaviest bass in Hell. Built like a tank, hits like a truck.',locked:true,unlockAt:3000},
-  {id:'lucifer_member',name:'Lucifer',role:'The Devil',atk:20,hp:69,maxHp:96,emoji:'😈',keyword:'FALLEN',desc:'Cannot be healed. Loses 1 HP per strike. If he dies, game over. Max 3 band members. Sell for 69 herb.',locked:true,unlockAt:100000},
+  {id:'bjorn',name:'Bjorn',role:'Lead Guitarist',atk:5,hp:6,maxHp:8,emoji:'🎸',keyword:'FRENZIED',desc:'High ATK, fragile. The carry.',bio:'Former blacksmith from Uppsala. Traded his hammer for a guitar at 14. His riffs have literally killed small animals.'},
+  {id:'ragnar',name:'Ragnar',role:'Lead Guitarist',atk:4,hp:7,maxHp:9,emoji:'🎸',keyword:'FRENZIED',desc:'Slightly tankier lead.',bio:'Claims to be descended from the real Ragnar Lothbrok. Nobody believes him, but nobody argues when he plays.'},
+  {id:'thor',name:'Thor',role:'Drummer',atk:0,hp:8,maxHp:11,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Attack fires twice per turn.',bio:'Not THAT Thor. This one is louder. Broke three drum kits in one show. The venue banned drums after that.'},
+  {id:'ingrid',name:'Ingrid',role:'Bass Player',atk:3,hp:10,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'High HP. Regen adjacent members.',bio:'The foundation. Ingrid held the band together through two breakups, a lawsuit, and a literal earthquake during a set.'},
+  {id:'loki',name:'Loki',role:'Synth Player',atk:3,hp:6,maxHp:8,emoji:'🎹',keyword:'CORRUPT',desc:'Damage scales with Corruption.',bio:'Found a cursed synthesizer in a pawn shop. The more corrupt the signal, the harder it hits. He sleeps with it.'},
+  {id:'grimnir',name:'Grimnir',role:'Vocalist',atk:2,hp:7,maxHp:9,emoji:'🎤',keyword:'DEBUFF',desc:'The Masked One. Reduces boss passive each turn.',bio:'Nobody has seen his face. His voice strips the will from anything that hears it. Even the sound guy wears earplugs.'},
+  {id:'dag',name:'Dag',role:'Bass Player',atk:2,hp:12,maxHp:16,emoji:'🎵',keyword:'ANCHOR',desc:'Tankiest member.',bio:'16 HP of pure Viking stubbornness. Dag once played a 9-hour set without sitting down. He does not believe in breaks.'},
+  {id:'vitalik',name:'Vitalik',role:'Dark Minstrel',atk:6,hp:9,maxHp:12,emoji:'🪈',keyword:'FOLK MAGIC',desc:'Nobody asked. Nobody complained twice.',bio:'Showed up backstage with a carved bone flute. When asked to leave, he played one note. Everyone sat down and listened.'},
+  {id:'sigrid',name:'Sigrid',role:'Rhythm Guitarist',atk:3,hp:8,maxHp:11,emoji:'🎸',keyword:'SHREDDER',desc:'Every riff she plays, the next one comes faster.',bio:'Ex-military. Applied the same discipline to guitar that she applied to combat. Each riff is a controlled burst.'},
+  {id:'gunnar',name:'Gunnar',role:'Rhythm Guitarist',atk:4,hp:7,maxHp:9,emoji:'🎸',keyword:'SHREDDER',desc:'Rhythm? He makes the rhythm.',bio:'Gunnar does not follow tempo. Tempo follows Gunnar. Three metronomes have broken trying to keep up with him.'},
+  {id:'astrid',name:'Astrid',role:'Vocalist',atk:3,hp:8,maxHp:11,emoji:'🎤',keyword:'DEBUFF',desc:'Her voice alone can break a curse.',bio:'Trained as an opera singer. Got bored. Now she shatters demonic wards with a B-flat. The opera house still calls.'},
+  {id:'freya',name:'Freya',role:'Synth Player',atk:4,hp:5,maxHp:7,emoji:'🎹',keyword:'CORRUPT',desc:'She plays the dark frequencies.',bio:'Freya heard the frequency that drives men mad. Instead of going mad, she tuned her synth to it. Glass cannon.'},
+  {id:'ulf',name:'Ulf',role:'Bass Player',atk:4,hp:9,maxHp:12,emoji:'🎵',keyword:'ANCHOR',desc:'The anchor that also bites.',bio:'Most bass players hold the line. Ulf holds the line and then crosses it. His low-end hits like a freight train.'},
+  {id:'brynja',name:'Brynja',role:'Bass Player',atk:1,hp:14,maxHp:19,emoji:'🎵',keyword:'ANCHOR',desc:'An immovable wall. The bass never stops.',bio:'19 HP. She once tanked a full drum kit falling on her mid-set and kept playing. The wall of Valhalla.'},
+  {id:'rolf',name:'Rolf',role:'Drummer',atk:1,hp:9,maxHp:12,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Hits harder than the rest combined. Statistically speaking.',bio:'A mathematician who discovered the optimal striking frequency. Each hit is precisely calculated for maximum devastation.'},
+  {id:'orm',name:'Orm',role:'Dark Minstrel',atk:2,hp:11,maxHp:15,emoji:'🪈',keyword:'HEXED',desc:'The longer he plays, the worse it gets. For everyone.',bio:'Orm plays an instrument nobody can name. It has too many strings and not enough frets. The sound haunts your dreams.'},
+  {id:'tanuki',name:'Tanuki',role:'Bass Player',atk:8,hp:8,maxHp:11,emoji:'🦝',keyword:'ANCHOR',desc:'The heaviest bass in Hell. Built like a tank, hits like a truck.',locked:true,unlockAt:3000,bio:'A raccoon-dog from Japanese folklore. How he ended up in a Norse doom metal band is a question nobody dares ask.'},
+  {id:'lucifer_member',name:'Lucifer',role:'The Devil',atk:20,hp:69,maxHp:96,emoji:'😈',keyword:'FALLEN',desc:'Cannot be healed. Loses 1 HP per strike. If he dies, game over. Max 3 band members. Sell for 69 herb.',locked:true,unlockAt:100000,bio:'The actual Devil. Joined the band out of boredom. Unstoppable power, but his HP drains every strike. A ticking time bomb of pure evil.'},
 ]
 
 // ── UNLOCK MILESTONES ──────────────────────────────────────────
@@ -1111,6 +1109,36 @@ const BOSS_QUOTES={
   'lucifer':'Impressive. I\'ll be seeing you again. Soon.',
 }
 
+const BOSS_BIOS={
+  wanderer:'A soul who never chose a side. Drifts through Limbo endlessly, attacking out of confusion rather than malice.',
+  lostsoul:'Once a musician herself. Lost her voice, then her mind, then her name. Now she lashes out at anything that reminds her of what she was.',
+  drifter:'The gatekeeper of Limbo. Pure pressure, no strategy. If you can\'t handle this, Hell will eat you alive.',
+  siren:'Her voice was the last beautiful thing many heard. Now she sings to lure the damned deeper into the circles.',
+  tempter:'Offers everything you want, takes everything you have. His charm is a weapon sharper than any blade.',
+  lust_boss:'The embodiment of desire. Every buff you gain makes you want more. That\'s exactly how she wins.',
+  glutton:'Consumes your damage like a buffet. The more you feed it, the hungrier it gets.',
+  feaster:'Three stomachs. Each one heals what the others digest. A biological war of attrition.',
+  gluttony_boss:'The mouth at the bottom of the food chain. Everything in Gluttony flows into the Devourer eventually.',
+  miser:'Counts every coin twice. Steals your stash not out of need, but out of principle.',
+  hoarder:'Has more wealth than any demon in Hell. Still steals from the damned. Old habits.',
+  greed_boss:'Invented interest rates in the afterlife. Your debt to him grows faster than your damage.',
+  wrathful:'Rage given physical form. The more you prepare, the angrier he gets.',
+  berserker:'No strategy. No hesitation. Just fury. Every buff you stack is fuel for his fire.',
+  anger_boss:'Commanded armies in life. Commands rage in death. Your strength is his weapon.',
+  heretic:'Challenged God. Lost. Now he challenges everyone else. His corruption is contagious.',
+  apostate:'A former priest who found the wrong truth. His faith corrupts everything it touches.',
+  heresy_boss:'Wrote the book on corruption. Literally. Reading it costs 20% of your soul per page.',
+  brute:'Precision violence. Always targets the strongest. Believes in cutting the head off the snake.',
+  hunter:'Tracked souls across nine circles for centuries. His patience is his deadliest weapon.',
+  violence_boss:'Executioner of Hell. Methodical. Doubles his damage against your strongest. There is no hiding.',
+  trickster:'Nothing is what it seems. Your hand, your strategy, your plan — he scrambles all of it.',
+  deceiver:'The second-best liar in Hell. Manipulates your cards, your confidence, your hope.',
+  fraud_boss:'The greatest con artist who ever lived — or died. His lies are indistinguishable from truth.',
+  traitor:'Betrayed his own circle to survive. Now he turns your band against each other.',
+  betrayer:'Steals what you\'ve built. Your permanent ATK, your strategy, your progress. All of it.',
+  lucifer:'The Morning Star. Fell from Heaven. Rules Hell. Two phases. The ultimate test of everything you\'ve built.',
+}
+
 const CIRCLE_ARTIFACTS=[
   {id:'ca1',name:'The Goat of Mendes',emoji:'🐐',effect:'All band members gain +1 ATK permanently.',cost:14},
   {id:'ca2',name:'Hellfire Amulet',emoji:'🔮',effect:'Start each fight with +2 bonus Embers.',cost:17},
@@ -1312,6 +1340,41 @@ function Float({v,x,y,color,big,onDone}){
     else if(v>=20)sz='3.5rem'
   }
   return <div style={{position:'absolute',left:x,top:y,transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:sz,fontWeight:900,color:color,textShadow:`0 0 24px ${color}, 0 0 48px ${color}44`,pointerEvents:'none',zIndex:9000,animation:'popFloat 1.6s ease-out forwards'}}>{typeof v==='number'&&v>0?'-'+v:v}</div>
+}
+
+// Boss kill quote — types out letter by letter
+function TypewriterQuote({text}){
+  const [shown,setShown]=useState(0)
+  useEffect(()=>{
+    if(shown<text.length){const t=setTimeout(()=>setShown(p=>p+1),45);return()=>clearTimeout(t)}
+  },[shown,text])
+  return(
+    <div style={{position:'absolute',top:'35%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9200,pointerEvents:'none',textAlign:'center',animation:'fadeIn 0.3s ease'}}>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:28,color:'var(--ink-bone)',fontStyle:'italic',lineHeight:1.6,textShadow:'0 0 30px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.9)',maxWidth:600,opacity:0.9}}>
+        "{text.slice(0,shown)}<span style={{opacity:shown<text.length?1:0,animation:'pulse 0.5s ease infinite alternate'}}>|</span>"
+      </div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'var(--blood)',letterSpacing:4,textTransform:'uppercase',marginTop:12,opacity:0.6}}>💀 Last Words</div>
+    </div>
+  )
+}
+
+// Victory confetti — falling embers and sparks
+function ConfettiRain(){
+  const particles=useRef(Array.from({length:60},(_,i)=>({
+    id:i,x:Math.random()*100,delay:Math.random()*3,dur:2+Math.random()*3,size:3+Math.random()*6,
+    color:['#ffd700','#ff6600','#ff3300','#e8a820','#cc4400','#ffaa00'][Math.floor(Math.random()*6)],
+    drift:-20+Math.random()*40,rot:Math.random()*720
+  }))).current
+  return(
+    <div style={{position:'absolute',inset:0,zIndex:9100,pointerEvents:'none',overflow:'hidden'}}>
+      {particles.map(p=><div key={p.id} style={{
+        position:'absolute',left:p.x+'%',top:'-10px',width:p.size,height:p.size*1.5,
+        background:p.color,borderRadius:1,opacity:0.8,
+        animation:`confettiFall ${p.dur}s linear ${p.delay}s infinite`,
+        transform:`rotate(${p.rot}deg) translateX(${p.drift}px)`
+      }}/>)}
+    </div>
+  )
 }
 
 function DiceRoll({target,onDone}){
@@ -2023,6 +2086,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,
             color:'#c8a878',textAlign:'center',padding:'8px 14px',
             lineHeight:1.5,flex:1}}>{card.effect||card.desc||''}</div>
+          {/* Card compare — how many copies already in deck */}
+          {!card.isMember&&(()=>{const inDeck=[...deck,...discardPile].filter(c=>c.id===card.id).length;return inDeck>0?<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:2,textTransform:'uppercase',textAlign:'center',padding:'4px 8px',color:'#88aa66',borderTop:'1px solid rgba(255,255,255,0.05)'}}>IN DECK: {inDeck} {inDeck>=3?'(STACKED!)':''}</div>:<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,letterSpacing:2,textTransform:'uppercase',textAlign:'center',padding:'4px 8px',color:'#887744',borderTop:'1px solid rgba(255,255,255,0.05)'}}>NEW CARD</div>})()}
           {card.isMember&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',
             padding:'10px 16px',borderTop:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>
             <div style={{textAlign:'center'}}>
@@ -2527,7 +2592,7 @@ function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,
         transition:strikeAnim?'transform 0.25s cubic-bezier(0.2,0.8,0.3,1.2), border 0.2s, box-shadow 0.2s, opacity 0.3s':'border 0.2s, box-shadow 0.2s, opacity 0.3s, transform 0.3s',
         cursor:'grab',position:'relative'}}>
       {/* Keyword tooltip */}
-      {showTip&&member&&KEYWORD_DESC[member.keyword]&&<div style={{position:'absolute',top:'calc(100% + 6px)',left:'50%',transform:'translateX(-50%)',background:'rgba(8,4,2,0.97)',border:'1px solid rgba(196,30,58,0.5)',borderRadius:3,padding:'8px 12px',zIndex:9999,pointerEvents:'none',minWidth:180,maxWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'var(--gold)',letterSpacing:2,textTransform:'uppercase',marginBottom:4}}>{member.keyword}</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'var(--ink-bone)',lineHeight:1.4}}>{KEYWORD_DESC[member.keyword]}</div></div>}
+      {showTip&&member&&KEYWORD_DESC[member.keyword]&&<div style={{position:'absolute',top:'calc(100% + 6px)',left:'50%',transform:'translateX(-50%)',background:'rgba(8,4,2,0.97)',border:'1px solid rgba(196,30,58,0.5)',borderRadius:3,padding:'8px 12px',zIndex:9999,pointerEvents:'none',minWidth:180,maxWidth:260,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'var(--gold)',letterSpacing:2,textTransform:'uppercase',marginBottom:4}}>{member.keyword}</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'var(--ink-bone)',lineHeight:1.4}}>{KEYWORD_DESC[member.keyword]}</div>{member.bio&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'var(--ink-dim)',lineHeight:1.4,fontStyle:'italic',marginTop:6,paddingTop:6,borderTop:'1px solid rgba(100,60,20,0.3)'}}>{member.bio}</div>}</div>}
       {buffCount>0&&<div style={{position:'absolute',top:6,left:6,background:buffCount>=3?'#aa1111':'#9933cc',borderRadius:10,padding:'1px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#fff',zIndex:10,boxShadow:'0 0 8px rgba(0,0,0,0.6)'}}>+{buffCount}</div>}
       {isDiceTarget&&<div style={{position:'absolute',top:-16,left:'50%',transform:'translateX(-50%)',fontSize:20}}>🎯</div>}
       {mentorState==='active'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:18,textShadow:'0 0 12px #ffd700',zIndex:12,animation:'mentorPulse 1.5s ease-in-out infinite'}}>⛓</div>}
@@ -3140,6 +3205,19 @@ function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chr
         <div style={{width:150,height:150,borderRadius:'50%',background:'radial-gradient(circle at 40% 35%, #2a0408, #080204)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',position:'relative',boxShadow:isLow?'inset 0 0 30px rgba(196,30,58,0.4), 0 0 30px rgba(196,30,58,0.5)':'inset 0 0 20px rgba(0,0,0,0.8)'}}>
           {BOSS_PORTRAITS[enemy.id]?<img src={enemy.id==='lucifer'&&luciferPhase===2?'/vestibule/bosses/lucifer_p2.png':BOSS_PORTRAITS[enemy.id]} alt={enemy.name} style={{width:130,height:130,objectFit:'contain',imageRendering:'pixelated'}}/>:<span style={{fontSize:80}}>{enemy.emoji}</span>}
           {isLow&&<div style={{position:'absolute',inset:0,background:'rgba(196,30,58,0.15)',animation:'pulse 1.2s ease infinite alternate'}}/>}
+          {/* Portrait cracks — deepen as HP drops */}
+          {pct<50&&<svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:5}} viewBox="0 0 150 150">
+            <path d="M 75 10 L 78 35 L 72 55 L 80 75" stroke="rgba(196,30,58,0.4)" strokeWidth="1" fill="none"/>
+          </svg>}
+          {pct<35&&<svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:5}} viewBox="0 0 150 150">
+            <path d="M 40 30 L 55 50 L 48 70 L 58 95" stroke="rgba(196,30,58,0.5)" strokeWidth="1.2" fill="none"/>
+            <path d="M 110 20 L 100 45 L 108 65" stroke="rgba(196,30,58,0.4)" strokeWidth="1" fill="none"/>
+          </svg>}
+          {pct<20&&<svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:5}} viewBox="0 0 150 150">
+            <path d="M 30 60 L 50 75 L 45 100 L 55 120" stroke="rgba(255,0,0,0.6)" strokeWidth="1.5" fill="none"/>
+            <path d="M 120 40 L 105 65 L 115 85 L 100 110" stroke="rgba(255,0,0,0.5)" strokeWidth="1.3" fill="none"/>
+            <path d="M 70 5 L 75 30 L 65 55 L 75 80 L 68 110 L 78 140" stroke="rgba(255,0,0,0.7)" strokeWidth="1.8" fill="none"/>
+          </svg>}
         </div>
         {debuff>0&&<div style={{position:'absolute',bottom:4,right:4,background:'rgba(0,80,160,0.9)',border:'1px solid #4488ff',borderRadius:4,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#88aaff',zIndex:3}}>-{debuff}dmg</div>}
       </div>
@@ -3159,7 +3237,7 @@ function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chr
         </svg>
 
         {/* Tagline — ScratchFont italic, like a marginalia scribble */}
-        <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'var(--ink-dim)',fontStyle:'italic',lineHeight:1.2,fontWeight:700,textAlign:'center',cursor:'help',maxWidth:520}} title={enemy.passive}>"{enemy.tagline||enemy.passive}"</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'var(--ink-dim)',fontStyle:'italic',lineHeight:1.2,fontWeight:700,textAlign:'center',cursor:'help',maxWidth:520}} title={enemy.passive+(BOSS_BIOS[enemy.id]?'\n\n'+BOSS_BIOS[enemy.id]:'')}>{'"'+((enemy.tagline||enemy.passive))+'"'}</div>
 
         {/* Base damage — small MBScribbles */}
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'var(--ink-rust)',letterSpacing:3,fontWeight:900,textAlign:'center',textTransform:'uppercase'}}>Base Damage · {enemy.baseDmg} per Strike</div>
@@ -3760,9 +3838,18 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
               )
             })}
           </div>
+          {/* Last run comparison */}
+          {(()=>{const hist=getRunHistory();const last=hist.length>0?hist[0]:null;if(!last)return null
+            const thisScore=calcRunScore(stats,isVictory);const diff=thisScore-(last.score||0)
+            const thisDmg=stats.totalDamage;const diffDmg=thisDmg-(last.damage||0)
+            return <div style={{display:'flex',justifyContent:'center',gap:24,marginTop:6,padding:'4px 0'}}>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#8a7050',letterSpacing:2}}>VS LAST RUN:</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:diff>0?'#44cc44':diff<0?'#cc4444':'#888'}}>SCORE {diff>0?'+':''}{diff.toLocaleString()}</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:diffDmg>0?'#44cc44':diffDmg<0?'#cc4444':'#888'}}>DMG {diffDmg>0?'+':''}{diffDmg.toLocaleString()}</span>
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#887755'}}>({last.cause==='victory'?'Won':'C'+last.circle})</span>
+            </div>
+          })()}
         </div>
-
-        {/* ROW 5.4: New Trophies */}
         {newTrophies&&newTrophies.length>0&&<div style={{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
           {newTrophies.map(t=>(
             <div key={t.id} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 20px',
@@ -4162,6 +4249,8 @@ function App(){
   const [strikeAnim,setStrikeAnim]=useState(null) // {slotIdx,phase,dx,dy}
   const [bossStrikeAnim,setBossStrikeAnim]=useState(null) // {targetIdx,phase}
   const [hitMemberIdx,setHitMemberIdx]=useState(-1) // which member is shaking from boss hit
+  const [bossQuoteTypewriter,setBossQuoteTypewriter]=useState(null) // typewriter quote after boss kill
+  const [showConfetti,setShowConfetti]=useState(false) // victory confetti
   const [cardAbsorb,setCardAbsorb]=useState(null)
   const [flyingCard,setFlyingCard]=useState(null) // {emoji,type,fromX,fromY,toX,toY,key}
   const [shakeOffset,setShakeOffset]=useState({x:0,y:0})
@@ -5502,9 +5591,9 @@ function App(){
     }
     // CLUTCH DETECTION
     const aliveCount=stage.filter(m=>m&&!m.tooStoned).length
-    if(aliveCount===1){setClutchFlash({text:'SOLO VICTORY!',color:'#ffd700'});playSfx('big_hit');triggerShake(8,300);setTimeout(()=>setClutchFlash(null),2500)}
+    if(aliveCount===1){setClutchFlash({text:'SOLO VICTORY!',color:'#ffd700'});playSfx('big_hit');triggerShake(8,300);setTimeout(()=>setClutchFlash(null),2500);setShowConfetti(true);setTimeout(()=>setShowConfetti(false),5000)}
     else if(strikesLeft<=0){setClutchFlash({text:'BY THE SKIN OF YOUR TEETH!',color:'#ff4400'});playSfx('big_hit');triggerShake(6,250);setTimeout(()=>setClutchFlash(null),2500)}
-    else{setClutchFlash({text:'⛧ VICTORY ⛧',color:'#ffd700'});triggerShake(6,200);setTimeout(()=>setClutchFlash(null),2000)}
+    else{setClutchFlash({text:'⛧ VICTORY ⛧',color:'#ffd700'});triggerShake(6,200);setTimeout(()=>setClutchFlash(null),2000);setShowConfetti(true);setTimeout(()=>setShowConfetti(false),5000)}
     // Golden burst particles at boss position
     const bpos=getCenter(bossRef);spawnParticles(bpos.x,bpos.y,20,'#ffd700',120);spawnParticles(bpos.x,bpos.y,12,'#ff8800',80)
     setStage(function(prev){
@@ -5561,7 +5650,7 @@ function App(){
     if(corruption>=100)tryAchieve('corruption_lord')
     if(stage.filter(m=>m&&!m.tooStoned).length>=5)tryAchieve('full_band')
     if(fightIndex===26){tryAchieve('beat_lucifer');beatStake(activeStake.id);tryAchieve('beat_'+selectedDeck)}
-    const bq=BOSS_QUOTES[enemy&&enemy.id];if(bq)setTimeout(()=>addLog('💀 "'+bq+'"'),600)
+    const bq=BOSS_QUOTES[enemy&&enemy.id];if(bq){setTimeout(()=>addLog('💀 "'+bq+'"'),600);setBossQuoteTypewriter(bq);setTimeout(()=>setBossQuoteTypewriter(null),3500)}
     setTimeout(function(){
       const isCircleBoss=(fightIndex+1)%3===0
       if(isCircleBoss){
@@ -8522,6 +8611,8 @@ function App(){
         TUTORIAL — Fight {tutorialFight} of 3
       </div>}
       {screenFade&&<div style={{position:'absolute',inset:0,zIndex:99990,background:'#000',animation:'screenFadeFlash 350ms ease-out forwards',pointerEvents:'none'}}/>}
+      {bossQuoteTypewriter&&<TypewriterQuote text={bossQuoteTypewriter}/>}
+      {showConfetti&&<ConfettiRain/>}
 
     </div>
   )
