@@ -889,6 +889,13 @@ function buildDeck(seed,deckId){
     })
   }
   for(let i=deck.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
+  // #9: GOLD CARDS — Legendary mastery (666+ plays) = auto-upgraded in all runs
+  const mastery=getMasteryData()
+  for(let i=0;i<deck.length;i++){
+    if(mastery[deck[i].id]>=666&&!deck[i].upgraded){
+      deck[i]=Object.assign({},deck[i],{upgraded:true,gold:true,name:deck[i].name+' ⛧'})
+    }
+  }
   return deck
 }
 
@@ -2726,20 +2733,26 @@ function DamageBreakdown({data,onDone}){
   const [slamming,setSlamming]=useState(false)
   const lines=data.lines||[]
   const total=data.total||0
-  const LINE_DELAY=localStorage.getItem('vst_speed')==='fast'?70:140
-  const SLAM_DELAY=lines.length*LINE_DELAY+200
+  const isFast=localStorage.getItem('vst_speed')==='fast'
+  const LINE_DELAY=isFast?100:200
+  const SLAM_DELAY=lines.length*LINE_DELAY+400
+  const hasMults=lines.filter(l=>l.type==='multiply').length
 
   useEffect(()=>{
     let i=0
     const timer=setInterval(()=>{
       i++
       setVisibleCount(i)
+      // Play a tick sound for each multiplier line
+      if(lines[i-1]&&lines[i-1].type==='multiply'){
+        try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator();const g=ctx.createGain();o.type='sine';o.frequency.value=400+i*80;g.gain.value=0.15;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+0.08)}catch(e){}
+      }
       if(i>=lines.length){clearInterval(timer)}
     },LINE_DELAY)
     const slamTimer=setTimeout(()=>{setSlamming(true)
-      try{document.getElementById('root').style.animation='none';document.getElementById('root').offsetHeight;document.getElementById('root').style.animation='screenShake 0.3s ease'}catch(e){}
+      try{document.getElementById('root').style.animation='none';document.getElementById('root').offsetHeight;document.getElementById('root').style.animation='screenShake 0.4s ease'}catch(e){}
     },SLAM_DELAY)
-    const doneTimer=setTimeout(()=>{if(onDone)onDone()},SLAM_DELAY+900)
+    const doneTimer=setTimeout(()=>{if(onDone)onDone()},SLAM_DELAY+1200)
     return()=>{clearInterval(timer);clearTimeout(slamTimer);clearTimeout(doneTimer)}
   },[lines.length])
 
@@ -2772,8 +2785,8 @@ function DamageBreakdown({data,onDone}){
       </div>}
     </div>
     {slamming&&<div style={{marginTop:8,textAlign:'center',animation:'dmgSlam 0.5s ease-out forwards'}}>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:56,fontWeight:900,color:'#ff2200',textShadow:'0 0 30px rgba(255,34,0,0.8),0 0 60px rgba(255,100,0,0.4),0 4px 0 #440000',letterSpacing:3,animation:'dmgPulse 1s ease-in-out infinite'}}>{total.toLocaleString()}</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#ff6644',letterSpacing:4,textTransform:'uppercase',marginTop:2}}>DAMAGE</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:total>=10000?80:total>=5000?72:total>=1000?64:56,fontWeight:900,color:total>=5000?'#ffdd00':total>=1000?'#ff6600':'#ff2200',textShadow:'0 0 30px rgba(255,34,0,0.8),0 0 60px rgba(255,100,0,0.4),0 4px 0 #440000',letterSpacing:3,animation:'dmgPulse 1s ease-in-out infinite'}}>{total.toLocaleString()}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:total>=5000?18:14,color:total>=5000?'#ffaa00':'#ff6644',letterSpacing:4,textTransform:'uppercase',marginTop:2}}>{total>=10000?'⛧ GODLIKE DAMAGE ⛧':total>=5000?'💀 DEVASTATING':total>=1000?'MASSIVE DAMAGE':'DAMAGE'}</div>
     </div>}
   </div>)
 }
@@ -6334,7 +6347,7 @@ function App(){
         const phaseTotalDmg=luciferPhase===1?(3333-newEHp):(3333-newEHp)
         setBossRageAtk(Math.floor(Math.max(0,phaseTotalDmg)/20)*atkGain)
       }
-      if(_breakdownLines.length>1){setDmgBreakdown({lines:_breakdownLines,total:finalDmg});setTimeout(()=>setDmgBreakdown(null),1500)}
+      if(_breakdownLines.length>1){setDmgBreakdown({lines:_breakdownLines,total:finalDmg})}
       addFloat(finalDmg.toLocaleString(),bc.x,bc.y-60,'#ff2200',true)
       if(folkMagicFired){
         setEmbers(maxEmbers)
