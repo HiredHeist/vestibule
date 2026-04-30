@@ -1925,9 +1925,9 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'#fff',
             boxShadow:'0 0 12px rgba(255,100,0,0.6)'}}>{card.embers}</div>}
           <div style={{flex:'0 0 35%',display:'flex',alignItems:'center',justifyContent:'center',
-            fontSize:72,marginTop:card.foil||card.mythic?28:0,background:'rgba(0,0,0,0.25)',position:'relative'}}>
+            marginTop:card.foil||card.mythic?28:0,background:'rgba(0,0,0,0.25)',position:'relative',padding:'12px 0'}}>
             <div style={{position:'absolute',inset:0,background:'radial-gradient(circle at center,'+bc+'20,transparent 70%)'}}/>
-            {card.emoji}
+            <CardArtImg id={card.id} emoji={card.emoji} size={80}/>
           </div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:700,
             color:card.mythic?'#e8aaff':card.foil?'#ffd700':'#eedfc0',
@@ -1983,7 +1983,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         {/* Header */}
         <div style={{textAlign:'center'}}>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:ac,
-            textShadow:'0 0 20px '+ac+'99',marginBottom:6}}>{pack.emoji} {pack.name}</div>
+            textShadow:'0 0 20px '+ac+'99',marginBottom:6}}>{pack.name}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#8a8060',letterSpacing:2}}>
             {remaining>0?'Pick '+remaining+' card'+(remaining>1?'s':''):remaining===0?'All picks made':''}
           </div>
@@ -4175,7 +4175,7 @@ function RemasterModal({cards,onConfirm,onClose}){
           return(
             <div key={card.uid} style={{width:140,background:'linear-gradient(180deg,#201408,#100804)',border:isDel?'2px solid #ee2222':isCopy?'2px solid #22aa44':'1px solid '+bc+'55',borderRadius:7,overflow:'hidden',opacity:(isDel||isCopy||(!isDel&&!isCopy))?1:0.5,transition:'all 0.2s',flexShrink:0}}>
               <div style={{height:4,background:bc}}/>
-              <div style={{height:70,display:'flex',alignItems:'center',justifyContent:'center',fontSize:36,background:'rgba(0,0,0,0.35)'}}>{card.emoji}</div>
+              <div style={{height:70,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.35)'}}><CardArtImg id={card.id} emoji={card.emoji} size={50}/></div>
               <div style={{padding:'6px 8px 4px'}}>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:700,color:'#eedfc0',textAlign:'center',marginBottom:2}}>{card.name}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:7,color:bc,textAlign:'center',letterSpacing:2,textTransform:'uppercase'}}>{card.type}</div>
@@ -4226,7 +4226,7 @@ function SetlistModal({hand,onConfirm}){
                 transform:sel?'translateY(-12px) scale(1.05)':'none',transition:'all 0.15s',
                 boxShadow:sel?'0 0 20px rgba(200,0,0,0.6)':'none'}}>
               <div style={{height:4,background:sel?'#cc0000':bc}}/>
-              <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:40,background:'rgba(0,0,0,0.3)'}}>{card.emoji}</div>
+              <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.3)'}}><CardArtImg id={card.id} emoji={card.emoji} size={60}/></div>
               <div style={{padding:'6px 8px 10px'}}>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:700,color:sel?'#ff6666':'#eedfc0',textAlign:'center',marginBottom:3}}>{card.name}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:bc,textAlign:'center',letterSpacing:2,textTransform:'uppercase'}}>{card.type}</div>
@@ -7407,7 +7407,7 @@ function App(){
               <div key={item.id} style={{background:item.done?'rgba(20,12,4,0.7)':'rgba(10,6,2,0.5)',border:item.done?'1px solid '+(item.color||'rgba(160,100,25,0.5)'):'1px solid rgba(160,120,40,0.3)',borderRadius:10,padding:'20px 14px',textAlign:'center',opacity:item.done?1:0.7,transition:'all 0.2s',position:'relative'}}
                 onMouseEnter={()=>{if(item.card)setUnlockHover({card:item.card,idx})}}
                 onMouseLeave={()=>setUnlockHover(null)}>
-                <div style={{fontSize:64,filter:item.done?'none':'brightness(0.6)',marginBottom:6}}>{item.emoji}</div>
+                <div style={{filter:item.done?'none':'brightness(0.6)',marginBottom:6,display:'flex',justifyContent:'center'}}><CardArtImg id={item.id||''} emoji={item.emoji} size={64}/></div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:item.done?(item.color||'#e8a820'):'#c8a040',lineHeight:1.2,marginBottom:4}}>{item.name}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:item.done?'#c0a060':'#aa8a50',lineHeight:1.3}}>{item.sub}</div>
                 {item.pct!==undefined&&!item.done&&<div style={{height:6,background:'rgba(20,12,4,0.8)',borderRadius:3,marginTop:6,overflow:'hidden'}}><div style={{height:'100%',width:item.pct+'%',background:'linear-gradient(90deg,#8a2200,#e8a820)',borderRadius:3}}/></div>}
@@ -7421,7 +7421,7 @@ function App(){
                       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:bc,fontWeight:900,letterSpacing:1,textTransform:'uppercase'}}>{c.type}</div>
                       <div style={{width:30,height:30,borderRadius:'50%',background:c.embers>0?'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)':'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)',border:'2px solid #ff6600',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#fff'}}>{c.embers}</div>
                     </div>
-                    <div style={{fontSize:44,textAlign:'center',marginBottom:8}}>{c.emoji}</div>
+                    <div style={{textAlign:'center',marginBottom:8,display:'flex',justifyContent:'center'}}><CardArtImg id={c.id} emoji={c.emoji} size={48}/></div>
                     <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:'#e8d090',textAlign:'center',marginBottom:4,letterSpacing:1}}>{c.name}</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:bc,textAlign:'center',letterSpacing:2,marginBottom:8,textTransform:'uppercase'}}>{c.rarity}{c.shopOnly?' · SHOP ONLY':''}</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8b080',textAlign:'center',lineHeight:1.5,fontStyle:'italic'}}>{c.effect}</div>
@@ -8117,7 +8117,7 @@ function App(){
             onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-6px)';e.currentTarget.style.borderColor='#ffd700';e.currentTarget.style.boxShadow='0 6px 25px rgba(200,150,0,0.3)'}}
             onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor=bc+'88';e.currentTarget.style.boxShadow='none'}}>
             <div style={{height:5,background:bc,borderRadius:'10px 10px 0 0'}}/>
-            <div style={{fontSize:52,textAlign:'center',padding:'14px 0'}}>{c.emoji}</div>
+            <div style={{textAlign:'center',padding:'14px 0',display:'flex',justifyContent:'center'}}><CardArtImg id={c.id} emoji={c.emoji} size={56}/></div>
             <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:20,color:'#ffd700',textAlign:'center',letterSpacing:1}}>{c.name}+</div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:bc,textAlign:'center',letterSpacing:1,textTransform:'uppercase',marginBottom:6}}>{c.type} {c.rarity}</div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c8b080',textAlign:'center',lineHeight:1.5,padding:'0 12px'}}>{up.desc}</div>
@@ -8319,7 +8319,7 @@ function App(){
                     </div>
                     <div style={{display:'flex',flexDirection:'column',gap:4}}>
                       {typeCards.map((c,i)=><div key={c.uid||i} style={{display:'flex',alignItems:'center',gap:6,padding:'4px 8px',background:'rgba(10,6,2,0.6)',borderRadius:4,borderLeft:'3px solid '+bc+'66'}}>
-                        <span style={{fontSize:18}}>{c.emoji}</span>
+                        <CardArtImg id={c.id} emoji={c.emoji} size={20}/>
                         <div style={{flex:1}}>
                           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:700,color:'#eedfc0'}}>{c.name}{c.upgraded?' ⛧':''}</div>
                           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:'#887755'}}>{c.rarity}{c.embers>0?' · '+c.embers+'🔥':' · FREE'}</div>
@@ -8336,7 +8336,7 @@ function App(){
               const bc=c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
               return <div key={c.uid||i} style={{width:120,background:'linear-gradient(180deg,#201408,#100804)',border:'1px solid '+bc+'88',borderRadius:5,padding:'0 0 8px'}}>
                 <div style={{height:3,background:bc,borderRadius:'5px 5px 0 0'}}/>
-                <div style={{fontSize:30,textAlign:'center',padding:'8px 0',background:'rgba(0,0,0,0.3)'}}>{c.emoji}</div>
+                <div style={{textAlign:'center',padding:'8px 0',background:'rgba(0,0,0,0.3)',display:'flex',justifyContent:'center'}}><CardArtImg id={c.id} emoji={c.emoji} size={36}/></div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'0 4px'}}>{c.name}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:8,color:bc,textAlign:'center',letterSpacing:1,textTransform:'uppercase'}}>{c.type} · {c.rarity}</div>
                 {c.embers>0&&<div style={{display:'flex',justifyContent:'center',marginTop:2}}><div style={{width:18,height:18,borderRadius:'50%',background:'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)',border:'1px solid #ff6600',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:'#fff'}}>{c.embers}</div></div>}
