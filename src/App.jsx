@@ -2079,7 +2079,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             <CardArtImg id={card.id} emoji={card.emoji} size={140}/>
           </div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:700,
-            color:'#eedfc0',textAlign:'center',padding:'10px 10px 4px',
+            color:'#eedfc0',textAlign:'center',padding:'10px 10px 4px',position:'relative',
             letterSpacing:0.3,lineHeight:1.2,
             borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:700,
@@ -2858,7 +2858,12 @@ function DamageBreakdown({data,onDone}){
       @keyframes strikeInferno{0%{box-shadow:0 0 30px rgba(255,0,0,0.6);transform:scale(1) rotate(-0.5deg)}100%{box-shadow:0 0 60px rgba(255,0,0,1),0 0 100px rgba(255,100,0,0.5);transform:scale(1.05) rotate(0.5deg)}}
       @keyframes hpBarCritical{0%,100%{opacity:1}50%{opacity:0.7}}
       @keyframes dmgPreviewPulse{0%{transform:scale(1.15);color:#ff4400}100%{transform:scale(1);color:var(--blood)}}
-      @keyframes postStrikeFlash{0%{opacity:0;transform:scale(0.8)}20%{opacity:1;transform:scale(1.05)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(0.95) translateY(-20px)}} @keyframes dmgSlam{0%{transform:scale(2.5);opacity:0}30%{transform:scale(0.9);opacity:1}50%{transform:scale(1.15)}70%{transform:scale(0.95)}100%{transform:scale(1);opacity:1}}`
+      @keyframes postStrikeFlash{0%{opacity:0;transform:scale(0.8)}20%{opacity:1;transform:scale(1.05)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(0.95) translateY(-20px)}}
+      @keyframes heartbeat{0%,100%{opacity:0.6}50%{opacity:1}}
+      @keyframes chainSlam{0%{opacity:0;transform:translate(-50%,-50%) scale(2.5)}15%{opacity:1;transform:translate(-50%,-50%) scale(0.9)}25%{transform:translate(-50%,-50%) scale(1.05)}35%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(0.8) translateY(-40px)}}
+      @keyframes artifactTrigger{0%{box-shadow:0 0 0 rgba(232,168,32,0)}50%{box-shadow:0 0 20px rgba(232,168,32,0.8)}100%{box-shadow:0 0 0 rgba(232,168,32,0)}}
+      @keyframes memberDistress{0%{transform:translateX(0)}100%{transform:translateX(2px)}}
+      @keyframes newBadgePulse{0%,100%{opacity:0.7}50%{opacity:1}} @keyframes dmgSlam{0%{transform:scale(2.5);opacity:0}30%{transform:scale(0.9);opacity:1}50%{transform:scale(1.15)}70%{transform:scale(0.95)}100%{transform:scale(1);opacity:1}}`
   const lineAnim=`@keyframes dmgLineIn{0%{transform:translateX(30px);opacity:0}100%{transform:translateX(0);opacity:1}}`
   const pulseAnim=`@keyframes dmgPulse{0%,100%{text-shadow:0 0 20px rgba(255,34,0,0.6)}50%{text-shadow:0 0 40px rgba(255,100,0,0.9)}}`
   const countAnim=`@keyframes dmgCount{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}`
@@ -4455,7 +4460,8 @@ function App(){
   const [cardsPlayedThisStrike,setCardsPlayedThisStrike]=useState([])
   const cardsPlayedRef=useRef([])
   const combosFiredRef=useRef([])
-  const [comboFlash,setComboFlash]=useState(null) // {name,color,emoji}
+  const [comboFlash,setComboFlash]=useState(null)
+  const [chainCallout,setChainCallout]=useState(null) // {name,color,emoji}
   const [combosDiscoveredThisRun,setCombosDiscoveredThisRun]=useState([])
   const discoveredRef=useRef(new Set())
   const [bossDebuff,setBossDebuff]=useState(0)
@@ -4476,7 +4482,8 @@ function App(){
   const [lastKillingBlow,setLastKillingBlow]=useState('')
   const [hellquakeAnim,setHellquakeAnim]=useState(null)
   const [milestoneFlash,setMilestoneFlash]=useState(null) // {text,color} for boss HP milestones
-  const [strikeMult,setStrikeMult]=useState(1.0) // score multiplier that builds per card played
+  const [strikeMult,setStrikeMult]=useState(1.0)
+  const multMilestonesRef=useRef({2:false,4:false,8:false,16:false}) // score multiplier that builds per card played
   const strikeMultRef=useRef(1.0)
   useEffect(()=>{strikeMultRef.current=strikeMult},[strikeMult])
   const [memberBuffs,setMemberBuffs]=useState({}) // {uid: [{text,color},...]} persistent until strike
@@ -4509,13 +4516,15 @@ function App(){
   const [eventsSeenThisRun,setEventsSeenThisRun]=useState([]) // ids of events seen // {circleNum, circleName, circleEmoji} for 3s transition
   const milestonesFiredRef=useRef({half:false,quarter:false,tenth:false})
   const [phaseBanner,setPhaseBanner]=useState('play')
-  const [postStrikeFlash,setPostStrikeFlash]=useState(null) // {dmg, mult, isNewBest}
+  const [postStrikeFlash,setPostStrikeFlash]=useState(null)
+  const [mvpFlash,setMvpFlash]=useState(null) // {name, dmg, pct} // {dmg, mult, isNewBest}
   const [currentTip,setCurrentTip]=useState('') // 'play','strike','boss'
   const [deckViewOpen,setDeckViewOpen]=useState(false)
   const [discardViewOpen,setDiscardViewOpen]=useState(false)
   const [circleArtifact,setCircleArtifact]=useState(()=>STARTER_ARTIFACTS[Math.floor(Math.random()*STARTER_ARTIFACTS.length)])
   const [circlePassive,setCirclePassive]=useState(()=>STARTER_PASSIVES[Math.floor(Math.random()*STARTER_PASSIVES.length)])
-  const [activeArtifacts,setActiveArtifacts]=useState([]) // max 3
+  const [activeArtifacts,setActiveArtifacts]=useState([])
+  const [triggeredArtifactId,setTriggeredArtifactId]=useState(null) // max 3
   const [discovered,setDiscovered]=useState(new Set())
   const [newAchievements,setNewAchievements]=useState([])
   const [polaroidNotif,setPolaroidNotif]=useState(null)
@@ -5496,7 +5505,10 @@ function App(){
     setStage(ns)
     if(spent>0){setEmbers(function(p){return p-spent});embersSpentThisFightRef.current+=spent}
     if(msg)addLog(msg)
-    updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+    updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
+    // #4: MASTERY MILESTONE POPS
+    const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
     if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
@@ -5513,7 +5525,8 @@ function App(){
           const disc=JSON.parse(localStorage.getItem('vst_combos_discovered')||'[]')
           if(!disc.includes(chain.id)){disc.push(chain.id);localStorage.setItem('vst_combos_discovered',JSON.stringify(disc))}
         }
-        setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.78*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
+        setChainCallout(chain.name);setTimeout(()=>setChainCallout(null),1200)
+          setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.78*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
         playSfx('chain_combo');triggerShake(18,600);setChainFlashActive(true);setTimeout(()=>setChainFlashActive(false),600);setStrikeMult(p=>Math.min(6.66,Math.round((p*1.78)*100)/100));showFirstTimeTip('chain','Riff Chains fire when you play BOTH cards of a pair in the same Strike. Check Rules for all 16 chains!',addLog);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×1.78 MULTIPLIER!')
         combosFiredRef.current.push(chain.id)
           // #7: Track lifetime chain discovery
@@ -5567,7 +5580,10 @@ function App(){
       setCorruption(p=>Math.max(0,p-15))
       addLog('🎼 Smoke Break! '+victim.name+' discarded. +3 Embers. -15% Corruption. Drew 1 card.'+(preSelected.length===0?' (tip: select a card first)':''))
       addFloat('+3 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
+    // #4: MASTERY MILESTONE POPS
+    const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard']
@@ -5590,7 +5606,10 @@ function App(){
       setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus-effectiveEmbers))
       addLog('🍯 Groupie! +2 Embers, drew 1 card.')
       addFloat('+2 🔥 +1 card',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
+    // #4: MASTERY MILESTONE POPS
+    const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -5612,7 +5631,10 @@ function App(){
       setSetlistOpen(true)
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
       addLog('📋 Setlist! Drew 2 cards — now pick 1 to discard.')
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
+    // #4: MASTERY MILESTONE POPS
+    const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -5635,7 +5657,10 @@ function App(){
       setSelected([])
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
       addLog('🔥 Burned '+discardCount+' card'+(discardCount!==1?'s':'')+', drew '+drawCount+'.'+(discardCount===0?' (Tip: select cards before playing)':''))
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
+    // #4: MASTERY MILESTONE POPS
+    const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       setLastRiffPlayed(card)
@@ -5659,7 +5684,10 @@ function App(){
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
       addLog('🎙 Remastered! Deleted '+toDelete.name+', drew 3.')
       addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
+    // #4: MASTERY MILESTONE POPS
+    const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -5697,7 +5725,10 @@ function App(){
       }
       setSelected([])
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
-      updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+      updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
+    // #4: MASTERY MILESTONE POPS
+    const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -6092,6 +6123,15 @@ function App(){
     prevEmbersRef.current=embers
   },[embers,gameState,strikesLeft,fightMaxStrikes,maxEmbers])
 
+  // ── MULTIPLIER MILESTONES ──
+  useEffect(()=>{
+    if(gameState!=='playing')return
+    const ms=multMilestonesRef.current
+    if(strikeMult>=16&&!ms[16]){ms[16]=true;addFloat('⛧ ×16 MULTIPLIER! ⛧',960,250,'#ff00ff',true);addLog('⛧ ×16 MULTIPLIER UNLOCKED! TRANSCENDENT!')}
+    else if(strikeMult>=8&&!ms[8]){ms[8]=true;addFloat('🔥 ×8 MULTIPLIER!',960,250,'#ff4400',true);addLog('🔥 ×8 MULTIPLIER UNLOCKED! INSANE!')}
+    else if(strikeMult>=4&&!ms[4]){ms[4]=true;addFloat('⚡ ×4 MULTIPLIER!',960,250,'#ffaa00',true);addLog('⚡ ×4 MULTIPLIER UNLOCKED!')}
+    else if(strikeMult>=2&&!ms[2]){ms[2]=true;addFloat('💥 ×2 MULTIPLIER!',960,250,'#ff8800',true);addLog('💥 ×2 MULTIPLIER UNLOCKED!')}
+  },[strikeMult,gameState])
   // ── 3.0× BEAST TIER ENTRY — first cross above 3.0 each strike triggers shake + red overlay
   const [beastTierFlash,setBeastTierFlash]=useState(false)
   const prevMultRef=useRef(1.0)
@@ -6529,7 +6569,7 @@ function App(){
           const m=Math.pow(art.mult,fires)
           artifactMult*=m
           _breakdownLines.push({type:'multiply',label:art.emoji+' '+art.name+' ×'+m.toFixed(2),label2:'',runningAfter:0,color:'#e8a820'})
-          addLog('⛧ '+art.emoji+' '+art.name+' TRIGGERS! ×'+m.toFixed(2))
+          addLog('⛧ '+art.emoji+' '+art.name+' TRIGGERS! ×'+m.toFixed(2));setTriggeredArtifactId(art.id);setTimeout(()=>setTriggeredArtifactId(null),600)
         }
       }
       // CA1 Goat of Mendes — permanent ×1.25 all strikes
@@ -6937,7 +6977,7 @@ function App(){
     const _fmDiscards = MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0);
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setShredderUsed(false);setLastRiffPlayed(null);lastRiffPlayedRef.current=null;setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0)
+    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setShredderUsed(false);setLastRiffPlayed(null);lastRiffPlayedRef.current=null;setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);multMilestonesRef.current={2:false,4:false,8:false,16:false}
     // AUTO-SAVE at fight start
     setTimeout(()=>{try{saveGame({
       v:1,gs:gameState,fi:fightIndex,seed:runSeed,deck:selectedDeck,
@@ -8321,6 +8361,14 @@ function App(){
         </div>
       </div>}
       {projectiles.filter(Boolean).map(p=><Projectile key={p.id} from={p.from} to={p.to} emoji={p.emoji} onDone={()=>setProjectiles(prev=>prev.filter(x=>x.id!==p.id))} isBoss={p.isBoss}/>)}
+      {mvpFlash&&<div style={{position:'absolute',top:'35%',left:'50%',transform:'translate(-50%,-50%)',zIndex:99995,textAlign:'center',animation:'postStrikeFlash 2s ease-out forwards',pointerEvents:'none'}}>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#ffaa44',letterSpacing:4,textTransform:'uppercase'}}>⭐ MVP ⭐</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:'#ffd700',textShadow:'0 0 20px rgba(255,215,0,0.6)',letterSpacing:3}}>{mvpFlash.emoji} {mvpFlash.name}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#ffcc66'}}>{mvpFlash.atk} ATK</div>
+      </div>}
+      {chainCallout&&<div style={{position:'absolute',top:'40%',left:'50%',transform:'translate(-50%,-50%)',zIndex:99996,textAlign:'center',animation:'chainSlam 1.2s ease-out forwards',pointerEvents:'none'}}>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,fontWeight:900,color:'#ffd700',textShadow:'0 0 30px rgba(255,215,0,0.8),0 0 60px rgba(255,200,0,0.4),0 4px 0 #885500',letterSpacing:8}}>⛧ {chainCallout.toUpperCase()} ⛧</div>
+      </div>}
       {postStrikeFlash&&<div style={{position:'absolute',top:'15%',left:'50%',transform:'translateX(-50%)',zIndex:99998,textAlign:'center',animation:'postStrikeFlash 1.8s ease-out forwards',pointerEvents:'none'}}>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:postStrikeFlash.dmg>=5000?42:postStrikeFlash.dmg>=1000?36:28,fontWeight:900,color:postStrikeFlash.isNewBest?'#ffdd00':'#ff8844',textShadow:'0 0 20px rgba(255,100,0,0.8)',letterSpacing:4}}>{postStrikeFlash.dmg.toLocaleString()} DMG</div>
         {postStrikeFlash.mult>1.5&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#ffaa44',letterSpacing:3}}>×{postStrikeFlash.mult.toFixed(2)} MULTIPLIER</div>}
@@ -8536,7 +8584,7 @@ function App(){
                 <div key={i} style={{position:'relative'}}
                   onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='1'}}
                   onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='0'}}>
-                  {a?<div style={{width:80,height:105,border:'1px solid rgba(200,140,30,0.65)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 10px rgba(200,140,20,0.25)',cursor:'help'}}><ArtifactArtImg id={a.id} emoji={a.emoji} size={28}/><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:6,letterSpacing:0.5,color:'#c8a040',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 3px'}}>{a.name}</div></div>
+                  {a?<div style={{width:80,height:105,border:'1px solid rgba(200,140,30,0.65)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 10px rgba(200,140,20,0.25)',cursor:'help'}}><ArtifactArtImg id={a.id} emoji={a.emoji} size={28} style={{animation:triggeredArtifactId===a.id?'artifactTrigger 0.5s ease-out':'none',transform:triggeredArtifactId===a.id?'scale(1.4)':'scale(1)',transition:'transform 0.15s'}}/><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:6,letterSpacing:0.5,color:'#c8a040',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 3px'}}>{a.name}</div></div>
                   :<div style={{width:80,height:105,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:5,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:52,opacity:0.35,textShadow:'0 0 12px rgba(255,180,0,0.4)'}}>⛧</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:7,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>}
                   {a&&<div data-artip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:88,top:0,zIndex:99999,pointerEvents:'none',minWidth:200,maxWidth:280,background:'rgba(12,7,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:700,color:'#e8c060',marginBottom:4}}>{a.emoji} {a.name}</div>
@@ -8854,6 +8902,20 @@ function App(){
           ))}
         </div>
       </div>
+      {/* LIVE GRADE TRACKER — top left */}
+      {gameState==='playing'&&<div style={{position:'absolute',top:8,left:8,zIndex:60,fontFamily:"'MBScribblesFont',serif",pointerEvents:'none'}}>
+        <div style={{fontSize:11,color:'var(--ink-dim)',letterSpacing:2,textTransform:'uppercase'}}>Grade</div>
+        <div style={{fontSize:28,fontWeight:900,letterSpacing:2,
+          color:(()=>{const s=stats.totalDamage+(stats.fightsSurvived||0)*500;return s>=15000?'#ff44ff':s>=10000?'#ffdd00':s>=6000?'#ff8800':s>=3000?'#44aaff':s>=1000?'#44cc44':'#888888'})(),
+          textShadow:'0 0 12px currentColor'}}>
+          {(()=>{const s=stats.totalDamage+(stats.fightsSurvived||0)*500;return s>=15000?'SS':s>=10000?'S':s>=6000?'A':s>=3000?'B':s>=1000?'C':'D'})()}
+        </div>
+      </div>}
+      {/* CORRUPTION HEARTBEAT VIGNETTE */}
+      {corruption>=40&&gameState==='playing'&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:50,
+        boxShadow:'inset 0 0 '+(corruption>=100?'120':'corruption>=80?80:corruption>=60?50:30')+'px rgba(150,0,20,'+(corruption>=100?'0.5':corruption>=80?'0.35':corruption>=60?'0.25':'0.15')+')',
+        animation:corruption>=100?'none':corruption>=80?'heartbeat 0.6s ease-in-out infinite':corruption>=60?'heartbeat 0.9s ease-in-out infinite':'heartbeat 1.4s ease-in-out infinite',
+        borderRadius:0}}/>}
       {/* PAUSE OPTIONS OVERLAY (ESC key) */}
       {showPauseOptions&&<div style={{position:'absolute',inset:0,zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.85)'}} onClick={()=>setShowPauseOptions(false)}>
         <div onClick={e=>e.stopPropagation()} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16,padding:'40px 60px',background:'rgba(10,6,2,0.98)',border:'2px solid rgba(100,65,15,0.5)',borderRadius:12,maxWidth:500,width:'90%'}}>
