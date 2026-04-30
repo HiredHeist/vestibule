@@ -2822,14 +2822,27 @@ function DamageBreakdown({data,onDone}){
           document.body.style.background='#ff2200';setTimeout(()=>{document.body.style.background='#000'},60)
         }else if(total>=2500){
           _root.style.animation='screenShake 0.5s ease'
+          document.body.style.background='#881100';setTimeout(()=>{document.body.style.background='#000'},40)
         }else if(total>=1000){
           _root.style.animation='screenShake 0.4s ease'
         }else if(total>=500){
-          _root.style.animation='screenPulse 0.3s ease'
-        }else if(total>=100){
-          _root.style.animation='screenPulse 0.2s ease'
-        }else{
           _root.style.animation='screenShake 0.3s ease'
+        }else if(total>=200){
+          _root.style.animation='screenPulse 0.3s ease'
+        }else if(total>=50){
+          _root.style.animation='screenPulse 0.15s ease'
+        }
+        // CUSTOM SPLASH ANIMATION — load from /vestibule/fx/[tier].webm if exists
+        const _tier=total>=10000?'godlike':total>=5000?'ultra':total>=2500?'devastating':total>=1000?'massive':total>=500?'critical':total>=200?'heavy':total>=50?'solid':null
+        if(_tier){
+          const _fx=document.createElement('video')
+          _fx.src=import.meta.env.BASE_URL+'vestibule/fx/'+_tier+'.webm'
+          _fx.autoplay=true;_fx.muted=true;_fx.playsInline=true
+          _fx.style.cssText='position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:99997;pointer-events:none;mix-blend-mode:screen'
+          _fx.onended=()=>_fx.remove()
+          _fx.onerror=()=>_fx.remove()
+          document.body.appendChild(_fx)
+          setTimeout(()=>{try{_fx.remove()}catch(e){}},3000)
         }
       }catch(e){}
     },SLAM_DELAY)
@@ -2874,8 +2887,8 @@ function DamageBreakdown({data,onDone}){
       </div>}
     </div>
     {slamming&&<div style={{marginTop:8,textAlign:'center',animation:'dmgSlam 0.5s ease-out forwards'}}>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:total>=10000?96:total>=5000?84:total>=2500?72:total>=1000?64:total>=500?56:48,fontWeight:900,color:total>=10000?'#ffffff':total>=5000?'#ffdd00':total>=2500?'#ff8800':total>=1000?'#ff6600':'#ff2200',textShadow:'0 0 30px rgba(255,34,0,0.8),0 0 60px rgba(255,100,0,0.4),0 4px 0 #440000',letterSpacing:3,animation:'dmgPulse 1s ease-in-out infinite'}}>{total.toLocaleString()}</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:total>=5000?18:14,color:total>=5000?'#ffaa00':'#ff6644',letterSpacing:4,textTransform:'uppercase',marginTop:2}}>{total>=10000?'⛧ GODLIKE ⛧':total>=5000?'☠ ULTRA DAMAGE':total>=2500?'💀 DEVASTATING':total>=1000?'🔥 MASSIVE':total>=500?'CRITICAL':'DAMAGE'}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:total>=10000?96:total>=5000?84:total>=2500?72:total>=1000?64:total>=500?56:total>=200?48:total>=50?42:36,fontWeight:900,color:total>=10000?'#ffffff':total>=5000?'#ffdd00':total>=2500?'#ff8800':total>=1000?'#ff6600':total>=500?'#ff4400':total>=200?'#ee6633':total>=50?'#cc8844':'#aa8866',textShadow:'0 0 30px rgba(255,34,0,0.8),0 0 60px rgba(255,100,0,0.4),0 4px 0 #440000',letterSpacing:3,animation:'dmgPulse 1s ease-in-out infinite'}}>{total.toLocaleString()}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:total>=5000?18:14,color:total>=5000?'#ffaa00':'#ff6644',letterSpacing:4,textTransform:'uppercase',marginTop:2}}>{total>=10000?'⛧ GODLIKE ⛧':total>=5000?'☠ ULTRA KILL':total>=2500?'💀 DEVASTATING':total>=1000?'🔥 MASSIVE HIT':total>=500?'💢 CRITICAL':total>=200?'⚡ HEAVY':total>=50?'SOLID HIT':'HIT'}</div>
     </div>}
   </div>)
 }
