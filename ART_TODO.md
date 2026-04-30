@@ -177,3 +177,78 @@ Must read at 32px on taskbar.
 | **TOTAL** | **46** | |
 
 Priority: Missing cards → Artifacts → Passives → Packs → everything else
+
+---
+
+## 🟡 DAMAGE SPLASH ANIMATIONS (After Effects → WebM)
+
+**Resolution:** 1920×1080 (matches game design resolution)
+**Format:** WebM (VP9, opaque) — black background, `mix-blend-mode: screen` makes black invisible
+**Duration:** 1-3 seconds each
+**FPS:** 30 or 60
+**Background:** PURE BLACK (#000000) — this disappears via screen blend
+
+Drop files at: `public/vestibule/fx/[tier].webm`
+
+### Tier 1: `solid.webm` (50+ damage)
+**Mood:** "Nice shot." Subtle, encouraging.
+A single small spark or ember floats up from center-bottom and fades.
+Maybe a faint circular pulse ring expanding outward. Barely there.
+Think: candle flame flicker. Duration: 0.5-1s.
+
+### Tier 2: `heavy.webm` (200+ damage)
+**Mood:** "Now we're talking." Building confidence.
+A quick burst of orange sparks from center, like a guitar amp popping.
+Small shockwave ring expanding. A few embers drifting up.
+Think: match being struck. Duration: 0.8-1.2s.
+
+### Tier 3: `critical.webm` (500+ damage)
+**Mood:** "That HURT." First real impact.
+Red/orange impact flash at center. Sparks flying outward in all directions.
+Screen edges briefly glow red. Cracks of light radiating from center.
+Think: hitting an anvil with a hammer. Duration: 1-1.5s.
+
+### Tier 4: `massive.webm` (1000+ damage)
+**Mood:** "HOLY SHIT." Player's jaw drops.
+Explosion from center — fiery particles everywhere. Screen shake energy lines.
+Lightning bolts arcing across the screen. Red vignette pulses.
+Debris/embers rain down from top. Bass impact feeling.
+Think: pyrotechnics at a metal concert. Duration: 1.5-2s.
+
+### Tier 5: `devastating.webm` (2500+ damage)
+**Mood:** "I broke the game." Disbelief.
+Massive shockwave — everything pushes outward from center.
+Screen CRACKS like glass with light pouring through the fractures.
+Purple/red energy vortex spinning at center. Particles are dense.
+Lightning chains across the cracks. Everything vibrates.
+Think: the stage is collapsing. Duration: 2-2.5s.
+
+### Tier 6: `ultra.webm` (5000+ damage)
+**Mood:** "SCREENSHOT THIS." Peak dopamine.
+Full screen eruption. White-hot center explosion expanding.
+Pentagram sigils burning into existence at the edges.
+Energy beams shooting from center to all corners.
+Color shifts from red → gold → white. Particles EVERYWHERE.
+Reality itself seems to tear. Screen border burns gold.
+Think: nuclear detonation at a Black Sabbath concert. Duration: 2-3s.
+
+### Tier 7: `godlike.webm` (10000+ damage)
+**Mood:** "I AM GOD." Transcendence.
+Everything goes white for 2-3 frames, then:
+Kaleidoscope of color — hue rotation, fractals, sacred geometry.
+Inverted pentagram burns in the center, golden and massive.
+The entire screen is effects — you can barely see the game underneath.
+Colors cycle through the spectrum. Stars/galaxies swirl.
+"⛧" symbols rain from the sky like Matrix code but metal.
+Think: DMT trip at the gates of Hell. Duration: 2.5-3s.
+
+### AE WORKFLOW:
+1. Create 1920×1080 comp, black background
+2. Design your effect (particles, light rays, etc.)
+3. Export: File → Export → Add to Media Encoder
+4. Format: WebM, VP9 codec
+5. If AE can't export WebM: export as ProRes 4444 → convert with FFmpeg:
+   `ffmpeg -i input.mov -c:v libvpx-vp9 -pix_fmt yuva420p -b:v 2M output.webm`
+6. Drop at `public/vestibule/fx/[tier].webm`
+7. Test in game — black disappears, effects composite over gameplay
+
