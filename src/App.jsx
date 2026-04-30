@@ -492,12 +492,12 @@ const ALL_CARDS=[
   {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:0,effect:'+10% Corruption. All +3 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'soundcheck',name:'Sound Check',type:'UTILITY',rarity:'Common',emoji:'🔊',embers:2,effect:'All +4 HP. Injured: +1 ATK this Strike.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'sigdecay',name:'Signal Decay',type:'CORRUPT',rarity:'Common',emoji:'📡',embers:1,effect:'Discard 1 card from hand. Draw 2 cards.',color:'#aa1111',typeColor:'#880000',copies:1},
-  {id:'battlecry',name:'Battle Cry',type:'RIFF',rarity:'Common',emoji:'🤘',embers:2,effect:'Target: +1 ATK permanentlyanent.',color:'#9933cc',typeColor:'#7722aa',copies:4},
+  {id:'battlecry',name:'Battle Cry',type:'RIFF',rarity:'Common',emoji:'🤘',embers:2,effect:'Target: +1 ATK permanently.',color:'#9933cc',typeColor:'#7722aa',copies:4},
   {id:'roadie',name:'Roadie',type:'UTILITY',rarity:'Common',emoji:'🛡',embers:1,effect:'+2 HP. Immune to Too Stoned (2 Strikes).',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'setlist',name:'Setlist',type:'UTILITY',rarity:'Common',emoji:'📋',embers:0,effect:'Draw 3. Discard 1 of choice.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'groupie',name:'Groupie',type:'EMBER',rarity:'Uncommon',emoji:'🍯',embers:1,effect:'+2 Embers. Draw 1.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'demotape',name:'Demo Tape',type:'RIFF',rarity:'Common',emoji:'📼',embers:1,effect:'Copy the last Riff played, cast it free.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'newstrings',name:'New Strings',type:'RIFF',rarity:'Uncommon',emoji:'🎸',embers:2,effect:'+2 ATK permanentlyanent to target.',color:'#9933cc',typeColor:'#7722aa',copies:2},
+  {id:'newstrings',name:'New Strings',type:'RIFF',rarity:'Uncommon',emoji:'🎸',embers:2,effect:'+2 ATK permanently to target.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'encore',name:'Encore',type:'RIFF',rarity:'Uncommon',emoji:'🔁',embers:2,effect:'Target attacks again this Strike.',color:'#9933cc',typeColor:'#7722aa',copies:3},
   {id:'wakeup',name:'Wake Up Call',type:'UTILITY',rarity:'Uncommon',emoji:'☕',embers:1,effect:'All +2 HP. Revives Too Stoned.',color:'#22aa44',typeColor:'#118833',copies:2},
   {id:'feedbackloop',name:'Feedback Loop',type:'CORRUPT',rarity:'Uncommon',emoji:'🎛',embers:3,effect:'Deal damage = Corruption ÷ 2.',color:'#aa1111',typeColor:'#880000',copies:1},
@@ -523,7 +523,7 @@ const ALL_CARDS=[
   {id:'distortion',name:'Distortion',type:'CORRUPT',rarity:'Common',emoji:'🎸',embers:1,effect:'Corruption +15%. All members +1 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:3},
   {id:'seance',name:'Séance',type:'CORRUPT',rarity:'Uncommon',emoji:'🔮',embers:1,effect:'Heal all members HP equal to Corruption ÷ 4. Rewards high corruption.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'staticcharge',name:'Static Charge',type:'CORRUPT',rarity:'Common',emoji:'⚡',embers:0,effect:'Gain 2 Embers. Gain 4 instead if Corruption is 0%.',color:'#aa1111',typeColor:'#880000',copies:2},
-  {id:'darktuning',name:'Dark Tuning',type:'CORRUPT',rarity:'Uncommon',emoji:'🌑',embers:3,effect:'+1 ATK permanentlyanent to 1 random per 15% Corruption.',color:'#aa1111',typeColor:'#880000',copies:2},
+  {id:'darktuning',name:'Dark Tuning',type:'CORRUPT',rarity:'Uncommon',emoji:'🌑',embers:3,effect:'+1 ATK permanently to 1 random per 15% Corruption.',color:'#aa1111',typeColor:'#880000',copies:2},
   {id:'powertap',name:'Power Tap',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'Gain 2 Embers.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'soundboard',name:'Soundboard',type:'EMBER',rarity:'Uncommon',emoji:'🎛',embers:1,effect:'Gain 2 Embers. Draw 1 extra card at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'setbreak',name:'Smoke Break',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Select 1 card first, then play to discard it. Gain 2 Embers. -15% Corruption. Draw 1 card. (Random if no selection)',color:'#22aa44',typeColor:'#118833',copies:2},
@@ -4406,6 +4406,7 @@ function App(){
   const [bonusDiscards,setBonusDiscards]=useState(0) // extra discards next fight from descent
   const [bonusEmbers,setBonusEmbers]=useState(0) // extra embers next fight from descent
   const [lastRiffPlayed,setLastRiffPlayed]=useState(null)
+  const lastRiffPlayedRef=useRef(null)
   const [cardsPlayedThisStrike,setCardsPlayedThisStrike]=useState([])
   const cardsPlayedRef=useRef([])
   const combosFiredRef=useRef([])
@@ -4894,7 +4895,7 @@ function App(){
     }
     else if(card.id==='blood_price'){
       ns=ns.map((m,mi)=>mi===slotIdx&&m?Object.assign({},m,{atk:m.atk+4,permAtkBonus:(m.permAtkBonus||0)+4,hp:Math.max(1,m.hp-3),buffCount:(m.buffCount||0)+1}):m)
-      msg='🩸 Blood Price! +4 ATK permanentlyanent. -3 HP.'
+      msg='🩸 Blood Price! +4 ATK permanently. -3 HP.'
     }
     else if(card.id==='void_pact'){
       const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true)
@@ -4939,10 +4940,10 @@ function App(){
     }
     else if(card.id==='tappedout'){setPendingEmbers(function(p){return p+5});spent=0;playEmber();msg='🪙 Tapped Out! +5 Embers next Strike.'}
     else if(card.id==='demotape'){
-      if(!lastRiffPlayed){addLog('📼 No riff recorded yet.');return false}
+      if(!lastRiffPlayedRef.current){addLog('📼 No riff recorded yet.');return false}
       spent=0
       // Inline replay — directly apply the last riff effect without recursive applyCard
-      const lr=lastRiffPlayed
+      const lr=lastRiffPlayedRef.current
       const lrTarget=ns[slotIdx]
       if(lr.id==='amp'&&lrTarget&&!lrTarget.tooStoned){
         ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk*2,_origAtk:lrTarget._origAtk||lrTarget.atk,tempBuff:true,buffCount:(lrTarget.buffCount||0)+1})
@@ -5454,7 +5455,7 @@ function App(){
     updStat('cardsPlayed',1);addMasteryPlays(card.id,1);setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
     if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
     if(card.type==='RIFF'&&ampFbDiscount>0)setAmpFeedbackDiscount(0)
-    if(card.type==='RIFF')setLastRiffPlayed(card)
+    if(card.type==='RIFF'){setLastRiffPlayed(card);lastRiffPlayedRef.current=card}
     // ── RIFF CHAIN COMBO DETECTION ──
     cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
     const played=cardsPlayedRef.current
@@ -6802,7 +6803,7 @@ function App(){
         setEnemyHp(AR_EXECUTIVE.maxHp)
         const _fmS=activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0);
         setEmbers(maxEmbers);setStrikesLeft(_fmS);setFightMaxStrikes(_fmS);setDiscardsLeft(MAX_DISCARDS);setFightMaxDiscards(MAX_DISCARDS)
-        setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setLastRiffPlayed(null)
+        setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setLastRiffPlayed(null);lastRiffPlayedRef.current=null
         setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
         setContractsPlayed(0);setPendingDraw(0);wthStrikesRef.current=0
         const allCards=[...handRef.current,...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
@@ -6866,7 +6867,7 @@ function App(){
     const _fmDiscards = MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0);
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0)
+    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setSkipNextDiscard(false);setShredderUsed(false);setLastRiffPlayed(null);lastRiffPlayedRef.current=null;setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0)
     // AUTO-SAVE at fight start
     setTimeout(()=>{try{saveGame({
       v:1,gs:gameState,fi:fightIndex,seed:runSeed,deck:selectedDeck,
