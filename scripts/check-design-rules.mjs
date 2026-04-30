@@ -34,6 +34,9 @@ const ALLOWED_TOKENS = new Set([
   'var(--type-corrupt)',
   'var(--type-utility)',
   'var(--type-ember)',
+  // Tier-identity (mythic / foil card tier indicators)
+  'var(--tier-mythic)',
+  'var(--tier-foil)',
   // Legacy aliases that resolve to tokens — kept readable during migration
   'var(--ink-bone)',
   'var(--ink-dim)',

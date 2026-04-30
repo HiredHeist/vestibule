@@ -63,6 +63,10 @@
   --type-utility: #22aa44;
   --type-ember:   #c87820;
 
+  /* TIER-IDENTITY COLORS — for mythic/foil card tier indicators (parallel to --type-*) */
+  --tier-mythic:  #cc88ff;  /* mythic-tier purple */
+  --tier-foil:    #88ccff;  /* foil-tier sky blue */
+
   /* TYPE SCALE — 5 sizes. Floor is 13px; never go smaller */
   --text-xs: 13px;  /* floor — micro labels: UNDISCOVERED, LOCKED, mastery tier */
   --text-sm: 15px;  /* body, prices, counts, secondary labels */
