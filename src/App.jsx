@@ -4981,6 +4981,58 @@ function App(){
         ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+1,tempBuff:true,_origAtk:s._origAtk||s.atk,buffCount:(s.buffCount||0)+1}):s)
       } else if(lr.id==='doubledown'){
         setNextCardFree(true)
+      } else if(lr.id==='heavyriff'&&lrTarget&&!lrTarget.tooStoned){
+        ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk+3,buffCount:(lrTarget.buffCount||0)+1})
+      } else if(lr.id==='moshpit'){
+        ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+1,buffCount:(s.buffCount||0)+1}):s)
+      } else if(lr.id==='shredsolo'&&lrTarget&&!lrTarget.tooStoned){
+        ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk+4,buffCount:(lrTarget.buffCount||0)+1})
+      } else if(lr.id==='sonicboom'){
+        const sbD=ns.filter(s=>s&&!s.tooStoned).reduce((s,m)=>s+m.atk,0)
+        const sbHp=Math.max(0,enemyHp-sbD);setEnemyHp(sbHp);updStat('totalDamage',sbD)
+        addFloat(sbD,getCenter(bossRef).x,getCenter(bossRef).y-60,'#ff6600',true);playHit()
+        if(sbHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
+      } else if(lr.id==='stagedive'){
+        const sdD=12;const sdHp=Math.max(0,enemyHp-sdD);setEnemyHp(sdHp);updStat('totalDamage',sdD)
+        addFloat(sdD,getCenter(bossRef).x,getCenter(bossRef).y-60,'#9933cc',true);playHit()
+        if(sdHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
+      } else if(lr.id==='possessedperf'&&lrTarget&&!lrTarget.tooStoned){
+        const ppB=Math.floor(corruption/20);ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk+ppB,buffCount:(lrTarget.buffCount||0)+1})
+      } else if(lr.id==='doomchord'){
+        ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+2,buffCount:(s.buffCount||0)+1}):s)
+      } else if(lr.id==='skullsplitter'){
+        const skD=15;const skHp=Math.max(0,enemyHp-skD);setEnemyHp(skHp);updStat('totalDamage',skD)
+        addFloat(skD,getCenter(bossRef).x,getCenter(bossRef).y-60,'#cc2222',true);playHit()
+        if(skHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
+      } else if(lr.id==='tremolopick'&&lrTarget&&!lrTarget.tooStoned){
+        ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk+2,buffCount:(lrTarget.buffCount||0)+1})
+      } else if(lr.id==='feedbackscream'){
+        const fsD=Math.floor(corruption/5)+3;const fsHp=Math.max(0,enemyHp-fsD);setEnemyHp(fsHp);updStat('totalDamage',fsD)
+        addFloat(fsD,getCenter(bossRef).x,getCenter(bossRef).y-60,'#aa1111',true);playHit()
+        if(fsHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
+      } else if(lr.id==='bloodharmony'){
+        const dupes=hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
+        if(lrTarget&&!lrTarget.tooStoned)ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk+dupes+1,buffCount:(lrTarget.buffCount||0)+1})
+      } else if(lr.id==='necroticamp'){
+        const naD=8;const naHp=Math.max(0,enemyHp-naD);setEnemyHp(naHp);updStat('totalDamage',naD)
+        setCorruption(p=>Math.min(100,p+5))
+        addFloat(naD,getCenter(bossRef).x,getCenter(bossRef).y-60,'#44aa44',true);playHit()
+        if(naHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
+      } else if(lr.id==='herbmoney'){
+        setStash(p=>Math.min(420,p+5));addLog('🌿 Herb Money replay! +5 Stash')
+      } else if(lr.id==='overdriveped'&&lrTarget&&!lrTarget.tooStoned){
+        ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk+3,buffCount:(lrTarget.buffCount||0)+1})
+      } else if(lr.id==='riffthief'){
+        if(lrTarget&&!lrTarget.tooStoned)ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk+2,buffCount:(lrTarget.buffCount||0)+1})
+      } else if(lr.id==='devilsdice'){
+        const roll=Math.floor(Math.random()*6)+1
+        if(roll>=5){ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+5,buffCount:(s.buffCount||0)+1}):s);addLog('🎲 Replay roll: '+roll+'! +5 ATK all!')}
+        else if(roll>=3){ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+3,buffCount:(s.buffCount||0)+1}):s);addLog('🎲 Replay roll: '+roll+'. +3 ATK all.')}
+        else{addLog('🎲 Replay roll: '+roll+'. Nothing.')}
+      } else {
+        // Fallback for any unhandled riff — generic +2 ATK to target
+        if(lrTarget&&!lrTarget.tooStoned)ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk+2,buffCount:(lrTarget.buffCount||0)+1})
+        addLog('📼 Demo Tape replays '+lr.name+' (generic)')
       }
       msg='📼 Demo Tape! Replays: '+lr.name
       addFloat('📼 '+lr.name,getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
