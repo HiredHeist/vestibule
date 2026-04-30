@@ -3058,7 +3058,7 @@ function MasteryGallery({onClose}){
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',width:'100%',maxWidth:1400,marginBottom:4}}>
       <div>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'#c8a040',textShadow:'0 0 30px rgba(200,160,40,0.4),2px 2px 0 #000',letterSpacing:6}}>Collection</div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#8a7050'}}>{discCount}/{allCards.length} discovered · {totalPlays.toLocaleString()} total plays · {pct}% complete</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#8a7050'}}>{discCount}/{allCards.length} discovered · {totalPlays.toLocaleString()} total plays · {pct}% complete</div>
       </div>
       <button onClick={onClose} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'#cc4444',background:'rgba(80,0,0,0.4)',border:'2px solid #aa2222',borderRadius:6,padding:'8px 24px',cursor:'pointer',letterSpacing:3}}>✕ CLOSE</button>
     </div>
@@ -3073,12 +3073,12 @@ function MasteryGallery({onClose}){
       {[['ALL','All Cards','#c8a040'],['RIFF','Riff','#9933cc'],['CORRUPT','Corrupt','#aa1111'],['UTILITY','Utility','#22aa44'],['EMBER','Ember','#c87820']].map(([id,label,color])=>{
         const count=id==='ALL'?allCards.length:allCards.filter(c=>c.type===id).length
         const disc=id==='ALL'?discCount:allCards.filter(c=>c.type===id&&discovered.has(c.id)).length
-        return <button key={id} onClick={()=>setFilter(id)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:2,padding:'6px 18px',cursor:'pointer',border:filter===id?'2px solid '+color:'1px solid rgba(100,65,15,0.3)',borderRadius:6,background:filter===id?color+'22':'transparent',color:filter===id?color:'#6a5a30',textTransform:'uppercase',transition:'all 0.15s'}}>{label} ({disc}/{count})</button>
+        return <button key={id} onClick={()=>setFilter(id)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,letterSpacing:2,padding:'8px 20px',cursor:'pointer',border:filter===id?'2px solid '+color:'1px solid rgba(100,65,15,0.3)',borderRadius:6,background:filter===id?color+'22':'transparent',color:filter===id?color:'#6a5a30',textTransform:'uppercase',transition:'all 0.15s'}}>{label} ({disc}/{count})</button>
       })}
     </div>
     
     {/* CARD GRID */}
-    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,155px)',gap:8,justifyContent:'center',width:'100%',maxWidth:1400,paddingBottom:30}}>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,180px)',gap:8,justifyContent:'center',width:'100%',maxWidth:1400,paddingBottom:30}}>
       {filtered.map(c=>{
         const plays=data[c.id]||0
         const isDiscovered=plays>0
@@ -3096,13 +3096,13 @@ function MasteryGallery({onClose}){
             transform:selectedCard?.id===c.id?'scale(1.05)':'none',transition:'all 0.15s',position:'relative'}}>
           <div style={{height:3,background:isDiscovered?tier.border||bc:'#333'}}/>
           <div style={{textAlign:'center',padding:'8px 0',background:'rgba(0,0,0,0.3)',position:'relative'}}>
-            {isLocked?<span style={{fontSize:40}}>🔒</span>:
-             <CardArtImg id={c.id} emoji={isDiscovered?c.emoji:'❓'} size={64}/>}
+            {isLocked?<span style={{fontSize:48}}>🔒</span>:
+             <CardArtImg id={c.id} emoji={isDiscovered?c.emoji:'❓'} size={72}/>}
           </div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,color:isDiscovered?'#eedfc0':'#555',textAlign:'center',padding:'2px 4px',lineHeight:1.1}}>{isLocked?'???':c.name}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,color:isDiscovered?'#eedfc0':'#555',textAlign:'center',padding:'2px 4px',lineHeight:1.1}}>{isLocked?'???':c.name}</div>
           {isDiscovered&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'2px 6px 4px'}}>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:tier.color,letterSpacing:1}}>{tier.name==='Unplayed'?'':tier.name}</span>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#aa8855'}}>{plays}×</span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'#aa8855'}}>{plays}×</span>
           </div>}
           {!isDiscovered&&!isLocked&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#444',textAlign:'center',padding:'2px 0 4px',letterSpacing:1}}>UNDISCOVERED</div>}
           {isLocked&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#444',textAlign:'center',padding:'2px 0 4px',letterSpacing:1}}>LOCKED</div>}
@@ -3115,12 +3115,12 @@ function MasteryGallery({onClose}){
       <div style={{display:'flex',gap:16,alignItems:'center'}}>
         <CardArtImg id={selectedCard.id} emoji={selectedCard.emoji} size={80}/>
         <div style={{flex:1}}>
-          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#e8d090',letterSpacing:2}}>{selectedCard.name}</div>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:32,color:'#e8d090',letterSpacing:2}}>{selectedCard.name}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:typeColors[selectedCard.type],letterSpacing:2,textTransform:'uppercase',marginBottom:4}}>{selectedCard.type} · {selectedCard.rarity} · {selectedCard.embers} EMBERS</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#c8a878',lineHeight:1.4}}>{selectedCard.effect}</div>
         </div>
         <div style={{textAlign:'center'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:36,fontWeight:900,color:'#e8a820'}}>{data[selectedCard.id]||0}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,color:'#e8a820'}}>{data[selectedCard.id]||0}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#8a7050',letterSpacing:2}}>PLAYS</div>
         </div>
       </div>
@@ -4084,7 +4084,7 @@ function DemonicConflictScreen({conflict,onChoice}){
         <div style={{background:'linear-gradient(90deg,#e8a820,#ffcc44)',padding:'6px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#0a0704'}}>{label}</div>
         <div style={{fontSize:64,textAlign:'center',padding:'20px 0',background:'rgba(0,0,0,0.4)',overflow:'hidden'}}>{MEMBER_PORTRAITS[m.id]?<MemberPortrait id={m.id} size={55}/>:m.emoji}</div>
         <div style={{padding:'0 16px 16px'}}>
-          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#e8d090',textAlign:'center',marginBottom:4}}>{m.name}</div>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:32,color:'#e8d090',textAlign:'center',marginBottom:4}}>{m.name}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:'#8a7040',textAlign:'center',marginBottom:10}}>{m.role}</div>
           <div style={{display:'flex',justifyContent:'space-between',padding:'8px',background:'rgba(0,0,0,0.5)',borderRadius:4,marginBottom:8}}>
             <div style={{textAlign:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#ee2222',fontWeight:900}}>ATK</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,color:'#ee2222'}}>{m.atk}</div></div>
@@ -7602,7 +7602,7 @@ function App(){
             ['🛡 Stone Shield','Roadie and some events grant Stone Shield — when a member would die, they survive at 1 HP instead. The shield absorbs the lethal hit and is consumed. Essential for surviving boss fights.'],
             ['🔄 Encore Mode','After defeating Lucifer and clearing all 9 Circles, you can choose to enter Encore Mode — all enemies return with ×2.0 HP. How far can you push your band?'],
           ].map(([title,desc],i)=><div key={i} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:8,padding:'14px 20px'}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:36,fontWeight:900,color:'#e8a820',marginBottom:4}}>{title}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,color:'#e8a820',marginBottom:4}}>{title}</div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,color:'#c8b080',lineHeight:1.5}}>{desc}</div>
           </div>)}
         </div>
@@ -7989,7 +7989,7 @@ function App(){
   if(welcomeToHell==='cutscene')return(
     <div style={{width:1920,height:1080,position:'relative',background:'#050302',overflow:'hidden',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:72,color:'#cc1111',textShadow:'0 0 40px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:10}}>WELCOME TO HELL</div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:28,color:'#e8d090',fontStyle:'italic'}}>The Second Album</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:32,color:'#e8d090',fontStyle:'italic'}}>The Second Album</div>
       <div style={{fontSize:100,marginTop:16}}>🕴</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#aa8a50',letterSpacing:2}}>THE EXECUTIVE — 100,000 HP</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#c0a050',fontStyle:'italic'}}>The real Devil wears a suit.</div>
