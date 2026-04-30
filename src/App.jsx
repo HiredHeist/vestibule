@@ -506,7 +506,7 @@ const ALL_CARDS=[
   {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:0,effect:'Select up to 3 cards first, then play this to discard them and draw that many +1. (No selection = draw 1 card.)',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:2,effect:'+1 ATK permanently to ALL. The whole band gets louder.',color:'#9933cc',typeColor:'#7722aa',copies:1},
   {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:3,effect:'Deal damage equal to target HP. Once per round.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'Requires 60% Corruption. DOUBLE all damage.',color:'#9933cc',typeColor:'#7722aa',copies:0,shopOnly:true},
+  {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'Requires 60% Corruption. DOUBLE all damage.',color:'#9933cc',typeColor:'#7722aa',copies:0,shopOnly:true,corrReq:60},
   {id:'infencore',name:'Infernal Encore',type:'RIFF',rarity:'Rare',emoji:'👿',embers:3,effect:'ALL members attack TWICE. Total carnage.',color:'#9933cc',typeColor:'#7722aa',copies:3},
   {id:'remaster',name:'The Remaster',type:'UTILITY',rarity:'Rare',emoji:'🎙',embers:0,effect:'Select 1 card in hand, then play this to delete it and draw 3 cards.',color:'#22aa44',typeColor:'#118833',copies:0,shopOnly:true},
   {id:'whispercard',name:'Dark Whisper',type:'CORRUPT',rarity:'Rare',emoji:'🌀',embers:0,effect:'FREE. Target member +2 ATK permanently. Corruption gift at 25%.',color:'#aa1111',typeColor:'#880000',copies:0},
@@ -523,7 +523,7 @@ const ALL_CARDS=[
   {id:'distortion',name:'Distortion',type:'CORRUPT',rarity:'Common',emoji:'🎸',embers:1,effect:'Corruption +15%. All members +1 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:3},
   {id:'seance',name:'Séance',type:'CORRUPT',rarity:'Uncommon',emoji:'🔮',embers:1,effect:'Heal ALL members (Corruption ÷ 4 HP). More corrupt = more healed.',color:'#aa1111',typeColor:'#880000',copies:1},
   {id:'staticcharge',name:'Static Charge',type:'CORRUPT',rarity:'Common',emoji:'⚡',embers:0,effect:'Gain 2 Embers. Gain 4 instead if Corruption is 0%.',color:'#aa1111',typeColor:'#880000',copies:2},
-  {id:'darktuning',name:'Dark Tuning',type:'CORRUPT',rarity:'Uncommon',emoji:'🌑',embers:2,effect:'+1 ATK to random members. More corruption = more buffed.',color:'#aa1111',typeColor:'#880000',copies:2},
+  {id:'darktuning',name:'Dark Tuning',type:'CORRUPT',rarity:'Uncommon',emoji:'🌑',embers:2,effect:'Needs ≥40% Corruption. +1 ATK to random members. More corruption = more buffed.',color:'#aa1111',typeColor:'#880000',copies:2,corrReq:40},
   {id:'powertap',name:'Power Tap',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'Gain 2 Embers.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'soundboard',name:'Soundboard',type:'EMBER',rarity:'Uncommon',emoji:'🎛',embers:1,effect:'Gain 2 Embers. Draw 1 extra card at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
   {id:'setbreak',name:'Smoke Break',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Select 1 card first, then play to discard it. Gain 2 Embers. -15% Corruption. Draw 1 card. (Random if no selection)',color:'#22aa44',typeColor:'#118833',copies:2},
@@ -2863,6 +2863,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
   const bc=card.type==='CORRUPT'?'#aa1111':card.type==='UTILITY'?'#22aa44':card.type==='EMBER'?'#c87820':'#9933cc'
   const glow=card.type==='CORRUPT'?'rgba(170,0,0,0.5)':card.type==='UTILITY'?'rgba(30,160,50,0.5)':card.type==='EMBER'?'rgba(200,120,20,0.5)':'rgba(140,40,200,0.5)'
   const unaffordable=!canAfford&&card.embers>0
+  const corrLocked=card.corrReq&&(corruption||0)<card.corrReq
   const shimmerAnim=card.upgraded?'upgradeShimmer 2s ease-in-out infinite':card.rarity==='Rare'?'holoShimmer 3s ease-in-out infinite':card.rarity==='Uncommon'?'uncommonGlow 2s ease-in-out infinite':''
   const masteryBorder=mastery.border?{borderTop:'2px solid '+mastery.border,boxShadow:'inset 0 2px 8px '+mastery.glow}:{}
   return(
@@ -2874,7 +2875,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       onMouseEnter={onHover} onMouseLeave={onLeave} onClick={e=>{e.stopPropagation();onClick()}}
       style={{width:210,height:310,flexShrink:0,position:'relative',display:'flex',flexDirection:'column',
         background:isSelected?'linear-gradient(180deg, #2a0c10, #160608)':'linear-gradient(180deg, var(--altar-raised), var(--altar-recess))',
-        border:isSelected?'2px solid var(--blood)':unaffordable?'1px solid var(--rot)':isHovered?'1px solid var(--ink-bone)':'1px solid var(--ink-rust)',
+        border:isSelected?'2px solid var(--blood)':unaffordable?'1px solid var(--rot)':corrLocked?'1px solid #6622aa':isHovered?'1px solid var(--ink-bone)':'1px solid var(--ink-rust)',
         borderRadius:4,cursor:'grab',position:'relative',
         outline:isHovered||isSelected?'1px solid rgba(232,216,184,0.2)':'1px solid rgba(232,216,184,0.06)',
         outlineOffset:'-5px',
@@ -2883,7 +2884,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
         zIndex:isDragging?0:isHovered?9999:isSelected?50+index:10+index,
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:chainReady&&canAfford?'2px 4px 16px rgba(0,0,0,0.75),0 0 14px rgba(255,220,50,0.5),0 0 28px rgba(255,200,0,0.2)':(mastery.glow?'2px 4px 16px rgba(0,0,0,0.75),0 0 8px '+mastery.glow:'2px 4px 16px rgba(0,0,0,0.75)'),
-        opacity:isDragging?0.4:unaffordable?0.55:1,filter:(corruption||0)>=80?'hue-rotate(-10deg) saturate(1.4) brightness(0.95)':(corruption||0)>=60?'saturate(1.2)':'none',
+        opacity:isDragging?0.4:unaffordable?0.55:corrLocked?0.6:1,filter:(corruption||0)>=80?'hue-rotate(-10deg) saturate(1.4) brightness(0.95)':(corruption||0)>=60?'saturate(1.2)':'none',
         animation:chainReady&&canAfford?'riffChainGlow 1.2s ease-in-out infinite':shimmerAnim,
         margin:total>HAND_SIZE?'0 -28px':'0 -22px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
       {/* Hand-drawn top stripe — SVG path with wobble */}
@@ -2908,6 +2909,8 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       {card.rarity==='Rare'&&!card.foil&&!card.mythic&&<div style={{position:'absolute',top:12,left:10,padding:'2px 5px',borderRadius:2,background:'rgba(200,152,56,0.18)',border:'1px solid rgba(200,152,56,0.4)',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--gold)',letterSpacing:2,zIndex:3,textTransform:'uppercase'}}>Rare</div>}
       {card.rarity==='Uncommon'&&!card.foil&&!card.mythic&&<div style={{position:'absolute',top:12,left:10,padding:'2px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--ink-dim)',letterSpacing:2,zIndex:3}}>✦</div>}
       {mastery.border&&<div style={{position:'absolute',bottom:4,left:4,padding:'1px 5px',borderRadius:2,background:'rgba(0,0,0,0.75)',border:'1px solid '+mastery.border+'88',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:mastery.color,letterSpacing:1,textTransform:'uppercase',zIndex:5}}>{mastery.name}</div>}
+      {/* CORRUPTION REQUIREMENT BADGE — shows when card needs more corruption than the player currently has */}
+      {card.corrReq&&(corruption||0)<card.corrReq&&<div style={{position:'absolute',top:-10,right:8,padding:'3px 9px',borderRadius:3,background:'rgba(60,0,90,0.96)',border:'1.5px solid #cc44ff',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--tier-mythic)',letterSpacing:2,zIndex:99999,whiteSpace:'nowrap',textTransform:'uppercase',boxShadow:'0 0 12px rgba(180,80,240,0.6),0 4px 12px rgba(0,0,0,0.9)',textShadow:'0 0 8px rgba(204,68,255,0.8)'}}>🌑 Need {card.corrReq}% Corr</div>}
       <div style={{height:180,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',background:'linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.15))',position:'relative',marginTop:4}}>
         <div style={{position:'absolute',inset:0,background:`radial-gradient(circle at center,${bc}22,transparent 70%)`}}/>
         <CardArtImg id={card.id} emoji={card.emoji} size={120}/>
@@ -5366,7 +5369,7 @@ function App(){
       // applyCard returns false here so handleDropOnStage runs the burnset logic directly
       return false
     }
-    else if(card.id==='overdrive'){if(corruption>=(card.upgraded?50:60)){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{addLog('⚠ Need >=60% Corruption.');return false}}
+    else if(card.id==='overdrive'){const req=card.corrReq||60;if(corruption>=(card.upgraded?50:req)){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{const showReq=card.upgraded?50:req;addLog('⚠ Need ≥'+showReq+'% Corruption (you have '+Math.floor(corruption)+'%)');addFloat('💥 Need '+showReq+'% Corruption',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true);return false}}
     else if(card.id==='crowdsurf'){
       if(!m)return false
       const buff=Math.max(1,hand.length-1)+(card.upgraded?1:0) // -1 because crowdsurf itself is leaving hand
@@ -5418,7 +5421,8 @@ function App(){
       addFloat('+'+scBonus+' 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='darktuning'){
-      if(corruption<40){addLog('🌑 Need ≥40% Corruption for Dark Tuning!');return false}
+      const req=card.corrReq||40
+      if(corruption<req){addLog('🌑 Need ≥'+req+'% Corruption for Dark Tuning! (you have '+Math.floor(corruption)+'%)');addFloat('🌑 Need '+req+'% Corruption',getCenter(bossRef).x,getCenter(bossRef).y-80,'#cc44ff',true);return false}
       const memberCount=corruption>=70?3:2
       const activeSlots=ns.map((m,i)=>m&&!m.tooStoned?i:-1).filter(i=>i>=0)
       for(let i=0;i<Math.min(memberCount,activeSlots.length);i++){

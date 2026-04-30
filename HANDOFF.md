@@ -1,5 +1,5 @@
 # VESTIBULE — HANDOFF DOCUMENT
-## Last updated: April 30, 2026 (mega session)
+## Last updated: May 1, 2026 (overnight polish + sim verification)
 
 ---
 
@@ -24,25 +24,25 @@ Doom metal roguelite deckbuilder in React/Vite. Think Balatro meets Black Sabbat
 Balatro-style "number go up" with doom metal theming.
 
 **Sacred constants:** 420 (stash cap, card height), 69 (deck size).
-**Fonts:** BogartsMetalFont (display), MBScribblesFont (UI/readable), ScratchFont (flavor).
-**CSS vars:** --ink-bone, --blood, --gold (#e8a820), --gold-dim, --gold-dark, --ink-rust, --ink-dim, --rot, --altar, --void.
-**Minimum font size:** 13px (10pt) globally. NEVER go under this.
-**Default readable font:** MBScribblesFont.
+**Fonts:** BogartsMetalFont (display), MBScribblesFont (UI/readable), ScratchFont (flavor — 20pt+ ONLY, lint enforced).
+**Design tokens (App.css :root):** 5 text + 2 semantic + 4 type + 2 tier = 13 tokens. Lint guards on file. `npm run check` enforces.
+**Minimum font size:** 13px (10pt) globally. NEVER go under this. Lint enforced.
+**Default readable font:** MBScribblesFont. ScratchFont is decorative — anything under 20pt MUST use MBScribblesFont. Lint enforced.
 
 ---
 
-## CURRENT STATE (commit 1c598d4)
+## CURRENT STATE (commit 0f1d548 + parallel session art commits — May 1, 2026)
 
 ### What's working:
 - Full game loop: menu → deck select → 9 circles × 3 fights → Lucifer boss → victory
 - Balatro multiplicative combo system (×1.05 per card, corruption mult, artifact triggers)
-- 85 cards, all balanced (8 cards rebalanced this session)
+- 85 cards, all balanced (8 cards rebalanced previously, 1 outlier flagged from sim — Herb Money 0.4% pick)
 - 42 card texts rewritten for clarity (no jargon, plain English)
 - 80/86 card arts are PixelLab pixel art (6 still procedural)
 - 5 booster pack arts (touring/underground/festival/headliner/demonic)
 - Save/resume system (auto-save at fight start)
 - 5 starter decks (Standard/Shredder/Ritualist/Engineer/Survivor)
-- Shop with Sly the Fence character
+- Shop with Sly the Fence character (animated GIF portrait shipped, 172×256 pixel art looping idle in shop slot)
 - Doom Forge card upgrades
 - Pact system (risk/reward modifiers)
 - Score system with grades (D→SS)
@@ -79,6 +79,118 @@ Balatro-style "number go up" with doom metal theming.
 Drop WebM files at `public/vestibule/fx/[tier].webm` — auto-play fullscreen
 with mix-blend-mode:screen. 7 tiers: solid, heavy, critical, massive,
 devastating, ultra, godlike. 1920×1080, black background.
+
+---
+
+## OVERNIGHT POLISH SESSION — APRIL 30 → MAY 1, 2026
+
+Multi-hour shop polish + readability + dopamine-system pass. All commits
+on main, all green builds, all 4 lint rules clean.
+
+### Shop redesign (multiple rounds)
+- Cards-for-sale section scaled to 75% (300×420 → 225×315) freeing center vertical
+- Bottom row (Boosters + Sly's Buyback) grew taller (420 → 520) for prominence
+- New Sly Icon panel beside Sly's Buyback (300×520) — clickable, opens PawnShopModal
+- **Sly portrait shipped** — animated GIF (172×256, looping idle) at `public/sly.gif`,
+  rendered with `objectFit:contain` + `imageRendering:pixelated` in the panel slot
+- Removed redundant "Sell Your Shit" button from Buyback rates panel
+- BACK TO THE PIT button: wider (240px), single line, throbbing red pulse
+  via new `@keyframes throbPulseRed` (2.4s cycle, hover pauses)
+- SLY'S MERCH header: banner taller (54→78), font 26→30, fits inside chevrons
+- "Another Look" → "🎲 Reroll" — wider single-line, wiggle preserved
+- Sly quote text: ScratchFont 13→14 → MBScribblesFont 14-15 (readable)
+- 🍄 Shrooms / 🧪 Acid emojis: 28 → 48 with tinted drop shadows
+- Left column reorganized: Band Recruitment dominates (flex:1, art 200→288),
+  Artifact + Effect Pedal panels bottom-justified
+- Renamed "⛧ Vintage Amp · C{N}" → "⛧ Artifact" (Balatro-Joker logic — items rotate per shop)
+- Renamed "⛧ Effect Pedal · C{N}" → "⛧ Effect Pedal"
+
+### Effect Pedal slots in left sidebar (during fights)
+Always-render 3+ purple slots parallel to artifact tray. Empty state shows
+⚡ icon + "EFFECT PEDAL" placeholder. Filled state has gradient + glow +
+hover tooltip with full effect text. Players see from fight 1 that two
+collectable systems exist.
+
+### Phase banner cleanup
+"⛧ Play Cards" idle text removed (redundant). "⚔ Striking!" / "👿 Boss
+Attacks" still telegraph hands-off animation phases. Tip-of-the-day shows
+during idle in its own positioned div.
+
+### Sly reactive dialogue — extended
+Added 3 new line pools (5 lines each):
+- `hoverArtifact` — top priority when hovering circle artifact panel
+- `cleanedOut` — when shop is fully bought-out / unaffordable
+- `encore` — when entering shop in encore mode (post-Lucifer)
+Wired `encoreMode` prop into ShopScreen, added `hoveringArtifact` state.
+
+### Heat indicator on main menu
+🔥 HEAT 3/10 panel below stake selector. 10-pip row fades gold → orange → red
+as level rises. +15% boss HP per level. "Beat Lucifer to raise Heat" hint
+when not maxed, "⛧ MAX HEAT ⛧" at level 10. Hover tooltip explains system.
+
+### Stats screen (📊 Stats button on main menu)
+Full-screen modal with 12 stat cards in 4-column grid:
+Total Runs, Personal Best, Lifetime Score, Heat Level, Bosses Defeated (X/28),
+Cards Discovered (X/85), Daily Streak, Win Streak, Stakes Conquered (X/6),
+Achievements, Combos Found, Daily Best.
+Bottom panel: top 5 most-played cards with art + count.
+All from existing localStorage — no new tracking added.
+
+### Font legibility migration
+- 41 ScratchFont usages with fontSize<20 → MBScribblesFont
+- 24 ScratchFont usages at fontSize≥20 kept (splash titles, victory text, etc)
+- Pawn shop "Deck is empty.", hunger warnings, polaroid labels, map rewards,
+  tutorial flavor — all migrated
+- New lint rule 1b enforces ScratchFont≥20pt forever
+
+### Hover glitch fix
+Diagnosed 3-way conflict: `throbShop` animation animating box-shadow,
+inline `boxShadow` set at rest, `transition: box-shadow 0.15s` causing
+React re-renders to flicker. Fix: removed inline boxShadow at rest from
+SaleCard + BoosterPack, conditionally applied on hover via spread, removed
+`box-shadow` from transition rule. Animation owns rest state exclusively.
+
+### Band Recruitment border vanishing fix
+Hover gold-glow was washing out same-hued gold border. Brightened border to
+near-white-gold (rgba(255,220,120,1)) on hover with inset highlight.
+
+### Pack art +20%
+Recruitment pack image 240 → 288, since Band Recruitment is now flex:1 and
+deserves the visual weight.
+
+### Empty slot legibility
+Empty Artifact + Effect Pedal placeholder text bumped from 0.45/0.5 alpha
+to 0.65/0.7 with letter-spacing 1→1.5 + fontWeight:900. Still clearly empty,
+now actually readable.
+
+### Design system status
+**13 sanctioned tokens (started at 180 unique inline hex):**
+- 5 text hierarchy: --text-primary / --text-secondary / --text-muted / --text-gold / --text-blood
+- 2 semantic: --text-positive / --text-inverse
+- 4 type identity: --type-riff / --type-corrupt / --type-utility / --type-ember
+- 2 tier identity: --tier-mythic / --tier-foil
+
+**4 lint rules tracked, all clean:**
+1. Font size floor ≥13px
+2. ScratchFont legibility ≥20pt
+3. Text colors on palette (no off-token hex in JSX text styles)
+4. Type-identity tokens
+
+`npm run check` is hard CI guard — passes only on tokens.
+
+### 10K-RUN BALANCE SIM (overnight)
+Ran 10,000 games across all 6 stakes. **Major findings:**
+- ✅ Card economy healthy: 36 cards seen, no dead picks except Herb Money (0.4%)
+- ✅ Slot-machine systems firing: 9 chains/game, 3.4 forge upgrades, 3.4 pacts,
+  43% mentor link engagement
+- ❌ **Lucifer is unreachable at every stake** — 0/10000 wins. C7-C9 boss HP
+  scaling needs a pass. 82% of bronze runs end in Circle 4 or 5.
+- ❌ Acid is functionally broken — 40:1 shroom-to-acid usage ratio
+- ⚠ Hellquakes never fire in sim (corruption-100% never reached because
+  runs don't survive that long)
+
+Full report at `SIM_REPORT_MORNING.md`. Raw outputs at
+`/tmp/sim_results/{stake}.txt`.
 
 ---
 
