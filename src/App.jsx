@@ -79,7 +79,7 @@
 // [ ] Run summary toast on death ("What killed you" highlight)
 // ═══════════════════════════
 
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 let _uidCounter=Date.now()
 function uid(){return(++_uidCounter).toString(36)}
 import './App.css'
@@ -1682,6 +1682,69 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
   )
 }
 
+// ── SLY REACTIVE DIALOGUE ──
+// Sly comments on what JV is *actually doing* — categorized line pools keyed off live state.
+// First match wins (priority order in slyContext). Falls through to ambient when nothing notable is happening.
+const SLY_LINES={
+  multiBuy:[
+    "Easy on the trigger, kid. I gotta restock.",
+    "Slow down — Sly likes a slow burn.",
+    "Buyin' me out tonight. I respect that.",
+    "Christ kid, leave somethin' for the next sucker.",
+  ],
+  boughtPack:[
+    "Open it here, open it there — just don't open it at home.",
+    "Pack's sealed. Mostly. Probably. Mostly probably.",
+    "If somethin' crawls out — that's a feature.",
+    "Heh. Tell me what's in it. ...Wait, no, don't.",
+  ],
+  boughtCard:[
+    "Solid pick. Or not. I don't read the cards.",
+    "That one's been in three bands. Two of 'em died.",
+    "Pleasure doin' business. Don't make eye contact on the way out.",
+    "Take it. Forget where you got it.",
+  ],
+  highCorruption:[
+    "You're glowin', kid. Not in a good way.",
+    "Hungerin' bad, huh? Hunger tax. Everything's marked up.",
+    "I can smell the rot on you. Hot merch for hot souls.",
+    "Stand back a little, will ya? You're leakin'.",
+  ],
+  flushStash:[
+    "Damn kid, you're loaded. C'mere.",
+    "That's a lotta green. Spend it before it spends you.",
+    "Pockets jangling like that, somebody'll notice.",
+    "Whole bandana full. Hope you didn't earn it honest.",
+  ],
+  brokeStash:[
+    "Looking light tonight? I got financing options. (I don't.)",
+    "Pawn somethin'. I take guitars, kidneys, regrets.",
+    "Light pockets, kid. Don't waste my time.",
+  ],
+  deepCircle:[
+    "You made it past Greed? Hell of a thing. Hell of a price too.",
+    "Most kids don't get this far. Most kids don't come back either.",
+    "Down here the markup's worse but the merch is meaner.",
+  ],
+  firstVisit:[
+    "First time? Don't make a habit of it. Or do — I don't care.",
+    "Heard about me from who? ...Don't answer that.",
+    "Look around, kid. Don't touch nothin' unless you're buyin'.",
+  ],
+  ambient:[
+    "Five-finger discount on everything tonight.",
+    "Don't ask, don't tell, don't bring cops.",
+    "Got these off a guy who 'doesn't need em anymore'.",
+    "You buy, you walk, you forget you saw me.",
+    "I take stash, herb, blood — your call, kid.",
+    "Cash only. And by cash I mean stash.",
+    "My cousin works at the venue. Don't worry about it.",
+    "Half off if you don't ask where it came from.",
+    "Stuff just falls into my van, you know how it is.",
+  ],
+}
+const pickSlyLine=(tag)=>{const p=SLY_LINES[tag]||SLY_LINES.ambient;return p[Math.floor(Math.random()*p.length)]}
+
 function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,shroomsInStock,acidInStock,onBuyShrooms,onBuyAcid,corruption,chosenPacts,addLog}){
   const drugMax=isUnlocked('double_dealer')?2:1
   const [hovId,setHovId]=useState(null)
@@ -1692,17 +1755,6 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   const [boughtPackIds,setBoughtPackIds]=useState([])
   const [packsBoughtThisVisit,setPacksBoughtThisVisit]=useState(0)
   const [shopTab,setShopTab]=useState('all') // all, cards, packs, gear
-  const SLY_QUOTES=[
-    "Five-finger discount on everything tonight.",
-    "Don't ask, don't tell, don't bring cops.",
-    "Got these off a guy who 'doesn't need em anymore'.",
-    "You buy, you walk, you forget you saw me.",
-    "I take stash, herb, blood — your call, kid.",
-    "Cash only. And by cash I mean stash.",
-    "My cousin works at the venue. Don't worry about it.",
-    "Half off if you don't ask where it came from."
-  ]
-  const [slyQuoteIndex,setSlyQuoteIndex]=useState(()=>Math.floor(Math.random()*SLY_QUOTES.length))
   const [tearingPack,setTearingPack]=useState(null) // pack object while tear animation plays
   const [tearPhase,setTearPhase]=useState(0) // 0=anticipate, 1=rip, 2=fan, 3=sparks
   // Stash pulse — track direction of last change so the counter pops green (gain) or shakes red (loss)
@@ -1715,7 +1767,36 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
     prevStashRef.current=stash
     if(stash!==prev){const t=setTimeout(()=>setStashPulse(''),520);return()=>clearTimeout(t)}
   },[stash])
-  useEffect(()=>{setBoughtIds([]);setBoughtPackIds([]);setPacksBoughtThisVisit(0);setSlyQuoteIndex(Math.floor(Math.random()*SLY_QUOTES.length))},[shopCards])
+  // Sly's reactive line — derive context tag, re-roll line when context changes, flash on change
+  const slyContext=useMemo(()=>{
+    const totalBuys=boughtIds.length+boughtPackIds.length+(leftBought.cart?1:0)+(leftBought.cpas?1:0)+(leftBought.rec?1:0)
+    const circle=Math.floor(fightIndex/3)+1
+    if(totalBuys>=3)return 'multiBuy'
+    if(boughtPackIds.length>=1)return 'boughtPack'
+    if(boughtIds.length>=1||leftBought.cart||leftBought.cpas||leftBought.rec)return 'boughtCard'
+    if(corruption>=50)return 'highCorruption'
+    if(stash>=300)return 'flushStash'
+    if(stash<=30)return 'brokeStash'
+    if(circle>=6)return 'deepCircle'
+    if(circle===1)return 'firstVisit'
+    return 'ambient'
+  },[boughtIds.length,boughtPackIds.length,leftBought,corruption,stash,fightIndex])
+  const [slyLine,setSlyLine]=useState(()=>pickSlyLine('ambient'))
+  const [slyFlash,setSlyFlash]=useState(false)
+  const slyContextRef=useRef(slyContext)
+  useEffect(()=>{
+    if(slyContextRef.current===slyContext)return
+    slyContextRef.current=slyContext
+    setSlyLine(pickSlyLine(slyContext))
+    setSlyFlash(true)
+    const t=setTimeout(()=>setSlyFlash(false),650)
+    return()=>clearTimeout(t)
+  },[slyContext])
+  // On reroll / new circle, freshen the line within the current pool too
+  useEffect(()=>{
+    setBoughtIds([]);setBoughtPackIds([]);setPacksBoughtThisVisit(0)
+    setSlyLine(pickSlyLine(slyContextRef.current))
+  },[shopCards])
   const [openPackModal,setOpenPackModal]=useState(null) // {pack, cards, picksLeft, picked}
   const circleNum=Math.floor(fightIndex/3)+1
   const hungerActive=corruption>=50
@@ -2348,7 +2429,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             <span style={{position:'relative',zIndex:1,fontFamily:"'BogartsMetalFont',cursive",fontSize:34,color:'var(--blood)',letterSpacing:4,textTransform:'uppercase',whiteSpace:'nowrap',animation:'neonFlicker 4.5s ease-in-out infinite'}}>🚬 SLY'S MERCH 🚬</span>
           </div>
           <div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'var(--ink-dim)',fontStyle:'italic',letterSpacing:0.5,transform:'rotate(-1deg)'}}>Hey kid... wanna see what fell off the truck?</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'var(--ink-rust)',fontStyle:'italic',letterSpacing:0.3,marginTop:1}}>"{SLY_QUOTES[slyQuoteIndex]}" —Sly</div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:slyFlash?'#ffe69a':'var(--ink-rust)',fontStyle:'italic',letterSpacing:0.3,marginTop:1,textShadow:slyFlash?'0 0 14px rgba(255,210,90,0.85), 0 0 4px rgba(255,210,90,0.5)':'none',transition:'color 320ms ease-out, text-shadow 320ms ease-out'}}>"{slyLine}" —Sly</div>
         </div>
 
         {/* ANOTHER LOOK (reroll) — pill badge */}

@@ -31,8 +31,10 @@
 ### Shop Redesign (Claude)
 - [ ] Simplify layout — too many sections overwhelm new players
 - [ ] Cleaner visual hierarchy: cards > artifacts > packs > rest
-- [ ] Artifact preview shows multiplier value prominently
-- [ ] Card compare: show "IN DECK: 2x" on shop cards
+- [x] Artifact preview shows multiplier value prominently (×N MULTIPLIER on circle artifact)
+- [x] Card compare: "IN DECK: Nx" badge on shop cards + STACKED! at 3+
+- [x] **Sly reactive dialogue** — 9 contextual line pools (multiBuy, boughtPack, boughtCard, highCorruption, flushStash, brokeStash, deepCircle, firstVisit, ambient). Line picks based on live state, gold-flash on change.
+- [ ] More Sly contexts: hover-on-artifact whisper, encore-mode greeting, "cleaned out" reaction
 
 ### Code Quality (Claude)
 - [ ] Split App.jsx into modules (8800 lines is unmaintainable)
