@@ -4285,6 +4285,7 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
 function RemasterModal({cards,onConfirm,onClose}){
   const [toDelete,setToDelete]=useState([])
   const [toCopy,setToCopy]=useState(null)
+  const [hovUid,setHovUid]=useState(null)
   const toggleDelete=(uid)=>{
     if(toDelete.includes(uid)){setToDelete(p=>p.filter(x=>x!==uid))}
     else if(toDelete.length<2){setToDelete(p=>[...p,uid])}
@@ -4303,9 +4304,12 @@ function RemasterModal({cards,onConfirm,onClose}){
           const isCopy=toCopy===card.uid
           const canDel=!isCopy&&(isDel||toDelete.length<2)
           const canCopy=!isDel
+          const hov=hovUid===card.uid
           return(
-            <div key={card.uid} style={{width:140,background:'linear-gradient(180deg,#201408,#100804)',border:isDel?'2px solid #ee2222':isCopy?'2px solid #22aa44':'1px solid '+bc+'55',borderRadius:7,overflow:'hidden',opacity:(isDel||isCopy||(!isDel&&!isCopy))?1:0.5,transition:'all 0.2s',flexShrink:0}}>
-              <div style={{height:4,background:bc}}/>
+            <div key={card.uid}
+              onMouseEnter={()=>setHovUid(card.uid)} onMouseLeave={()=>setHovUid(null)}
+              style={{width:140,background:'linear-gradient(180deg,#201408,#100804)',border:isDel?'2px solid #ee2222':isCopy?'2px solid #22aa44':'1px solid '+bc+'55',borderRadius:7,overflow:'visible',opacity:(isDel||isCopy||(!isDel&&!isCopy))?1:0.5,transition:'all 0.2s',flexShrink:0,position:'relative'}}>
+              <div style={{height:4,background:bc,borderRadius:'5px 5px 0 0'}}/>
               <div style={{height:70,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.35)'}}><CardArtImg id={card.id} emoji={card.emoji} size={50}/></div>
               <div style={{padding:'6px 8px 4px'}}>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,color:'var(--text-primary)',textAlign:'center',marginBottom:2}}>{card.name}</div>
@@ -4313,7 +4317,7 @@ function RemasterModal({cards,onConfirm,onClose}){
               </div>
               <div style={{display:'flex',gap:4,padding:'4px 6px 8px'}}>
                 <button onClick={()=>canDel&&toggleDelete(card.uid)}
-                  style={{flex:1,padding:'4px 0',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,background:isDel?'rgba(180,0,0,0.4)':'rgba(60,20,10,0.4)',border:isDel?'1px solid #ee2222':'1px solid rgba(100,40,20,0.4)',borderRadius:2,color:isDel?'#ff4444':'#6a3020',cursor:canDel?'pointer':'not-allowed'}}>
+                  style={{flex:1,padding:'4px 0',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,background:isDel?'rgba(180,0,0,0.4)':'rgba(60,20,10,0.4)',border:isDel?'1px solid #ee2222':'1px solid rgba(100,40,20,0.4)',borderRadius:2,color:isDel?'#ff4444':'var(--text-secondary)',cursor:canDel?'pointer':'not-allowed'}}>
                   {isDel?'✓ DEL':'✗ DEL'}
                 </button>
                 <button onClick={()=>canCopy&&setToCopy(isCopy?null:card.uid)}
@@ -4321,17 +4325,24 @@ function RemasterModal({cards,onConfirm,onClose}){
                   {isCopy?'✓ CPY':'+CPY'}
                 </button>
               </div>
+              {hov&&card.effect&&<div style={{position:'absolute',bottom:'calc(100% + 8px)',left:'50%',transform:'translateX(-50%)',width:240,background:'rgba(8,4,2,0.98)',border:'1px solid '+bc+'aa',borderRadius:5,padding:'10px 12px',zIndex:99999,pointerEvents:'none',boxShadow:'0 8px 32px rgba(0,0,0,0.9), 0 0 16px '+bc+'33'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6,gap:8}}>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:bc,letterSpacing:2,textTransform:'uppercase'}}>{card.type}{card.rarity?' · '+card.rarity:''}</div>
+                  {card.embers>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-gold)'}}>{card.embers}🔥</div>}
+                </div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-primary)',lineHeight:1.45}}>{card.effect}</div>
+              </div>}
             </div>
           )
         })}
       </div>
       <div style={{display:'flex',gap:16}}>
         <button onClick={()=>ready&&onConfirm(toDelete,toCopy)} disabled={!ready}
-          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:ready?'rgba(30,130,30,0.3)':'rgba(20,20,20,0.3)',border:ready?'2px solid #22aa44':'1px solid #333',borderRadius:3,color:ready?'#44dd44':'#555',cursor:ready?'pointer':'not-allowed'}}>
+          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:ready?'rgba(30,130,30,0.3)':'rgba(20,20,20,0.3)',border:ready?'2px solid #22aa44':'1px solid var(--text-muted)',borderRadius:3,color:ready?'#44dd44':'var(--text-muted)',cursor:ready?'pointer':'not-allowed'}}>
           ✓ Apply
         </button>
         <button onClick={onClose}
-          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(80,40,10,0.3)',border:'1px solid rgba(100,60,20,0.5)',borderRadius:3,color:'#8a6030',cursor:'pointer'}}>
+          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(80,40,10,0.3)',border:'1px solid rgba(100,60,20,0.5)',borderRadius:3,color:'var(--text-secondary)',cursor:'pointer'}}>
           Cancel
         </button>
       </div>
@@ -4342,6 +4353,7 @@ function RemasterModal({cards,onConfirm,onClose}){
 function SetlistModal({hand,onConfirm}){
   // Draw 2 already happened — player must pick 1 card to discard before continuing
   const [picked,setPicked]=useState(null)
+  const [hovUid,setHovUid]=useState(null)
   return(
     <div style={{position:'absolute',inset:0,zIndex:9700,background:'rgba(4,2,1,0.95)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,padding:'40px 20px'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#44dd44',textShadow:'0 0 30px rgba(40,200,60,0.5)'}}>Setlist</div>
@@ -4350,19 +4362,28 @@ function SetlistModal({hand,onConfirm}){
         {hand.map((card)=>{
           const bc=card.type==='CORRUPT'?'#aa1111':card.type==='UTILITY'?'#22aa44':card.type==='EMBER'?'#c87820':'#9933cc'
           const sel=picked===card.uid
+          const hov=hovUid===card.uid
           return(
             <div key={card.uid} onClick={()=>setPicked(sel?null:card.uid)}
+              onMouseEnter={()=>setHovUid(card.uid)} onMouseLeave={()=>setHovUid(null)}
               style={{width:150,background:sel?'linear-gradient(180deg,#2a1a0a,#160e05)':'linear-gradient(180deg,#201408,#100804)',
-                border:sel?'2px solid #cc0000':'2px solid '+bc+'66',borderRadius:7,overflow:'hidden',cursor:'pointer',
+                border:sel?'2px solid #cc0000':'2px solid '+bc+'66',borderRadius:7,overflow:'visible',cursor:'pointer',
                 transform:sel?'translateY(-12px) scale(1.05)':'none',transition:'all 0.15s',
-                boxShadow:sel?'0 0 20px rgba(200,0,0,0.6)':'none'}}>
-              <div style={{height:4,background:sel?'#cc0000':bc}}/>
+                boxShadow:sel?'0 0 20px rgba(200,0,0,0.6)':'none',position:'relative'}}>
+              <div style={{height:4,background:sel?'#cc0000':bc,borderRadius:'5px 5px 0 0'}}/>
               <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.3)'}}><CardArtImg id={card.id} emoji={card.emoji} size={60}/></div>
               <div style={{padding:'6px 8px 10px'}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,color:sel?'#ff6666':'#eedfc0',textAlign:'center',marginBottom:3}}>{card.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,color:sel?'#ff6666':'var(--text-primary)',textAlign:'center',marginBottom:3}}>{card.name}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:bc,textAlign:'center',letterSpacing:2,textTransform:'uppercase'}}>{card.type}</div>
               </div>
-              {sel&&<div style={{background:'rgba(180,0,0,0.3)',padding:'4px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#ff6666',letterSpacing:2}}>DISCARD</div>}
+              {sel&&<div style={{background:'rgba(180,0,0,0.3)',padding:'4px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#ff6666',letterSpacing:2,borderRadius:'0 0 5px 5px'}}>DISCARD</div>}
+              {hov&&card.effect&&<div style={{position:'absolute',bottom:'calc(100% + 8px)',left:'50%',transform:'translateX(-50%)',width:240,background:'rgba(8,4,2,0.98)',border:'1px solid '+bc+'aa',borderRadius:5,padding:'10px 12px',zIndex:99999,pointerEvents:'none',boxShadow:'0 8px 32px rgba(0,0,0,0.9), 0 0 16px '+bc+'33'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6,gap:8}}>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:bc,letterSpacing:2,textTransform:'uppercase'}}>{card.type}{card.rarity?' · '+card.rarity:''}</div>
+                  {card.embers>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-gold)'}}>{card.embers}🔥</div>}
+                </div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-primary)',lineHeight:1.45}}>{card.effect}</div>
+              </div>}
             </div>
           )
         })}
@@ -4370,8 +4391,8 @@ function SetlistModal({hand,onConfirm}){
       <button onClick={()=>picked&&onConfirm(picked)} disabled={!picked}
         style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,textTransform:'uppercase',
           padding:'14px 60px',background:picked?'rgba(30,130,30,0.4)':'rgba(20,20,20,0.4)',
-          border:picked?'2px solid #44dd44':'2px solid #333',borderRadius:3,
-          color:picked?'#44dd44':'#444',cursor:picked?'pointer':'not-allowed',transition:'all 0.15s'}}>
+          border:picked?'2px solid #44dd44':'2px solid var(--text-muted)',borderRadius:3,
+          color:picked?'#44dd44':'var(--text-muted)',cursor:picked?'pointer':'not-allowed',transition:'all 0.15s'}}>
         ✓ Discard &amp; Continue
       </button>
     </div>
@@ -4417,6 +4438,7 @@ function TutorialMessage({text,onContinue,isFinal}){
 function App(){
   const [gameState,setGameState]=useState('menu')
   const [screenFade,setScreenFade]=useState(false)
+  const [showDebugHud,setShowDebugHud]=useState(false)
   const prevGameStateRef=useRef('menu')
   useEffect(()=>{
     if(gameState!==prevGameStateRef.current&&gameState!=='playing'){
@@ -6336,6 +6358,8 @@ function App(){
         clearSave();setGameState('end')
       }
       if(e.shiftKey&&(e.key==='H'||e.key==='h')){setCreditsRoll(true)}
+      // Shift+` (tilde) = toggle debug HUD overlay (state inspection)
+      if(e.shiftKey&&(e.key==='`'||e.key==='~')){setShowDebugHud(p=>!p)}
       // Ctrl+Z = Undo last card play
       if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();handleUndoRef.current&&handleUndoRef.current();return}
       if(e.key==='Escape'){setShowPauseOptions(p=>!p)}
@@ -9009,6 +9033,26 @@ function App(){
           textShadow:'0 0 12px currentColor'}}>
           {(()=>{const s=stats.totalDamage+(stats.fightsSurvived||0)*500;return s>=15000?'SS':s>=10000?'S':s>=6000?'A':s>=3000?'B':s>=1000?'C':'D'})()}
         </div>
+      </div>}
+      {/* DEBUG HUD — toggle with Shift+` (tilde). Shows live game state for bug-hunting. */}
+      {showDebugHud&&<div style={{position:'absolute',top:8,right:8,zIndex:9998,fontFamily:'monospace',fontSize:13,lineHeight:1.5,color:'var(--text-primary)',background:'rgba(0,0,0,0.88)',border:'1px solid var(--text-gold)',borderRadius:4,padding:'10px 14px',minWidth:280,maxWidth:340,boxShadow:'0 0 16px rgba(232,168,32,0.3)',pointerEvents:'none',userSelect:'text'}}>
+        <div style={{color:'var(--text-gold)',fontWeight:900,marginBottom:4,letterSpacing:2,fontSize:13}}>━ DEBUG ━</div>
+        <div>state: <span style={{color:'var(--text-gold)'}}>{gameState}</span> · phase: <span style={{color:'var(--text-gold)'}}>{animPhase}</span></div>
+        <div>fight: <span style={{color:'var(--text-gold)'}}>{fightIndex+1}/27</span> · circle: <span style={{color:'var(--text-gold)'}}>{Math.floor(fightIndex/3)+1}</span></div>
+        <div>strikes: <span style={{color:'var(--text-gold)'}}>{strikesLeft}/{fightMaxStrikes}</span> · disc: <span style={{color:'var(--text-gold)'}}>{discardsLeft}</span> · embers: <span style={{color:'var(--text-gold)'}}>{embers}/{maxEmbers}</span></div>
+        <div>corruption: <span style={{color:corruption>=75?'var(--text-blood)':corruption>=50?'var(--text-gold)':'var(--text-primary)'}}>{corruption}%</span> · stash: <span style={{color:'var(--text-gold)'}}>{stash}</span></div>
+        <div>hand: <span style={{color:'var(--text-gold)'}}>{hand.length}</span> · deck: <span style={{color:'var(--text-gold)'}}>{deck.length}</span> · disc: <span style={{color:'var(--text-gold)'}}>{discardPile.length}</span></div>
+        <div>canStrike: <span style={{color:canStrike?'#44cc44':'var(--text-blood)'}}>{canStrike?'YES':'NO'}</span> · enemyHp: <span style={{color:'var(--text-gold)'}}>{enemyHp}</span></div>
+        <div style={{borderTop:'1px solid rgba(232,168,32,0.3)',marginTop:6,paddingTop:6,color:'var(--text-secondary)',letterSpacing:1,fontSize:13}}>STAGE</div>
+        {stage.map((m,i)=>{
+          if(!m)return <div key={i} style={{color:'var(--text-muted)'}}>  [{i}] empty</div>
+          const stoned=m.tooStoned
+          return <div key={i} style={{color:stoned?'var(--text-blood)':'var(--text-primary)'}}>  [{i}] {stoned?'☠':'♦'} {m.name||'?'} {m.hp}/{m.maxHp} atk:{m.atk}{m.isMentor?' MENTOR':''}{m.mentorLinkedToUid?' linked':''}{m.bloodOath?' OATH':''}{m.stoneShield?' shielded':''}</div>
+        })}
+        <div style={{borderTop:'1px solid rgba(232,168,32,0.3)',marginTop:6,paddingTop:6,color:'var(--text-secondary)',letterSpacing:1,fontSize:13}}>FLAGS</div>
+        <div style={{color:'var(--text-secondary)'}}>tutorial:{tutorialFight} wth:{welcomeToHell||'-'} death:{deathCause||'-'}</div>
+        <div style={{color:'var(--text-secondary)'}}>encore:{encoreMode?'Y':'N'} stake:{activeStake?.id||'-'}</div>
+        <div style={{borderTop:'1px solid rgba(232,168,32,0.3)',marginTop:6,paddingTop:6,fontSize:13,color:'var(--text-muted)',letterSpacing:1}}>shift+` to close · screenshot for repro</div>
       </div>}
       {/* CORRUPTION HEARTBEAT VIGNETTE */}
       {corruption>=40&&gameState==='playing'&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:50,
