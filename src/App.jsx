@@ -373,19 +373,19 @@ const CARD_UPGRADES={
 // -- BOSS LOOT: unique drops per circle boss --
 const BOSS_LOOT=[
   null, null,
-  {id:'limbos_echo',name:"Limbo's Echo",emoji:'👁',desc:'×1.15 per Strike remaining when you hit.',effect:'multStrikesLeft',circle:1,mult:1.15,multTrigger:'perStrikesLeft'},
+  {id:'limbos_echo',name:"Limbo's Echo",emoji:'👁',desc:'×1.3 per Strike remaining when you hit.',effect:'multStrikesLeft',circle:1,mult:1.3,multTrigger:'perStrikesLeft'},
   null, null,
   {id:'love_letter',name:'Love Letter',emoji:'💋',desc:'First card each fight is free. ×1.2 if you play it.',effect:'freeFirst',circle:2,mult:1.2,multTrigger:'firstCardFree'},
   null, null,
-  {id:'endless_hunger',name:'Endless Hunger',emoji:'🕳',desc:'×1.3 when your band has 4+ alive members.',effect:'mult4alive',circle:3,mult:1.3,multTrigger:'alive4'},
+  {id:'endless_hunger',name:'Endless Hunger',emoji:'🕳',desc:'×2.0 when your band has 4+ alive members.',effect:'mult4alive',circle:3,mult:2.0,multTrigger:'alive4'},
   null, null,
   {id:'golden_tooth',name:'Golden Tooth',emoji:'🪙',desc:'+5 Stash per boss kill. ×1.1 per 20 Stash.',effect:'stashBoss',circle:4,mult:1.1,multTrigger:'perStash20'},
   null, null,
-  {id:'berserker_rage',name:"Berserker's Rage",emoji:'🔥',desc:'×1.5 if any member has 20+ ATK.',effect:'atk20mult',circle:5,mult:1.5,multTrigger:'memberAtk20'},
+  {id:'berserker_rage',name:"Berserker's Rage",emoji:'🔥',desc:'×2.5 if any member has 20+ ATK.',effect:'atk20mult',circle:5,mult:2.5,multTrigger:'memberAtk20'},
   null, null,
-  {id:'heretics_brand',name:"Heretic's Brand",emoji:'⛧',desc:'×1.3 per corruption threshold passed (25/50/75/100).',effect:'corrThresholds',circle:6,mult:1.3,multTrigger:'perCorrThreshold'},
+  {id:'heretics_brand',name:"Heretic's Brand",emoji:'⛧',desc:'×1.5 per corruption threshold passed (25/50/75/100).',effect:'corrThresholds',circle:6,mult:1.5,multTrigger:'perCorrThreshold'},
   null, null,
-  {id:'the_blade',name:'The Blade',emoji:'🗡',desc:'×2.0 if you play exactly 1 card then Strike. Surgical.',effect:'singleCard',circle:7,mult:2.0,multTrigger:'cards1'},
+  {id:'the_blade',name:'The Blade',emoji:'🗡',desc:'×3.0 if you play exactly 1 card then Strike. Surgical.',effect:'singleCard',circle:7,mult:3.0,multTrigger:'cards1'},
   null, null,
   {id:'mask_of_lies',name:'Mask of Lies',emoji:'🎭',desc:'×1.2 per member with a different keyword on stage.',effect:'uniqueKeywords',circle:8,mult:1.2,multTrigger:'perUniqueKeyword'},
   null, null,
@@ -1015,7 +1015,7 @@ const STARTER_ARTIFACTS=[
   {id:'a7',name:"The Serpent's Kiss",emoji:'🐍',effect:'Start each fight with 1 extra Ember permanently (max 8 total).',cost:18},
   {id:'a8',name:'Stone Tablet',emoji:'🪨',effect:'All band members gain +3 max HP permanently.',cost:12},
   {id:'a9',name:'Resonance Coil',emoji:'⚙️',effect:'×1.15 for each duplicate card in your hand when you Strike.',cost:10,multTrigger:'perDupe',mult:1.15},
-  {id:'a10',name:'Burning Stage',emoji:'🔥',effect:'×2.0 if you play ALL 6 cards before Striking. Total commitment.',cost:22,multTrigger:'cards5',mult:2.0},
+  {id:'a10',name:'Burning Stage',emoji:'🔥',effect:'×3.0 if you play ALL 6 cards before Striking. Total commitment.',cost:22,multTrigger:'cards5',mult:3.0},
   // ── UNLOCKABLE ARTIFACT ────────────────────────────────────────
   {id:'wardrums',name:'War Drums',emoji:'🪘',effect:'+1 Strike per fight permanently (5 Strikes instead of 4).',cost:30,locked:true,unlockAt:5000},
 ]
@@ -1043,11 +1043,11 @@ const STARTER_PASSIVES=[
 // STARTER DECKS — achievement-gated alternate starting decks
 // ═══════════════════════════════════════════════════════════
 const STARTER_DECKS=[
-  {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. 10% win rate.',requirement:null,color:'#c8a060',hpScale:1.10},
-  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. Every card buffs or kills. 8% win rate.',requirement:'beat_standard',color:'#ff4400',hpScale:1.20},
-  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Embrace the darkness. 7% win rate.',requirement:'beat_shredder',color:'#cc44ff',hpScale:0.95},
-  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Find the combo. Copy the copier. 18 UTILITY cards. Break the game. 6% win rate.',requirement:'beat_ritualist',color:'#44aaff',hpScale:1.10},
-  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Extra strikes. Steady scaling. 5% win rate.',requirement:'beat_engineer',color:'#44cc44',hpScale:1.05},
+  {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. 10% win rate.',requirement:null,color:'#c8a060',hpScale:1.85},
+  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. Every card buffs or kills. 8% win rate.',requirement:'beat_standard',color:'#ff4400',hpScale:2.00},
+  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Embrace the darkness. 7% win rate.',requirement:'beat_shredder',color:'#cc44ff',hpScale:1.65},
+  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Find the combo. Copy the copier. 18 UTILITY cards. Break the game. 6% win rate.',requirement:'beat_ritualist',color:'#44aaff',hpScale:1.85},
+  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Extra strikes. Steady scaling. 5% win rate.',requirement:'beat_engineer',color:'#44cc44',hpScale:1.75},
 ]
 function getUnlockedDecks(){
   const achs=getAchievements()
@@ -1142,10 +1142,12 @@ const BOSS_BIOS={
 }
 
 const CIRCLE_ARTIFACTS=[
-  {id:'ca1',name:'The Goat of Mendes',emoji:'🐐',effect:'All Strikes deal ×1.25 damage. Stacks with other multipliers.',cost:28,multTrigger:'always',mult:1.25},
+  {id:'ca1',name:'The Goat of Mendes',emoji:'🐐',effect:'All Strikes deal ×1.5 damage. Stacks with other multipliers.',cost:28,multTrigger:'always',mult:1.5},
   {id:'ca2',name:'Hellfire Amulet',emoji:'🔮',effect:'Start each fight with +2 bonus Embers.',cost:17},
   {id:'ca3',name:'Sabbath Crown',emoji:'👑',effect:'Too Stoned members revive at 50% HP each round.',cost:22},
   {id:'ca4',name:'Wailing Guitar',emoji:'🎸',effect:'First Strike each fight deals double damage.',cost:16},
+  {id:'ca5',name:'Hellmouth Amplifier',emoji:'🌋',effect:'×5.0 damage when Corruption is 80%+. The sound of Hell itself.',cost:40,multTrigger:'corrupt80',mult:5.0},
+  {id:'ca6',name:'Void Engine',emoji:'🕳',effect:'×3.0 for each Too Stoned member. Feed the machine your bandmates.',cost:35,multTrigger:'perStoned',mult:3.0},
 ]
 
 // Card prices by rarity
@@ -6492,7 +6494,7 @@ function App(){
       setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
       setProjectiles([])
       const tripMult=fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION'?2:1
-      const corruptionMult=corruption>=40?1+Math.floor((corruption-25)/25)*0.15:1.0 // 40%=×1.15, 50%=×1.30, 75%=×1.45, 100%=×1.60
+      const corruptionMult=corruption>=100?3.0:corruption>=80?2.0:corruption>=60?1.5:corruption>=40?1.2:1.0 // 40%=×1.15, 50%=×1.30, 75%=×1.45, 100%=×1.60
       // ARTIFACT MULTIPLIER TRIGGERS — Balatro-style Jokers
       let artifactMult=1.0
       const cardsPlayedCount=cardsPlayedRef.current.length||0
@@ -6505,6 +6507,7 @@ function App(){
         if(art.multTrigger==='cards3'&&cardsPlayedCount>=4)fires=1
         if(art.multTrigger==='cards5'&&cardsPlayedCount>=6)fires=1
         if(art.multTrigger==='corrupt50'&&corruption>=60)fires=1
+        if(art.multTrigger==='corrupt80'&&corruption>=80)fires=1
         if(art.multTrigger==='perChain')fires=chainsFired
         if(art.multTrigger==='perStoned')fires=stonedCount
         if(art.multTrigger==='perDupe')fires=handDupes
@@ -6516,7 +6519,7 @@ function App(){
         }
       }
       // CA1 Goat of Mendes — permanent ×1.25 all strikes
-      if(activeArtifacts.some(a=>a.id==='ca1')){artifactMult*=1.25;_breakdownLines.push({type:'multiply',label:'🐐 Goat of Mendes ×1.25',label2:'',runningAfter:0,color:'#e8a820'})}
+      if(activeArtifacts.some(a=>a.id==='ca1')){artifactMult*=1.5;_breakdownLines.push({type:'multiply',label:'🐐 Goat of Mendes ×1.5',label2:'',runningAfter:0,color:'#e8a820'})}
       // BOSS LOOT MULTIPLIER TRIGGERS
       for(const lootId of collectedLoot){
         const loot=BOSS_LOOT.find(l=>l&&l.id===lootId)
@@ -7514,7 +7517,7 @@ function App(){
             ['×️ Strike Multiplier','Every card played MULTIPLIES your Strike by ×1.05. Riff Chains multiply by ×1.78. Multiple chains stack multiplicatively. 6 cards + 1 chain = ×2.39. Stack artifacts for the god run. The multiplier resets each Strike.'],
             ['🌀 Corruption','A risk/reward axis from 0-100%. Some cards and enemies raise it. CORRUPT keyword members get stronger at high corruption. Overdrive requires 60%+. Feedback Loop and Amp the Static scale with it.'],
             ['⚠ Corruption Thresholds','25% THE WHISPERS: Weakest member takes 1 damage each fight. 50% THE HUNGER: All shop prices +25%. 75% THE MADNESS: 15% chance to lose a random card before each Strike. 100% THE POSSESSION: Boss damage +3, but CORRUPT members get one-time +3 ATK.'],
-            ['💀 Corruption = Power','Corruption is a MULTIPLIER. Above 40%: each 25% threshold = ×1.15 damage. At 100% you deal ×1.60 damage but the boss hits +3 harder. Risk vs reward — ride the corruption wave.'],
+            ['💀 Corruption = Power','Corruption is a MULTIPLIER. 40%=×1.2, 60%=×1.5, 80%=×2.0, 100%=×3.0 damage but the boss hits +3 harder. Risk vs reward — ride the corruption wave.'],
             ['🧹 Reducing Corruption','Smoke Break: -15%. Herb Money: -15%. Controlled Feedback: Sets to 50%. Signal Decay: -15%. Atonement pact: -15% after each boss kill. Some descent rewards also reduce corruption.'],
             ['⛧ Pacts','After each boss kill, choose 1 of 2 pact offers. Pacts are permanent buffs for the rest of the run. 13 pacts total including Ember Surge, Iron Strings, Thick Skin, Clean Living, Corruption Engine, Atonement, and more.'],
             ['🔨 Doom Forge','After choosing a pact, the Doom Forge appears. Upgrade one card in your deck permanently. Upgraded cards have stronger effects and some grant permanent HP buffs.'],
@@ -8769,7 +8772,7 @@ function App(){
             // 6) Wailing Guitar artifact: ×2 on first strike
             if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===fightMaxStrikes)dmg*=2
             // 7) Corruption multiplier
-            const corrMult=corruption>=40?1+Math.floor((corruption-25)/25)*0.15:1.0
+            const corrMult=corruption>=100?3.0:corruption>=80?2.0:corruption>=60?1.5:corruption>=40?1.2:1.0
             dmg=Math.round(dmg*corrMult)
             // 8) Artifact multiplier triggers
             let artMult=1.0
@@ -8783,12 +8786,13 @@ function App(){
               if(art.multTrigger==='cards3'&&_cpc>=4)fires=1
               if(art.multTrigger==='cards5'&&_cpc>=6)fires=1
               if(art.multTrigger==='corrupt50'&&corruption>=60)fires=1
+        if(art.multTrigger==='corrupt80'&&corruption>=80)fires=1
               if(art.multTrigger==='perChain')fires=_cf
               if(art.multTrigger==='perStoned')fires=_sc
               if(art.multTrigger==='perDupe')fires=_hd
               if(fires>0)artMult*=Math.pow(art.mult,fires)
             }
-            if(activeArtifacts.some(a=>a.id==='ca1'))artMult*=1.25
+            if(activeArtifacts.some(a=>a.id==='ca1'))artMult*=1.5
             dmg=Math.round(dmg*artMult)
             // 9) Strike multiplier
             const fin=strikeMult>1.0?Math.round(dmg*strikeMult):dmg

@@ -165,7 +165,7 @@ const DECK_MANIFESTS={
   survivor:{battlecry:3,newstrings:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,crowdsurf:2,amp:1,soundwall:1,resonancecard:1,burnset:1,herbmoney:1,doomchord:2,sonicboom:1,necroticamp:1,distortion:2,staticcharge:2,darktuning:2,deathriff:2,controlfeedback:1,dialtoeleven:1,feedbackloop:1,seance:1,bloodritual:1,sigdecay:1,soundcheck:2,roadie:2,wakeup:2,setlist:2,setbreak:2,doublebooking:2,bootlegcopy:1,backstagepass:1,powertap:2,tappedout:2,ampoverload:2,drainthecrowd:2,groupie:1,soundboard:1,slowburn:1,pyromaniac:1,secondwind:1,corrsiphon:1,carrioncall:1},
 }
 const ACTIVE_DECK=DECK_MANIFESTS[DECK_ID]||DECK_MANIFESTS.standard
-const DECK_HP_SCALE={standard:1.10,shredder:1.20,ritualist:0.95,engineer:1.10,survivor:1.05}
+const DECK_HP_SCALE={standard:1.85,shredder:2.00,ritualist:1.65,engineer:1.85,survivor:1.75}
 const HP_SCALE=DECK_HP_SCALE[DECK_ID]||1.0
 // ── PACT REWARDS (12 options, sim picks best 1 of 2 offered) ──
 const PACT_IDS=['ember_surge','iron_strings','thick_skin','dark_bargain','speed_demon','blood_price','clean_living','corruption_engine','merchants_eye','stone_wall','sixth_slot','war_drums'];
@@ -704,7 +704,7 @@ function simFight(gs,phaseHp,luciferPhase){
     if(gs._tripBuff==='DIMENSIONAL_RIFT'||gs._tripBuff==='FRACTAL_VISION')strikeDmg*=2;
     // Apply strike multiplier (0.03 per card played + 0.15 per combo)
     // Corruption power multiplier
-    const corrMult=gs.corruption>=40?1+Math.floor((gs.corruption-25)/25)*0.15:1.0
+    const corrMult=gs.corruption>=100?3.0:gs.corruption>=80?2.0:gs.corruption>=60?1.5:gs.corruption>=40?1.2:1.0
     if(corrMult>1)strikeDmg=Math.round(strikeDmg*corrMult)
     // Artifact multiplier triggers
     let artMult=1.0
@@ -717,11 +717,12 @@ function simFight(gs,phaseHp,luciferPhase){
       if(art.multTrigger==='cards3'&&_cpc>=4)fires=1
       if(art.multTrigger==='cards5'&&_cpc>=6)fires=1
       if(art.multTrigger==='corrupt50'&&gs.corruption>=60)fires=1
+      if(art.multTrigger==='corrupt80'&&gs.corruption>=80)fires=1
       if(art.multTrigger==='perChain')fires=_cf
       if(art.multTrigger==='perStoned')fires=_sc
       if(fires>0)artMult*=Math.pow(art.mult,fires)
     }
-    if(gs.artifacts.some(a=>a.id==='ca1'))artMult*=1.25
+    if(gs.artifacts.some(a=>a.id==='ca1'))artMult*=1.5
     if(artMult>1)strikeDmg=Math.round(strikeDmg*artMult)
     // Boss loot multiplier triggers
     const _lootAlive=gs.stage.filter(m=>!m.tooStoned)
