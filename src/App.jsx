@@ -6348,9 +6348,10 @@ function App(){
     if(debuffCount>0){setBossDebuff(p=>p+debuffCount*2);addLog('🎤 Vocalist debuffs the boss! (-'+(debuffCount*2)+' damage)')}
     cardsToDrawRef.current=cardsPlayedRef.current.length
     setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1)
-      // #10: LUCKY DRAW — seeded random bonus (1 in 10 strikes)
+      // #10: LUCKY DRAW — unlocked after first Lucifer kill, toggleable
+      const _luckyUnlocked=localStorage.getItem('vst_achievement_beat_lucifer')==='1'&&localStorage.getItem('vst_lucky_draw')!=='off'
       const _luckyRng=((runSeed*7+stats.strikesThrown*13+fightIndex*31)%100)
-      if(_luckyRng<10){
+      if(_luckyUnlocked&&_luckyRng<10){
         const _luckyType=_luckyRng%5
         if(_luckyType===0){setStrikeMult(p=>Math.min(66.6,p*1.5));strikeMultRef.current=Math.min(66.6,strikeMultRef.current*1.5);addLog('🍀 LUCKY DRAW! ×1.5 Strike Mult bonus!');addFloat('🍀 LUCKY ×1.5!',960,300,'#ffdd00',true)}
         else if(_luckyType===1){setStash(p=>Math.min(420,p+10));addLog('🍀 LUCKY DRAW! +10 Stash from the crowd!');addFloat('🍀 +10 STASH!',960,300,'#44ff44',true)}
