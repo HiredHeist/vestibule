@@ -3894,8 +3894,8 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
               setStrikesLeft(activeStake.maxStrikes);setFightMaxStrikes(activeStake.maxStrikes);setDiscardsLeft(4);setFightMaxDiscards(4)
               setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
               setGameState('playing');setAnimPhase('idle');setDeathCause(null)
-              setVictoryFired(false);if(victoryFiredRef)victoryFiredRef.current=false
-    corruptCardsGivenRef.current=[];setCorruptionGiftsGiven([])
+              if(victoryFiredRef)victoryFiredRef.current=false
+    corruptCardsGivenRef.current=[]
               addLog('⛧ THE ENCORE BEGINS — All enemies ×2.0 HP! ⛧')
             }}
               style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,letterSpacing:4,
@@ -4557,13 +4557,7 @@ function App(){
     return()=>{document.removeEventListener('click',unlock);document.removeEventListener('keydown',unlock)}
   },[])
   // Volume change handler
-  const setMusicVolume=useCallback((v)=>{
-    const fv=parseFloat(v)
-    localStorage.setItem('vst_music_vol',fv)
-    setMusicVol(fv)
-    const trackName=currentTrackRef.current
-    if(trackName&&audioRef.current[trackName])audioRef.current[trackName].volume=fv
-  },[])
+  
 
   const [streakWins,setStreakWins]=useState(0)
   const [streakLosses,setStreakLosses]=useState(0)
@@ -6981,7 +6975,7 @@ function App(){
     // War Drums: +1 Strike
     if(activeArtifacts.some(a=>a.id==='wardrums')){setStrikesLeft(p=>p+1);setFightMaxStrikes(p=>p+1);addLog('🪘 War Drums! +1 Strike this fight.')}
     setGameState('playing')
-  },[fightIndex,maxEmbers,stage])
+  },[fightIndex,maxEmbers,stage,selectedDeck,activeStake,chosenPacts,activeArtifacts,activePassives,corruption,collectedLoot,encoreMode,bonusDiscards,bonusEmbers,tutorialFight,upgradedCards,heldShrooms,heldAcid,stash])
 
   // ═══════════════════════════════════════════════════════════
   // HANDLE EVENT CHOICE — apply effects, then go to shop
