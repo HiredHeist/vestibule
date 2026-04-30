@@ -2135,8 +2135,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             borderRadius:8,overflow:'hidden',
             cursor:canBuy&&!bought?'pointer':'default',
             transform:hov&&canBuy&&!bought?'translateY(-6px) scale(1.02)':'none',
-            transition:'transform 0.18s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
-            boxShadow:hov&&canBuy&&!bought?'0 16px 48px rgba(0,0,0,0.95),0 0 28px '+gl:'2px 4px 16px rgba(0,0,0,0.7)',
+            transition:'transform 0.18s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s',
+            ...(hov&&canBuy&&!bought?{boxShadow:'0 16px 48px rgba(0,0,0,0.95),0 0 28px '+gl}:{}),
             animation:bought?'':'throbShop 4.5s ease-in-out infinite',opacity:!canBuy&&!bought?0.4:1}}>
           {bought&&<SoldOverlay/>}
           <div style={{height:6,flexShrink:0,background:bc,boxShadow:'0 0 12px '+gl}}/>
@@ -2271,8 +2271,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             borderRadius:10,overflow:'hidden',
             cursor:canBuy?'pointer':'default',
             transform:hov&&canBuy?'translateY(-6px) scale(1.02)':'none',
-            transition:'transform 0.18s,box-shadow 0.15s,border-color 0.15s',
-            boxShadow:hov&&canBuy?'0 16px 48px rgba(0,0,0,0.95),0 0 32px '+ac+'55':'2px 6px 20px rgba(0,0,0,0.7)',
+            transition:'transform 0.18s,border-color 0.15s',
+            ...(hov&&canBuy?{boxShadow:'0 16px 48px rgba(0,0,0,0.95),0 0 32px '+ac+'55'}:{}),
             position:'relative',padding:'0 14px 18px',
             animation:bought||visitLocked?'':'throbShop 4.5s ease-in-out infinite',opacity:!canBuy&&!bought&&!visitLocked?0.4:visitLocked?0.55:1}}>
           {bought&&<SoldOverlay/>}
@@ -2474,18 +2474,18 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             }}
             style={{position:'relative',cursor:can(recruitPack.cost)&&!leftBought.rec&&packsBoughtThisVisit<1?'pointer':'default',
               flex:1,minHeight:0,
-              border:'2px solid '+(leftBought.rec?'rgba(100,65,15,0.3)':'rgba(232,168,32,0.6)'),borderRadius:10,
+              border:'2px solid '+(leftBought.rec?'rgba(100,65,15,0.3)':hovId==='rec'?'rgba(255,220,120,1)':'rgba(232,168,32,0.6)'),borderRadius:10,
               background:'linear-gradient(180deg,#1a1408,#0a0604)',overflow:'hidden',
               opacity:leftBought.rec?0.4:1,
               transform:hovId==='rec'&&!leftBought.rec?'scale(1.02)':'none',
-              transition:'all 0.15s',
+              transition:'transform 0.15s,border-color 0.15s',
               display:'flex',flexDirection:'column',
-              boxShadow:hovId==='rec'&&!leftBought.rec?'0 0 30px rgba(232,168,32,0.3)':'0 0 18px rgba(232,168,32,0.15)'}}
+              ...(hovId==='rec'&&!leftBought.rec?{boxShadow:'0 0 30px rgba(232,168,32,0.45),0 0 8px rgba(255,230,150,0.5) inset'}:{boxShadow:'0 0 18px rgba(232,168,32,0.15)'})}}
             onMouseEnter={()=>setHovId('rec')} onMouseLeave={()=>setHovId(null)}>
             {leftBought.rec&&<SoldOverlay/>}
             {packsBoughtThisVisit>=1&&!leftBought.rec&&<SoldOverlay label="SOLD OUT THIS VISIT"/>}
             <div style={{flex:'1 1 0',minHeight:0,display:'flex',justifyContent:'center',alignItems:'center',padding:'12px 0 6px'}}>
-              <PackArtImg packId={['cassette','cdr','vinyl','rarevinyl','cursed'][Math.min(4,Math.floor(circleNum/2))]} emoji="📦" size={240}/>
+              <PackArtImg packId={['cassette','cdr','vinyl','rarevinyl','cursed'][Math.min(4,Math.floor(circleNum/2))]} emoji="📦" size={288}/>
             </div>
             <div style={{padding:'4px 12px 12px',textAlign:'center',flexShrink:0}}>
               <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:'var(--text-gold)',letterSpacing:3,textShadow:'0 0 14px rgba(232,168,32,0.6)'}}>Band Recruitment</div>
