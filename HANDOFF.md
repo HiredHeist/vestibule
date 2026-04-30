@@ -1,97 +1,244 @@
-# VESTIBULE — Developer Handoff
-**Latest commit: 9715dd9 | April 14, 2026**
+# VESTIBULE — HANDOFF DOCUMENT
+## Last updated: April 30, 2026 (mega session)
 
-## Current Focus: Sprite Assets
-45 pixel art sprites being generated — 17 band members (96×96) + 28 bosses (128×128).
-- **Tool:** PixelLab (pixellab.ai) — free tier, enable "remove background", export PNG
-- **Global prompt prefix:** `pixel art, [SIZE], neutral flat dungeon lighting, no strong light source, transparent background,`
-- **Style anchor:** Generate Bjorn first, use as reference image for all remaining members
-- **Member files:** `public/members/{id}_stage.png` → register in `STAGE_PORTRAITS` (~line 578)
-- **Boss files:** `public/bosses/{id}.png` → wire into `BossSection` (~line 1813), replace 90px emoji div
-- Full prompt list + checkboxes in `TODO.md`
-- **Next after sprites:** Animation frame spec (idle loops, strike trigger, death)
+---
 
-## Quick Start
-```bash
-cd vestibule && npm run dev    # http://localhost:5173/vestibule/
-npm run build                  # Production build to dist/
-node vestibule-sim.js 5000 bronze  # Run simulator
-```
+## WHO YOU ARE
+You are "Roadie" — Claude, the AI dev partner for Vestibule.
+JV (alias "VomitWizard", may change before release) is a solo developer
+and music producer living in rural Minamiyamashiro, Japan. They play doom
+metal, build analog pedals, collect vinyl, and have a large guitar/synth rig.
+GitHub: HiredHeist. Repo: github.com/HiredHeist/vestibule (private).
+PAT: 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 (expires ~Jun 17 2026).
+You have direct git push access to main.
 
-## Architecture
-Single-file React app: `src/App.jsx` (5359 lines, 405KB).
-No component splitting — everything in one file for rapid iteration.
-Vite dev server with HMR. Base path: /vestibule/
+JV works from a three-terminal setup: dev server, git pull, Claude Code CLI.
+JV likes: direct communication, no BS, fast iteration, 420 jokes, doom metal.
+JV hates: tiny unreadable fonts, ugly red corruption overlays, wasted screen space.
 
-## Critical Gotchas
-1. **NEVER put setHand inside setDeck** — React Strict Mode double-fires
-2. **ALL setEnemyHp damage calls MUST check victory** — use triggerVictoryRef.current
-3. **Use REFS for values in useCallback closures:** nextCardFreeRef, allCardsFreeRef, strikeMultRef, triggerVictoryRef
-4. **applyCard/handleDropOnStage/handleStrike** all have comprehensive dependency arrays — verify any new deps are declared ABOVE the callback (temporal dead zone)
-5. **Top-level return order:** victoryCinematic -> welcomeToHell -> circleSplash -> descent -> campfire -> pact -> gameState checks
-6. **Apostrophes** — use "could not" not "couldn't" in JS strings
-7. **UPDATE DOCS ON EVERY PUSH**
-8. **Base path /vestibule/** — use import.meta.env.BASE_URL for assets
-9. **420 is sacred. 666 is the Usurer HP. 69 is the deck size.**
-10. **Mentor links match by ROLE not by name/id**
-11. **cardHeal passives guard with p<=0?p:** — prevents boss resurrection
-12. **Sabbath Sigil is CONSUMABLE** — destroyed after use, never goes to discard
-14. **drawUpTo MUST use refs** — deckRef.current, discRef.current, NEVER state vars
-15. **Card handlers in handleDropOnStage** — must include played card in drawUpTo discard arg: drawUpTo(remaining, deckRef.current, [...discRef.current, card], count)
-13. **victoryFiredRef** — only set inside triggerVictory itself, never externally
+---
 
-## Key Code Locations
-| What | ~Line |
-|------|-------|
-| ENEMIES array | 125 |
-| ALL_MUSICIANS | 160 |
-| CARD_UPGRADES | 247 |
-| BOSS_LOOT | 292 |
-| STREAK_BONUSES | 330 |
-| RIFF_CHAINS | 340 |
-| PACT_REWARDS | 355 |
-| ALL_CARDS | 400 |
-| STARTER_ARTIFACTS | 477 |
-| STARTER_PASSIVES | 494 |
-| cardPrice() | 545 |
-| genShopCards() | 553 |
-| BossSection component | 1813 |
-| DeckPile component | 1841 |
-| EndScreen component | 1870 |
-| StageSlot component | 1697 |
-| HandCard component | 1769 |
-| Music system | 2546 |
-| applyCard | ~2716 |
-| handleDropOnStage | ~3137 |
-| triggerVictory | ~3338 |
-| Safety net useEffect | ~3497 |
-| handleStrike | ~3612 |
-| activateTrip (drugs) | ~3545 |
-| handleShopLeave | ~3970 |
-| handleReset | ~4316 |
-| Combined Attack display | ~5084 |
+## WHAT VESTIBULE IS
+Doom metal roguelite deckbuilder in React/Vite. Think Balatro meets Black Sabbath.
+9 circles of Hell, multiplicative combo system, 85 card pool, 69 cards per deck.
+Balatro-style "number go up" with doom metal theming.
 
-## State Management
-All state lives in App() via useState. Key refs for closure stability:
-- nextCardFreeRef, allCardsFreeRef (ember cost calculations)
-- strikeMultRef (captured before reset in handleStrike)
-- triggerVictoryRef (all setTimeout victory calls go through this)
-- victoryFiredRef (prevents double-fire)
-- deckRef, discRef, handRef (stable deck/discard/hand access)
+**Sacred constants:** 420 (stash cap, card height), 69 (deck size).
+**Fonts:** BogartsMetalFont (display), MBScribblesFont (UI/readable), ScratchFont (flavor).
+**CSS vars:** --ink-bone, --blood, --gold (#e8a820), --gold-dim, --gold-dark, --ink-rust, --ink-dim, --rot, --altar, --void.
+**Minimum font size:** 13px (10pt) globally. NEVER go under this.
+**Default readable font:** MBScribblesFont.
 
-## Simulator
-`vestibule-sim.js` v16.0 — models ALL game mechanics:
-Artifacts, passives, pacts, boss loot, combos, multiplier, hellquake, drugs, genre, mentor links, doom forge, deck thinning, shop AI.
-Usage: `node vestibule-sim.js [games] [stake]`
+---
 
-## Dev Shortcuts (in combat)
-- Shift+S: Jump to shop
-- Shift+D: Trigger death screen
-- Shift+W: Trigger victory cinematic
-- Shift+C: Open Doom Forge
+## CURRENT STATE (commit 1c598d4)
 
-## Audio
-- Music: public/music/*.mp3 (11 tracks, crossfade on switch)
-- SFX: public/sfx/*.mp3 (30 files)
-- playSfx(name, vol?) — volume defaults to 1.0
-- TRACK_MAP determines music per gameState + boss/lucifer/victory overrides
+### What's working:
+- Full game loop: menu → deck select → 9 circles × 3 fights → Lucifer boss → victory
+- Balatro multiplicative combo system (×1.05 per card, corruption mult, artifact triggers)
+- 85 cards, all balanced (8 cards rebalanced this session)
+- 42 card texts rewritten for clarity (no jargon, plain English)
+- 80/86 card arts are PixelLab pixel art (6 still procedural)
+- 5 booster pack arts (touring/underground/festival/headliner/demonic)
+- Save/resume system (auto-save at fight start)
+- 5 starter decks (Standard/Shredder/Ritualist/Engineer/Survivor)
+- Shop with Sly the Fence character
+- Doom Forge card upgrades
+- Pact system (risk/reward modifiers)
+- Score system with grades (D→SS)
+- Daily challenge with "Beat VomitWizard" target (6,666)
+- Lucky Draw (seeded 1-in-10 bonus, locked behind Lucifer kill, toggleable)
+- Collection screen (Pokédex style, filter tabs, completion %, click-to-inspect)
+- 11 music tracks (placeholder) with working volume slider
+- Cold open splash screen with localStorage skip
+- Electron wrapper ready for Steam
+
+### THE ADDICTION UPDATE (20 dopamine features, all live):
+1. Live damage preview pulse on change
+2. Screen effects scaling with damage (8 tiers: 50/200/500/1K/2.5K/5K/10K+)
+3. Ascending pitch beep on each card played (300Hz + 120Hz/card)
+4. Boss HP bar critical pulse below 50%
+5. Post-strike highlight flash ("4,847 DMG ×4.2" + "NEW BEST!")
+6. Stash count-up with cha-ching sounds
+7. Chain fire golden screen flash + rising synth
+8. Strike button escalation (4 tiers: normal/glow/blaze/inferno)
+9. Daily "Beat VomitWizard" score target
+10. Lucky Draw (seeded, post-game unlock, toggleable)
+11. Artifact trigger pulse (icon flashes gold in sidebar)
+12. Corruption heartbeat vignette (red pulse at screen edges)
+13. Chain name callout ("⛧ MOSH MADNESS ⛧" center screen, 52px)
+14. Card mastery pops at 10/25/50/100/250/500 plays
+15. Member MVP after victory ("⭐ MVP: Björn — 24 ATK")
+16. Shop "NEW!" badges on never-played cards
+17. Live grade tracker in top-left (D→C→B→A→S→SS)
+18. Member distress at ≤25% HP (subtle desaturate + shake)
+19. Multiplier milestones (×2/×4/×8/×16 celebrations)
+20. Stash milestones (100/200/300/420 fanfare chord)
+
+### Custom AE splash animation system:
+Drop WebM files at `public/vestibule/fx/[tier].webm` — auto-play fullscreen
+with mix-blend-mode:screen. 7 tiers: solid, heavy, critical, massive,
+devastating, ultra, godlike. 1920×1080, black background.
+
+---
+
+## KEY TECHNICAL DETAILS
+
+### Vite config:
+- `base: '/vestibule/'` — ALL asset paths must use `import.meta.env.BASE_URL`
+- NEVER hardcode `/vestibule/` in asset paths
+- After main.jsx changes: `rm -rf node_modules/.vite` + restart
+
+### React patterns:
+- Named imports only (no `import React from 'react'`)
+- No side effects inside `setX(prev => ...)` updaters (React 18 Strict Mode)
+- Use REFS for values read inside useCallback (stale closure prevention)
+- `lastRiffPlayedRef` pattern: state + ref mirror for useCallback access
+- ErrorBoundary MUST `return this.props.children`
+
+### State architecture:
+- App.jsx is ~9050 lines (needs splitting — on TODO list)
+- handleShopLeave deps: [fightIndex,maxEmbers,stage,selectedDeck,activeStake,
+  chosenPacts,activeArtifacts,activePassives,corruption,collectedLoot,encoreMode,
+  bonusDiscards,bonusEmbers,tutorialFight,upgradedCards,heldShrooms,heldAcid,stash]
+- applyCard deps are comprehensive (line ~5564)
+- CardArtImg auto-loads PNGs from `public/vestibule/cards/[id].png`
+- PackArtImg uses PACK_ART_MAP: {cassette:'touring',cdr:'underground',
+  vinyl:'festival',rarevinyl:'headliner',cursed:'demonic'}
+
+### Known patterns that WILL break things:
+- Orphaned state setters (state deleted but setter call remains) → crash
+- `setUnlockTab_` has underscore — wrapper `setUnlockTab` calls it
+- `const [musicVol,setMusicVol]` not `setMusicVolume`
+- Always check `getMasteryPlays()` exists (was missing, broke all card plays)
+- Every commit MUST update TODO.md
+
+---
+
+## BUGS FIXED THIS SESSION
+1. `setSkipNextDiscard` orphaned — crashed "Back to the Pit" every click
+2. `setVictoryFired` orphaned — would crash encore mode
+3. `setCorruptionGiftsGiven` orphaned — would crash encore mode
+4. `setMusicVolume` → `setMusicVol` name mismatch — music slider broken
+5. `getMasteryPlays` undefined — broke ALL card plays (cards wouldn't leave hand)
+6. Demo Tape stale closure (lastRiffPlayed → lastRiffPlayedRef)
+7. Demo Tape only handled 12/31 riff cards — added all 31 + generic fallback
+8. `corruption` not passed as prop to HandCard
+9. 83 hardcoded `/vestibule/` asset paths fixed for Vite BASE_URL
+10. 4 "permanentlyanent" typos fixed
+11. handleShopLeave stale closure — deps expanded from 3 to 18 state variables
+12. Music volume slider now persists to localStorage AND updates live playback
+13. setUnlockTab duplicate declaration fixed
+14. setGenreCounts orphaned (genre system removed)
+15. Victory/retry buttons used undefined `victory` instead of `isVictory`
+
+---
+
+## WHAT JV NEEDS TO DO (ART + AUDIO)
+
+### Card art still procedural (6 cards):
+- skullsplitter, tappedout, hungercard, madnesscard, whispercard, void_pact
+- 128×128, transparent bg, drop at public/vestibule/cards/[id].png
+
+### Artifacts (12, all procedural):
+a1, a3, a5, a6, a8, a9, a10, wardrums, ca1, ca2, ca3, ca4
+- 128×128, gold accent, public/vestibule/artifacts/
+
+### Passives (10, all procedural):
+p1-p10
+- 128×128, purple accent, public/vestibule/passives/
+
+### Booster packs: need retheme to match names (cassette/cdr/vinyl/rarevinyl/cursed)
+
+### Other art needed:
+- Card back (128×178), Sly portrait (128×128)
+- 5 deck covers (128×128), App icon (512×512)
+- Recruitment pack art, Steam capsules (4 sizes)
+- 7 AE damage splash animations (1920×1080 WebM, see ART_TODO.md)
+- Cold open AE animation (added to TODO)
+
+### Audio (blocked until CA guitar trip):
+- Replace 11 placeholder tracks with real doom metal
+- SFX: card play, strike, chain, stoned, boss kill
+
+---
+
+## WHAT CLAUDE NEEDS TO DO (CODE)
+
+### HIGH PRIORITY:
+1. Shop overhaul — make it feel like a back-alley deal, not a spreadsheet
+2. Wire pack art into BoosterPack tear animation
+3. Wire recruitment pack to use pack art
+4. Wire card back, deck covers, Sly portrait when art is ready
+5. UI cleanup pass after 13px font bump (layouts may overflow)
+
+### MEDIUM PRIORITY:
+6. Split App.jsx into modules (~9050 lines is dangerous)
+7. Run statistics page (lifetime stats)
+8. Mobile touch controls (tap-to-select, tap-member-to-play)
+9. More dopamine juice (screen crack overlays, particles, camera zoom)
+10. Pack tear-open animation (Pokémon style)
+
+### LOW PRIORITY:
+11. Heat system rewards visible on menu
+12. Electron build testing
+13. Sim recalibration after card rebalance
+14. Steam achievements integration
+
+---
+
+## CARD BALANCE CHANGES THIS SESSION
+
+### Cost reductions (8 cards):
+- Battle Cry: 2e → 1e
+- Dark Tuning: 3e → 2e
+- Possessed Performance: 4e → 3e
+- Stage Dive: 4e → 3e
+- Sonic Boom: 4e → 3e
+- Skull Splitter: 3e → 2e
+- Feedback Loop: 3e → 2e
+- Amp the Static: 3e → 2e
+
+### Text clarity (42 cards rewritten):
+- No jargon, no math homework, plain English
+- "×2 ATK this Strike" → "DOUBLE damage"
+- "Target attacks again this Strike" → "Target attacks TWICE"
+- Full list in CARD_REFERENCE.md
+
+---
+
+## DESIGN PHILOSOPHY
+- 69 = deck size, 85 = total card pool. Not all cards appear in every run.
+- Permanent ATK buffs > direct damage. No division math.
+- Every card should do ONE thing simply.
+- Nuclear moments 1 in 20 strikes.
+- Corruption is POWER (risk/reward).
+- Target: most addictive card game possible.
+- Price: $4.20 pre-order / $6.66 full / $9.99 release.
+- Ship readiness: 8/10. Music is #1 launch blocker.
+- The number 420 is sacred — never change as stash cap or card height.
+- Dev alias: VomitWizard (may change before release).
+- JV has ~1 month of funds. Ship Early Access ASAP.
+- Path: Steam → Mobile ($4.99) → Console (publisher deal after 10k units).
+
+---
+
+## HOW TO START A NEW SESSION
+1. `cd ~/vestibule && git pull`
+2. Read this HANDOFF.md
+3. Check TODO.md and ART_TODO.md for current priorities
+4. Ask JV "what are we building?" and go
+
+## REFERENCE FILES IN REPO:
+- HANDOFF.md (this file)
+- TODO.md (task list)
+- ART_TODO.md (all art needed with descriptions)
+- CARD_REFERENCE.md (all 85 cards with costs/effects)
+- AUDIT_REPORT.md (code health status)
+- CARD_ART_GUIDE.md (PixelLab prompt descriptions)
+- STEAM.md (Electron build guide)
+- SIMULATION_REPORT.md (balance data)
+
+## TRANSCRIPT LOCATION:
+/mnt/transcripts/ — contains full conversation history from all sessions.
+Read incrementally (files are massive). Check journal.txt for catalog.
