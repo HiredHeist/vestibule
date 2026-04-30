@@ -2636,14 +2636,14 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,
                   color:'#cc88ff',textAlign:'center',
                   textShadow:'0 0 14px rgba(180,80,240,0.8)',letterSpacing:2,flexShrink:0}}>SLY</div>
-                {/* Sly portrait slot — pixel art animation goes here. Slot interior = 280×420 (after padding/title). */}
+                {/* Sly portrait — 172×256 source, scales to fill 280×420 slot via object-fit. Pixelated rendering preserves the pixel art. */}
                 <div data-sly-portrait="" style={{width:280,height:420,flexShrink:0,
                   background:'radial-gradient(ellipse at 50% 40%, rgba(80,40,140,0.35), rgba(30,10,50,0.85) 70%)',
-                  border:'1px dashed rgba(200,140,255,0.35)',borderRadius:8,
-                  display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:8,
-                  position:'relative'}}>
-                  <div style={{fontSize:96,opacity:0.5,filter:'drop-shadow(0 0 16px rgba(180,80,240,0.5))'}}>🚬</div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'rgba(200,140,255,0.55)',fontStyle:'italic',letterSpacing:0.5,textAlign:'center',padding:'0 12px'}}>portrait pending</div>
+                  border:'1px solid rgba(200,140,255,0.35)',borderRadius:8,
+                  display:'flex',alignItems:'center',justifyContent:'center',
+                  position:'relative',overflow:'hidden'}}>
+                  <img src={(import.meta.env.BASE_URL||'/')+'sly.gif'} alt="Sly"
+                    style={{width:'100%',height:'100%',objectFit:'contain',imageRendering:'pixelated',display:'block'}}/>
                 </div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:2,
                   color:pawnSalesLeft>0?'#cc88ff':'#4a2a6a',textTransform:'uppercase',textAlign:'center',flexShrink:0,
