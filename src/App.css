@@ -626,6 +626,30 @@ body {
   50%      { text-shadow: 0 3px 9px rgba(196,30,58,0.85), 0 7px 18px rgba(150,0,10,0.55); }
 }
 
+/* Throbbing red pulse — slow, chill cadence (~2.4s), impossible to miss.
+   Drives box-shadow + border-color + background to give the BACK TO THE PIT
+   button an unmissable but non-frantic heartbeat. */
+@keyframes throbPulseRed {
+  0%, 100% {
+    box-shadow:
+      0 0 18px rgba(196,30,58,0.45),
+      0 0 36px rgba(196,30,58,0.20),
+      0 6px 18px rgba(120,0,10,0.45),
+      inset 0 0 14px rgba(150,0,20,0.20);
+    background: rgba(120,8,8,0.32);
+    border-color: rgba(196,30,58,0.85);
+  }
+  50% {
+    box-shadow:
+      0 0 36px rgba(232,40,72,0.95),
+      0 0 80px rgba(232,40,72,0.55),
+      0 6px 22px rgba(160,0,15,0.65),
+      inset 0 0 26px rgba(196,30,58,0.45);
+    background: rgba(160,18,18,0.55);
+    border-color: rgba(255,80,100,1);
+  }
+}
+
 /* Drifting back-alley dust — very slow horizontal float */
 @keyframes dustDrift {
   0%   { transform: translate(0, 0); opacity: 0.05; }
