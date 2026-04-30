@@ -2198,9 +2198,9 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             boxShadow:'0 0 16px '+ac+'99'}}/>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:3,
             color:ac,textTransform:'uppercase',opacity:1,marginTop:8,flexShrink:0}}>VESTIBULE</div>
-          <div style={{fontSize:72,flex:'0 0 38%',display:'flex',alignItems:'center',justifyContent:'center',
+          <div style={{flex:'0 0 38%',display:'flex',alignItems:'center',justifyContent:'center',
             filter:'drop-shadow(0 0 '+(hov?'20px':'8px')+' '+ac+(hov?'cc':'66')+')',
-            transition:'filter 0.15s'}}>{pack.emoji}</div>
+            transition:'filter 0.15s'}}><PackArtImg packId={pack.id} emoji={pack.emoji} size={140}/></div>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:40,
             color:ac,textAlign:'center',lineHeight:1.2,
             textShadow:'0 0 16px '+ac+'99',flexShrink:0,padding:'4px 4px'}}>{pack.name}</div>
@@ -2249,7 +2249,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             transform:tearPhase>=1?'scale(1.12)':undefined,
             clipPath:tearPhase>=1?'polygon(0 0, 100% 0, 92% 12%, 78% 22%, 86% 36%, 72% 50%, 84% 64%, 70% 78%, 88% 90%, 100% 100%, 0 100%)':'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
             transition:'clip-path 300ms ease-out'}}>
-            <div style={{fontSize:96,filter:'drop-shadow(0 0 16px '+ac+'99)'}}>{pack.emoji}</div>
+            <div style={{filter:'drop-shadow(0 0 16px '+ac+'99)',display:'flex',alignItems:'center',justifyContent:'center'}}><PackArtImg packId={pack.id} emoji={pack.emoji} size={180}/></div>
             <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,color:ac,textShadow:'0 0 14px '+ac+'99',letterSpacing:2,textAlign:'center',padding:'0 8px'}}>{pack.name}</div>
           </div>
           {/* Foil flash overlay during rip */}
@@ -2591,6 +2591,18 @@ const LOADING_TIPS=[
   'Band Synergy: buff 3+ members and your whole band deals bonus damage.',
   'Corruption Gambit: play Void Pact (×2.5 mult) when corruption is already at 60% for maximum carnage.',
 ]
+
+// ═══ PACK ART — maps pack IDs to art files ═══
+const PACK_ART_MAP={cassette:'touring',cdr:'underground',vinyl:'festival',rarevinyl:'headliner',cursed:'demonic'}
+function PackArtImg({packId,emoji,size=120,style={}}){
+  const [hasArt,setHasArt]=React.useState(false)
+  const artFile=PACK_ART_MAP[packId]||packId
+  const src='/vestibule/packs/'+artFile+'.png'
+  React.useEffect(()=>{const img=new window.Image();img.onload=()=>setHasArt(true);img.onerror=()=>setHasArt(false);img.src=src},[packId])
+  if(hasArt)return <img src={src} alt={packId} style={{width:'auto',height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
+  return <span style={{fontSize:size*0.6,...style}}>{emoji}</span>
+}
+
 function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption,animPhase,ghostCard,onQuickPlay}){
   const [over,setOver]=useState(false)
   const [showTip,setShowTip]=useState(false)
