@@ -8717,14 +8717,25 @@ function App(){
                   </div>}
                 </div>
               )})}
-              {/* PASSIVE TRAY (Effect Pedals) */}
-              {activePassives.length>0&&<div style={{marginTop:6,borderTop:'1px solid rgba(130,50,180,0.3)',paddingTop:4}}>
-                {activePassives.map((p,i)=><div key={i} style={{width:100,height:52,border:'1px solid rgba(153,51,204,0.5)',borderRadius:4,display:'flex',alignItems:'center',gap:6,padding:'0 6px',background:'linear-gradient(180deg,rgba(20,8,30,0.95),rgba(10,4,15,0.95))',boxShadow:'0 0 8px rgba(130,50,200,0.2)',marginBottom:3,cursor:'help'}}
-                  title={p.effect}>
-                  <span style={{fontSize:22}}>{p.emoji}</span>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--tier-mythic)',lineHeight:1.2,letterSpacing:0.3}}>{p.name}</div>
-                </div>)}
-              </div>}
+              {/* EFFECT PEDALS (Passives) — always 3 slots minimum, max 5. Balatro Joker energy. */}
+              {(()=>{const slotCount=Math.max(3,activePassives.length);return [...Array(slotCount)].map((_,i)=>{const p=(activePassives||[])[i];return(
+                <div key={'p'+i} style={{position:'relative'}}
+                  onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-passtip]');if(t)t.style.opacity='1'}}
+                  onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-passtip]');if(t)t.style.opacity='0'}}>
+                  {p?<div style={{width:100,height:135,border:'2px solid rgba(153,51,204,0.65)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,background:'linear-gradient(180deg,rgba(34,12,48,0.95),rgba(18,6,28,0.95))',boxShadow:'0 0 14px rgba(153,51,204,0.4),inset 0 0 8px rgba(153,51,204,0.12)',cursor:'help'}}>
+                    <div style={{fontSize:48,filter:'drop-shadow(0 0 8px rgba(204,136,255,0.5))',lineHeight:1}}>{p.emoji}</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:0.5,color:'var(--tier-mythic)',textTransform:'uppercase',textAlign:'center',lineHeight:1.1,padding:'0 4px'}}>{p.name}</div>
+                  </div>
+                  :<div style={{width:100,height:135,border:'1px dashed rgba(153,51,204,0.32)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(20,8,30,0.65)'}}>
+                    <div style={{fontSize:42,opacity:0.4,textShadow:'0 0 12px rgba(204,136,255,0.4)',lineHeight:1}}>⚡</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:1,color:'rgba(180,130,220,0.5)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Effect<br/>Pedal</div>
+                  </div>}
+                  {p&&<div data-passtip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:108,top:0,zIndex:99999,pointerEvents:'none',minWidth:200,maxWidth:280,background:'rgba(12,7,18,0.97)',border:'1px solid rgba(153,51,204,0.6)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,color:'var(--tier-mythic)',marginBottom:4}}>{p.emoji} {p.name}</div>
+                    <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'var(--text-secondary)',fontStyle:'italic',lineHeight:1.4}}>{p.effect}</div>
+                  </div>}
+                </div>
+              )})})()}
             </div>
             {stage.map((m,i)=>(
               <div key={i} style={{position:'relative',zIndex:typeof strikingMemberIdx!=='undefined'&&strikingMemberIdx===i?200:1}}>
@@ -8760,14 +8771,15 @@ function App(){
                 <div style={{display:footerCollapsed?'none':'flex',alignItems:'center',justifyContent:'center',gap:10,padding:'1px 20px 2px',position:'relative',zIndex:5,flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)'}}>
           {/* FOOTER COLLAPSE TOGGLE */}
           <div onClick={()=>setFooterCollapsed(p=>!p)} style={{position:'absolute',right:8,top:-14,zIndex:10,cursor:'pointer',fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',background:'rgba(20,12,4,0.85)',border:'1px solid rgba(138,117,96,0.25)',borderRadius:2,padding:'2px 10px',letterSpacing:3,textTransform:'uppercase',transition:'color 0.2s'}} onMouseEnter={e=>e.currentTarget.style.color='var(--ink-bone)'} onMouseLeave={e=>e.currentTarget.style.color='var(--ink-dim)'}>{'▼ Hide'}</div>
-          {/* PHASE BANNER — left side, absolute so it never shifts center content */}
-          <div style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:4,textTransform:'uppercase',
-            color:phaseBanner==='play'?'var(--ink-dim)':phaseBanner==='strike'?'var(--blood)':'var(--blood)',
-            textShadow:phaseBanner==='play'?'none':'0 0 12px '+(phaseBanner==='strike'?'rgba(196,30,58,0.6)':'rgba(196,30,58,0.6)'),
-            transition:'color 0.2s',opacity:phaseBanner==='play'?0.7:0.95}}>
-            {phaseBanner==='play'?'⛧ Play Cards':phaseBanner==='strike'?'⚔ Striking!':'👿 Boss Attacks'}
-            {currentTip&&phaseBanner==='play'&&<div style={{fontSize:13,color:'var(--ink-dim)',letterSpacing:1,marginTop:2,fontWeight:400,textTransform:'none',opacity:0.6,maxWidth:200}}>💡 {currentTip}</div>}
-          </div>
+          {/* PHASE BANNER — only shows during strike/boss (when player needs heads-up that animation is playing). 'play' phase is silent — the player knows what to do. */}
+          {phaseBanner!=='play'&&<div style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:4,textTransform:'uppercase',
+            color:'var(--blood)',
+            textShadow:'0 0 12px rgba(196,30,58,0.6)',
+            transition:'color 0.2s',opacity:0.95}}>
+            {phaseBanner==='strike'?'⚔ Striking!':'👿 Boss Attacks'}
+          </div>}
+          {/* TIP HINT — separately rendered, only on idle 'play' phase, low-key bottom-left */}
+          {currentTip&&phaseBanner==='play'&&<div style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',fontSize:13,color:'var(--ink-dim)',letterSpacing:1,fontWeight:400,textTransform:'none',opacity:0.55,maxWidth:240,fontFamily:"'MBScribblesFont',serif",pointerEvents:'none'}}>💡 {currentTip}</div>}
           {/* PACT ICONS — keep the hover tooltips, remove redundant Combined Attack readout (DEALS X DMG',animation:'dmgPreviewPulse 0.3s ease-out covers that now) */}
           {chosenPacts.length>0&&<div style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',display:'flex',gap:4}}>
             {chosenPacts.filter(Boolean).map(pid=>{const p=PACT_REWARDS.find(r=>r.id===pid);return p?<div key={pid} style={{position:'relative',cursor:'help'}}
