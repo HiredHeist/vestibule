@@ -2498,7 +2498,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
 
           {/* CIRCLE ARTIFACT */}
           {circleArtifact&&<div style={{border:'1px solid rgba(200,120,32,0.4)',borderRadius:8,padding:'8px',background:'rgba(10,6,2,0.4)'}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:'#c87820',textAlign:'center',textTransform:'uppercase',marginBottom:4}}>⛧ Vintage Amp · C{circleNum}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:'var(--type-ember)',textAlign:'center',textTransform:'uppercase',marginBottom:4}}>⛧ Vintage Amp · C{circleNum}</div>
             <LeftCard item={circleArtifact} price={circleArtifact.cost}
               label="" accent='#c87820' id='cart'
               sold={leftBought.cart||!!circleCartBought||activeArtifacts.some(a=>a.id===circleArtifact.id)||(soldIds||[]).includes(circleArtifact.id)}
@@ -2508,7 +2508,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
 
           {/* CIRCLE PASSIVE (Effect Pedal) */}
           {circlePassive&&<div style={{border:'1px solid rgba(153,51,204,0.4)',borderRadius:8,padding:'8px',background:'rgba(10,6,2,0.4)'}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:'#9933cc',textAlign:'center',textTransform:'uppercase',marginBottom:4}}>⛧ Effect Pedal · C{circleNum}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:'var(--type-riff)',textAlign:'center',textTransform:'uppercase',marginBottom:4}}>⛧ Effect Pedal · C{circleNum}</div>
             <LeftCard item={circlePassive} price={circlePassive.cost}
               label="" accent='#9933cc' id='cpas'
               sold={leftBought.cpas||!!circleCpasBought||activePassives.some(p=>p.id===circlePassive.id)||(soldIds||[]).includes(circlePassive.id)}
@@ -4295,7 +4295,7 @@ function RemasterModal({cards,onConfirm,onClose}){
     <div style={{position:'absolute',inset:0,zIndex:9700,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,padding:'20px'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'var(--text-secondary)'}}>The Remaster</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:15,color:'var(--text-secondary)',fontStyle:'italic',textAlign:'center'}}>
-        Click <span style={{color:'var(--text-blood)',fontWeight:900}}>2 cards to delete</span> · Click <span style={{color:'#22aa44',fontWeight:900}}>1 card to copy</span>
+        Click <span style={{color:'var(--text-blood)',fontWeight:900}}>2 cards to delete</span> · Click <span style={{color:'var(--type-utility)',fontWeight:900}}>1 card to copy</span>
       </div>
       <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center',maxWidth:1100,overflowY:'auto',maxHeight:'55vh'}}>
         {cards.map((card)=>{

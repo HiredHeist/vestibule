@@ -91,7 +91,11 @@ for (const file of files) {
 
     // Rule 2: text color must be a token (only enforce inside JSX styles)
     if (!isJsxStyle) continue
-    const colorMatches = line.matchAll(/color:'([^']+)'/g)
+    // ErrorBoundary fallback — debug-only, always-visible. Skip line.
+    if (/className=['"]error-boundary|RENDER ERROR/.test(line)) continue
+    // Require `color:` to be preceded by whitespace, comma, or `{` so we only match
+    // object-property syntax — not `t.color:'1px solid...'` from ternary expressions.
+    const colorMatches = [...line.matchAll(/(?<=[\s,{])color:'([^']+)'/g)]
     for (const m of colorMatches) {
       const value = m[1]
       // Skip rgba/rgb (handled separately) and any non-hex non-var
