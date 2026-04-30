@@ -7511,7 +7511,7 @@ function App(){
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#e8a820'}}>Music Volume</span>
             <div style={{display:'flex',alignItems:'center',gap:10}}>
               <input type="range" min="0" max="1" step="0.05" value={musicVol}
-                onChange={e=>setMusicVol(parseFloat(e.target.value))}
+                onChange={e=>{const v=parseFloat(e.target.value);setMusicVol(v);localStorage.setItem('vst_music_vol',v)}}
                 style={{width:120,accentColor:'#e8a820',cursor:'pointer'}}/>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#aa8030',minWidth:36,textAlign:'right'}}>{Math.round(musicVol*100)}%</span>
             </div>
@@ -8796,7 +8796,7 @@ function App(){
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'#e8a820'}}>Music Volume</span>
               <div style={{display:'flex',alignItems:'center',gap:8}}>
                 <input type="range" min="0" max="1" step="0.05" value={musicVol}
-                  onChange={e=>setMusicVol(parseFloat(e.target.value))}
+                  onChange={e=>{const v=parseFloat(e.target.value);setMusicVol(v);localStorage.setItem('vst_music_vol',v)}}
                   style={{width:100,accentColor:'#e8a820',cursor:'pointer'}}/>
                 <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:'#aa8030',minWidth:30,textAlign:'right'}}>{Math.round(musicVol*100)}%</span>
               </div>
