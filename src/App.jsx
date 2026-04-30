@@ -4556,8 +4556,13 @@ function App(){
     document.addEventListener('keydown',unlock)
     return()=>{document.removeEventListener('click',unlock);document.removeEventListener('keydown',unlock)}
   },[])
-  // Volume change handler
-  
+  // Volume change handler — update currently playing track when slider moves
+  useEffect(()=>{
+    const track=currentTrackRef.current
+    if(track&&audioRef.current[track]){
+      audioRef.current[track].volume=musicVol
+    }
+  },[musicVol])
 
   const [streakWins,setStreakWins]=useState(0)
   const [streakLosses,setStreakLosses]=useState(0)
