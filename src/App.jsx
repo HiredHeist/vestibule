@@ -7750,7 +7750,7 @@ function App(){
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'#c8a040',
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(200,160,40,0.4)',borderRadius:6,
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
-              🏆 Mastery ({getTotalMastery().maxed}/{ALL_CARDS.filter(c=>!c.shopOnly&&c.id!=='contract').length})
+              📀 Collection
             </button>
           </div>
 
