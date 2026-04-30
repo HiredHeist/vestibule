@@ -3041,91 +3041,90 @@ function TrophyWall({onClose}){
 
 function MasteryGallery({onClose}){
   const data=getMasteryData()
-  const cards=ALL_CARDS.filter(c=>!c.shopOnly&&c.id!=='contract')
-  const totals=getTotalMastery()
-  const holoAnim='@keyframes holoShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}'
-  const tierCounts=MASTERY_TIERS.map(t=>({name:t.name,count:cards.filter(c=>{const p=data[c.id]||0;let tier=MASTERY_TIERS[0];for(const tt of MASTERY_TIERS){if(p>=tt.min)tier=tt};return tier.name===t.name}).length}))
-
-  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.99)',display:'flex',flexDirection:'column',alignItems:'center',padding:'14px 30px',overflowY:'auto'}}>
-    <style>{holoAnim}</style>
-    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',width:'100%',maxWidth:1200,marginBottom:2}}>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:46,color:'#c8a040',textShadow:'0 0 30px rgba(200,160,40,0.4),2px 2px 0 #000',letterSpacing:6}}>Card Mastery</div>
-      <button onClick={onClose} style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:'#cc4444',background:'rgba(80,0,0,0.4)',border:'2px solid #aa2222',borderRadius:6,padding:'8px 24px',cursor:'pointer',letterSpacing:3,textTransform:'uppercase'}}>✕ Close</button>
-    </div>
-    <div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'#a09060',fontStyle:'italic',marginBottom:4}}>Play cards across runs to unlock visual upgrades</div>
-
-    {/* Tier summary */}
-    <div style={{display:'flex',gap:10,marginBottom:8,flexWrap:'wrap',justifyContent:'center'}}>
-      {MASTERY_TIERS.slice(1).map(t=>(
-        <div key={t.name} style={{display:'flex',alignItems:'center',gap:6,padding:'4px 14px',background:'rgba(0,0,0,0.4)',border:'1px solid '+t.border+'66',borderRadius:4}}>
-          <div style={{width:10,height:10,borderRadius:'50%',background:t.color,boxShadow:'0 0 6px '+t.glow}}/>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:t.color,fontWeight:900}}>{t.name}</span>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#8a7050'}}>({t.min}+ plays)</span>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#c8a060',fontWeight:900}}>{tierCounts.find(tc=>tc.name===t.name)?.count||0}</span>
-        </div>
-      ))}
-      <div style={{padding:'4px 14px',background:'rgba(0,0,0,0.4)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:4}}>
-        <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#c8a060'}}>{totals.total.toLocaleString()} total plays · {totals.maxed} Legendary</span>
+  const allCards=ALL_CARDS.filter(c=>!c.shopOnly&&c.id!=='contract')
+  const [filter,setFilter]=useState('ALL')
+  const [selectedCard,setSelectedCard]=useState(null)
+  const discovered=new Set(Object.keys(data).filter(k=>data[k]>0))
+  const totalPlays=Object.values(data).reduce((s,v)=>s+v,0)
+  
+  const filtered=filter==='ALL'?allCards:allCards.filter(c=>c.type===filter)
+  const discCount=allCards.filter(c=>discovered.has(c.id)).length
+  const pct=Math.round(discCount/allCards.length*100)
+  
+  const typeColors={RIFF:'#9933cc',CORRUPT:'#aa1111',UTILITY:'#22aa44',EMBER:'#c87820'}
+  
+  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'linear-gradient(180deg,#080404,#0a0604)',display:'flex',flexDirection:'column',alignItems:'center',padding:'10px 20px',overflowY:'auto'}}>
+    {/* HEADER */}
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',width:'100%',maxWidth:1400,marginBottom:4}}>
+      <div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'#c8a040',textShadow:'0 0 30px rgba(200,160,40,0.4),2px 2px 0 #000',letterSpacing:6}}>Collection</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'#8a7050'}}>{discCount}/{allCards.length} discovered · {totalPlays.toLocaleString()} total plays · {pct}% complete</div>
       </div>
+      <button onClick={onClose} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'#cc4444',background:'rgba(80,0,0,0.4)',border:'2px solid #aa2222',borderRadius:6,padding:'8px 24px',cursor:'pointer',letterSpacing:3}}>✕ CLOSE</button>
     </div>
-
-    {/* Card grid */}
-    <div style={{display:'grid',gridTemplateColumns:'repeat(9,120px)',gap:8,justifyContent:'center',maxWidth:1200,paddingBottom:40}}>
-      {cards.map(c=>{
+    
+    {/* COMPLETION BAR */}
+    <div style={{width:'100%',maxWidth:1400,height:8,background:'rgba(0,0,0,0.5)',borderRadius:4,overflow:'hidden',marginBottom:8}}>
+      <div style={{height:'100%',width:pct+'%',background:'linear-gradient(90deg,#c87820,#e8a820,#ffd700)',borderRadius:4,transition:'width 0.5s',boxShadow:'0 0 10px rgba(232,168,32,0.5)'}}/>
+    </div>
+    
+    {/* FILTER TABS */}
+    <div style={{display:'flex',gap:4,marginBottom:8,flexWrap:'wrap',justifyContent:'center'}}>
+      {[['ALL','All Cards','#c8a040'],['RIFF','Riff','#9933cc'],['CORRUPT','Corrupt','#aa1111'],['UTILITY','Utility','#22aa44'],['EMBER','Ember','#c87820']].map(([id,label,color])=>{
+        const count=id==='ALL'?allCards.length:allCards.filter(c=>c.type===id).length
+        const disc=id==='ALL'?discCount:allCards.filter(c=>c.type===id&&discovered.has(c.id)).length
+        return <button key={id} onClick={()=>setFilter(id)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:2,padding:'6px 18px',cursor:'pointer',border:filter===id?'2px solid '+color:'1px solid rgba(100,65,15,0.3)',borderRadius:6,background:filter===id?color+'22':'transparent',color:filter===id?color:'#6a5a30',textTransform:'uppercase',transition:'all 0.15s'}}>{label} ({disc}/{count})</button>
+      })}
+    </div>
+    
+    {/* CARD GRID */}
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,130px)',gap:8,justifyContent:'center',width:'100%',maxWidth:1400,paddingBottom:30}}>
+      {filtered.map(c=>{
         const plays=data[c.id]||0
+        const isDiscovered=plays>0
+        const isLocked=c.locked&&c.unlockAt&&(parseInt(localStorage.getItem('vst_lifetime_score')||'0')<c.unlockAt)
         let tier=MASTERY_TIERS[0]
         for(const t of MASTERY_TIERS){if(plays>=t.min)tier=t}
-        const nextTier=MASTERY_TIERS[MASTERY_TIERS.indexOf(tier)+1]
-        const progress=nextTier?Math.min(1,(plays-tier.min)/(nextTier.min-tier.min)):1
-        const bc=c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
+        const bc=typeColors[c.type]||'#9933cc'
         const isLegendary=tier.name==='Legendary'
-        const borderColor=tier.border||bc+'66'
-
-        return(<div key={c.id} style={{
-          background:isLegendary?'linear-gradient(135deg,#1a0820,#0a0412,#1a0820)':'linear-gradient(180deg,#1a1008,#0c0604)',
-          border:'2px solid '+borderColor,
-          borderRadius:7,padding:0,position:'relative',overflow:'hidden',
-          boxShadow:tier.glow?'0 0 12px '+tier.glow+',inset 0 0 8px '+tier.glow:'0 2px 8px rgba(0,0,0,0.5)'
-        }}>
-          {/* Holo shimmer for Legendary */}
-          {isLegendary&&<div style={{position:'absolute',inset:0,background:'linear-gradient(45deg,transparent 30%,rgba(255,68,255,0.08) 50%,transparent 70%)',backgroundSize:'200% 200%',animation:'holoShift 3s ease infinite',pointerEvents:'none',zIndex:1}}/>}
-
-          {/* Type bar */}
-          <div style={{height:3,background:tier.border||bc}}/>
-
-          {/* Emoji */}
-          <div style={{textAlign:'center',padding:'6px 0',background:'rgba(0,0,0,0.3)'}}><CardArtImg id={c.id} emoji={c.emoji} size={48}/></div>
-
-          {/* Name */}
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:700,color:'#eedfc0',textAlign:'center',padding:'1px 3px',lineHeight:1.1}}>{c.name}</div>
-
-          {/* Tier badge */}
-          <div style={{textAlign:'center',padding:'2px 0'}}>
-            {tier.name!=='Unplayed'?
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:tier.color,letterSpacing:1,textTransform:'uppercase'}}>{tier.name}</span>:
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#554433',letterSpacing:1}}>UNPLAYED</span>
-            }
+        
+        return(<div key={c.id} onClick={()=>setSelectedCard(selectedCard?.id===c.id?null:c)}
+          style={{background:isLocked?'rgba(10,6,2,0.8)':!isDiscovered?'rgba(10,6,2,0.6)':isLegendary?'linear-gradient(135deg,#1a0820,#0a0412)':'linear-gradient(180deg,#1a1008,#0c0604)',
+            border:'2px solid '+(isLocked?'#222':!isDiscovered?'#333':tier.border||bc+'66'),borderRadius:7,overflow:'hidden',cursor:'pointer',
+            filter:isLocked?'brightness(0.3)':!isDiscovered?'brightness(0.5) saturate(0.3)':'none',
+            boxShadow:tier.glow&&isDiscovered?'0 0 12px '+tier.glow:'none',
+            transform:selectedCard?.id===c.id?'scale(1.05)':'none',transition:'all 0.15s',position:'relative'}}>
+          <div style={{height:3,background:isDiscovered?tier.border||bc:'#333'}}/>
+          <div style={{textAlign:'center',padding:'8px 0',background:'rgba(0,0,0,0.3)',position:'relative'}}>
+            {isLocked?<span style={{fontSize:40}}>🔒</span>:
+             <CardArtImg id={c.id} emoji={isDiscovered?c.emoji:'❓'} size={52}/>}
           </div>
-
-          {/* Progress bar */}
-          <div style={{margin:'0 4px 4px',height:5,background:'rgba(0,0,0,0.5)',borderRadius:3,overflow:'hidden',position:'relative'}}>
-            <div style={{height:'100%',width:(progress*100)+'%',
-              background:isLegendary?'linear-gradient(90deg,#ff44ff,#ff88ff,#ff44ff)':tier.border?'linear-gradient(90deg,'+tier.border+','+tier.color+')':'rgba(100,65,15,0.4)',
-              borderRadius:3,transition:'width 0.5s ease'}}/>
-          </div>
-
-          {/* Play count */}
-          <div style={{textAlign:'center',padding:'0 0 3px'}}>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:tier.color||'#665533'}}>{plays}</span>
-            {nextTier&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#554433'}}> / {nextTier.min}</span>}
-          </div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:700,color:isDiscovered?'#eedfc0':'#555',textAlign:'center',padding:'2px 4px',lineHeight:1.1}}>{isLocked?'???':c.name}</div>
+          {isDiscovered&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'2px 6px 4px'}}>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,fontWeight:900,color:tier.color,letterSpacing:1}}>{tier.name==='Unplayed'?'':tier.name}</span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,fontWeight:900,color:'#aa8855'}}>{plays}×</span>
+          </div>}
+          {!isDiscovered&&!isLocked&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#444',textAlign:'center',padding:'2px 0 4px',letterSpacing:1}}>UNDISCOVERED</div>}
+          {isLocked&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:9,color:'#444',textAlign:'center',padding:'2px 0 4px',letterSpacing:1}}>LOCKED</div>}
         </div>)
       })}
     </div>
-
-    <button onClick={onClose} style={{marginTop:4,fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,padding:'8px 40px',flexShrink:0,background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'#c8a040',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
-      Close
-    </button>
+    
+    {/* DETAIL PANEL — shows when card clicked */}
+    {selectedCard&&<div style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:800,background:'linear-gradient(180deg,rgba(20,12,4,0.98),rgba(10,6,2,0.99))',border:'2px solid '+(typeColors[selectedCard.type]||'#c8a040'),borderRadius:'12px 12px 0 0',padding:'16px 24px',zIndex:9999,boxShadow:'0 -10px 40px rgba(0,0,0,0.8)'}}>
+      <div style={{display:'flex',gap:16,alignItems:'center'}}>
+        <CardArtImg id={selectedCard.id} emoji={selectedCard.emoji} size={80}/>
+        <div style={{flex:1}}>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'#e8d090',letterSpacing:2}}>{selectedCard.name}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,color:typeColors[selectedCard.type],letterSpacing:2,textTransform:'uppercase',marginBottom:4}}>{selectedCard.type} · {selectedCard.rarity} · {selectedCard.embers} EMBERS</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'#c8a878',lineHeight:1.4}}>{selectedCard.effect}</div>
+        </div>
+        <div style={{textAlign:'center'}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:36,fontWeight:900,color:'#e8a820'}}>{data[selectedCard.id]||0}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,color:'#8a7050',letterSpacing:2}}>PLAYS</div>
+        </div>
+      </div>
+    </div>}
   </div>)
 }
 
@@ -4540,7 +4539,7 @@ function App(){
 
 
   const speedMult=speedMode?0.5:1.0
-  const [showMastery,setShowMastery]=useState(false)
+  const [showCollection,setShowCollection]=useState(false)
   const [selectedDeck,setSelectedDeck]=useState('standard')
   const [encoreMode,setEncoreMode]=useState(false)
   const [encoreCircle,setEncoreCircle]=useState(0)
@@ -7463,7 +7462,7 @@ function App(){
 
   // ── TROPHY WALL / MASTERY GALLERY (overlay from menu) ──
   if(showTrophies&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><TrophyWall onClose={()=>setShowTrophies(false)}/></div>)
-  if(showMastery&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'auto'}}><MasteryGallery onClose={()=>setShowMastery(false)}/></div>)
+  if(showCollection&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'auto'}}><MasteryGallery onClose={()=>setShowCollection(false)}/></div>)
 
   // ── COLD OPEN SPLASH — overlays menu on first ever launch
   const ColdOpenOverlay=coldOpenPhase!==null&&coldOpenPhase<5?<ColdOpenScreen phase={coldOpenPhase}/>:null
@@ -7747,7 +7746,7 @@ function App(){
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
               💀 Trophies ({Object.keys(getTrophyData()).length}/28)
             </button>
-            <button onClick={()=>setShowMastery(true)}
+            <button onClick={()=>setShowCollection(true)}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'#c8a040',
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(200,160,40,0.4)',borderRadius:6,
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
