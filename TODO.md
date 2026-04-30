@@ -68,6 +68,10 @@
 ---
 
 ## ✅ COMPLETED THIS SESSION
+- [x] **Design system tokens**: 5 text colors (cream/dim-bone/smoke-grey/gold/blood) + 5 size tiers + 4 type-identity colors. All WCAG-validated against `--void`. Defined in `App.css` :root.
+- [x] **Color migration**: 208 inline `color:'#xxx'` instances in App.jsx swept to `var(--text-*)`. JSX-style-only heuristic protected card.color / grade.color / pact.color data props from breaking hex math.
+- [x] **Legacy var redirect**: `--ink-rust` (was failing 1.94:1 contrast), `--gold-dim` (over-gold subtitle), `--ink-dim` now resolve to the new tokens — fixes `var()` usages without JSX changes.
+- [x] **SLY DIALOGUE: reactive lines** — 9 contextual line pools (multiBuy, boughtPack, boughtCard, highCorruption, flushStash, brokeStash, deepCircle, firstVisit, ambient). Line picks based on live state, gold-flash on change.
 - [x] Balatro multiplicative combo system
 - [x] Corruption as power multiplier
 - [x] Artifact jokers + boss loot jokers + gambit cards
