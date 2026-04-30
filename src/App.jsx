@@ -2420,26 +2420,26 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
 
         {/* RIBBON + TAGLINE + SLY QUOTE */}
         <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2}}>
-          <div style={{position:'relative',width:'94%',minWidth:420,maxWidth:820,height:54,display:'flex',alignItems:'center',justifyContent:'center'}}>
-            <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:0}} preserveAspectRatio="none" viewBox="0 0 960 54">
-              <path d="M 0 27 L 30 6 L 60 18 L 900 18 L 930 6 L 960 27 L 930 48 L 900 36 L 60 36 L 30 48 Z" fill="rgba(60,0,15,0.82)" stroke="var(--blood)" strokeWidth="0.8" opacity="0.95"/>
-              <path d="M 60 18 Q 240 15, 480 18 T 900 18" stroke="var(--blood)" strokeWidth="0.7" fill="none" opacity="0.55"/>
-              <path d="M 60 36 Q 240 39, 480 36 T 900 36" stroke="var(--blood)" strokeWidth="0.7" fill="none" opacity="0.55"/>
+          <div style={{position:'relative',width:'94%',minWidth:420,maxWidth:820,height:78,display:'flex',alignItems:'center',justifyContent:'center'}}>
+            <svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:0}} preserveAspectRatio="none" viewBox="0 0 960 78">
+              <path d="M 0 39 L 30 8 L 60 22 L 900 22 L 930 8 L 960 39 L 930 70 L 900 56 L 60 56 L 30 70 Z" fill="rgba(60,0,15,0.82)" stroke="var(--blood)" strokeWidth="0.8" opacity="0.95"/>
+              <path d="M 60 22 Q 240 19, 480 22 T 900 22" stroke="var(--blood)" strokeWidth="0.7" fill="none" opacity="0.55"/>
+              <path d="M 60 56 Q 240 59, 480 56 T 900 56" stroke="var(--blood)" strokeWidth="0.7" fill="none" opacity="0.55"/>
             </svg>
-            <span style={{position:'relative',zIndex:1,fontFamily:"'BogartsMetalFont',cursive",fontSize:26,color:'var(--blood)',letterSpacing:3,textTransform:'uppercase',whiteSpace:'nowrap',animation:'neonFlicker 4.5s ease-in-out infinite',padding:'0 80px',lineHeight:1}}>🚬 SLY'S MERCH 🚬</span>
+            <span style={{position:'relative',zIndex:1,fontFamily:"'BogartsMetalFont',cursive",fontSize:30,color:'var(--blood)',letterSpacing:3,textTransform:'uppercase',whiteSpace:'nowrap',animation:'neonFlicker 4.5s ease-in-out infinite',padding:'0 90px',lineHeight:1}}>🚬 SLY'S MERCH 🚬</span>
           </div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:14,color:'var(--ink-dim)',fontStyle:'italic',letterSpacing:0.5,transform:'rotate(-1deg)'}}>Hey kid... wanna see what fell off the truck?</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:slyFlash?'#ffe69a':'var(--ink-rust)',fontStyle:'italic',letterSpacing:0.3,marginTop:1,textShadow:slyFlash?'0 0 14px rgba(255,210,90,0.85), 0 0 4px rgba(255,210,90,0.5)':'none',transition:'color 320ms ease-out, text-shadow 320ms ease-out'}}>"{slyLine}" —Sly</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'var(--ink-bone)',letterSpacing:0.5,marginTop:4,fontWeight:700,opacity:0.85}}>Hey kid... wanna see what fell off the truck?</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:slyFlash?'#ffe69a':'var(--ink-rust)',letterSpacing:0.3,marginTop:2,fontWeight:700,fontStyle:'italic',textShadow:slyFlash?'0 0 14px rgba(255,210,90,0.85), 0 0 4px rgba(255,210,90,0.5)':'none',transition:'color 320ms ease-out, text-shadow 320ms ease-out'}}>"{slyLine}" —Sly</div>
         </div>
 
-        {/* ANOTHER LOOK (reroll) — pill badge */}
+        {/* REROLL — pill badge, single-line wider, wiggle preserved */}
         <div onClick={onReroll} title="Sly shuffles the merch."
           onMouseEnter={e=>{e.currentTarget.style.animation='none';e.currentTarget.style.background='rgba(55,40,8,0.95)'}}
           onMouseLeave={e=>{e.currentTarget.style.animation='rerollWiggle 3s ease-in-out infinite';e.currentTarget.style.background='rgba(25,18,4,0.92)'}}
-          style={{width:128,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2,padding:'8px 6px',
+          style={{minWidth:160,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2,padding:'8px 14px',whiteSpace:'nowrap',
             background:'rgba(25,18,4,0.92)',border:'2px solid rgba(200,150,30,0.85)',borderRadius:8,cursor:'pointer',
             boxShadow:'0 0 16px rgba(180,130,20,0.3)',animation:'rerollWiggle 3s ease-in-out infinite'}}>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-gold)',letterSpacing:2,textTransform:'uppercase'}}>🎲 Another Look</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-gold)',letterSpacing:3,textTransform:'uppercase'}}>🎲 Reroll</span>
           <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--text-gold)',lineHeight:1}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:13}}>{rerollCost}</span> <WeedLeaf size={14}/> {realPrice(rerollCost)}</>:<><WeedLeaf size={14}/> {rerollCost}</>}</span>
         </div>
 
@@ -2539,7 +2539,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 border:'1px solid '+(shroomsInStock&&heldShrooms<drugMax?'rgba(200,150,50,0.5)':'rgba(60,40,20,0.3)'),
                 borderRadius:6,cursor:shroomsInStock&&heldShrooms<drugMax&&can(6)?'pointer':'default',
                 opacity:shroomsInStock?1:0.4,transition:'all 0.15s'}}>
-              <span style={{fontSize:28}}>🍄</span>
+              <span style={{fontSize:48,filter:'drop-shadow(0 0 6px rgba(232,168,32,0.4))'}}>🍄</span>
               <div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:shroomsInStock?'#e8a820':'#554428'}}>
                   {heldShrooms>=drugMax?'HOLDING':shroomsInStock?'Shrooms':'DRY'}</div>
@@ -2553,7 +2553,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                 border:'1px solid '+(acidInStock&&heldAcid<drugMax?'rgba(150,50,220,0.5)':'rgba(40,20,60,0.3)'),
                 borderRadius:6,cursor:acidInStock&&heldAcid<drugMax&&can(12)?'pointer':'default',
                 opacity:acidInStock?1:0.4,transition:'all 0.15s'}}>
-              <span style={{fontSize:28}}>🧪</span>
+              <span style={{fontSize:48,filter:'drop-shadow(0 0 6px rgba(204,68,255,0.4))'}}>🧪</span>
               <div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:acidInStock?'#cc44ff':'#4a2a6a'}}>
                   {heldAcid>=drugMax?'HOLDING':acidInStock?'Acid':'DRY'}</div>
