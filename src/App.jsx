@@ -2377,26 +2377,15 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         </button>
       </div>
 
-      {/* SHOP TABS — bigger, gold underline on active */}
-      <div style={{flexShrink:0,display:'flex',gap:4,justifyContent:'center',padding:'0 12px',borderBottom:'1px solid rgba(100,80,40,0.2)'}}>
-        {[['all','All'],['cards','Cards'],['packs','Packs'],['gear','Gear']].map(([id,label])=>
-          <button key={id} onClick={()=>setShopTab(id)}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,letterSpacing:3,
-              color:shopTab===id?'var(--ink-bone)':'var(--ink-dim)',
-              background:'transparent',
-              border:'none',
-              borderBottom:shopTab===id?'3px solid var(--gold)':'3px solid transparent',
-              padding:'8px 22px 6px',cursor:'pointer',textTransform:'uppercase',
-              transition:'all 0.15s'}}>{label}</button>)}
-      </div>
+      {/* TABS REMOVED — single scrollable view */}
 
       {/* MAIN */}
       <div style={{flex:'1 1 0',display:'flex',gap:10,minHeight:0,overflow:'hidden'}}>
 
         {/* LEFT COLUMN — gear (FROM THE BACK ROOM) */}
-        <div style={{width:240,flexShrink:0,display:shopTab==='cards'||shopTab==='packs'?'none':'flex',flexDirection:'column',gap:4,minHeight:0}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,letterSpacing:3,color:'var(--gold)',textAlign:'center',textTransform:'uppercase',fontWeight:900,padding:'4px 0 0',textShadow:'0 0 8px rgba(200,152,56,0.4)'}}>🔦 From the Back Room</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',padding:'0 0 4px',borderBottom:'1px solid rgba(200,152,56,0.35)'}}>(Don't tell the boss.)</div>
+        <div style={{width:240,flexShrink:0,display:'flex',flexDirection:'column',gap:4,minHeight:0}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,letterSpacing:3,color:'var(--gold)',textAlign:'center',textTransform:'uppercase',fontWeight:900,padding:'4px 0 0',textShadow:'0 0 8px rgba(200,152,56,0.4)'}}>⛧ Circle Rewards</div>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',padding:'0 0 4px',borderBottom:'1px solid rgba(200,152,56,0.35)'}}>Boss loot from this circle.</div>
           <LeftCard item={recruitPack} price={recruitPack.cost}
             label="Band Recruitment" accent='#e8a820' id='rec' sold={leftBought.rec===true}
             visitLocked={packsBoughtThisVisit>=1&&leftBought.rec!==true}
@@ -2420,75 +2409,55 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',minHeight:0}}>
 
           {/* CARDS ROW */}
-          <div style={{display:shopTab==='packs'||shopTab==='gear'?'none':'block',border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>🎸 Cards For Sale (★ = good deal)</div>
+          <div style={{display:'block',border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>🎸 Cards For Sale</div>
           <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start',paddingTop:4}}>
-            {/* THE DEALER — first card */}
-            <div style={{width:300,flexShrink:0,display:'flex',flexDirection:'column',paddingTop:24,position:'relative'}}>
-              <div style={{flex:1,minHeight:420,display:'flex',flexDirection:'column',
-                background:'linear-gradient(160deg,#0a100a,#040804)',
-                border:'2px solid rgba(50,180,50,0.5)',borderRadius:10,
-                padding:'0 14px 14px',overflow:'hidden',
-                boxShadow:'0 0 30px rgba(40,150,40,0.15)'}}>
-                <div style={{height:7,flexShrink:0,background:'linear-gradient(90deg,#22882244,#44cc44ee,#22882244)',boxShadow:'0 0 12px rgba(40,200,40,0.5)'}}/> 
-                <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:26,
-                  color:'#44cc44',textAlign:'center',marginTop:8,
-                  textShadow:'0 0 18px rgba(60,200,60,0.8)',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}><WeedLeaf size={26}/> Sly's Stash</div>
-                <div style={{fontFamily:"'ScratchFont',serif",fontSize:12,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',padding:'2px 6px 6px',letterSpacing:0.5}}>"The good shit. Don't ask where it came from."</div>
-                {/* Mushrooms */}
-                <div onClick={()=>{if(shroomsInStock&&heldShrooms<drugMax&&can(6)){onSpend(6,'dealer',null);onBuyShrooms()}}}
-                  style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
-                    background:shroomsInStock&&heldShrooms<drugMax?'rgba(80,40,10,0.4)':'rgba(20,15,10,0.4)',
-                    border:shroomsInStock&&heldShrooms<drugMax?'1px solid rgba(200,150,50,0.5)':'1px solid rgba(60,40,20,0.3)',
-                    borderRadius:8,cursor:shroomsInStock&&heldShrooms<drugMax&&can(6)?'pointer':'default',
-                    margin:'8px 0 4px',transition:'all 0.15s',position:'relative',
-                    opacity:shroomsInStock?1:0.5}}>
-                  {/* Cost oval */}
-                  <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',
-                    background:shroomsInStock&&heldShrooms<drugMax&&can(6)?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
-                    border:'2px solid '+(shroomsInStock&&heldShrooms<drugMax&&can(6)?'#44bb44':'#4a3318'),borderRadius:20,
-                    padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
-                    fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-                    color:shroomsInStock&&heldShrooms<drugMax&&can(6)?'#55ee55':'#554428',display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:9}}>6</span> <WeedLeaf size={12}/> {realPrice(6)}</>:<><WeedLeaf size={12}/> 6</>}</div>
-                  <div style={{fontSize:72,filter:shroomsInStock&&heldShrooms<drugMax?'drop-shadow(0 0 10px rgba(200,150,50,0.6))':'none',animation:shroomsInStock&&heldShrooms<drugMax?'shroomPulse 2.4s ease-in-out infinite':'none'}}>🍄</div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
-                    color:shroomsInStock?'#e8a820':'#554428',marginTop:4}}>
-                    {heldShrooms>=drugMax?'HOLDING'+(heldShrooms>1?' ×'+heldShrooms:''):shroomsInStock?'Magic Mushrooms':'DRY'}</div>
-                  {heldShrooms>=drugMax&&<SoldOverlay/>}
-                </div>
-                {/* Acid */}
-                <div onClick={()=>{if(acidInStock&&heldAcid<drugMax&&can(12)){onSpend(12,'dealer',null);onBuyAcid()}}}
-                  style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
-                    background:acidInStock&&heldAcid<drugMax?'rgba(40,10,80,0.4)':'rgba(15,10,20,0.4)',
-                    border:acidInStock&&heldAcid<drugMax?'1px solid rgba(150,50,220,0.5)':'1px solid rgba(40,20,60,0.3)',
-                    borderRadius:8,cursor:acidInStock&&heldAcid<drugMax&&can(12)?'pointer':'default',
-                    margin:'4px 0 8px',transition:'all 0.15s',position:'relative',
-                    opacity:acidInStock?1:0.5}}>
-                  {/* Cost oval */}
-                  <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',
-                    background:acidInStock&&heldAcid<drugMax&&can(12)?'rgba(8,25,8,0.97)':'rgba(18,10,4,0.97)',
-                    border:'2px solid '+(acidInStock&&heldAcid<drugMax&&can(12)?'#44bb44':'#4a3318'),borderRadius:20,
-                    padding:'3px 14px',zIndex:5,whiteSpace:'nowrap',
-                    fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,
-                    color:acidInStock&&heldAcid<drugMax&&can(12)?'#55ee55':'#554428',display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:9}}>12</span> <WeedLeaf size={12}/> {realPrice(12)}</>:<><WeedLeaf size={12}/> 12</>}</div>
-                  <div style={{fontSize:72,filter:acidInStock&&heldAcid<drugMax?'drop-shadow(0 0 10px rgba(150,50,220,0.6))':'none',animation:acidInStock&&heldAcid<drugMax?'shroomPulse 2.4s ease-in-out infinite':'none'}}>🧪</div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,
-                    color:acidInStock?'#cc44ff':'#4a2a6a',marginTop:4}}>
-                    {heldAcid>=drugMax?'HOLDING'+(heldAcid>1?' ×'+heldAcid:''):acidInStock?'Blotter Acid':'DRY'}</div>
-                  {heldAcid>=drugMax&&<SoldOverlay/>}
-                </div>
-              </div>
-            </div>
             {shopCards.filter(Boolean).map((card,i)=><SaleCard key={i} card={card} idx={i}/>)}
           </div>
+          </div>
+
+          
+          {/* COMPACT DRUG SECTION */}
+          <div style={{flexShrink:0,display:'flex',gap:12,justifyContent:'center',padding:'6px 0'}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#44cc44',letterSpacing:2,display:'flex',alignItems:'center',gap:6}}>
+              <WeedLeaf size={16}/> SLY'S STASH:
+            </div>
+            <div onClick={()=>{if(shroomsInStock&&heldShrooms<drugMax&&can(6)){onSpend(6,'dealer',null);onBuyShrooms()}}}
+              style={{display:'flex',alignItems:'center',gap:6,padding:'4px 16px',
+                background:shroomsInStock&&heldShrooms<drugMax&&can(6)?'rgba(80,40,10,0.5)':'rgba(20,15,10,0.3)',
+                border:'1px solid '+(shroomsInStock&&heldShrooms<drugMax?'rgba(200,150,50,0.5)':'rgba(60,40,20,0.3)'),
+                borderRadius:6,cursor:shroomsInStock&&heldShrooms<drugMax&&can(6)?'pointer':'default',
+                opacity:shroomsInStock?1:0.4,transition:'all 0.15s'}}>
+              <span style={{fontSize:28}}>🍄</span>
+              <div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:shroomsInStock?'#e8a820':'#554428'}}>
+                  {heldShrooms>=drugMax?'HOLDING':shroomsInStock?'Shrooms':'DRY'}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#88774a',display:'flex',alignItems:'center',gap:2}}>
+                  <WeedLeaf size={10}/> {realPrice(6)}</div>
+              </div>
+            </div>
+            <div onClick={()=>{if(acidInStock&&heldAcid<drugMax&&can(12)){onSpend(12,'dealer',null);onBuyAcid()}}}
+              style={{display:'flex',alignItems:'center',gap:6,padding:'4px 16px',
+                background:acidInStock&&heldAcid<drugMax&&can(12)?'rgba(40,10,80,0.5)':'rgba(15,10,20,0.3)',
+                border:'1px solid '+(acidInStock&&heldAcid<drugMax?'rgba(150,50,220,0.5)':'rgba(40,20,60,0.3)'),
+                borderRadius:6,cursor:acidInStock&&heldAcid<drugMax&&can(12)?'pointer':'default',
+                opacity:acidInStock?1:0.4,transition:'all 0.15s'}}>
+              <span style={{fontSize:28}}>🧪</span>
+              <div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:acidInStock?'#cc44ff':'#4a2a6a'}}>
+                  {heldAcid>=drugMax?'HOLDING':acidInStock?'Acid':'DRY'}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#88774a',display:'flex',alignItems:'center',gap:2}}>
+                  <WeedLeaf size={10}/> {realPrice(12)}</div>
+              </div>
+            </div>
           </div>
 
           {/* GAP */}
           <div style={{flex:1,minHeight:8,maxHeight:30}}/>
 
           {/* PACKS + PAWN ROW */}
-          <div style={{display:shopTab==='cards'||shopTab==='gear'?'none':'block',border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>📦 Booster Packs + Pawn Shop</div>
+          <div style={{display:'block',border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:11,color:'#c8a040',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>📦 Boosters + Pawn Shop</div>
           <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start'}}>
             {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
             <div style={{paddingTop:24,flexShrink:0}}>
