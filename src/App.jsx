@@ -2537,14 +2537,14 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
 // ═══ CARD ART — shows pixel art PNG if available, falls back to emoji ═══
 function CardArtImg({id,emoji,size=52,style={}}){
   const [hasArt,setHasArt]=React.useState(false)
-  const src='/vestibule/cards/'+id+'.png'
+  const src=import.meta.env.BASE_URL+'vestibule/cards/'+id+'.png'
   React.useEffect(()=>{const img=new window.Image();img.onload=()=>setHasArt(true);img.onerror=()=>setHasArt(false);img.src=src},[id])
   if(hasArt)return <img src={src} alt={id} style={{width:size,height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
   return <span style={{fontSize:size*0.85,...style}}>{emoji}</span>
 }
 function ArtifactArtImg({id,emoji,size=40,style={}}){
   const [hasArt,setHasArt]=React.useState(false)
-  const src='/vestibule/artifacts/'+id+'.png'
+  const src=import.meta.env.BASE_URL+'vestibule/artifacts/'+id+'.png'
   React.useEffect(()=>{const img=new window.Image();img.onload=()=>setHasArt(true);img.onerror=()=>setHasArt(false);img.src=src},[id])
   if(hasArt)return <img src={src} alt={id} style={{width:size,height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
   return <span style={{fontSize:size*0.7,...style}}>{emoji}</span>
