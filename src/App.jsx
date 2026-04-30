@@ -599,6 +599,7 @@ const MASTERY_TIERS=[
   {name:'Legendary',min:100,color:'#ff44ff',border:'#ff44ff',glow:'rgba(255,68,255,0.6)'},
 ]
 function getMasteryData(){try{return JSON.parse(localStorage.getItem('vst_mastery')||'{}')}catch(e){return{}}}
+function getMasteryPlays(cardId){return getMasteryData()[cardId]||0}
 function saveMasteryData(d){localStorage.setItem('vst_mastery',JSON.stringify(d))}
 function getMasteryTier(cardId){
   const d=getMasteryData()
