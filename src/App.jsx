@@ -1731,6 +1731,26 @@ const SLY_LINES={
     "Heard about me from who? ...Don't answer that.",
     "Look around, kid. Don't touch nothin' unless you're buyin'.",
   ],
+  hoverArtifact:[
+    "That thing's got a curse on it. Probably.",
+    "Eyes off, kid. Or pay up.",
+    "Found it in a dumpster behind a strip mall. No questions.",
+    "Last guy who held one — we don't talk about it.",
+    "It hums at night. Just so you know.",
+  ],
+  cleanedOut:[
+    "You bought me out, kid. Get gone.",
+    "Nothin' left but lint. Come back next circle.",
+    "Show's over. Door's that way.",
+    "I respect the hustle. Now scram.",
+  ],
+  encore:[
+    "Back already? Most don't make it once.",
+    "Heard you killed the big guy. Word travels.",
+    "Round two on the house. Just kiddin'. Pay up.",
+    "Different kid, same bullshit. Welcome back.",
+    "You smell different now. Less alive.",
+  ],
   ambient:[
     "Five-finger discount on everything tonight.",
     "Don't ask, don't tell, don't bring cops.",
@@ -1745,9 +1765,10 @@ const SLY_LINES={
 }
 const pickSlyLine=(tag)=>{const p=SLY_LINES[tag]||SLY_LINES.ambient;return p[Math.floor(Math.random()*p.length)]}
 
-function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,shroomsInStock,acidInStock,onBuyShrooms,onBuyAcid,corruption,chosenPacts,addLog}){
+function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,shroomsInStock,acidInStock,onBuyShrooms,onBuyAcid,corruption,chosenPacts,addLog,encoreMode}){
   const drugMax=isUnlocked('double_dealer')?2:1
   const [hovId,setHovId]=useState(null)
+  const [hoveringArtifact,setHoveringArtifact]=useState(false)
   const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
   const [pawnOpen,setPawnOpen]=useState(false)
   const [boughtIds,setBoughtIds]=useState([])
@@ -1771,16 +1792,26 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   const slyContext=useMemo(()=>{
     const totalBuys=boughtIds.length+boughtPackIds.length+(leftBought.cart?1:0)+(leftBought.cpas?1:0)+(leftBought.rec?1:0)
     const circle=Math.floor(fightIndex/3)+1
+    // Hover-on-artifact takes top priority — Sly whispers about whatever you're eyeing
+    if(hoveringArtifact)return 'hoverArtifact'
+    // CLEANED OUT — nothing left to buy. Higher priority than multiBuy because it's a terminal state.
+    const recruitGone=leftBought.rec||packsBoughtThisVisit>=1
+    const allCardsGone=(shopCards||[]).every(c=>!c||boughtIds.includes(c.uid||c.id)||(soldIds||[]).includes(c.uid||c.id))
+    const allPacksGone=(boosterPacks||[]).slice(0,2).every(p=>boughtPackIds.includes(p.id))||packsBoughtThisVisit>=1
+    const cartGone=leftBought.cart||!!circleCartBought||(soldIds||[]).includes(circleArtifact?.id)
+    const cpasGone=leftBought.cpas||!!circleCpasBought||(soldIds||[]).includes(circlePassive?.id)
+    if(recruitGone&&allCardsGone&&allPacksGone&&cartGone&&cpasGone)return 'cleanedOut'
     if(totalBuys>=3)return 'multiBuy'
     if(boughtPackIds.length>=1)return 'boughtPack'
     if(boughtIds.length>=1||leftBought.cart||leftBought.cpas||leftBought.rec)return 'boughtCard'
     if(corruption>=50)return 'highCorruption'
     if(stash>=300)return 'flushStash'
     if(stash<=30)return 'brokeStash'
+    if(encoreMode)return 'encore'
     if(circle>=6)return 'deepCircle'
     if(circle===1)return 'firstVisit'
     return 'ambient'
-  },[boughtIds.length,boughtPackIds.length,leftBought,corruption,stash,fightIndex])
+  },[hoveringArtifact,boughtIds,boughtPackIds,leftBought,corruption,stash,fightIndex,encoreMode,packsBoughtThisVisit,shopCards,soldIds,boosterPacks,circleCartBought,circleCpasBought,circleArtifact,circlePassive])
   const [slyLine,setSlyLine]=useState(()=>pickSlyLine('ambient'))
   const [slyFlash,setSlyFlash]=useState(false)
   const slyContextRef=useRef(slyContext)
@@ -2498,7 +2529,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           </div>
 
           {/* GEAR PANELS — Artifact above, Effect Pedal below. Both fixed-height, sit at bottom of column. */}
-          {circleArtifact&&<div style={{flexShrink:0,border:'1px solid rgba(200,120,32,0.4)',borderRadius:8,padding:'8px',background:'rgba(10,6,2,0.4)'}}>
+          {circleArtifact&&<div onMouseEnter={()=>setHoveringArtifact(true)} onMouseLeave={()=>setHoveringArtifact(false)} style={{flexShrink:0,border:'1px solid rgba(200,120,32,0.4)',borderRadius:8,padding:'8px',background:'rgba(10,6,2,0.4)'}}>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:'var(--type-ember)',textAlign:'center',textTransform:'uppercase',marginBottom:4}}>⛧ Artifact</div>
             <LeftCard item={circleArtifact} price={circleArtifact.cost}
               label="" accent='#c87820' id='cart'
@@ -3139,6 +3170,107 @@ function TrophyWall({onClose}){
     </div>
 
     <button onClick={onClose} style={{marginTop:4,fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,padding:'8px 40px',flexShrink:0,background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'var(--text-secondary)',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
+      Close
+    </button>
+  </div>)
+}
+
+// ═══ STATS SCREEN — lifetime run statistics ════════════════════════
+function StatsScreen({onClose}){
+  const ls=(k,d='0')=>localStorage.getItem(k)||d
+  const lsInt=(k)=>parseInt(ls(k),10)||0
+  const totalRuns=lsInt('vst_runs')
+  const personalBest=lsInt('vst_best')
+  const lifetime=lsInt('vst_lifetime')
+  const dailyStreak=lsInt('vst_streak')
+  const winStreak=lsInt('vst_streak_wins')
+  const heat=lsInt('vst_heat')||1
+  const dailyBest=lsInt('vst_daily_best')
+  const lastDate=ls('vst_lastdate','—')
+  // Trophies — count defeated bosses
+  const trophies=(()=>{try{return JSON.parse(ls('vst_trophies','{}'))}catch(e){return{}}})()
+  const bossesKilled=Object.keys(trophies).length
+  const totalKills=Object.values(trophies).reduce((s,t)=>s+(t?.kills||0),0)
+  // Mastery — count unique cards played
+  const mastery=(()=>{try{return JSON.parse(ls('vst_mastery','{}'))}catch(e){return{}}})()
+  const cardsDiscovered=Object.keys(mastery).filter(k=>mastery[k]>0).length
+  const totalCardsPlayed=Object.values(mastery).reduce((s,v)=>s+v,0)
+  // Top 5 most-played
+  const topCards=Object.entries(mastery)
+    .filter(([_,v])=>v>0)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,5)
+    .map(([id,plays])=>({id,plays,name:(ALL_CARDS.find(c=>c.id===id)||{}).name||id,emoji:(ALL_CARDS.find(c=>c.id===id)||{}).emoji||'⛧'}))
+  // Stake unlocks
+  const stakesBeaten=(()=>{try{return JSON.parse(ls('vst_stakes_beaten','[]'))}catch(e){return[]}})()
+  // Combos / chains discovered
+  const combosDiscovered=(()=>{try{return JSON.parse(ls('vst_combos_discovered','[]')).length}catch(e){return 0}})()
+  const chainsDiscovered=(()=>{try{return JSON.parse(ls('vst_chains_discovered','[]')).length}catch(e){return 0}})()
+  // Achievements
+  const achievementCount=(()=>{try{return Object.keys(JSON.parse(ls('vst_achievements','{}'))).length}catch(e){return 0}})()
+
+  const StatCard=({label,value,sub,color='var(--text-gold)',big})=>(
+    <div style={{background:'linear-gradient(180deg,rgba(25,15,5,0.95),rgba(12,6,2,0.98))',
+      border:'1px solid rgba(140,90,30,0.4)',borderRadius:8,padding:'14px 18px',
+      display:'flex',flexDirection:'column',gap:4,minWidth:180}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',letterSpacing:2,textTransform:'uppercase'}}>{label}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:big?38:28,color,letterSpacing:1,fontWeight:900,textShadow:'0 0 12px '+color+'55',lineHeight:1}}>{value}</div>
+      {sub&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:1,fontStyle:'italic'}}>{sub}</div>}
+    </div>
+  )
+
+  return(<div style={{width:1920,height:1080,position:'relative',display:'flex',flexDirection:'column',alignItems:'center',padding:'40px 80px 30px',background:'radial-gradient(ellipse at center,rgba(15,9,3,1) 0%,rgba(5,3,1,1) 100%)'}}>
+    {/* Header */}
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',marginBottom:24,flexShrink:0}}>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:'var(--text-gold)',letterSpacing:6,textShadow:'0 0 24px rgba(200,160,40,0.6)',lineHeight:1}}>📊 Tour Stats</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'var(--text-secondary)',letterSpacing:3,textTransform:'uppercase',marginTop:6,fontStyle:'italic'}}>Every run, every kill, every card played</div>
+    </div>
+
+    {/* Stats grid */}
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:14,width:'100%',maxWidth:1500,marginBottom:18,flexShrink:0}}>
+      <StatCard label="Total Runs" value={totalRuns} sub={lastDate!=='—'?'Last: '+lastDate:'No runs yet'} big/>
+      <StatCard label="Personal Best" value={personalBest.toLocaleString()} sub="Single-run score" color="var(--text-blood)" big/>
+      <StatCard label="Lifetime Score" value={lifetime.toLocaleString()} sub="All runs combined" color="var(--text-positive)" big/>
+      <StatCard label="🔥 Heat Level" value={heat+'/10'} sub={heat<10?'+'+((heat-1)*15)+'% boss HP':'⛧ MAX HEAT ⛧'} color="rgba(255,140,40,1)" big/>
+    </div>
+
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:14,width:'100%',maxWidth:1500,marginBottom:18,flexShrink:0}}>
+      <StatCard label="Bosses Defeated" value={bossesKilled+'/28'} sub={totalKills+' total kills'} />
+      <StatCard label="Cards Discovered" value={cardsDiscovered+'/85'} sub={totalCardsPlayed.toLocaleString()+' plays'} />
+      <StatCard label="Daily Streak" value={dailyStreak} sub={dailyStreak>0?'days in a row':'log in to start a streak'} color="var(--text-blood)"/>
+      <StatCard label="Win Streak" value={winStreak} sub="consecutive wins" color="var(--text-positive)"/>
+    </div>
+
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:14,width:'100%',maxWidth:1500,marginBottom:24,flexShrink:0}}>
+      <StatCard label="Stakes Conquered" value={stakesBeaten.length+'/6'} sub="difficulty tiers"/>
+      <StatCard label="Achievements" value={achievementCount} sub="unlocks earned"/>
+      <StatCard label="Combos Found" value={combosDiscovered} sub="multi-card synergies"/>
+      <StatCard label="Daily Best" value={dailyBest.toLocaleString()} sub="single-day record" color="var(--text-blood)"/>
+    </div>
+
+    {/* Top 5 most-played cards */}
+    {topCards.length>0&&<div style={{width:'100%',maxWidth:1500,background:'linear-gradient(180deg,rgba(25,15,5,0.95),rgba(12,6,2,0.98))',
+      border:'1px solid rgba(140,90,30,0.4)',borderRadius:8,padding:'18px 24px',flexShrink:0}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-secondary)',letterSpacing:3,textTransform:'uppercase',marginBottom:14,fontWeight:900}}>🏆 Most Played Cards</div>
+      <div style={{display:'flex',gap:18,justifyContent:'space-around'}}>
+        {topCards.map((c,i)=>(
+          <div key={c.id} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:6,minWidth:140}}>
+            <div style={{fontSize:14,color:'var(--text-gold)',fontFamily:"'MBScribblesFont',serif",fontWeight:900,letterSpacing:2}}>#{i+1}</div>
+            <div style={{width:80,height:80,background:'radial-gradient(circle at center,rgba(80,40,10,0.5),rgba(20,10,3,0.9))',border:'1px solid rgba(200,140,40,0.5)',borderRadius:6,display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <CardArtImg id={c.id} emoji={c.emoji} size={64}/>
+            </div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-primary)',textAlign:'center',letterSpacing:0.5,lineHeight:1.1}}>{c.name}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-positive)',letterSpacing:1}}>{c.plays.toLocaleString()} plays</div>
+          </div>
+        ))}
+      </div>
+    </div>}
+
+    {topCards.length===0&&<div style={{width:'100%',maxWidth:1500,padding:'40px',background:'rgba(20,12,5,0.5)',border:'1px dashed rgba(140,90,30,0.4)',borderRadius:8,textAlign:'center',flexShrink:0}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--text-secondary)',fontStyle:'italic',letterSpacing:1}}>Play a few runs and your most-loved cards will show up here.</div>
+    </div>}
+
+    <button onClick={onClose} style={{marginTop:20,fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,padding:'10px 50px',flexShrink:0,background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'var(--text-secondary)',cursor:'pointer',textTransform:'uppercase'}}>
       Close
     </button>
   </div>)
@@ -4681,6 +4813,7 @@ function App(){
   const [encoreMode,setEncoreMode]=useState(false)
   const [encoreCircle,setEncoreCircle]=useState(0)
   const [showTrophies,setShowTrophies]=useState(false)
+  const [showStats,setShowStats]=useState(false)
   const [activeStakeId,setActiveStakeId]=useState(()=>localStorage.getItem('vst_active_stake')||'bronze')
   const activeStake=STAKES.find(s=>s.id===activeStakeId)||STAKES[0]
   const [musicVol,setMusicVol]=useState(()=>parseFloat(localStorage.getItem('vst_music_vol')||'0.3'))
@@ -7601,6 +7734,7 @@ function App(){
 
   // ── TROPHY WALL / MASTERY GALLERY (overlay from menu) ──
   if(showTrophies&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><TrophyWall onClose={()=>setShowTrophies(false)}/></div>)
+  if(showStats&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'auto'}}><StatsScreen onClose={()=>setShowStats(false)}/></div>)
   if(showCollection&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'auto'}}><MasteryGallery onClose={()=>setShowCollection(false)}/></div>)
 
   // ── COLD OPEN SPLASH — overlays menu on first ever launch
@@ -7891,6 +8025,12 @@ function App(){
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
               📀 Collection
             </button>
+            <button onClick={()=>setShowStats(true)}
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'var(--text-secondary)',
+                background:'rgba(40,25,5,0.5)',border:'1px solid rgba(120,160,200,0.4)',borderRadius:6,
+                padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
+              📊 Stats
+            </button>
           </div>
 
           {/* Stake + Deck selection */}
@@ -7914,6 +8054,24 @@ function App(){
             </div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:activeStake.color,fontStyle:'italic',textAlign:'center',maxWidth:500}}>{activeStake.desc}{activeStake.scoreMult>1?' Score ×'+activeStake.scoreMult:''}</div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',letterSpacing:2}}>DECK: Demo Deck</div>
+            {/* HEAT — earned permanent difficulty/score modifier. +1 per Lucifer kill, +15% boss HP per level. */}
+            {(()=>{const heat=parseInt(localStorage.getItem('vst_heat')||'1');const hpBonus=Math.round((heat-1)*15);const maxHeat=10;return(
+              <div title={"Beat Lucifer to raise Heat. Each level: +15% boss HP. Higher Heat = harder fights, bigger bragging rights."} style={{marginTop:8,display:'flex',flexDirection:'column',alignItems:'center',gap:4,padding:'8px 16px',background:'rgba(40,15,5,0.6)',border:'1px solid rgba(255,100,30,0.3)',borderRadius:6,cursor:'help'}}>
+                <div style={{display:'flex',alignItems:'center',gap:6}}>
+                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'rgba(255,140,40,0.9)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>🔥 Heat</span>
+                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:heat>=10?'var(--text-blood)':heat>=5?'rgba(255,140,40,1)':'var(--text-gold)',letterSpacing:1,fontWeight:900,textShadow:heat>=5?'0 0 8px rgba(255,140,40,0.6)':'none'}}>{heat} / {maxHeat}</span>
+                  {hpBonus>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-blood)',letterSpacing:1,fontWeight:700}}>· +{hpBonus}% Boss HP</span>}
+                </div>
+                {/* Pip row — filled = earned, dim = locked */}
+                <div style={{display:'flex',gap:3}}>
+                  {Array.from({length:maxHeat}).map((_,i)=>(
+                    <div key={i} style={{width:14,height:14,borderRadius:2,background:i<heat?(i>=4?'rgba(255,80,30,0.95)':'rgba(255,160,40,0.85)'):'rgba(40,25,15,0.6)',border:'1px solid '+(i<heat?'rgba(255,140,40,0.7)':'rgba(80,55,25,0.4)'),boxShadow:i<heat?'0 0 6px rgba(255,120,40,0.4)':'none'}}/>
+                  ))}
+                </div>
+                {heat<maxHeat&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',fontStyle:'italic',letterSpacing:0.5,opacity:0.75}}>Beat Lucifer to raise Heat</div>}
+                {heat>=maxHeat&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-blood)',letterSpacing:2,fontWeight:900,textShadow:'0 0 8px rgba(196,30,58,0.6)'}}>⛧ MAX HEAT ⛧</div>}
+              </div>
+            )})()}
           </div>
         </div>
       </div>
@@ -8385,7 +8543,7 @@ function App(){
   if(victorySummary)return <VictorySummaryScreen summary={victorySummary} onContinue={continueVictorySummary}/>
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)} encoreMode={encoreMode}/>
   if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} devDailyScore={6666} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage} runElapsed={Math.floor((Date.now()-runStartTimeRef.current)/1000)} lastKillingBlow={lastKillingBlow}/></div>
 
   return(
@@ -8724,7 +8882,7 @@ function App(){
                   onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='1'}}
                   onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='0'}}>
                   {a?<div style={{width:100,height:135,border:'2px solid rgba(200,140,30,0.65)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 14px rgba(200,140,20,0.35),inset 0 0 8px rgba(200,140,20,0.1)',cursor:'help'}}><ArtifactArtImg id={a.id} emoji={a.emoji} size={48} style={{animation:triggeredArtifactId===a.id?'artifactTrigger 0.5s ease-out':'none',transform:triggeredArtifactId===a.id?'scale(1.4)':'scale(1)',transition:'transform 0.15s'}}/><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:0.5,color:'var(--text-secondary)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 4px'}}>{a.name}</div>{a.mult&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-gold)',textShadow:'0 0 8px rgba(255,136,0,0.5)'}}>×{a.mult}</div>}</div>
-                  :<div style={{width:100,height:135,border:'1px dashed rgba(200,160,50,0.32)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:52,opacity:0.35,textShadow:'0 0 12px rgba(255,180,0,0.4)'}}>⛧</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:1,color:'rgba(200,160,60,0.45)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Artifact</div></div>}
+                  :<div style={{width:100,height:135,border:'1px dashed rgba(200,160,50,0.4)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:52,opacity:0.45,textShadow:'0 0 12px rgba(255,180,0,0.4)'}}>⛧</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:1.5,color:'rgba(220,170,70,0.65)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,fontWeight:900}}>Artifact</div></div>}
                   {a&&<div data-artip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:88,top:0,zIndex:99999,pointerEvents:'none',minWidth:200,maxWidth:280,background:'rgba(12,7,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,color:'var(--text-gold)',marginBottom:4}}>{a.emoji} {a.name}</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',fontStyle:'italic',lineHeight:1.4}}>{a.effect}</div>
@@ -8749,9 +8907,9 @@ function App(){
                     <div style={{fontSize:48,filter:'drop-shadow(0 0 8px rgba(204,136,255,0.5))',lineHeight:1}}>{p.emoji}</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:0.5,color:'var(--tier-mythic)',textTransform:'uppercase',textAlign:'center',lineHeight:1.1,padding:'0 4px'}}>{p.name}</div>
                   </div>
-                  :<div style={{width:100,height:135,border:'1px dashed rgba(153,51,204,0.32)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(20,8,30,0.65)'}}>
-                    <div style={{fontSize:42,opacity:0.4,textShadow:'0 0 12px rgba(204,136,255,0.4)',lineHeight:1}}>⚡</div>
-                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:1,color:'rgba(180,130,220,0.5)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2}}>Effect<br/>Pedal</div>
+                  :<div style={{width:100,height:135,border:'1px dashed rgba(153,51,204,0.4)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(20,8,30,0.65)'}}>
+                    <div style={{fontSize:42,opacity:0.5,textShadow:'0 0 12px rgba(204,136,255,0.4)',lineHeight:1}}>⚡</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:1.5,color:'rgba(200,150,235,0.7)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,fontWeight:900}}>Effect<br/>Pedal</div>
                   </div>}
                   {p&&<div data-passtip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:108,top:0,zIndex:99999,pointerEvents:'none',minWidth:200,maxWidth:280,background:'rgba(12,7,18,0.97)',border:'1px solid rgba(153,51,204,0.6)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,color:'var(--tier-mythic)',marginBottom:4}}>{p.emoji} {p.name}</div>
