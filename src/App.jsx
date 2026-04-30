@@ -2382,27 +2382,54 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
       {/* MAIN */}
       <div style={{flex:'1 1 0',display:'flex',gap:10,minHeight:0,overflow:'hidden'}}>
 
-        {/* LEFT COLUMN — gear (FROM THE BACK ROOM) */}
-        <div style={{width:240,flexShrink:0,display:'flex',flexDirection:'column',gap:4,minHeight:0}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,letterSpacing:3,color:'var(--gold)',textAlign:'center',textTransform:'uppercase',fontWeight:900,padding:'4px 0 0',textShadow:'0 0 8px rgba(200,152,56,0.4)'}}>⛧ Circle Rewards</div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',padding:'0 0 4px',borderBottom:'1px solid rgba(200,152,56,0.35)'}}>Boss loot from this circle.</div>
-          <LeftCard item={recruitPack} price={recruitPack.cost}
-            label="Band Recruitment" accent='#e8a820' id='rec' sold={leftBought.rec===true}
-            visitLocked={packsBoughtThisVisit>=1&&leftBought.rec!==true}
-            onBuy={()=>{
-              if(packsBoughtThisVisit>=1){addLog&&addLog('🛑 Already bought a pack this visit. Come back next time.');return}
+        {/* LEFT COLUMN — RECRUIT PACK (star) + GEAR */}
+        <div style={{width:280,flexShrink:0,display:'flex',flexDirection:'column',gap:6,minHeight:0,overflowY:'auto'}}>
+          {/* RECRUITMENT PACK — the star */}
+          <div onClick={()=>{
+              if(leftBought.rec||packsBoughtThisVisit>=1)return
               if(can(recruitPack.cost)){onSpend(recruitPack.cost,'recruit',recruitPack);setLeftBought(p=>({...p,rec:true}));setPacksBoughtThisVisit(1)}
-            }} />
-          {circleArtifact&&<div className="sigil-divider" style={{fontSize:11}}>· ⛧ ·</div>}
-          {circleArtifact&&<LeftCard item={circleArtifact} price={circleArtifact.cost}
-            label={'Vintage Amp · C'+circleNum} accent='#c87820' id='cart'
-            sold={leftBought.cart||!!circleCartBought||activeArtifacts.some(a=>a.id===circleArtifact.id)||(soldIds||[]).includes(circleArtifact.id)}
-            onBuy={()=>buyLeft('cart',circleArtifact.cost,'artifact',circleArtifact)} />}
-          {circlePassive&&<div className="sigil-divider" style={{fontSize:11}}>· ⛧ ·</div>}
-          {circlePassive&&<LeftCard item={circlePassive} price={circlePassive.cost}
-            label={'Effect Pedal · C'+circleNum} accent='#9933cc' id='cpas'
-            sold={leftBought.cpas||!!circleCpasBought||activePassives.some(p=>p.id===circlePassive.id)||(soldIds||[]).includes(circlePassive.id)}
-            onBuy={()=>buyLeft('cpas',circlePassive.cost,'passive',circlePassive)} />}
+            }}
+            style={{position:'relative',cursor:can(recruitPack.cost)&&!leftBought.rec&&packsBoughtThisVisit<1?'pointer':'default',
+              border:'2px solid '+(leftBought.rec?'rgba(100,65,15,0.3)':'rgba(232,168,32,0.6)'),borderRadius:10,
+              background:'linear-gradient(180deg,#1a1408,#0a0604)',overflow:'hidden',
+              opacity:leftBought.rec?0.4:1,
+              transform:hovId==='rec'&&!leftBought.rec?'scale(1.02)':'none',
+              transition:'all 0.15s',
+              boxShadow:hovId==='rec'&&!leftBought.rec?'0 0 30px rgba(232,168,32,0.3)':'none'}}
+            onMouseEnter={()=>setHovId('rec')} onMouseLeave={()=>setHovId(null)}>
+            {leftBought.rec&&<SoldOverlay/>}
+            {packsBoughtThisVisit>=1&&!leftBought.rec&&<SoldOverlay label="SOLD OUT THIS VISIT"/>}
+            <div style={{display:'flex',justifyContent:'center',padding:'8px 0 4px'}}>
+              <PackArtImg packId={['cassette','cdr','vinyl','rarevinyl','cursed'][Math.min(4,Math.floor(circleNum/2))]} emoji="📦" size={200}/>
+            </div>
+            <div style={{padding:'4px 12px 8px',textAlign:'center'}}>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:18,color:'#e8a820',letterSpacing:3,textShadow:'0 0 12px rgba(232,168,32,0.5)'}}>Band Recruitment</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#c8a060',margin:'4px 0'}}>{recruitPack.name}</div>
+              <div style={{fontFamily:"'ScratchFont',serif",fontSize:11,color:'var(--ink-dim)',fontStyle:'italic'}}>{recruitPack.effect||recruitPack.desc||''}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'#55ee55',marginTop:6,display:'flex',alignItems:'center',justifyContent:'center',gap:4}}>
+                <WeedLeaf size={16}/> {realPrice(recruitPack.cost)}
+              </div>
+            </div>
+          </div>
+
+          {/* CIRCLE ARTIFACT */}
+          {circleArtifact&&<div style={{border:'1px solid rgba(200,120,32,0.4)',borderRadius:8,padding:'8px',background:'rgba(10,6,2,0.4)'}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,letterSpacing:2,color:'#c87820',textAlign:'center',textTransform:'uppercase',marginBottom:4}}>⛧ Vintage Amp · C{circleNum}</div>
+            <LeftCard item={circleArtifact} price={circleArtifact.cost}
+              label="" accent='#c87820' id='cart'
+              sold={leftBought.cart||!!circleCartBought||activeArtifacts.some(a=>a.id===circleArtifact.id)||(soldIds||[]).includes(circleArtifact.id)}
+              onBuy={()=>buyLeft('cart',circleArtifact.cost,'artifact',circleArtifact)} />
+            {circleArtifact.mult&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:900,color:'#ff8800',textAlign:'center',marginTop:2}}>×{circleArtifact.mult} MULTIPLIER</div>}
+          </div>}
+
+          {/* CIRCLE PASSIVE (Effect Pedal) */}
+          {circlePassive&&<div style={{border:'1px solid rgba(153,51,204,0.4)',borderRadius:8,padding:'8px',background:'rgba(10,6,2,0.4)'}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:10,letterSpacing:2,color:'#9933cc',textAlign:'center',textTransform:'uppercase',marginBottom:4}}>⛧ Effect Pedal · C{circleNum}</div>
+            <LeftCard item={circlePassive} price={circlePassive.cost}
+              label="" accent='#9933cc' id='cpas'
+              sold={leftBought.cpas||!!circleCpasBought||activePassives.some(p=>p.id===circlePassive.id)||(soldIds||[]).includes(circlePassive.id)}
+              onBuy={()=>buyLeft('cpas',circlePassive.cost,'passive',circlePassive)} />
+          </div>}
         </div>
 
         {/* CENTER */}
