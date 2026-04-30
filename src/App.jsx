@@ -625,95 +625,95 @@ function getTotalMastery(){
 // MEMBER PORTRAITS — replaces emoji with ink art + Dr. Katz wiggle
 // ═══════════════════════════════════════════════════════════
 const MEMBER_PORTRAITS={
-  bjorn:'/vestibule/members/bjorn_stage.png',
-  ragnar:'/vestibule/members/ragnar_stage.png',
-  thor:'/vestibule/members/thor_stage.png',
-  rolf:'/vestibule/members/rolf_stage.png',
-  ingrid:'/vestibule/members/ingrid_stage.png',
-  dag:'/vestibule/members/dag_stage.png',
-  ulf:'/vestibule/members/ulf_stage.png',
-  brynja:'/vestibule/members/brynja_stage.png',
-  loki:'/vestibule/members/loki_stage.png',
-  freya:'/vestibule/members/freya_stage.png',
-  astrid:'/vestibule/members/astrid_stage.png',
-  grimnir:'/vestibule/members/grimnir_stage.png',
-  sigrid:'/vestibule/members/sigrid_stage.png',
-  gunnar:'/vestibule/members/gunnar_stage.png',
-  vitalik:'/vestibule/members/vitalik_stage.png',
-  orm:'/vestibule/members/orm_stage.png',
-  tanuki:'/vestibule/members/tanuki_stage.png',
-  lucifer_member:'/vestibule/members/lucifer_member_stage.png',
+  bjorn:import.meta.env.BASE_URL+'members/bjorn_stage.png',
+  ragnar:import.meta.env.BASE_URL+'members/ragnar_stage.png',
+  thor:import.meta.env.BASE_URL+'members/thor_stage.png',
+  rolf:import.meta.env.BASE_URL+'members/rolf_stage.png',
+  ingrid:import.meta.env.BASE_URL+'members/ingrid_stage.png',
+  dag:import.meta.env.BASE_URL+'members/dag_stage.png',
+  ulf:import.meta.env.BASE_URL+'members/ulf_stage.png',
+  brynja:import.meta.env.BASE_URL+'members/brynja_stage.png',
+  loki:import.meta.env.BASE_URL+'members/loki_stage.png',
+  freya:import.meta.env.BASE_URL+'members/freya_stage.png',
+  astrid:import.meta.env.BASE_URL+'members/astrid_stage.png',
+  grimnir:import.meta.env.BASE_URL+'members/grimnir_stage.png',
+  sigrid:import.meta.env.BASE_URL+'members/sigrid_stage.png',
+  gunnar:import.meta.env.BASE_URL+'members/gunnar_stage.png',
+  vitalik:import.meta.env.BASE_URL+'members/vitalik_stage.png',
+  orm:import.meta.env.BASE_URL+'members/orm_stage.png',
+  tanuki:import.meta.env.BASE_URL+'members/tanuki_stage.png',
+  lucifer_member:import.meta.env.BASE_URL+'members/lucifer_member_stage.png',
 }
 const STAGE_PORTRAITS={
-  bjorn:'/vestibule/members/bjorn_stage.png',
-  ragnar:'/vestibule/members/ragnar_stage.png',
-  thor:'/vestibule/members/thor_stage.png',
-  rolf:'/vestibule/members/rolf_stage.png',
-  ingrid:'/vestibule/members/ingrid_stage.png',
-  dag:'/vestibule/members/dag_stage.png',
-  ulf:'/vestibule/members/ulf_stage.png',
-  brynja:'/vestibule/members/brynja_stage.png',
-  loki:'/vestibule/members/loki_stage.png',
-  freya:'/vestibule/members/freya_stage.png',
-  astrid:'/vestibule/members/astrid_stage.png',
-  grimnir:'/vestibule/members/grimnir_stage.png',
-  sigrid:'/vestibule/members/sigrid_stage.png',
-  gunnar:'/vestibule/members/gunnar_stage.png',
-  vitalik:'/vestibule/members/vitalik_stage.png',
-  orm:'/vestibule/members/orm_stage.png',
-  tanuki:'/vestibule/members/tanuki_stage.png',
-  lucifer_member:'/vestibule/members/lucifer_member_stage.png',
+  bjorn:import.meta.env.BASE_URL+'members/bjorn_stage.png',
+  ragnar:import.meta.env.BASE_URL+'members/ragnar_stage.png',
+  thor:import.meta.env.BASE_URL+'members/thor_stage.png',
+  rolf:import.meta.env.BASE_URL+'members/rolf_stage.png',
+  ingrid:import.meta.env.BASE_URL+'members/ingrid_stage.png',
+  dag:import.meta.env.BASE_URL+'members/dag_stage.png',
+  ulf:import.meta.env.BASE_URL+'members/ulf_stage.png',
+  brynja:import.meta.env.BASE_URL+'members/brynja_stage.png',
+  loki:import.meta.env.BASE_URL+'members/loki_stage.png',
+  freya:import.meta.env.BASE_URL+'members/freya_stage.png',
+  astrid:import.meta.env.BASE_URL+'members/astrid_stage.png',
+  grimnir:import.meta.env.BASE_URL+'members/grimnir_stage.png',
+  sigrid:import.meta.env.BASE_URL+'members/sigrid_stage.png',
+  gunnar:import.meta.env.BASE_URL+'members/gunnar_stage.png',
+  vitalik:import.meta.env.BASE_URL+'members/vitalik_stage.png',
+  orm:import.meta.env.BASE_URL+'members/orm_stage.png',
+  tanuki:import.meta.env.BASE_URL+'members/tanuki_stage.png',
+  lucifer_member:import.meta.env.BASE_URL+'members/lucifer_member_stage.png',
 }
 
 const IDLE_PORTRAITS={
-  bjorn:'/vestibule/members/idle/bjorn_stage_idle.gif',
-  ragnar:'/vestibule/members/idle/ragnar_stage_idle.gif',
-  thor:'/vestibule/members/idle/thor_stage_idle.gif',
-  rolf:'/vestibule/members/idle/rolf_stage_idle.gif',
-  ingrid:'/vestibule/members/idle/ingrid_stage_idle.gif',
-  dag:'/vestibule/members/idle/dag_stage_idle.gif',
-  ulf:'/vestibule/members/idle/ulf_stage_idle.gif',
-  brynja:'/vestibule/members/idle/brynja_stage_idle.gif',
-  loki:'/vestibule/members/idle/loki_stage_idle.gif',
-  freya:'/vestibule/members/idle/freya_stage_idle.gif',
-  astrid:'/vestibule/members/idle/astrid_stage_idle.gif',
-  grimnir:'/vestibule/members/idle/grimnir_stage_idle.gif',
-  sigrid:'/vestibule/members/idle/sigrid_stage_idle.gif',
-  gunnar:'/vestibule/members/idle/gunnar_stage_idle.gif',
-  vitalik:'/vestibule/members/idle/vitalik_stage_idle.gif',
-  orm:'/vestibule/members/idle/orm_stage_idle.gif',
-  tanuki:'/vestibule/members/idle/tanuki_stage_idle.gif',
-  lucifer_member:'/vestibule/members/idle/lucifer_member_stage_idle.gif',
+  bjorn:import.meta.env.BASE_URL+'members/idle/bjorn_stage_idle.gif',
+  ragnar:import.meta.env.BASE_URL+'members/idle/ragnar_stage_idle.gif',
+  thor:import.meta.env.BASE_URL+'members/idle/thor_stage_idle.gif',
+  rolf:import.meta.env.BASE_URL+'members/idle/rolf_stage_idle.gif',
+  ingrid:import.meta.env.BASE_URL+'members/idle/ingrid_stage_idle.gif',
+  dag:import.meta.env.BASE_URL+'members/idle/dag_stage_idle.gif',
+  ulf:import.meta.env.BASE_URL+'members/idle/ulf_stage_idle.gif',
+  brynja:import.meta.env.BASE_URL+'members/idle/brynja_stage_idle.gif',
+  loki:import.meta.env.BASE_URL+'members/idle/loki_stage_idle.gif',
+  freya:import.meta.env.BASE_URL+'members/idle/freya_stage_idle.gif',
+  astrid:import.meta.env.BASE_URL+'members/idle/astrid_stage_idle.gif',
+  grimnir:import.meta.env.BASE_URL+'members/idle/grimnir_stage_idle.gif',
+  sigrid:import.meta.env.BASE_URL+'members/idle/sigrid_stage_idle.gif',
+  gunnar:import.meta.env.BASE_URL+'members/idle/gunnar_stage_idle.gif',
+  vitalik:import.meta.env.BASE_URL+'members/idle/vitalik_stage_idle.gif',
+  orm:import.meta.env.BASE_URL+'members/idle/orm_stage_idle.gif',
+  tanuki:import.meta.env.BASE_URL+'members/idle/tanuki_stage_idle.gif',
+  lucifer_member:import.meta.env.BASE_URL+'members/idle/lucifer_member_stage_idle.gif',
 }
 const BOSS_PORTRAITS={
-  wanderer:'/vestibule/bosses/wanderer.png',
-  lostsoul:'/vestibule/bosses/lostsoul.png',
-  drifter:'/vestibule/bosses/drifter.png',
-  siren:'/vestibule/bosses/siren.png',
-  tempter:'/vestibule/bosses/tempter.png',
-  lust_boss:'/vestibule/bosses/lust_boss.png',
-  glutton:'/vestibule/bosses/glutton.png',
-  feaster:'/vestibule/bosses/feaster.png',
-  gluttony_boss:'/vestibule/bosses/gluttony_boss.png',
-  miser:'/vestibule/bosses/miser.png',
-  hoarder:'/vestibule/bosses/hoarder.png',
-  greed_boss:'/vestibule/bosses/greed_boss.png',
-  wrathful:'/vestibule/bosses/wrathful.png',
-  berserker:'/vestibule/bosses/berserker.png',
-  anger_boss:'/vestibule/bosses/anger_boss.png',
-  heretic:'/vestibule/bosses/heretic.png',
-  apostate:'/vestibule/bosses/apostate.png',
-  heresy_boss:'/vestibule/bosses/heresy_boss.png',
-  brute:'/vestibule/bosses/brute.png',
-  hunter:'/vestibule/bosses/hunter.png',
-  violence_boss:'/vestibule/bosses/violence_boss.png',
-  trickster:'/vestibule/bosses/trickster.png',
-  deceiver:'/vestibule/bosses/deceiver.png',
-  fraud_boss:'/vestibule/bosses/fraud_boss.png',
-  traitor:'/vestibule/bosses/traitor.png',
-  betrayer:'/vestibule/bosses/betrayer.png',
-  lucifer:'/vestibule/bosses/lucifer_p1.png',
-  ar_exec:'/vestibule/bosses/ar_exec.png',
+  wanderer:import.meta.env.BASE_URL+'bosses/wanderer.png',
+  lostsoul:import.meta.env.BASE_URL+'bosses/lostsoul.png',
+  drifter:import.meta.env.BASE_URL+'bosses/drifter.png',
+  siren:import.meta.env.BASE_URL+'bosses/siren.png',
+  tempter:import.meta.env.BASE_URL+'bosses/tempter.png',
+  lust_boss:import.meta.env.BASE_URL+'bosses/lust_boss.png',
+  glutton:import.meta.env.BASE_URL+'bosses/glutton.png',
+  feaster:import.meta.env.BASE_URL+'bosses/feaster.png',
+  gluttony_boss:import.meta.env.BASE_URL+'bosses/gluttony_boss.png',
+  miser:import.meta.env.BASE_URL+'bosses/miser.png',
+  hoarder:import.meta.env.BASE_URL+'bosses/hoarder.png',
+  greed_boss:import.meta.env.BASE_URL+'bosses/greed_boss.png',
+  wrathful:import.meta.env.BASE_URL+'bosses/wrathful.png',
+  berserker:import.meta.env.BASE_URL+'bosses/berserker.png',
+  anger_boss:import.meta.env.BASE_URL+'bosses/anger_boss.png',
+  heretic:import.meta.env.BASE_URL+'bosses/heretic.png',
+  apostate:import.meta.env.BASE_URL+'bosses/apostate.png',
+  heresy_boss:import.meta.env.BASE_URL+'bosses/heresy_boss.png',
+  brute:import.meta.env.BASE_URL+'bosses/brute.png',
+  hunter:import.meta.env.BASE_URL+'bosses/hunter.png',
+  violence_boss:import.meta.env.BASE_URL+'bosses/violence_boss.png',
+  trickster:import.meta.env.BASE_URL+'bosses/trickster.png',
+  deceiver:import.meta.env.BASE_URL+'bosses/deceiver.png',
+  fraud_boss:import.meta.env.BASE_URL+'bosses/fraud_boss.png',
+  traitor:import.meta.env.BASE_URL+'bosses/traitor.png',
+  betrayer:import.meta.env.BASE_URL+'bosses/betrayer.png',
+  lucifer:import.meta.env.BASE_URL+'bosses/lucifer_p1.png',
+  ar_exec:import.meta.env.BASE_URL+'bosses/ar_exec.png',
 }
 // ═══ CIRCLE BACKGROUND THEMES ═══
 const CIRCLE_BG={
@@ -2072,9 +2072,9 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
               :<div style={{position:'absolute',top:7,right:10}}><div style={{width:24,height:24,borderRadius:'50%',background:'radial-gradient(circle at 35% 35%,#ff8800,#cc5500)',border:'2px solid #ff6600',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'MBScribblesFont',serif",fontSize:11,fontWeight:900,color:'#fff',boxShadow:'0 0 8px rgba(255,100,0,0.6)'}}>0</div></div>}
           </div>
           <div style={{height:130,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',
-            fontSize:68,background:'rgba(0,0,0,0.3)',position:'relative'}}>
+            background:'rgba(0,0,0,0.3)',position:'relative'}}>
             <div style={{position:'absolute',inset:0,background:'radial-gradient(circle at center,'+bc+'18,transparent 70%)'}}/>
-            {card.emoji}
+            <CardArtImg id={card.id} emoji={card.emoji} size={90}/>
           </div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:700,
             color:'#eedfc0',textAlign:'center',padding:'10px 10px 4px',
@@ -2143,8 +2143,8 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             color:ac,textAlign:'center',padding:'4px 4px 0',
             textTransform:'uppercase',opacity:1,flexShrink:0}}>{label}</div>
           <div style={{flex:'0 0 auto',display:'flex',alignItems:'center',justifyContent:'center',padding:'4px 0',
-            fontSize:36,filter:hov&&canBuy?'drop-shadow(0 0 12px '+ac+')':'none',
-            transition:'filter 0.15s'}}>{item.emoji}</div>
+            filter:hov&&canBuy?'drop-shadow(0 0 12px '+ac+')':'none',
+            transition:'filter 0.15s'}}><ArtifactArtImg id={item.id} emoji={item.emoji} size={40}/></div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,
             color:'#ffe8a0',textAlign:'center',padding:'0 6px',
             lineHeight:1.2,flexShrink:0}}>{item.name}</div>
@@ -2597,7 +2597,7 @@ const PACK_ART_MAP={cassette:'touring',cdr:'underground',vinyl:'festival',rarevi
 function PackArtImg({packId,emoji,size=120,style={}}){
   const [hasArt,setHasArt]=React.useState(false)
   const artFile=PACK_ART_MAP[packId]||packId
-  const src='/vestibule/packs/'+artFile+'.png'
+  const src=import.meta.env.BASE_URL+'vestibule/packs/'+artFile+'.png'
   React.useEffect(()=>{const img=new window.Image();img.onload=()=>setHasArt(true);img.onerror=()=>setHasArt(false);img.src=src},[packId])
   if(hasArt)return <img src={src} alt={packId} style={{width:'auto',height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
   return <span style={{fontSize:size*0.6,...style}}>{emoji}</span>
@@ -3256,7 +3256,7 @@ function BossSection({enemy,currentHp,scaledMaxHp,isWiggling,innerRef,debuff,chr
         </svg>
         {/* Inner portrait area */}
         <div style={{width:150,height:150,borderRadius:'50%',background:'radial-gradient(circle at 40% 35%, #2a0408, #080204)',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden',position:'relative',boxShadow:isLow?'inset 0 0 30px rgba(196,30,58,0.4), 0 0 30px rgba(196,30,58,0.5)':'inset 0 0 20px rgba(0,0,0,0.8)'}}>
-          {BOSS_PORTRAITS[enemy.id]?<img src={enemy.id==='lucifer'&&luciferPhase===2?'/vestibule/bosses/lucifer_p2.png':BOSS_PORTRAITS[enemy.id]} alt={enemy.name} style={{width:130,height:130,objectFit:'contain',imageRendering:'pixelated'}}/>:<span style={{fontSize:80}}>{enemy.emoji}</span>}
+          {BOSS_PORTRAITS[enemy.id]?<img src={enemy.id==='lucifer'&&luciferPhase===2?import.meta.env.BASE_URL+'bosses/lucifer_p2.png':BOSS_PORTRAITS[enemy.id]} alt={enemy.name} style={{width:130,height:130,objectFit:'contain',imageRendering:'pixelated'}}/>:<span style={{fontSize:80}}>{enemy.emoji}</span>}
           {isLow&&<div style={{position:'absolute',inset:0,background:'rgba(196,30,58,0.15)',animation:'pulse 1.2s ease infinite alternate'}}/>}
           {/* Portrait cracks — deepen as HP drops */}
           {pct<50&&<svg style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:5}} viewBox="0 0 150 150">
