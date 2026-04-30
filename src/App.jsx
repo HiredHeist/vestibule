@@ -2691,7 +2691,7 @@ function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,
   )
 }
 
-function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop,isUsed,lastRiffPlayed,chainHintsOn,hoverZoomOn,chainReady}){
+function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,onHover,onLeave,onClick,onDragStart,onDragEnd,isDragging,isShopBought,isDragOver,onHandDragOver,onHandDrop,isUsed,lastRiffPlayed,chainHintsOn,hoverZoomOn,chainReady,corruption}){
   const mastery=getMasteryTier(card.id)
   const spread=Math.min(4,20/total),mid=(total-1)/2
   const rot=(index-mid)*spread,yOff=Math.abs(index-mid)*2
@@ -2718,7 +2718,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
         zIndex:isDragging?0:isHovered?9999:isSelected?50+index:10+index,
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:chainReady&&canAfford?'2px 4px 16px rgba(0,0,0,0.75),0 0 14px rgba(255,220,50,0.5),0 0 28px rgba(255,200,0,0.2)':(mastery.glow?'2px 4px 16px rgba(0,0,0,0.75),0 0 8px '+mastery.glow:'2px 4px 16px rgba(0,0,0,0.75)'),
-        opacity:isDragging?0.4:unaffordable?0.55:1,filter:corruption>=80?'hue-rotate(-10deg) saturate(1.4) brightness(0.95)':corruption>=60?'saturate(1.2)':'none',
+        opacity:isDragging?0.4:unaffordable?0.55:1,filter:(corruption||0)>=80?'hue-rotate(-10deg) saturate(1.4) brightness(0.95)':(corruption||0)>=60?'saturate(1.2)':'none',
         animation:chainReady&&canAfford?'riffChainGlow 1.2s ease-in-out infinite':shimmerAnim,
         margin:total>HAND_SIZE?'0 -28px':'0 -22px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
       {/* Hand-drawn top stripe — SVG path with wobble */}
@@ -8690,6 +8690,7 @@ function App(){
               onHandDrop={()=>handleHandReorder(dragHandIdx,i)}
               chainHintsOn={typeof chainHintsOn!=='undefined'?chainHintsOn:false}
               hoverZoomOn={typeof localStorage!=='undefined'&&localStorage.getItem('vst_hoverzoom')!=='off'}
+              corruption={corruption}
             />
           ))}
         </div>
