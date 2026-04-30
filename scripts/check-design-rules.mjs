@@ -19,6 +19,7 @@ import { join, extname } from 'node:path'
 
 const ROOT = new URL('../src', import.meta.url).pathname
 const FONT_FLOOR = 13
+const SCRATCH_FONT_FLOOR = 20  // ScratchFont is decorative — illegible below 20pt
 
 // Sanctioned text colors — anything else inside a JSX style is a violation
 const ALLOWED_TOKENS = new Set([
@@ -73,6 +74,7 @@ function walk(dir) {
 
 const files = walk(ROOT)
 let fontViolations = []
+let scratchFontViolations = []
 let colorOffPalette = []
 let colorTypeIdentityNeedsToken = []
 
@@ -91,6 +93,17 @@ for (const file of files) {
       const px = parseInt(m[1], 10)
       if (px < FONT_FLOOR) {
         fontViolations.push({ file, lineNo, line: line.trim(), value: px })
+      }
+    }
+
+    // Rule 1b: ScratchFont legibility — illegible below 20pt
+    if (line.includes("'ScratchFont'")) {
+      const sizes = [...line.matchAll(/fontSize:(\d+)/g)].map(m => parseInt(m[1], 10))
+      if (sizes.length > 0) {
+        const smallest = Math.min(...sizes)
+        if (smallest < SCRATCH_FONT_FLOOR) {
+          scratchFontViolations.push({ file, lineNo, line: line.trim(), value: smallest })
+        }
       }
     }
 
@@ -137,6 +150,18 @@ if (fontViolations.length === 0) {
   failed = true
   console.log(`❌ Font size floor (≥13px): ${fontViolations.length} VIOLATION${fontViolations.length === 1 ? '' : 'S'}`)
   for (const v of fontViolations) {
+    console.log(`   ${rel(v.file)}:${v.lineNo}  fontSize:${v.value}`)
+  }
+}
+
+console.log('')
+if (scratchFontViolations.length === 0) {
+  console.log('✅ ScratchFont legibility (≥20pt): CLEAN')
+} else {
+  failed = true
+  console.log(`❌ ScratchFont legibility (≥20pt): ${scratchFontViolations.length} VIOLATION${scratchFontViolations.length === 1 ? '' : 'S'}`)
+  console.log(`   ScratchFont is decorative — switch to MBScribblesFont below 20pt.`)
+  for (const v of scratchFontViolations) {
     console.log(`   ${rel(v.file)}:${v.lineNo}  fontSize:${v.value}`)
   }
 }
