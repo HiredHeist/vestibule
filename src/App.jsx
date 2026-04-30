@@ -2082,7 +2082,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:700,
             color:'#eedfc0',textAlign:'center',padding:'10px 10px 4px',position:'relative',
             letterSpacing:0.3,lineHeight:1.2,
-            borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}</div>
+            borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}{!card.isMember&&getMasteryPlays(card.id)===0&&<span style={{marginLeft:6,fontFamily:"'MBScribblesFont',serif",fontSize:8,fontWeight:900,color:'#44ff44',background:'rgba(30,120,30,0.4)',border:'1px solid rgba(60,200,60,0.5)',borderRadius:3,padding:'1px 5px',letterSpacing:2}}>NEW!</span>}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontWeight:700,
             color:bc,textAlign:'center',padding:'4px 6px',
             letterSpacing:2,textTransform:'uppercase',flexShrink:0}}>
@@ -4366,6 +4366,16 @@ function App(){
   const [maxEmbers,setMaxEmbers]=useState(5)
   const [embers,setEmbers]=useState(5)
   const [stash,setStash]=useState(3)
+  const stashMilestonesRef=useRef({100:false,200:false,300:false,420:false})
+  useEffect(()=>{
+    if(gameState!=="playing"&&gameState!=="shop")return
+    const ms=stashMilestonesRef.current
+    if(stash>=420&&!ms[420]){ms[420]=true;addLog("🌿🌿🌿 420! THE SACRED NUMBER! 🌿🌿🌿")
+      try{const _c=new(window.AudioContext||window.webkitAudioContext)();[440,554,659,880].forEach((f,i)=>{const o=_c.createOscillator();const g=_c.createGain();o.type="sine";o.frequency.value=f;g.gain.value=0.1;o.connect(g);g.connect(_c.destination);o.start(_c.currentTime+i*0.15);o.stop(_c.currentTime+i*0.15+0.2)})}catch(e){}}
+    else if(stash>=300&&!ms[300]){ms[300]=true;try{const _c=new(window.AudioContext||window.webkitAudioContext)();const o=_c.createOscillator();const g=_c.createGain();o.type="sine";o.frequency.value=700;g.gain.value=0.08;o.connect(g);g.connect(_c.destination);o.start();o.stop(_c.currentTime+0.1)}catch(e){}}
+    else if(stash>=200&&!ms[200]){ms[200]=true;try{const _c=new(window.AudioContext||window.webkitAudioContext)();const o=_c.createOscillator();const g=_c.createGain();o.type="sine";o.frequency.value=600;g.gain.value=0.07;o.connect(g);g.connect(_c.destination);o.start();o.stop(_c.currentTime+0.08)}catch(e){}}
+    else if(stash>=100&&!ms[100]){ms[100]=true;try{const _c=new(window.AudioContext||window.webkitAudioContext)();const o=_c.createOscillator();const g=_c.createGain();o.type="sine";o.frequency.value=500;g.gain.value=0.06;o.connect(g);g.connect(_c.destination);o.start();o.stop(_c.currentTime+0.06)}catch(e){}}
+  },[stash,gameState])
   const [strikesLeft,setStrikesLeft]=useState(MAX_STRIKES)
   const [discardsLeft,setDiscardsLeft]=useState(MAX_DISCARDS)
   const [fightMaxStrikes,setFightMaxStrikes]=useState(MAX_STRIKES) // dynamic — includes pact bonuses, card effects
