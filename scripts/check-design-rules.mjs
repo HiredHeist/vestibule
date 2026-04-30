@@ -27,6 +27,8 @@ const ALLOWED_TOKENS = new Set([
   'var(--text-muted)',
   'var(--text-gold)',
   'var(--text-blood)',
+  'var(--text-positive)',
+  'var(--text-inverse)',
   // Type-identity (used as text on type badges)
   'var(--type-riff)',
   'var(--type-corrupt)',

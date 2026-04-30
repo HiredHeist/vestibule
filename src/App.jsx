@@ -1484,8 +1484,8 @@ function BoosterScreen({onComplete,seed}){
                   </div>
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,color:kwc,fontWeight:900,textAlign:'center',letterSpacing:0.5,maxWidth:100}}>{kw}{(()=>{const _l=getMemberLegacy(m.id);return _l&&_l.runs>0?<div style={{fontSize:13,color:'var(--text-secondary)',marginTop:2}}>{_l.nickname||(_l.runs+' runs')}</div>:null})()}</div>
                   <div style={{textAlign:'center'}}>
-                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
-                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-positive)',textTransform:'uppercase',fontWeight:900}}>HP</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,color:'var(--text-positive)',lineHeight:1}}>{m.hp}</div>
                   </div>
                 </div>
               )}
@@ -1566,7 +1566,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
       <div style={{position:'absolute',top:24,right:32,display:'flex',flexDirection:'column',alignItems:'center',gap:4,
         background:'rgba(20,10,5,0.95)',border:'2px solid #55ee66',borderRadius:10,padding:'12px 20px',
         boxShadow:'0 0 24px rgba(60,220,80,0.4)',minWidth:100}}>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#33aa44',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Stash</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-positive)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Stash</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,color:'#55ee66',lineHeight:1,
           textShadow:'0 0 20px rgba(60,220,80,0.8)'}}>{stash}</div>
         <WeedLeaf size={16}/>
@@ -1575,7 +1575,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:25,color:'#c8a0ee',fontStyle:'italic',marginBottom:6}}>
         {salesLeft} sale{salesLeft!==1?'s':''} remaining this visit
       </div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'#8a6aaa',letterSpacing:1,marginBottom:20}}>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--text-muted)',letterSpacing:1,marginBottom:20}}>
         Cannot sell last 2 members · Bonds break on member sale
       </div>
 
@@ -1587,7 +1587,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
 
       {/* Members tab */}
       {tab==='members'&&<div style={{display:'flex',gap:16,flexWrap:'wrap',justifyContent:'center',maxWidth:1200}}>
-        {members.length===0&&<div style={{fontFamily:"'ScratchFont',serif",color:'#5a3a6a',fontStyle:'italic',fontSize:16}}>No members on stage.</div>}
+        {members.length===0&&<div style={{fontFamily:"'ScratchFont',serif",color:'var(--text-muted)',fontStyle:'italic',fontSize:16}}>No members on stage.</div>}
         {members.map(({m,i})=>{
           const price = memberSellPrice(m)
           const cantSell = activeMembers.length<=2
@@ -1595,7 +1595,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
           const tierColor = m.demonic?'#ffd700':m.mythic?'#dd88ff':m.foil?'#88ccff':null
           return(
             <div key={m.uid||i} style={{width:180,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'1px solid '+(tierColor||'rgba(160,80,240,0.4)'),borderRadius:7,overflow:'hidden',opacity:cantSell?0.5:1}}>
-              {tierColor&&<div style={{background:tierColor,padding:'3px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#0a0704',letterSpacing:2}}>{m.demonic?'⛧ DEMONIC':m.mythic?'✦ MYTHIC':'✨ FOIL'}</div>}
+              {tierColor&&<div style={{background:tierColor,padding:'3px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-inverse)',letterSpacing:2}}>{m.demonic?'⛧ DEMONIC':m.mythic?'✦ MYTHIC':'✨ FOIL'}</div>}
               <div style={{fontSize:44,textAlign:'center',padding:'14px 0',background:'rgba(0,0,0,0.3)',overflow:'hidden'}}>{MEMBER_PORTRAITS[m.id]?<MemberPortrait id={m.id} size={45}/>:m.emoji}</div>
               <div style={{padding:'0 10px 12px'}}>
                 <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:20,color:'var(--text-primary)',textAlign:'center',marginBottom:2}}>{m.name}</div>
@@ -1603,7 +1603,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
                 <div style={{display:'flex',justifyContent:'space-between',padding:'4px 6px',background:'rgba(0,0,0,0.4)',borderRadius:3,marginBottom:8}}>
                   <div style={{textAlign:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-blood)',fontWeight:900}}>ATK</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,color:'var(--text-blood)'}}>{m.atk}</div></div>
                   <div style={{alignSelf:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,color:bc,fontWeight:700}}>{m.keyword}</div>
-                  <div style={{textAlign:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#33dd33',fontWeight:900}}>HP</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,color:'#33dd33'}}>{m.hp}/{m.maxHp}</div></div>
+                  <div style={{textAlign:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-positive)',fontWeight:900}}>HP</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:22,fontWeight:900,color:'var(--text-positive)'}}>{m.hp}/{m.maxHp}</div></div>
                 </div>
                 {m.roleBondBonus>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-gold)',textAlign:'center',marginBottom:6}}>🔗 Bond +{m.roleBondBonus} ATK (breaks)</div>}
                 <button
@@ -1625,7 +1625,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
 
       {/* Cards tab */}
       {tab==='cards'&&<div style={{display:'flex',gap:14,flexWrap:'wrap',justifyContent:'center',maxWidth:1200}}>
-        {allCards.length===0&&<div style={{fontFamily:"'ScratchFont',serif",color:'#5a3a6a',fontStyle:'italic',fontSize:16}}>Deck is empty.</div>}
+        {allCards.length===0&&<div style={{fontFamily:"'ScratchFont',serif",color:'var(--text-muted)',fontStyle:'italic',fontSize:16}}>Deck is empty.</div>}
         {allCards.map((c,ci)=>{
           const price = cardSellPrice(c)
           const bc = c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
@@ -2035,12 +2035,12 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#aaa',letterSpacing:1,textAlign:'center'}}>{card.keyword}</div>
             <div style={{textAlign:'center'}}>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-muted)',letterSpacing:1}}>HP</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'#33dd33',fontWeight:900,lineHeight:1}}>{card.hp}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'var(--text-positive)',fontWeight:900,lineHeight:1}}>{card.hp}</div>
             </div>
           </div>}
           {isPicked&&<div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.6)',
             display:'flex',alignItems:'center',justifyContent:'center',borderRadius:8}}>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'#55ee55',letterSpacing:2}}>✓ PICKED</span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,color:'var(--text-positive)',letterSpacing:2}}>✓ PICKED</span>
           </div>}
         </div>
         {!isPicked&&picksLeft>0&&<div style={{marginTop:8,fontFamily:"'MBScribblesFont',serif",fontSize:13,
@@ -2124,7 +2124,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             position:'relative'}}>
             {/* hole + string knot */}
             <div style={{position:'absolute',top:3,left:4,width:6,height:6,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
-            <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{price}</span> <WeedLeaf size={14}/>{realPrice(price)}</>:<><WeedLeaf size={14}/> {price}</>}</div>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,fontWeight:900,color:'var(--text-inverse)',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{price}</span> <WeedLeaf size={14}/>{realPrice(price)}</>:<><WeedLeaf size={14}/> {price}</>}</div>
             {hungerActive&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#8a1010',fontWeight:900,letterSpacing:0.5,marginTop:-1}}>⚠ HUNGER +25%</div>}
           </div>
         </div>
@@ -2163,7 +2163,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:700,
             color:'#eedfc0',textAlign:'center',padding:'10px 10px 4px',position:'relative',
             letterSpacing:0.3,lineHeight:1.2,
-            borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}{!card.isMember&&getMasteryPlays(card.id)===0&&<span style={{marginLeft:6,fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#44ff44',background:'rgba(30,120,30,0.4)',border:'1px solid rgba(60,200,60,0.5)',borderRadius:3,padding:'1px 5px',letterSpacing:2}}>NEW!</span>}</div>
+            borderBottom:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>{card.name}{!card.isMember&&getMasteryPlays(card.id)===0&&<span style={{marginLeft:6,fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-positive)',background:'rgba(30,120,30,0.4)',border:'1px solid rgba(60,200,60,0.5)',borderRadius:3,padding:'1px 5px',letterSpacing:2}}>NEW!</span>}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,
             color:bc,textAlign:'center',padding:'4px 6px',
             letterSpacing:2,textTransform:'uppercase',flexShrink:0}}>
@@ -2183,7 +2183,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:card.kwColor||'#aaa',letterSpacing:1,textAlign:'center'}}>{card.keyword}</div>
             <div style={{textAlign:'center'}}>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-muted)',letterSpacing:1}}>HP</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,color:'#33dd33',fontWeight:900,lineHeight:1}}>{card.hp}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,color:'var(--text-positive)',fontWeight:900,lineHeight:1}}>{card.hp}</div>
             </div>
           </div>}
         </div>
@@ -2208,7 +2208,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             padding:'2px 8px 3px',borderRadius:2,whiteSpace:'nowrap',minWidth:48,textAlign:'center',
             position:'relative'}}>
             <div style={{position:'absolute',top:3,left:3,width:4,height:4,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
-            <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{price}</span> <WeedLeaf size={11}/>{realPrice(price)}</>:<><WeedLeaf size={11}/> {price}</>}</div>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,fontWeight:900,color:'var(--text-inverse)',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{price}</span> <WeedLeaf size={11}/>{realPrice(price)}</>:<><WeedLeaf size={11}/> {price}</>}</div>
           </div>
         </div>
         <div onClick={()=>canBuy&&onBuy()}
@@ -2261,7 +2261,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             padding:'3px 10px 4px',borderRadius:2,whiteSpace:'nowrap',minWidth:58,textAlign:'center',
             position:'relative'}}>
             <div style={{position:'absolute',top:3,left:4,width:6,height:6,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
-            <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,fontWeight:900,color:'#1a1408',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{pack.cost}</span> <WeedLeaf size={14}/>{realPrice(pack.cost)}</>:<><WeedLeaf size={14}/> {pack.cost}</>}</div>
+            <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,fontWeight:900,color:'var(--text-inverse)',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{pack.cost}</span> <WeedLeaf size={14}/>{realPrice(pack.cost)}</>:<><WeedLeaf size={14}/> {pack.cost}</>}</div>
           </div>
         </div>
         <div onClick={()=>canBuy&&handleOpenPack(pack)}
@@ -2490,7 +2490,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
               <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:18,color:'var(--text-gold)',letterSpacing:3,textShadow:'0 0 12px rgba(232,168,32,0.5)'}}>Band Recruitment</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',margin:'4px 0'}}>{recruitPack.name}</div>
               <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'var(--ink-dim)',fontStyle:'italic'}}>{recruitPack.effect||recruitPack.desc||''}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'#55ee55',marginTop:6,display:'flex',alignItems:'center',justifyContent:'center',gap:4}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--text-positive)',marginTop:6,display:'flex',alignItems:'center',justifyContent:'center',gap:4}}>
                 <WeedLeaf size={16}/> {realPrice(recruitPack.cost)}
               </div>
             </div>
@@ -2530,7 +2530,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           
           {/* COMPACT DRUG SECTION */}
           <div style={{flexShrink:0,display:'flex',gap:12,justifyContent:'center',padding:'6px 0'}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#44cc44',letterSpacing:2,display:'flex',alignItems:'center',gap:6}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-positive)',letterSpacing:2,display:'flex',alignItems:'center',gap:6}}>
               <WeedLeaf size={16}/> SLY'S STASH:
             </div>
             <div onClick={()=>{if(shroomsInStock&&heldShrooms<drugMax&&can(6)){onSpend(6,'dealer',null);onBuyShrooms()}}}
@@ -3054,7 +3054,7 @@ function TrophyWall({onClose}){
 
       {/* Best damage */}
       {defeated&&t.bestDamage>0&&<div style={{background:'rgba(0,0,0,0.5)',padding:'2px 6px',textAlign:'center',borderTop:'1px solid rgba(80,50,10,0.2)'}}>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#aa8844'}}>BEST HIT</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)'}}>BEST HIT</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-gold)'}}>{t.bestDamage.toLocaleString()}</div>
       </div>}
 
@@ -3091,7 +3091,7 @@ function TrophyWall({onClose}){
             <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:allDefeated?'#aa8844':'#443322',fontStyle:'italic'}}>
               {circle.name.split(' — ')[1]}
             </div>
-            {allDefeated&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#44cc44',letterSpacing:1,marginTop:1}}>✓ CLEARED</div>}
+            {allDefeated&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-positive)',letterSpacing:1,marginTop:1}}>✓ CLEARED</div>}
           </div>
           {/* 3 trophy slots */}
           <div style={{display:'flex',gap:8}}>
@@ -3106,7 +3106,7 @@ function TrophyWall({onClose}){
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:trophies['ar_exec']?'#ffd700':'#665533',letterSpacing:2}}>
             🕴 BONUS
           </div>
-          <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'#aa8844',fontStyle:'italic'}}>
+          <div style={{fontFamily:"'ScratchFont',serif",fontSize:13,color:'var(--text-secondary)',fontStyle:'italic'}}>
             Welcome to Hell
           </div>
         </div>
@@ -3361,7 +3361,7 @@ function EventScreen({event,onChoose}){
       </div>
 
       {/* Flavor text */}
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:17,color:'#998866',fontStyle:'italic',textAlign:'center',lineHeight:1.6,marginBottom:28,padding:'0 10px'}}>{event.flavor}</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:17,color:'var(--text-secondary)',fontStyle:'italic',textAlign:'center',lineHeight:1.6,marginBottom:28,padding:'0 10px'}}>{event.flavor}</div>
 
       {/* Divider */}
       <div style={{height:1,background:'linear-gradient(90deg,transparent,rgba(200,100,20,0.4),transparent)',margin:'0 0 24px'}}/>
@@ -3765,7 +3765,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
           <span style={{fontSize:36,flexShrink:0}}>{h.emoji}</span>
           <div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:h.color,lineHeight:1,textShadow:'0 0 12px '+h.color+'44'}}>{h.value}</div>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#998866',letterSpacing:2,textTransform:'uppercase',marginTop:3}}>{h.label}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',letterSpacing:2,textTransform:'uppercase',marginTop:3}}>{h.label}</div>
           </div>
         </div>))}
       </div>}
@@ -3935,7 +3935,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   const TitleBlock=()=>{
     if(isStoned)return(<>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:100,color:'var(--text-blood)',textShadow:'-4px 0 rgba(255,0,0,0.9),4px 0 rgba(0,255,80,0.7),0 0 50px rgba(180,0,0,0.8),3px 3px 0 #000',lineHeight:1}}>Stoned to the Bone</div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:30,color:'#44ff44',fontStyle:'italic',textShadow:'0 0 15px rgba(60,255,60,0.7)'}}>The band ran out of herb.</div>
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:30,color:'var(--text-positive)',fontStyle:'italic',textShadow:'0 0 15px rgba(60,255,60,0.7)'}}>The band ran out of herb.</div>
     </>)
     if(isBeaten)return(<>
       <div style={{display:'flex',alignItems:'center',gap:20}}>
@@ -4162,7 +4162,7 @@ function DemonicConflictScreen({conflict,onChoice}){
       <div onClick={onPick} style={{width:260,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'3px solid #e8a820',borderRadius:8,overflow:'hidden',cursor:'pointer',transition:'all 0.2s',boxShadow:'0 0 40px rgba(232,168,32,0.5)'}}
         onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.04)';e.currentTarget.style.boxShadow='0 0 60px rgba(232,168,32,0.8)'}}
         onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='0 0 40px rgba(232,168,32,0.5)'}}>
-        <div style={{background:'linear-gradient(90deg,#e8a820,#ffcc44)',padding:'6px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'#0a0704'}}>{label}</div>
+        <div style={{background:'linear-gradient(90deg,#e8a820,#ffcc44)',padding:'6px',textAlign:'center',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:3,color:'var(--text-inverse)'}}>{label}</div>
         <div style={{fontSize:64,textAlign:'center',padding:'20px 0',background:'rgba(0,0,0,0.4)',overflow:'hidden'}}>{MEMBER_PORTRAITS[m.id]?<MemberPortrait id={m.id} size={55}/>:m.emoji}</div>
         <div style={{padding:'0 16px 16px'}}>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:32,color:'var(--text-primary)',textAlign:'center',marginBottom:4}}>{m.name}</div>
@@ -4170,7 +4170,7 @@ function DemonicConflictScreen({conflict,onChoice}){
           <div style={{display:'flex',justifyContent:'space-between',padding:'8px',background:'rgba(0,0,0,0.5)',borderRadius:4,marginBottom:8}}>
             <div style={{textAlign:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-blood)',fontWeight:900}}>ATK</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,color:'var(--text-blood)'}}>{m.atk}</div></div>
             <div style={{textAlign:'center',alignSelf:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:bc,fontWeight:700}}>{m.keyword}</div></div>
-            <div style={{textAlign:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#33dd33',fontWeight:900}}>HP</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,color:'#33dd33'}}>{m.hp}</div></div>
+            <div style={{textAlign:'center'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-positive)',fontWeight:900}}>HP</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,color:'var(--text-positive)'}}>{m.hp}</div></div>
           </div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',textAlign:'center'}}>{m.desc}</div>
           {m.roleBondBonus>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-gold)',textAlign:'center',marginTop:8}}>🔗 +{m.roleBondBonus} ATK Bond</div>}
@@ -4232,8 +4232,8 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-gold)',fontWeight:700}}>{m.keyword}</div>
                   </div>
                   <div style={{textAlign:'center'}}>
-                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#33dd33',textTransform:'uppercase',fontWeight:900}}>HP</div>
-                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'#33dd33',lineHeight:1}}>{m.hp}</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-positive)',textTransform:'uppercase',fontWeight:900}}>HP</div>
+                    <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'var(--text-positive)',lineHeight:1}}>{m.hp}</div>
                   </div>
                 </div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',textAlign:'center',lineHeight:1.3}}>{m.desc}</div>
@@ -4356,7 +4356,7 @@ function SetlistModal({hand,onConfirm}){
   const [hovUid,setHovUid]=useState(null)
   return(
     <div style={{position:'absolute',inset:0,zIndex:9700,background:'rgba(4,2,1,0.95)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,padding:'40px 20px'}}>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'#44dd44',textShadow:'0 0 30px rgba(40,200,60,0.5)'}}>Setlist</div>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'var(--text-positive)',textShadow:'0 0 30px rgba(40,200,60,0.5)'}}>Setlist</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:18,color:'#88bb88',fontStyle:'italic'}}>You drew 2 cards. Now discard 1 to continue.</div>
       <div style={{display:'flex',gap:14,flexWrap:'wrap',justifyContent:'center',maxWidth:1100}}>
         {hand.map((card)=>{
@@ -8346,7 +8346,7 @@ function App(){
             <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:20,color:'var(--text-gold)',textAlign:'center',letterSpacing:1}}>{c.name}+</div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:bc,textAlign:'center',letterSpacing:1,textTransform:'uppercase',marginBottom:6}}>{c.type} {c.rarity}</div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-secondary)',textAlign:'center',lineHeight:1.5,padding:'0 12px'}}>{up.desc}</div>
-            {hasHp&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#44cc44',textAlign:'center',marginTop:6,fontWeight:900}}>+{up.hpAmt} MAX HP ({up.hp})</div>}
+            {hasHp&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-positive)',textAlign:'center',marginTop:6,fontWeight:900}}>+{up.hpAmt} MAX HP ({up.hp})</div>}
           </div>
         })}
         {uniqueUpgradeable.length===0&&<div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'var(--text-muted)',fontStyle:'italic',padding:40}}>All cards already upgraded!</div>}
@@ -8709,7 +8709,7 @@ function App(){
                       const syns=(SYNERGIES[a.id]||[]).map(sid=>activeArtifacts.find(x=>x.id===sid)).filter(Boolean)
                       if(syns.length===0)return null
                       return <div style={{marginTop:4,paddingTop:4,borderTop:'1px solid rgba(200,140,30,0.3)'}}>
-                        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#44cc44',letterSpacing:2,textTransform:'uppercase',marginBottom:2}}>⛧ SYNERGIZES WITH</div>
+                        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-positive)',letterSpacing:2,textTransform:'uppercase',marginBottom:2}}>⛧ SYNERGIZES WITH</div>
                         {syns.map(s=><div key={s.id} style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#88ff88'}}>{s.emoji} {s.name}</div>)}
                       </div>
                     })()}

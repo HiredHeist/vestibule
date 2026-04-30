@@ -53,6 +53,10 @@
   --text-gold:      #e8a820;  /*  9.6:1 AAA — stash, prices, highlights ONLY */
   --text-blood:     #ee2222;  /*  4.7:1 AA  — danger, HP critical, errors */
 
+  /* SEMANTIC EXTRAS — required by gameplay feedback patterns */
+  --text-positive:  #44dd44;  /* gain feedback: stash up, +HP, ✓ confirmations */
+  --text-inverse:   #0a0704;  /* dark text — for use ON bright/light backgrounds (badges, gold gradients) */
+
   /* TYPE-IDENTITY COLORS — 4 colors, one per card type. Borders/badges only, NOT body text */
   --type-riff:    #9933cc;
   --type-corrupt: #aa1111;
