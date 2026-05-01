@@ -67,6 +67,20 @@ calculation and per-member ATK bonus injection).
 
 ---
 
+## 🩹 UI FIXES — MAY 2
+
+### Death screen overflow clipping — DONE
+- [x] EndScreen wrapper used `justifyContent:'center'` + `overflow:'hidden'`,
+      which clipped both top and bottom when content exceeded 1080px.
+      Switched to `flex-start` + `overflowY:'auto'` with 30px top/bottom
+      padding so tall content scrolls instead of vanishing. Visible at
+      line 4126 in `src/App.jsx`. Repro: die with full stats panel +
+      keyword strip + achievement badges + near-miss block all firing —
+      stats row at top and keyword strip at bottom were getting cut off.
+
+
+---
+
 ## 🚨 OLDER LAUNCH BLOCKERS — FROM 10K-RUN SIM
 
 These were identified by running the v19.1 simulator over 10,000 games at

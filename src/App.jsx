@@ -4123,7 +4123,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
   }
 
   return(
-    <div style={{position:'absolute',inset:0,zIndex:9800,background:bgColor,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',animation:'fadeIn 0.8s ease',overflow:'hidden'}}>
+    <div style={{position:'absolute',inset:0,zIndex:9800,background:bgColor,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',paddingTop:30,paddingBottom:30,animation:'fadeIn 0.8s ease',overflowY:'auto',overflowX:'hidden'}}>
       {/* Scanlines */}
       
       {/* Vignette */}
