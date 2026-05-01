@@ -65,9 +65,17 @@ behaviors with sim-spec versions, since sim is balance source of truth).
       where shredderHits = consecutive same-type card pairs played this
       strike. Computed in handleStrike from card-id snapshot, mirrored in
       damage preview reading cardsPlayedRef live.
-- [ ] **4d — ANCHOR rewrite**: kill "+1 HP/strike to adjacent" regen,
-      replace with lethal save (1/2/any per fight by tier). Needs
-      `_anchorSavesUsed` state + hooks at 5 boss-damage death sites.
+- [x] **4d — ANCHOR rewrite (COMMITTED)**: ripped the +1 HP/strike adjacent
+      regen block. ANCHOR now saves members from lethal boss damage,
+      tier 1 = 1 save/fight on ANCHOR members, tier 2 = 2 saves/fight on
+      ANCHOR members, tier 4 (3+ stacks) = 4 saves/fight on ANY member.
+      Added `anchorTierRef`/`anchorSavesUsedRef`, locked at fight start.
+      Added `_tryAnchorSave(target)` helper that increments saves-used.
+      Hooked into 2 boss-damage death sites: Lucifer phase-2 AoE and
+      standard boss attack. Decisions pre-computed OUTSIDE setStage to
+      avoid StrictMode double-fire of ref mutations. Voluntary deaths
+      (Mosh Pit, Devil's Wager, Russian Roulette, Blood Oath) bypass
+      save by design — boss damage only.
 - [ ] **4e — DOUBLE TIME tier-3 + tooltip/desc updates**: at 3-stack of
       Drummers, ALL members attack twice. Update KEYWORD_DESC tooltips
       and member descriptions for all 4 reworked keywords.

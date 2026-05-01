@@ -4799,6 +4799,24 @@ function App(){
   const [dblRoll,setDblRoll]=useState(null) // null=not rolled, 1-2=half, 3-4=offbeat, 5-6=double
   // shredderUsed state removed in commit 4c — SHREDDER no longer grants
   // an ember discount; it now grants per-chain ATK via getEffectiveAtk.
+  // ANCHOR (4d) — lethal save mechanic. Tier locked at fight start.
+  // tier 1 = save 1 lethal hit / fight on any ANCHOR member
+  // tier 2 = save 2 lethal hits / fight on any ANCHOR member
+  // tier 4 (3+ stacks) = ANY member can be saved (not just ANCHORs), 4 saves / fight
+  const anchorTierRef=useRef(0)
+  const anchorSavesUsedRef=useRef(0)
+  // Returns true if save fires (caller sets hp=1 instead of killing the member).
+  // Mutates the saves-used counter on success. Only fires for boss damage; voluntary
+  // member deaths (Mosh Pit, Devil's Wager, Russian Roulette, Blood Oath) bypass.
+  const _tryAnchorSave=(target)=>{
+    if(!target)return false
+    const cap=anchorTierRef.current
+    if(!cap)return false
+    if(anchorSavesUsedRef.current>=cap)return false
+    if(cap<4&&target.keyword!=='ANCHOR')return false // tier 1-2: only ANCHORs save themselves
+    anchorSavesUsedRef.current++
+    return true
+  }
   const [nextCardFree,setNextCardFree]=useState(false)
   const nextCardFreeRef=useRef(false)
   useEffect(()=>{nextCardFreeRef.current=nextCardFree},[nextCardFree])
@@ -7118,13 +7136,32 @@ function App(){
             // Phase 2: AoE — split damage across ALL alive members
             const splitDmg=Math.ceil(actualDmg/activeM.length)
             addLog('😈 Satan strikes ALL members for '+splitDmg+' each! ('+actualDmg+' total)')
+            // ── ANCHOR (4d) — pre-compute save decisions BEFORE setStage ──
+            // _tryAnchorSave mutates anchorSavesUsedRef, so we must call it
+            // outside the setStage updater (StrictMode double-fires updaters).
+            const _aoeAnchorSaved={}
+            for(let ai=0;ai<stage.length;ai++){
+              const _m=stage[ai]
+              if(!_m||_m.tooStoned)continue
+              const _newHp=_m.hp-splitDmg
+              if(_newHp<=0&&!_m.stoneShield){
+                _aoeAnchorSaved[ai]=_tryAnchorSave(_m)
+              }
+            }
             setStage(function(prev){
               const ns2=[...prev]
               for(let ai=0;ai<ns2.length;ai++){
                 if(!ns2[ai]||ns2[ai].tooStoned)continue
                 const newHp=ns2[ai].hp-splitDmg
-                if(newHp<=0&&!ns2[ai].stoneShield){ns2[ai]=Object.assign({},ns2[ai],{hp:0,tooStoned:true,bloodOath:false});updStat('tooStonedCount',1);playSfx('member_down');triggerShake(12,400)
-                  if(activeArtifacts.some(a=>a.id==='a6')){setEnemyHp(ehp=>{const nh=Math.max(0,ehp-8);if(nh<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);return nh});addLog('🕯 Black Candle! 8 damage!')}
+                if(newHp<=0&&!ns2[ai].stoneShield){
+                  if(_aoeAnchorSaved[ai]){
+                    addLog('⚓ ANCHOR! '+ns2[ai].name+' barely survives the lethal blow!')
+                    addFloat('⚓ SAVED!',getCenter(stageRefs.current[ai]).x,getCenter(stageRefs.current[ai]).y-80,'#33dd33',true)
+                    ns2[ai]=Object.assign({},ns2[ai],{hp:1})
+                  } else {
+                    ns2[ai]=Object.assign({},ns2[ai],{hp:0,tooStoned:true,bloodOath:false});updStat('tooStonedCount',1);playSfx('member_down');triggerShake(12,400)
+                    if(activeArtifacts.some(a=>a.id==='a6')){setEnemyHp(ehp=>{const nh=Math.max(0,ehp-8);if(nh<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);return nh});addLog('🕯 Black Candle! 8 damage!')}
+                  }
                 }
                 else if(newHp<=0&&ns2[ai].stoneShield){const nsh=typeof ns2[ai].stoneShield==='number'?ns2[ai].stoneShield-1:0;ns2[ai]=Object.assign({},ns2[ai],{hp:1,stoneShield:nsh>0?nsh:false});setClutchFlash({text:'CLUTCH!',color:'#ffd700'});setTimeout(()=>setClutchFlash(null),1500)}
                 else{ns2[ai]=Object.assign({},ns2[ai],{hp:Math.max(0,newHp)})}
@@ -7135,6 +7172,14 @@ function App(){
             })
             setDamageFlash(true);triggerShake(10,350);setTimeout(()=>setDamageFlash(false),400)
           } else {
+          // ── ANCHOR (4d) — pre-compute save decision BEFORE setStage ──
+          let _stdAnchorSaved=false
+          if(stage[ti]&&!stage[ti].tooStoned&&!(stage[ti].bloodOath&&actualDmg>0)){
+            const _newHpPre=stage[ti].hp-actualDmg
+            if(_newHpPre<=0&&!stage[ti].stoneShield){
+              _stdAnchorSaved=_tryAnchorSave(stage[ti])
+            }
+          }
           setStage(function(prev){
             const ns2=[...prev]
             if(ns2[ti]){
@@ -7149,6 +7194,11 @@ function App(){
               } else {
               const newHp=ns2[ti].hp-actualDmg
               if(newHp<=0&&!ns2[ti].stoneShield){
+                if(_stdAnchorSaved){
+                  addLog('⚓ ANCHOR! '+ns2[ti].name+' barely survives the lethal blow!')
+                  addFloat('⚓ SAVED!',targetPos.x,targetPos.y-80,'#33dd33',true)
+                  ns2[ti]=Object.assign({},ns2[ti],{hp:1})
+                } else {
                 ns2[ti]=Object.assign({},ns2[ti],{hp:0,tooStoned:true,bloodOath:false})
                 if(ns2[ti].isMentor){for(let _bi=0;_bi<ns2.length;_bi++){if(ns2[_bi]&&ns2[_bi].mentorLinkedToUid===ns2[ti].uid)ns2[_bi]={...ns2[_bi],mentorAlive:false}}}
                 updStat('tooStonedCount',1)
@@ -7163,6 +7213,7 @@ function App(){
                   addLog('🎭 Cult Following! +3 Stash.')
                 }
                 addFloat('TOO STONED',targetPos.x,targetPos.y-60,'#888',false)
+                } // end anchor save else
               } else if(newHp<=0&&ns2[ti].stoneShield){
                 // StoneShield absorbs lethal hit — survives at 1 HP, decrement shield
                 const newShield=typeof ns2[ti].stoneShield==='number'?ns2[ti].stoneShield-1:0
@@ -7179,7 +7230,7 @@ function App(){
             if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned');playSfx('defeat')};const _bc=Math.floor(fightIndex/3)+1;if(_bc>bestRunCircle){localStorage.setItem('vst_best_circle',_bc.toString())};recordLegacyRun(stage,stats,false,Math.floor(fightIndex/3)+1);setTimeout(function(){clearSave();setGameState('end')},800)}
             return ns2
           })
-          if(stage[stage.indexOf(target)]&&!stage[stage.indexOf(target)].tooStoned&&(stage[stage.indexOf(target)].hp-actualDmg)<=0&&!stage[stage.indexOf(target)].stoneShield)addLog('💨 '+target.name+' is TOO STONED!')
+          if(!_stdAnchorSaved&&stage[stage.indexOf(target)]&&!stage[stage.indexOf(target)].tooStoned&&(stage[stage.indexOf(target)].hp-actualDmg)<=0&&!stage[stage.indexOf(target)].stoneShield)addLog('💨 '+target.name+' is TOO STONED!')
           setDamageFlash(true);triggerShake(10,350);setTimeout(function(){setDamageFlash(false)},400)
           addLog('👁 '+enemy.name+' hits '+target.name+' for '+actualDmg)
           } // end single-target else
@@ -7206,17 +7257,8 @@ function App(){
                 addLog('📝 The Executive slides a contract across the table...')
               }
             }
-            // ANCHOR keyword: heal adjacent members after Strike
-            setStage(function(prev){
-              const ns=[...prev];
-              prev.forEach(function(m,i){
-                if(m&&!m.tooStoned&&m.keyword==='ANCHOR'){
-                  if(i>0&&ns[i-1]&&!ns[i-1].tooStoned&&ns[i-1].keyword!=='FALLEN')ns[i-1]=Object.assign({},ns[i-1],{hp:Math.min(ns[i-1].maxHp,ns[i-1].hp+1)});
-                  if(i<4&&ns[i+1]&&!ns[i+1].tooStoned&&ns[i+1].keyword!=='FALLEN')ns[i+1]=Object.assign({},ns[i+1],{hp:Math.min(ns[i+1].maxHp,ns[i+1].hp+1)});
-                }
-              });
-              return ns;
-            });
+            // ANCHOR +1 HP/strike adjacent regen removed in commit 4d —
+            // keyword now grants per-fight lethal save via _tryAnchorSave.
             // CA3: Sabbath Crown — revive Too Stoned members at 50% HP after each Strike
             if(activeArtifacts.some(a=>a.id==='ca3')){
               setStage(prev=>{
@@ -7345,6 +7387,12 @@ function App(){
     highestStrikeThisFightRef.current=0
     damageThisFightRef.current=0
     embersSpentThisFightRef.current=0
+    // ── ANCHOR (4d) — lock save tier + reset save count for this fight ──
+    {
+      const _anchorCount=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='ANCHOR').reduce((s,m)=>s+(m.foil?2:1),0)
+      anchorTierRef.current=_stackTier(_anchorCount)
+      anchorSavesUsedRef.current=0
+    }
     addLog('══════ FIGHT '+(nextIdx+1)+': '+nextEnemy.name+' ('+Math.ceil(nextEnemy.maxHp*activeStake.hpMult*(encoreMode?2.0:1.0))+' HP) ══════')
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
