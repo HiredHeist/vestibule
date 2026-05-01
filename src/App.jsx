@@ -4236,7 +4236,15 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
             </button>
             {isVictory&&<button onClick={()=>{/* Encore: restart with scaled enemies */
               setEncoreMode(true);setEncoreCircle(p=>p+10)
-              setFightIndex(0);setEnemy(ENEMIES[0]);const _wHp=Math.round(ENEMIES[0].maxHp*activeStake.hpMult*2.0);setEnemyHp(_wHp);setScaledMaxHp(_wHp)
+              setFightIndex(0);setEnemy(ENEMIES[0]);
+              // Encore mode is now true (set above) so getScaledMaxHp will apply the ×2 boost.
+              // We can't call the helper here directly because encoreMode state hasn't propagated yet,
+              // so inline the same formula with encoreMode forced true:
+              const _ds=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1
+              const _hl=parseInt(localStorage.getItem('vst_heat')||'1')
+              const _hm=1+(Math.max(0,_hl-1)*0.15)
+              const _wHp=Math.ceil(ENEMIES[0].maxHp*_ds*_hm*2.0)
+              setEnemyHp(_wHp);setScaledMaxHp(_wHp)
               setStrikesLeft(activeStake.maxStrikes);setFightMaxStrikes(activeStake.maxStrikes);setDiscardsLeft(4);setFightMaxDiscards(4)
               setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
               setGameState('playing');setAnimPhase('idle');setDeathCause(null)
@@ -4896,6 +4904,20 @@ function App(){
   const [showStats,setShowStats]=useState(false)
   const [activeStakeId,setActiveStakeId]=useState(()=>localStorage.getItem('vst_active_stake')||'bronze')
   const activeStake=STAKES.find(s=>s.id===activeStakeId)||STAKES[0]
+
+  // Single source of truth for displayed enemy HP — must match fight-start scaling
+  // (line ~7387). Stake.hpMult is intentionally NOT applied here because the live
+  // fight code doesn't use it either; the deck.hpScale is the canonical difficulty knob.
+  // If we ever want stake.hpMult to actually affect combat, wire it into the fight-start
+  // formula AND this helper at the same time.
+  const getScaledMaxHp=useCallback((e)=>{
+    if(!e)return 0
+    const _ds=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1
+    const _hl=parseInt(localStorage.getItem('vst_heat')||'1')
+    const _hm=1+(Math.max(0,_hl-1)*0.15)
+    return Math.ceil(e.maxHp*_ds*_hm*(encoreMode?2.0:1.0))
+  },[selectedDeck,encoreMode])
+
   const [musicVol,setMusicVol]=useState(()=>parseFloat(localStorage.getItem('vst_music_vol')||'0.3'))
   const [sfxVol,setSfxVol]=useState(()=>parseFloat(localStorage.getItem('vst_sfx_vol')||'0.5'))
   const [shakeEnabled,setShakeEnabled]=useState(()=>localStorage.getItem('vst_shake')!=='off')
@@ -5290,7 +5312,7 @@ function App(){
     }
     else if(card.id==='whispercard'){ns=ns.map((m,mi)=>mi===slotIdx?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2,buffCount:(m.buffCount||0)+1}):m);msg='\u{1F300} Dark Whisper! +2 ATK permanently.'}
     else if(card.id==='hungercard'){ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,tempAtkBonus:(m.tempAtkBonus||0)+1,buffCount:(m.buffCount||0)+1}):m);drawUpTo(hand.filter(c=>c.uid!==card.uid),deckRef.current,[...discRef.current,card],2);msg='\u{1F525} Hungering Flame! All +1 ATK, drew 2 cards.'}
-    else if(card.id==='madnesscard'){const maxHp=enemy?Math.ceil(enemy.maxHp*(activeStake.hpMult||1.3)):100;const dmg=Math.floor(maxHp*0.15);const bc2=getCenter(bossRef);const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp);if(newHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);addFloat(dmg,bc2.x,bc2.y-60,'#cc1144',dmg>=20);playHit();updStat('totalDamage',dmg);msg='\u{1F480} Madness Unleashed! '+dmg+' damage (15% of max HP)!'}
+    else if(card.id==='madnesscard'){const maxHp=scaledMaxHp||(enemy?enemy.maxHp:100);const dmg=Math.floor(maxHp*0.15);const bc2=getCenter(bossRef);const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp);if(newHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);addFloat(dmg,bc2.x,bc2.y-60,'#cc1144',dmg>=20);playHit();updStat('totalDamage',dmg);msg='\u{1F480} Madness Unleashed! '+dmg+' damage (15% of max HP)!'}
     else if(card.id==='dark_whisper'){
       const nc=Math.min(100,corruption+5);setCorruption(nc);updStat('maxCorruption',nc,true)
       ns=ns.map((m,mi)=>mi===slotIdx&&m?Object.assign({},m,{atk:m.atk+2,tempAtkBonus:(m.tempAtkBonus||0)+2,buffCount:(m.buffCount||0)+1}):m)
@@ -6344,7 +6366,7 @@ function App(){
             }
             // Build victory summary payload
             const dur=Date.now()-(fightStartTimeRef.current||Date.now())
-            const startHp=Math.ceil((enemy?enemy.maxHp:0)*((activeStake&&activeStake.hpMult)||1))
+            const startHp=getScaledMaxHp(enemy)
             const damageShown=Math.max(damageThisFightRef.current,startHp)
             // MVP = band member with highest effective ATK this fight (best proxy we have)
             const aliveStage=stage.filter(m=>m&&!m.tooStoned)
@@ -7403,7 +7425,7 @@ function App(){
       anchorTierRef.current=_stackTier(_anchorCount)
       anchorSavesUsedRef.current=0
     }
-    addLog('══════ FIGHT '+(nextIdx+1)+': '+nextEnemy.name+' ('+Math.ceil(nextEnemy.maxHp*activeStake.hpMult*(encoreMode?2.0:1.0))+' HP) ══════')
+    addLog('══════ FIGHT '+(nextIdx+1)+': '+nextEnemy.name+' ('+_sHp+' HP) ══════')
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
     // CORRUPTION THRESHOLD: 25% — The Whispers (weakest takes 1 dmg)
@@ -8568,7 +8590,7 @@ function App(){
                 {/* HP parchment scroll */}
                 <div style={{position:'relative',padding:'4px 18px',background:'linear-gradient(180deg, rgba(60,35,10,0.6), rgba(30,18,5,0.75))',border:'1px solid var(--gold-deep)',borderRadius:3,
                   boxShadow:'inset 0 0 8px rgba(0,0,0,0.5)'}}>
-                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--gold)',letterSpacing:2}}>{Math.ceil(enemy.maxHp*activeStake.hpMult)} HP</span>
+                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--gold)',letterSpacing:2}}>{getScaledMaxHp(enemy)} HP</span>
                 </div>
                 {isSkipped&&reward&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'var(--text-positive)',marginTop:2,fontStyle:'italic',display:'flex',alignItems:'center',justifyContent:'center',gap:4}}>{reward.emoji==='🌿'?<WeedLeaf size={18}/>:reward.emoji} {reward.name}</div>}
                 {/* Select-this-path tooltip */}
@@ -8982,7 +9004,7 @@ function App(){
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-blood)',letterSpacing:3,textTransform:'uppercase'}}>Circle {CIRCLE_NAMES[nc]} Awaits</div>
               <div style={{display:'flex',gap:16,justifyContent:'center',marginTop:6}}>
                 {nextEnemies.filter(Boolean).map(e=><div key={e.id} style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-muted)'}}>
-                  {e.emoji} {Math.ceil(e.maxHp*activeStake.hpMult)} HP
+                  {e.emoji} {getScaledMaxHp(e)} HP
                 </div>)}
               </div>
             </div>
