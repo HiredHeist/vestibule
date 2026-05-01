@@ -5635,7 +5635,7 @@ function App(){
       addBuff(m.uid,'SHRED','#ff4400');msg='🎸 Shred Solo! '+m.name+' attacks TWICE this strike!'
     }
     else if(card.id==='overdriveped'){
-      setStrikeMult(p=>Math.min(66.6,Math.round(p*1.5*100)/100));strikeMultRef.current=Math.min(66.6,Math.round(strikeMultRef.current*1.5*100)/100)
+      setStrikeMult(p=>Math.min(10000,Math.round(p*1.5*100)/100));strikeMultRef.current=Math.min(10000,Math.round(strikeMultRef.current*1.5*100)/100)
       msg='🔊 Overdrive Pedal! Strike multiplier ×1.5!'
     }
     else if(card.id==='devilsdice'){
@@ -5701,7 +5701,7 @@ function App(){
       msg='👁️ POSSESSION! '+m.name+' +20 ATK this strike! Corruption +10%'
     }
     else if(card.id==='darkcrescendo'){
-      if(corruption>=80){setStrikeMult(p=>Math.min(66.6,Math.round(p*3*100)/100));strikeMultRef.current=Math.min(66.6,Math.round(strikeMultRef.current*3*100)/100);msg='🌑 DARK CRESCENDO! TRIPLE STRIKE MULTIPLIER! ('+corruption+'% corruption)'}
+      if(corruption>=80){setStrikeMult(p=>Math.min(10000,Math.round(p*3*100)/100));strikeMultRef.current=Math.min(10000,Math.round(strikeMultRef.current*3*100)/100);msg='🌑 DARK CRESCENDO! TRIPLE STRIKE MULTIPLIER! ('+corruption+'% corruption)'}
       else msg='🌑 Dark Crescendo... corruption too low ('+Math.floor(corruption)+'%, need 80%)'
     }
     // ═══ CORRUPTION GAMBIT CARDS — insane power, insane corruption cost ═══
@@ -5714,7 +5714,7 @@ function App(){
       msg='⚰️ SOUL SACRIFICE! ALL +5 ATK PERMANENT! +15% CORRUPTION!';addFloat('+5 ALL PERM!',getCenter(bossRef).x,getCenter(bossRef).y-120,'#cc0044',true)
     }
     else if(card.id==='voidpact'){
-      setStrikeMult(p=>Math.min(66.6,Math.round(p*2.5*100)/100));strikeMultRef.current=Math.min(66.6,Math.round(strikeMultRef.current*2.5*100)/100);setCorruption(p=>Math.min(100,p+25))
+      setStrikeMult(p=>Math.min(10000,Math.round(p*2.5*100)/100));strikeMultRef.current=Math.min(10000,Math.round(strikeMultRef.current*2.5*100)/100);setCorruption(p=>Math.min(100,p+25))
       msg='🕳 VOID PACT! STRIKE MULTIPLIER ×2.5! +25% CORRUPTION!';addFloat('×2.5 MULT!',getCenter(bossRef).x,getCenter(bossRef).y-120,'#8800ff',true)
     }
     else if(card.id==='russianroulette'){
@@ -5784,7 +5784,7 @@ function App(){
     updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
     if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
@@ -5859,7 +5859,7 @@ function App(){
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard']
@@ -5885,7 +5885,7 @@ function App(){
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -5910,7 +5910,7 @@ function App(){
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -5936,7 +5936,7 @@ function App(){
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       setLastRiffPlayed(card)
@@ -5963,7 +5963,7 @@ function App(){
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -6004,7 +6004,7 @@ function App(){
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(66.6,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -6661,9 +6661,11 @@ function App(){
       setPendingDraw(0)
     }
 
-    // DEBUFF keyword: Vocalists reduce boss damage each Strike
-    const debuffCount=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='DEBUFF').length
-    if(debuffCount>0){setBossDebuff(p=>p+debuffCount*2);addLog('🎤 Vocalist debuffs the boss! (-'+(debuffCount*2)+' damage)')}
+    // KEYWORD STACK — DEBUFF: tier-scaled boss debuff (foil counts as 2 stacks)
+    const debuffStacks=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='DEBUFF').reduce((s,m)=>s+(m.foil?2:1),0)
+    const debuffTier=debuffStacks>=3?4:debuffStacks===2?2:debuffStacks>=1?1:0
+    const debuffCount=debuffTier // backwards-compat name; preserved for downstream reads
+    if(debuffTier>0){setBossDebuff(p=>p+debuffTier*2);addLog('🎤 Vocalist debuffs the boss! (-'+(debuffTier*2)+' damage'+(debuffTier>=2?' · STACK ×'+debuffTier:'')+')')}
     cardsToDrawRef.current=cardsPlayedRef.current.length
     setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1)
       // #10: LUCKY DRAW — unlocked after first Lucifer kill, toggleable
@@ -6671,7 +6673,7 @@ function App(){
       const _luckyRng=((runSeed*7+stats.strikesThrown*13+fightIndex*31)%100)
       if(_luckyUnlocked&&_luckyRng<10){
         const _luckyType=_luckyRng%5
-        if(_luckyType===0){setStrikeMult(p=>Math.min(66.6,p*1.5));strikeMultRef.current=Math.min(66.6,strikeMultRef.current*1.5);addLog('🍀 LUCKY DRAW! ×1.5 Strike Mult bonus!');addFloat('🍀 LUCKY ×1.5!',960,300,'#ffdd00',true)}
+        if(_luckyType===0){setStrikeMult(p=>Math.min(10000,p*1.5));strikeMultRef.current=Math.min(10000,strikeMultRef.current*1.5);addLog('🍀 LUCKY DRAW! ×1.5 Strike Mult bonus!');addFloat('🍀 LUCKY ×1.5!',960,300,'#ffdd00',true)}
         else if(_luckyType===1){setStash(p=>Math.min(420,p+10));addLog('🍀 LUCKY DRAW! +10 Stash from the crowd!');addFloat('🍀 +10 STASH!',960,300,'#44ff44',true)}
         else if(_luckyType===2){setEmbers(p=>Math.min(maxEmbers,p+2));addLog('🍀 LUCKY DRAW! +2 bonus Embers!');addFloat('🍀 +2 EMBERS!',960,300,'#ff8800',true)}
         else if(_luckyType===3&&hand.length<6){setPendingDraw(p=>p+1);addLog('🍀 LUCKY DRAW! Draw 1 extra card!');addFloat('🍀 +1 CARD!',960,300,'#44aaff',true)}

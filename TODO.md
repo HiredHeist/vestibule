@@ -30,16 +30,34 @@ something feels off in playtest.
 - [x] C9 nerf: Traitor/Betrayer HP 22000/30000 → 2000/2100 (-91%/-93%)
 - [x] Lucifer formula unchanged — already lands at 6666 HP at endgame
 
-### Commit 3 (FINAL) — Keyword stack system + strikeMult cap raise
-- [ ] FRENZIED stack: +N ATK per RIFF (N=1/2/4 by stack tier)
-- [ ] ANCHOR stack: lethal save 1/2/all per fight
-- [ ] DOUBLE TIME stack: existing 2x; tier 3 = all members 2x
-- [ ] CORRUPT stack: +1/+2/+3 ATK per 25% corruption
-- [ ] DEBUFF stack: -2/-4/-8 boss dmg per turn
-- [ ] SHREDDER stack: +1/+2/+4 ATK per consecutive same-type card
-- [ ] Foil = counts as 2 stacks
-- [ ] strikeMult cap: 66.6× → 10,000× (Balatro-feel uncap; sim shows cap
-      was never binding anyway, this is for the dopamine ceiling)
+### Commit 3 (THIS COMMIT) — strikeMult cap raise + partial keyword stacking
+- [x] strikeMult cap: 66.6× → 10,000× across all 11 clamp sites. Sim showed
+      cap was never binding for the AI; this is for the dopamine ceiling
+      that real players will eventually hit when they break the game.
+      Balatro-feel uncap.
+- [x] DEBUFF stack tier scaling: count → tier (1/2/4 by stacks), foil
+      counts as 2 stacks. 3 DEBUFF members now reduce boss dmg by ×4
+      tier instead of ×3 linear. Real defensive payoff for Vocalist stacks.
+
+### Commit 4 (DEFERRED — needs fresh-context session) — Full keyword stack refactor
+The full keyword stack system requires a centralized `getEffectiveAtk()`
+helper because CORRUPT keyword logic alone is scattered across 10+ damage
+calculation sites (lines 2842, 6698, 6713, 6726-7, 6767, 9165, 9177, 9191).
+Doing this safely in one pass needs fresh context — too invasive for the
+end of a long iteration session. Sim has the full implementation as
+reference (see `vestibule-sim-kwstacks.js` lines ~700-740 for stack tier
+calculation and per-member ATK bonus injection).
+- [ ] Centralize keyword bonuses in single `getEffectiveAtk(m, ctx)` helper
+- [ ] FRENZIED stack: +N ATK per RIFF played per strike (N=1/2/4 by tier)
+- [ ] ANCHOR stack: lethal save 1/2/all members per fight (needs new
+      `_anchorSavesUsed` state, hook into all 5+ death-handling paths)
+- [ ] DOUBLE TIME stack tier 3: all members attack twice (currently only
+      Drummers do)
+- [ ] CORRUPT stack tier scaling: ×1/×2/×3 the existing floor(corruption/12)
+- [ ] SHREDDER stack: +N ATK per consecutive same-type card chain (needs
+      same-type chain tracking added to existing combo system)
+- [ ] Foil = counts as 2 stacks for tier calculation (already done for
+      DEBUFF in commit 3)
 
 ### Sim results targets (after all 3 commits):
 - Avg fight reached: 17.66/26 (vs 10.88 baseline, +63%)
