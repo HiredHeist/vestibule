@@ -39,25 +39,28 @@ something feels off in playtest.
       counts as 2 stacks. 3 DEBUFF members now reduce boss dmg by ×4
       tier instead of ×3 linear. Real defensive payoff for Vocalist stacks.
 
-### Commit 4 (DEFERRED — needs fresh-context session) — Full keyword stack refactor
-The full keyword stack system requires a centralized `getEffectiveAtk()`
-helper because CORRUPT keyword logic alone is scattered across 10+ damage
-calculation sites (lines 2842, 6698, 6713, 6726-7, 6767, 9165, 9177, 9191).
-Doing this safely in one pass needs fresh context — too invasive for the
-end of a long iteration session. Sim has the full implementation as
-reference (see `vestibule-sim-kwstacks.js` lines ~700-740 for stack tier
-calculation and per-member ATK bonus injection).
-- [ ] Centralize keyword bonuses in single `getEffectiveAtk(m, ctx)` helper
-- [ ] FRENZIED stack: +N ATK per RIFF played per strike (N=1/2/4 by tier)
-- [ ] ANCHOR stack: lethal save 1/2/all members per fight (needs new
-      `_anchorSavesUsed` state, hook into all 5+ death-handling paths)
-- [ ] DOUBLE TIME stack tier 3: all members attack twice (currently only
-      Drummers do)
-- [ ] CORRUPT stack tier scaling: ×1/×2/×3 the existing floor(corruption/12)
-- [ ] SHREDDER stack: +N ATK per consecutive same-type card chain (needs
-      same-type chain tracking added to existing combo system)
-- [ ] Foil = counts as 2 stacks for tier calculation (already done for
-      DEBUFF in commit 3)
+### Commit 4 (IN PROGRESS — staged sub-commits) — Full keyword stack refactor
+Centralizes keyword bonuses into `getEffectiveAtk()` helper and re-specs
+FRENZIED/SHREDDER/ANCHOR to match sim behavior (Option A: replace live
+behaviors with sim-spec versions, since sim is balance source of truth).
+
+- [x] **4a — Helper foundation + CORRUPT centralization (COMMITTED)**
+      Added top-level `CARD_TYPE_BY_ID`, `_stackTier`, `getKeywordStacks`,
+      `getEffectiveAtk` helpers. Centralized 10 scattered CORRUPT sites
+      (2842 preview, 6700/6715/6728/6729/6769 in handleStrike, 9215-9242
+      in damage tooltip). 2-stack CORRUPT now ×2 the per-corruption bonus,
+      3+ stack ×4 (matches sim). 1-stack unchanged. StageSlot received
+      new `corruptTier` prop computed once per render.
+- [ ] **4b — FRENZIED rewrite**: kill "+1 ATK per boss kill" perm stack,
+      replace with "+N ATK per RIFF played this strike" (N = stack tier).
+- [ ] **4c — SHREDDER rewrite**: kill "first RIFF/strike costs 1 less ember",
+      replace with "+N ATK per consecutive same-type card chain".
+- [ ] **4d — ANCHOR rewrite**: kill "+1 HP/strike to adjacent" regen,
+      replace with lethal save (1/2/any per fight by tier). Needs
+      `_anchorSavesUsed` state + hooks at 5 boss-damage death sites.
+- [ ] **4e — DOUBLE TIME tier-3 + tooltip/desc updates**: at 3-stack of
+      Drummers, ALL members attack twice. Update KEYWORD_DESC tooltips
+      and member descriptions for all 4 reworked keywords.
 
 ### Sim results targets (after all 3 commits):
 - Avg fight reached: 17.66/26 (vs 10.88 baseline, +63%)

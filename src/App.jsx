@@ -576,6 +576,49 @@ const ALL_CARDS=[
   {id:'corrsiphon',name:'Corruption Siphon',type:'EMBER',rarity:'Common',emoji:'🌀',embers:0,effect:'+3 Embers. +8% Corruption.',color:'#8844aa',typeColor:'#662288',copies:0},
 ]
 
+// ═══════════════════════════════════════════════════════════
+// KEYWORD STACK SYSTEM — centralized helpers for tier-scaled
+// keyword bonuses (CORRUPT, FRENZIED, SHREDDER, etc.)
+// Mirrors vestibule-sim-kwstacks.js so sim numbers match live game.
+// ═══════════════════════════════════════════════════════════
+// Card type lookup by ID — for FRENZIED (per-RIFF) and SHREDDER
+// (consecutive same-type) bonuses introduced in later commits.
+const CARD_TYPE_BY_ID={};for(const _c of ALL_CARDS)CARD_TYPE_BY_ID[_c.id]=_c.type
+// Stack tier mapping — 1 stack = ×1, 2 stacks = ×2, 3+ stacks = ×4 (foil counts as 2)
+function _stackTier(n){return n>=3?4:n===2?2:n>=1?1:0}
+// Compute keyword stack tiers for the current band. Foil counts as 2 stacks.
+// Returns { counts, tier(kw) } where counts is the raw stack count map and
+// tier(kw) returns 0/1/2/4 for use in damage formulas.
+function getKeywordStacks(stage){
+  const counts={}
+  if(!stage)return{counts,tier:()=>0}
+  for(const m of stage){
+    if(!m||m.tooStoned)continue
+    const c=m.foil?2:1
+    counts[m.keyword]=(counts[m.keyword]||0)+c
+  }
+  return{counts,tier:(kw)=>_stackTier(counts[kw]||0)}
+}
+// Effective ATK for a member, applying all keyword bonuses given strike context.
+// ctx: { corruption, riffsThisStrike, shredderHits, tier }
+//   - corruption: 0-100, current run corruption level (for CORRUPT)
+//   - riffsThisStrike: RIFF card count played this strike (for FRENZIED, commit 4b)
+//   - shredderHits: consecutive same-type pair count this strike (for SHREDDER, commit 4c)
+//   - tier: function(keyword) → 0/1/2/4 (from getKeywordStacks)
+// Always returns m.atk for stoned members (caller filters those out anyway).
+function getEffectiveAtk(m,ctx){
+  if(!m)return 0
+  let atk=m.atk
+  if(!ctx)return atk
+  if(m.keyword==='CORRUPT'){
+    const tier=ctx.tier?Math.max(1,ctx.tier('CORRUPT')):1
+    atk+=Math.floor((ctx.corruption||0)/12)*tier
+  }
+  // FRENZIED (per-RIFF) and SHREDDER (per-chain) bonuses activate in commits 4b/4c.
+  // Helper signature ready for them — flip the flag when those commits land.
+  return atk
+}
+
 const KEYWORD_DESC={
   'FRENZIED':'High damage dealer. ATK scales with consecutive buffs.',
   'DOUBLE TIME':'Rolls d6 each fight: 5-6=Double Time (×2 ATK), 3-4=Off Beat (×1.5), 1-2=Standard (×1). Never a liability!',
@@ -2768,7 +2811,7 @@ function PackArtImg({packId,emoji,size=120,style={}}){
   return <span style={{fontSize:size*0.6,...style}}>{emoji}</span>
 }
 
-function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption,animPhase,ghostCard,onQuickPlay}){
+function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,onDrop,onDragOver,onDragStart,innerRef,bondColor,mentorState,corruption,corruptTier,animPhase,ghostCard,onQuickPlay}){
   const [over,setOver]=useState(false)
   const [showTip,setShowTip]=useState(false)
   if(!member){
@@ -2839,7 +2882,8 @@ function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,
             const base=ALL_MUSICIANS.find(mu=>mu.id===member.id)
             const baseAtk=base?base.atk+(member.demonic?4:member.mythic?2:member.foil?1:0):member.atk
             const permBonus=member.atk-baseAtk
-            const corrBonus=member.keyword==='CORRUPT'&&corruption>0?Math.floor(corruption/12):0
+            const _previewKwTier=corruptTier||0
+            const corrBonus=member.keyword==='CORRUPT'&&corruption>0?Math.floor(corruption/12)*Math.max(1,_previewKwTier):0
             const totalBonus=permBonus+corrBonus
             if(totalBonus>0)return <>{baseAtk}<span style={{fontSize:18,color:'var(--gold)'}}>+{totalBonus}</span></>
             return member.atk
@@ -6648,6 +6692,11 @@ function App(){
     if(animPhase!=='idle'||strikesLeft<=0||enemyHp<=0)return
     const actives=stage.filter(m=>m&&!m.tooStoned)
     if(actives.length===0){addLog('⚠ No active members!');return}
+    // ── KEYWORD STACK CONTEXT — centralized helper for tier-scaled bonuses ──
+    // Stage doesn't change during damage calc, so compute tier once per strike.
+    // riffsThisStrike/shredderHits stay 0 in 4a; commits 4b/4c populate them.
+    const _kwStacks=getKeywordStacks(stage)
+    const _atkCtx={corruption,tier:_kwStacks.tier,riffsThisStrike:0,shredderHits:0}
 
     if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
     if(slowBurnStrikes>0){setEmbers(p=>Math.min(maxEmbers,p+1));addLog('🕯️ Slow Burn: +1 ember');setSlowBurnStrikes(p=>p-1)}
@@ -6697,7 +6746,7 @@ function App(){
     const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===activeStake.maxStrikes?10:0
     const _breakdownLines=[]
     let dmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
-      const effectiveAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
+      const effectiveAtk=getEffectiveAtk(m,_atkCtx)
       const cleanLivingBonus=0 /* clean_living now applies at fight start */
       return s+effectiveAtk+cleanLivingBonus
     },0)+p10Bonus
@@ -6712,7 +6761,7 @@ function App(){
       if(dblMult!==1)_breakdownLines.push({type:'multiply',label:dblMode+' ×'+dblMult,label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff8800'})
     }
     const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer').reduce((s,m)=>{
-      const ea=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
+      const ea=getEffectiveAtk(m,_atkCtx)
       return s+ea
     },0)
     dmg+=encDmg
@@ -6725,8 +6774,8 @@ function App(){
       const _mn=stage[_i],_bs=stage[_i+1]
       if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue
       if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){
-        const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/12):_mn.atk
-        const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/12):_bs.atk
+        const _ma=getEffectiveAtk(_mn,_atkCtx)
+        const _ba=getEffectiveAtk(_bs,_atkCtx)
         const _effectiveMult=_bs.mentorMult+(activeStake.mentorBonus||0)
         const _b=Math.round((_ma+_ba)*(_effectiveMult-1))
         _mlb+=_b
@@ -6766,7 +6815,7 @@ function App(){
     actives.forEach(function(m){
       if(m.role==='Drummer')return
       if(paranoiaVictim&&m.uid===paranoiaVictim.uid)return
-      let mAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
+      let mAtk=getEffectiveAtk(m,_atkCtx)
       /* clean_living now applies at fight start */
       if(m.encoreReady)mAtk*=2
       memberDmgs.push({m,atk:mAtk})
@@ -8965,7 +9014,7 @@ function App(){
                 </div>
               )})})()}
             </div>
-            {stage.map((m,i)=>(
+            {(()=>{const _kwT=getKeywordStacks(stage).tier;return stage.map((m,i)=>(
               <div key={i} style={{position:'relative',zIndex:typeof strikingMemberIdx!=='undefined'&&strikingMemberIdx===i?200:1}}>
                 {m&&memberBuffs[m.uid]&&memberBuffs[m.uid].length>0&&<div style={{position:'absolute',top:-4,left:'50%',transform:'translateX(-50%)',zIndex:90,display:'flex',flexDirection:'column-reverse',alignItems:'center',gap:2,pointerEvents:'none'}}>
                   {memberBuffs[m.uid].map((b,bi)=><div key={bi} style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:b.color,textShadow:'0 0 8px '+b.color+'88,1px 1px 0 #000',letterSpacing:1,whiteSpace:'nowrap',animation:'fadeIn 0.3s ease'}}>{b.text}</div>)}
@@ -8990,9 +9039,10 @@ function App(){
                 onQuickPlay={()=>{if(quickPlayCardUid&&m){setDragCardUid(quickPlayCardUid);handleDropOnStage(i);setQuickPlayCardUid(null)}}}
                 mentorState={m&&m.mentorLinkedToUid?(m.mentorAlive?'active':'broken'):m&&m.isMentor&&stage[i+1]&&stage[i+1].mentorLinkedToUid===m.uid&&!m.tooStoned?'mentor':null}
                 corruption={corruption}
+                corruptTier={_kwT('CORRUPT')}
               />
               </div>
-            ))}
+            ))})()}
           </div>
         </div>
                 {footerCollapsed&&<div onClick={()=>setFooterCollapsed(false)} style={{display:'flex',alignItems:'center',justifyContent:'center',padding:'2px 20px',flexShrink:0,borderTop:'1px solid rgba(60,35,5,0.18)',background:'rgba(10,6,2,0.28)',cursor:'pointer'}}><span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-muted)',letterSpacing:2}}>▲ SHOW STATS</span></div>}
@@ -9161,10 +9211,13 @@ function App(){
           {(()=>{
             // ═══ MIRRORS handleStrike formula EXACTLY (line 5147+) ═══
             const actives=stage.filter(m=>m&&!m.tooStoned)
+            // Keyword stack ctx — must match handleStrike's _atkCtx to keep preview accurate
+            const _previewKw=getKeywordStacks(stage)
+            const _previewCtx={corruption,tier:_previewKw.tier,riffsThisStrike:0,shredderHits:0}
             // 1) base sum (non-Drummer; paranoia is random so excluded from preview)
             const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===fightMaxStrikes?10:0
             let dmg=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
-              const effAtk=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
+              const effAtk=getEffectiveAtk(m,_previewCtx)
               const cleanLivingBonus=0 /* clean_living now applies at fight start */
               return s+effAtk+cleanLivingBonus
             },0)+p10Bonus
@@ -9176,7 +9229,7 @@ function App(){
             }
             // 3) Encore: members with encoreReady get a SECOND attack (added separately)
             const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer').reduce((s,m)=>{
-              const ea=m.keyword==='CORRUPT'?m.atk+Math.floor(corruption/12):m.atk
+              const ea=getEffectiveAtk(m,_previewCtx)
               return s+ea
             },0)
             dmg+=encDmg
@@ -9190,8 +9243,8 @@ function App(){
               if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue
               if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){
                 const _em=_bs.mentorMult+(activeStake.mentorBonus||0)
-                const _ma=_mn.keyword==='CORRUPT'?_mn.atk+Math.floor(corruption/12):_mn.atk
-                const _ba=_bs.keyword==='CORRUPT'?_bs.atk+Math.floor(corruption/12):_bs.atk
+                const _ma=getEffectiveAtk(_mn,_previewCtx)
+                const _ba=getEffectiveAtk(_bs,_previewCtx)
                 dmg+=Math.round((_ma+_ba)*(_em-1))
               }
             }
