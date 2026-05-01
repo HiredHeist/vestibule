@@ -51,8 +51,12 @@ behaviors with sim-spec versions, since sim is balance source of truth).
       in damage tooltip). 2-stack CORRUPT now ×2 the per-corruption bonus,
       3+ stack ×4 (matches sim). 1-stack unchanged. StageSlot received
       new `corruptTier` prop computed once per render.
-- [ ] **4b — FRENZIED rewrite**: kill "+1 ATK per boss kill" perm stack,
-      replace with "+N ATK per RIFF played this strike" (N = stack tier).
+- [x] **4b — FRENZIED rewrite (COMMITTED)**: ripped boss-kill +1 ATK
+      perm stack from victory block. FRENZIED branch in getEffectiveAtk
+      now adds `riffsThisStrike * tier` per member. handleStrike
+      snapshots cardsPlayedRef before the reset on line 6730 to feed
+      the bonus. Damage preview reads cardsPlayedRef directly (refs are
+      always fresh on render). 1-stack = +1/RIFF, 2 = +2/RIFF, 3+ = +4/RIFF.
 - [ ] **4c — SHREDDER rewrite**: kill "first RIFF/strike costs 1 less ember",
       replace with "+N ATK per consecutive same-type card chain".
 - [ ] **4d — ANCHOR rewrite**: kill "+1 HP/strike to adjacent" regen,

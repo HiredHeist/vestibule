@@ -614,8 +614,14 @@ function getEffectiveAtk(m,ctx){
     const tier=ctx.tier?Math.max(1,ctx.tier('CORRUPT')):1
     atk+=Math.floor((ctx.corruption||0)/12)*tier
   }
-  // FRENZIED (per-RIFF) and SHREDDER (per-chain) bonuses activate in commits 4b/4c.
-  // Helper signature ready for them — flip the flag when those commits land.
+  // FRENZIED — Lead Guitarists. +N ATK per RIFF card played this strike,
+  // where N = stack tier (1 stack = +1/RIFF, 2 = +2/RIFF, 3+ = +4/RIFF).
+  // Activated in commit 4b. Mirrors sim line ~761.
+  if(m.keyword==='FRENZIED'){
+    const tier=ctx.tier?ctx.tier('FRENZIED'):0
+    if(tier>0)atk+=(ctx.riffsThisStrike||0)*tier
+  }
+  // SHREDDER (per-chain) bonus activates in commit 4c — helper signature ready.
   return atk
 }
 
@@ -6168,15 +6174,8 @@ function App(){
     else{setClutchFlash({text:'⛧ VICTORY ⛧',color:'#ffd700'});triggerShake(6,200);setTimeout(()=>setClutchFlash(null),2000);setShowConfetti(true);setTimeout(()=>setShowConfetti(false),5000)}
     // Golden burst particles at boss position
     const bpos=getCenter(bossRef);spawnParticles(bpos.x,bpos.y,20,'#ffd700',120);spawnParticles(bpos.x,bpos.y,12,'#ff8800',80)
-    setStage(function(prev){
-      return prev.map(function(m){
-        if(m&&!m.tooStoned&&m.keyword==='FRENZIED'){
-          addFloat('FRENZIED!',getCenter(stageRefs.current[prev.indexOf(m)]).x,getCenter(stageRefs.current[prev.indexOf(m)]).y-80,'#ff6600',false)
-          return Object.assign({},m,{atk:m.atk+1})
-        }
-        return m
-      })
-    })
+    // FRENZIED boss-kill +1 ATK perm stack removed in commit 4b — keyword now
+    // grants +N ATK per RIFF played per strike via getEffectiveAtk (see helper).
     // ATONEMENT PACT: -15% corruption on boss kill
     const isBossKill=(fightIndex+1)%3===0
     if(isBossKill&&chosenPacts.includes('atonement')){
@@ -6694,9 +6693,12 @@ function App(){
     if(actives.length===0){addLog('⚠ No active members!');return}
     // ── KEYWORD STACK CONTEXT — centralized helper for tier-scaled bonuses ──
     // Stage doesn't change during damage calc, so compute tier once per strike.
-    // riffsThisStrike/shredderHits stay 0 in 4a; commits 4b/4c populate them.
+    // riffsThisStrike captured here before cardsPlayedRef reset further down.
+    // shredderHits stays 0 in 4b; commit 4c populates it.
     const _kwStacks=getKeywordStacks(stage)
-    const _atkCtx={corruption,tier:_kwStacks.tier,riffsThisStrike:0,shredderHits:0}
+    const _cardIdsThisStrike=cardsPlayedRef.current.slice() // snapshot before reset
+    const _riffsThisStrike=_cardIdsThisStrike.filter(id=>CARD_TYPE_BY_ID[id]==='RIFF').length
+    const _atkCtx={corruption,tier:_kwStacks.tier,riffsThisStrike:_riffsThisStrike,shredderHits:0}
 
     if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
     if(slowBurnStrikes>0){setEmbers(p=>Math.min(maxEmbers,p+1));addLog('🕯️ Slow Burn: +1 ember');setSlowBurnStrikes(p=>p-1)}
@@ -9211,9 +9213,12 @@ function App(){
           {(()=>{
             // ═══ MIRRORS handleStrike formula EXACTLY (line 5147+) ═══
             const actives=stage.filter(m=>m&&!m.tooStoned)
-            // Keyword stack ctx — must match handleStrike's _atkCtx to keep preview accurate
+            // Keyword stack ctx — must match handleStrike's _atkCtx to keep preview accurate.
+            // riffsThisStrike read from cardsPlayedRef (always fresh on render); 4c adds shredderHits.
             const _previewKw=getKeywordStacks(stage)
-            const _previewCtx={corruption,tier:_previewKw.tier,riffsThisStrike:0,shredderHits:0}
+            const _previewCardIds=cardsPlayedRef.current||[]
+            const _previewRiffs=_previewCardIds.filter(id=>CARD_TYPE_BY_ID[id]==='RIFF').length
+            const _previewCtx={corruption,tier:_previewKw.tier,riffsThisStrike:_previewRiffs,shredderHits:0}
             // 1) base sum (non-Drummer; paranoia is random so excluded from preview)
             const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===fightMaxStrikes?10:0
             let dmg=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
