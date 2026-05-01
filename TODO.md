@@ -20,15 +20,15 @@ something feels off in playtest.
       Deceiver/Archfraud).
 - [x] Damage preview updated to reflect new C5 mechanics.
 
-### Commit 2 (NEXT) — HP rebalance across 20 bosses
-- [ ] C3 buff: Glutton/Feaster/Devourer HP +25-36%, heal/card +25/50/80
-- [ ] C4 nerf: Miser/Hoarder/Usurer HP -26 to -30%
-- [ ] C5 nerf: Wrathful/Berserker/Warlord HP -52 to -61%
-- [ ] C6 nerf: Heretic/Apostate/F.Prophet HP -73 to -75%
-- [ ] C7 nerf: Brute/Hunter/Executioner HP -81%
-- [ ] C8 nerf: Trickster/Deceiver/Archfraud HP -78 to -80%
-- [ ] C9 nerf: Traitor/Betrayer HP -91 to -93% (Lucifer formula already
-      lands at 6666 HP — keep)
+### Commit 2 (THIS COMMIT) — HP rebalance across 20 bosses
+- [x] C3 buff: Glutton/Feaster/Devourer HP 620/840/2600 → 775/1120/3536, heal/card 3/5/8 → 8/15/25
+- [x] C4 nerf: Miser/Hoarder/Usurer HP 1100/1650/4800 → 770/1220/3550 (-30%/-26%/-26%)
+- [x] C5 nerf: Wrathful/Berserker/Warlord HP 2800/4100/8000 → 1090/1680/3840 (-61%/-59%/-52%)
+- [x] C6 nerf: Heretic/Apostate/F.Prophet HP 6200/9000/14000 → 1550/2340/3780 (-75%/-74%/-73%)
+- [x] C7 nerf: Brute/Hunter/Executioner HP 10500/15000/22000 → 2000/2850/4180 (-81% across)
+- [x] C8 nerf: Trickster/Deceiver/Archfraud HP 18000/24000/32000 → 3960/5040/6400 (-78%/-79%/-80%)
+- [x] C9 nerf: Traitor/Betrayer HP 22000/30000 → 2000/2100 (-91%/-93%)
+- [x] Lucifer formula unchanged — already lands at 6666 HP at endgame
 
 ### Commit 3 (FINAL) — Keyword stack system + strikeMult cap raise
 - [ ] FRENZIED stack: +N ATK per RIFF (N=1/2/4 by stack tier)
