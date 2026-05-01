@@ -57,8 +57,14 @@ behaviors with sim-spec versions, since sim is balance source of truth).
       snapshots cardsPlayedRef before the reset on line 6730 to feed
       the bonus. Damage preview reads cardsPlayedRef directly (refs are
       always fresh on render). 1-stack = +1/RIFF, 2 = +2/RIFF, 3+ = +4/RIFF.
-- [ ] **4c — SHREDDER rewrite**: kill "first RIFF/strike costs 1 less ember",
-      replace with "+N ATK per consecutive same-type card chain".
+- [x] **4c — SHREDDER rewrite (COMMITTED)**: ripped the "first RIFF/strike
+      costs 1 less ember" discount entirely — removed `shredderUsed` state,
+      `hasShredder`/`shredderDiscount` from cost calc, deps array entry,
+      undoSnapshot field, undo restore, and 2 fight-reset call sites.
+      SHREDDER now adds `shredderHits * tier` to ATK via getEffectiveAtk,
+      where shredderHits = consecutive same-type card pairs played this
+      strike. Computed in handleStrike from card-id snapshot, mirrored in
+      damage preview reading cardsPlayedRef live.
 - [ ] **4d — ANCHOR rewrite**: kill "+1 HP/strike to adjacent" regen,
       replace with lethal save (1/2/any per fight by tier). Needs
       `_anchorSavesUsed` state + hooks at 5 boss-damage death sites.

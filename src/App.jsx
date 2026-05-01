@@ -621,7 +621,13 @@ function getEffectiveAtk(m,ctx){
     const tier=ctx.tier?ctx.tier('FRENZIED'):0
     if(tier>0)atk+=(ctx.riffsThisStrike||0)*tier
   }
-  // SHREDDER (per-chain) bonus activates in commit 4c — helper signature ready.
+  // SHREDDER — Rhythm Guitarists. +N ATK per consecutive same-type card pair
+  // played this strike (a "chain hit"), where N = stack tier.
+  // Activated in commit 4c. Mirrors sim line ~763.
+  if(m.keyword==='SHREDDER'){
+    const tier=ctx.tier?ctx.tier('SHREDDER'):0
+    if(tier>0)atk+=(ctx.shredderHits||0)*tier
+  }
   return atk
 }
 
@@ -4791,7 +4797,8 @@ function App(){
   // Wrathful self-immolation: stacks each strike, +50% dmg per stack, also loses 8% maxHp/strike
   const [immolateStacks,setImmolateStacks]=useState(0)
   const [dblRoll,setDblRoll]=useState(null) // null=not rolled, 1-2=half, 3-4=offbeat, 5-6=double
-  const [shredderUsed,setShredderUsed]=useState(false) // tracks if first RIFF played this Strike
+  // shredderUsed state removed in commit 4c — SHREDDER no longer grants
+  // an ember discount; it now grants per-chain ATK via getEffectiveAtk.
   const [nextCardFree,setNextCardFree]=useState(false)
   const nextCardFreeRef=useRef(false)
   useEffect(()=>{nextCardFreeRef.current=nextCardFree},[nextCardFree])
@@ -5199,13 +5206,13 @@ function App(){
 
   const applyCard=useCallback((card,slotIdx)=>{
     const foilDiscount=(card.foil&&card.embers>=2)?1:0
-    const hasShredder=stage.some(m=>m&&!m.tooStoned&&m.keyword==='SHREDDER')
+    // SHREDDER ember discount removed in commit 4c — keyword now grants per-chain ATK
+    // bonus via getEffectiveAtk, not a resource discount.
     const sfxMap={RIFF:'riff_play',CORRUPT:'corrupt_play',UTILITY:'utility_play',EMBER:'ember_play'};playSfx(sfxMap[card.type]||'card_play')
-    const shredderDiscount=(hasShredder&&!shredderUsed&&card.type==='RIFF'&&card.embers>=1)?1:0
     const synesthesiaDiscount=(fightTripBuff==='SYNESTHESIA')?1:0
     const darkBargainDiscount=(chosenPacts.includes('dark_bargain')&&card.type==='CORRUPT'&&card.embers>=1)?1:0
     const ampFbDiscount=(ampFeedbackDiscount>0&&card.type==='RIFF')?1:0
-    const effectiveEmbers=(nextCardFreeRef.current&&card.id!=='doubledown')||allCardsFreeRef.current?0:Math.max(0,card.embers-foilDiscount-shredderDiscount-synesthesiaDiscount-darkBargainDiscount-ampFbDiscount)
+    const effectiveEmbers=(nextCardFreeRef.current&&card.id!=='doubledown')||allCardsFreeRef.current?0:Math.max(0,card.embers-foilDiscount-synesthesiaDiscount-darkBargainDiscount-ampFbDiscount)
   if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers, have '+embers+'.');return false}
   if(nextCardFreeRef.current&&card.id!=='doubledown'){setNextCardFree(false)}
     if(card.id==='stagedive'&&stageDiveUsed){addLog('⚠ Stage Dive once per round only.');return false}
@@ -5837,7 +5844,6 @@ function App(){
     if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
-    if(card.type==='RIFF'&&shredderDiscount>0)setShredderUsed(true)
     if(card.type==='RIFF'&&ampFbDiscount>0)setAmpFeedbackDiscount(0)
     if(card.type==='RIFF'){setLastRiffPlayed(card);lastRiffPlayedRef.current=card}
     // ── RIFF CHAIN COMBO DETECTION ──
@@ -5877,7 +5883,7 @@ function App(){
     else if(enemy.passiveId==='cardHeal3b')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+8))
     else if(enemy.passiveId==='cardHeal8')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+25))
     return true
-  },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected,fightTripBuff,enemy,enemyHp,maxEmbers,activePassives,activeArtifacts,chosenPacts,fightIndex,shredderUsed,collectedLoot])
+  },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected,fightTripBuff,enemy,enemyHp,maxEmbers,activePassives,activeArtifacts,chosenPacts,fightIndex,collectedLoot])
 
   const handleDropOnStage=useCallback((slotIdx)=>{
     if(!dragCardUid||animPhase!=='idle')return
@@ -5885,7 +5891,7 @@ function App(){
     const card=hand.find(c=>c.uid===dragCardUid)
     if(!card)return
     // ── UNDO SNAPSHOT — save state before card play ──
-    setUndoSnapshot({hand:[...hand],deck:[...deckRef.current],disc:[...discRef.current],stage:stage.map(m=>m?Object.assign({},m):null),embers,corruption,strikeMult:strikeMultRef.current,selected:[...selected],shredderUsed,nextCardFree:nextCardFreeRef.current})
+    setUndoSnapshot({hand:[...hand],deck:[...deckRef.current],disc:[...discRef.current],stage:stage.map(m=>m?Object.assign({},m):null),embers,corruption,strikeMult:strikeMultRef.current,selected:[...selected],nextCardFree:nextCardFreeRef.current})
 
     // ── SMOKE BREAK: handle entirely here to avoid double setHand race ──
     if(card.id==='setbreak'){
@@ -6150,7 +6156,7 @@ function App(){
     setHand(undoSnapshot.hand);setDeck(undoSnapshot.deck);setDiscardPile(undoSnapshot.disc)
     setStage(undoSnapshot.stage);setEmbers(undoSnapshot.embers);setCorruption(undoSnapshot.corruption)
     setStrikeMult(undoSnapshot.strikeMult);strikeMultRef.current=undoSnapshot.strikeMult
-    setSelected(undoSnapshot.selected);setShredderUsed(undoSnapshot.shredderUsed)
+    setSelected(undoSnapshot.selected)
     if(undoSnapshot.nextCardFree){setNextCardFree(true);nextCardFreeRef.current=true}
     setUndoSnapshot(null)
     playSfx('discard');addLog('↩ Undo — last card play reversed.')
@@ -6694,11 +6700,16 @@ function App(){
     // ── KEYWORD STACK CONTEXT — centralized helper for tier-scaled bonuses ──
     // Stage doesn't change during damage calc, so compute tier once per strike.
     // riffsThisStrike captured here before cardsPlayedRef reset further down.
-    // shredderHits stays 0 in 4b; commit 4c populates it.
+    // shredderHits = consecutive same-type pairs (each adjacent same-type
+    // adds 1 hit; e.g. RIFF→RIFF→CORRUPT yields 1 hit).
     const _kwStacks=getKeywordStacks(stage)
     const _cardIdsThisStrike=cardsPlayedRef.current.slice() // snapshot before reset
     const _riffsThisStrike=_cardIdsThisStrike.filter(id=>CARD_TYPE_BY_ID[id]==='RIFF').length
-    const _atkCtx={corruption,tier:_kwStacks.tier,riffsThisStrike:_riffsThisStrike,shredderHits:0}
+    let _shredderHits=0
+    for(let _si=1;_si<_cardIdsThisStrike.length;_si++){
+      if(CARD_TYPE_BY_ID[_cardIdsThisStrike[_si]]===CARD_TYPE_BY_ID[_cardIdsThisStrike[_si-1]])_shredderHits++
+    }
+    const _atkCtx={corruption,tier:_kwStacks.tier,riffsThisStrike:_riffsThisStrike,shredderHits:_shredderHits}
 
     if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
     if(slowBurnStrikes>0){setEmbers(p=>Math.min(maxEmbers,p+1));addLog('🕯️ Slow Burn: +1 ember');setSlowBurnStrikes(p=>p-1)}
@@ -7346,7 +7357,7 @@ function App(){
     const _fmDiscards = MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0);
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setNextCardFree(false);setAllCardsFree(false);setShredderUsed(false);setLastRiffPlayed(null);lastRiffPlayedRef.current=null;setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);multMilestonesRef.current={2:false,4:false,8:false,16:false}
+    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setNextCardFree(false);setAllCardsFree(false);setLastRiffPlayed(null);lastRiffPlayedRef.current=null;setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);multMilestonesRef.current={2:false,4:false,8:false,16:false}
     // AUTO-SAVE at fight start
     setTimeout(()=>{try{saveGame({
       v:1,gs:gameState,fi:fightIndex,seed:runSeed,deck:selectedDeck,
@@ -7787,7 +7798,7 @@ function App(){
     clearSave();setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
     setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
-    setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0,overkillDmg:0,bestMultiplier:1.0});setScaledMaxHp(0);setVenomDotStacks(0);setDblRoll(null);setLastKillingBlow('');setCurrentTip('');setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setSlowBurnStrikes(0);setStashStolenThisFight(0);setShredderUsed(false);corrPowerShownRef.current=false
+    setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0,overkillDmg:0,bestMultiplier:1.0});setScaledMaxHp(0);setVenomDotStacks(0);setDblRoll(null);setLastKillingBlow('');setCurrentTip('');setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setSlowBurnStrikes(0);setStashStolenThisFight(0);corrPowerShownRef.current=false
   }
 
   // Boss HP milestone detection
@@ -9214,11 +9225,15 @@ function App(){
             // ═══ MIRRORS handleStrike formula EXACTLY (line 5147+) ═══
             const actives=stage.filter(m=>m&&!m.tooStoned)
             // Keyword stack ctx — must match handleStrike's _atkCtx to keep preview accurate.
-            // riffsThisStrike read from cardsPlayedRef (always fresh on render); 4c adds shredderHits.
+            // riffsThisStrike + shredderHits read from cardsPlayedRef (always fresh on render).
             const _previewKw=getKeywordStacks(stage)
             const _previewCardIds=cardsPlayedRef.current||[]
             const _previewRiffs=_previewCardIds.filter(id=>CARD_TYPE_BY_ID[id]==='RIFF').length
-            const _previewCtx={corruption,tier:_previewKw.tier,riffsThisStrike:_previewRiffs,shredderHits:0}
+            let _previewShredHits=0
+            for(let _psi=1;_psi<_previewCardIds.length;_psi++){
+              if(CARD_TYPE_BY_ID[_previewCardIds[_psi]]===CARD_TYPE_BY_ID[_previewCardIds[_psi-1]])_previewShredHits++
+            }
+            const _previewCtx={corruption,tier:_previewKw.tier,riffsThisStrike:_previewRiffs,shredderHits:_previewShredHits}
             // 1) base sum (non-Drummer; paranoia is random so excluded from preview)
             const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===fightMaxStrikes?10:0
             let dmg=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
