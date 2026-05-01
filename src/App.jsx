@@ -246,12 +246,12 @@ const ALL_MUSICIANS=[
   {id:'bjorn',name:'Bjorn',role:'Lead Guitarist',atk:5,hp:6,maxHp:8,emoji:'🎸',keyword:'FRENZIED',desc:'High ATK, fragile. The carry.',bio:'Former blacksmith from Uppsala. Traded his hammer for a guitar at 14. His riffs have literally killed small animals.'},
   {id:'ragnar',name:'Ragnar',role:'Lead Guitarist',atk:4,hp:7,maxHp:9,emoji:'🎸',keyword:'FRENZIED',desc:'Slightly tankier lead.',bio:'Claims to be descended from the real Ragnar Lothbrok. Nobody believes him, but nobody argues when he plays.'},
   {id:'thor',name:'Thor',role:'Drummer',atk:0,hp:8,maxHp:11,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Attack fires twice per turn.',bio:'Not THAT Thor. This one is louder. Broke three drum kits in one show. The venue banned drums after that.'},
-  {id:'ingrid',name:'Ingrid',role:'Bass Player',atk:3,hp:10,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'High HP. Regen adjacent members.',bio:'The foundation. Ingrid held the band together through two breakups, a lawsuit, and a literal earthquake during a set.'},
+  {id:'ingrid',name:'Ingrid',role:'Bass Player',atk:3,hp:10,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'High HP. Save a member from a lethal hit.',bio:'The foundation. Ingrid held the band together through two breakups, a lawsuit, and a literal earthquake during a set.'},
   {id:'loki',name:'Loki',role:'Synth Player',atk:3,hp:6,maxHp:8,emoji:'🎹',keyword:'CORRUPT',desc:'Damage scales with Corruption.',bio:'Found a cursed synthesizer in a pawn shop. The more corrupt the signal, the harder it hits. He sleeps with it.'},
   {id:'grimnir',name:'Grimnir',role:'Vocalist',atk:2,hp:7,maxHp:9,emoji:'🎤',keyword:'DEBUFF',desc:'The Masked One. Reduces boss passive each turn.',bio:'Nobody has seen his face. His voice strips the will from anything that hears it. Even the sound guy wears earplugs.'},
   {id:'dag',name:'Dag',role:'Bass Player',atk:2,hp:12,maxHp:16,emoji:'🎵',keyword:'ANCHOR',desc:'Tankiest member.',bio:'16 HP of pure Viking stubbornness. Dag once played a 9-hour set without sitting down. He does not believe in breaks.'},
   {id:'vitalik',name:'Vitalik',role:'Dark Minstrel',atk:6,hp:9,maxHp:12,emoji:'🪈',keyword:'FOLK MAGIC',desc:'Nobody asked. Nobody complained twice.',bio:'Showed up backstage with a carved bone flute. When asked to leave, he played one note. Everyone sat down and listened.'},
-  {id:'sigrid',name:'Sigrid',role:'Rhythm Guitarist',atk:3,hp:8,maxHp:11,emoji:'🎸',keyword:'SHREDDER',desc:'Every riff she plays, the next one comes faster.',bio:'Ex-military. Applied the same discipline to guitar that she applied to combat. Each riff is a controlled burst.'},
+  {id:'sigrid',name:'Sigrid',role:'Rhythm Guitarist',atk:3,hp:8,maxHp:11,emoji:'🎸',keyword:'SHREDDER',desc:'+ATK on every same-type chain. Stack riffs.',bio:'Ex-military. Applied the same discipline to guitar that she applied to combat. Each riff is a controlled burst.'},
   {id:'gunnar',name:'Gunnar',role:'Rhythm Guitarist',atk:4,hp:7,maxHp:9,emoji:'🎸',keyword:'SHREDDER',desc:'Rhythm? He makes the rhythm.',bio:'Gunnar does not follow tempo. Tempo follows Gunnar. Three metronomes have broken trying to keep up with him.'},
   {id:'astrid',name:'Astrid',role:'Vocalist',atk:3,hp:8,maxHp:11,emoji:'🎤',keyword:'DEBUFF',desc:'Her voice alone can break a curse.',bio:'Trained as an opera singer. Got bored. Now she shatters demonic wards with a B-flat. The opera house still calls.'},
   {id:'freya',name:'Freya',role:'Synth Player',atk:4,hp:5,maxHp:7,emoji:'🎹',keyword:'CORRUPT',desc:'She plays the dark frequencies.',bio:'Freya heard the frequency that drives men mad. Instead of going mad, she tuned her synth to it. Glass cannon.'},
@@ -632,13 +632,13 @@ function getEffectiveAtk(m,ctx){
 }
 
 const KEYWORD_DESC={
-  'FRENZIED':'High damage dealer. ATK scales with consecutive buffs.',
-  'DOUBLE TIME':'Rolls d6 each fight: 5-6=Double Time (×2 ATK), 3-4=Off Beat (×1.5), 1-2=Standard (×1). Never a liability!',
-  'ANCHOR':'After each Strike, heals adjacent members +1 HP.',
-  'CORRUPT':'ATK increases with Corruption level. Thrives in chaos.',
+  'FRENZIED':'+ATK per RIFF played each Strike. Stack more for bigger bonus (1/2/4×).',
+  'DOUBLE TIME':'Drummer rolls d6: 5-6=×2, 3-4=×1.5, 1-2=×1. At 3+ stacks, ALL members attack twice.',
+  'ANCHOR':'Saves a member from a lethal hit. 1 save/fight at 1 stack, 2/fight at 2 stacks. 3+ stacks: ANY member can be saved (4 saves/fight).',
+  'CORRUPT':'+ATK from Corruption (×1/×2/×4 by stack tier). Thrives in chaos.',
   'DEBUFF':'Reduces boss damage by 2 each Strike, stacking permanently this fight.',
   'FOLK MAGIC':'20% chance each Strike to refill all Embers.',
-  'SHREDDER':'First RIFF card each Strike costs 1 less Ember.',
+  'SHREDDER':'+ATK per consecutive same-type card chain played each Strike (1/2/4×).',
   'HEXED':'Gains +Corruption each Strike, ATK scales with Corruption.',
   'FALLEN':'Cannot be healed. Loses 1 HP per Strike. If Lucifer dies, game over. Max 3 band members.',
 }
@@ -1554,13 +1554,13 @@ function BoosterScreen({onComplete,seed}){
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,letterSpacing:4,color:'var(--text-secondary)',textTransform:'uppercase',textAlign:'center',marginBottom:6}}>⚗ Band Abilities — What Do They Mean?</div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
           {[
-            ['FRENZIED','#ee2222','⚡','Each time the boss is defeated, this member gains +1 ATK permanently.'],
-            ['DOUBLE TIME','#ff8800','🥁','Rolls d6 each fight: 5-6 doubles ATK (×2), 3-4 gives ×1.5. 1-2 is standard (×1). Never a penalty!'],
-            ['ANCHOR','#33dd33','⚓','After every Strike, heals the members next to this one for +1 HP.'],
-            ['CORRUPT','#cc44ff','🌀','ATK scales up the higher your Corruption is.'],
+            ['FRENZIED','#ee2222','⚡','+ATK per RIFF card played each Strike. 1 stack = +1/RIFF, 2 stacks = +2/RIFF, 3+ stacks = +4/RIFF. Foil counts as 2 stacks.'],
+            ['DOUBLE TIME','#ff8800','🥁','Drummer rolls d6 each fight: 5-6 doubles ATK (×2), 3-4 gives ×1.5, 1-2 standard. At 3+ stacks, ALL members attack twice this Strike.'],
+            ['ANCHOR','#33dd33','⚓','Saves a member from a lethal hit. 1 stack = save 1 lethal/fight on an ANCHOR. 2 stacks = 2 saves. 3+ stacks = ANY member can be saved (4 saves/fight).'],
+            ['CORRUPT','#cc44ff','🌀','+ATK based on Corruption level. Per-stack-tier multiplier: ×1/×2/×4 the floor(corruption/12) bonus. Thrives in chaos.'],
             ['DEBUFF','#4488ff','🎤','Each Strike permanently reduces boss damage by 2 this fight. Stacks up.'],
             ['FOLK MAGIC','#44ddaa','🪈','Each Strike has a 20% chance to refund ALL the Embers you spent. Pure luck. Pure folk magic.'],
-            ['SHREDDER','#ff4488','🎸','The first RIFF card you play each Strike costs 1 less Ember. Play fast, hit hard.'],
+            ['SHREDDER','#ff4488','🎸','+ATK per consecutive same-type card pair played each Strike. Chain RIFF→RIFF→RIFF for max stacks (1/2/4× per chain hit).'],
             ['HEXED','#cc8800','🟠','Each Strike auto-raises Corruption +5%. Gains +1 ATK for every 10% Corruption. Gets scarier over time.'],
           ].map(([kw,color,icon,desc])=>(
             <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:10,background:'rgba(0,0,0,0.4)',borderRadius:6,padding:'8px 12px',border:`1px solid ${color}44`}}>
@@ -6797,6 +6797,16 @@ function App(){
     },0)
     dmg+=encDmg
     if(encDmg>0){_bkRunning=dmg;_breakdownLines.push({type:'add',label:'Encore',emoji:'🔁',value:encDmg,runningAfter:dmg,color:'#44cc44'})}
+    // ── DOUBLE TIME tier-3 (4d) — at 3+ stacks of Drummers, ALL members attack twice ──
+    const _dtTier=_kwStacks.tier('DOUBLE TIME')
+    if(_dtTier>=4){
+      const _dtBonusDmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>s+getEffectiveAtk(m,_atkCtx),0)
+      if(_dtBonusDmg>0){
+        dmg+=_dtBonusDmg;_bkRunning=dmg
+        _breakdownLines.push({type:'add',label:'DOUBLE TIME ×3!',emoji:'🥁',value:_dtBonusDmg,runningAfter:dmg,color:'#ff8800'})
+        addLog('🥁 DOUBLE TIME ×3! All members attack twice!')
+      }
+    }
     dmg=Math.round(dmg*bandBonus)
     if(bandBonus>1){_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Band Synergy ×'+bandBonus.toFixed(2),label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ffd700'})}
     // ── MENTOR LINK strike multiplier ──────────────────────────────
@@ -7992,7 +8002,7 @@ function App(){
             ['🌿 Stash','Your currency. Earned after victories (scales with circle depth). Spent in the shop on recruit packs, cards, artifacts, passives, and drugs. Capped at 420.'],
             ['💀 Too Stoned','When a member reaches 0 HP, they go Too Stoned and can\'t attack or be targeted. If ALL members go Too Stoned, the run ends.'],
             ['👥 Band Members','Your band has up to 5 slots (6 with the Sixth Slot pact). Each member has ATK, HP, and a keyword ability. Recruit new members from packs in the shop.'],
-            ['🏷 Member Keywords','FRENZIED: +1 ATK on boss kills. DOUBLE TIME: Roll d6 for damage multiplier. ANCHOR: Heals adjacent members. CORRUPT: +1 ATK per 15% corruption. DEBUFF: Reduces boss damage. FOLK MAGIC: 20% chance to refill all Embers. SHREDDER: First RIFF card each strike costs -1 Ember. HEXED: Auto-raises corruption, gains ATK from it.'],
+            ['🏷 Member Keywords','FRENZIED: +ATK per RIFF played each Strike (×1/2/4 by stack tier). DOUBLE TIME: Drummer d6 multiplier; at 3+ stacks ALL members attack twice. ANCHOR: Saves from lethal damage 1/2/any-member by stack tier (per fight). CORRUPT: +ATK from Corruption (×1/2/4 by stack tier). DEBUFF: Reduces boss damage. FOLK MAGIC: 20% chance to refill all Embers. SHREDDER: +ATK per consecutive same-type card chain (×1/2/4 by stack tier). HEXED: Auto-raises corruption, gains ATK from it.'],
             ['⛓ Mentor Links','Place a Foil/Mythic/Demonic member directly LEFT of a basic member with the same role. They form a Mentor Link — a permanent damage multiplier that fires every Strike while both are alive.'],
             ['✨ Member Tiers','Members come in tiers: Basic (standard), Foil (+1 ATK/HP, -1 Ember on cards), Mythic (+3 ATK/HP), Demonic (+5 ATK/HP, golden glow). Higher tiers appear in better packs.'],
             ['🃏 Card Types','RIFF (purple): Direct damage and ATK buffs. CORRUPT (red): Corruption-scaling power. UTILITY (green): Healing, draw, and economy. EMBER (orange): Ember management and recovery.'],
@@ -9301,6 +9311,12 @@ function App(){
               return s+ea
             },0)
             dmg+=encDmg
+            // 3.5) DOUBLE TIME tier-3 (4e): at 3+ Drummer stacks, all members attack twice
+            const _previewDtTier=_previewKw.tier('DOUBLE TIME')
+            if(_previewDtTier>=4){
+              const _dtBonus=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>s+getEffectiveAtk(m,_previewCtx),0)
+              dmg+=_dtBonus
+            }
             // 4) Band synergy
             const buf=actives.filter(m=>(m.buffCount||0)>0).length
             const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1

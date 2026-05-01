@@ -76,9 +76,19 @@ behaviors with sim-spec versions, since sim is balance source of truth).
       avoid StrictMode double-fire of ref mutations. Voluntary deaths
       (Mosh Pit, Devil's Wager, Russian Roulette, Blood Oath) bypass
       save by design — boss damage only.
-- [ ] **4e — DOUBLE TIME tier-3 + tooltip/desc updates**: at 3-stack of
-      Drummers, ALL members attack twice. Update KEYWORD_DESC tooltips
-      and member descriptions for all 4 reworked keywords.
+- [x] **4e — DOUBLE TIME tier-3 + tooltip/desc rewrites (COMMITTED)**:
+      added DT tier-3 logic — at 3+ stacks of Drummers (or 2 foils),
+      ALL non-drummer members get a second hit equal to their effective
+      ATK. Sits between encore and band synergy in the damage flow.
+      Mirrored in damage preview tooltip. Updated KEYWORD_DESC tooltips,
+      in-game keyword glossary cards (line 1557+), and the rules-help
+      Member Keywords text (line 8005) to reflect new mechanics for
+      FRENZIED, SHREDDER, ANCHOR, DOUBLE TIME, CORRUPT.
+
+**Commit 4 status: COMPLETE.** All 5 sub-commits shipped. Live game
+keyword behaviors now match the sim. Re-playtest needed to verify the
+2-member opener (Bjorn FRENZIED + Gunnar SHREDDER) handles Wanderer
+better, and to find any tuning issues from the per-strike scaling.
 
 ### Sim results targets (after all 3 commits):
 - Avg fight reached: 17.66/26 (vs 10.88 baseline, +63%)
