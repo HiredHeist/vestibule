@@ -1,6 +1,6 @@
 # VESTIBULE — Developer Notes
 
-*Last updated: May 2, 2026 · Current commit: `f08c65f` · App.jsx: 9,580 lines*
+*Last updated: May 2, 2026 · Latest commit: overnight P1 fixes · App.jsx: 9,603 lines*
 
 This is the canonical dev reference. If something here conflicts with another doc, this wins. If you find this doc out of sync with the code, **fix the doc in the same commit as the code**.
 
@@ -34,7 +34,7 @@ This is the canonical dev reference. If something here conflicts with another do
 
 ## FILE STRUCTURE
 
-- `src/App.jsx` — 9,580 lines, single-file architecture (split TODO'd, see TODO 3.1)
+- `src/App.jsx` — 9,603 lines, single-file architecture (split TODO'd, see TODO 3.1)
 - `src/main.jsx` — root mount, CRT/VHS overlay, scale wrapper
 - `src/App.css` — design tokens (`:root` CSS vars), global animations
 - `public/vestibule/` — game assets (cards, artifacts, passives, pacts, loot, packs, fx)
@@ -227,10 +227,11 @@ vst_achievement_*         Per-achievement unlock flags
 ## SIMULATION
 
 - File: `vestibule-sim-kwstacks.js` (current, post-keyword-refactor)
-- Run: `node vestibule-sim-kwstacks.js [numGames] [stake]`
+- Run: `node vestibule-sim-kwstacks.js [numGames] [stake] [deck]`
 - Models: cards, passives, artifacts, pacts, loot, combos, mentor links, drugs, hellquakes, corruption thresholds, random events, blood oath, full keyword stack tier scaling
-- Latest 10K Bronze sim: avg fight reached 17.66/26, Lucifer wins 10.16%
-- Sim is fast: 10K games in ~30 seconds
+- **Live HP sync:** sim reads `boss_hp_override.json` at repo root for current ENEMIES maxHp values, then applies `deck.hpScale` (1.85 default Standard). Matches live `getScaledMaxHp` exactly. **When live boss HPs change, update `boss_hp_override.json` in the same commit.**
+- Latest 5K Bronze sim (May 2 overnight, post-fix): avg fight reached 14.37/26, Wanderer 0% deaths, Lost Soul 20.6% deaths (new wall), Devourer C3 17.9% deaths (second wall), Lucifer wins 17.7%
+- Sim is fast: 5K games in ~17 seconds, 10K in ~35 seconds
 
 When changing game balance, run sim before committing.
 

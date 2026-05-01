@@ -633,7 +633,7 @@ function getEffectiveAtk(m,ctx){
 
 const KEYWORD_DESC={
   'FRENZIED':'+ATK per RIFF played each Strike. Stack more for bigger bonus (1/2/4×).',
-  'DOUBLE TIME':'Drummer rolls d6: 5-6=×2, 3-4=×1.5, 1-2=×1. At 3+ stacks, ALL members attack twice.',
+  'DOUBLE TIME':'Drummer rolls d6 each fight: 5-6=×2 damage, 3-4=×1.5, 1-2=×1. (Only one drummer per band.)',
   'ANCHOR':'Saves a member from a lethal hit. 1 save/fight at 1 stack, 2/fight at 2 stacks. 3+ stacks: ANY member can be saved (4 saves/fight).',
   'CORRUPT':'+ATK from Corruption (×1/×2/×4 by stack tier). Thrives in chaos.',
   'DEBUFF':'Reduces boss damage by 2 each Strike, stacking permanently this fight.',
@@ -1555,7 +1555,7 @@ function BoosterScreen({onComplete,seed}){
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
           {[
             ['FRENZIED','#ee2222','⚡','+ATK per RIFF card played each Strike. 1 stack = +1/RIFF, 2 stacks = +2/RIFF, 3+ stacks = +4/RIFF. Foil counts as 2 stacks.'],
-            ['DOUBLE TIME','#ff8800','🥁','Drummer rolls d6 each fight: 5-6 doubles ATK (×2), 3-4 gives ×1.5, 1-2 standard. At 3+ stacks, ALL members attack twice this Strike.'],
+            ['DOUBLE TIME','#ff8800','🥁','Drummer rolls d6 each fight: 5-6 doubles ATK (×2), 3-4 gives ×1.5, 1-2 standard. Only one drummer per band — they multiply the whole stage.'],
             ['ANCHOR','#33dd33','⚓','Saves a member from a lethal hit. 1 stack = save 1 lethal/fight on an ANCHOR. 2 stacks = 2 saves. 3+ stacks = ANY member can be saved (4 saves/fight).'],
             ['CORRUPT','#cc44ff','🌀','+ATK based on Corruption level. Per-stack-tier multiplier: ×1/×2/×4 the floor(corruption/12) bonus. Thrives in chaos.'],
             ['DEBUFF','#4488ff','🎤','Each Strike permanently reduces boss damage by 2 this fight. Stacks up.'],
@@ -6820,6 +6820,11 @@ function App(){
     dmg+=encDmg
     if(encDmg>0){_bkRunning=dmg;_breakdownLines.push({type:'add',label:'Encore',emoji:'🔁',value:encDmg,runningAfter:dmg,color:'#44cc44'})}
     // ── DOUBLE TIME tier-3 (4d) — at 3+ stacks of Drummers, ALL members attack twice ──
+    // NOTE (May 2): currently unreachable in normal play. The recruit screen at line 4433
+    // blocks adding a 2nd DOUBLE TIME drummer (canAdd = ... && !(isDblTime&&hasDblTime)).
+    // 2 basic drummers via Opening Night = 2 stacks (tier 2), not tier 3+. Code kept
+    // intact in case JV ever lifts the recruit restriction. Tooltip text and rules-help
+    // updated to NOT promise this tier so players aren't misled.
     const _dtTier=_kwStacks.tier('DOUBLE TIME')
     if(_dtTier>=4){
       const _dtBonusDmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>s+getEffectiveAtk(m,_atkCtx),0)
@@ -7858,6 +7863,17 @@ function App(){
     setActivePassives((sv.pas||[]).map(id=>STARTER_PASSIVES.find(p=>p.id===id)).filter(Boolean))
     if(sv.stats)setStats(sv.stats)
     setHeldShrooms(sv.shrooms||0);setHeldAcid(sv.acid||0)
+    // ── ANCHOR refs (commit 4d): recompute from restored stage on resume.
+    //    Save happens at fight start (before any saves used), so saves-used is always 0
+    //    at save time. Recomputing tier from stage is deterministic and avoids needing
+    //    to extend the save format. If mid-fight saves are ever added, switch this to
+    //    explicit ref persistence and restore both fields from sv.
+    {
+      const _stage=sv.stage||[]
+      const _anchorCount=_stage.filter(m=>m&&!m.tooStoned&&m.keyword==='ANCHOR').reduce((s,m)=>s+(m.foil?2:1),0)
+      anchorTierRef.current=_stackTier(_anchorCount)
+      anchorSavesUsedRef.current=0
+    }
     const ne=ENEMIES[sv.fi]||ENEMIES[0];setEnemy(ne)
     const _ds=(STARTER_DECKS.find(d=>d.id===sv.deck)||{}).hpScale||1
     const _hm=1+(Math.max(0,parseInt(localStorage.getItem('vst_heat')||'1')-1)*0.15)

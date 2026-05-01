@@ -11,7 +11,13 @@ const NUM_GAMES=parseInt(process.argv[2])||5000;
 const STAKE_ID=process.argv[3]||'bronze';
 const DECK_ID=process.argv[4]||'standard';
 const HP_OVERRIDE=parseFloat(process.argv[4])||0;
-let BOSS_HP_OVERRIDE=null;try{BOSS_HP_OVERRIDE=JSON.parse(readFileSync('/tmp/boss_hp_override.json','utf8'))}catch(e){}
+let BOSS_HP_OVERRIDE=null;
+// Try repo root first (committed file with current live HPs), then /tmp (legacy/manual override)
+try{BOSS_HP_OVERRIDE=JSON.parse(readFileSync('./boss_hp_override.json','utf8'))}catch(e){
+  try{BOSS_HP_OVERRIDE=JSON.parse(readFileSync('/tmp/boss_hp_override.json','utf8'))}catch(e2){}
+}
+// Strip the _comment field if present so it doesn't pollute keyed lookups
+if(BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE._comment)delete BOSS_HP_OVERRIDE._comment;
 const STAKES={
   bronze:{id:'bronze',name:'Bronze',hpMult:1.30,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.0,mentorBonus:0},
   silver:{id:'silver',name:'Silver',hpMult:1.30,dmgAdd:2,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.5,mentorBonus:0.05},
