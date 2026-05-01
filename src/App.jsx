@@ -221,9 +221,9 @@ const ENEMIES=[
   {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:1650,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2🌿 per Strike. Your stash is its stash.',passiveId:'stashSteal2'},
   {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:4800,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3🌿 per Strike. 666 HP of pure greed.',passiveId:'stashSteal3'},
   // ── CIRCLE V: ANGER — Hits harder the more you buff ─────────
-  {id:'wrathful',tagline:'Your buffs fed its rage.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:2800,baseDmg:5,emoji:'🔥',passive:'Enraged. +1 damage for each buffed member on your stage.',passiveId:'rageScale1'},
-  {id:'berserker',tagline:'Fury without limit.',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:4100,baseDmg:6,emoji:'⚔️',passive:'Furious. +1 damage per buffed member.',passiveId:'rageScale1'},
-  {id:'anger_boss',tagline:'Strategy means nothing to rage.',name:'The Warlord',circle:'Circle V — Anger',subtitle:'Circle Boss — Fight 3 of 3',maxHp:8000,baseDmg:7,emoji:'💢',passive:'Explosive rage. +2 damage per buffed member.',passiveId:'rageScale2'},
+  {id:'wrathful',tagline:'It rages itself to death.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:2800,baseDmg:5,emoji:'🔥',passive:'Self-immolating rage. Loses 8% HP each Strike but deals +50% damage cumulatively. Outlast it.',passiveId:'selfImmolate'},
+  {id:'berserker',tagline:'Wounded fury — strike fast or weather the storm.',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:4100,baseDmg:6,emoji:'⚔️',passive:'Bloodlust. Below 50% HP, attacks deal double damage.',passiveId:'bloodlust'},
+  {id:'anger_boss',tagline:'The commander of the damned.',name:'The Warlord',circle:'Circle V — Anger',subtitle:'Circle Boss — Fight 3 of 3',maxHp:8000,baseDmg:7,emoji:'💢',passive:'Commands. Each Strike, applies a random debuff: -1 ATK to all members, lose 1 ember, OR discard 1 hand card.',passiveId:'commands'},
   // ── CIRCLE VI: HERESY — Corrupts your corruption system ──────
   {id:'heretic',tagline:'Your soul is sufficiently corrupted now.',name:'The Heretic',circle:'Circle VI — Heresy',subtitle:'Fight 1 of 3',maxHp:6200,baseDmg:5,emoji:'🔱',passive:'Blasphemous. Each Strike raises your Corruption by 10%.',passiveId:'corruptPlayer'},
   {id:'apostate',tagline:'Corruption claimed another believer.',name:'The Apostate',circle:'Circle VI — Heresy',subtitle:'Fight 2 of 3',maxHp:9000,baseDmg:6,emoji:'⛧',passive:'Corrupting. Raises Corruption by 15% each Strike.',passiveId:'corruptPlayer15'},
@@ -234,8 +234,8 @@ const ENEMIES=[
   {id:'violence_boss',tagline:'The sentence was carried out.',name:'The Executioner',circle:'Circle VII — Violence',subtitle:'Circle Boss — Fight 3 of 3',maxHp:22000,baseDmg:8,emoji:'🩸',passive:'Methodical. Targets highest HP and deals double damage. Protect your strongest.',passiveId:'targetHighestHp3'},
   // ── CIRCLE VIII: FRAUD — Shuffles your hand after each strike ──
   {id:'trickster',tagline:'You played right into its hands.',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:18000,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle'},
-  {id:'deceiver',tagline:'Nothing was what it seemed.',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:24000,baseDmg:7,emoji:'🎭',passive:'Manipulative. After each Strike, 2 cards in hand are discarded and replaced.',passiveId:'fraudShuffle2'},
-  {id:'fraud_boss',tagline:'The greatest con: you thought you could win.',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:32000,baseDmg:8,emoji:'🪞',passive:'Master of lies. After each Strike, 3 cards in hand are discarded and replaced.',passiveId:'fraudShuffle3'},
+  {id:'deceiver',tagline:'Nothing was what it seemed.',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:24000,baseDmg:7,emoji:'🎭',passive:'Manipulative. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle2'},
+  {id:'fraud_boss',tagline:'The greatest con: you thought you could win.',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:32000,baseDmg:8,emoji:'🪞',passive:'Master of lies. After each Strike, 2 cards in hand are discarded and replaced.',passiveId:'fraudShuffle3'},
   // ── CIRCLE IX: TREACHERY ──────────────────────────────────────
   {id:'traitor',tagline:'Your own band turned on you.',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:22000,baseDmg:6,emoji:'🗝️',passive:'Paranoia. Each Strike, 1 random member refuses to attack and deals 3 damage to an ally.',passiveId:'paranoia'},
   {id:'betrayer',tagline:'It stole everything you built.',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:30000,baseDmg:7,emoji:'🔒',passive:'Soul Thief. Each Strike, steals 1 permanent ATK from a random member. Returned on victory.',passiveId:'soulThief'},
@@ -4738,6 +4738,8 @@ function App(){
   const discoveredRef=useRef(new Set())
   const [bossDebuff,setBossDebuff]=useState(0)
   const [bossRageAtk,setBossRageAtk]=useState(0)
+  // Wrathful self-immolation: stacks each strike, +50% dmg per stack, also loses 8% maxHp/strike
+  const [immolateStacks,setImmolateStacks]=useState(0)
   const [dblRoll,setDblRoll]=useState(null) // null=not rolled, 1-2=half, 3-4=offbeat, 5-6=double
   const [shredderUsed,setShredderUsed]=useState(false) // tracks if first RIFF played this Strike
   const [nextCardFree,setNextCardFree]=useState(false)
@@ -6974,9 +6976,47 @@ function App(){
         // selfbuff: boss gains +1/+2 dmg per Strike
         if(enemy.passiveId==='selfbuff'){scaledBaseDmg=stakeBaseDmg+strikesLeft}
         else if(enemy.passiveId==='selfbuff2'){scaledBaseDmg=stakeBaseDmg+(activeStake.maxStrikes-strikesLeft)*2}
-        // rageScale: +X dmg per buffed member
-        else if(enemy.passiveId==='rageScale1'){const buffed=stage.filter(m=>m&&(m.buffCount||0)>0).length;scaledBaseDmg=stakeBaseDmg+buffed*1}
-        else if(enemy.passiveId==='rageScale2'){const buffed=stage.filter(m=>m&&(m.buffCount||0)>0).length;scaledBaseDmg=stakeBaseDmg+buffed*2}
+        // C5 ANGER REWORKS — replace rageScale1/2 with mechanic-distinct bosses
+        // Wrathful: SELF-IMMOLATING RAGE — +50% dmg per stack (cumulative), loses 8% maxHp/strike
+        else if(enemy.passiveId==='selfImmolate'){
+          scaledBaseDmg=Math.floor(stakeBaseDmg*(1+0.5*immolateStacks))
+          // Self-damage: 8% of maxHp (use scaledMaxHp for the actual scaled fight HP)
+          const _selfDmg=Math.max(1,Math.floor((scaledMaxHp||enemy.maxHp)*0.08))
+          setEnemyHp(ehp=>{
+            const nh=Math.max(0,ehp-_selfDmg)
+            if(nh<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
+            return nh
+          })
+          setImmolateStacks(s=>s+1)
+          addLog('🔥 The Wrathful immolates! -'+_selfDmg+' self-damage. Rage stack ×'+(immolateStacks+1)+'.')
+        }
+        // Berserker: BLOODLUST — double damage when below 50% HP
+        else if(enemy.passiveId==='bloodlust'){
+          scaledBaseDmg=stakeBaseDmg
+          if(enemyHp<(scaledMaxHp||enemy.maxHp)*0.5){
+            scaledBaseDmg=stakeBaseDmg*2
+            addLog('⚔️ BLOODLUST! Berserker strikes twice as hard!')
+            addFloat('BLOODLUST!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#cc0000',true)
+          }
+        }
+        // Warlord: COMMANDS — random debuff each strike (-1 ATK all / -1 ember / discard 1)
+        else if(enemy.passiveId==='commands'){
+          scaledBaseDmg=stakeBaseDmg
+          const _cmd=Math.floor(Math.random()*3)
+          if(_cmd===0){
+            setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:Math.max(0,m.atk-1),tempBuff:true}):m))
+            addLog('💢 Warlord commands: ALL members lose 1 ATK!')
+            addFloat('-1 ATK ALL',getCenter(bossRef).x,getCenter(bossRef).y-80,'#cc1144',true)
+          } else if(_cmd===1){
+            setEmbers(e=>Math.max(0,e-1))
+            addLog('💢 Warlord commands: lose 1 ember!')
+            addFloat('-1 EMBER',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff8800',true)
+          } else {
+            setHand(h=>{if(h.length===0)return h;const di=Math.floor(Math.random()*h.length);const dropped=h[di];setDiscard(d=>[...d,dropped]);const nh=[...h];nh.splice(di,1);return nh})
+            addLog('💢 Warlord commands: 1 hand card discarded!')
+            addFloat('CARD LOST',getCenter(bossRef).x,getCenter(bossRef).y-80,'#cc1144',true)
+          }
+        }
         // corruptPlayer: raises player corruption each Strike
         else if(enemy.passiveId==='corruptPlayer'||enemy.passiveId==='corruptPlayer10tut'){setCorruption(p=>Math.min(100,p+10));addLog('🔱 '+enemy.name+' corrupts your band! +10% Corruption.')}
         else if(enemy.passiveId==='corruptPlayer15'){setCorruption(p=>Math.min(100,p+15));addLog('⛧ Apostate corrupts! +15% Corruption.')}
@@ -7143,7 +7183,7 @@ function App(){
             })
             // C8 FRAUD: discard N random cards from hand, draw N replacements
             if(enemy.passiveId==='fraudShuffle'||enemy.passiveId==='fraudShuffle2'||enemy.passiveId==='fraudShuffle3'){
-              const shuffleCount=enemy.passiveId==='fraudShuffle'?1:enemy.passiveId==='fraudShuffle2'?2:3
+              const shuffleCount=enemy.passiveId==='fraudShuffle'?1:enemy.passiveId==='fraudShuffle2'?1:2
               const curH=[...handRef.current],curD=[...deckRef.current],curDisc=[...discRef.current]
               if(curH.length>0){
                 const toDiscard=Math.min(shuffleCount,curH.length)
@@ -7253,7 +7293,7 @@ function App(){
     const _fmDiscards = MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0);
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setNextCardFree(false);setAllCardsFree(false);setShredderUsed(false);setLastRiffPlayed(null);lastRiffPlayedRef.current=null;setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);multMilestonesRef.current={2:false,4:false,8:false,16:false}
+    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setNextCardFree(false);setAllCardsFree(false);setShredderUsed(false);setLastRiffPlayed(null);lastRiffPlayedRef.current=null;setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);multMilestonesRef.current={2:false,4:false,8:false,16:false}
     // AUTO-SAVE at fight start
     setTimeout(()=>{try{saveGame({
       v:1,gs:gameState,fi:fightIndex,seed:runSeed,deck:selectedDeck,
@@ -7694,7 +7734,7 @@ function App(){
     clearSave();setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
     setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
-    setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0,overkillDmg:0,bestMultiplier:1.0});setScaledMaxHp(0);setVenomDotStacks(0);setDblRoll(null);setLastKillingBlow('');setCurrentTip('');setBossDebuff(0);setBossRageAtk(0);setSlowBurnStrikes(0);setStashStolenThisFight(0);setShredderUsed(false);corrPowerShownRef.current=false
+    setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0,overkillDmg:0,bestMultiplier:1.0});setScaledMaxHp(0);setVenomDotStacks(0);setDblRoll(null);setLastKillingBlow('');setCurrentTip('');setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setSlowBurnStrikes(0);setStashStolenThisFight(0);setShredderUsed(false);corrPowerShownRef.current=false
   }
 
   // Boss HP milestone detection
@@ -8858,8 +8898,9 @@ function App(){
                 if(pid==='luciferBoss'&&luciferPhase===2)target='ALL'
                 if(pid==='selfbuff')dmg=base+(strikesLeft||0)
                 else if(pid==='selfbuff2')dmg=base+((activeStake.maxStrikes||4)-(strikesLeft||0))*2
-                else if(pid==='rageScale1')dmg=base+stage.filter(m=>m&&(m.buffCount||0)>0).length
-                else if(pid==='rageScale2')dmg=base+stage.filter(m=>m&&(m.buffCount||0)>0).length*2
+                else if(pid==='selfImmolate'){dmg=Math.floor(base*(1+0.5*immolateStacks));special='+50% per stack'}
+                else if(pid==='bloodlust'){if(enemyHp<(scaledMaxHp||enemy.maxHp)*0.5){dmg=base*2;special='BLOODLUST ×2'}}
+                else if(pid==='commands')special='random debuff'
                 else if(pid==='soulThief'){dmg=base+(stolenAtkPool||0);special='steals ATK'}
                 else if(pid==='luciferBoss'||pid.startsWith('damageScaleAtk'))dmg=base+(bossRageAtk||0)
                 if(pid==='corruptPlayer'||pid==='corruptPlayer10tut')special='+10% corrupt'

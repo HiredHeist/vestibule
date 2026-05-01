@@ -1,22 +1,60 @@
 # VESTIBULE — TODO (Pre-Early Access)
-*Last updated: May 1, 2026 (post-overnight-sim, 10k runs analyzed)*
+*Last updated: May 1, 2026 (sim-validated balance pass v20 in progress, commit 1/3 shipped)*
 
 ---
 
-## 🚨 NEW LAUNCH BLOCKERS — FROM 10K-RUN SIM
+## 🎯 BALANCE PASS v20 — STAGED ROLLOUT
+
+Sim-validated 10k-game tuning across all 9 circles. Designed alongside JV
+in long iteration session. Shipping in 3 commits to allow clean revert if
+something feels off in playtest.
+
+### Commit 1 (THIS COMMIT) — C5 boss reworks + fraudShuffle softening
+- [x] Wrathful: rageScale1 → SELF-IMMOLATING RAGE (+50% dmg/strike cumulative,
+      loses 8% maxHp/strike). Outlast or burst.
+- [x] Berserker: rageScale1 → BLOODLUST (×2 damage when below 50% HP).
+      DPS race phase mechanic.
+- [x] Warlord: rageScale2 → COMMANDS (random debuff per strike: -1 ATK all,
+      OR -1 ember, OR discard 1 hand card).
+- [x] fraudShuffle softened: 1/2/3 → 1/1/2 cards discarded (Trickster/
+      Deceiver/Archfraud).
+- [x] Damage preview updated to reflect new C5 mechanics.
+
+### Commit 2 (NEXT) — HP rebalance across 20 bosses
+- [ ] C3 buff: Glutton/Feaster/Devourer HP +25-36%, heal/card +25/50/80
+- [ ] C4 nerf: Miser/Hoarder/Usurer HP -26 to -30%
+- [ ] C5 nerf: Wrathful/Berserker/Warlord HP -52 to -61%
+- [ ] C6 nerf: Heretic/Apostate/F.Prophet HP -73 to -75%
+- [ ] C7 nerf: Brute/Hunter/Executioner HP -81%
+- [ ] C8 nerf: Trickster/Deceiver/Archfraud HP -78 to -80%
+- [ ] C9 nerf: Traitor/Betrayer HP -91 to -93% (Lucifer formula already
+      lands at 6666 HP — keep)
+
+### Commit 3 (FINAL) — Keyword stack system + strikeMult cap raise
+- [ ] FRENZIED stack: +N ATK per RIFF (N=1/2/4 by stack tier)
+- [ ] ANCHOR stack: lethal save 1/2/all per fight
+- [ ] DOUBLE TIME stack: existing 2x; tier 3 = all members 2x
+- [ ] CORRUPT stack: +1/+2/+3 ATK per 25% corruption
+- [ ] DEBUFF stack: -2/-4/-8 boss dmg per turn
+- [ ] SHREDDER stack: +1/+2/+4 ATK per consecutive same-type card
+- [ ] Foil = counts as 2 stacks
+- [ ] strikeMult cap: 66.6× → 10,000× (Balatro-feel uncap; sim shows cap
+      was never binding anyway, this is for the dopamine ceiling)
+
+### Sim results targets (after all 3 commits):
+- Avg fight reached: 17.66/26 (vs 10.88 baseline, +63%)
+- **Lucifer wins: 10.16%** (vs 0% baseline — earned victory tier)
+- Smooth death curve C3→C9 instead of bimodal C4-C5 walls
+- Slot machine fires +319% (Riff Chains 36k → 152k per 10k runs)
+
+---
+
+## 🚨 OLDER LAUNCH BLOCKERS — FROM 10K-RUN SIM
 
 These were identified by running the v19.1 simulator over 10,000 games at
 all 6 stakes. Full report: `SIM_REPORT_MORNING.md`.
 
-### Boss HP scaling C7-C9 — TOP PRIORITY
-- [ ] **Lucifer is unreachable.** 0/10,000 runs at every stake reach Lucifer.
-      The C7→C9 boss HP curve (Brute 220k → Lucifer 50.5M) is too steep
-      for the player damage curve to keep up. 99%+ of Steam EA buyers
-      will never see the back half of the game.
-- [ ] **C5 wall is brutal too.** Wrathful at 24.3k HP kills 34% of Bronze
-      runs at F12 alone. 48% of Bronze runs end in Circle 5.
-- [ ] Verification target: Bronze should have 5-15% Lucifer win rate.
-      Currently 0%.
+### Boss HP scaling C7-C9 — RESOLVED IN BALANCE PASS v20
 
 ### Acid rebalance — HIGH
 - [ ] Acid is functionally dead. 1.6% use rate vs 40% for shrooms (40:1 ratio).
