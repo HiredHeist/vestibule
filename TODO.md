@@ -1,337 +1,517 @@
-# VESTIBULE — TODO (Pre-Early Access)
-*Last updated: May 1, 2026 (sim-validated balance pass v20 in progress, commit 1/3 shipped)*
+# VESTIBULE — TODO
+
+*Last updated: May 2, 2026 — full audit pass after keyword refactor*
+*Last commit: `d77e2a6` (Wanderer nerf + tooltip + DECK/DISC cleanup)*
+*App.jsx: 9,565 lines*
+
+This is the new authoritative TODO. The old one was bloated with completed work — that history lives in git. This doc is **what's left** and **what's next**, sorted ruthlessly by priority.
 
 ---
 
-## 🎯 BALANCE PASS v20 — STAGED ROLLOUT
+## 🟥 PRIORITY 1 — PLAYABILITY (do these before anything else)
 
-Sim-validated 10k-game tuning across all 9 circles. Designed alongside JV
-in long iteration session. Shipping in 3 commits to allow clean revert if
-something feels off in playtest.
+These are bugs or imbalances that affect whether the game is fun or even completable.
 
-### Commit 1 (THIS COMMIT) — C5 boss reworks + fraudShuffle softening
-- [x] Wrathful: rageScale1 → SELF-IMMOLATING RAGE (+50% dmg/strike cumulative,
-      loses 8% maxHp/strike). Outlast or burst.
-- [x] Berserker: rageScale1 → BLOODLUST (×2 damage when below 50% HP).
-      DPS race phase mechanic.
-- [x] Warlord: rageScale2 → COMMANDS (random debuff per strike: -1 ATK all,
-      OR -1 ember, OR discard 1 hand card).
-- [x] fraudShuffle softened: 1/2/3 → 1/1/2 cards discarded (Trickster/
-      Deceiver/Archfraud).
-- [x] Damage preview updated to reflect new C5 mechanics.
+### 1.1 Verify post-refactor balance with real playtest
+The keyword refactor (4a-4e) replaced FRENZIED/SHREDDER/ANCHOR/CORRUPT mechanics with sim-spec versions. Sim says it works. Real player hands haven't been tested in a full run yet.
 
-### Commit 2 (THIS COMMIT) — HP rebalance across 20 bosses
-- [x] C3 buff: Glutton/Feaster/Devourer HP 620/840/2600 → 775/1120/3536, heal/card 3/5/8 → 8/15/25
-- [x] C4 nerf: Miser/Hoarder/Usurer HP 1100/1650/4800 → 770/1220/3550 (-30%/-26%/-26%)
-- [x] C5 nerf: Wrathful/Berserker/Warlord HP 2800/4100/8000 → 1090/1680/3840 (-61%/-59%/-52%)
-- [x] C6 nerf: Heretic/Apostate/F.Prophet HP 6200/9000/14000 → 1550/2340/3780 (-75%/-74%/-73%)
-- [x] C7 nerf: Brute/Hunter/Executioner HP 10500/15000/22000 → 2000/2850/4180 (-81% across)
-- [x] C8 nerf: Trickster/Deceiver/Archfraud HP 18000/24000/32000 → 3960/5040/6400 (-78%/-79%/-80%)
-- [x] C9 nerf: Traitor/Betrayer HP 22000/30000 → 2000/2100 (-91%/-93%)
-- [x] Lucifer formula unchanged — already lands at 6666 HP at endgame
+- [ ] **Run 5-10 full Bronze runs.** Note: where do you die? Where does it feel unfair? Where does it feel trivial?
+- [ ] **Verify Wanderer is now beatable in 2-3 strikes** with the 2-member opener (just nerfed 140→90 base HP, scaled = 167)
+- [ ] **Verify Lost Soul (150) and Drifter (340)** still feel right with new keyword scaling. If 4-RIFF spam clears them in one strike, they need a small bump.
+- [ ] **Verify ANCHOR save fires correctly.** Take Ingrid into a fight, push her to lethal HP, confirm "⚓ SAVED!" float pops and she's at 1 HP after.
+- [ ] **Verify FRENZIED tooltip text is correct now.** Hard refresh the dev server. Should read "+ATK per RIFF played each Strike. Stack more for bigger bonus (1/2/4×)."
+- [ ] **Verify CORRUPT 2-stack scaling** (Loki + Freya). Card preview should show double the per-corruption ATK bonus.
 
-### Commit 3 (THIS COMMIT) — strikeMult cap raise + partial keyword stacking
-- [x] strikeMult cap: 66.6× → 10,000× across all 11 clamp sites. Sim showed
-      cap was never binding for the AI; this is for the dopamine ceiling
-      that real players will eventually hit when they break the game.
-      Balatro-feel uncap.
-- [x] DEBUFF stack tier scaling: count → tier (1/2/4 by stacks), foil
-      counts as 2 stacks. 3 DEBUFF members now reduce boss dmg by ×4
-      tier instead of ×3 linear. Real defensive payoff for Vocalist stacks.
+### 1.2 Known bugs to verify/fix
+- [ ] **"Back to the Pit" button** — old AUDIT_REPORT.md flagged this as broken. Might be stale closure in `handleShopLeave` (line 7338) — its useCallback deps don't include all referenced state. Need browser console error to diagnose. **Action: open shop, click Back to Pit, check F12.**
+- [ ] **Stoned bug** ("when one member gets too stoned it seems like the run is over") — JV reported, code logic verified correct. Suspect `triggerShake` animation creates the perception. Repro with Shift+~ debug HUD if it recurs.
+- [ ] **Mid-fight save/resume** — confirm `anchorTierRef`/`anchorSavesUsedRef` survive a save/load cycle. Save happens at fight start, so refs reset correctly on resume — but a save mid-fight after an ANCHOR save was used would lose the counter. **Verify: trigger ANCHOR save, refresh page, see if counter resets correctly.**
+- [ ] **DOUBLE TIME tier-3 unreachable in normal play** — "ONLY ONE DRUMMER" stage rule blocks 2 drummers, so 3-stack tier never fires. Either lift the restriction (let 2 drummers stack) or remove the dormant tier-3 code. Currently it's wired but inert.
 
-### Commit 4 (IN PROGRESS — staged sub-commits) — Full keyword stack refactor
-Centralizes keyword bonuses into `getEffectiveAtk()` helper and re-specs
-FRENZIED/SHREDDER/ANCHOR to match sim behavior (Option A: replace live
-behaviors with sim-spec versions, since sim is balance source of truth).
+### 1.3 Sim/live divergence (cleanup)
+- [ ] **Update `vestibule-sim-kwstacks.js` Wanderer HP** from old value to new (was 140 base → now 90 base) so sim re-runs reflect current live game.
+- [ ] **Re-run 10K Bronze sim** after sim update. Confirm Wanderer death rate drops from "wall" levels to ~20-30% (i.e., a real tutorial fight, not a wipeout).
+- [ ] **Lock in the keyword stack tier scaling in sim** matching live `getEffectiveAtk` (CORRUPT ×1/×2/×4, FRENZIED per-RIFF tier 1/2/4, SHREDDER per-chain tier 1/2/4, ANCHOR tier 1/2/4 with cap-4 = any-member save).
 
-- [x] **4a — Helper foundation + CORRUPT centralization (COMMITTED)**
-      Added top-level `CARD_TYPE_BY_ID`, `_stackTier`, `getKeywordStacks`,
-      `getEffectiveAtk` helpers. Centralized 10 scattered CORRUPT sites
-      (2842 preview, 6700/6715/6728/6729/6769 in handleStrike, 9215-9242
-      in damage tooltip). 2-stack CORRUPT now ×2 the per-corruption bonus,
-      3+ stack ×4 (matches sim). 1-stack unchanged. StageSlot received
-      new `corruptTier` prop computed once per render.
-- [x] **4b — FRENZIED rewrite (COMMITTED)**: ripped boss-kill +1 ATK
-      perm stack from victory block. FRENZIED branch in getEffectiveAtk
-      now adds `riffsThisStrike * tier` per member. handleStrike
-      snapshots cardsPlayedRef before the reset on line 6730 to feed
-      the bonus. Damage preview reads cardsPlayedRef directly (refs are
-      always fresh on render). 1-stack = +1/RIFF, 2 = +2/RIFF, 3+ = +4/RIFF.
-- [x] **4c — SHREDDER rewrite (COMMITTED)**: ripped the "first RIFF/strike
-      costs 1 less ember" discount entirely — removed `shredderUsed` state,
-      `hasShredder`/`shredderDiscount` from cost calc, deps array entry,
-      undoSnapshot field, undo restore, and 2 fight-reset call sites.
-      SHREDDER now adds `shredderHits * tier` to ATK via getEffectiveAtk,
-      where shredderHits = consecutive same-type card pairs played this
-      strike. Computed in handleStrike from card-id snapshot, mirrored in
-      damage preview reading cardsPlayedRef live.
-- [x] **4d — ANCHOR rewrite (COMMITTED)**: ripped the +1 HP/strike adjacent
-      regen block. ANCHOR now saves members from lethal boss damage,
-      tier 1 = 1 save/fight on ANCHOR members, tier 2 = 2 saves/fight on
-      ANCHOR members, tier 4 (3+ stacks) = 4 saves/fight on ANY member.
-      Added `anchorTierRef`/`anchorSavesUsedRef`, locked at fight start.
-      Added `_tryAnchorSave(target)` helper that increments saves-used.
-      Hooked into 2 boss-damage death sites: Lucifer phase-2 AoE and
-      standard boss attack. Decisions pre-computed OUTSIDE setStage to
-      avoid StrictMode double-fire of ref mutations. Voluntary deaths
-      (Mosh Pit, Devil's Wager, Russian Roulette, Blood Oath) bypass
-      save by design — boss damage only.
-- [x] **4e — DOUBLE TIME tier-3 + tooltip/desc rewrites (COMMITTED)**:
-      added DT tier-3 logic — at 3+ stacks of Drummers (or 2 foils),
-      ALL non-drummer members get a second hit equal to their effective
-      ATK. Sits between encore and band synergy in the damage flow.
-      Mirrored in damage preview tooltip. Updated KEYWORD_DESC tooltips,
-      in-game keyword glossary cards (line 1557+), and the rules-help
-      Member Keywords text (line 8005) to reflect new mechanics for
-      FRENZIED, SHREDDER, ANCHOR, DOUBLE TIME, CORRUPT.
-
-**Commit 4 status: COMPLETE.** All 5 sub-commits shipped. Live game
-keyword behaviors now match the sim. Re-playtest needed to verify the
-2-member opener (Bjorn FRENZIED + Gunnar SHREDDER) handles Wanderer
-better, and to find any tuning issues from the per-strike scaling.
-
-### Sim results targets (after all 3 commits):
-- Avg fight reached: 17.66/26 (vs 10.88 baseline, +63%)
-- **Lucifer wins: 10.16%** (vs 0% baseline — earned victory tier)
-- Smooth death curve C3→C9 instead of bimodal C4-C5 walls
-- Slot machine fires +319% (Riff Chains 36k → 152k per 10k runs)
+### 1.4 Tutorial verification
+- [ ] **Tutorial fight 1** uses Bjorn (FRENZIED) + Gunnar (SHREDDER). Both keywords are now per-strike bonuses. **Verify the tutorial scripted hand still teaches the new mechanics.** If the hand has no RIFF cards, FRENZIED never fires and the "this is your damage dealer" message lies.
+- [ ] **Tutorial fight 3** introduces RIFF chains. Verify chain firing still works post-refactor.
+- [ ] **First-encounter tips** — pacts, shop, events, descent. Confirm they fire on first real run after tutorial.
 
 ---
 
-## 🩹 UI FIXES — MAY 2
+## 🟧 PRIORITY 2 — BALANCE & TUNING
 
-### Death screen overflow clipping — DONE
-- [x] EndScreen wrapper used `justifyContent:'center'` + `overflow:'hidden'`,
-      which clipped both top and bottom when content exceeded 1080px.
-      Switched to `flex-start` + `overflowY:'auto'` with 30px top/bottom
-      padding so tall content scrolls instead of vanishing. Visible at
-      line 4126 in `src/App.jsx`. Repro: die with full stats panel +
-      keyword strip + achievement badges + near-miss block all firing —
-      stats row at top and keyword strip at bottom were getting cut off.
+### 2.1 Card-level outliers (from sim)
+- [ ] **Herb Money** — 0.4% pick rate. Worst card in the pool. Either drop cost (1🔥→0🔥) or add synergy hook (e.g., +1 ATK per 50 stash). Currently dead weight.
+- [ ] **Acid items** — 25:1 shroom-to-acid usage gap. Acid is too expensive and the bad-trip risk discourages purchase. Try cheaper (12→8) or remove bad-trip on Bronze stake only.
+- [ ] **Hellquake** — 0 fires per 10K runs in sim. Either reachability bug (only triggered by sabbathsigil card) or sabbathsigil itself is dead. Investigate and fix or remove.
 
-### Member tooltip clipping under hand fan — DONE (May 2)
-- [x] StageSlot keyword tooltip was positioned `top:'calc(100% + 6px)'`
-      (below card), causing it to land in the hand-fan area where it got
-      clipped despite z-index 99999. Moved to `bottom:'calc(100% + 6px)'`
-      so it floats above the card into the artifact tray area which has
-      breathing room. Line 2856 in App.jsx.
+### 2.2 Circle-level tuning
+- [ ] **C2 Lust circle** — 1.1% deaths in sim. Target ~5%. Buff Siren/Tempter +1 dmg or HP, or give them a trait that punishes the natural early-game momentum players will have.
+- [ ] **C3 Gluttony heal rates** — 8/15/25 HP per card played might be too aggressive after FRENZIED/SHREDDER buffs let players spam more cards. Watch in playtest.
+- [ ] **C5 Anger reworks** (Wrathful selfImmolate, Berserker bloodlust, Warlord commands) — these landed in v20. Validate they still feel right with keyword refactor.
+- [ ] **Stake-specific tuning** — All v20 numbers tuned on Bronze. Silver/Gold/Obsidian/Blood/Demonic likely need stake-specific overrides since their `hpMult` and `dmgAdd` differ. Currently they all use the same enemy table.
 
-### Redundant DECK/DISC small labels above hand fan — DONE (May 2)
-- [x] Two small text labels ("DECK 62", "DISC 0") sat at the top of the
-      card-fan area duplicating data already shown in the lower-left
-      DeckPile + DiscardPile components. Removed both (and the inline
-      discard preview popup that was triggered by clicking DISC — the
-      lower-left DiscardPile already opens a fuller viewer). Hand-size
-      indicator (e.g. "5/5") in the middle is preserved. Removed the
-      now-orphaned `showDiscardPreview` state. Line ~9376 area.
+### 2.3 Late-game HP cuts (from v20)
+HP for C7-C9 was cut 75-93% in the v20 balance pass. Sim says fine. Real-player feel still untested at scale.
+- [ ] **Brute through Lucifer playtest.** If they feel pushover-easy first time JV plays through, those values are each one number from a bump.
 
-### Wanderer HP nerf — fight 1 should be a tutorial, not a wall — DONE (May 2)
-- [x] Wanderer base maxHp 140 → 90 (35% cut). Standard deck scaled HP
-      drops from 259 to 167. JV's playtest had repeated runs ending at
-      Wanderer with 14 HP remaining despite playing 22 cards over 4
-      strikes — system was tuned for the multiplicative ceiling but the
-      2-member starter can't generate enough chains to hit it. Lost Soul
-      (150) and Drifter (340) untouched, so Circle I curve goes 90 →
-      150 → 340 base — gentle ramp, room to add a 3rd member from the
-      shop after fight 1. NOTE: sim's wanderer HP not yet updated to
-      match — sim divergence is acceptable for now since JV will
-      re-tune sim post-keyword-refactor playtest.
-
+### 2.4 Score / grade calibration
+- [ ] **Verify grade thresholds** still feel right post-refactor. With FRENZIED+SHREDDER now stacking damage harder, lifetime score might inflate. Recalibrate D→SS thresholds if a casual run now lands on A grade.
 
 ---
 
-## 🚨 OLDER LAUNCH BLOCKERS — FROM 10K-RUN SIM
+## 🟨 PRIORITY 3 — CODE HEALTH
 
-These were identified by running the v19.1 simulator over 10,000 games at
-all 6 stakes. Full report: `SIM_REPORT_MORNING.md`.
+### 3.1 The big one — App.jsx split
+**App.jsx is 9,565 lines.** Becoming actively painful to navigate.
 
-### Boss HP scaling C7-C9 — RESOLVED IN BALANCE PASS v20
+Suggested split:
+- `src/App.jsx` (main shell, 500-1000 lines)
+- `src/data/cards.js` — ALL_CARDS, CARD_TYPE_BY_ID, RIFF_CHAINS
+- `src/data/enemies.js` — ENEMIES, BOSS_LOOT, boss tooltips
+- `src/data/musicians.js` — ALL_MUSICIANS, member portraits, idle animations
+- `src/data/decks.js` — DECK_MANIFESTS, STARTER_DECKS, mastery
+- `src/data/artifacts.js` — STARTER_ARTIFACTS, CIRCLE_ARTIFACTS, passives
+- `src/data/keywords.js` — KEYWORD_DESC, getKeywordStacks, getEffectiveAtk, _stackTier, KW_BOND_COLOR
+- `src/data/balance.js` — STAKES, hpMult, dmgAdd, scoring
+- `src/components/StageSlot.jsx` — extracted member card
+- `src/components/HandCard.jsx` — extracted hand card
+- `src/components/EndScreen.jsx` — extracted death screen
+- `src/components/DeckPile.jsx` — extracted pile component
+- `src/components/EventScreen.jsx`, `ShopScreen.jsx`, `ForgeScreen.jsx`, etc.
+- `src/lib/save.js` — saveGame, loadGame, clearSave, serialization
+- `src/lib/sfx.js` — playSfx, playTone, all the audio helpers
+- `src/lib/scoring.js` — calcRunScore, getScoreGrade
 
-### Acid rebalance — HIGH
-- [ ] Acid is functionally dead. 1.6% use rate vs 40% for shrooms (40:1 ratio).
-- [ ] Options: lower price (12→8), remove bad-trip on Bronze, buff guaranteed
-      positive outcomes, OR show clearer effect previews.
+This is **fresh-mind work** — defer to a focused session, not the end of a bug-fix marathon. A bad split creates worse problems than the long file.
 
-### Herb Money buff
-- [ ] Only card with <1% pick rate (0.4%). Either drop the cost or add a
-      synergy hook to other RIFF cards.
+### 3.2 Dead-code sweep
+- [ ] **`cardsPlayedThisStrike` state** (line 4836) — only ever reset to `[]`, never appended. Probably vestigial. Either start updating it alongside `cardsPlayedRef` or remove entirely.
+- [ ] **Lint baseline 254 problems** — mostly pre-existing unused-vars and unused functions. Worth a single cleanup pass (`getTotalMastery`, `getDailySeed`, `markRuleSeen`, `getUnlockedDecks`, `isGoodDeal` unused).
+- [ ] **`getShopCost` is referenced but undefined** (lint error) — bug or dead code path? Verify.
+- [ ] **Vite chunk size warning** — bundle > 500KB. Code-split when App.jsx is split (see 3.1).
 
-### Hellquake reachability
-- [ ] Sim shows 0 Hellquakes fired across 10k runs (corruption-100% never
-      reached because runs die first). Worth checking whether corruption-100%
-      is reachable in real play, or if the climactic Hellquake moment is
-      decorative content nobody sees.
+### 3.3 Documentation drift cleanup
+The docs collected over the past few months are now badly out of date. Suggestion: consolidate into 3 living docs and **delete the rest**. Stale docs cost more than no docs.
 
----
-
-## 🔴 LAUNCH BLOCKERS (do these or don't ship)
-
-### Audio (JV)
-- [ ] Menu ambient drone (30-60sec dark loop)
-- [ ] Combat music loop (60-90sec doom metal)
-- [ ] Death/defeat sting (5-10sec)
-- [ ] SFX: card play (thud/slap)
-- [ ] SFX: strike hit (impact)
-- [ ] SFX: chain combo (ascending chime)
-- [ ] SFX: member too stoned (distorted crash)
-- [ ] SFX: boss kill (heavy drop)
-
-### Card Art (JV — PixelLab, top 10 most-played by sim)
-Priority order updated based on 4k-bronze-run sim card usage data:
-- [ ] Battle Cry (cards/battlecry.png) — 8.22 plays/game · #1 staple
-- [ ] Encore (cards/encore.png) — 6.91/game
-- [ ] Infernal Encore (cards/infencore.png) — 6.62/game
-- [ ] Distortion (cards/distortion.png) — 6.46/game
-- [ ] Resonance (cards/resonancecard.png) — 6.41/game
-- [ ] Power Tap — 4.77/game (NEW priority based on sim)
-- [ ] Static Charge — 4.72/game (NEW priority)
-- [ ] Tapped Out — 4.71/game (NEW priority)
-- [ ] Possessed Performance — 4.51/game
-- [ ] Amp It Up (cards/amp.png) — 4.38/game
-- [ ] Heavy Riff (cards/heavyriff.png) — 4.30/game
-- [ ] Mosh Pit (cards/moshpit.png) — 4.30/game
-- [ ] Death Riff (cards/deathriff.png) — 3.60/game
-- [ ] Blood Ritual (cards/bloodritual.png) — 1.91/game
+- **KEEP:** `CLAUDE.md` (rules, gotchas, structure) — needs refresh, line counts and key locations are wrong
+- **KEEP:** `TODO.md` (this file)
+- **KEEP:** `README.md` (intro for AI agents)
+- **REWRITE/MERGE then DELETE:** `HANDOFF.md`, `HANDOFF_NEXT_SESSION.md`, `SESSION_HANDOFF.md`, `ANIMATION_HANDOFF.md`, `AUDIT_REPORT.md`, `SIM_REPORT_MORNING.md` — all stale, overlapping, generated at different points. Pull anything still relevant into `CLAUDE.md` or `TODO.md`.
+- **REWRITE:** `GDD.md` — talks about strikeMult max 6.66× (now 10,000×), old keyword behaviors. Refresh before showing anyone.
+- **REWRITE:** `FINAL_DECKS.md` — the boss HP table here is from before v20 balance pass. Numbers shown are 2-3× the current values. Either update or delete.
+- **CONSOLIDATE:** `ART_GUIDE.md`, `ART_TODO.md`, `CARD_ART_GUIDE.md` — three art docs, all overlapping. Pick one (`ART_TODO.md` is the most actionable) and delete the others.
+- **DELETE:** `CARD_IDEAS.md` — nice brainstorm doc but the cards either shipped or got dropped. Living doc with no current purpose.
+- **KEEP:** `STEAM.md` — short, useful, build/deploy reference.
 
 ---
 
-## 🟡 HIGH PRIORITY (first week post-EA)
+## 🎵 PRIORITY 4 — AUDIO
 
-### Code Quality (Claude) — RISK GROWING DAILY
-- [ ] **Split App.jsx into modules.** Currently 9,261 lines. Latent bugs
-      hide in a file this big (the `ns=` undefined we caught was a symptom).
-      Save for fresh-eyes morning session.
-      Suggested split: ShopScreen → src/screens/ShopScreen.jsx;
-      MasteryGallery, StatsScreen, TrophyWall → src/screens/;
-      SaleCard / BoosterPack / HandCard / StageSlot → src/components/;
-      Constants (ALL_CARDS, STARTER_ARTIFACTS, etc) → src/data/;
-      Animations CSS stays in App.css.
+### 4.1 What's already here
+- 31 SFX files in `public/sfx/` — full set, no missing references
+- 11 music tracks in `public/music/` — placeholder versions at this point, JV plans to replace with original compositions
 
-### Features (Claude)
-- [ ] Heat unlocks / scoring multiplier — currently Heat is just +HP for
-      bosses. No reward for the player. Add: heat-locked stake unlocks,
-      heat score multiplier, heat-only cosmetics.
-- [ ] More Sly contexts: hover-on-card whisper (not just artifact),
-      hover-on-pack whisper, "you're broke kid" reaction at <10 stash
+### 4.2 What's needed
+- [ ] **JV records all 11 music tracks** as originals (Vestibule's only-doom-metal-game pitch falls flat with placeholder music).
+  - `menu.mp3` — title screen ambient (60-90s loop)
+  - `select.mp3` — deck/booster select (slower, foreboding, 60s loop)
+  - `descent.mp3` — between-fight cutscene (building dread, 30-45s)
+  - `battle.mp3` — main combat track (90-120s loop, the most important)
+  - `boss.mp3` — boss fight track (heavier than battle, 90-120s loop)
+  - `lucifer.mp3` — final boss (epic, distinct from `boss`, 120s+)
+  - `shop.mp3` — Sly's shop (sleazier, smokier, 60s loop)
+  - `forge.mp3` — Doom Forge upgrade (ritualistic, 30s)
+  - `pact.mp3` — pact selection (dark choice ambient, 30s)
+  - `victory.mp3` — Lucifer death / triumph (60s, can be one-shot)
+  - `death.mp3` — defeat sting (5-10s, one-shot, sad)
+- [ ] **Audio mixing pass** — current SFX volumes vs music balance. SFX probably too loud on default mix. Run through every state and balance.
+- [ ] **Music ducking** — SFX should duck the music briefly so important hits land. Currently they overlap muddily.
+- [ ] **Cross-fade between states** — abrupt cut between menu music and battle music. Should crossfade over ~1.5s.
 
----
-
-## 🟢 POST-LAUNCH (player feedback driven)
-
-### Audio (JV)
-- [ ] Per-circle music variants
-- [ ] Lucifer boss theme
-- [ ] Victory fanfare, corruption drone, shop ambient
-
-### Art (JV)
-- [ ] Remaining ~70+ card arts (5-10 per patch)
-- [ ] Card back, loading screen, Steam capsule images
-
-### Features (Claude)
-- [ ] Unlockable card themes (cosmetic)
-- [ ] Boss rush mode
-- [ ] Practice mode
-- [ ] Card crafting (2 copies = 1 upgraded)
-- [ ] Elite fights, daily leaderboard
-- [ ] Steam achievements
+### 4.3 Missing/desired SFX
+- [ ] **ANCHOR save sound** — distinct chime/save-the-day sound when ⚓ SAVED! fires. Right now it uses generic SFX.
+- [ ] **Mythic interaction discovery** — the "first time you trigger a 4+ card combo" needs a special sound. Currently just regular chain sound.
+- [ ] **Achievement unlock sting** — short triumphant sound, separate from victory.
+- [ ] **Foil card draw shimmer** — when a foil card enters hand, light shimmer SFX.
+- [ ] **Stash milestone tones** — already exist for 100/200/300/420 but verify they're distinct, building.
 
 ---
 
-## ✅ COMPLETED — APRIL 30 → MAY 1 OVERNIGHT
+## 🎨 PRIORITY 5 — ART ASSETS
 
-### Shop polish (multiple rounds)
-- [x] Shop overhaul: simpler layout, cleaner hierarchy
-- [x] Cards-for-sale: 75% scale (300→225 width)
-- [x] Bottom row taller (420→520) — boosters + Sly's Buyback prominent
-- [x] Sly icon panel beside Buyback rates (300×520)
-- [x] **Sly portrait shipped** — 172×256 animated GIF in shop slot
-- [x] BACK TO THE PIT throbbing red pulse (`throbPulseRed` animation)
-- [x] SLY'S MERCH banner taller (54→78), font fits cleanly
-- [x] "Another Look" → "🎲 Reroll", single-line wider
-- [x] Sly quotes use MBScribblesFont (readable, was illegible at 13pt)
-- [x] Drug emojis 28→48 with tinted shadows
-- [x] Left column: Band Recruitment dominates (flex:1, art 200→288)
-- [x] Artifact + Effect Pedal renamed (Balatro-Joker logic — they rotate)
-- [x] Bottom-justified gear panels
+Drop PNGs at the listed paths — they auto-load via `BASE_URL`. No code changes needed unless explicitly noted.
 
-### Visible game-state systems
-- [x] Effect Pedal slots in fight sidebar — always 3+, parallel to artifact tray
-- [x] Phase banner cleanup (Play Cards idle text removed)
-- [x] Chain hint tooltip clipping fix (absolute-positioned below card)
-- [x] Hover glitch killed (3-way animation conflict diagnosed)
-- [x] Band Recruitment vanishing-border fix (gold-on-gold contrast)
+### 5.1 Missing card art (6 cards) — `public/vestibule/cards/`
+**Size: 128×128px (transparent PNG)**
 
-### Sly reactive dialogue — extended
-- [x] hoverArtifact pool (5 lines, top priority)
-- [x] cleanedOut pool (4 lines, when shop is bought out)
-- [x] encore pool (5 lines, post-Lucifer encore mode)
-- [x] encoreMode prop wired into ShopScreen
-- [x] hoveringArtifact state on circle artifact panel
+These are the only cards still rendering with procedural placeholders. All 6 are corruption-themed, narrow palette:
 
-### Heat indicator on menu
-- [x] 🔥 HEAT X/10 panel below stake selector
-- [x] 10-pip row fades gold → orange → red
-- [x] +15% boss HP per level shown
-- [x] Hover tooltip explains system
+- [ ] **`hungercard.png`** — *Hungering Flame* (CORRUPT) — Roaring black flame with a hungry maw inside it, biting outward. Reds/blacks.
+- [ ] **`madnesscard.png`** — *Madness Unleashed* (CORRUPT) — A cracked head with maggots/eyes pouring out. Pure madness. Disturbing.
+- [ ] **`whispercard.png`** — *Dark Whisper* (CORRUPT) — A shadowy mouth at an ear, smoke-tendrils visible as the whisper. Subtle, creepy.
+- [ ] **`void_pact.png`** — *Void Pact* (CORRUPT) — A pure black hole consuming light. Stars warping inward at the edge.
+- [ ] **`skullsplitter.png`** — *Skull Splitter* (RIFF) — An axe (the instrument!) embedded in a cracked skull. Purple energy at the impact.
+- [ ] **`tappedout.png`** — *Tapped Out* (EMBER) — Empty Marshall amp with the power light dim, but glowing through cracks. The pre-surge moment.
 
-### Stats screen
-- [x] 📊 Stats button on main menu
-- [x] 12 stat cards in 4-column grid
-- [x] Top 5 most-played cards panel
-- [x] All sourced from existing localStorage (no new tracking)
+### 5.2 Artifact art (12 items) — `public/vestibule/artifacts/`
+**Size: 128×128px** (renders at 28-80px in tray and shop)
 
-### Font legibility migration
-- [x] 41 ScratchFont→MBScribblesFont swaps where fontSize<20
-- [x] Lint rule 1b enforces ScratchFont≥20pt forever
-- [x] Pawn shop, hunger warnings, polaroid labels, map rewards — all migrated
+All 12 currently render as procedural icons. **Replace order: do shop-shown ones first** (a1, a3, a5, a6, ca1, ca2, ca3, ca4) since players see them in the buy menu most.
 
-### Design system v3
-- [x] 180 unique inline hex → 13 sanctioned tokens (92.8% reduction)
-- [x] 5 text hierarchy + 2 semantic + 4 type + 2 tier
-- [x] All WCAG-validated where applicable
-- [x] `npm run check` is hard guard — 4 rules clean
+- [ ] `a1.png` — **Vintage Guitar** — Old Les Paul, glowing gold aura. Triggers ×1.5 always.
+- [ ] `a3.png` — **The Evil Eye** — Single glowing teal iris in a triangular frame. First card free.
+- [ ] `a5.png` — **Haunted Radio** — Old tube radio, ghostly static and a single visible face in the screen.
+- [ ] `a6.png` — **Black Candle** — Dripping wax, purple flame, skull in the wax pool.
+- [ ] `a8.png` — **Stone Tablet** — Carved runes glowing red. Crumbling at edges.
+- [ ] `a9.png` — **Resonance Coil** — Tesla coil arcing gold sparks. Tuning fork base.
+- [ ] `a10.png` — **Burning Stage** — Stage on fire, microphone silhouette in flames.
+- [ ] `wardrums.png` — **War Drums** — Tribal drums with bone sticks, blood splatter on the skin.
+- [ ] `ca1.png` — **The Goat of Mendes** — Goat skull, pentagram between horns, gold inlay.
+- [ ] `ca2.png` — **Hellfire Amulet** — Glowing red gem on chain, flames around the setting.
+- [ ] `ca3.png` — **Sabbath Crown** — Black crown with red gems and bone thorns.
+- [ ] `ca4.png` — **Wailing Guitar** — Ghost guitar mid-scream, sound waves visible.
 
-### Sly reactive dialogue — base system (earlier this week)
-- [x] 9 contextual line pools (multiBuy, boughtPack, boughtCard,
-      highCorruption, flushStash, brokeStash, deepCircle, firstVisit, ambient)
-- [x] Live state-driven context picks
-- [x] Gold flash on context change
+### 5.3 Passive art (10 items) — `public/vestibule/passives/`
+**Size: 128×128px** (renders at 60-64px in shop and footer)
 
-### Per earlier sessions
-- [x] Big 5 features
-- [x] Doom Forge
-- [x] Sim v19.1 synced
-- [x] 69-card deck
-- [x] Corruption deck
-- [x] Tutorial system
-- [x] All 65 sprites + 18 idle anims wired
-- [x] 20 dopamine features (live damage preview, screen effects, etc)
-- [x] Custom AE splash animation system (WebM)
-- [x] Cold open splash with localStorage skip
-- [x] Pokémon-style pack tear-open animation
-- [x] Mentor Link system
-- [x] Score system + grade tiers
-- [x] Card mastery + Pokédex collection screen
-- [x] Daily challenge with "Beat VomitWizard" target
-- [x] Lucky Draw (post-game, locked behind Lucifer kill)
-- [x] Save/resume system
-- [x] 5 starter decks
-- [x] Pact system
+CD-R / equipment / band-life theme, purple accent. All currently procedural.
+
+- [ ] `p1.png` — **Power Chord** — Lightning striking a power strip
+- [ ] `p2.png` — **Roadie Crew** — Wrench + first aid kit
+- [ ] `p3.png` — **Merch Table** — Band shirt + cash on a table
+- [ ] `p4.png` — **Feedback Hum** — Amp humming with orange wave lines
+- [ ] `p5.png` — **Amp Stack** — Wall of stacked Marshall amps
+- [ ] `p6.png` — **Cult Following** — Hooded figures in a circle, candles
+- [ ] `p7.png` — **Guitar Tech** — Hands adjusting guitar pickup screws
+- [ ] `p8.png` — **Green Room** — Backstage couch, dim lamp, beer cans
+- [ ] `p9.png` — **Heavy Rotation** — Spinning vinyl with motion blur
+- [ ] `p10.png` — **Stage Fright Reversal** — Spotlight beam piercing total darkness
+
+### 5.4 Pact art (currently 23 placeholders) — `public/vestibule/pacts/`
+**Size: 128×128px** (renders at ~120px during pact selection)
+
+Pacts already have 23 PNG files but they may all be procedural placeholders. **Audit by file size** — anything under 1KB is procedural. The 13 actual pact slots are:
+
+`ember_surge` 🔥, `iron_strings` 🎸, `thick_skin` 🛡, `dark_bargain` 🌑, `speed_demon` ⚡, `blood_price` 🩸, `clean_living` ✨, `corruption_engine` ☠, `merchants_eye` 💰, `stone_wall` 🧱, `sixth_slot` 👥, `war_drums` 🥁, `atonement` 🕊
+
+- [ ] **Audit pact art folder** — confirm which are real vs placeholders
+- [ ] **Replace placeholders** — pact selection is a high-attention moment, art quality matters here
+
+### 5.5 Boss loot art (5 + new ones) — `public/vestibule/loot/`
+**Size: 128×128px** (renders at ~80px on drop)
+
+Existing art for 5 items. Drops are a high-dopamine moment.
+
+- [ ] `love_letter.png` 💋 (C2)
+- [ ] `endless_hunger.png` 🕳 (C3)
+- [ ] `golden_tooth.png` 🪙 (C4)
+- [ ] `the_blade.png` 🗡 (C7)
+- [ ] `mask_of_lies.png` 🎭 (C8)
+
+There are **6 more loot items** added since this list was made (`limbos_echo`, `berserker_rage`, `heretics_brand`, plus three corruption gambit cards). Verify against current `BOSS_LOOT` array and create art for any missing.
+
+### 5.6 Booster pack art retheme (5 packs) — `public/vestibule/packs/`
+**Size: 256×384px** (vertical pack shape, renders at smaller in shop)
+
+Current files: `touring.png`, `underground.png`, `festival.png`, `headliner.png`, `demonic.png`
+But the **in-game pack names** are `cassette`, `cdr`, `vinyl`, `rarevinyl`, `cursed` — **mismatch.**
+
+**Two options:**
+1. **(Recommended)** Make new pack art matching the actual format names:
+   - [ ] `cassette.png` — Cracked cassette, hand-written label, DIY ($6)
+   - [ ] `cdr.png` — Burned CD-R in paper sleeve, marker-scrawled ($12)
+   - [ ] `vinyl.png` — Standard vinyl in sleeve, import sticker ($22)
+   - [ ] `rarevinyl.png` — Holographic gold vinyl, collector's edition ($38)
+   - [ ] `cursed.png` — Bone/flesh case, glowing runes, hellish ($60)
+2. Rename current files in code: touring→cassette, underground→cdr, festival→vinyl, headliner→rarevinyl, demonic→cursed.
+
+### 5.7 Recruitment pack art (1 pack) — `public/vestibule/packs/`
+- [ ] **`recruit.png`** — 256×384px — Sealed envelope with band silhouette behind it, "AUDITION" stamped on front
+
+### 5.8 Card back (1 design) — `public/vestibule/cardback.png`
+**Size: 256×384px** (renders at draw pile and pack opening)
+- [ ] Inverted pentagram, "VESTIBULE" wordmark, dark with gold/red accents
+- Players see this every single hand. Style anchor for the whole game.
+
+### 5.9 Sly the Fence portrait — shop
+- [x] Sly art exists as animated GIF at `public/sly.gif`
+- [ ] **Verify shop layout uses Sly properly** — should feel like a character, not just a portrait. Already has reactive dialogue per memories.
+- [ ] **Sly voice lines** — short audio barks on shop entry, big purchase, low stash, reroll. Even 4-5 lines transforms his presence.
+
+### 5.10 Deck cover art (5 decks) — `public/vestibule/decks/`
+**Size: 384×512px** (renders at ~280×360 on deck-select screen)
+
+Folder is empty. These are the menu thumbnails for the 5 starter decks:
+
+- [ ] `standard.png` — Electric guitar in a single spotlight, clean, balanced
+- [ ] `shredder.png` — Flying V on fire, lightning, speed lines, aggro
+- [ ] `ritualist.png` — Guitar on a stone altar, black candles, occult
+- [ ] `engineer.png` — Mechanical guitar made of gears and circuit traces
+- [ ] `survivor.png` — Battered cracked guitar held together with duct tape
+
+### 5.11 App icon — `public/vestibule/icon.png`
+- [ ] **`icon.png` 512×512** — Stylized "V" as inverted pentagram, blood red on black. Must read at 32px on a taskbar. Drop a 256×256 and a 128×128 alongside for OS scaling.
+
+### 5.12 Steam capsule images
+For the eventual Steam page:
+- [ ] **Header capsule:** 460×215 — Logo + key art crop, hero element
+- [ ] **Small capsule:** 231×87 — Just the wordmark, must read tiny
+- [ ] **Large capsule:** 467×181 — Wider hero variant
+- [ ] **Hero graphic:** 3840×1240 — Banner for the store header
+- [ ] **Logo (transparent):** 1280×720 — For overlays
+- [ ] **5+ screenshots:** 1920×1080 each — In-game moments showing combo, shop, boss reveal, score screen, deck building
+
+### 5.13 Damage splash effects (7 tiers) — `public/vestibule/fx/`
+**Size: 1920×1080 WebM (VP9 codec, opaque, black background — black disappears via `mix-blend-mode: screen` in CSS)**
+**Duration: 0.5-3s per tier**
+**FPS: 30 or 60**
+
+Folder is empty. These are the **dopamine bombs** that fire on big hits. Current code already wires them — just drop the files and they activate.
+
+- [ ] **`solid.webm`** (50+ dmg) — 0.5-1s — Single ember floats up from center, faint pulse ring. Like a candle flicker.
+- [ ] **`heavy.webm`** (200+ dmg) — 0.8-1.2s — Quick orange spark burst from center, small shockwave ring. Match-strike energy.
+- [ ] **`critical.webm`** (500+ dmg) — 1-1.5s — Red/orange flash, sparks outward, screen edges glow red, light cracks radiating. Anvil hammer.
+- [ ] **`massive.webm`** (1000+ dmg) — 1.5-2s — Center explosion, fire particles, lightning arcs across screen, debris falling. Pyrotechnics.
+- [ ] **`devastating.webm`** (2500+ dmg) — 2-2.5s — Massive shockwave, screen cracks like glass with light pouring through, purple/red vortex spinning. Stage collapsing.
+- [ ] **`ultra.webm`** (5000+ dmg) — 2-3s — Full eruption, white-hot center, pentagram sigils burning at edges, energy beams to corners, color cycle red→gold→white. Nuclear at a Sabbath show.
+- [ ] **`godlike.webm`** (10,000+ dmg) — 2.5-3s — White flash → kaleidoscope, fractals, sacred geometry, inverted pentagram center, ⛧ symbols rain like Matrix code. DMT trip at the gates of Hell.
+
+**AE workflow:**
+1. Comp: 1920×1080, black background
+2. Design effect with particles/light rays/etc.
+3. Export → Media Encoder → WebM, VP9 codec
+4. If AE can't WebM, export ProRes 4444 then convert: `ffmpeg -i input.mov -c:v libvpx-vp9 -pix_fmt yuva420p -b:v 2M output.webm`
+5. Drop in `public/vestibule/fx/`
+6. Test in-game — black should disappear
 
 ---
 
-## 📊 BALANCE SNAPSHOT (10K SIM)
+## 🎬 PRIORITY 6 — CUT SCENES (currently zero)
 
-From `SIM_REPORT_MORNING.md`, key per-game numbers worth tracking:
+The game has **no cut scenes**. This is the biggest "AAA polish" gap. Each one anchors a memorable moment. All target **1920×1080** at **24-30fps**, **5-15 seconds** each, exported as **WebM (VP9 alpha) or MP4**.
 
-| Metric | Value | Verdict |
-|---|---|---|
-| Riff Chains / game | 9.05 | Strong rhythm ✅ |
-| Doom Forge upgrades / game | 3.4 | Active crafting ✅ |
-| Pacts chosen / game | 3.4 | Engaged with risk/reward ✅ |
-| Random events / game | 1.6 | Choice density solid ✅ |
-| Mentor Links per run | 43% | Good synergy hits ✅ |
-| Boss loot collected / game | 3.4 | Drop rhythm healthy ✅ |
-| Lucifer wins | 0% | ❌ TOP PRIORITY |
-| Acid use rate | 1.6% (vs 40% shroom) | ❌ Acid broken |
-| Hellquakes / 10k games | 0 | ⚠ Decorative, never seen |
+### 6.1 Cold Open / Game Intro
+**5-8 seconds, 1920×1080**
+- Fade up from black on a smoky club back-alley. Camera tracks past stacked amps and graffiti walls. Distorted guitar drone builds. Final beat: stage curtain pulls back to reveal the VESTIBULE logo carved in burning runes.
+- **Direction:** This sets the tone for the entire game. Should feel like the cold open of a metal documentary — gritty, lived-in, dangerous.
+- **Skippable:** YES (with localStorage flag, code already supports this pattern)
+
+### 6.2 Welcome to Hell (Welcome Tour)
+**8-12 seconds, 1920×1080**
+- Already has a `welcomeToHell` state in code (line 7340 area). Currently just a state transition with no visual.
+- **Direction:** Camera plummets from a stormy sky down through layers of cloud, then fire, then twisted geometry, finally arriving at the gates of Hell. The Executive (AR_EXECUTIVE) is silhouetted at the gate, holding a clipboard. "We've been expecting you."
+- **Trigger:** First time the player reaches Lucifer (post-final-shop, before the AR_EXECUTIVE encounter)
+
+### 6.3 Circle entry transitions (9 short scenes)
+**3-5 seconds each, 1920×1080**
+- Brief flythrough into each new circle as the player descends.
+- Currently the descent screen just shows enemy choices — should be preceded by a 3-5s atmospheric beat.
+
+| Circle | Direction |
+|---|---|
+| **I — Limbo** | Foggy void, distant figures shuffling aimlessly, gray and listless |
+| **II — Lust** | Velvet rooms with chained doors, red light, distant moaning |
+| **III — Gluttony** | Mountains of rotting feasts, flies, gnashing teeth in the dark |
+| **IV — Greed** | Gold coins falling forever into a black pit, glittering uselessly |
+| **V — Anger** | Lakes of fire, screams, distorted bodies in eternal combat |
+| **VI — Heresy** | Burning books, broken altars, false idols crumbling |
+| **VII — Violence** | A forest of weapons growing from blood-soaked earth |
+| **VIII — Fraud** | Endless mirrors, masks shedding to reveal more masks |
+| **IX — Treachery** | Ice plains, frozen faces under the surface, wind howling |
+
+### 6.4 Boss reveals (27 short scenes — optional, do bosses first then minor enemies later)
+**2-4 seconds each, 1920×1080**
+- A "name card" reveal when each boss appears for the first time. Big text, heavy hit on the name beat, boss portrait holds.
+- **Priority subset (3 boss-tier per circle, 9 total):** Drifter, Seducer, Devourer, Usurer, Warlord, False Prophet, Executioner, Archfraud, Lucifer.
+- **Direction:** Camera close on the boss silhouette, then snap-zoom out as the name burns onto screen. Drum hit on the name. 2 seconds total — fast, punchy, never skippable on first encounter.
+
+### 6.5 Lucifer reveal (the big one)
+**12-18 seconds, 1920×1080**
+- Earned at end of C9. Should be the single best cinematic moment in the game.
+- **Direction:** Black screen. Distant heartbeat builds. Eyes open in the dark — six of them. Camera pulls back to reveal Lucifer on a throne of bones, surrounded by burning books and broken instruments. He stands. He speaks one line: *"You came all this way... for an encore?"* Stage lights snap on. The final boss music drops. Title card: **LUCIFER — Circle IX, Treachery.**
+- **Make it cinema.** This is the moment players post on social media.
+
+### 6.6 Victory cutscene
+**10-15 seconds, 1920×1080**
+- Triggered when Lucifer dies. Currently goes straight to score screen, which feels deflating.
+- **Direction:** Lucifer collapses in slow motion, the throne shattering. Camera pulls back through Hell. Each circle we descended through flashes by in reverse, but burning brighter now. The band emerges from Hell standing on a stage built on the gates. Crowd silhouettes raise lighters. Hold on the band. Cut to score screen.
+- **Tease NG+:** End title says "VESTIBULE — Encore Mode Available" if first victory.
+
+### 6.7 Death stings (3 variants)
+**5-8 seconds each, 1920×1080**
+- Currently goes straight to the (now-fixed) end screen. A 5-8s sting before the score increases dramatic weight.
+- **`stoned.webm`** — All band members slumped on stage, smoke rising, instruments dropped. Slow zoom out. Heavy black metal dirge.
+- **`beaten.webm`** — Boss silhouette towering over fallen band, victorious. The boss looks at camera. Silence.
+- **`fallen.webm`** — (Lucifer's FALLEN keyword path) Lucifer's flame extinguishes; the band looks horrified at what they've done. They've killed God's adversary — what does that make them? Ambiguous moral beat.
+
+### 6.8 Member MVP cards (cosmetic, future)
+**2-3 seconds each, 1920×1080**
+- After-victory: a quick name-card style flourish for the MVP member of the run, with a quote.
+- **Direction:** Member portrait, name, "MVP" stamp animating in, their best stat, then their voice line (see dopamine #11).
+
+---
+
+## 🛍️ PRIORITY 7 — SHOP POLISH
+
+### 7.1 Pack opening polish
+- [x] 5-phase tear-open animation already shipped (per memory)
+- [ ] **Verify pack art matches name** (see 5.6 — packs are mismatched currently)
+- [ ] **Anticipation pause** — increase the hold-before-reveal by 200-300ms. Players need that "what's inside?" tension.
+- [ ] **Rare card reveal sequence** — if pack contains a Rare card, slow the reveal of that card by 50%, add slight glow build-up.
+
+### 7.2 Card display in shop
+- [x] All shop screens use CardArtImg (per AUDIT_REPORT.md)
+- [ ] **Add hover-to-zoom** on shop cards — magnify card art on hover for those who want to study before buying.
+- [ ] **Show rarity badge prominently** — currently just border color. Add explicit "RARE" / "UNCOMMON" stamps.
+
+### 7.3 Sly character development
+- [ ] **Sly voice lines** (see 5.9) — when 4-5 audio barks land, run a polish session on his existing reactive dialogue to sync voice + text.
+- [ ] **Sly inventory teasing** — when reroll is hovered, show a faded silhouette of "what could appear" to bait the gamble.
+
+---
+
+## 🧠 PRIORITY 8 — UI/UX POLISH
+
+### 8.1 Quick wins
+- [ ] **Damage preview color-codes** — preview should turn green when it kills the boss, gold when it would set personal best, red if a critical strike will leave a member dead from incoming counter
+- [ ] **Card cost ghost** — when you can't afford a card, show "need X more" tooltip on hover
+- [ ] **Boss intent telegraph** — small icon next to boss showing "next attack: 4 dmg → random" or similar (SLAY THE SPIRE STAPLE — players love planning)
+- [ ] **Drag preview improvement** — when dragging a card to a member, show the post-play stats (current ATK + bonus). Currently you only see the buff number, not the result
+- [ ] **Pre-strike multiplier breakdown** — hover the strike button to see "base 47 × 1.5 dbl × 1.78 chain × 1.5 corrupt = 188". Already mostly built (DamageBreakdown component) but needs hover trigger
+
+### 8.2 Resolution / scaling
+- [ ] Game is hard-coded at 1920×1080. Players on smaller screens (1366×768 laptops) get clipped. Add a global CSS scale transform that fits viewport.
+
+### 8.3 Performance
+- [ ] **Bundle size** — 743KB minified, 198KB gzipped. Code-split lazy-loaded screens (shop, end, collection) to drop main bundle to ~300KB
+- [ ] **Animation profiling** — at 9000+ lines and dozens of styled-divs per render, the StageSlot map probably re-renders too often. Memoize with React.memo
+
+---
+
+## 🏆 PRIORITY 9 — META-SYSTEMS / LONGEVITY
+
+These are what bring players back day 2, day 7, day 30.
+
+### 9.1 Daily challenge (already started)
+- [x] Daily seed system shipped
+- [x] "Beat VomitWizard" target shipped
+- [ ] **Daily leaderboard** — score visible across all players who beat the same daily seed. Either Steam leaderboards or a simple Firebase/Supabase backend.
+- [ ] **Daily streak rewards** — 3-day streak = +X stash next run, 7-day = unlock cosmetic, 30-day = unique title. Already partially implemented.
+
+### 9.2 Achievements
+- [x] 28+ achievement system in code
+- [ ] **Achievement variety pass** — review the current set. Are there enough EASY ones (early dopamine)? Enough HARD ones (long-term chase)? Should be a heavy curve: many easy, few hard.
+- [ ] **Steam achievement integration** — when you ship to Steam, hook up the SDK. Already flagged in STEAM.md.
+
+### 9.3 Cosmetics / unlockables
+- [ ] **Card backs** — beat each circle = unlock a new card back. Currently single design. Hugely cheap dopamine win.
+- [ ] **Foil card upgrade** — let players spend stash post-run to "foil" a favorite card. Cosmetic only, but it's their card now.
+- [ ] **Member alternate art** — beat the game with a member as MVP = unlock alt-color sprite for them.
+
+### 9.4 Endless mode
+- [ ] **NG+ / Encore Mode escalation** — already exists as a flag but the scaling needs review. Should hit insane numbers on second loop. The "I broke the game" moment.
+- [ ] **Infinite circle (post-Lucifer)** — after killing Lucifer, optional "Mt. Olympus" mode where bosses scale infinitely. Pure number-go-up endgame.
+
+---
+
+## 🚀 PRIORITY 10 — STEAM LAUNCH READY
+
+When the above is solid, this is the path to live:
+
+- [ ] **Set up Steamworks account** ($100 Direct fee — JV's task)
+- [ ] **Create store page** with description, tags, screenshots, capsules
+- [ ] **Submit Steam Direct review** (typically 5-10 days)
+- [ ] **Steam Cloud save** — wire up via Steamworks SDK
+- [ ] **Steam achievements** — wire up SDK
+- [ ] **Build pipeline** — `npm run dist:win` → SteamPipe upload, automate this
+- [ ] **Pre-order page live** at $4.20
+- [ ] **Trailer** — 60-90s, Vestibule cuts, set to one of JV's tracks. Critical for storefront conversion.
+- [ ] **Press kit** — screenshots, key art, fact sheet, contact info
+
+---
+
+## 🧬 20 DOPAMINE IDEAS — making this addictive
+
+Why people can't stop playing **Balatro, Slay the Spire, Vampire Survivors, MTG**:
+
+- **Balatro:** Multiplicative scaling that surprises you. Hidden joker synergies. Daily run with shareable scores. Visceral SFX on every chip/mult. "I broke the game" moments.
+- **Slay the Spire:** Relic stacking, deck archetypes that feel distinct, transparent enemy intent for planning, daily climbs.
+- **Vampire Survivors:** Power-up evolutions that combine into something stronger, endless number-go-up, easy unlock cadence, screen drowning in particles.
+- **MTG:** Infinite combinatorics, the chase for the rare card, decks players name and share.
+
+**The common DNA: the player should feel they discovered something the designer didn't fully anticipate.** That's the addiction.
+
+Twenty things to push Vestibule there:
+
+### 1. Mid-strike running multiplier tally
+Show the strikeMult building in real-time as cards are played. "×1.05 → ×1.10 → ×1.78 (CHAIN!) → ×2.67". Each tick has a sound. Players feel the stack growing — Balatro's whole loop is this single mechanic visualized hard.
+
+### 2. Joker-style artifact "loud" advertising
+When an artifact triggers, it shouldn't just pulse — it should pop a banner: "🎸 VINTAGE GUITAR FIRES — ×1.5". Players should know which artifact did the thing so they go hunt for more like it.
+
+### 3. Combo discovery banner
+First time you fire a specific 4+ card combo, dim the screen, freeze for 1.5s, blast a banner: "FIRST DISCOVERY: VOID CASCADE!" with a 🔓 sound. Save to localStorage so it's once-per-account, not per-run. Players will hunt the rest.
+
+### 4. Boss intent telegraph (Slay the Spire's killer feature)
+Small icon next to boss: "next attack: ⚔ 4 dmg → random member". Lets players plan. Removes randomness from feeling unfair. Currently you can't see what's coming.
+
+### 5. Pre-strike "kill confirm" highlight
+If your pending damage will kill the boss, the strike button glows green and pulses faster. The hover shows "LETHAL". Pure dopamine — that "I solved it" feeling.
+
+### 6. Member voice barks (low budget if needed)
+2-3 short audio clips per member. They bark on crit, on dying, on MVP-ing. Even synthesized voice or just a single distorted "fuck yeah" works. Members become characters, not stat blocks.
+
+### 7. Run highlights montage
+Post-victory: 5-8 second auto-edited montage of the 3-4 biggest hits of the run, slowed down with damage numbers floating up. Like NBA 2K's after-game highlights.
+
+### 8. Deck DNA badge
+While playing, a small badge in the corner reads "RIFF SPECIALIST 78%" or "CORRUPT MASTER 65%" based on what cards you've played most. Updates live. Players start min-maxing for their badge.
+
+### 9. Card discovery shimmer on first draw
+First time you draw a card you've never played, it gets a 1.5s gold shimmer animation as it slides into hand, with a soft chime. Tracks via mastery system. Encourages exploring all 85 cards.
+
+### 10. Synergy hint on hover
+Hover a card in hand → other cards that combo with it briefly glow gold. Riff Chains visible to players who haven't memorized them. Slay the Spire does this with their "exhaust" coloring.
+
+### 11. Member MVP voice line
+After the score screen, your MVP member says a 2-second line. "Bjorn: 'I think we just killed God.'" Random per member, 4-5 lines each. Players will replay just to see them all.
+
+### 12. Number-tier visual escalation
+Damage numbers should look DIFFERENT at different tiers. 50 dmg = small white. 500 = orange, screen-shake-1. 5000 = giant gold, screen-shake-3, glow. 50000 = full-screen explosion text. Already partially in (8 tiers) — push it harder.
+
+### 13. Daily leaderboard with friends
+Daily seed already exists. Add a simple leaderboard (Steam or your own). Show your rank vs everyone. Show top 3 worldwide. Let players invite a friend's username to compare. This is how Balatro became viral.
+
+### 14. Stash overflow conversion
+When stash hits 420 cap, excess flows into something else — bonus rerolls? Bonus pack? Currently overflow is just lost. Free dopamine — every coin should feel like progress.
+
+### 15. "Almost died" moments captured
+If a member ended a fight at 1-3 HP, log it. Show on score screen: "💀 ALMOST DIED: Ingrid (1 HP)". Then "BUT YOU SURVIVED." Frames close calls as wins.
+
+### 16. Streak meta-rewards
+Win-streak rewards already exist (memory). Push it: 3 wins = +1 starting ember next run, 5 = +1 stash, 10 = unlock cosmetic. Make the streak visible on the menu so it never gets forgotten.
+
+### 17. Cassette tape "save your run" share
+At end of run, generate a tiny PNG image: pixel art cassette with run stats burned onto the label. Player can save/share. Like Balatro's run summary or Wordle's emoji grid.
+
+### 18. Hidden mythic combo unlocks
+5-10 secret combos pre-defined in code (e.g., "Possessed Performance + Echo Pedal + ×3 corruption mult"). When a player triggers one for the first time, full-screen takeover: "MYTHIC COMBO: HEAVEN'S MOUTH" with a 3-second cinematic. They scream and tell their friends.
+
+### 19. "Gear lust" between runs
+Show the 3 most-popular cards/artifacts the player has NEVER unlocked, on the death screen. "You haven't seen: ⚡ Resonance Coil." Adds run #2 motivation that wasn't there.
+
+### 20. Ascension/stake visible meta-progress
+Stakes (Bronze→Demonic) already exist. Make the meta-progress LOUD. After-run screen: "SILVER UNLOCKED → +1 boss damage, but you now know Bronze better than 78% of players." Let people know they're climbing a real ladder.
+
+---
+
+## NOTES TO SELF
+
+**Cardinal rule:** every commit MUST update this TODO.md. If a feature lands, mark it done. If a bug is found, add it. The doc decays the moment it stops being touched.
+
+**Stale doc cleanup is the cheapest unlock for the next session** — see Priority 3.3. After that, every session starts faster.
+
+**The game is mechanically close to done.** What's left is polish, art, and the dopamine layer — which is where AAA-feel actually lives. Don't underestimate this phase. A mediocre game with great juice ships better than a great game with mediocre juice.
