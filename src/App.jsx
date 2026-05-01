@@ -205,7 +205,7 @@ function unlockAchievement(id){
 
 const ENEMIES=[
   // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
-  {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:140,baseDmg:4,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
+  {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:90,baseDmg:4,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
   {id:'lostsoul',tagline:'You were lost before you started.',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:150,baseDmg:5,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
   {id:'drifter',tagline:'110 HP and pure aggression.',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:340,baseDmg:7,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
   // ── CIRCLE II: LUST — Enemy buffs itself each strike ─────────
@@ -2852,8 +2852,8 @@ function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,
         animation:isHit?'memberHitShake 0.4s ease-out':(!st&&!isAttacking&&!isDiceTarget&&!isStriking)?(nearDeath?'nearDeathPulse 0.8s ease-in-out infinite':'throb 3s ease-in-out infinite'):'none',
         transition:strikeAnim?'transform 0.25s cubic-bezier(0.2,0.8,0.3,1.2), border 0.2s, box-shadow 0.2s, opacity 0.3s':'border 0.2s, box-shadow 0.2s, opacity 0.3s, transform 0.3s',
         cursor:'grab',position:'relative'}}>
-      {/* Keyword tooltip */}
-      {showTip&&member&&KEYWORD_DESC[member.keyword]&&<div style={{position:'absolute',top:'calc(100% + 6px)',left:'50%',transform:'translateX(-50%)',background:'rgba(8,4,2,0.97)',border:'1px solid rgba(196,30,58,0.5)',borderRadius:3,padding:'8px 12px',zIndex:99999,pointerEvents:'none',minWidth:180,maxWidth:260,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--gold)',letterSpacing:2,textTransform:'uppercase',marginBottom:4}}>{member.keyword}</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-bone)',lineHeight:1.4}}>{KEYWORD_DESC[member.keyword]}</div>{member.bio&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',lineHeight:1.4,fontStyle:'italic',marginTop:6,paddingTop:6,borderTop:'1px solid rgba(100,60,20,0.3)'}}>{member.bio}</div>}</div>}
+      {/* Keyword tooltip — positioned ABOVE the card to avoid the hand-fan z-index/overflow trap below */}
+      {showTip&&member&&KEYWORD_DESC[member.keyword]&&<div style={{position:'absolute',bottom:'calc(100% + 6px)',left:'50%',transform:'translateX(-50%)',background:'rgba(8,4,2,0.97)',border:'1px solid rgba(196,30,58,0.5)',borderRadius:3,padding:'8px 12px',zIndex:99999,pointerEvents:'none',minWidth:180,maxWidth:260,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--gold)',letterSpacing:2,textTransform:'uppercase',marginBottom:4}}>{member.keyword}</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-bone)',lineHeight:1.4}}>{KEYWORD_DESC[member.keyword]}</div>{member.bio&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',lineHeight:1.4,fontStyle:'italic',marginTop:6,paddingTop:6,borderTop:'1px solid rgba(100,60,20,0.3)'}}>{member.bio}</div>}</div>}
       {buffCount>0&&<div style={{position:'absolute',top:6,left:6,background:buffCount>=3?'#aa1111':'#9933cc',borderRadius:10,padding:'1px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-primary)',zIndex:10,boxShadow:'0 0 8px rgba(0,0,0,0.6)'}}>+{buffCount}</div>}
       {member.encoreReady&&<div style={{position:'absolute',top:6,right:6,background:'#dd2222',borderRadius:10,padding:'1px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-primary)',zIndex:10,boxShadow:'0 0 8px rgba(220,0,0,0.6)',animation:'pulse 0.8s ease infinite alternate'}}>🔁×2</div>}
       {isDiceTarget&&<div style={{position:'absolute',top:-16,left:'50%',transform:'translateX(-50%)',fontSize:20}}>🎯</div>}
@@ -4714,7 +4714,7 @@ function App(){
   const [log,setLog]=useState(['⛧ The gig begins.'])
   const fullRunLogRef=useRef(['⛧ The gig begins.'])
   const [showCombatLog,setShowCombatLog]=useState(false)
-  const [showDiscardPreview,setShowDiscardPreview]=useState(false)
+  // showDiscardPreview removed — discard pile now viewed exclusively through the lower-left DiscardPile component (setDiscardViewOpen)
   const [undoSnapshot,setUndoSnapshot]=useState(null) // one-step undo for last card play
   const [damageFlash,setDamageFlash]=useState(false)
   const [animPhase,setAnimPhase]=useState('idle')
@@ -9371,17 +9371,11 @@ function App(){
 
         {/* CARD FAN — centered between panels */}
         <div style={{position:'absolute',left:410,right:150,top:22,bottom:0,display:'flex',justifyContent:'center',alignItems:'flex-end',paddingBottom:10,overflow:'visible',zIndex:50}}>
-          {/* HAND SIZE INDICATOR — gold pulse at overcap */}
+          {/* HAND SIZE INDICATOR — gold pulse at overcap (kept; DECK/DISC small labels removed because the lower-left DeckPile/DiscardPile already shows count + click-to-view) */}
           {(()=>{const tgt=handTargetRef.current||HAND_SIZE;const over=hand.length>tgt;return (<>
-            <div style={{position:'absolute',top:-2,left:8,fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:1,color:'var(--ink-dim)',pointerEvents:'none',zIndex:51,fontWeight:900}}>DECK {deck.length}</div>
             <div style={{position:'absolute',top:-2,left:'50%',transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:over?'var(--gold)':'var(--ink-dim)',textShadow:over?'0 0 8px rgba(200,152,56,0.6)':'none',animation:over?'handOvercapPulse 1.2s ease-in-out infinite':'none',pointerEvents:'none',zIndex:51,fontWeight:900}}>
               {hand.length}/{tgt}
             </div>
-            <div onClick={()=>setShowDiscardPreview(p=>!p)} style={{position:'absolute',top:-2,right:8,fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:1,color:'var(--ink-dim)',cursor:'pointer',zIndex:51,fontWeight:900,padding:'2px 6px',borderRadius:3,background:showDiscardPreview?'rgba(200,152,56,0.2)':'transparent',border:showDiscardPreview?'1px solid rgba(200,152,56,0.3)':'1px solid transparent'}}>DISC {discardPile.length}</div>
-            {showDiscardPreview&&discardPile.length>0&&<div style={{position:'absolute',top:16,right:0,zIndex:99999,background:'rgba(10,6,2,0.97)',border:'1px solid rgba(200,152,56,0.4)',borderRadius:6,padding:'12px',maxHeight:300,overflowY:'auto',minWidth:200,maxWidth:320,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--gold)',letterSpacing:3,textTransform:'uppercase',fontWeight:900,marginBottom:8}}>Discard Pile ({discardPile.length})</div>
-              {Object.entries(discardPile.reduce((acc,c)=>{acc[c.name]=(acc[c.name]||0)+1;return acc},{})).sort((a,b)=>b[1]-a[1]).map(([name,count])=><div key={name} style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-bone)',padding:'2px 0',borderBottom:'1px solid rgba(80,50,10,0.15)',display:'flex',justifyContent:'space-between'}}><span>{name}</span><span style={{color:'var(--ink-dim)'}}>{count>1?'×'+count:''}</span></div>)}
-            </div>}
           </>)})()}
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).filter(Boolean).map((card,i)=>(
             <HandCard key={card.uid} card={card} index={i} total={hand.length} chainReady={RIFF_CHAINS.some(ch=>ch.cards.includes(card.id)&&(hand.some(c2=>c2.uid!==card.uid&&ch.cards.includes(c2.id))||(cardsPlayedRef.current||[]).some(pid=>ch.cards.includes(pid)&&pid!==card.id)))} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}

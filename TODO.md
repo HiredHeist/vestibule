@@ -109,6 +109,34 @@ better, and to find any tuning issues from the per-strike scaling.
       keyword strip + achievement badges + near-miss block all firing —
       stats row at top and keyword strip at bottom were getting cut off.
 
+### Member tooltip clipping under hand fan — DONE (May 2)
+- [x] StageSlot keyword tooltip was positioned `top:'calc(100% + 6px)'`
+      (below card), causing it to land in the hand-fan area where it got
+      clipped despite z-index 99999. Moved to `bottom:'calc(100% + 6px)'`
+      so it floats above the card into the artifact tray area which has
+      breathing room. Line 2856 in App.jsx.
+
+### Redundant DECK/DISC small labels above hand fan — DONE (May 2)
+- [x] Two small text labels ("DECK 62", "DISC 0") sat at the top of the
+      card-fan area duplicating data already shown in the lower-left
+      DeckPile + DiscardPile components. Removed both (and the inline
+      discard preview popup that was triggered by clicking DISC — the
+      lower-left DiscardPile already opens a fuller viewer). Hand-size
+      indicator (e.g. "5/5") in the middle is preserved. Removed the
+      now-orphaned `showDiscardPreview` state. Line ~9376 area.
+
+### Wanderer HP nerf — fight 1 should be a tutorial, not a wall — DONE (May 2)
+- [x] Wanderer base maxHp 140 → 90 (35% cut). Standard deck scaled HP
+      drops from 259 to 167. JV's playtest had repeated runs ending at
+      Wanderer with 14 HP remaining despite playing 22 cards over 4
+      strikes — system was tuned for the multiplicative ceiling but the
+      2-member starter can't generate enough chains to hit it. Lost Soul
+      (150) and Drifter (340) untouched, so Circle I curve goes 90 →
+      150 → 340 base — gentle ramp, room to add a 3rd member from the
+      shop after fight 1. NOTE: sim's wanderer HP not yet updated to
+      match — sim divergence is acceptable for now since JV will
+      re-tune sim post-keyword-refactor playtest.
+
 
 ---
 
