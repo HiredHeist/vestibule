@@ -326,6 +326,24 @@ Need 3-state display:
 
 ---
 
+## ✅ DECISIONS LOCKED (May 2 2026 — JV approved)
+
+### LOCKED FIX #1 — Echoplex purity exclusion
+Retriggers fire all card effects but are flagged `_isEchoplexRetrigger:true`.
+Excluded from: `allSameType` (Doom Crown), `cards2exact` (Solo Sermon), `cards1` (The Blade), any future "exact N" or "all same" checks.
+Included in: `cards3` (Vintage Guitar 4+), `cards5` (Burning Stage 6), `perCorruptCard` (Pentagram Shrine), `perChain`, all volume / per-instance checks.
+
+### LOCKED FIX #2 — Black Goat math
+Original: ×1.5 always × ×1.5 per artifact owned (including self) → max ×5.06 in 3-slot, total ×68 with Goat+Triple Sixes.
+**LOCKED:** ×1.5 always × ×1.3 per OTHER artifact owned. Max from Black Goat alone: ×2.54 (with 2 other mult artifacts). Stacks with Goat of Mendes (×1.5) and Triple Sixes (×9 max). Combined ceiling: ~×34 always-on, which is meaty without breaking the math.
+
+### LOCKED FIX #3 — Sigil of Set rewording
+Original: "First Strike of every fight is automatically your highest possible damage roll (all multipliers fire as if perfect conditions)." → trivialized whole conditional artifact pool.
+**LOCKED:** "First Strike of every fight, your card-played and chain mults are auto-peaked (as if you played 6 cards + fired 2 chains, ×4.31 strike mult). Other artifacts/conditions still require their own triggers. One-shot per fight."
+Math: ×4.31 strike mult on opener = strong but not auto-win. Conditional artifacts (Pentagram, Inverted Cross, Doom Crown) still demand their own triggers.
+
+---
+
 ## DECISIONS RECOMMENDED
 
 1. **Echoplex retriggers DON'T count toward "same type" / "exactly N cards" checks** but DO count toward "all 6 cards" / "4+ cards" checks. (Hot Bug #2 fix)

@@ -82,7 +82,7 @@ Cost range: 32–50 herb. Multipliers: ×3.0–×8.0. Score bumps: +25%–+40%. 
 | 22 | **Triple Sixes ⛧⛧⛧** | ×3 per OTHER artifact equipped | 35 | `perOtherArtifact` | Caps at ×9 with 3-slot limit |
 | 23 | **Lucifer's Pact 😈** | ×4 if Lucifer is on stage. Run score ×1.3 | 40 | `luciferOnStage` + scoreMult | Lucifer band-member |
 | 24 | **Inverted Pentacle ⛧** | ×5 if Corruption is exactly 100% (no over, no under) | 36 | `corrupt100exact` | Corruption peak |
-| 25 | **The Black Goat 🐐** | ×1.5 always × ×1.5 per artifact owned. Compounds with Goat of Mendes (stacks!) | 42 | `goatStack` | Hyper-mult builds |
+| 25 | **The Black Goat 🐐** | ×1.5 always × ×1.3 per OTHER artifact owned (excludes self). Compounds with Goat of Mendes (stacks!) | 42 | `goatStackOther` | Hyper-mult builds (max ×2.54 from this artifact alone) |
 
 ---
 
@@ -124,7 +124,7 @@ Cost range: 24–32 herb. These are build-locking picks.
 |---|---|---|---|---|
 | 13 | **The Looper ♾️** | First card each Strike replays at end of Strike (free) | 28 | Effectively +1 free card → 6-card combos easier |
 | 14 | **Bit Crusher 💥** | Each card you discard gives +5% Corruption | 26 | Corruption rocket → Hellmouth, Inverted Pentacle |
-| 15 | **Echoplex 🎚** | When you play a card, **69% chance** it triggers a second time at end of Strike (free). The god-tier pedal. | **42** | Combo extension god-pedal → multiplies any per-card-played artifact (Pentagram Shrine, Cracked Pickup, Doom Crown, Burning Stage). The ⚡ pedal you hope to see. |
+| 15 | **Echoplex 🎚** | When you play a card, **69% chance** it triggers a second time at end of Strike (free). Retriggers DON'T count toward 'same type' or 'exact N cards' checks (no sabotage of Doom Crown/Solo Sermon) but DO count toward volume checks (Burning Stage 6 cards, Vintage Guitar 4+). | **42** | Combo extension god-pedal → multiplies any per-card-played artifact (Pentagram Shrine, Cracked Pickup, Burning Stage). The ⚡ pedal you hope to see. |
 
 ---
 
@@ -141,7 +141,7 @@ These are NOT in the shop pool by default. Each is gated behind a specific in-ga
 |---|---|---|---|
 | **M1** | **The Inverted Cross ✟** | ×69 damage if Corruption is exactly 100% AND no member is Too Stoned. Run score ×1.5. | Beat Lucifer for the first time |
 | **M2** | **Tongue of the Devourer 👅** | Every card you play deals damage equal to your highest member's ATK. Stacks WITH all multipliers. | Beat Devourer (C3) without losing any band members |
-| **M3** | **The Sigil of Set 𓂀** | First Strike of every fight automatically triggers as if all multiplier conditions are met (peak roll). One-shot per fight. | Win a Bronze run using only ONE band member |
+| **M3** | **The Sigil of Set 𓂀** | First Strike of every fight, your card-played and chain mults are auto-peaked (as if you played 6 cards + fired 2 chains, ×4.31 strike mult). Other artifacts/conditions still require their own triggers. One-shot per fight. | Win a Bronze run using only ONE band member |
 
 ## 🎛 Mythic Pedals (3)
 
