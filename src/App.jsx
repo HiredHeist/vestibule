@@ -741,6 +741,31 @@ const IDLE_PORTRAITS={
   tanuki:import.meta.env.BASE_URL+'members/idle/tanuki_stage_idle.gif',
   lucifer_member:import.meta.env.BASE_URL+'members/idle/lucifer_member_stage_idle.gif',
 }
+// STONED_PORTRAITS — per-character "Too Stoned" state animations.
+// JV's plan: each character slumped over with smoke clouds. Drop GIFs at
+// public/members/stoned/{id}_stage_stoned.gif and they auto-load.
+// Currently empty — falls back to CSS smoke-cloud overlay (see StageSlot).
+// As you finish each character's stoned animation, just uncomment the line.
+const STONED_PORTRAITS={
+  // bjorn:import.meta.env.BASE_URL+'members/stoned/bjorn_stage_stoned.gif',
+  // ragnar:import.meta.env.BASE_URL+'members/stoned/ragnar_stage_stoned.gif',
+  // thor:import.meta.env.BASE_URL+'members/stoned/thor_stage_stoned.gif',
+  // rolf:import.meta.env.BASE_URL+'members/stoned/rolf_stage_stoned.gif',
+  // ingrid:import.meta.env.BASE_URL+'members/stoned/ingrid_stage_stoned.gif',
+  // dag:import.meta.env.BASE_URL+'members/stoned/dag_stage_stoned.gif',
+  // ulf:import.meta.env.BASE_URL+'members/stoned/ulf_stage_stoned.gif',
+  // brynja:import.meta.env.BASE_URL+'members/stoned/brynja_stage_stoned.gif',
+  // loki:import.meta.env.BASE_URL+'members/stoned/loki_stage_stoned.gif',
+  // freya:import.meta.env.BASE_URL+'members/stoned/freya_stage_stoned.gif',
+  // astrid:import.meta.env.BASE_URL+'members/stoned/astrid_stage_stoned.gif',
+  // grimnir:import.meta.env.BASE_URL+'members/stoned/grimnir_stage_stoned.gif',
+  // sigrid:import.meta.env.BASE_URL+'members/stoned/sigrid_stage_stoned.gif',
+  // gunnar:import.meta.env.BASE_URL+'members/stoned/gunnar_stage_stoned.gif',
+  // vitalik:import.meta.env.BASE_URL+'members/stoned/vitalik_stage_stoned.gif',
+  // orm:import.meta.env.BASE_URL+'members/stoned/orm_stage_stoned.gif',
+  // tanuki:import.meta.env.BASE_URL+'members/stoned/tanuki_stage_stoned.gif',
+  // lucifer_member:import.meta.env.BASE_URL+'members/stoned/lucifer_member_stage_stoned.gif',
+}
 const BOSS_PORTRAITS={
   wanderer:import.meta.env.BASE_URL+'bosses/wanderer.png',
   lostsoul:import.meta.env.BASE_URL+'bosses/lostsoul.png',
@@ -2846,9 +2871,9 @@ function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,
         border:isDiceTarget?'3px solid #e8a820':isAttacking?'2px solid #ff3300':mentorState==='active'?'3px solid #ffd700':mentorState==='broken'?'2px solid #555':mentorState==='mentor'?'2px solid #ffd700':bondColor?'2px solid '+bondColor:over?'2px solid #e8a820':st?'1px solid #333':member.demonic?'2px solid #ffd700':member.mythic?'2px solid #cc44ff':member.foil?'2px solid #88ccff':'1px solid rgba(190,120,25,0.08)',
         borderRadius:6,
         boxShadow:isDiceTarget?'0 0 30px rgba(232,168,32,0.7)':isAttacking?'0 0 40px rgba(255,50,0,0.8)':mentorState==='active'&&!st?'0 0 40px rgba(255,215,0,0.9),0 6px 24px rgba(0,0,0,0.85)':mentorState==='mentor'&&!st?'0 0 22px rgba(255,215,0,0.5),0 6px 24px rgba(0,0,0,0.85)':bondColor&&!st?'0 0 20px '+bondColor+',0 6px 24px rgba(0,0,0,0.85)':!st&&member.demonic?'0 0 25px rgba(255,200,0,0.5),0 6px 24px rgba(0,0,0,0.85)':!st&&member.mythic?'0 0 25px rgba(200,0,255,0.4),0 6px 24px rgba(0,0,0,0.85)':!st&&member.foil?'0 0 20px rgba(100,180,255,0.35),0 6px 24px rgba(0,0,0,0.85)':'0 4px 20px rgba(0,0,0,0.9),0 0 1px rgba(190,120,25,0.3)',
-        transform:st?'rotate(15deg) scale(0.95)':strikeAnim&&strikeAnim.phase==='dip'?'translateY(20px) scale(0.95) rotate(-3deg)':strikeAnim&&strikeAnim.phase==='wiggle'?'translateY(12px) scale(0.97) rotate(4deg)':strikeAnim&&strikeAnim.phase==='launch'?'translate('+strikeAnim.dx+'px,'+(strikeAnim.dy-80)+'px) scale(0.7) rotate(-5deg)':strikeAnim&&strikeAnim.phase==='impact'?'translate('+strikeAnim.dx+'px,'+strikeAnim.dy+'px) scale(1.15) rotate(0deg)':strikeAnim&&strikeAnim.phase==='return'?'translate(0px,-30px) scale(1.05)':'none',
-        filter:st?'grayscale(0.8) brightness(0.5)':(strikeAnim&&strikeAnim.phase==='launch'?'blur(1.5px) drop-shadow(0 0 18px rgba(255,80,0,0.6))':'none'),
-        opacity:st?0.6:animPhase==='idle'&&!isAttacking&&buffCount===0?0.7:1,
+        transform:st?'rotate(8deg) scale(0.97)':strikeAnim&&strikeAnim.phase==='dip'?'translateY(20px) scale(0.95) rotate(-3deg)':strikeAnim&&strikeAnim.phase==='wiggle'?'translateY(12px) scale(0.97) rotate(4deg)':strikeAnim&&strikeAnim.phase==='launch'?'translate('+strikeAnim.dx+'px,'+(strikeAnim.dy-80)+'px) scale(0.7) rotate(-5deg)':strikeAnim&&strikeAnim.phase==='impact'?'translate('+strikeAnim.dx+'px,'+strikeAnim.dy+'px) scale(1.15) rotate(0deg)':strikeAnim&&strikeAnim.phase==='return'?'translate(0px,-30px) scale(1.05)':'none',
+        filter:st?'grayscale(0.3) brightness(0.7) hue-rotate(-15deg)':(strikeAnim&&strikeAnim.phase==='launch'?'blur(1.5px) drop-shadow(0 0 18px rgba(255,80,0,0.6))':'none'),
+        opacity:st?0.78:animPhase==='idle'&&!isAttacking&&buffCount===0?0.7:1,
         animation:isHit?'memberHitShake 0.4s ease-out':(!st&&!isAttacking&&!isDiceTarget&&!isStriking)?(nearDeath?'nearDeathPulse 0.8s ease-in-out infinite':'throb 3s ease-in-out infinite'):'none',
         transition:strikeAnim?'transform 0.25s cubic-bezier(0.2,0.8,0.3,1.2), border 0.2s, box-shadow 0.2s, opacity 0.3s':'border 0.2s, box-shadow 0.2s, opacity 0.3s, transform 0.3s',
         cursor:'grab',position:'relative'}}>
@@ -2860,8 +2885,30 @@ function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,
       {mentorState==='active'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:18,textShadow:'0 0 12px #ffd700',zIndex:12,animation:'mentorPulse 1.5s ease-in-out infinite'}}>⛓</div>}
       {mentorState==='broken'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:16,opacity:0.45,zIndex:12}}>💔</div>}
       {mentorState==='mentor'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:18,textShadow:'0 0 8px rgba(255,215,0,0.6)',zIndex:12}}>⛓</div>}
-      {st&&<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',zIndex:15,pointerEvents:'none'}}>
-        <div style={{fontSize:64,opacity:0.7,animation:'fadeIn 0.5s ease',textShadow:'0 0 20px rgba(0,0,0,0.9)'}}>💀</div>
+      {st&&<div style={{position:'absolute',inset:0,zIndex:15,pointerEvents:'none',overflow:'hidden'}}>
+        {/* Drifting smoke clouds at varying positions/timings — reads as "passed out" not "dead" */}
+        <div style={{position:'absolute',bottom:'18%',left:'12%',fontSize:42,opacity:0.85,animation:'stonedSmoke 3.2s ease-in-out infinite',filter:'drop-shadow(0 0 8px rgba(180,160,200,0.5))'}}>💨</div>
+        <div style={{position:'absolute',bottom:'42%',left:'58%',fontSize:36,opacity:0.75,animation:'stonedSmoke 3.6s ease-in-out infinite 0.5s',filter:'drop-shadow(0 0 8px rgba(180,160,200,0.5))'}}>💨</div>
+        <div style={{position:'absolute',bottom:'24%',right:'15%',fontSize:46,opacity:0.8,animation:'stonedSmoke 2.9s ease-in-out infinite 1.1s',filter:'drop-shadow(0 0 8px rgba(180,160,200,0.5))'}}>💨</div>
+        <div style={{position:'absolute',top:'22%',left:'30%',fontSize:32,opacity:0.7,animation:'stonedSmoke 3.4s ease-in-out infinite 1.7s',filter:'drop-shadow(0 0 8px rgba(180,160,200,0.5))'}}>💨</div>
+        {/* Status pill — "back next fight" subtitle removes the "run is over" feeling */}
+        <div style={{position:'absolute',bottom:'38%',left:'50%',transform:'translateX(-50%)',
+          fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,
+          background:'linear-gradient(180deg, rgba(80,40,120,0.95), rgba(50,20,80,0.95))',
+          color:'#ddc8f0',padding:'5px 12px',borderRadius:3,
+          border:'1px solid rgba(160,100,220,0.7)',textTransform:'uppercase',
+          textShadow:'0 0 8px rgba(180,100,220,0.8)',
+          boxShadow:'0 0 18px rgba(120,60,180,0.5), 0 4px 12px rgba(0,0,0,0.7)',
+          whiteSpace:'nowrap'}}>
+          😶‍🌫️ Too Stoned
+        </div>
+        <div style={{position:'absolute',bottom:'30%',left:'50%',transform:'translateX(-50%)',
+          fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,letterSpacing:1,
+          color:'rgba(220,200,240,0.85)',padding:'2px 8px',
+          textShadow:'0 0 6px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,0.9)',
+          fontStyle:'italic',whiteSpace:'nowrap'}}>
+          Back next fight
+        </div>
       </div>}
       <div style={{height:5,borderRadius:'6px 6px 0 0',
         background:st?'#333':member.demonic?'linear-gradient(90deg,#e8a820,#ffd700,#e8a820)':member.mythic?'linear-gradient(90deg,#cc44ff,#ff88ff,#cc44ff)':member.foil?'linear-gradient(90deg,#88ccff,#ffffff,#88ccff)':'linear-gradient(90deg,#dd2222,#ff7700)',
@@ -2874,8 +2921,7 @@ function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,
         {member.demonic?'⛧ DEMONIC':member.mythic?'✦ MYTHIC':'✨ FOIL'}
       </div>}
       <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',fontSize:68,background:'linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.45))',position:'relative',minHeight:200,overflow:'hidden'}}>
-        {STAGE_PORTRAITS[member.id]?<img className={animPhase==='idle'?'':'squiggle'} src={animPhase==='idle'&&IDLE_PORTRAITS[member.id]?IDLE_PORTRAITS[member.id]:STAGE_PORTRAITS[member.id]} alt={member.id} style={{width:'95%',height:'95%',objectFit:'contain',objectPosition:'center center',imageRendering:'pixelated'}}/>:member.emoji}
-        {st&&<div style={{position:'absolute',top:4,right:4,fontSize:22}}>💨</div>}
+        {STAGE_PORTRAITS[member.id]?<img className={animPhase==='idle'?'':'squiggle'} src={st&&STONED_PORTRAITS[member.id]?STONED_PORTRAITS[member.id]:animPhase==='idle'&&IDLE_PORTRAITS[member.id]?IDLE_PORTRAITS[member.id]:STAGE_PORTRAITS[member.id]} alt={member.id} style={{width:'95%',height:'95%',objectFit:'contain',objectPosition:'center center',imageRendering:'pixelated'}}/>:member.emoji}
         {isAttacking&&<div style={{position:'absolute',inset:0,background:strikeAnim?'rgba(196,30,58,0.3)':'rgba(196,30,58,0.12)',animation:strikeAnim?'pulse 0.15s ease infinite alternate':'pulse 0.4s ease infinite alternate'}}/>}
         {/* Name overlay on portrait bottom */}
         <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'6px 6px 4px',background:'linear-gradient(180deg, transparent, rgba(10,6,8,0.9))',fontFamily:"'BogartsMetalFont',cursive",fontSize:26,color:st?'var(--rot)':'var(--ink-bone)',textAlign:'center',lineHeight:1,textShadow:'0 2px 6px rgba(0,0,0,0.9)'}}>{member.name}</div>

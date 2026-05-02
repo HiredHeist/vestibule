@@ -715,3 +715,13 @@ body {
 }
 @keyframes coldOpenFadeIn  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes coldOpenFadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+/* Too-Stoned smoke clouds — drift upward and fade, looping forever.
+   Used by StageSlot when member.tooStoned. Replaces the old skull overlay
+   to read as "passed out, recoverable" rather than "dead." */
+@keyframes stonedSmoke {
+  0%   { transform: translate(0, 0) scale(0.95); opacity: 0.4; }
+  35%  { transform: translate(-4px, -8px) scale(1.05); opacity: 0.85; }
+  70%  { transform: translate(3px, -16px) scale(1.0); opacity: 0.65; }
+  100% { transform: translate(-2px, -24px) scale(0.9); opacity: 0.3; }
+}

@@ -263,3 +263,41 @@ If JV has 3 hours to spend on art, here's the order:
 4. **App icon** (30 min) — needed for any build that ships
 
 Everything else is "nice to have" before launch. Steam capsules and cutscenes can wait until pre-launch.
+
+---
+
+## PRIORITY 4.5 — STONED ANIMATIONS (18 members)
+
+**Path:** `public/members/stoned/{id}_stage_stoned.gif`
+**Size:** 128×128px (same as `idle/` GIFs), transparent background
+**Status:** CSS smoke-cloud overlay shipped May 2 as the fallback. As you finish each character's stoned animation, drop the GIF in the path above and uncomment the matching line in `STONED_PORTRAITS` at `src/App.jsx` ~line 749. The fallback CSS smoke + "TOO STONED" pill keeps showing on top of the GIF, which is fine — the GIF is the body language, the pill is the status label.
+
+**Direction:** Each character slumped over with smoke clouds. Same Bjorn-as-color-reference style as the idle GIFs. Personality counts:
+- `bjorn` — passed out hugging his guitar, drool optional
+- `ragnar` — slumped against amp stack, sunglasses askew
+- `thor` — face-down on drum kit, drumstick rolling away
+- `rolf` — sliding off drum throne mid-fall
+- `ingrid` — sprawled on couch (the foundation needs a couch)
+- `dag` — sitting cross-legged staring at the void
+- `ulf` — bass player horizontal, bass still resonating
+- `brynja` — meditation pose that became a nap
+- `loki` — devious grin even unconscious
+- `freya` — flowers in hair, peaceful trance
+- `astrid` — leaned against mic stand snoring
+- `grimnir` — mask slipped, just barely visible
+- `sigrid` — guitar is the pillow now
+- `gunnar` — head-banging in slow motion, frozen
+- `vitalik` — surrounded by floating crypto runes (he's got bigger problems)
+- `orm` — folk magic gone wrong, hovering an inch off the ground
+- `tanuki` — back to tanuki form, belly up
+- `lucifer_member` — even the devil takes a break
+
+**Animation length:** 1.5-3s loop. Subtle: breathing, smoke wisps, occasional twitch. Should NOT scream "dead" — should scream "very high right now."
+
+**Why this matters:** JV reproduced the perception bug live (May 2) — the old skull overlay + heavy grayscale read as "this person is permanently dead, the run is half over." The CSS fix removed the skull and added a "Back next fight" subtitle, but the per-character animations are the real polish. Each stoned moment becomes a tiny character vignette instead of a tombstone.
+
+---
+
+## QUICK WINS BY ROI (continued)
+
+If you want to add stoned animations into your art queue, slot them as **Priority 4.5** — somewhere between artifact arts and Steam capsules. They're not blocking launch, but they're a high-personality polish item that pays off every time corruption stacks up.
