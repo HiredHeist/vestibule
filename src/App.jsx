@@ -208,11 +208,15 @@ function unlockAchievement(id){
 
 const ENEMIES=[
   // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
-  // Wanderer — TUTORIAL FIGHT. Tuned to feel winnable for sub-optimal picks
-  // so players reach shop 1 (where the modifier system actually unfolds).
-  // Was 90 HP / 4 dmg; lowered to ease onboarding without affecting curve.
-  // Lost Soul and Drifter unchanged — they preserve the difficulty ramp.
-  {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:65,baseDmg:3,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
+  // Wanderer — TRAINING WHEELS FIGHT. Per JV's design vision: r1 should be a
+  // tutorial fight EVERY player wins, then shop 1 delivers a free 3rd member
+  // (Welcome Pack at line 1484) so the band "starts popping off" in fight 2+.
+  // Live playtest with 9-ATK team (Ulf 4 + Bjorn 5) STILL LOST at the previous
+  // 65 HP / 2 dmg tuning — corruption-stoning + ember scarcity killed Bjorn.
+  // Hard nerf: 45 HP base × 1.85 deck = 83 displayed; 2 dmg/strike means
+  // members at 6 HP survive 4 hits comfortably. Goal: ~95% win rate.
+  // Lost Soul (278) and Drifter (629) UNCHANGED — real game starts fight 2.
+  {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:45,baseDmg:2,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
   {id:'lostsoul',tagline:'You were lost before you started.',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:150,baseDmg:5,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
   {id:'drifter',tagline:'110 HP and pure aggression.',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:340,baseDmg:7,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
   // ── CIRCLE II: LUST — Enemy buffs itself each strike ─────────
@@ -1477,6 +1481,10 @@ function genRecruitPack(fightIndex=0){
     {name:'Touring Pack',emoji:'🎤',cost:22,desc:'Pick 1 of 3. 25% Foil, 5% Mythic chance.',members:3,foilChance:0.25,mythicChance:0.05,demonicChance:0},
     {name:'Demonic Pack',emoji:'⛧',cost:40,desc:'Pick 1 of 4. 25% Foil, 15% Mythic, 5% DEMONIC.',members:4,foilChance:0.25,mythicChance:0.15,demonicChance:0.05},
   ]
+  // SHOP 1 (after fight 1) — FREE Garage Band Pack. Per JV: "r1 = training wheels,
+  // then in shop you get a 3rd member and start to pop off." Players need a
+  // guaranteed 3rd member to crack open the build crafting before fight 2.
+  if(fightIndex===0) return {...packs[0],cost:0,name:'🎸 Welcome Pack',desc:'FREE — Pick 1 of 2 musicians. Welcome to your band!'}
   // Circle 1: only Garage Band
   // Circle 2-3: Garage Band or Touring (Foil/Mythic available early for Mentor Link)
   // Circle 4+: all packs (Demonic available before Hoarder wall)
