@@ -133,6 +133,34 @@ JV decided to make each deck feel mechanically distinct. Goal: 5 unique identiti
 
 **Result:** All 5 decks cluster 13-15% Bronze Lucifer win rate. Score multipliers correctly track risk: Ritualist hardest+highest reward, Engineer easiest+lowest reward.
 
+### 2.05 Big Numbers / Cascade Feel-Pass (May 2 — IN PROGRESS)
+
+JV asked for "Balatro meets Vampire Survivors" feel — nonstop dopamine, slamming numbers, climbing multipliers into the thousands. Diagnosed root cause: visible mult tracker only showed `strikeMult` (cards + chains), all artifact/corruption/loot multipliers fired silently in handleStrike and were baked into final damage without ever appearing on screen. Plus the 6.66 chain cap suppressed the high end.
+
+**Done (this commit):**
+- [x] **Chain cap lifted** 6.66 → 10000 (line 6346) so chains stack like everything else
+- [x] **Strike damage refactored** to emit `_cascadeMults` array — discrete events for Strike, Trip, Corruption tier, every artifact, Goat of Mendes, every boss loot. Final damage math identical (multiplication is commutative) but every multiplier now visible in cascade
+- [x] **Climbing total multiplier** added as cascade centerpiece — grows from ×1 through every event into the thousands. Color/size/glow escalate at ×2/3/5/10/20/50/100/666 thresholds. Up to 180px font at ×666+
+- [x] **Floating slamming numbers** — each mult event spawns a `🐐 ×1.50` number that flies in from off-side, slams to a pile next to centerpiece, then fades. Vampire Survivors-style accumulation
+- [x] **Per-event flash + tiny shake** — color-tinted screen flash (gold for artifact, purple for corruption, etc.) + 3-5px shake on every mult landing. Adrenaline stays elevated through whole cascade
+- [x] **Drum kit audio layering** — kick on every mult (140Hz→50Hz exponential drop), snare crack on ≥2x, full drum fill (kick-snare-kick-snare-crash) on final SLAM. Replaces the flat ascending-tone of before
+- [x] **Particle bursts** — 6-24 sparks per mult event, count scales with magnitude, gravity-affected, fade out. 60-particle pentagram burst on 666 DEAL WITH THE DEVIL slam
+- [x] **Persistent source emoji stack** — small row below climbing mult shows what stacked (`🎸 ⛧ 🐐 🕯 🌑`). Visual record of "I did this"
+- [x] **666 DEAL WITH THE DEVIL tier** for total damage in 600-699 range — red 108px font, demonic three-tone descending chant (A2→F2→E2 sawtooth), 60-particle red burst, custom devilPulse animation
+- [x] **HP drop deferred to slam** (Option B / Balatro-style) — boss HP stays full during cascade, slams down WITH the final number. Lethal strikes still apply HP immediately to keep Lucifer phase 2 / victory triggers clean
+
+**Not done yet (follow-ups):**
+- [ ] **Boss HP "preview damage" indicator** during cascade — faint red ghost overlay on HP bar showing where it's about to land. Would build anticipation. Skipped this commit because it requires adding state pass-through across BossSection. Not a blocker for the dopamine feel.
+- [ ] **New "synergy" artifacts to enable 666 organically** — current ceiling depends on existing artifact stacks. Tier 3 of original plan: design 6 new artifacts with strong inter-stack synergy (e.g., Hellmouth Amplifier × Void Engine × Black Candle = exponential per-stoned-member). Defer until JV plays current state and decides if numbers are big enough.
+- [ ] **Settings: Cascade speed Slow/Normal/Fast/Instant.** Currently controlled by existing `vst_speed` setting (Space-hold for fast). May want a 4-way dial later if veterans want even faster.
+- [ ] **Card-by-card cascade during play** (not just at Strike). Bigger refactor — defer until current state is felt.
+
+**File locations:**
+- `src/App.jsx` line ~3055 — DamageBreakdown component (massive rewrite, +437 lines)
+- `src/App.jsx` line ~6346 — chain cap lifted to 10000
+- `src/App.jsx` line ~7185-7245 — strike damage calc refactored to emit cascadeMults
+- `src/App.jsx` line ~7270 — setDmgBreakdown passes cascadeMults + totalMult
+
 ### 2.1 Card-level outliers (from sim)
 - [ ] **Herb Money** — 0.4% pick rate. Worst card in the pool. Either drop cost (1🔥→0🔥) or add synergy hook (e.g., +1 ATK per 50 stash). Currently dead weight.
 - [ ] **Acid items** — 25:1 shroom-to-acid usage gap. Acid is too expensive and the bad-trip risk discourages purchase. Try cheaper (12→8) or remove bad-trip on Bronze stake only.

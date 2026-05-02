@@ -3052,33 +3052,252 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
 // ═══════════════════════════════════════════════════════════
 // DAMAGE BREAKDOWN — Balatro-style number-go-up animation
 // ═══════════════════════════════════════════════════════════
-function DamageBreakdown({data,onDone}){
+function DamageBreakdown({data,onDone,onSlam}){
   const [visibleCount,setVisibleCount]=useState(0)
   const [slamming,setSlamming]=useState(false)
+  const [tickerMult,setTickerMult]=useState(1.0)  // climbing TOTAL multiplier (the star)
+  // FEEL-PASS STATE:
+  // floatingNums: array of {id, text, color, x, y, age, life} — slamming numbers that pile up
+  // particles:    array of {id, x, y, vx, vy, color, age, life} — sparks/debris bursts
+  // sourceEmojis: array of {id, emoji, color} — persistent row of mult sources below ticker
+  const [floatingNums,setFloatingNums]=useState([])
+  const [particles,setParticles]=useState([])
+  const [sourceEmojis,setSourceEmojis]=useState([])
+  // Ref tracks current floating num count so stack positioning works in closure
+  const floatingCountRef=useRef(0)
   const lines=data.lines||[]
   const total=data.total||0
+  const totalMult=data.totalMult||1.0
+  const cascadeMults=data.cascadeMults||[]
   const isFast=localStorage.getItem('vst_speed')==='fast'
-  const LINE_DELAY=isFast?100:200
-  const SLAM_DELAY=lines.length*LINE_DELAY+400
-  const hasMults=lines.filter(l=>l.type==='multiply').length
+
+  // Magnitude-scaled delay — bigger multipliers pause longer.
+  function lineDelay(line){
+    if(isFast)return 90
+    const base=180
+    if(line.type==='multiply'&&line.mult){
+      if(line.mult>=5)return 700
+      if(line.mult>=3)return 500
+      if(line.mult>=2)return 380
+      if(line.mult>=1.5)return 280
+      return base
+    }
+    return base
+  }
+
+  // 666 special tier (600-699 range)
+  const isDevilDeal=total>=600&&total<700
+
+  // Drum audio helpers — share one AudioContext per call, layer drums for nonstop reward feel
+  function playKick(velocity){
+    try{
+      const ctx=new(window.AudioContext||window.webkitAudioContext)()
+      const o=ctx.createOscillator(),g=ctx.createGain()
+      o.type='sine';o.frequency.setValueAtTime(140,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(50,ctx.currentTime+0.1)
+      g.gain.setValueAtTime(velocity*0.4,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.18)
+      o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+0.18)
+    }catch(e){}
+  }
+  function playSnare(velocity){
+    try{
+      const ctx=new(window.AudioContext||window.webkitAudioContext)()
+      // White noise burst for the crack
+      const buf=ctx.createBuffer(1,2048,ctx.sampleRate)
+      const data=buf.getChannelData(0)
+      for(let i=0;i<2048;i++)data[i]=(Math.random()*2-1)*0.7
+      const src=ctx.createBufferSource();src.buffer=buf
+      const f=ctx.createBiquadFilter();f.type='highpass';f.frequency.value=1200
+      const g=ctx.createGain();g.gain.setValueAtTime(velocity*0.25,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.12)
+      src.connect(f);f.connect(g);g.connect(ctx.destination);src.start();src.stop(ctx.currentTime+0.12)
+    }catch(e){}
+  }
+  function playDrumFill(){
+    // Kick + snare hits in quick succession, ending with crash
+    try{
+      playKick(1.0)
+      setTimeout(()=>playSnare(0.9),60)
+      setTimeout(()=>playKick(0.9),120)
+      setTimeout(()=>playSnare(1.0),180)
+      // Crash cymbal — high-pass noise
+      setTimeout(()=>{
+        const ctx=new(window.AudioContext||window.webkitAudioContext)()
+        const buf=ctx.createBuffer(1,8192,ctx.sampleRate)
+        const data=buf.getChannelData(0)
+        for(let i=0;i<8192;i++)data[i]=(Math.random()*2-1)*0.6
+        const src=ctx.createBufferSource();src.buffer=buf
+        const f=ctx.createBiquadFilter();f.type='highpass';f.frequency.value=4000
+        const g=ctx.createGain();g.gain.setValueAtTime(0.35,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.6)
+        src.connect(f);f.connect(g);g.connect(ctx.destination);src.start();src.stop(ctx.currentTime+0.6)
+      },240)
+    }catch(e){}
+  }
+
+  // Trigger per-event feel: flash, mini-shake, particles, floating number, source emoji
+  function fireEventFeel(line,multSoFar){
+    const multVal=line.mult||1.0
+    // 1. SCREEN FLASH — color tinted to mult source. Quick body-bg pulse.
+    const flashColor=line.color||'#e8a820'
+    try{
+      // Tiny screen shake — magnitude scales with mult
+      const shakeMag=multVal>=3?5:multVal>=2?4:3
+      const _root=document.getElementById('root')
+      if(_root){
+        // Only override if not already in big slam shake
+        _root.style.transition='transform 60ms ease-out'
+        _root.style.transform='translate('+((Math.random()-0.5)*shakeMag*2)+'px,'+((Math.random()-0.5)*shakeMag*2)+'px)'
+        setTimeout(()=>{if(_root)_root.style.transform='translate(0,0)'},80)
+      }
+      // Color-tinted flash overlay — fade quickly
+      const flash=document.createElement('div')
+      flash.style.cssText='position:fixed;inset:0;background:'+flashColor+';opacity:'+(multVal>=3?0.18:multVal>=2?0.12:0.08)+';z-index:99996;pointer-events:none;mix-blend-mode:screen'
+      document.body.appendChild(flash)
+      setTimeout(()=>{flash.style.transition='opacity 200ms ease-out';flash.style.opacity='0';setTimeout(()=>{try{flash.remove()}catch(e){}},220)},20)
+    }catch(e){}
+
+    // 2. PARTICLE BURST — radial sparks, count scales with mult
+    const partCount=Math.min(24,Math.round(6+multVal*4))
+    const newParts=[]
+    const cx=window.innerWidth/2,cy=window.innerHeight/2-50
+    const burstId=Date.now()+Math.random()
+    for(let i=0;i<partCount;i++){
+      const angle=(Math.PI*2*i)/partCount+Math.random()*0.4
+      const speed=2+Math.random()*4+(multVal>=2?2:0)
+      newParts.push({
+        id:burstId+'-'+i,
+        x:cx,y:cy,
+        vx:Math.cos(angle)*speed,
+        vy:Math.sin(angle)*speed-1, // slight upward bias
+        color:flashColor,
+        age:0,
+        life:isFast?20:35
+      })
+    }
+    setParticles(p=>[...p,...newParts])
+
+    // 3. FLOATING SLAMMING NUMBER — flies in from random off-side, settles in pile
+    // Pile is a column to the RIGHT of the climbing mult. Each new number stacks below the last.
+    const floatId=Date.now()+'-'+Math.random()
+    const sideOffset=(Math.random()<0.5?-1:1)*(180+Math.random()*80)
+    const targetX=170 + (Math.random()*40-20) // pile is to the right of center
+    const stackIdx=floatingCountRef.current
+    floatingCountRef.current++
+    const targetY=-30+stackIdx*38 // each number stacks 38px below the previous
+    setFloatingNums(p=>[...p,{
+      id:floatId,
+      text:'×'+multVal.toFixed(2),
+      color:flashColor,
+      label:line.emoji||'',
+      startX:sideOffset,
+      startY:-100, // above
+      x:targetX,
+      y:targetY,
+      age:0,
+      life:isFast?60:120,
+      mult:multVal
+    }])
+
+    // 4. SOURCE EMOJI STACK — append the source emoji to the persistent row
+    if(line.emoji){
+      const emId=Date.now()+'-em-'+Math.random()
+      setSourceEmojis(p=>[...p,{id:emId,emoji:line.emoji,color:flashColor}])
+    }
+
+    // 5. AUDIO: kick on every mult, snare on ≥2x, sub-bass rumble on ≥2.5x
+    const velocity=Math.min(1.0,0.5+multVal*0.15)
+    playKick(velocity)
+    if(multVal>=2)setTimeout(()=>playSnare(Math.min(1.0,velocity)),40)
+    // Existing ascending pitch tone — KEEP, layer on top
+    try{
+      const ctx=new(window.AudioContext||window.webkitAudioContext)()
+      const o=ctx.createOscillator(),g=ctx.createGain()
+      o.type='sine';o.frequency.value=400+visibleCount*80
+      g.gain.value=0.15;o.connect(g);g.connect(ctx.destination)
+      o.start();o.stop(ctx.currentTime+0.08)
+      if(multVal>=2.5){
+        const o2=ctx.createOscillator(),g2=ctx.createGain()
+        o2.type='triangle';o2.frequency.value=80+multVal*15
+        g2.gain.value=0.18;o2.connect(g2);g2.connect(ctx.destination)
+        o2.start();o2.stop(ctx.currentTime+0.18)
+      }
+    }catch(e){}
+  }
+
+  // Particle physics tick — runs while particles exist
+  useEffect(()=>{
+    if(particles.length===0)return
+    const tick=setInterval(()=>{
+      setParticles(prev=>prev
+        .map(p=>({...p,x:p.x+p.vx,y:p.y+p.vy,vy:p.vy+0.35,age:p.age+1}))
+        .filter(p=>p.age<p.life)
+      )
+    },isFast?20:30)
+    return()=>clearInterval(tick)
+  },[particles.length>0])
+
+  // Floating numbers physics tick — slam in, settle, then fade up
+  useEffect(()=>{
+    if(floatingNums.length===0)return
+    const tick=setInterval(()=>{
+      setFloatingNums(prev=>prev
+        .map(f=>({...f,age:f.age+1}))
+        .filter(f=>f.age<f.life)
+      )
+    },isFast?20:30)
+    return()=>clearInterval(tick)
+  },[floatingNums.length>0])
 
   useEffect(()=>{
-    let i=0
-    const timer=setInterval(()=>{
-      i++
-      setVisibleCount(i)
-      // Play a tick sound for each multiplier line
-      if(lines[i-1]&&lines[i-1].type==='multiply'){
-        try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator();const g=ctx.createGain();o.type='sine';o.frequency.value=400+i*80;g.gain.value=0.15;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+0.08)}catch(e){}
-      }
-      if(i>=lines.length){clearInterval(timer)}
-    },LINE_DELAY)
-    const slamTimer=setTimeout(()=>{setSlamming(true)
+    let cumDelay=0
+    const timers=[]
+    let multSoFar=1.0
+    lines.forEach((line,i)=>{
+      const t=setTimeout(()=>{
+        setVisibleCount(i+1)
+        // For multiply lines, climb the visible mult counter + fire all the feel-pass effects
+        if(line.type==='multiply'&&line.mult){
+          multSoFar=Math.round(multSoFar*line.mult*100)/100
+          setTickerMult(multSoFar)
+          fireEventFeel(line,multSoFar)
+        }
+      },cumDelay)
+      timers.push(t)
+      cumDelay+=lineDelay(line)
+    })
+    const slamAt=cumDelay+(isFast?200:400)
+    const slamTimer=setTimeout(()=>{
+      setSlamming(true)
+      // Full drum kit fill on slam
+      playDrumFill()
+      if(onSlam)onSlam()
       try{
         const _root=document.getElementById('root')
         _root.style.animation='none';_root.offsetHeight
-        // DAMAGE TIER SCREEN EFFECTS
-        if(total>=10000){
+        if(isDevilDeal){
+          _root.style.animation='screenShake 0.7s ease,acidTrip 1.5s ease-out'
+          document.body.style.background='#660000';setTimeout(()=>{document.body.style.background='#000'},120)
+          // Demonic chant — three-tone descending
+          try{
+            const ctx=new(window.AudioContext||window.webkitAudioContext)()
+            const tones=[110,87.31,82.41]
+            tones.forEach((freq,i)=>{
+              setTimeout(()=>{
+                const o=ctx.createOscillator(),g=ctx.createGain()
+                o.type='sawtooth';o.frequency.value=freq
+                g.gain.value=0.22;o.connect(g);g.connect(ctx.destination)
+                o.start();o.stop(ctx.currentTime+0.4)
+              },i*80)
+            })
+          }catch(e){}
+          // Massive particle burst at slam for 666
+          const newParts=[]
+          const cx=window.innerWidth/2,cy=window.innerHeight/2
+          for(let i=0;i<60;i++){
+            const angle=(Math.PI*2*i)/60+Math.random()*0.3
+            const speed=4+Math.random()*8
+            newParts.push({id:'devil-'+i,x:cx,y:cy,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,color:'#ff2200',age:0,life:60})
+          }
+          setParticles(p=>[...p,...newParts])
+        } else if(total>=10000){
           _root.style.animation='screenShake 0.6s ease,acidTrip 1.5s ease-out'
           document.body.style.background='#fff';setTimeout(()=>{document.body.style.background='#000'},80)
         }else if(total>=5000){
@@ -3096,11 +3315,10 @@ function DamageBreakdown({data,onDone}){
         }else if(total>=50){
           _root.style.animation='screenPulse 0.15s ease'
         }
-        // CUSTOM SPLASH ANIMATION — load from /vestibule/fx/[tier].webm if exists
-        const _tier=total>=10000?'godlike':total>=5000?'ultra':total>=2500?'devastating':total>=1000?'massive':total>=500?'critical':total>=200?'heavy':total>=50?'solid':null
-        if(_tier){
+        const _splashTier=isDevilDeal?'devil':total>=10000?'godlike':total>=5000?'ultra':total>=2500?'devastating':total>=1000?'massive':total>=500?'critical':total>=200?'heavy':total>=50?'solid':null
+        if(_splashTier){
           const _fx=document.createElement('video')
-          _fx.src=import.meta.env.BASE_URL+'vestibule/fx/'+_tier+'.webm'
+          _fx.src=import.meta.env.BASE_URL+'vestibule/fx/'+_splashTier+'.webm'
           _fx.autoplay=true;_fx.muted=true;_fx.playsInline=true
           _fx.style.cssText='position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:99997;pointer-events:none;mix-blend-mode:screen'
           _fx.onended=()=>_fx.remove()
@@ -3109,9 +3327,11 @@ function DamageBreakdown({data,onDone}){
           setTimeout(()=>{try{_fx.remove()}catch(e){}},3000)
         }
       }catch(e){}
-    },SLAM_DELAY)
-    const doneTimer=setTimeout(()=>{if(onDone)onDone()},SLAM_DELAY+1200)
-    return()=>{clearInterval(timer);clearTimeout(slamTimer);clearTimeout(doneTimer)}
+    },slamAt)
+    timers.push(slamTimer)
+    const doneTimer=setTimeout(()=>{if(onDone)onDone()},slamAt+(isDevilDeal?2000:1200))
+    timers.push(doneTimer)
+    return()=>{timers.forEach(clearTimeout)}
   },[lines.length])
 
   const slamAnim=`@keyframes screenShake{0%,100%{transform:translate(0,0)}10%{transform:translate(-6px,4px)}20%{transform:translate(8px,-3px)}30%{transform:translate(-4px,6px)}40%{transform:translate(6px,-2px)}50%{transform:translate(-3px,3px)}60%{transform:translate(4px,-4px)}70%{transform:translate(-2px,2px)}80%{transform:translate(3px,-1px)}90%{transform:translate(-1px,1px)}}
@@ -3127,39 +3347,152 @@ function DamageBreakdown({data,onDone}){
       @keyframes chainSlam{0%{opacity:0;transform:translate(-50%,-50%) scale(2.5)}15%{opacity:1;transform:translate(-50%,-50%) scale(0.9)}25%{transform:translate(-50%,-50%) scale(1.05)}35%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(0.8) translateY(-40px)}}
       @keyframes artifactTrigger{0%{box-shadow:0 0 0 rgba(232,168,32,0)}50%{box-shadow:0 0 20px rgba(232,168,32,0.8)}100%{box-shadow:0 0 0 rgba(232,168,32,0)}}
       @keyframes memberDistress{0%{transform:translateX(0)}100%{transform:translateX(2px)}}
-      @keyframes newBadgePulse{0%,100%{opacity:0.7}50%{opacity:1}} @keyframes dmgSlam{0%{transform:scale(2.5);opacity:0}30%{transform:scale(0.9);opacity:1}50%{transform:scale(1.15)}70%{transform:scale(0.95)}100%{transform:scale(1);opacity:1}}`
-  const lineAnim=`@keyframes dmgLineIn{0%{transform:translateX(30px);opacity:0}100%{transform:translateX(0);opacity:1}}`
-  const pulseAnim=`@keyframes dmgPulse{0%,100%{text-shadow:0 0 20px rgba(255,34,0,0.6)}50%{text-shadow:0 0 40px rgba(255,100,0,0.9)}}`
-  const countAnim=`@keyframes dmgCount{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}`
+      @keyframes newBadgePulse{0%,100%{opacity:0.7}50%{opacity:1}} @keyframes dmgSlam{0%{transform:scale(2.5);opacity:0}30%{transform:scale(0.9);opacity:1}50%{transform:scale(1.15)}70%{transform:scale(0.95)}100%{transform:scale(1);opacity:1}}
+      @keyframes lineSlamSmall{0%{transform:translateX(30px) scale(1.0);opacity:0}50%{transform:translateX(0) scale(1.08);opacity:1}100%{transform:translateX(0) scale(1);opacity:1}}
+      @keyframes lineSlamMed{0%{transform:translateX(40px) scale(1.3);opacity:0}40%{transform:translateX(-4px) scale(1.18);opacity:1}70%{transform:translateX(2px) scale(1.04)}100%{transform:translateX(0) scale(1);opacity:1}}
+      @keyframes lineSlamBig{0%{transform:translateX(60px) scale(1.6);opacity:0;text-shadow:0 0 0 rgba(255,150,0,0)}30%{transform:translateX(-8px) scale(1.35);opacity:1;text-shadow:0 0 28px rgba(255,150,0,0.95)}60%{transform:translateX(4px) scale(1.1);text-shadow:0 0 18px rgba(255,150,0,0.6)}100%{transform:translateX(0) scale(1);opacity:1;text-shadow:0 0 8px rgba(255,150,0,0.4)}}
+      @keyframes multClimb{0%{transform:scale(1.5);color:#ffdd44}50%{transform:scale(1.15)}100%{transform:scale(1);color:#ff8800}}
+      @keyframes multClimbBig{0%{transform:scale(2);color:#ff2200;text-shadow:0 0 50px rgba(255,50,0,1),0 0 100px rgba(255,100,0,0.6)}40%{transform:scale(1.3);color:#ff6600}100%{transform:scale(1);color:#ff8800;text-shadow:0 0 20px rgba(255,100,0,0.6)}}
+      @keyframes devilPulse{0%,100%{text-shadow:0 0 25px rgba(255,0,0,0.95),0 0 60px rgba(180,0,0,0.7),0 4px 0 #220000}50%{text-shadow:0 0 50px rgba(255,40,0,1),0 0 100px rgba(255,0,0,0.6),0 4px 0 #440000}}
+      @keyframes emojiPopIn{0%{transform:scale(2.5) rotate(-15deg);opacity:0}50%{transform:scale(1.2) rotate(5deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}`
 
-  let runningTotal=0
-  return(<div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9500,pointerEvents:'none',display:'flex',flexDirection:'column',alignItems:'center',gap:0,minWidth:380}}>
-    <style>{slamAnim+lineAnim+pulseAnim+countAnim}</style>
-    <div style={{background:'linear-gradient(180deg,rgba(15,8,2,0.95),rgba(10,5,0,0.98))',border:'2px solid rgba(200,160,40,0.5)',borderRadius:12,padding:'16px 28px 20px',boxShadow:'0 0 60px rgba(0,0,0,0.9),0 0 30px rgba(200,100,0,0.15),inset 0 1px 0 rgba(200,160,40,0.15)',minWidth:340,maxWidth:440}}>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:16,color:'var(--text-secondary)',textAlign:'center',letterSpacing:4,textTransform:'uppercase',marginBottom:10,opacity:0.7}}>STRIKE BREAKDOWN</div>
-      {lines.map((line,i)=>{
-        if(i>=visibleCount)return null
-        if(line.type==='member'){runningTotal+=line.value}
-        else if(line.type==='multiply'){runningTotal=line.runningAfter}
-        else if(line.type==='add'){runningTotal=line.runningAfter}
-        const isLast=i===visibleCount-1
-        return(<div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'3px 0',borderBottom:'1px solid rgba(80,50,10,0.15)',animation:'dmgLineIn 0.25s ease-out',opacity:1}}>
-          <div style={{display:'flex',alignItems:'center',gap:8}}>
-            {line.emoji&&<span style={{fontSize:18}}>{line.emoji}</span>}
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:line.type==='subtotal'?15:14,color:line.color||'#c8a060',fontWeight:line.type==='subtotal'?900:400,letterSpacing:line.type==='subtotal'?2:0,textTransform:line.type==='subtotal'?'uppercase':'none'}}>{line.label}</span>
-          </div>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:line.type==='subtotal'?20:line.type==='multiply'||line.type==='add'?17:16,fontWeight:900,color:line.type==='multiply'?'#ff8800':line.type==='add'?'#44cc44':line.type==='subtotal'?'#e8a820':line.color||'#c8a060',animation:isLast?'dmgCount 0.3s ease':'none',textShadow:line.type==='multiply'?'0 0 10px rgba(255,136,0,0.5)':line.type==='subtotal'?'0 0 8px rgba(200,160,40,0.3)':'none'}}>{line.type==='multiply'?line.label2:line.type==='add'?'+'+line.value:line.value}</span>
-        </div>)
+  // Pick mult ticker color/size based on its size
+  const multSize=tickerMult>=666?180:tickerMult>=100?140:tickerMult>=50?120:tickerMult>=20?100:tickerMult>=10?86:tickerMult>=5?72:tickerMult>=3?60:tickerMult>=2?52:44
+  const multColor=tickerMult>=666?'#ff0000':tickerMult>=100?'#ff2200':tickerMult>=50?'#ff4400':tickerMult>=20?'#ff6600':tickerMult>=10?'#ff8800':tickerMult>=5?'#ffaa00':tickerMult>=3?'#ffcc00':tickerMult>=2?'#e8a820':'#c8a060'
+  const multGlow=tickerMult>=100?'0 0 50px rgba(255,50,0,1),0 0 100px rgba(255,100,0,0.6)':tickerMult>=20?'0 0 35px rgba(255,100,0,0.9),0 0 70px rgba(255,150,0,0.4)':tickerMult>=5?'0 0 22px rgba(255,150,0,0.7)':'0 0 14px rgba(232,168,32,0.5)'
+  const multAnim=tickerMult>=10?'multClimbBig 0.5s ease-out':'multClimb 0.4s ease-out'
+
+  return(<>
+    <style>{slamAnim}</style>
+
+    {/* PARTICLE LAYER — full-viewport overlay, behind everything else */}
+    <div style={{position:'fixed',inset:0,zIndex:9498,pointerEvents:'none',overflow:'hidden'}}>
+      {particles.map(p=>{
+        const fade=Math.max(0,1-(p.age/p.life))
+        return(<div key={p.id} style={{
+          position:'absolute',
+          left:p.x,top:p.y,
+          width:6,height:6,
+          background:p.color,
+          borderRadius:'50%',
+          boxShadow:'0 0 10px '+p.color+', 0 0 20px '+p.color,
+          opacity:fade,
+          transform:'translate(-50%,-50%)'
+        }}/>)
       })}
-      {visibleCount>=lines.length&&!slamming&&<div style={{textAlign:'center',marginTop:8}}>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-muted)',letterSpacing:2}}>RUNNING: {runningTotal.toLocaleString()}</div>
+    </div>
+
+    {/* FLOATING SLAM NUMBERS — pile to the right of the centerpiece, fly in from off-side */}
+    <div style={{position:'absolute',top:'50%',left:'50%',zIndex:9501,pointerEvents:'none',transform:'translate(-50%,-50%)'}}>
+      {floatingNums.map(f=>{
+        // Phase 1 (age 0-12): slam in from sideOffset to target position
+        // Phase 2 (12-life-30): hold in pile
+        // Phase 3 (life-30 to life): float up + fade
+        const phase1=Math.min(1,f.age/12)
+        const inX=f.startX+(f.x-f.startX)*phase1
+        const inY=f.startY+(f.y-f.startY)*phase1
+        const fadePhase=f.age>(f.life-30)?(f.age-(f.life-30))/30:0
+        const finalX=inX
+        const finalY=inY-(fadePhase*40)
+        const opacity=1-fadePhase
+        const scale=phase1<1?(2-phase1):(1-fadePhase*0.2)
+        const fontSize=f.mult>=3?44:f.mult>=2?38:32
+        return(<div key={f.id} style={{
+          position:'absolute',
+          left:finalX,top:finalY,
+          fontFamily:"'BogartsMetalFont',cursive",
+          fontSize:fontSize,
+          fontWeight:900,
+          color:f.color,
+          textShadow:'0 0 20px '+f.color+', 0 0 40px '+f.color+', 0 3px 0 #220000',
+          letterSpacing:2,
+          transform:'translate(-50%,-50%) scale('+scale+')',
+          opacity:opacity,
+          whiteSpace:'nowrap',
+          willChange:'transform,opacity',
+          textTransform:'uppercase'
+        }}>{f.label} {f.text}</div>)
+      })}
+    </div>
+
+    {/* MAIN CASCADE PANEL — climbing mult + breakdown */}
+    <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9500,pointerEvents:'none',display:'flex',flexDirection:'column',alignItems:'center',gap:0,minWidth:380}}>
+
+      {/* CLIMBING MULTIPLIER — the centerpiece. Grows from ×1 into the thousands. */}
+      {!slamming&&visibleCount>0&&<div key={tickerMult} style={{
+        fontFamily:"'BogartsMetalFont',cursive",
+        fontSize:multSize,
+        fontWeight:900,
+        color:multColor,
+        textShadow:multGlow+',0 4px 0 #220000',
+        letterSpacing:3,
+        marginBottom:8,
+        animation:multAnim,
+        lineHeight:1
+      }}>×{tickerMult.toFixed(2)}</div>}
+
+      {/* SOURCE EMOJI STACK — persistent row showing what stacked */}
+      {!slamming&&sourceEmojis.length>0&&<div style={{
+        display:'flex',
+        gap:6,
+        marginBottom:8,
+        padding:'6px 14px',
+        background:'rgba(0,0,0,0.45)',
+        border:'1px solid rgba(232,168,32,0.4)',
+        borderRadius:24,
+        backdropFilter:'blur(4px)'
+      }}>
+        {sourceEmojis.map((em,i)=>(
+          <div key={em.id} style={{
+            fontSize:24,
+            animation:i===sourceEmojis.length-1?'emojiPopIn 0.4s ease-out':'none',
+            filter:'drop-shadow(0 0 6px '+em.color+')'
+          }}>{em.emoji}</div>
+        ))}
+      </div>}
+
+      <div style={{background:'linear-gradient(180deg,rgba(15,8,2,0.95),rgba(10,5,0,0.98))',border:'2px solid rgba(200,160,40,0.5)',borderRadius:12,padding:'16px 28px 20px',boxShadow:'0 0 60px rgba(0,0,0,0.9),0 0 30px rgba(200,100,0,0.15),inset 0 1px 0 rgba(200,160,40,0.15)',minWidth:340,maxWidth:440}}>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:16,color:'var(--text-secondary)',textAlign:'center',letterSpacing:4,textTransform:'uppercase',marginBottom:10,opacity:0.7}}>STRIKE BREAKDOWN</div>
+        {lines.map((line,i)=>{
+          if(i>=visibleCount)return null
+          const isLast=i===visibleCount-1
+          let popAnim='lineSlamSmall'
+          if(line.type==='multiply'&&line.mult){
+            if(line.mult>=2.5)popAnim='lineSlamBig'
+            else if(line.mult>=1.5)popAnim='lineSlamMed'
+          }
+          return(<div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'3px 0',borderBottom:'1px solid rgba(80,50,10,0.15)',animation:isLast?popAnim+' 0.32s ease-out':'none',opacity:1}}>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              {line.emoji&&<span style={{fontSize:18}}>{line.emoji}</span>}
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:line.type==='subtotal'?15:14,color:line.color||'#c8a060',fontWeight:line.type==='subtotal'?900:400,letterSpacing:line.type==='subtotal'?2:0,textTransform:line.type==='subtotal'?'uppercase':'none'}}>{line.label}</span>
+            </div>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:line.type==='subtotal'?20:line.type==='multiply'||line.type==='add'?17:16,fontWeight:900,color:line.type==='multiply'?'#ff8800':line.type==='add'?'#44cc44':line.type==='subtotal'?'#e8a820':line.color||'#c8a060',textShadow:line.type==='multiply'?'0 0 10px rgba(255,136,0,0.5)':line.type==='subtotal'?'0 0 8px rgba(200,160,40,0.3)':'none'}}>{line.type==='multiply'?line.label2:line.type==='add'?'+'+line.value:line.value}</span>
+          </div>)
+        })}
+      </div>
+
+      {slamming&&<div style={{marginTop:8,textAlign:'center',animation:'dmgSlam 0.5s ease-out forwards'}}>
+        <div style={{
+          fontFamily:"'MBScribblesFont',serif",
+          fontSize:isDevilDeal?108:total>=10000?96:total>=5000?84:total>=2500?72:total>=1000?64:total>=500?56:total>=200?48:total>=50?42:36,
+          fontWeight:900,
+          color:isDevilDeal?'#ff0000':total>=10000?'#ffffff':total>=5000?'#ffdd00':total>=2500?'#ff8800':total>=1000?'#ff6600':total>=500?'#ff4400':total>=200?'#ee6633':total>=50?'#cc8844':'#aa8866',
+          textShadow:isDevilDeal?'0 0 50px rgba(255,0,0,0.95),0 0 100px rgba(180,0,0,0.7),0 4px 0 #220000':'0 0 30px rgba(255,34,0,0.8),0 0 60px rgba(255,100,0,0.4),0 4px 0 #440000',
+          letterSpacing:3,
+          animation:isDevilDeal?'devilPulse 0.6s ease-in-out infinite':'dmgPulse 1s ease-in-out infinite'
+        }}>{total.toLocaleString()}</div>
+        <div style={{
+          fontFamily:"'BogartsMetalFont',cursive",
+          fontSize:isDevilDeal?28:total>=5000?18:14,
+          color:isDevilDeal?'#ff2222':total>=5000?'#ffaa00':'#ff6644',
+          letterSpacing:isDevilDeal?6:4,
+          textTransform:'uppercase',
+          marginTop:isDevilDeal?6:2,
+          textShadow:isDevilDeal?'0 0 20px rgba(255,0,0,0.9)':'none'
+        }}>{isDevilDeal?'⛧ DEAL WITH THE DEVIL ⛧':total>=10000?'⛧ GODLIKE ⛧':total>=5000?'☠ ULTRA KILL':total>=2500?'💀 DEVASTATING':total>=1000?'🔥 MASSIVE HIT':total>=500?'💢 CRITICAL':total>=200?'⚡ HEAVY':total>=50?'SOLID HIT':'HIT'}</div>
       </div>}
     </div>
-    {slamming&&<div style={{marginTop:8,textAlign:'center',animation:'dmgSlam 0.5s ease-out forwards'}}>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:total>=10000?96:total>=5000?84:total>=2500?72:total>=1000?64:total>=500?56:total>=200?48:total>=50?42:36,fontWeight:900,color:total>=10000?'#ffffff':total>=5000?'#ffdd00':total>=2500?'#ff8800':total>=1000?'#ff6600':total>=500?'#ff4400':total>=200?'#ee6633':total>=50?'#cc8844':'#aa8866',textShadow:'0 0 30px rgba(255,34,0,0.8),0 0 60px rgba(255,100,0,0.4),0 4px 0 #440000',letterSpacing:3,animation:'dmgPulse 1s ease-in-out infinite'}}>{total.toLocaleString()}</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:total>=5000?18:14,color:total>=5000?'#ffaa00':'#ff6644',letterSpacing:4,textTransform:'uppercase',marginTop:2}}>{total>=10000?'⛧ GODLIKE ⛧':total>=5000?'☠ ULTRA KILL':total>=2500?'💀 DEVASTATING':total>=1000?'🔥 MASSIVE HIT':total>=500?'💢 CRITICAL':total>=200?'⚡ HEAVY':total>=50?'SOLID HIT':'HIT'}</div>
-    </div>}
-  </div>)
+  </>)
 }
 
 
@@ -6010,7 +6343,7 @@ function App(){
         }
         setChainCallout(chain.name);setTimeout(()=>setChainCallout(null),1200)
           setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.78*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
-        playSfx('chain_combo');triggerShake(18,600);setChainFlashActive(true);setTimeout(()=>setChainFlashActive(false),600);setStrikeMult(p=>Math.min(6.66,Math.round((p*1.78)*100)/100));showFirstTimeTip('chain','Riff Chains fire when you play BOTH cards of a pair in the same Strike. Check Rules for all 16 chains!',addLog);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×1.78 MULTIPLIER!')
+        playSfx('chain_combo');triggerShake(18,600);setChainFlashActive(true);setTimeout(()=>setChainFlashActive(false),600);setStrikeMult(p=>Math.min(10000,Math.round((p*1.78)*100)/100));showFirstTimeTip('chain','Riff Chains fire when you play BOTH cards of a pair in the same Strike. Check Rules for all 16 chains!',addLog);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×1.78 MULTIPLIER!')
         combosFiredRef.current.push(chain.id)
         // ── SHREDDER SIGNATURE: queue chain for echo on next strike ──
         if((STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).signature==='riff_chain_echo'){
@@ -7080,6 +7413,19 @@ function App(){
       setProjectiles([])
       const tripMult=fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION'?2:1
       const corruptionMult=corruption>=100?3.0:corruption>=80?2.0:corruption>=60?1.5:corruption>=40?1.2:1.0 // 40%=×1.15, 50%=×1.30, 75%=×1.45, 100%=×1.60
+      // ── BIG-NUMBERS ENGINE: collect every multiplier as a discrete cascade event ──
+      // Each entry = {mult, label, color}. During the cascade, the visible strikeMult
+      // counter climbs through each entry one by one, building suspense as it grows
+      // from ~1.85 (card-play) into the hundreds or thousands with stacked artifacts.
+      // Final damage is identical to before — this is purely visualization.
+      const _cascadeMults=[]
+      // 1. Strike (cards + chains) — the visible mult already shows this, but we
+      //    re-emit it in the cascade so the animation has a starting beat.
+      if(currentMult>1.0)_cascadeMults.push({mult:currentMult,label:'Strike (cards + chains)',emoji:'⛧',color:'#ff4400'})
+      // 2. Trip buff
+      if(tripMult>1)_cascadeMults.push({mult:tripMult,label:fightTripBuff||'Trip',emoji:'🍄',color:'#ff44ff'})
+      // 3. Corruption tier
+      if(corruptionMult>1)_cascadeMults.push({mult:corruptionMult,label:'Corruption '+Math.floor(corruption)+'%',emoji:'🌀',color:'#cc44ff'})
       // ARTIFACT MULTIPLIER TRIGGERS — Balatro-style Jokers
       let artifactMult=1.0
       const cardsPlayedCount=cardsPlayedRef.current.length||0
@@ -7099,12 +7445,12 @@ function App(){
         if(fires>0){
           const m=Math.pow(art.mult,fires)
           artifactMult*=m
-          _breakdownLines.push({type:'multiply',label:art.emoji+' '+art.name+' ×'+m.toFixed(2),label2:'',runningAfter:0,color:'#e8a820'})
+          _cascadeMults.push({mult:m,label:art.name+(fires>1?' ×'+fires:''),emoji:art.emoji,color:'#e8a820'})
           addLog('⛧ '+art.emoji+' '+art.name+' TRIGGERS! ×'+m.toFixed(2));setTriggeredArtifactId(art.id);setTimeout(()=>setTriggeredArtifactId(null),600)
         }
       }
-      // CA1 Goat of Mendes — permanent ×1.25 all strikes
-      if(activeArtifacts.some(a=>a.id==='ca1')){artifactMult*=1.5;_breakdownLines.push({type:'multiply',label:'🐐 Goat of Mendes ×1.5',label2:'',runningAfter:0,color:'#e8a820'})}
+      // CA1 Goat of Mendes — permanent ×1.5 all strikes
+      if(activeArtifacts.some(a=>a.id==='ca1')){artifactMult*=1.5;_cascadeMults.push({mult:1.5,label:'Goat of Mendes',emoji:'🐐',color:'#e8a820'})}
       // BOSS LOOT MULTIPLIER TRIGGERS
       for(const lootId of collectedLoot){
         const loot=BOSS_LOOT.find(l=>l&&l.id===lootId)
@@ -7118,12 +7464,19 @@ function App(){
         if(loot.multTrigger==='perCorrThreshold')fires=[25,50,75,100].filter(t=>corruption>=t).length
         if(loot.multTrigger==='cards1'&&cardsPlayedCount===1)fires=1
         if(loot.multTrigger==='perUniqueKeyword')fires=new Set(actives.map(m=>m.keyword)).size
-        if(fires>0){const m=Math.pow(loot.mult,fires);artifactMult*=m;_breakdownLines.push({type:'multiply',label:loot.emoji+' '+loot.name+' ×'+m.toFixed(2),label2:'',runningAfter:0,color:'#44ddff'});addLog('💎 '+loot.emoji+' '+loot.name+' ×'+m.toFixed(2)+'!')}
+        if(fires>0){const m=Math.pow(loot.mult,fires);artifactMult*=m;_cascadeMults.push({mult:m,label:loot.name+(fires>1?' ×'+fires:''),emoji:loot.emoji,color:'#44ddff'});addLog('💎 '+loot.emoji+' '+loot.name+' ×'+m.toFixed(2)+'!')}
       }
       const finalDmg=Math.round(dmg*tripMult*currentMult*corruptionMult*artifactMult)
-      if(tripMult>1){const _tr=Math.round(dmg*tripMult);_breakdownLines.push({type:'multiply',label:(fightTripBuff||'Trip')+' ×'+tripMult,label2:'= '+_tr.toLocaleString(),runningAfter:_tr,color:'#ff44ff'})}
-      if(corruptionMult>1){_breakdownLines.push({type:'multiply',label:'Corruption ×'+corruptionMult.toFixed(1),label2:'= '+Math.round(dmg*tripMult*corruptionMult).toLocaleString(),runningAfter:Math.round(dmg*tripMult*corruptionMult),color:'#cc44ff'})}
-      if(currentMult>1.0){_breakdownLines.push({type:'multiply',label:'Strike ×'+currentMult.toFixed(2),label2:'= '+finalDmg.toLocaleString(),runningAfter:finalDmg,color:'#ff4400'})}
+      // Compute the TRUE total multiplier = product of every cascade mult.
+      // This is what climbs in the visible counter during the cascade.
+      const _totalMult=_cascadeMults.reduce((p,e)=>p*e.mult,1.0)
+      // Push every cascade mult into the breakdown panel as a line. Each line
+      // carries the mult value so the cascade can climb the visible mult counter.
+      let _runningDmg=dmg
+      for(const ev of _cascadeMults){
+        _runningDmg=Math.round(_runningDmg*ev.mult)
+        _breakdownLines.push({type:'multiply',label:ev.emoji+' '+ev.label+' ×'+ev.mult.toFixed(2),label2:'= '+_runningDmg.toLocaleString(),runningAfter:_runningDmg,color:ev.color,mult:ev.mult})
+      }
       // ── SHREDDER SIGNATURE: apply echo damage from chains queued PREVIOUS strike ──
       // Echo = 50% of this strike's final damage × pending chain count.
       // Chains queued THIS strike (combosFiredRef populated in playCard) won't echo
@@ -7139,14 +7492,28 @@ function App(){
       const _totalStrikeDmg=finalDmg+_shredderEchoDmg
       const newEHp=Math.max(0,startHp-_totalStrikeDmg)
       if(newEHp<=0){const _ok=Math.abs(newEHp);updStat('overkillDmg',_ok)}
-      setEnemyHp(prev=>Math.min(prev,newEHp))
-      // damageScaleAtk: boss gains ATK per 20 damage taken
-      if(enemy.passiveId==='luciferBoss'){
-        const atkGain=luciferPhase===1?1:2
-        const phaseTotalDmg=Math.max(0,scaledMaxHp-newEHp)
-        setBossRageAtk(Math.floor(Math.max(0,phaseTotalDmg)/20)*atkGain)
+      // ── HP DROP DEFERRED TO CASCADE SLAM (Option B / Balatro-style) ──
+      // If the strike has multiple multipliers, hand HP-drop to the breakdown's
+      // onSlam callback so HP slams down WITH the final number.
+      // CRITICAL EXCEPTION: lethal strikes apply immediately, otherwise the
+      // Lucifer phase 2 transition + victory triggers race with the cascade.
+      const _applyHpDrop=()=>{
+        setEnemyHp(prev=>Math.min(prev,newEHp))
+        if(enemy.passiveId==='luciferBoss'){
+          const atkGain=luciferPhase===1?1:2
+          const phaseTotalDmg=Math.max(0,scaledMaxHp-newEHp)
+          setBossRageAtk(Math.floor(Math.max(0,phaseTotalDmg)/20)*atkGain)
+        }
       }
-      if(_breakdownLines.length>1){setDmgBreakdown({lines:_breakdownLines,total:_totalStrikeDmg})}
+      const _lethalStrike=newEHp<=0
+      if(_breakdownLines.length>1&&!_lethalStrike){
+        // Cascade drives HP drop — boss HP stays put until SLAM
+        setDmgBreakdown({lines:_breakdownLines,total:_totalStrikeDmg,_pendingHpDrop:_applyHpDrop,cascadeMults:_cascadeMults,totalMult:_totalMult})
+      } else {
+        // Lethal OR no cascade: apply immediately
+        _applyHpDrop()
+        if(_breakdownLines.length>1)setDmgBreakdown({lines:_breakdownLines,total:_totalStrikeDmg,cascadeMults:_cascadeMults,totalMult:_totalMult})
+      }
       addFloat(_totalStrikeDmg.toLocaleString(),bc.x,bc.y-60,'#ff2200',true)
       if(folkMagicFired){
         setEmbers(maxEmbers)
@@ -9070,7 +9437,7 @@ function App(){
         {postStrikeFlash.mult>1.5&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--text-gold)',letterSpacing:3}}>×{postStrikeFlash.mult.toFixed(2)} MULTIPLIER</div>}
         {postStrikeFlash.isNewBest&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:'var(--text-gold)',letterSpacing:6,marginTop:4,textShadow:'0 0 16px rgba(255,220,0,0.8)'}}>⛧ NEW BEST! ⛧</div>}
       </div>}
-      {dmgBreakdown&&<DamageBreakdown data={dmgBreakdown} onDone={()=>setDmgBreakdown(null)}/>}
+      {dmgBreakdown&&<DamageBreakdown data={dmgBreakdown} onSlam={()=>{if(dmgBreakdown._pendingHpDrop)dmgBreakdown._pendingHpDrop()}} onDone={()=>setDmgBreakdown(null)}/>}
 
       {hellquakeAnim&&<div style={{position:'absolute',inset:0,zIndex:9500,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.85)',animation:'fadeIn 0.1s ease'}}>
         <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.04) 3px,rgba(255,255,255,0.04) 4px)',animation:'interlaceFlicker 0.08s steps(1) infinite',pointerEvents:'none'}}/>
