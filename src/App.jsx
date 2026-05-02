@@ -1368,7 +1368,8 @@ function rollWeightedFromPool(pool,unlockedMythics){
   const lifetimeScore=parseInt(localStorage.getItem('vst_lifetime_score')||'0')
   const filtered=pool.filter(item=>{
     if(item.locked&&item.unlockAt&&lifetimeScore<item.unlockAt)return false
-    if(item.rarity==='mythic'&&unlockedMythics&&!unlockedMythics.includes(item.id))return false
+    // Mythic items use unlockId (camelCase) — check against unlocked list, NOT item.id
+    if(item.rarity==='mythic'&&unlockedMythics&&item.unlockId&&!unlockedMythics.includes(item.unlockId))return false
     return true
   })
   if(filtered.length===0)return null
@@ -5727,7 +5728,7 @@ function App(){
   const luciferStrikesUsedRef=useRef(0)  // strikes used to defeat Lucifer (lower = better)
   const fightLossMembersRef=useRef(new Set())  // member uids lost during current fight
   const chainsFiredThisRunRef=useRef(new Set())  // chain IDs fired this run
-  const allStonedAchievedRef=useRef(false)  // any moment all 4 members were Too Stoned in same fight
+  const runStonedMembersRef=useRef(new Set())  // unique uids of members that were Too Stoned at any point this run
   const soloMembersUsedRef=useRef(new Set())  // unique members ever on stage in this run
   const [mythicUnlockOverlay,setMythicUnlockOverlay]=useState(null) // {name, emoji, hint}
   const fireMythicUnlock=useCallback((unlockId)=>{
@@ -6591,18 +6592,20 @@ function App(){
       const _hasLooper=activePassives.some(p=>p.id==='looperpedal')
       const _hasSabbath=activePassives.some(p=>p.id==='witchssabbath')  // mythic: 3 replays of first card
       const _isFirstCardThisStrike=cardsPlayedRef.current.length===1
-      // Echoplex roll
+      // Echoplex roll (independent of Looper/Sabbath — can stack)
       if(_hasEcho&&Math.random()<0.69){
         queuedReplaysRef.current.push({cardId:card.id,slotIdx,kind:'echoplex'})
       }
-      // Looper: first card always replays
-      if(_hasLooper&&_isFirstCardThisStrike){
-        queuedReplaysRef.current.push({cardId:card.id,slotIdx,kind:'looper'})
-      }
-      // Witch's Sabbath (mythic): first card replays THREE times total (so push twice more)
-      if(_hasSabbath&&_isFirstCardThisStrike){
-        queuedReplaysRef.current.push({cardId:card.id,slotIdx,kind:'sabbath'})
-        queuedReplaysRef.current.push({cardId:card.id,slotIdx,kind:'sabbath'})
+      // First-card replay: Sabbath supersedes Looper (don't stack the two).
+      // Sabbath = first card replays 3 times total → push 2 sabbath entries.
+      // Looper = first card replays once → push 1 looper entry.
+      if(_isFirstCardThisStrike){
+        if(_hasSabbath){
+          queuedReplaysRef.current.push({cardId:card.id,slotIdx,kind:'sabbath'})
+          queuedReplaysRef.current.push({cardId:card.id,slotIdx,kind:'sabbath'})
+        } else if(_hasLooper){
+          queuedReplaysRef.current.push({cardId:card.id,slotIdx,kind:'looper'})
+        }
       }
     }
     const played=cardsPlayedRef.current
@@ -7649,8 +7652,112 @@ function App(){
           else if(card.id==='amp'&&m&&!m.tooStoned){
             ns[slotIdx]=Object.assign({},m,{atk:m.atk*2,_origAtk:m._origAtk||m.atk,tempBuff:true})
           }
+          // ── ADDITIONAL REPLAY HANDLERS (tier-A/B from audit) ──
+          // Groupie: +1 ATK perm to target
+          else if(card.id==='groupie'&&m){
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1})
+          }
+          // Roadie: shield + heal target
+          else if(card.id==='roadie'&&m){
+            ns[slotIdx]=Object.assign({},m,{stoneShield:2,hp:m.keyword==='FALLEN'?m.hp:Math.min(m.maxHp,m.hp+2)})
+          }
+          // Wake Up Call: revive a Too Stoned member at 50% HP
+          else if(card.id==='wakeup'){
+            const stonedIdx=ns.findIndex(mm=>mm&&mm.tooStoned)
+            if(stonedIdx>=0){const sm=ns[stonedIdx];ns[stonedIdx]=Object.assign({},sm,{tooStoned:false,hp:Math.floor(sm.maxHp*0.5)})}
+          }
+          // Slow Burn: +1 ember (no perpetual track since replay shouldn't loop the buff)
+          else if(card.id==='slowburn'){
+            setEmbers(p=>Math.min(maxEmbers,p+1))
+          }
+          // Riff Thief: steal 2 ATK from a random alive member to target
+          else if(card.id==='riffthief'&&m){
+            const candidates=ns.map((mm,i)=>(mm&&!mm.tooStoned&&i!==slotIdx)?i:-1).filter(i=>i>=0&&ns[i].atk>=2)
+            if(candidates.length>0){
+              const vi=candidates[Math.floor(Math.random()*candidates.length)]
+              ns[vi]=Object.assign({},ns[vi],{atk:ns[vi].atk-2})
+              ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,tempBuff:true,_origAtk:m._origAtk||m.atk})
+            }
+          }
+          // Blood Harmony: +1 ATK to all + 1 HP heal to all
+          else if(card.id==='bloodharmony'){
+            ns=ns.map(mm=>mm&&!mm.tooStoned?Object.assign({},mm,{atk:mm.atk+1,permAtkBonus:(mm.permAtkBonus||0)+1,hp:Math.min(mm.maxHp,mm.hp+1)}):mm)
+          }
+          // Blood Ritual: sacrifice 25% target HP, deal that as damage
+          else if(card.id==='bloodritual'&&m){
+            const sacrifice=Math.floor(m.hp*0.25)
+            if(sacrifice>0){
+              ns[slotIdx]=Object.assign({},m,{hp:Math.max(1,m.hp-sacrifice)})
+              // Direct damage to boss handled below in damage section
+            }
+          }
           return ns
         })
+        // ── ADDITIONAL DIRECT DAMAGE CARD REPLAYS ──
+        // Tapped Out: +5 embers next strike
+        if(card.id==='tappedout'){setPendingEmbers(p=>p+5)}
+        // Power Tap: +2 embers (3 with Haunted Radio a5)
+        else if(card.id==='powertap'){
+          const ptBonus=activeArtifacts.some(a=>a.id==='a5')?3:2
+          setEmbers(p=>Math.min(maxEmbers,p+ptBonus))
+        }
+        // Shred Solo: direct damage = target ATK × 2
+        else if(card.id==='shredsolo'){
+          const target=stage[slotIdx]
+          if(target){
+            const dmg=getEffectiveAtk(target,_atkCtx)*2
+            const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp)
+            addFloat(dmg.toLocaleString(),bc.x,bc.y-60,'#9933cc',true)
+            updStat('totalDamage',dmg)
+          }
+        }
+        // Dark Crescendo: dmg scales with cards played this strike (10 per card)
+        else if(card.id==='darkcrescendo'){
+          const cnt=cardsPlayedRef.current.length
+          const dmg=cnt*10
+          const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp)
+          addFloat(dmg.toLocaleString(),bc.x,bc.y-60,'#aa44cc',true)
+          updStat('totalDamage',dmg)
+        }
+        // Going Broke: dmg = current stash (no spend on replay since stash was already spent)
+        else if(card.id==='goingbroke'){
+          // Replay just floats a "broke!" with no damage since stash is 0
+          addFloat('💸 BROKE ECHO',bc.x,bc.y-90,'#ffcc00')
+        }
+        // Russian Roulette: roll d6 fresh each replay
+        else if(card.id==='russianroulette'){
+          const target=stage[slotIdx]
+          if(target&&!target.tooStoned){
+            const roll=Math.floor(Math.random()*6)+1
+            setStage(prev=>{
+              const ns=[...prev];const t=ns[slotIdx]
+              if(!t)return prev
+              if(roll===1){ns[slotIdx]=Object.assign({},t,{tooStoned:true,hp:0});addFloat('🔫 STONED!',cx.x,cx.y-130,'#ff0000',true)}
+              else if(roll<=5){ns[slotIdx]=Object.assign({},t,{atk:t.atk+4,tempBuff:true,_origAtk:t._origAtk||t.atk});addFloat('🔫 +4 ATK!',cx.x,cx.y-130,'#22aa44')}
+              else{ns[slotIdx]=Object.assign({},t,{atk:t.atk+8,tempBuff:true,_origAtk:t._origAtk||t.atk,stoneShield:2});addFloat('🔫 +8 ATK + 🛡',cx.x,cx.y-130,'#ffdd00')}
+              return ns
+            })
+          }
+        }
+        // Devil's Dice: random 1-12 dmg
+        else if(card.id==='devilsdice'){
+          const dmg=Math.floor(Math.random()*12)+1
+          const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp)
+          addFloat(dmg.toLocaleString(),bc.x,bc.y-60,'#cc1144',true)
+          updStat('totalDamage',dmg)
+        }
+        // ── BLOOD RITUAL DAMAGE (separate from buff above) ──
+        else if(card.id==='bloodritual'){
+          const target=stage[slotIdx]
+          if(target){
+            const sacrifice=Math.floor(target.hp*0.25)
+            if(sacrifice>0){
+              const newHp=Math.max(0,enemyHp-sacrifice*3);setEnemyHp(newHp)
+              addFloat((sacrifice*3).toLocaleString(),bc.x,bc.y-60,'#aa1111',true)
+              updStat('totalDamage',sacrifice*3)
+            }
+          }
+        }
         // Direct damage cards (Stage Dive deals damage = target HP)
         if(card.id==='stagedive'){
           const target=stage[slotIdx]
@@ -7701,6 +7808,9 @@ function App(){
     if(queue.length>0){addLog('🎚 '+queue.length+' replay'+(queue.length>1?'s':'')+' fired!')}
   },[stage,enemyHp,scaledMaxHp,enemy,corruption,activePassives])
 
+  // handleStrikeBody is invoked via ref to avoid stale-closure issues across
+  // the handleStrike→handleStrikeBody split. Ref is wired below the definition.
+  const handleStrikeBodyRef=useRef(null)
   const handleStrike=useCallback(()=>{
     setUndoSnapshot(null) // can't undo after striking
     // Guard: don't allow re-triggering during animation
@@ -7718,11 +7828,11 @@ function App(){
       // Set animPhase to a non-idle marker so player can't re-click Strike
       setAnimPhase('replaying')
       const _replayDelay=_replayQueueLen*200+800
-      setTimeout(()=>{setAnimPhase('idle');handleStrikeBody()},_replayDelay)
+      setTimeout(()=>{setAnimPhase('idle');if(handleStrikeBodyRef.current)handleStrikeBodyRef.current()},_replayDelay)
       return
     }
-    handleStrikeBody()
-  },[stage,hand,deck,discardPile,embers,maxEmbers,corruption,strikesLeft,activeArtifacts,activePassives,enemyHp,enemy,activeStake,strikeMult,collectedLoot,fireQueuedReplays])
+    if(handleStrikeBodyRef.current)handleStrikeBodyRef.current()
+  },[animPhase,strikesLeft,enemyHp,fireQueuedReplays])
 
   // The actual strike resolution body — extracted so we can delay it for replay animations.
   const handleStrikeBody=useCallback(()=>{
@@ -7737,7 +7847,10 @@ function App(){
       setDiscardPile(p=>[...p,lost]);discRef.current=[...discRef.current,lost]
       addLog('🌀 MADNESS! Corruption forces you to drop '+lost.name+'!')
     };const currentMult=strikeMultRef.current;setStrikeMult(1.0);setMemberBuffs({});
-    if(animPhase!=='idle'||strikesLeft<=0||enemyHp<=0)return
+    // animPhase guard removed here — wrapper handleStrike checks it before calling.
+    // After replay delay, animPhase=='replaying' in this closure (stale), so checking
+    // here would always early-return and strike would never resolve.
+    if(strikesLeft<=0||enemyHp<=0)return
     const actives=stage.filter(m=>m&&!m.tooStoned)
     if(actives.length===0){addLog('⚠ No active members!');return}
     // ── KEYWORD STACK CONTEXT — centralized helper for tier-scaled bonuses ──
@@ -7859,8 +7972,9 @@ function App(){
       }
     }
     if(_mlb>0){dmg+=_mlb;_bkRunning=dmg;_breakdownLines.push({type:'add',label:'Mentor Link',emoji:'⛓',value:_mlb,runningAfter:dmg,color:'#ffd700'})}
-    // CA4: Wailing Guitar — first Strike deals double damage
-    if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===activeStake.maxStrikes){dmg*=2;_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Wailing Guitar ×2',label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff4488'});addLog('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')}
+    // CA4: Wailing Guitar — first Strike deals double damage.
+    // strikesLeft is decremented before this fires, so first strike = fightMaxStrikes - 1.
+    if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===fightMaxStrikes-1){dmg*=2;_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Wailing Guitar ×2',label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff4488'});addLog('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')}
     // HEXED: auto-raise corruption +5%, member gains +1 ATK per 10% corruption
     const hexedMembers=actives.filter(m=>m.keyword==='HEXED')
     if(hexedMembers.length>0){
@@ -8075,8 +8189,9 @@ function App(){
           continue
         }
         if(art.multTrigger==='sigilOpener'){
-          // First Strike of every fight: card+chain mults auto-peaked + auto-trip if no other trip
-          const isFirstStrikeOfFight=(strikesLeft===(activeStake.maxStrikes||4))
+          // First Strike of every fight: card+chain mults auto-peaked + auto-trip if no other trip.
+          // strikesLeft is decremented BEFORE this check fires, so first strike = fightMaxStrikes - 1.
+          const isFirstStrikeOfFight=(strikesLeft===(fightMaxStrikes-1))
           if(isFirstStrikeOfFight){
             const peakMult=4.31  // 1.05^6 * 1.78^2 simulated peak
             artifactMult*=peakMult
@@ -8203,32 +8318,35 @@ function App(){
 
       // ── MYTHIC UNLOCK CHECKS — fire after stage state updates ──
       setTimeout(()=>{
-        // Witch's Sabbath: all 4 members Too Stoned at any moment in a fight
-        const _stoneCheck=stage.filter(m=>m).length>=4&&stage.filter(m=>m&&m.tooStoned).length>=4
-        if(_stoneCheck&&!allStonedAchievedRef.current){
-          allStonedAchievedRef.current=true
-          // Will be confirmed if fight is won
-        }
+        // Witch's Sabbath: across the run, every member must have been
+        // Too Stoned at some point. The "haze consumed them all" — and you
+        // bring them back. Tracked via fightLossMembersRef union per-fight
+        // accumulating into runStonedMembersRef.
+        stage.forEach(function(m){
+          if(m&&m.tooStoned&&m.uid){runStonedMembersRef.current.add(m.uid)}
+        })
       },0)
 
       if(newEHp<=0){
         // ── MYTHIC UNLOCKS at fight victory ──
-        // Inverted Cross: first time defeating Lucifer
-        if(enemy&&(enemy.passiveId==='luciferBoss'||enemy.id==='lucifer'||enemy.name==='Lucifer')){
-          if(luciferPhase===2||!enemy.passiveId){
-            // Lucifer phase 2 just died (final kill)
-            fireMythicUnlock('invertedCross')
-            // The Conduit: defeated Lucifer in ≤3 strikes total (across both phases)
-            if(luciferStrikesUsedRef.current<=3){fireMythicUnlock('theConduit')}
-          }
+        // Inverted Cross: defeating Lucifer (final phase 2 kill)
+        if(enemy&&enemy.id==='lucifer'&&luciferPhase===2){
+          fireMythicUnlock('invertedCross')
+          // The Conduit: defeated Lucifer in ≤3 strikes total (across both phases)
+          if(luciferStrikesUsedRef.current<=3){fireMythicUnlock('theConduit')}
         }
-        // Tongue of the Devourer: beat Devourer (C3 boss, fight 8) without losing any members
-        if(enemy&&(enemy.id==='devourer'||enemy.name==='Devourer')){
+        // Tongue of the Devourer: beat the C3 boss without losing any members.
+        // Enemy ID is 'gluttony_boss' (not 'devourer' — that was the wrong ID).
+        if(enemy&&enemy.id==='gluttony_boss'){
           if(fightLossMembersRef.current.size===0){fireMythicUnlock('tongueOfDevourer')}
         }
-        // Witch's Sabbath: all 4 members were Too Stoned at some point and you won the fight
-        if(allStonedAchievedRef.current){
-          fireMythicUnlock('witchsSabbath')
+        // Witch's Sabbath: at Lucifer victory, check if every member that was
+        // ever on stage went Too Stoned at some point in the run AND there are
+        // ≥3 such members (so it's a real "haze" not just one bad fight).
+        if(enemy&&enemy.id==='lucifer'&&luciferPhase===2){
+          if(runStonedMembersRef.current.size>=3&&runStonedMembersRef.current.size>=soloMembersUsedRef.current.size*0.75){
+            fireMythicUnlock('witchsSabbath')
+          }
         }
       }
 
@@ -8581,6 +8699,8 @@ function App(){
       },_bossDelay)
     },delay+200)
   },[animPhase,strikesLeft,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,bossRef,stageRefs,drawUpTo,triggerVictory,bossRageAtk,bossDebuff,fightTripBuff,luciferPhase,stolenAtkPool,maxEmbers])
+  // Wire the ref so handleStrike can call the latest body without stale closure
+  handleStrikeBodyRef.current=handleStrikeBody
 
   const handleShopLeave=useCallback(()=>{
     // Welcome to Hell: after final shop, go to cutscene then fight
@@ -8676,7 +8796,9 @@ function App(){
     const _deckMaxStrikesMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
     const _fmStrikes = activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0)+_deckMaxStrikesMod;
     const _fmDiscards = MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0);
-    setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
+    // Initial ember placement: let the extraEm calculation below do all the work
+    // Don't pre-set to max, or P1/Power Conditioner gains get silently capped.
+    playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
     setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setNextCardFree(false);setAllCardsFree(false);setLastRiffPlayed(null);lastRiffPlayedRef.current=null;setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);multMilestonesRef.current={2:false,4:false,8:false,16:false}
     // AUTO-SAVE at fight start
@@ -8713,7 +8835,7 @@ function App(){
     const ndCount=stage.filter(m=>m&&m.role==='Drummer').length
     if(nd){let r=Math.floor(Math.random()*6)+1;if(ndCount>=2&&r<=2)r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
     setStage(p=>{
-      const reset=p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined}):null)
+      const reset=p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined,_sustainUsed:undefined}):null)
       return scanMentorLinks(reset)
     })
     // Redeal hand from current deck+discard
@@ -8781,17 +8903,18 @@ function App(){
     if(hasDevilsFork)setCorruption(15)
     // Clean Living pact: +2 ATK and +2 HP all at fight start
     if(chosenPacts.includes('clean_living')){setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+2,hp:Math.min(m.maxHp,m.hp+2)}):m));addLog('✨ Clean Living! All members +2 ATK, +2 HP.')}
-    // Extra embers from Serpent's Kiss (P1 + burning stage + Hellfire Amulet)
+    // Extra embers from passives that activate at fight start
     const hasPowerCond=activePassives.some(p=>p.id==='powerconditioner') // +1 ember
     const hasConduit=activePassives.some(p=>p.id==='theconduit') // mythic — start at MAX
     const extraEm=(hasP1?1:0)+burnBonus+(hasHellfire?2:0)+(hasPowerCond?1:0)
+    // Start with embers = maxEmbers + descent bonus + passive extras.
+    // Temporary overcap is allowed (these are explicit bonuses, not regen).
     if(hasConduit){
-      // Mythic: Start at MAX embers
-      setEmbers(maxEmbers)
+      setEmbers(maxEmbers+(bonusEmbers>0?bonusEmbers:0))
       addLog('⚡ The Conduit! Started at MAX embers.')
     } else {
-      setEmbers(p=>Math.min(maxEmbers,p+extraEm))
-      if(extraEm>0)addLog('🌿 Ember bonus: +'+(extraEm)+' (passives/artifacts)')
+      setEmbers(maxEmbers+(bonusEmbers>0?bonusEmbers:0)+extraEm)
+      if(extraEm>0)addLog('🌿 Ember bonus: +'+(extraEm)+' (passives)')
     }
     // Roll DOUBLE TIME d6 if drummer is on stage
     const hasDrummer=stage.some(m=>m&&m.role==='Drummer')
@@ -9125,8 +9248,9 @@ function App(){
     setEmbers(sv.em);setMaxEmbers(sv.mx);setStash(sv.st);setCorruption(sv.co)
     setStrikesLeft(sv.sl);setFightMaxStrikes(sv.ms);setDiscardsLeft(sv.dl)
     setChosenPacts(sv.pa||[]);setCollectedLoot(sv.loot||[]);setUpgradedCards(sv.upg||[])
-    setActiveArtifacts((sv.art||[]).map(id=>[...STARTER_ARTIFACTS,...CIRCLE_ARTIFACTS].find(a=>a.id===id)).filter(Boolean))
-    setActivePassives((sv.pas||[]).map(id=>STARTER_PASSIVES.find(p=>p.id===id)).filter(Boolean))
+    // Include MYTHIC pools so save loads with unlocked mythics restore correctly.
+    setActiveArtifacts((sv.art||[]).map(id=>[...STARTER_ARTIFACTS,...CIRCLE_ARTIFACTS,...MYTHIC_ARTIFACTS].find(a=>a.id===id)).filter(Boolean))
+    setActivePassives((sv.pas||[]).map(id=>[...STARTER_PASSIVES,...MYTHIC_PEDALS].find(p=>p.id===id)).filter(Boolean))
     if(sv.stats)setStats(sv.stats)
     setHeldShrooms(sv.shrooms||0);setHeldAcid(sv.acid||0)
     // ── ANCHOR refs (commit 4d): recompute from restored stage on resume.
@@ -9163,7 +9287,7 @@ function App(){
     // Reset mythic unlock per-run trackers
     chainsFiredThisRunRef.current=new Set()
     soloMembersUsedRef.current=new Set()
-    allStonedAchievedRef.current=false
+    runStonedMembersRef.current=new Set()
     luciferStrikesUsedRef.current=0
     fightLossMembersRef.current=new Set()
     setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
@@ -10774,7 +10898,9 @@ function App(){
                 continue
               }
               if(art.multTrigger==='sigilOpener'){
-                const isFirstStrike=(strikesLeft===((activeStake&&activeStake.maxStrikes)||4))
+                // Preview runs BEFORE strike, so strikesLeft hasn't decremented.
+                // First strike = fightMaxStrikes (or fallback maxStrikes).
+                const isFirstStrike=(strikesLeft===fightMaxStrikes)
                 if(isFirstStrike){
                   _vmArt*=4.31
                   if(_vmTrip<=1)_vmArt*=2
@@ -10972,7 +11098,7 @@ function App(){
                 continue
               }
               if(art.multTrigger==='sigilOpener'){
-                const isFS=(strikesLeft===((activeStake&&activeStake.maxStrikes)||4))
+                const isFS=(strikesLeft===fightMaxStrikes)
                 if(isFS){artMult*=4.31;if(strikeMult<=1)artMult*=2}
                 continue
               }
