@@ -51,10 +51,15 @@ This is the authoritative TODO. The old one was bloated with completed work — 
 - Tablet of Az'Tothoth: Fire all 16 unique chains in one run
 
 **Still in-progress / future polish:**
-- ⏳ Sim engine port — mirror new triggers in `vestibule-sim-kwstacks.js`, run 25K-game balance check
-- ⏳ Trophies UI for hidden mythics (??? / silhouette+hint / full reveal display)
-- ⏳ Tablet of Az'Tothoth permanent-card-upgrade-on-chain-fire effect (data exists, effect logic TODO)
-- ⏳ Playtest pass to tune costs and rarity weights
+- ⏳ **PLAYTEST TUNING PASS** ← this is on JV. After 2-3 runs, look at:
+  - Echoplex 69% — too consistent? too rare? Try with Battle Cry build.
+  - Black Goat ×46 ceiling — earned or trivial?
+  - Pentagram Shrine multiplicative compounding — fun or excessive?
+  - Mythic unlock pacing — first mythic should hit ~run 4-6 ideally
+  - Shop pedal/artifact rarity feel — too many commons? not enough rares?
+- ⏳ Sim port for mythic pedals (Echoplex %, Looper, Sabbath, Conduit, Tablet)
+  — currently sim approximates without these, real numbers will skew positive
+- ⏳ Devourer C3 wall (15.4% die here — pre-existing, not caused by overhaul)
 
 ---
 
