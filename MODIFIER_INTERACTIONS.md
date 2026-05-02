@@ -344,54 +344,78 @@ Math: ×4.31 strike mult on opener = strong but not auto-win. Conditional artifa
 
 ---
 
-## DECISIONS RECOMMENDED
+## DECISIONS RECOMMENDED (now historical record)
 
-1. **Echoplex retriggers DON'T count toward "same type" / "exactly N cards" checks** but DO count toward "all 6 cards" / "4+ cards" checks. (Hot Bug #2 fix)
-2. **Soul Bargain + Echoplex can kill members.** Brutal but consistent. (Hot Bug #3 embrace)
-3. **Black Goat: ×1.5 always × ×1.3 per OTHER artifact** (not self). (Hot Bug #4 tune)
-4. **Big numbers embrace + display formatting (M for millions)**. (Hot Bug #5 embrace)
-5. **Sigil of Set REWORDED** to only peak card+chain mults, not all artifact conditionals. (Hot Bug #6 fix)
-6. **All replay rules consistent across Echoplex / Witch's Sabbath / The Looper.** Permanent buffs stack, temp buffs refresh, damage fires each time. (Hot Bug #8 standardize)
-7. **Mythic unlock stats added to existing stats system.** New: bossesKilledNoLoss, chainsFiredThisRun, luciferStrikeCount, soloRunVictory, allStonedFightWin.
-
----
-
-## ⚠️ JV DECISION POINTS
-
-Things I want JV to confirm before I implement:
-
-### D1. Black Goat fix
-Original: ×1.5 always × ×1.5 per artifact owned (counts self). Yields ×68 always-on with stacked builds.
-Proposed: ×1.5 always × ×1.3 per OTHER artifact owned. Yields ×2.5 always-on max.
-**Or: Cut Black Goat entirely and replace with new design.**
-
-### D2. Sigil of Set rewording
-Original: peak roll on all multipliers (including conditionals). Trivializes builds.
-Proposed: peak roll on card-played and chain mults only. Still strong opener.
-**Confirm or alt-text.**
-
-### D3. Echoplex retrigger UI
-Should each retrigger show:
-- A small "🎚 ECHO" badge floating up from the card?
-- The card visibly re-animate (slide back into hand and replay)?
-- Just inline in the cascade without specific UI?
-**Default: small ECHO badge, inline in cascade. Can be polished post-ship.**
-
-### D4. Soul Bargain death rule
-Echoplex can kill via HP cost. Confirm: brutal is good.
-**Or: Echoplex skips fatal retriggers. Loses brutality but is more newbie-friendly.**
-
-### D5. Big number formatting
-At ×268,704 mult and 50 base damage, we're at 13.4M damage. Format display as:
-- "13,435,200" — comma-separated, exact
-- "13.4M" — abbreviated, readable
-- "13,435,200 (13.4M)" — both
-**Default: 13.4M for >999,999, comma format below.**
-
-### D6. Should I cap mult somewhere?
-Hard cap at ×1000? Diminishing returns past ×500? Or no cap (Hot Bug #5 Option C).
-**Default: no cap, big numbers are the dopamine.**
+1. ✅ Echoplex retriggers DON'T count toward purity checks, DO count toward volume checks. (LOCKED)
+2. ✅ Soul Bargain + Echoplex can kill, with FATAL ECHO INCOMING warning UI. (LOCKED via D4)
+3. ✅ Black Goat tuned to ×2.0 × ×1.3/other (LOCKED via D1, JV chose the stronger option)
+4. ✅ Big numbers embraced. Comma format always (LOCKED via D5/D6)
+5. ✅ Sigil of Set rewritten with auto-trip buff (LOCKED via D2)
+6. ✅ Replay rules consistent across Echoplex/Sabbath/Looper. (LOCKED)
+7. ✅ Mythic unlock stats list confirmed. (LOCKED)
 
 ---
 
-**END ANALYSIS. AWAITING JV DECISIONS BEFORE CODE.**
+## 🔒 JV DECISIONS LOCKED — ALL 6 (May 2 2026)
+
+### D1 — Black Goat: STRONGER VARIANT 🐐
+**LOCKED:** ×2.0 always × ×1.3 per OTHER artifact owned. Max from this artifact alone: ×3.38 (with 2 other mult artifacts). Stacks with Goat of Mendes (×1.5) and Triple Sixes (×9 max).
+Combined ceiling: ~×46 always-on. Strong but not infinite.
+
+### D2 — Sigil of Set: BUFFED VARIANT 𓂀
+**LOCKED:** "First Strike of every fight, your card-played and chain mults are auto-peaked (×4.31). Additionally, if no other trip buff is active, that strike gains an automatic ×2 trip multiplier. One-shot per fight."
+Math on opener: ×4.31 × ×2 trip = ×8.62 strike mult on round 1 of every fight. Conditional artifacts (Pentagram, Inverted Cross, Doom Crown) still demand their own triggers. Strong but not auto-win.
+
+### D3 — Echoplex Visual: FULL RE-ANIMATION 🎚
+**LOCKED:** When Echoplex's 69% roll succeeds:
+- Card visibly slides back from played pile into hand position
+- Plays through the same animation it did originally
+- "🎚 ECHOPLEX" tape-delay overlay text fades in/out during replay
+- All effects fire normally (with `_isEchoplexRetrigger:true` flag for purity exclusions)
+- Then card returns to discard pile
+- Total replay animation: ~600ms
+- This is dramatic — the full visceral satisfaction Eddie Van Halen would approve of
+
+### D4 — Soul Bargain Death Rule: BRUTAL WITH WARNING ⚠️
+**LOCKED:** Echoplex retriggers can absolutely kill members from HP cost.
+Pre-resolution, if Echoplex's planned retrigger would kill the member, show:
+- "⚠️ FATAL ECHO INCOMING" overlay text (1.2s pause)
+- Member portrait pulses red
+- After pause, retrigger resolves and member dies
+- Player gets the dramatic warning so death feels earned, not surprise
+- Cancel option: NONE. The Echo decided. The price is paid.
+
+### D5 — Damage Display: COMMA FORMAT ALWAYS ⛧
+**LOCKED:** All damage numbers display with commas, no abbreviation:
+- 850 → "850"
+- 12,450 → "12,450"
+- 1,234,567 → "1,234,567"
+- 13,435,200 → "13,435,200"
+- Precise. Readable. The full glory of the number you achieved is shown.
+- No "M" abbreviation. No K. The 7-digit god strike number is the dopamine.
+
+### D6 — Multiplier Cap: NO CAP 🔥
+**LOCKED:** No mult cap. No diminishing returns. No display cap.
+Numbers explode as the build allows. The peak whale combo at ×268,704 multiplier × ×50 base = 13,435,200 damage IS the dopamine peak we're building toward.
+Lucifer at ~70K HP gets vaporized by such a strike. **This is intentional.**
+The "moment of triumph" requires a number worth bragging about.
+
+---
+
+## 🚀 IMPLEMENTATION CLEARED
+
+All design questions answered. All interactions analyzed. All risk mitigations locked. Code begins next session.
+
+Ship plan: Single atomic feat commit (~750 lines), 10 phases:
+1. Data additions (40+ entries with rarity tags)
+2. Reclassification of 7 utility artifacts → pedals
+3. Trigger logic (~12 new multTrigger types) in 3 strike-resolution sites
+4. Pedal effect implementations (Echoplex 69% with full re-animation, Phaser, Wah, etc.)
+5. Shop generator with weighted rarity rolls + boss-kill discount + mythic gate
+6. Mythic unlock system (stat tracking, localStorage, gates)
+7. Trophies UI (3-state silhouette/hint/reveal display)
+8. Mythic unlock dramatic overlay
+9. Sim engine port for balance verification
+10. Save format bump vst_save_v3, sim run, tune
+
+**END ANALYSIS. CODE NEXT.**

@@ -82,7 +82,7 @@ Cost range: 32–50 herb. Multipliers: ×3.0–×8.0. Score bumps: +25%–+40%. 
 | 22 | **Triple Sixes ⛧⛧⛧** | ×3 per OTHER artifact equipped | 35 | `perOtherArtifact` | Caps at ×9 with 3-slot limit |
 | 23 | **Lucifer's Pact 😈** | ×4 if Lucifer is on stage. Run score ×1.3 | 40 | `luciferOnStage` + scoreMult | Lucifer band-member |
 | 24 | **Inverted Pentacle ⛧** | ×5 if Corruption is exactly 100% (no over, no under) | 36 | `corrupt100exact` | Corruption peak |
-| 25 | **The Black Goat 🐐** | ×1.5 always × ×1.3 per OTHER artifact owned (excludes self). Compounds with Goat of Mendes (stacks!) | 42 | `goatStackOther` | Hyper-mult builds (max ×2.54 from this artifact alone) |
+| 25 | **The Black Goat 🐐** | ×2.0 always × ×1.3 per OTHER artifact owned. Compounds with Goat of Mendes (stacks!) | 42 | `goatStackOther` | Hyper-mult builds (max ×3.38 from this artifact alone, ×46 combined ceiling) |
 
 ---
 
@@ -141,7 +141,7 @@ These are NOT in the shop pool by default. Each is gated behind a specific in-ga
 |---|---|---|---|
 | **M1** | **The Inverted Cross ✟** | ×69 damage if Corruption is exactly 100% AND no member is Too Stoned. Run score ×1.5. | Beat Lucifer for the first time |
 | **M2** | **Tongue of the Devourer 👅** | Every card you play deals damage equal to your highest member's ATK. Stacks WITH all multipliers. | Beat Devourer (C3) without losing any band members |
-| **M3** | **The Sigil of Set 𓂀** | First Strike of every fight, your card-played and chain mults are auto-peaked (as if you played 6 cards + fired 2 chains, ×4.31 strike mult). Other artifacts/conditions still require their own triggers. One-shot per fight. | Win a Bronze run using only ONE band member |
+| **M3** | **The Sigil of Set 𓂀** | First Strike of every fight, card+chain mults are auto-peaked (×4.31). Plus auto-×2 trip mult if no other trip is active. One-shot per fight. Other artifacts/conditions still require their own triggers. | Win a Bronze run using only ONE band member |
 
 ## 🎛 Mythic Pedals (3)
 
