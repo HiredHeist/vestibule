@@ -105,6 +105,30 @@ This wasn't visible in the old broken sim. Two interpretations:
 
 ## 🟧 PRIORITY 2 — BALANCE & TUNING
 
+### 2.0 Deck identity overhaul (IN PROGRESS — May 2)
+
+JV decided to make each deck feel mechanically distinct. The goal: 5 unique identities with their own opening conditions, signature mechanics, and reward scaling. Specs locked in via `ask_user_input_v0` exchange.
+
+**Progress:**
+- [x] **Commit 1: Schema + opening conditions.** Extended `STARTER_DECKS` with `memberHpMod`, `memberHpPct`, `handSize`, `startEmbers`, `startCorruption`, `maxStrikesMod`, `freeArtifact`, `signature`, `scoreMult`. Wired all opening conditions at run start, fight start, encore restart, play-again restart, and Lucifer phase 2 transition. Build green, no signature mechanics yet.
+- [ ] **Commit 2: Signature mechanics.** Implement the 4 unique mechanics:
+  - **Shredder — `riff_chain_echo`:** every Riff Chain triggered fires a second time at 50% damage on the next strike. Stacks within a fight.
+  - **Ritualist — `corruption_feeds`:** every 10% corruption gained refunds 1 ember (capped at 3/strike).
+  - **Engineer — `copier`:** every UTILITY card has 25% chance to add a copy of itself to your hand on play.
+  - **Survivor — `second_wind`:** first time each fight a member would go Too Stoned, they instead heal to 50% HP. Once per fight, automatic.
+- [ ] **Commit 3: Sim engine port.** Port the 4 signatures to `vestibule-sim-kwstacks.js`. Run 5K-game sim per deck (25K total), output death rates and win rates per circle.
+- [ ] **Commit 4: Tune + ship.** Adjust based on sim results, update player-facing copy in any places that mention deck stats, write up findings.
+
+**Current deck identities (locked):**
+
+| Deck | Hand | Embers | Corruption | HP mod | Strikes | Signature | Score |
+|---|---|---|---|---|---|---|---|
+| Standard | 5 | 5 | 0% | normal | 4 | none | ×1.0 |
+| Shredder | 6 | 6 | 0% | -15% | 4 | RIFF CHAIN ECHO | ×1.4 |
+| Ritualist | 5 | 4 | 25% | normal | 4 | CORRUPTION FEEDS | ×1.6 |
+| Engineer | 7 | 5 | 0% | normal | 4 | COPIER + free artifact | ×1.5 |
+| Survivor | 5 | 5 | 0% | +2/member | 5 | SECOND WIND | ×1.3 |
+
 ### 2.1 Card-level outliers (from sim)
 - [ ] **Herb Money** — 0.4% pick rate. Worst card in the pool. Either drop cost (1🔥→0🔥) or add synergy hook (e.g., +1 ATK per 50 stash). Currently dead weight.
 - [ ] **Acid items** — 25:1 shroom-to-acid usage gap. Acid is too expensive and the bad-trip risk discourages purchase. Try cheaper (12→8) or remove bad-trip on Bronze stake only.

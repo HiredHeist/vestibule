@@ -1130,12 +1130,24 @@ const STARTER_PASSIVES=[
 // ═══════════════════════════════════════════════════════════
 // STARTER DECKS — achievement-gated alternate starting decks
 // ═══════════════════════════════════════════════════════════
+// STARTER_DECKS — each deck has a distinct identity beyond just card pool.
+//   hpScale         — boss HP scaling (canonical difficulty knob)
+//   memberHpMod     — flat HP added to each band member at run start (Survivor +2)
+//   memberHpPct     — % HP modifier applied to each band member (Shredder -15%)
+//   handSize        — opening hand size (default HAND_SIZE = 5)
+//   startEmbers     — fight-start ember count (default = maxEmbers, usually 5)
+//   startCorruption — fight-start corruption (default 0)
+//   maxStrikesMod   — bonus strikes per fight (Survivor +1)
+//   freeArtifact    — start run with a random Tier 1 artifact (Engineer)
+//   signature       — id of the unique mechanic ('riff_chain_echo', 'corruption_feeds',
+//                     'copier', 'second_wind'). Wired in their respective handlers.
+//   scoreMult       — final-score multiplier for leaderboard (stacks with stake.scoreMult)
 const STARTER_DECKS=[
-  {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. 10% win rate.',requirement:null,color:'#c8a060',hpScale:1.85},
-  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. Every card buffs or kills. 8% win rate.',requirement:'beat_standard',color:'#ff4400',hpScale:2.00},
-  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Embrace the darkness. 7% win rate.',requirement:'beat_shredder',color:'#cc44ff',hpScale:1.65},
-  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Find the combo. Copy the copier. 18 UTILITY cards. Break the game. 6% win rate.',requirement:'beat_ritualist',color:'#44aaff',hpScale:1.85},
-  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Extra strikes. Steady scaling. 5% win rate.',requirement:'beat_engineer',color:'#44cc44',hpScale:1.75},
+  {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. The honest fight.',requirement:null,color:'#c8a060',hpScale:1.85,scoreMult:1.0},
+  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. +1 hand size. +1 starting ember. Band starts at 85% HP — glass cannons. SIGNATURE: Riff Chain Echo — every chain fires a second time at 50% damage on the next strike.',requirement:'beat_standard',color:'#ff4400',hpScale:2.00,memberHpPct:0.85,handSize:6,startEmbers:6,signature:'riff_chain_echo',scoreMult:1.4},
+  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Start each fight at 25% corruption (Whispers fires immediately). 4 starting embers. SIGNATURE: Corruption Feeds — every 10% corruption gained refunds 1 ember (max 3/strike).',requirement:'beat_shredder',color:'#cc44ff',hpScale:1.65,startEmbers:4,startCorruption:25,signature:'corruption_feeds',scoreMult:1.6},
+  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Combo nerd. 18 UTILITY cards. +2 hand size (7 cards). Start with a free Tier 1 artifact. SIGNATURE: Copier — every UTILITY card has a 25% chance to add a copy of itself to your hand.',requirement:'beat_ritualist',color:'#44aaff',hpScale:1.85,handSize:7,freeArtifact:true,signature:'copier',scoreMult:1.5},
+  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Each band member starts with +2 max HP. +1 max strike per fight (5 instead of 4). SIGNATURE: Second Wind — once per fight, the first member who would go Too Stoned heals to 50% HP instead.',requirement:'beat_engineer',color:'#44cc44',hpScale:1.75,memberHpMod:2,maxStrikesMod:1,signature:'second_wind',scoreMult:1.3},
 ]
 function getUnlockedDecks(){
   const achs=getAchievements()
@@ -4298,7 +4310,8 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
               const _hm=1+(Math.max(0,_hl-1)*0.15)
               const _wHp=Math.ceil(ENEMIES[0].maxHp*_ds*_hm*2.0)
               setEnemyHp(_wHp);setScaledMaxHp(_wHp)
-              setStrikesLeft(activeStake.maxStrikes);setFightMaxStrikes(activeStake.maxStrikes);setDiscardsLeft(4);setFightMaxDiscards(4)
+              const _encDeckStrMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
+              setStrikesLeft(activeStake.maxStrikes+_encDeckStrMod);setFightMaxStrikes(activeStake.maxStrikes+_encDeckStrMod);setDiscardsLeft(4);setFightMaxDiscards(4)
               setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
               setGameState('playing');setAnimPhase('idle');setDeathCause(null)
               if(victoryFiredRef)victoryFiredRef.current=false
@@ -5263,14 +5276,36 @@ function App(){
   const startGame=useCallback(selIds=>{
     const musicians=selIds.map(id=>ALL_MUSICIANS.find(m=>m.id===id))
     const maxStage=chosenPacts.includes('sixth_slot')?6:5
-    const initStage=[null,...musicians.map(m=>({...m,maxHp:m.hp})),...Array(4).fill(null)].slice(0,maxStage)
+    const _deckDef=STARTER_DECKS.find(d=>d.id===selectedDeck)||{}
+    // ── DECK IDENTITY: per-member HP modifiers ──
+    const _hpMod=_deckDef.memberHpMod||0       // Survivor: +2 maxHp per member
+    const _hpPct=_deckDef.memberHpPct||1       // Shredder: 0.85 (band at 85% HP)
+    const initStage=[null,...musicians.map(m=>{
+      const _adjMaxHp=Math.max(1,Math.round((m.hp+_hpMod)*_hpPct))
+      return{...m,hp:_adjMaxHp,maxHp:_adjMaxHp}
+    }),...Array(4).fill(null)].slice(0,maxStage)
     setStage(initStage)
+    // ── DECK IDENTITY: free starter artifact (Engineer) ──
+    if(_deckDef.freeArtifact){
+      const _t1Pool=ARTIFACTS.filter(a=>a.cost<=8)
+      if(_t1Pool.length>0){
+        const _gift=_t1Pool[Math.floor(Math.random()*_t1Pool.length)]
+        setActiveArtifacts(p=>[...p,_gift])
+        setTimeout(()=>addLog('🔧 Engineer\'s gift: starting artifact '+_gift.name),300)
+      }
+    }
     const d=buildDeck(runSeed,selectedDeck)
     // STREAK BONUSES
     const _streakW=parseInt(localStorage.getItem('vst_streak_wins')||'0')
     if(_streakW>=2){setMaxEmbers(p=>Math.min(MAX_EMBERS_CAP,p+1));setEmbers(p=>p+1);addLog('🔥 Streak bonus: +1 starting Ember!')}
     if(_streakW>=3){addLog('🔥 Streak bonus: Your next recruit has a Foil upgrade!')}
-    const _hs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
+    // ── DECK IDENTITY: hand size + starting embers ──
+    const _deckHandSize=_deckDef.handSize||HAND_SIZE
+    const _hs=_deckHandSize+(chosenPacts.includes('speed_demon')?1:0)
+    if(_deckDef.startEmbers!=null){
+      setMaxEmbers(_deckDef.startEmbers)   // Shredder: 6, Ritualist: 4
+      setEmbers(_deckDef.startEmbers)
+    }
     setHand(d.slice(0,_hs))
     setDeck(d.slice(_hs))
     handTargetRef.current=_hs
@@ -5288,6 +5323,11 @@ function App(){
       setStage(p=>{const idx=p.findIndex(m=>m&&!m.mythic&&!m.demonic);if(idx===-1)return p;const ns=[...p];ns[idx]=Object.assign({},ns[idx],{mythic:true,foil:false,atk:ns[idx].atk+2,maxHp:ns[idx].maxHp+4,hp:ns[idx].hp+4});return ns})
     }
     if(streakWins>=2)addLog('🔥 Win streak '+streakWins+'! '+STREAK_BONUSES[Math.min(streakWins,5)].desc)
+    // ── DECK IDENTITY: Ritualist starts at 25% corruption ──
+    if(_deckDef.startCorruption!=null&&_deckDef.startCorruption>0){
+      setCorruption(_deckDef.startCorruption)
+      setTimeout(()=>addLog('💀 '+_deckDef.name+': starting at '+_deckDef.startCorruption+'% corruption'),200)
+    }
     setGameState('playing')
     addLog('⛧ '+musicians[0].name+' and '+musicians[1].name+' take the stage!')
     // Show Descent map for Circle 1
@@ -7077,8 +7117,9 @@ function App(){
           // Full band reset
           setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,stoneShield:false,tempBuff:false,encoreReady:false,ampedThisStrike:false}):null))
           setEmbers(maxEmbers)
-          setStrikesLeft(activeStake.maxStrikes)
-          setFightMaxStrikes(activeStake.maxStrikes)
+          const _lucDeckStrMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
+          setStrikesLeft(activeStake.maxStrikes+_lucDeckStrMod)
+          setFightMaxStrikes(activeStake.maxStrikes+_lucDeckStrMod)
           setDiscardsLeft(MAX_DISCARDS)
           setFightMaxDiscards(MAX_DISCARDS)
           setTripUsedThisFight(false)
@@ -7491,7 +7532,8 @@ function App(){
       setStage(p=>{const alive=p.filter(m=>m&&!m.tooStoned);if(alive.length===0)return p;const weakest=alive.reduce((a,b)=>a.hp<b.hp?a:b);return p.map(m=>m&&m.uid===weakest.uid?Object.assign({},m,{hp:Math.max(1,m.hp-1)}):m)})
       addLog('🔮 The Whispers... '+corruption+'% corruption gnaws at your weakest.')
     }
-    const _fmStrikes = activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0);
+    const _deckMaxStrikesMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
+    const _fmStrikes = activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0)+_deckMaxStrikesMod;
     const _fmDiscards = MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0);
     setEmbers(function(){return maxEmbers+(bonusEmbers>0?bonusEmbers:0)});playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
@@ -7942,7 +7984,8 @@ function App(){
     if(deckDef?.startStash)setStash(p=>p+(deckDef.startStash||0))
     setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
-    setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes);setFightMaxStrikes(activeStake.maxStrikes);setDiscardsLeft(MAX_DISCARDS);setFightMaxDiscards(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
+    const _restartDeckStrMod=deckDef?.maxStrikesMod||0
+    setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes+_restartDeckStrMod);setFightMaxStrikes(activeStake.maxStrikes+_restartDeckStrMod);setDiscardsLeft(MAX_DISCARDS);setFightMaxDiscards(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
     setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false
     clearSave();setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
