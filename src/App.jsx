@@ -208,7 +208,11 @@ function unlockAchievement(id){
 
 const ENEMIES=[
   // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
-  {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:90,baseDmg:4,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
+  // Wanderer — TUTORIAL FIGHT. Tuned to feel winnable for sub-optimal picks
+  // so players reach shop 1 (where the modifier system actually unfolds).
+  // Was 90 HP / 4 dmg; lowered to ease onboarding without affecting curve.
+  // Lost Soul and Drifter unchanged — they preserve the difficulty ramp.
+  {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:65,baseDmg:3,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
   {id:'lostsoul',tagline:'You were lost before you started.',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:150,baseDmg:5,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
   {id:'drifter',tagline:'110 HP and pure aggression.',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:340,baseDmg:7,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
   // ── CIRCLE II: LUST — Enemy buffs itself each strike ─────────
