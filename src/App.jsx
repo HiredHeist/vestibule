@@ -1096,33 +1096,117 @@ function markTipSeen(id){const seen=JSON.parse(localStorage.getItem('vst_tips')|
 function markTutorialDone(){localStorage.setItem('vst_tutorial','done')}
 
 // ── STARTER ARTIFACTS A1-A10 ─────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// ARTIFACTS — DAMAGE/SCORE MULTIPLIERS (3 slots, max equipped)
+// ═══════════════════════════════════════════════════════════
+// Framing: ARTIFACTS PAYOUT, PEDALS ENABLE.
+// All artifacts here produce a multiplier (mult/multTrigger) or
+// score bump (scoreBump). Utility effects moved to STARTER_PASSIVES.
+// Rarity weights: Common 50%, Uncommon 30%, Rare 17%, Mythic 3%.
+// Mythic tier locked behind in-game accomplishments — see MYTHIC_ARTIFACTS.
 const STARTER_ARTIFACTS=[
-  {id:'a1',name:'Vintage Guitar',emoji:'🎸',effect:'×1.3 when you play 4+ cards before Striking.',cost:10,multTrigger:'cards3',mult:1.3},
-  {id:'a2',name:"Devil's Tuning Fork",emoji:'🔱',effect:'Start each fight at 15% Corruption. ×1.5 damage when Corruption hits 60%+.',cost:16,multTrigger:'corrupt50',mult:1.5},
-  {id:'a3',name:'The Evil Eye',emoji:'🧿',effect:'The first card you play each Strike costs 0 Embers.',cost:20,rare:true},
-  {id:'a4',name:"Roadie's Toolbelt",emoji:'🧰',effect:'At the start of each fight, one random member gains Stonewall (immune to Too Stoned once).',cost:6},
-  {id:'a5',name:'Haunted Radio',emoji:'📻',effect:'×1.2 damage for each Riff Chain fired this Strike.',cost:8,multTrigger:'perChain',mult:1.2},
-  {id:'a6',name:'Black Candle',emoji:'🕯',effect:'×1.4 damage for each Too Stoned member.',cost:12,multTrigger:'perStoned',mult:1.4},
-  {id:'a7',name:"The Serpent's Kiss",emoji:'🐍',effect:'Start each fight with 1 extra Ember permanently (max 8 total).',cost:18},
-  {id:'a8',name:'Stone Tablet',emoji:'🪨',effect:'All band members gain +3 max HP permanently.',cost:12},
-  {id:'a9',name:'Resonance Coil',emoji:'⚙️',effect:'×1.15 for each duplicate card in your hand when you Strike.',cost:10,multTrigger:'perDupe',mult:1.15},
-  {id:'a10',name:'Burning Stage',emoji:'🔥',effect:'×3.0 if you play ALL 6 cards before Striking. Total commitment.',cost:22,multTrigger:'cards5',mult:3.0},
-  // ── UNLOCKABLE ARTIFACT ────────────────────────────────────────
-  {id:'wardrums',name:'War Drums',emoji:'🪘',effect:'+1 Strike per fight permanently (5 Strikes instead of 4).',cost:30,locked:true,unlockAt:5000},
+  // ── EXISTING MULTIPLIERS (kept, retagged with rarity) ─────────
+  {id:'a1',name:'Vintage Guitar',emoji:'🎸',effect:'×1.3 when you play 4+ cards before Striking.',cost:10,multTrigger:'cards3',mult:1.3,rarity:'common'},
+  {id:'a2',name:"Devil's Tuning Fork",emoji:'🔱',effect:'Start each fight at 15% Corruption. ×1.5 damage when Corruption hits 60%+.',cost:16,multTrigger:'corrupt50',mult:1.5,rarity:'uncommon',startCorr:15},
+  {id:'a5',name:'Haunted Radio',emoji:'📻',effect:'×1.2 damage for each Riff Chain fired this Strike.',cost:8,multTrigger:'perChain',mult:1.2,rarity:'common'},
+  {id:'a6',name:'Black Candle',emoji:'🕯',effect:'×1.4 damage for each Too Stoned member.',cost:12,multTrigger:'perStoned',mult:1.4,rarity:'uncommon'},
+  {id:'a9',name:'Resonance Coil',emoji:'⚙️',effect:'×1.15 for each duplicate card in your hand when you Strike.',cost:10,multTrigger:'perDupe',mult:1.15,rarity:'common'},
+  {id:'a10',name:'Burning Stage',emoji:'🔥',effect:'×3.0 if you play ALL 6 cards before Striking. Total commitment.',cost:22,multTrigger:'cards5',mult:3.0,rarity:'rare'},
+  // ── NEW COMMON-TIER (12) ──────────────────────────────────────
+  {id:'crackedpickup',name:'Cracked Pickup',emoji:'🎤',effect:'×1.2 damage if you played a RIFF this strike.',cost:10,multTrigger:'playedRiff',mult:1.2,rarity:'common'},
+  {id:'distortioncab',name:'Distortion Cab',emoji:'🔊',effect:'×1.25 damage always.',cost:14,multTrigger:'alwaysOn',mult:1.25,rarity:'common'},
+  {id:'ashtray',name:'Ash Tray',emoji:'🚬',effect:'×1.3 damage if any member is Too Stoned.',cost:12,multTrigger:'anyStoned',mult:1.3,rarity:'common'},
+  {id:'crowdnoise',name:'Crowd Noise',emoji:'🤘',effect:'×1.15 per alive non-stoned member.',cost:14,multTrigger:'perAliveMember',mult:1.15,rarity:'common'},
+  {id:'tapehiss',name:'Tape Hiss',emoji:'📼',effect:"×1.2 if you DIDN'T play any RIFF this strike.",cost:8,multTrigger:'noRiff',mult:1.2,rarity:'common'},
+  {id:'cheapbeer',name:'Cheap Beer',emoji:'🍺',effect:'×1.15 damage. +5% run score.',cost:10,multTrigger:'alwaysOn',mult:1.15,scoreBump:0.05,rarity:'common'},
+  {id:'setlistart',name:'Set List',emoji:'📋',effect:'×1.4 if first card played was an EMBER type.',cost:12,multTrigger:'firstCardEmber',mult:1.4,rarity:'common'},
+  {id:'gaffertape',name:'Gaffer Tape',emoji:'🩹',effect:'×1.2 if no member is below half HP.',cost:10,multTrigger:'allHealthy',mult:1.2,rarity:'common'},
+  {id:'powerstrip',name:'Power Strip',emoji:'⚡',effect:'×1.25 if you have 5+ Embers when you Strike.',cost:11,multTrigger:'embers5',mult:1.25,rarity:'common'},
+  {id:'spitcup',name:'Spit Cup',emoji:'🥃',effect:'×1.5 damage if you discarded ≥1 card this fight.',cost:10,multTrigger:'discardedFight',mult:1.5,rarity:'common'},
+  {id:'toursticker',name:'Tour Sticker',emoji:'🎟',effect:'+10% run score.',cost:8,scoreBump:0.10,rarity:'common'},
+  {id:'divebarsign',name:'Dive Bar Sign',emoji:'🍻',effect:'×1.2 in Circles I-III only.',cost:9,multTrigger:'earlyCircle',mult:1.2,rarity:'common'},
+  // ── NEW UNCOMMON-TIER (8) ─────────────────────────────────────
+  {id:'pentagramshrine',name:'Pentagram Shrine',emoji:'🜏',effect:'×1.4 per CORRUPT card played this strike (multiplicative).',cost:22,multTrigger:'perCorruptCard',mult:1.4,rarity:'uncommon'},
+  {id:'doomchoir',name:'Doom Choir',emoji:'🎵',effect:'×1.5 per same-role member on stage (multiplicative).',cost:24,multTrigger:'perSameRole',mult:1.5,rarity:'uncommon'},
+  {id:'solosermon',name:'Solo Sermon',emoji:'🎙',effect:'×6.0 if EXACTLY 2 cards played this strike.',cost:26,multTrigger:'cards2exact',mult:6.0,rarity:'uncommon'},
+  {id:'blackmassbell',name:'Black Mass Bell',emoji:'🔔',effect:'×2.5 if 3+ Riff Chains fired this strike.',cost:22,multTrigger:'chains3',mult:2.5,rarity:'uncommon'},
+  {id:'ouroborospin',name:'Ouroboros Pin',emoji:'🐍',effect:'×1.3 per discarded card this strike (multiplicative).',cost:20,multTrigger:'perDiscardStrike',mult:1.3,rarity:'uncommon'},
+  {id:'drummerstick',name:"Drummer's Stick",emoji:'🥁',effect:'×2.5 if your Drummer rolled DOUBLE TIME this fight.',cost:22,multTrigger:'doubleTimeRolled',mult:2.5,rarity:'uncommon'},
+  {id:'fogmachine',name:'Fog Machine',emoji:'💨',effect:'×1.4 per stoned member. +20% run score per stoned at fight end.',cost:24,multTrigger:'perStoned',mult:1.4,scoreBumpPerStoned:0.20,rarity:'uncommon'},
+  {id:'chromeskull',name:'Chrome Skull',emoji:'💀',effect:'×3 if exactly 1 member is alive at strike time.',cost:28,multTrigger:'lastMemberStanding',mult:3.0,rarity:'uncommon'},
+  // ── NEW RARE-TIER (5) ─────────────────────────────────────────
+  {id:'doomcrown',name:'The Doom Crown',emoji:'👑',effect:'×8 if all cards played this strike are SAME TYPE (min 3 cards).',cost:38,multTrigger:'allSameType',mult:8.0,rarity:'rare'},
+  {id:'triplesixes',name:'Triple Sixes',emoji:'⛧',effect:'×3 per OTHER artifact equipped (max ×9 with full slots).',cost:35,multTrigger:'perOtherArtifact',mult:3.0,rarity:'rare'},
+  {id:'luciferspact',name:"Lucifer's Pact",emoji:'😈',effect:'×4 if Lucifer is on stage. Run score ×1.3.',cost:40,multTrigger:'luciferOnStage',mult:4.0,scoreMult:1.3,rarity:'rare'},
+  {id:'invertedpentacle',name:'Inverted Pentacle',emoji:'🜺',effect:'×5 if Corruption is exactly 100% (no over, no under).',cost:36,multTrigger:'corrupt100exact',mult:5.0,rarity:'rare'},
+  {id:'blackgoat',name:'The Black Goat',emoji:'🐐',effect:'×2.0 always × ×1.3 per OTHER artifact owned. Stacks with Goat of Mendes.',cost:42,multTrigger:'goatStackOther',mult:2.0,rarity:'rare'},
+  // ── UNLOCKABLE (kept) ─────────────────────────────────────────
+  {id:'wardrums',name:'War Drums',emoji:'🪘',effect:'+1 Strike per fight permanently (5 Strikes instead of 4).',cost:30,locked:true,unlockAt:5000,reclassifiedToPedal:true},
 ]
 
-// ── STARTER PASSIVES P1-P10 (CD-Rs) ───────────────────────────
+// ── MYTHIC ARTIFACTS (3) — UNLOCK-GATED ────────────────────────
+// Not in shop pool until corresponding unlock fires. See unlock conditions
+// in MODIFIER_CONTENT.md. Discovered via play, not displayed in trophies
+// until "seen" or "unlocked".
+const MYTHIC_ARTIFACTS=[
+  {id:'invertedcross',name:'The Inverted Cross',emoji:'✟',effect:'×69 damage if Corruption is exactly 100% AND no member is Too Stoned. Run score ×1.5.',cost:50,multTrigger:'corruptedClean',mult:69.0,scoreMult:1.5,rarity:'mythic',unlockId:'invertedCross',hint:'When the King of Hell falls before you for the first time...'},
+  {id:'tongueofdevourer',name:'Tongue of the Devourer',emoji:'👅',effect:"Every card you play deals damage equal to your highest member's ATK. Stacks with all multipliers.",cost:50,multTrigger:'tongueDamage',mult:1.0,rarity:'mythic',unlockId:'tongueOfDevourer',hint:"Stand against the third circle's hunger without sacrifice."},
+  {id:'sigilofset',name:'The Sigil of Set',emoji:'𓂀',effect:'First Strike of every fight, card+chain mults are auto-peaked (×4.31). Plus auto-×2 trip mult if no other trip is active. One-shot per fight.',cost:50,multTrigger:'sigilOpener',mult:4.31,rarity:'mythic',unlockId:'sigilOfSet',hint:'Walk the path alone. Burn through Hell with one voice.'},
+]
+
+// ═══════════════════════════════════════════════════════════
+// PEDALS (PASSIVES) — STRATEGY ENABLERS (2 slots, max equipped)
+// ═══════════════════════════════════════════════════════════
+// Framing: PEDALS ENABLE, ARTIFACTS PAYOUT.
+// All pedals here change rules / economy / draw / cost / structure.
+// No multipliers in this pool (those are artifacts).
+// Some pedals were reclassified from artifacts (former a3/a4/a7/a8/ca2/ca3/wardrums).
 const STARTER_PASSIVES=[
-  {id:'p1',name:'Power Chord',emoji:'⚡',effect:'Gain 1 extra Ember at the start of every fight.',cost:6},
-  {id:'p2',name:'Roadie Crew',emoji:'🔧',effect:'At the start of each fight, one random member heals 3 HP.',cost:8},
-  {id:'p3',name:'Merch Table',emoji:'👕',effect:'After each fight victory, gain +2 bonus Stash.',cost:6},
-  {id:'p4',name:'Feedback Hum',emoji:'🔊',effect:'All EMBER type cards give 1 additional Ember when played.',cost:10},
-  {id:'p5',name:'Amp Stack',emoji:'📻',effect:'Sound Wall gives +2 ATK permanently to all (instead of +1). Heavy Riff cap raised to +25 (instead of +20).',cost:10},
-  {id:'p6',name:'Cult Following',emoji:'🕯',effect:'Each time any member goes Too Stoned, gain 3 Stash.',cost:10},
-  {id:'p7',name:'Guitar Tech',emoji:'🎛',effect:'Battle Cry gives +2 ATK permanently instead of +1.',cost:8},
-  {id:'p8',name:'Green Room',emoji:'🛋',effect:'At the start of each fight, all members gain Stonewall (immune to first Too Stoned event).',cost:16},
-  {id:'p9',name:'Heavy Rotation',emoji:'🎚',effect:'When you draw a duplicate card into your hand, draw 1 extra card next Strike.',cost:10},
-  {id:'p10',name:'Stage Fright Reversal',emoji:'🎙',effect:'The first Strike of every fight deals +10 bonus damage.',cost:14},
+  // ── ORIGINAL P1-P10 (kept, retagged with rarity) ──────────────
+  {id:'p1',name:'Power Chord',emoji:'⚡',effect:'Gain 1 extra Ember at the start of every fight.',cost:6,rarity:'common'},
+  {id:'p2',name:'Roadie Crew',emoji:'🔧',effect:'At the start of each fight, one random member heals 3 HP.',cost:8,rarity:'common'},
+  {id:'p3',name:'Merch Table',emoji:'👕',effect:'After each fight victory, gain +2 bonus Stash.',cost:6,rarity:'common'},
+  {id:'p4',name:'Feedback Hum',emoji:'🔊',effect:'All EMBER type cards give 1 additional Ember when played.',cost:10,rarity:'uncommon'},
+  {id:'p5',name:'Amp Stack',emoji:'📻',effect:'Sound Wall gives +2 ATK permanently to all (instead of +1). Heavy Riff cap raised to +25 (instead of +20).',cost:10,rarity:'uncommon'},
+  {id:'p6',name:'Cult Following',emoji:'🕯',effect:'Each time any member goes Too Stoned, gain 3 Stash.',cost:10,rarity:'common'},
+  {id:'p7',name:'Guitar Tech',emoji:'🎛',effect:'Battle Cry gives +2 ATK permanently instead of +1.',cost:8,rarity:'common'},
+  {id:'p8',name:'Green Room',emoji:'🛋',effect:'At the start of each fight, all members gain Stonewall (immune to first Too Stoned event).',cost:16,rarity:'uncommon'},
+  {id:'p9',name:'Heavy Rotation',emoji:'🎚',effect:'When you draw a duplicate card into your hand, draw 1 extra card next Strike.',cost:10,rarity:'uncommon'},
+  {id:'p10',name:'Stage Fright Reversal',emoji:'🎙',effect:'The first Strike of every fight deals +10 bonus damage.',cost:14,rarity:'common'},
+  // ── RECLASSIFIED FROM ARTIFACTS (7) ───────────────────────────
+  // Former a3, a4, a7, a8, ca2, ca3, wardrums — all utility/structural.
+  {id:'a3',name:'The Evil Eye',emoji:'🧿',effect:'The first card you play each Strike costs 0 Embers.',cost:20,rarity:'rare',reclassified:true},
+  {id:'a4',name:"Roadie's Toolbelt",emoji:'🧰',effect:'At the start of each fight, one random member gains Stonewall (immune to Too Stoned once).',cost:6,rarity:'common',reclassified:true},
+  {id:'a7',name:"The Serpent's Kiss",emoji:'🐍',effect:'Start each fight with 1 extra Ember permanently (max 8 total).',cost:18,rarity:'uncommon',reclassified:true},
+  {id:'a8',name:'Stone Tablet',emoji:'🪨',effect:'All band members gain +3 max HP permanently.',cost:12,rarity:'uncommon',reclassified:true},
+  {id:'ca2',name:'Hellfire Amulet',emoji:'🔮',effect:'Gain +2 Embers at the start of each fight.',cost:17,rarity:'uncommon',reclassified:true},
+  {id:'ca3',name:'Sabbath Crown',emoji:'👑',effect:'When a member goes Too Stoned, 50% chance to revive them at 1 HP.',cost:22,rarity:'rare',reclassified:true},
+  {id:'wardrums',name:'War Drums',emoji:'🪘',effect:'+1 Strike per fight permanently (5 Strikes instead of 4).',cost:30,rarity:'rare',locked:true,unlockAt:5000,reclassified:true},
+  // ── NEW COMMON PEDALS (8) ─────────────────────────────────────
+  {id:'reverbtank',name:'Reverb Tank',emoji:'〰️',effect:'First card you play each Strike costs 1 less Ember (min 0).',cost:12,rarity:'common'},
+  {id:'fuzzbox',name:'Fuzz Box',emoji:'🌫',effect:'All RIFF cards cost 1 less Ember.',cost:14,rarity:'common'},
+  {id:'tunerpedal',name:'Tuner Pedal',emoji:'🎯',effect:'Discarding a card draws 1 immediately.',cost:12,rarity:'common'},
+  {id:'wahpedal',name:'Wah Pedal',emoji:'🦶',effect:'First CORRUPT card each fight costs 0 Embers.',cost:12,rarity:'common'},
+  {id:'volumeknob',name:'Volume Knob',emoji:'🔆',effect:'If you played 4+ cards last Strike, draw 1 extra next Strike.',cost:11,rarity:'common'},
+  {id:'powerconditioner',name:'Power Conditioner',emoji:'🔌',effect:'Start each fight with +1 Ember.',cost:10,rarity:'common'},
+  {id:'cabletester',name:'Cable Tester',emoji:'🪡',effect:'Duplicate cards cost 1 less Ember.',cost:12,rarity:'common'},
+  {id:'drumthrone',name:'Drum Throne',emoji:'🪑',effect:'Drummer rolls d6 twice and picks higher result.',cost:14,rarity:'common'},
+  // ── NEW UNCOMMON PEDALS (4) ───────────────────────────────────
+  {id:'phaserpedal',name:'Phaser',emoji:'🌊',effect:'All CORRUPT cards cost 1 less Ember.',cost:18,rarity:'uncommon'},
+  {id:'compressorpedal',name:'Compressor',emoji:'📊',effect:'If you play 4+ cards in a Strike, draw 1 next Strike AND gain 1 Ember.',cost:18,rarity:'uncommon'},
+  {id:'octavepedal',name:'Octave Pedal',emoji:'🎼',effect:'First Riff Chain each fight fires twice (double mult).',cost:22,rarity:'uncommon'},
+  {id:'sustainpedal',name:'Sustain Pedal',emoji:'🦶',effect:'Buffs from temp ATK cards last 1 extra Strike.',cost:20,rarity:'uncommon'},
+  // ── NEW RARE PEDALS (3) ───────────────────────────────────────
+  {id:'looperpedal',name:'The Looper',emoji:'♾️',effect:'First card each Strike replays at end of Strike (free).',cost:28,rarity:'rare'},
+  {id:'bitcrusher',name:'Bit Crusher',emoji:'💥',effect:'Each card you discard gives +5% Corruption.',cost:26,rarity:'rare'},
+  {id:'echoplex',name:'Echoplex',emoji:'🎚',effect:'When you play a card, 69% chance it triggers a second time at end of Strike (free). The god-tier pedal.',cost:42,rarity:'rare'},
+]
+
+// ── MYTHIC PEDALS (3) — UNLOCK-GATED ───────────────────────────
+const MYTHIC_PEDALS=[
+  {id:'witchssabbath',name:"The Witch's Sabbath",emoji:'🌑',effect:'First card each Strike replays THREE times instead of once. Looper × Echoplex on steroids.',cost:50,rarity:'mythic',unlockId:'witchsSabbath',hint:'Let the haze consume them all, and emerge victorious.'},
+  {id:'theconduit',name:'The Conduit',emoji:'⚡',effect:'Start each fight at MAX Embers. All cards cost half (rounded down).',cost:50,rarity:'mythic',unlockId:'theConduit',hint:'Slay the King swiftly. Mercy is for the weak.'},
+  {id:'tabletofazothoth',name:"Tablet of Az'Tothoth",emoji:'📜',effect:'First Riff Chain each fight permanently upgrades a random card for the rest of the run.',cost:50,rarity:'mythic',unlockId:'tabletOfAzothoth',hint:'Master every chain in a single descent.'},
 ]
 
 
@@ -1245,12 +1329,12 @@ const BOSS_BIOS={
 }
 
 const CIRCLE_ARTIFACTS=[
-  {id:'ca1',name:'The Goat of Mendes',emoji:'🐐',effect:'All Strikes deal ×1.5 damage. Stacks with other multipliers.',cost:28,multTrigger:'always',mult:1.5},
-  {id:'ca2',name:'Hellfire Amulet',emoji:'🔮',effect:'Start each fight with +2 bonus Embers.',cost:17},
-  {id:'ca3',name:'Sabbath Crown',emoji:'👑',effect:'Too Stoned members revive at 50% HP each round.',cost:22},
-  {id:'ca4',name:'Wailing Guitar',emoji:'🎸',effect:'First Strike each fight deals double damage.',cost:16},
-  {id:'ca5',name:'Hellmouth Amplifier',emoji:'🌋',effect:'×5.0 damage when Corruption is 80%+. The sound of Hell itself.',cost:40,multTrigger:'corrupt80',mult:5.0},
-  {id:'ca6',name:'Void Engine',emoji:'🕳',effect:'×3.0 for each Too Stoned member. Feed the machine your bandmates.',cost:35,multTrigger:'perStoned',mult:3.0},
+  {id:'ca1',name:'The Goat of Mendes',emoji:'🐐',effect:'All Strikes deal ×1.5 damage. Stacks with other multipliers.',cost:28,multTrigger:'alwaysOn',mult:1.5,rarity:'rare'},
+  // ca2 (Hellfire Amulet) RECLASSIFIED to pedal pool
+  // ca3 (Sabbath Crown) RECLASSIFIED to pedal pool
+  {id:'ca4',name:'Wailing Guitar',emoji:'🎸',effect:'First Strike each fight deals double damage.',cost:16,multTrigger:'firstStrikeOfFight',mult:2.0,rarity:'uncommon'},
+  {id:'ca5',name:'Hellmouth Amplifier',emoji:'🌋',effect:'×5.0 damage when Corruption is 80%+. The sound of Hell itself.',cost:40,multTrigger:'corrupt80',mult:5.0,rarity:'rare'},
+  {id:'ca6',name:'Void Engine',emoji:'🕳',effect:'×3.0 for each Too Stoned member. Feed the machine your bandmates.',cost:35,multTrigger:'perStoned',mult:3.0,rarity:'rare'},
 ]
 
 // Card prices by rarity
@@ -5198,6 +5282,9 @@ function App(){
   const [cardsPlayedThisStrike,setCardsPlayedThisStrike]=useState([])
   const cardsPlayedRef=useRef([])
   const combosFiredRef=useRef([])
+  // Discard tracking refs for new modifier system (Spit Cup, Ouroboros Pin)
+  const discardsThisFightRef=useRef(0)
+  const discardsThisStrikeRef=useRef(0)
   const [comboFlash,setComboFlash]=useState(null)
   const [chainCallout,setChainCallout]=useState(null) // {name,color,emoji}
   const [combosDiscoveredThisRun,setCombosDiscoveredThisRun]=useState([])
@@ -5586,6 +5673,7 @@ function App(){
     setCardsPlayedThisStrike([])
     cardsPlayedRef.current=[]
     combosFiredRef.current=[]
+    discardsThisStrikeRef.current=0
     victoryFiredRef.current=false
     setStash(20) // enough to buy stuff if shop appears
         setBossDebuff(0)
@@ -6652,8 +6740,18 @@ function App(){
     const res=drawUpTo(rem,deckRef.current,[...discRef.current,...toDisc],HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0))
     setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
     playSfx('discard');setDiscardsLeft(p=>p-1);setSelected([]);setUndoSnapshot(null)
+    // ── DISCARD TRACKING for Spit Cup / Ouroboros Pin / Bit Crusher pedal ──
+    discardsThisFightRef.current+=toDisc.length
+    discardsThisStrikeRef.current+=toDisc.length
+    // Bit Crusher pedal: each discard = +5% corruption
+    if(activePassives.some(p=>p.id==='bitcrusher')){
+      const corrGain=toDisc.length*5
+      setCorruption(p=>Math.min(100,p+corrGain))
+      addFloat('+'+corrGain+'% corr',window.innerWidth/2,window.innerHeight*0.4,'#aa44cc')
+    }
+    // Tuner Pedal: discard draws 1 immediately (already covered by drawUpTo replacing)
     addLog('🗑 '+toDisc.length+' discarded & replaced.')
-  },[selected,discardsLeft,animPhase,hand,deck,discardPile,drawUpTo])
+  },[selected,discardsLeft,animPhase,hand,deck,discardPile,drawUpTo,activePassives])
 
   // ── UNDO LAST CARD PLAY — one-step restore ──
   const handleUndo=useCallback(()=>{
@@ -7432,9 +7530,46 @@ function App(){
       const chainsFired=(combosFiredRef.current||[]).length
       const stonedCount=stage.filter(m=>m&&m.tooStoned).length
       const handDupes=hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
+      // ── EXTENDED CONTEXT for new multTrigger types ──
+      // _cardsThisStrike list filtered to count types/CORRUPTs/RIFFs played this strike.
+      // Echoplex retriggers are flagged with _isEchoplexRetrigger and excluded from
+      // purity checks (allSameType, cards2exact, cards1) per locked design D1.
+      const cardsThisStrike=cardsPlayedRef.current||[]
+      const cardsRealPlays=cardsThisStrike.filter(c=>!c._isEchoplexRetrigger)
+      const corruptCardsCount=cardsThisStrike.filter(c=>c.type==='CORRUPT').length
+      const riffCardsCount=cardsThisStrike.filter(c=>c.type==='RIFF').length
+      const playedAnyRiff=riffCardsCount>0
+      // Same-type purity check: every REAL play (excl Echoplex retriggers) is the same type.
+      const realCardsForPurity=cardsRealPlays
+      const allSameType=realCardsForPurity.length>=3&&realCardsForPurity.every(c=>c.type===realCardsForPurity[0].type)
+      // Same-role count: max number of band members sharing the same role.
+      const roleCounts={}
+      stage.forEach(m=>{if(m&&m.role){roleCounts[m.role]=(roleCounts[m.role]||0)+1}})
+      const maxSameRole=Math.max(0,...Object.values(roleCounts))
+      // Alive non-stoned members
+      const aliveNonStoned=stage.filter(m=>m&&!m.tooStoned&&m.hp>0).length
+      // Discard tracking — discardsThisFightRef counts discards this fight.
+      const discardsThisFight=(discardsThisFightRef&&discardsThisFightRef.current)||0
+      const discardsThisStrike=(discardsThisStrikeRef&&discardsThisStrikeRef.current)||0
+      // Lucifer on stage check
+      const luciferOnStage=stage.some(m=>m&&(m.id==='lucifer'||m.name==='Lucifer'))
+      // Drummer DOUBLE TIME rolled this fight (uses existing dblRoll state)
+      const drummerDT=dblRoll>=5
+      // First card played type (for setlist artifact)
+      const firstCardType=cardsThisStrike.length>0?cardsThisStrike[0].type:null
+      // All members healthy (≥50% HP) for Gaffer Tape
+      const allMembersHealthy=stage.filter(m=>m).every(m=>m.hp>=Math.ceil(m.maxHp/2))
+      // Last member standing
+      const aliveCount=stage.filter(m=>m&&m.hp>0).length
+      // Early circle check (1-3 = early, indices 0-2)
+      const earlyCircleCheck=Math.floor((fightIndex||0)/3)<3
+      // Highest member ATK on stage (for Tongue of the Devourer mythic)
+      const highestStageAtk=Math.max(0,...stage.filter(m=>m).map(m=>getEffectiveAtk(m,_atkCtx)))
+
       for(const art of activeArtifacts){
         if(!art.multTrigger)continue
         let fires=0
+        // EXISTING TRIGGERS (kept)
         if(art.multTrigger==='cards3'&&cardsPlayedCount>=4)fires=1
         if(art.multTrigger==='cards5'&&cardsPlayedCount>=6)fires=1
         if(art.multTrigger==='corrupt50'&&corruption>=60)fires=1
@@ -7442,6 +7577,73 @@ function App(){
         if(art.multTrigger==='perChain')fires=chainsFired
         if(art.multTrigger==='perStoned')fires=stonedCount
         if(art.multTrigger==='perDupe')fires=handDupes
+        // ── NEW COMMON TRIGGERS ──
+        if(art.multTrigger==='alwaysOn')fires=1
+        if(art.multTrigger==='playedRiff'&&playedAnyRiff)fires=1
+        if(art.multTrigger==='anyStoned'&&stonedCount>0)fires=1
+        if(art.multTrigger==='perAliveMember')fires=aliveNonStoned
+        if(art.multTrigger==='noRiff'&&!playedAnyRiff&&cardsPlayedCount>0)fires=1
+        if(art.multTrigger==='firstCardEmber'&&firstCardType==='EMBER')fires=1
+        if(art.multTrigger==='allHealthy'&&allMembersHealthy)fires=1
+        if(art.multTrigger==='embers5'&&embers>=5)fires=1
+        if(art.multTrigger==='discardedFight'&&discardsThisFight>=1)fires=1
+        if(art.multTrigger==='earlyCircle'&&earlyCircleCheck)fires=1
+        // ── NEW UNCOMMON TRIGGERS ──
+        if(art.multTrigger==='perCorruptCard')fires=corruptCardsCount
+        if(art.multTrigger==='perSameRole')fires=Math.max(0,maxSameRole)
+        if(art.multTrigger==='cards2exact'&&cardsRealPlays.length===2)fires=1
+        if(art.multTrigger==='chains3'&&chainsFired>=3)fires=1
+        if(art.multTrigger==='perDiscardStrike')fires=discardsThisStrike
+        if(art.multTrigger==='doubleTimeRolled'&&drummerDT)fires=1
+        if(art.multTrigger==='lastMemberStanding'&&aliveCount===1)fires=1
+        // ── NEW RARE TRIGGERS ──
+        if(art.multTrigger==='allSameType'&&allSameType)fires=1
+        if(art.multTrigger==='perOtherArtifact')fires=Math.max(0,activeArtifacts.length-1)
+        if(art.multTrigger==='luciferOnStage'&&luciferOnStage)fires=1
+        if(art.multTrigger==='corrupt100exact'&&corruption===100)fires=1
+        if(art.multTrigger==='goatStackOther'){
+          // Black Goat: ×2.0 always × ×1.3 per OTHER artifact
+          // Implemented as: base ×2.0 fires once + ×1.3 per other artifact
+          const others=Math.max(0,activeArtifacts.length-1)
+          // We'll handle this as TWO mult events for clarity in cascade
+          const baseAmount=art.mult||2.0
+          const perOtherMult=Math.pow(1.3,others)
+          const totalMult=baseAmount*perOtherMult
+          artifactMult*=totalMult
+          _cascadeMults.push({mult:baseAmount,label:art.name+' (base)',emoji:art.emoji,color:'#aa44cc'})
+          if(others>0){_cascadeMults.push({mult:perOtherMult,label:art.name+' (×1.3 per other ×'+others+')',emoji:art.emoji,color:'#aa44cc'})}
+          addLog('⛧ '+art.emoji+' '+art.name+' TRIGGERS! ×'+totalMult.toFixed(2));setTriggeredArtifactId(art.id);setTimeout(()=>setTriggeredArtifactId(null),600)
+          continue
+        }
+        // ── NEW MYTHIC TRIGGERS ──
+        if(art.multTrigger==='corruptedClean'&&corruption===100&&stonedCount===0)fires=1
+        if(art.multTrigger==='tongueDamage'){
+          // Each card you play deals damage = highest member ATK. Flat addition.
+          const tongueDmg=highestStageAtk*cardsPlayedCount
+          if(tongueDmg>0){
+            // Add as a flat additive event in cascade
+            _cascadeMults.push({mult:1.0+(tongueDmg/Math.max(1,dmg)),label:art.name+' (+'+tongueDmg+' flat)',emoji:art.emoji,color:'#ff0000'})
+            addLog('👅 '+art.name+' DEVOURS! +'+tongueDmg+' flat damage!');setTriggeredArtifactId(art.id);setTimeout(()=>setTriggeredArtifactId(null),600)
+          }
+          continue
+        }
+        if(art.multTrigger==='sigilOpener'){
+          // First Strike of every fight: card+chain mults auto-peaked + auto-trip if no other trip
+          const isFirstStrikeOfFight=(strikesLeft===(activeStake.maxStrikes||4))
+          if(isFirstStrikeOfFight){
+            const peakMult=4.31  // 1.05^6 * 1.78^2 simulated peak
+            artifactMult*=peakMult
+            _cascadeMults.push({mult:peakMult,label:art.name+' (auto-peaked)',emoji:art.emoji,color:'#ffaa00'})
+            // Auto-trip if no other trip active
+            if(tripMult<=1){
+              artifactMult*=2
+              _cascadeMults.push({mult:2.0,label:art.name+' (auto-trip)',emoji:art.emoji,color:'#ff44ff'})
+            }
+            addLog('𓂀 '+art.name+' awakens! Peak roll on opening strike!');setTriggeredArtifactId(art.id);setTimeout(()=>setTriggeredArtifactId(null),600)
+          }
+          continue
+        }
+        // GENERAL FIRES HANDLER (after all custom multi-event triggers handled above)
         if(fires>0){
           const m=Math.pow(art.mult,fires)
           artifactMult*=m
@@ -7449,8 +7651,6 @@ function App(){
           addLog('⛧ '+art.emoji+' '+art.name+' TRIGGERS! ×'+m.toFixed(2));setTriggeredArtifactId(art.id);setTimeout(()=>setTriggeredArtifactId(null),600)
         }
       }
-      // CA1 Goat of Mendes — permanent ×1.5 all strikes
-      if(activeArtifacts.some(a=>a.id==='ca1')){artifactMult*=1.5;_cascadeMults.push({mult:1.5,label:'Goat of Mendes',emoji:'🐐',color:'#e8a820'})}
       // BOSS LOOT MULTIPLIER TRIGGERS
       for(const lootId of collectedLoot){
         const loot=BOSS_LOOT.find(l=>l&&l.id===lootId)
@@ -7951,6 +8151,9 @@ function App(){
     ritualistPrevCorruptionRef.current=corruption
     ritualistEmberRefundsThisStrikeRef.current=0
     survivorSavesUsedRef.current=new Set()
+    // Reset modifier tracking refs each fight
+    discardsThisFightRef.current=0
+    discardsThisStrikeRef.current=0
     addLog('══════ FIGHT '+(nextIdx+1)+': '+nextEnemy.name+' ('+_sHp+' HP) ══════')
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
