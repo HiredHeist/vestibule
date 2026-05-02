@@ -1354,6 +1354,58 @@ function isGoodDeal(card){
   if(card.upgraded)return true
   return false
 }
+// ═══════════════════════════════════════════════════════════
+// RARITY-WEIGHTED ROLL — used for shop artifact + pedal generation
+// ═══════════════════════════════════════════════════════════
+// Rolls a random entry from a pool, weighted by rarity tier.
+// Drop weights: Common 50%, Uncommon 30%, Rare 17%, Mythic 3%.
+// Mythic-tier rolls bump to rare if no unlocked mythics in pool.
+// Locked entries (unlockAt threshold) excluded automatically.
+const RARITY_WEIGHTS={common:50,uncommon:30,rare:17,mythic:3}
+function rollWeightedFromPool(pool,unlockedMythics){
+  if(!pool||pool.length===0)return null
+  // Filter out locked entries (e.g. War Drums until 5000 score)
+  const lifetimeScore=parseInt(localStorage.getItem('vst_lifetime_score')||'0')
+  const filtered=pool.filter(item=>{
+    if(item.locked&&item.unlockAt&&lifetimeScore<item.unlockAt)return false
+    if(item.rarity==='mythic'&&unlockedMythics&&!unlockedMythics.includes(item.id))return false
+    return true
+  })
+  if(filtered.length===0)return null
+  // Roll a tier first
+  let tierRoll=Math.random()*100
+  let chosenTier='common'
+  if(tierRoll<RARITY_WEIGHTS.mythic)chosenTier='mythic'
+  else if(tierRoll<RARITY_WEIGHTS.mythic+RARITY_WEIGHTS.rare)chosenTier='rare'
+  else if(tierRoll<RARITY_WEIGHTS.mythic+RARITY_WEIGHTS.rare+RARITY_WEIGHTS.uncommon)chosenTier='uncommon'
+  // If chosen tier has no items in filtered pool, fall back to lower tiers
+  const tierFallback=['mythic','rare','uncommon','common']
+  const startIdx=tierFallback.indexOf(chosenTier)
+  for(let i=startIdx;i<tierFallback.length;i++){
+    const t=tierFallback[i]
+    const inTier=filtered.filter(item=>item.rarity===t)
+    if(inTier.length>0)return inTier[Math.floor(Math.random()*inTier.length)]
+  }
+  // Final fallback — any item in filtered pool
+  return filtered[Math.floor(Math.random()*filtered.length)]
+}
+// Roll an artifact for the shop (pulls from STARTER_ARTIFACTS + CIRCLE_ARTIFACTS + unlocked MYTHIC_ARTIFACTS)
+function rollShopArtifact(){
+  let unlockedMythics=[]
+  try{unlockedMythics=JSON.parse(localStorage.getItem('vst_mythic_unlocks')||'[]')}catch(e){}
+  const pool=[...STARTER_ARTIFACTS,...CIRCLE_ARTIFACTS,...MYTHIC_ARTIFACTS.filter(m=>unlockedMythics.includes(m.unlockId))]
+  // Skip artifacts that were reclassified to pedals
+  const artifactPool=pool.filter(a=>!a.reclassifiedToPedal)
+  return rollWeightedFromPool(artifactPool,unlockedMythics)||STARTER_ARTIFACTS[0]
+}
+// Roll a pedal for the shop (pulls from STARTER_PASSIVES + unlocked MYTHIC_PEDALS)
+function rollShopPedal(){
+  let unlockedMythics=[]
+  try{unlockedMythics=JSON.parse(localStorage.getItem('vst_mythic_unlocks')||'[]')}catch(e){}
+  const pool=[...STARTER_PASSIVES,...MYTHIC_PEDALS.filter(m=>unlockedMythics.includes(m.unlockId))]
+  return rollWeightedFromPool(pool,unlockedMythics)||STARTER_PASSIVES[0]
+}
+
 function genShopCards(circleNum){
   const cn=circleNum||1
   // 9% chance to replace one slot with a member appearance
@@ -5380,8 +5432,8 @@ function App(){
   const [currentTip,setCurrentTip]=useState('') // 'play','strike','boss'
   const [deckViewOpen,setDeckViewOpen]=useState(false)
   const [discardViewOpen,setDiscardViewOpen]=useState(false)
-  const [circleArtifact,setCircleArtifact]=useState(()=>STARTER_ARTIFACTS[Math.floor(Math.random()*STARTER_ARTIFACTS.length)])
-  const [circlePassive,setCirclePassive]=useState(()=>STARTER_PASSIVES[Math.floor(Math.random()*STARTER_PASSIVES.length)])
+  const [circleArtifact,setCircleArtifact]=useState(()=>rollShopArtifact())
+  const [circlePassive,setCirclePassive]=useState(()=>rollShopPedal())
   const [activeArtifacts,setActiveArtifacts]=useState([])
   const [triggeredArtifactId,setTriggeredArtifactId]=useState(null) // max 3
   const [discovered,setDiscovered]=useState(new Set())
@@ -6885,8 +6937,8 @@ function App(){
         // Rotate circle artifact + passive at each new circle (every 3rd fight)
         const isCircleBoss=(fightIndex+1)%3===0
         if(isCircleBoss){
-          setCircleArtifact(STARTER_ARTIFACTS[Math.floor(Math.random()*STARTER_ARTIFACTS.length)])
-          setCirclePassive(STARTER_PASSIVES[Math.floor(Math.random()*STARTER_PASSIVES.length)])
+          setCircleArtifact(rollShopArtifact())
+          setCirclePassive(rollShopPedal())
           setCircleCartBought(false)
           setCirCleCpasBought(false)
         }
@@ -10057,6 +10109,26 @@ function App(){
             const _vmCf  = (combosFiredRef.current||[]).length
             const _vmSc  = stage.filter(m=>m&&m.tooStoned).length
             const _vmHd  = hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
+            // Extended preview context — mirrors the real strike calc
+            const _vmCardsThisStrike = cardsPlayedRef.current||[]
+            const _vmRealPlays = _vmCardsThisStrike.filter(c=>!c._isEchoplexRetrigger)
+            const _vmCorruptCards = _vmCardsThisStrike.filter(c=>c.type==='CORRUPT').length
+            const _vmRiffCards = _vmCardsThisStrike.filter(c=>c.type==='RIFF').length
+            const _vmAllSameType = _vmRealPlays.length>=3 && _vmRealPlays.every(c=>c.type===_vmRealPlays[0].type)
+            const _vmRoleCounts = {}
+            stage.forEach(m=>{if(m&&m.role)_vmRoleCounts[m.role]=(_vmRoleCounts[m.role]||0)+1})
+            const _vmMaxSameRole = Math.max(0, ...Object.values(_vmRoleCounts))
+            const _vmAliveNS = stage.filter(m=>m&&!m.tooStoned&&m.hp>0).length
+            const _vmDiscardsFight = (discardsThisFightRef && discardsThisFightRef.current) || 0
+            const _vmDiscardsStrike = (discardsThisStrikeRef && discardsThisStrikeRef.current) || 0
+            const _vmLuciferOnStage = stage.some(m=>m&&(m.id==='lucifer'||m.name==='Lucifer'))
+            const _vmDrumDT = dblRoll>=5
+            const _vmFirstType = _vmCardsThisStrike.length>0 ? _vmCardsThisStrike[0].type : null
+            const _vmAllHealthy = stage.filter(m=>m).every(m=>m.hp>=Math.ceil(m.maxHp/2))
+            const _vmAliveAll = stage.filter(m=>m&&m.hp>0).length
+            const _vmEarlyCircle = Math.floor((fightIndex||0)/3)<3
+            const _vmHighestAtk = Math.max(0, ...stage.filter(m=>m).map(m=>getEffectiveAtk(m,_atkCtx)))
+
             for(const art of activeArtifacts){
               if(!art.multTrigger)continue
               let fires=0
@@ -10067,9 +10139,54 @@ function App(){
               if(art.multTrigger==='perChain')fires=_vmCf
               if(art.multTrigger==='perStoned')fires=_vmSc
               if(art.multTrigger==='perDupe')fires=_vmHd
+              // New common
+              if(art.multTrigger==='alwaysOn')fires=1
+              if(art.multTrigger==='playedRiff'&&_vmRiffCards>0)fires=1
+              if(art.multTrigger==='anyStoned'&&_vmSc>0)fires=1
+              if(art.multTrigger==='perAliveMember')fires=_vmAliveNS
+              if(art.multTrigger==='noRiff'&&_vmRiffCards===0&&_vmCpc>0)fires=1
+              if(art.multTrigger==='firstCardEmber'&&_vmFirstType==='EMBER')fires=1
+              if(art.multTrigger==='allHealthy'&&_vmAllHealthy)fires=1
+              if(art.multTrigger==='embers5'&&embers>=5)fires=1
+              if(art.multTrigger==='discardedFight'&&_vmDiscardsFight>=1)fires=1
+              if(art.multTrigger==='earlyCircle'&&_vmEarlyCircle)fires=1
+              // New uncommon
+              if(art.multTrigger==='perCorruptCard')fires=_vmCorruptCards
+              if(art.multTrigger==='perSameRole')fires=Math.max(0,_vmMaxSameRole)
+              if(art.multTrigger==='cards2exact'&&_vmRealPlays.length===2)fires=1
+              if(art.multTrigger==='chains3'&&_vmCf>=3)fires=1
+              if(art.multTrigger==='perDiscardStrike')fires=_vmDiscardsStrike
+              if(art.multTrigger==='doubleTimeRolled'&&_vmDrumDT)fires=1
+              if(art.multTrigger==='lastMemberStanding'&&_vmAliveAll===1)fires=1
+              // New rare
+              if(art.multTrigger==='allSameType'&&_vmAllSameType)fires=1
+              if(art.multTrigger==='perOtherArtifact')fires=Math.max(0,activeArtifacts.length-1)
+              if(art.multTrigger==='luciferOnStage'&&_vmLuciferOnStage)fires=1
+              if(art.multTrigger==='corrupt100exact'&&corruption===100)fires=1
+              if(art.multTrigger==='goatStackOther'){
+                const others=Math.max(0,activeArtifacts.length-1)
+                _vmArt*=(art.mult||2.0)*Math.pow(1.3,others)
+                continue
+              }
+              // Mythic
+              if(art.multTrigger==='corruptedClean'&&corruption===100&&_vmSc===0)fires=1
+              if(art.multTrigger==='tongueDamage'){
+                // Flat damage preview: harder to express as mult, approximate
+                const tongueDmg=_vmHighestAtk*_vmCpc
+                if(tongueDmg>0&&dmg>0)_vmArt*=(1+tongueDmg/dmg)
+                continue
+              }
+              if(art.multTrigger==='sigilOpener'){
+                const isFirstStrike=(strikesLeft===((activeStake&&activeStake.maxStrikes)||4))
+                if(isFirstStrike){
+                  _vmArt*=4.31
+                  if(_vmTrip<=1)_vmArt*=2
+                }
+                continue
+              }
               if(fires>0)_vmArt*=Math.pow(art.mult,fires)
             }
-            if(activeArtifacts.some(a=>a.id==='ca1'))_vmArt*=1.5
+            // ca1 'always' legacy now handled by alwaysOn trigger above
             // Boss loot mult triggers
             const _activesNoStone = stage.filter(s=>s&&!s.tooStoned)
             for(const lootId of collectedLoot){
@@ -10184,25 +10301,81 @@ function App(){
             // 7) Corruption multiplier
             const corrMult=corruption>=100?3.0:corruption>=80?2.0:corruption>=60?1.5:corruption>=40?1.2:1.0
             dmg=Math.round(dmg*corrMult)
-            // 8) Artifact multiplier triggers
+            // 8) Artifact multiplier triggers — full set including new modifiers
             let artMult=1.0
             const _cpc=(cardsPlayedRef.current||[]).length
             const _cf=(combosFiredRef.current||[]).length
             const _sc=stage.filter(m=>m&&m.tooStoned).length
             const _hd=hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
+            // Extended preview context for new triggers
+            const _cardsThis = cardsPlayedRef.current||[]
+            const _realPlays = _cardsThis.filter(c=>!c._isEchoplexRetrigger)
+            const _corrCards = _cardsThis.filter(c=>c.type==='CORRUPT').length
+            const _riffCards = _cardsThis.filter(c=>c.type==='RIFF').length
+            const _allSame = _realPlays.length>=3 && _realPlays.every(c=>c.type===_realPlays[0].type)
+            const _roleCnts = {}
+            stage.forEach(m=>{if(m&&m.role)_roleCnts[m.role]=(_roleCnts[m.role]||0)+1})
+            const _maxRole = Math.max(0, ...Object.values(_roleCnts))
+            const _aliveNS = stage.filter(m=>m&&!m.tooStoned&&m.hp>0).length
+            const _discFight = (discardsThisFightRef && discardsThisFightRef.current) || 0
+            const _discStrike = (discardsThisStrikeRef && discardsThisStrikeRef.current) || 0
+            const _lucStg = stage.some(m=>m&&(m.id==='lucifer'||m.name==='Lucifer'))
+            const _drumDT = dblRoll>=5
+            const _firstT = _cardsThis.length>0 ? _cardsThis[0].type : null
+            const _allHlth = stage.filter(m=>m).every(m=>m.hp>=Math.ceil(m.maxHp/2))
+            const _aliveAll = stage.filter(m=>m&&m.hp>0).length
+            const _earlyC = Math.floor((fightIndex||0)/3)<3
+            const _highAtk = Math.max(0, ...stage.filter(m=>m).map(m=>getEffectiveAtk(m,_atkCtx)))
             for(const art of activeArtifacts){
               if(!art.multTrigger)continue
               let fires=0
               if(art.multTrigger==='cards3'&&_cpc>=4)fires=1
               if(art.multTrigger==='cards5'&&_cpc>=6)fires=1
               if(art.multTrigger==='corrupt50'&&corruption>=60)fires=1
-        if(art.multTrigger==='corrupt80'&&corruption>=80)fires=1
+              if(art.multTrigger==='corrupt80'&&corruption>=80)fires=1
               if(art.multTrigger==='perChain')fires=_cf
               if(art.multTrigger==='perStoned')fires=_sc
               if(art.multTrigger==='perDupe')fires=_hd
+              if(art.multTrigger==='alwaysOn')fires=1
+              if(art.multTrigger==='playedRiff'&&_riffCards>0)fires=1
+              if(art.multTrigger==='anyStoned'&&_sc>0)fires=1
+              if(art.multTrigger==='perAliveMember')fires=_aliveNS
+              if(art.multTrigger==='noRiff'&&_riffCards===0&&_cpc>0)fires=1
+              if(art.multTrigger==='firstCardEmber'&&_firstT==='EMBER')fires=1
+              if(art.multTrigger==='allHealthy'&&_allHlth)fires=1
+              if(art.multTrigger==='embers5'&&embers>=5)fires=1
+              if(art.multTrigger==='discardedFight'&&_discFight>=1)fires=1
+              if(art.multTrigger==='earlyCircle'&&_earlyC)fires=1
+              if(art.multTrigger==='perCorruptCard')fires=_corrCards
+              if(art.multTrigger==='perSameRole')fires=Math.max(0,_maxRole)
+              if(art.multTrigger==='cards2exact'&&_realPlays.length===2)fires=1
+              if(art.multTrigger==='chains3'&&_cf>=3)fires=1
+              if(art.multTrigger==='perDiscardStrike')fires=_discStrike
+              if(art.multTrigger==='doubleTimeRolled'&&_drumDT)fires=1
+              if(art.multTrigger==='lastMemberStanding'&&_aliveAll===1)fires=1
+              if(art.multTrigger==='allSameType'&&_allSame)fires=1
+              if(art.multTrigger==='perOtherArtifact')fires=Math.max(0,activeArtifacts.length-1)
+              if(art.multTrigger==='luciferOnStage'&&_lucStg)fires=1
+              if(art.multTrigger==='corrupt100exact'&&corruption===100)fires=1
+              if(art.multTrigger==='goatStackOther'){
+                const others=Math.max(0,activeArtifacts.length-1)
+                artMult*=(art.mult||2.0)*Math.pow(1.3,others)
+                continue
+              }
+              if(art.multTrigger==='corruptedClean'&&corruption===100&&_sc===0)fires=1
+              if(art.multTrigger==='tongueDamage'){
+                const tDmg=_highAtk*_cpc
+                if(tDmg>0&&dmg>0)artMult*=(1+tDmg/dmg)
+                continue
+              }
+              if(art.multTrigger==='sigilOpener'){
+                const isFS=(strikesLeft===((activeStake&&activeStake.maxStrikes)||4))
+                if(isFS){artMult*=4.31;if(strikeMult<=1)artMult*=2}
+                continue
+              }
               if(fires>0)artMult*=Math.pow(art.mult,fires)
             }
-            if(activeArtifacts.some(a=>a.id==='ca1'))artMult*=1.5
+            // ca1 'always' legacy now handled by alwaysOn trigger
             dmg=Math.round(dmg*artMult)
             // 9) Strike multiplier
             const fin=strikeMult>1.0?Math.round(dmg*strikeMult):dmg
