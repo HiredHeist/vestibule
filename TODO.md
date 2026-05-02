@@ -63,6 +63,54 @@ This is the authoritative TODO. The old one was bloated with completed work — 
 
 ---
 
+## ⚠️ ARCHITECTURAL DEBT (non-blocking, defer to v0.7 cleanup pass)
+
+These are smells, not bugs. The game plays correctly — these just make
+future maintenance harder.
+
+### 1. Echoplex replay engine is hand-rolled per card
+`fireQueuedReplays` duplicates effect logic from `playCard` for ~41 specific
+cards. Every NEW card needs to be added to BOTH places or it silently no-ops
+on retrigger.
+
+**Fix later:** Refactor `playCard` to take `{isReplay, freeOfCost}` flag so
+the replay engine just calls `playCard(card, slot, {isReplay:true})` and any
+card auto-works.
+
+### 2. Three sites duplicate artifact mult logic
+Main strike (line ~7960) + visible mult preview (line ~10866) + DEALS preview
+(line ~11072). Every new trigger has to be copied to all 3. They're consistent
+right now (verified in Pass 1 audit) but will drift over time.
+
+**Fix later:** Extract `computeArtifactMult(ctx, artifacts)` helper.
+
+### 3. Save load truncation is silent
+v4 saves with corrupted >2 pedals get truncated to first 2 with a log message.
+No UI for player to choose which to keep. Acceptable for now since v4 is
+the new format and no >2 saves should exist.
+
+**Fix later:** "Select 2 pedals to keep" modal on truncation.
+
+### 4. Mythic unlock conditions are pure puzzles
+No "you're getting closer" hints. Players need wiki/community to find them.
+Intentional Balatro-style discovery, but consider subtle progress indicators
+post-launch if discovery rate is low.
+
+---
+
+## ✅ DESIGN LOCKED — gameplay dynamics confirmed
+
+Per JV (May 2 2026):
+- **3 artifacts + 2 pedals** = 5 modifier slots (Choice B locked)
+- Permanent buff stacking with Echoplex IS the goal — players shouldn't want
+  to discard buffed members. Hard choices for great players.
+- Save format v4 (was v3) — old saves auto-invalidate cleanly.
+
+After tonight's playtest: ART AND MUSIC. Game-play dynamics frozen until
+v0.7 cleanup pass.
+
+---
+
 ## 📬 OVERNIGHT STATUS (May 2 — for JV when you wake up)
 
 While you slept I worked through P1.2 and P1.3. Summary of what changed:

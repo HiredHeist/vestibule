@@ -2957,11 +2957,13 @@ function ArtifactArtImg({id,emoji,size=40,style={}}){
 
 
 // ═══ SAVE/RESUME SYSTEM ═══
-// SAVE FORMAT v3 — modifier system overhaul (May 2 2026):
+// SAVE FORMAT v4 — pedal slot cap reduced to 2 (was 5):
+// - Old saves with 3+ pedals would silently lose pedals on load
+// - Bumping vst_save_v3 → vst_save_v4 invalidates v3 saves cleanly
+// SAVE FORMAT v3 (May 2 2026) — modifier system overhaul:
 // - 7 utility artifacts (a3,a4,a7,a8,ca2,ca3,wardrums) reclassified to pedals
 // - Old saves with these in activeArtifacts would route through wrong slot
-// - Bumping vst_save → vst_save_v3 invalidates old saves cleanly.
-const SAVE_KEY='vst_save_v3'
+const SAVE_KEY='vst_save_v4'
 function saveGame(state) {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)) } catch(e) {}
 }
@@ -2969,7 +2971,7 @@ function loadGame() {
   try { const s = localStorage.getItem(SAVE_KEY); return s ? JSON.parse(s) : null } catch(e) { return null }
 }
 function clearSave() {
-  try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem('vst_save') /* old key cleanup */ } catch(e) {}
+  try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem('vst_save_v3'); localStorage.removeItem('vst_save') /* old key cleanup */ } catch(e) {}
 }
 function showFirstTimeTip(key, msg, addLog, addFloat) {
   const k = 'vst_tip_' + key
@@ -3722,7 +3724,7 @@ function TrophyWall({onClose}){
     </div>)
   }
 
-  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.99)',display:'flex',flexDirection:'column',alignItems:'center',padding:'12px 40px',overflow:'hidden',gap:4}}>
+  return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(4,2,1,0.99)',display:'flex',flexDirection:'column',alignItems:'center',padding:'12px 40px',overflow:'auto',gap:4}}>
     <style>{glowAnim+revealAnim}</style>
     <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'var(--text-blood)',textShadow:'0 0 30px rgba(180,0,0,0.6),2px 2px 0 #000',letterSpacing:6}}>Hall of Damnation</div>
     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-secondary)',fontStyle:'italic',marginBottom:2}}>Every boss you have conquered earns a place on this wall</div>
@@ -3736,7 +3738,7 @@ function TrophyWall({onClose}){
     </div>
 
     {/* Circle rows */}
-    <div style={{display:'flex',flexDirection:'column',gap:1,width:'100%',maxWidth:1400,alignItems:'center',flex:1,overflowY:'auto',overflowX:'hidden'}}>
+    <div style={{display:'flex',flexDirection:'column',gap:1,width:'100%',maxWidth:1400,alignItems:'center',flexShrink:0}}>
       {CIRCLES.map((circle,ci)=>{
         const allDefeated=circle.enemies.every(eid=>trophies[eid])
         return(<div key={ci} style={{display:'flex',alignItems:'center',gap:10,width:'100%'}}>
@@ -7701,11 +7703,12 @@ function App(){
           const ptBonus=activeArtifacts.some(a=>a.id==='a5')?3:2
           setEmbers(p=>Math.min(maxEmbers,p+ptBonus))
         }
-        // Shred Solo: direct damage = target ATK × 2
+        // Shred Solo: direct damage = target ATK × 2 (use raw atk in replay since
+        // we don't have full _atkCtx here — close enough for retrigger purposes)
         else if(card.id==='shredsolo'){
           const target=stage[slotIdx]
           if(target){
-            const dmg=getEffectiveAtk(target,_atkCtx)*2
+            const dmg=(target.atk||0)*2
             const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp)
             addFloat(dmg.toLocaleString(),bc.x,bc.y-60,'#9933cc',true)
             updStat('totalDamage',dmg)
@@ -9065,7 +9068,7 @@ function App(){
       if(item.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
       addLog('⚗ Artifact equipped: '+item.name+'!')
     } else if(type==='passive'){
-      if(activePassives.length>=5){addLog('⚠ Passive slots full! Max 5.');return}
+      if(activePassives.length>=2){addLog('⚠ Pedal slots full! Max 2 — sell or replace one first.');return}
       setActivePassives(p=>[...p,item])
       // RECLASSIFIED ARTIFACTS — apply on-equip effects from passive branch too
       // A7: Serpent's Kiss — permanent +1 max ember
@@ -9116,22 +9119,27 @@ function App(){
         setShopBoughtIds(p=>[...p,nc.uid])
         addLog('🛒 Added '+c.name+' to deck!')
       })
-      // Equip artifacts
+      // Equip artifacts — 3-slot cap, use local counter to avoid stale activeArtifacts.length
+      let _aCount=activeArtifacts.length
       artifacts.forEach(a => {
-        if(activeArtifacts.length>=3){addLog('⚠ Artifact slots full!');return}
-        setActiveArtifacts(p=>[...p,a])
+        if(_aCount>=3){addLog('⚠ Artifact slots full! Sell or replace one in shop.');return}
+        _aCount++
+        setActiveArtifacts(p=>p.length>=3?p:[...p,a])
         if(a.id==='a7')setMaxEmbers(p=>Math.min(8,p+1))
         if(a.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
         addLog('⚗ Artifact equipped: '+a.name+'!')
       })
-      // Equip passives
+      // Equip passives — 2-slot pedal cap (design: 3 artifacts + 2 pedals).
+      // Use a local counter — activePassives.length is stale across forEach iterations.
+      let _pCount=activePassives.length
       passives.forEach(p => {
-        if(activePassives.length>=5){addLog('⚠ Passive slots full!');return}
-        setActivePassives(prev=>[...prev,p])
+        if(_pCount>=2){addLog('⚠ Pedal slots full! Sell or replace one in shop.');return}
+        _pCount++
+        setActivePassives(prev=>prev.length>=2?prev:[...prev,p])
         // Reclassified artifact-as-passive equip effects
         if(p.id==='a7')setMaxEmbers(em=>Math.min(8,em+1))
         if(p.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
-        addLog('💿 Passive equipped: '+p.name+'!')
+        addLog('💿 Pedal equipped: '+p.name+'!')
       })
       // Members — trigger recruit flow (same as buying a recruitment pack)
       if(members.length>0){
@@ -9249,8 +9257,10 @@ function App(){
     setStrikesLeft(sv.sl);setFightMaxStrikes(sv.ms);setDiscardsLeft(sv.dl)
     setChosenPacts(sv.pa||[]);setCollectedLoot(sv.loot||[]);setUpgradedCards(sv.upg||[])
     // Include MYTHIC pools so save loads with unlocked mythics restore correctly.
-    setActiveArtifacts((sv.art||[]).map(id=>[...STARTER_ARTIFACTS,...CIRCLE_ARTIFACTS,...MYTHIC_ARTIFACTS].find(a=>a.id===id)).filter(Boolean))
-    setActivePassives((sv.pas||[]).map(id=>[...STARTER_PASSIVES,...MYTHIC_PEDALS].find(p=>p.id===id)).filter(Boolean))
+    // Truncate to slot caps as safety net (3 artifacts, 2 pedals).
+    setActiveArtifacts((sv.art||[]).slice(0,3).map(id=>[...STARTER_ARTIFACTS,...CIRCLE_ARTIFACTS,...MYTHIC_ARTIFACTS].find(a=>a.id===id)).filter(Boolean))
+    setActivePassives((sv.pas||[]).slice(0,2).map(id=>[...STARTER_PASSIVES,...MYTHIC_PEDALS].find(p=>p.id===id)).filter(Boolean))
+    if((sv.pas||[]).length>2)addLog('⚠ Loaded save had '+sv.pas.length+' pedals; only first 2 equipped (cap is 2).')
     if(sv.stats)setStats(sv.stats)
     setHeldShrooms(sv.shrooms||0);setHeldAcid(sv.acid||0)
     // ── ANCHOR refs (commit 4d): recompute from restored stage on resume.
@@ -10635,8 +10645,9 @@ function App(){
                   </div>}
                 </div>
               )})}
-              {/* EFFECT PEDALS (Passives) — always 3 slots minimum, max 5. Balatro Joker energy. */}
-              {(()=>{const slotCount=Math.max(3,activePassives.length);return [...Array(slotCount)].map((_,i)=>{const p=(activePassives||[])[i];return(
+              {/* EFFECT PEDALS (Passives) — exactly 2 slots. Design lock: 3 artifacts + 2 pedals.
+                  This forces meaningful build choices. Choose wisely. */}
+              {[0,1].map(i=>{const p=(activePassives||[])[i];return(
                 <div key={'p'+i} style={{position:'relative'}}
                   onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-passtip]');if(t)t.style.opacity='1'}}
                   onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-passtip]');if(t)t.style.opacity='0'}}>
@@ -10653,7 +10664,7 @@ function App(){
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',fontStyle:'italic',lineHeight:1.4}}>{p.effect}</div>
                   </div>}
                 </div>
-              )})})()}
+              )})}
             </div>
             {(()=>{const _kwT=getKeywordStacks(stage).tier;return stage.map((m,i)=>(
               <div key={i} style={{position:'relative',zIndex:typeof strikingMemberIdx!=='undefined'&&strikingMemberIdx===i?200:1}}>
@@ -10848,7 +10859,11 @@ function App(){
             const _vmAllHealthy = stage.filter(m=>m).every(m=>m.hp>=Math.ceil(m.maxHp/2))
             const _vmAliveAll = stage.filter(m=>m&&m.hp>0).length
             const _vmEarlyCircle = Math.floor((fightIndex||0)/3)<3
-            const _vmHighestAtk = Math.max(0, ...stage.filter(m=>m).map(m=>getEffectiveAtk(m,_atkCtx)))
+            // Build ad-hoc atk context for preview damage calc — mirrors handleStrikeBody
+            const _vmKwStacks=getKeywordStacks(stage)
+            const _vmRiffsThis=_vmCardsThisStrike.filter(c=>c.type==='RIFF').length
+            const _vmAtkCtx={corruption,tier:_vmKwStacks.tier,riffsThisStrike:_vmRiffsThis,shredderHits:0}
+            const _vmHighestAtk = Math.max(0, ...stage.filter(m=>m).map(m=>getEffectiveAtk(m,_vmAtkCtx)))
 
             for(const art of activeArtifacts){
               if(!art.multTrigger)continue
@@ -11054,7 +11069,7 @@ function App(){
             const _allHlth = stage.filter(m=>m).every(m=>m.hp>=Math.ceil(m.maxHp/2))
             const _aliveAll = stage.filter(m=>m&&m.hp>0).length
             const _earlyC = Math.floor((fightIndex||0)/3)<3
-            const _highAtk = Math.max(0, ...stage.filter(m=>m).map(m=>getEffectiveAtk(m,_atkCtx)))
+            const _highAtk = Math.max(0, ...stage.filter(m=>m).map(m=>getEffectiveAtk(m,_previewCtx)))
             for(const art of activeArtifacts){
               if(!art.multTrigger)continue
               let fires=0
