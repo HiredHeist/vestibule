@@ -6325,7 +6325,7 @@ function App(){
     updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.08)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
     if(card.type==='RIFF'&&ampFbDiscount>0)setAmpFeedbackDiscount(0)
@@ -6420,7 +6420,7 @@ function App(){
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.08)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id,'_smokebreak_discard']
@@ -6446,7 +6446,7 @@ function App(){
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.08)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -6471,7 +6471,7 @@ function App(){
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.08)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -6497,7 +6497,7 @@ function App(){
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.08)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       setLastRiffPlayed(card)
@@ -6524,7 +6524,7 @@ function App(){
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.08)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -6565,7 +6565,7 @@ function App(){
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
-    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.05)*100)/100))
+    if(_milestones.includes(_mp)){addFloat('⭐ MASTERY '+_mp+'!',960,400,'#ffd700',true);addLog('⭐ '+card.name+' reached '+_mp+' plays! Mastery up!')};setStrikeMult(p=>Math.min(10000,Math.round((p*1.08)*100)/100))
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
@@ -8607,7 +8607,7 @@ function App(){
             ['✨ Member Tiers','Members come in tiers: Basic (standard), Foil (+1 ATK/HP, -1 Ember on cards), Mythic (+3 ATK/HP), Demonic (+5 ATK/HP, golden glow). Higher tiers appear in better packs.'],
             ['🃏 Card Types','RIFF (purple): Direct damage and ATK buffs. CORRUPT (red): Corruption-scaling power. UTILITY (green): Healing, draw, and economy. EMBER (orange): Ember management and recovery.'],
             ['⛧ Riff Chains','Playing specific card pairs triggers Riff Chains — massive combo bonuses! Chains multiply your Strike damage (e.g., Battle Cry + Stage Dive = DEATH WISH). 16 chains to discover. The celebration shows which cards triggered it.'],
-            ['×️ Strike Multiplier','Every card played MULTIPLIES your Strike by ×1.05. Riff Chains multiply by ×1.78. Multiple chains stack multiplicatively. 6 cards + 1 chain = ×2.39. Stack artifacts for the god run. The multiplier resets each Strike.'],
+            ['×️ Strike Multiplier','Every card played MULTIPLIES your Strike by ×1.08. Riff Chains multiply by ×1.78. Multiple chains stack multiplicatively. 6 cards + 1 chain = ×2.83. Stack artifacts for the god run. The multiplier resets each Strike.'],
             ['🌀 Corruption','A risk/reward axis from 0-100%. Some cards and enemies raise it. CORRUPT keyword members get stronger at high corruption. Overdrive requires 60%+. Feedback Loop and Amp the Static scale with it.'],
             ['⚠ Corruption Thresholds','25% THE WHISPERS: Weakest member takes 1 damage each fight. 50% THE HUNGER: All shop prices +25%. 75% THE MADNESS: 15% chance to lose a random card before each Strike. 100% THE POSSESSION: Boss damage +3, but CORRUPT members get one-time +3 ATK.'],
             ['💀 Corruption = Power','Corruption is a MULTIPLIER. 40%=×1.2, 60%=×1.5, 80%=×2.0, 100%=×3.0 damage but the boss hits +3 harder. Risk vs reward — ride the corruption wave.'],
@@ -9842,18 +9842,63 @@ function App(){
                 {/* RIGHT PANEL: Strike seal — sits on altar */}
         <div style={{position:'absolute',right:8,top:24,bottom:12,zIndex:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:10,padding:'8px 4px',width:160}}>
           {(() => {
-            const m = strikeMult || 1.0;
-            const tier = m >= 3.0 ? 4 : m >= 2.0 ? 3 : m >= 1.5 ? 2 : m > 1.0 ? 1 : 0;
-            const size = tier === 4 ? 62 : tier === 3 ? 52 : tier === 2 ? 44 : tier === 1 ? 38 : 34;
-            const color = tier === 4 ? '#ffffff' : tier === 3 ? 'var(--blood)' : tier === 2 ? '#ff6b6b' : tier === 1 ? 'var(--gold)' : 'var(--ink-dim)';
-            const bgOpacity = tier === 4 ? 0.55 : tier === 3 ? 0.4 : tier === 2 ? 0.3 : tier === 1 ? 0.2 : 0.08;
-            const borderColor = tier >= 3 ? 'var(--blood)' : tier === 2 ? 'rgba(255,107,107,0.6)' : tier === 1 ? 'var(--gold)' : 'rgba(138,117,96,0.25)';
-            const glow = tier === 4 ? '0 0 40px #fff, 0 0 80px var(--blood)' : tier === 3 ? '0 0 30px var(--blood), 0 0 60px rgba(196,30,58,0.5)' : tier === 2 ? '0 0 20px rgba(255,107,107,0.7)' : tier === 1 ? '0 0 16px rgba(200,152,56,0.5)' : 'none';
+            // FULL STACK MULTIPLIER — mirrors handleStrike's product of every multiplier source.
+            // Player sees the TRUE damage multiplier they're sitting on, not just card-play.
+            // Updated live as artifacts trigger / corruption ticks / cards play.
+            const _vmStrike = strikeMult || 1.0
+            const _vmTrip = (fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION')?2:1
+            const _vmCorr = corruption>=100?3.0:corruption>=80?2.0:corruption>=60?1.5:corruption>=40?1.2:1.0
+            // Artifact mult triggers (mirror handleStrike loop)
+            let _vmArt = 1.0
+            const _vmCpc = (cardsPlayedRef.current||[]).length
+            const _vmCf  = (combosFiredRef.current||[]).length
+            const _vmSc  = stage.filter(m=>m&&m.tooStoned).length
+            const _vmHd  = hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
+            for(const art of activeArtifacts){
+              if(!art.multTrigger)continue
+              let fires=0
+              if(art.multTrigger==='cards3'&&_vmCpc>=4)fires=1
+              if(art.multTrigger==='cards5'&&_vmCpc>=6)fires=1
+              if(art.multTrigger==='corrupt50'&&corruption>=60)fires=1
+              if(art.multTrigger==='corrupt80'&&corruption>=80)fires=1
+              if(art.multTrigger==='perChain')fires=_vmCf
+              if(art.multTrigger==='perStoned')fires=_vmSc
+              if(art.multTrigger==='perDupe')fires=_vmHd
+              if(fires>0)_vmArt*=Math.pow(art.mult,fires)
+            }
+            if(activeArtifacts.some(a=>a.id==='ca1'))_vmArt*=1.5
+            // Boss loot mult triggers
+            const _activesNoStone = stage.filter(s=>s&&!s.tooStoned)
+            for(const lootId of collectedLoot){
+              const loot=BOSS_LOOT.find(l=>l&&l.id===lootId)
+              if(!loot||!loot.multTrigger||!loot.mult)continue
+              let fires=0
+              if(loot.multTrigger==='perStrikesLeft')fires=strikesLeft
+              if(loot.multTrigger==='firstCardFree'&&_vmCpc>=1)fires=1
+              if(loot.multTrigger==='alive4'&&_activesNoStone.length>=4)fires=1
+              if(loot.multTrigger==='perStash20')fires=Math.floor(stash/20)
+              if(loot.multTrigger==='memberAtk20'&&_activesNoStone.some(m=>m.atk>=20))fires=1
+              if(loot.multTrigger==='perCorrThreshold')fires=[25,50,75,100].filter(t=>corruption>=t).length
+              if(loot.multTrigger==='cards1'&&_vmCpc===1)fires=1
+              if(loot.multTrigger==='perUniqueKeyword')fires=new Set(_activesNoStone.map(m=>m.keyword)).size
+              if(fires>0)_vmArt*=Math.pow(loot.mult,fires)
+            }
+            // The TRUE total multiplier — what handleStrike will actually multiply damage by.
+            const m = _vmStrike * _vmTrip * _vmCorr * _vmArt
+            // Tier thresholds bumped up — full stack numbers are much larger than strikeMult-only
+            const tier = m >= 50 ? 5 : m >= 10 ? 4 : m >= 5 ? 3 : m >= 2.5 ? 2 : m > 1.0 ? 1 : 0
+            const size = tier === 5 ? 70 : tier === 4 ? 60 : tier === 3 ? 50 : tier === 2 ? 42 : tier === 1 ? 36 : 32
+            const color = tier === 5 ? '#ffffff' : tier === 4 ? '#ff2200' : tier === 3 ? 'var(--blood)' : tier === 2 ? '#ff6b6b' : tier === 1 ? 'var(--gold)' : 'var(--ink-dim)';
+            const bgOpacity = tier === 5 ? 0.7 : tier === 4 ? 0.55 : tier === 3 ? 0.4 : tier === 2 ? 0.3 : tier === 1 ? 0.2 : 0.08;
+            const borderColor = tier >= 4 ? '#ff2200' : tier === 3 ? 'var(--blood)' : tier === 2 ? 'rgba(255,107,107,0.6)' : tier === 1 ? 'var(--gold)' : 'rgba(138,117,96,0.25)';
+            const glow = tier === 5 ? '0 0 50px #fff, 0 0 100px var(--blood), 0 0 150px rgba(255,50,0,0.6)' : tier === 4 ? '0 0 40px #ff2200, 0 0 80px rgba(255,100,0,0.5)' : tier === 3 ? '0 0 30px var(--blood), 0 0 60px rgba(196,30,58,0.5)' : tier === 2 ? '0 0 20px rgba(255,107,107,0.7)' : tier === 1 ? '0 0 16px rgba(200,152,56,0.5)' : 'none';
+            // Format: keep 2 decimals up to 9.99, switch to 1 decimal for 10-99.9, integers for 100+
+            const mDisplay = m >= 100 ? Math.floor(m).toLocaleString() : m >= 10 ? m.toFixed(1) : m.toFixed(2)
             return (
               <div style={{textAlign:'center',padding:'10px 8px',background:`linear-gradient(180deg, rgba(196,30,58,${bgOpacity}), rgba(196,30,58,${bgOpacity*0.3}))`,border:'1px solid '+borderColor,borderRadius:3,width:'100%',transition:'all 0.3s'}}>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',marginBottom:2}}>Multiplier</div>
-                <div key={'mult-'+m.toFixed(2)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:size,fontWeight:900,color:color,textShadow:glow,lineHeight:1,transition:'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',animation:tier>0?'inkStamp 0.4s ease-out':'none',display:'inline-block'}}>×{m.toFixed(2)}</div>
-                {tier >= 3 && <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:13,color:'var(--blood)',letterSpacing:4,marginTop:2,textTransform:'uppercase',textShadow:'0 0 8px var(--blood)'}}>{tier===4?'⛧ BEAST ⛧':'INFERNAL'}</div>}
+                <div key={'mult-'+mDisplay} style={{fontFamily:"'MBScribblesFont',serif",fontSize:size,fontWeight:900,color:color,textShadow:glow,lineHeight:1,transition:'all 0.3s cubic-bezier(0.34,1.56,0.64,1)',animation:tier>0?'inkStamp 0.4s ease-out':'none',display:'inline-block'}}>×{mDisplay}</div>
+                {tier >= 3 && <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:13,color:tier>=4?'#ffaa00':'var(--blood)',letterSpacing:4,marginTop:2,textTransform:'uppercase',textShadow:tier>=4?'0 0 12px rgba(255,150,0,0.9)':'0 0 8px var(--blood)'}}>{tier===5?'⛧ GODLIKE ⛧':tier===4?'⛧ BEAST ⛧':'INFERNAL'}</div>}
               </div>
             );
           })()}
@@ -9869,14 +9914,12 @@ function App(){
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:strikesLeft<=1?22:strikesLeft<=2?18:15,fontWeight:900,color:strikesLeft<=1?'#ff2200':strikesLeft<=2?'#ff4400':'var(--blood)',letterSpacing:1,textShadow:strikesLeft<=1?'0 0 12px rgba(255,0,0,0.8)':'none'}}><span key={'sl-'+strikesLeft} style={{animation:strikesLeft<=1?'memberHitShake 0.4s ease-out, inkStamp 0.4s ease-out':strikesLeft<=2?'inkStamp 0.4s ease-out, pulse 0.8s ease infinite alternate':'inkStamp 0.4s ease-out',display:'inline-block'}}>{strikesLeft}/{fightMaxStrikes}</span></span>
           </div>
           {/* DAMAGE PREVIEW — below pips, big stamp animation */}
-          {/* ACTIVE BUFF BADGES — show when multiplier or temp ATK buffs are live */}
+          {/* ACTIVE BUFF BADGES — CHAIN chip removed (redundant with multiplier box). TEMP ATK kept since it shows team total. */}
           {(()=>{
             const tempTotal=stage.filter(m=>m&&!m.tooStoned).reduce((s,m)=>s+(m.tempAtkBonus||0),0)
-            const hasMult=strikeMult>1.0
-            if(!tempTotal&&!hasMult)return null
+            if(!tempTotal)return null
             return <div style={{display:'flex',gap:6,justifyContent:'center',flexWrap:'wrap',marginTop:2}}>
-              {hasMult&&<span title='Strike multiplier from cards played (×1.05 each) + Riff Chains (×1.78 each)' style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-gold)',background:'rgba(200,152,56,0.15)',border:'1px solid rgba(200,152,56,0.5)',borderRadius:3,padding:'1px 6px',letterSpacing:1,cursor:'help',animation:'handOvercapPulse 1.5s ease-in-out infinite'}}>×{strikeMult.toFixed(2)} CHAIN</span>}
-              {tempTotal>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#cc44ff',background:'rgba(153,51,204,0.15)',border:'1px solid rgba(153,51,204,0.5)',borderRadius:3,padding:'1px 6px',letterSpacing:1,animation:'handOvercapPulse 1.5s ease-in-out infinite'}}>+{tempTotal} TEMP ATK</span>}
+              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#cc44ff',background:'rgba(153,51,204,0.15)',border:'1px solid rgba(153,51,204,0.5)',borderRadius:3,padding:'1px 6px',letterSpacing:1,animation:'handOvercapPulse 1.5s ease-in-out infinite'}}>+{tempTotal} TEMP ATK</span>
             </div>
           })()}
           {(()=>{

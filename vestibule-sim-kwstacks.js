@@ -738,7 +738,7 @@ function simFight(gs,phaseHp,luciferPhase){
       cost=Math.max(0,cost)
       gs.embers-=cost;gs.hand.splice(best.idx,1);
       applyCardSim(card,gs,enemy);if(gs._consumeCard){gs._consumeCard=false}else if(card.id!=='contract')gs.discard.push(card);cardsPlayed++;
-      gs._strikeMult=Math.min(10000,Math.round((gs._strikeMult*1.05)*100)/100)
+      gs._strikeMult=Math.min(10000,Math.round((gs._strikeMult*1.08)*100)/100)
       gs._cardsPlayedIds.push(card.id)
       if(card.type==='EMBER'&&gs.passives.some(p=>p.id==='p4'))gs.embers=Math.min(gs.maxEmbers,gs.embers+1)
       // ── RITUALIST SIGNATURE: Corruption Feeds — refund 1 ember per 10% gained ──
