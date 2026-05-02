@@ -5337,6 +5337,8 @@ function App(){
   // Discard tracking refs for new modifier system (Spit Cup, Ouroboros Pin)
   const discardsThisFightRef=useRef(0)
   const discardsThisStrikeRef=useRef(0)
+  // Wah Pedal: tracks whether first-CORRUPT-free has been used this fight
+  const wahPedalUsedRef=useRef(false)
   const [comboFlash,setComboFlash]=useState(null)
   const [chainCallout,setChainCallout]=useState(null) // {name,color,emoji}
   const [combosDiscoveredThisRun,setCombosDiscoveredThisRun]=useState([])
@@ -5836,7 +5838,20 @@ function App(){
     const synesthesiaDiscount=(fightTripBuff==='SYNESTHESIA')?1:0
     const darkBargainDiscount=(chosenPacts.includes('dark_bargain')&&card.type==='CORRUPT'&&card.embers>=1)?1:0
     const ampFbDiscount=(ampFeedbackDiscount>0&&card.type==='RIFF')?1:0
-    const effectiveEmbers=(nextCardFreeRef.current&&card.id!=='doubledown')||allCardsFreeRef.current?0:Math.max(0,card.embers-foilDiscount-synesthesiaDiscount-darkBargainDiscount-ampFbDiscount)
+    // ── NEW PEDAL DISCOUNTS ──
+    // Reverb Tank: first card each strike costs 1 less ember
+    const reverbTankDiscount=(activePassives.some(p=>p.id==='reverbtank')&&(cardsPlayedRef.current||[]).length===0)?1:0
+    // Fuzz Box: all RIFF cards cost 1 less
+    const fuzzBoxDiscount=(activePassives.some(p=>p.id==='fuzzbox')&&card.type==='RIFF')?1:0
+    // Phaser: all CORRUPT cards cost 1 less
+    const phaserDiscount=(activePassives.some(p=>p.id==='phaserpedal')&&card.type==='CORRUPT')?1:0
+    // Wah Pedal: first CORRUPT card each fight is FREE (use ref to track)
+    const wahFreeFirst=(activePassives.some(p=>p.id==='wahpedal')&&card.type==='CORRUPT'&&!wahPedalUsedRef.current)?card.embers:0
+    // Cable Tester: duplicate cards cost 1 less
+    const cableTesterDiscount=(activePassives.some(p=>p.id==='cabletester')&&hand.filter(c=>c.id===card.id).length>=2)?1:0
+    // The Conduit (mythic): all cards cost half (rounded down)
+    const conduitDiscount=activePassives.some(p=>p.id==='theconduit')?Math.floor(card.embers/2):0
+    const effectiveEmbers=(nextCardFreeRef.current&&card.id!=='doubledown')||allCardsFreeRef.current?0:Math.max(0,card.embers-foilDiscount-synesthesiaDiscount-darkBargainDiscount-ampFbDiscount-reverbTankDiscount-fuzzBoxDiscount-phaserDiscount-wahFreeFirst-cableTesterDiscount-conduitDiscount)
   if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers, have '+embers+'.');return false}
   if(nextCardFreeRef.current&&card.id!=='doubledown'){setNextCardFree(false)}
     if(card.id==='stagedive'&&stageDiveUsed){addLog('⚠ Stage Dive once per round only.');return false}
@@ -6470,6 +6485,10 @@ function App(){
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
     if(card.type==='RIFF'&&ampFbDiscount>0)setAmpFeedbackDiscount(0)
     if(card.type==='RIFF'){setLastRiffPlayed(card);lastRiffPlayedRef.current=card}
+    // ── WAH PEDAL: mark first CORRUPT as used (free shot consumed) ──
+    if(card.type==='CORRUPT'&&!wahPedalUsedRef.current&&activePassives.some(p=>p.id==='wahpedal')){
+      wahPedalUsedRef.current=true
+    }
     // ── RIFF CHAIN COMBO DETECTION ──
     cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
     const played=cardsPlayedRef.current
@@ -7584,9 +7603,14 @@ function App(){
       const handDupes=hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
       // ── EXTENDED CONTEXT for new multTrigger types ──
       // _cardsThisStrike list filtered to count types/CORRUPTs/RIFFs played this strike.
-      // Echoplex retriggers are flagged with _isEchoplexRetrigger and excluded from
-      // purity checks (allSameType, cards2exact, cards1) per locked design D1.
-      const cardsThisStrike=cardsPlayedRef.current||[]
+      // Echoplex retriggers prefix with '_echo:' on the card ID — excluded from purity checks.
+      const cardIdsThisStrike=cardsPlayedRef.current||[]
+      const cardsThisStrike=cardIdsThisStrike.map(id=>{
+        const isEcho=typeof id==='string'&&id.startsWith('_echo:')
+        const realId=isEcho?id.slice(6):id
+        const card=ALL_CARDS.find(c=>c.id===realId)
+        return card?{...card,_isEchoplexRetrigger:isEcho}:null
+      }).filter(Boolean)
       const cardsRealPlays=cardsThisStrike.filter(c=>!c._isEchoplexRetrigger)
       const corruptCardsCount=cardsThisStrike.filter(c=>c.type==='CORRUPT').length
       const riffCardsCount=cardsThisStrike.filter(c=>c.type==='RIFF').length
@@ -8065,7 +8089,7 @@ function App(){
             // ANCHOR +1 HP/strike adjacent regen removed in commit 4d —
             // keyword now grants per-fight lethal save via _tryAnchorSave.
             // CA3: Sabbath Crown — revive Too Stoned members at 50% HP after each Strike
-            if(activeArtifacts.some(a=>a.id==='ca3')){
+            if(activeArtifacts.some(a=>a.id==='ca3')||activePassives.some(p=>p.id==='ca3')){
               setStage(prev=>{
                 let revived=false
                 const ns=prev.map(m=>{
@@ -8206,6 +8230,7 @@ function App(){
     // Reset modifier tracking refs each fight
     discardsThisFightRef.current=0
     discardsThisStrikeRef.current=0
+    wahPedalUsedRef.current=false
     addLog('══════ FIGHT '+(nextIdx+1)+': '+nextEnemy.name+' ('+_sHp+' HP) ══════')
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
@@ -8270,9 +8295,9 @@ function App(){
     // A2: Devil's Tuning Fork — start at 15% corruption (applied below)
     const hasDevilsFork=activeArtifacts.some(a=>a.id==='a2')
     // A3: Evil Eye — first card each Strike free (state reset each fight)
-    if(activeArtifacts.some(a=>a.id==='a3'))setNextCardFree(true)
+    if(activeArtifacts.some(a=>a.id==='a3')||activePassives.some(p=>p.id==='a3'))setNextCardFree(true)
     // A4: Roadie's Toolbelt — random member Stonewall
-    const hasToolbelt=activeArtifacts.some(a=>a.id==='a4')
+    const hasToolbelt=activeArtifacts.some(a=>a.id==='a4')||activePassives.some(p=>p.id==='a4')
     // A7: Serpent's Kiss — handled via maxEmbers permanently
     // A8: Stone Tablet — handled via maxHp permanently
     // A10: Burning Stage bonus embers
@@ -8280,13 +8305,18 @@ function App(){
     if(pendingBurningStage)setPendingBurningStage(false)
     // ── CIRCLE ARTIFACT FIGHT-START EFFECTS ──────────────────
     const hasGoat=activeArtifacts.some(a=>a.id==='ca1')     // Goat of Mendes: all +1 ATK
-    const hasHellfire=activeArtifacts.some(a=>a.id==='ca2')  // Hellfire Amulet: +2 embers
-    const hasCrown=activeArtifacts.some(a=>a.id==='ca3')     // Sabbath Crown: revive (handled post-strike)
+    // ca2 (Hellfire) and ca3 (Sabbath Crown) reclassified to pedal pool — now check activePassives
+    const hasHellfire=activePassives.some(p=>p.id==='ca2')   // Hellfire Amulet: +2 embers
+    const hasCrown=activePassives.some(p=>p.id==='ca3')      // Sabbath Crown: revive (handled post-strike)
     const hasWailing=activeArtifacts.some(a=>a.id==='ca4')   // Wailing Guitar: first strike x2 (handled in handleStrike)
     // ── PASSIVE FIGHT-START EFFECTS ──────────────────────────
     const hasP1=activePassives.some(p=>p.id==='p1') // +1 ember
     const hasP2=activePassives.some(p=>p.id==='p2') // +3 HP random member
     const hasP8=activePassives.some(p=>p.id==='p8') // Stonewall all
+    // Reclassified passives that need fight-start handling
+    const hasToolbeltP=activePassives.some(p=>p.id==='a4')  // Roadie's Toolbelt: random Stonewall
+    const hasStoneTabP=activePassives.some(p=>p.id==='a8')  // Stone Tablet: +3 max HP all
+    const hasSerpentKissP=activePassives.some(p=>p.id==='a7')  // Serpent's Kiss: +1 max ember
     // Apply stage modifications
     setStage(prev=>{
       let ns=[...prev]
@@ -8318,21 +8348,36 @@ function App(){
     // Clean Living pact: +2 ATK and +2 HP all at fight start
     if(chosenPacts.includes('clean_living')){setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+2,hp:Math.min(m.maxHp,m.hp+2)}):m));addLog('✨ Clean Living! All members +2 ATK, +2 HP.')}
     // Extra embers from Serpent's Kiss (P1 + burning stage + Hellfire Amulet)
-    const extraEm=(hasP1?1:0)+burnBonus+(hasHellfire?2:0)
-    setEmbers(p=>Math.min(maxEmbers,p+extraEm))
-    if(extraEm>0)addLog('🌿 Ember bonus: +'+(extraEm)+' (passives/artifacts)')
+    const hasPowerCond=activePassives.some(p=>p.id==='powerconditioner') // +1 ember
+    const hasConduit=activePassives.some(p=>p.id==='theconduit') // mythic — start at MAX
+    const extraEm=(hasP1?1:0)+burnBonus+(hasHellfire?2:0)+(hasPowerCond?1:0)
+    if(hasConduit){
+      // Mythic: Start at MAX embers
+      setEmbers(maxEmbers)
+      addLog('⚡ The Conduit! Started at MAX embers.')
+    } else {
+      setEmbers(p=>Math.min(maxEmbers,p+extraEm))
+      if(extraEm>0)addLog('🌿 Ember bonus: +'+(extraEm)+' (passives/artifacts)')
+    }
     // Roll DOUBLE TIME d6 if drummer is on stage
     const hasDrummer=stage.some(m=>m&&m.role==='Drummer')
     const drumCount3=stage.filter(m=>m&&m.role==='Drummer').length
+    const hasDrumThrone=activePassives.some(p=>p.id==='drumthrone')
     if(hasDrummer){
       let roll=Math.floor(Math.random()*6)+1
       if(drumCount3>=2&&roll<=2)roll=Math.floor(Math.random()*6)+1
+      // Drum Throne pedal: roll twice and pick higher
+      if(hasDrumThrone){
+        const reroll=Math.floor(Math.random()*6)+1
+        roll=Math.max(roll,reroll)
+        addLog('🪑 Drum Throne re-roll: kept '+roll)
+      }
       setDblRoll(roll)
     } else {
       setDblRoll(null)
     }
     // War Drums: +1 Strike
-    if(activeArtifacts.some(a=>a.id==='wardrums')){setStrikesLeft(p=>p+1);setFightMaxStrikes(p=>p+1);addLog('🪘 War Drums! +1 Strike this fight.')}
+    if(activeArtifacts.some(a=>a.id==='wardrums')||activePassives.some(p=>p.id==='wardrums')){setStrikesLeft(p=>p+1);setFightMaxStrikes(p=>p+1);addLog('🪘 War Drums! +1 Strike this fight.')}
     setGameState('playing')
   },[fightIndex,maxEmbers,stage,selectedDeck,activeStake,chosenPacts,activeArtifacts,activePassives,corruption,collectedLoot,encoreMode,bonusDiscards,bonusEmbers,tutorialFight,upgradedCards,heldShrooms,heldAcid,stash])
 
@@ -10110,7 +10155,13 @@ function App(){
             const _vmSc  = stage.filter(m=>m&&m.tooStoned).length
             const _vmHd  = hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
             // Extended preview context — mirrors the real strike calc
-            const _vmCardsThisStrike = cardsPlayedRef.current||[]
+            const _vmCardIds = cardsPlayedRef.current||[]
+            const _vmCardsThisStrike = _vmCardIds.map(id=>{
+              const isEcho=typeof id==='string'&&id.startsWith('_echo:')
+              const realId=isEcho?id.slice(6):id
+              const card=ALL_CARDS.find(c=>c.id===realId)
+              return card?{...card,_isEchoplexRetrigger:isEcho}:null
+            }).filter(Boolean)
             const _vmRealPlays = _vmCardsThisStrike.filter(c=>!c._isEchoplexRetrigger)
             const _vmCorruptCards = _vmCardsThisStrike.filter(c=>c.type==='CORRUPT').length
             const _vmRiffCards = _vmCardsThisStrike.filter(c=>c.type==='RIFF').length
@@ -10308,7 +10359,13 @@ function App(){
             const _sc=stage.filter(m=>m&&m.tooStoned).length
             const _hd=hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
             // Extended preview context for new triggers
-            const _cardsThis = cardsPlayedRef.current||[]
+            const _cardIds = cardsPlayedRef.current||[]
+            const _cardsThis = _cardIds.map(id=>{
+              const isEcho=typeof id==='string'&&id.startsWith('_echo:')
+              const realId=isEcho?id.slice(6):id
+              const card=ALL_CARDS.find(c=>c.id===realId)
+              return card?{...card,_isEchoplexRetrigger:isEcho}:null
+            }).filter(Boolean)
             const _realPlays = _cardsThis.filter(c=>!c._isEchoplexRetrigger)
             const _corrCards = _cardsThis.filter(c=>c.type==='CORRUPT').length
             const _riffCards = _cardsThis.filter(c=>c.type==='RIFF').length
