@@ -124,7 +124,7 @@ Cost range: 24–32 herb. These are build-locking picks.
 |---|---|---|---|---|
 | 13 | **The Looper ♾️** | First card each Strike replays at end of Strike (free) | 28 | Effectively +1 free card → 6-card combos easier |
 | 14 | **Bit Crusher 💥** | Each card you discard gives +5% Corruption | 26 | Corruption rocket → Hellmouth, Inverted Pentacle |
-| 15 | **Echoplex 🎚** | When you play a card, 25% chance it triggers a second time at end of Strike (free) | 30 | Random combo extension → Doom Crown, Pentagram Shrine, Burning Stage |
+| 15 | **Echoplex 🎚** | When you play a card, **69% chance** it triggers a second time at end of Strike (free). The god-tier pedal. | **42** | Combo extension god-pedal → multiplies any per-card-played artifact (Pentagram Shrine, Cracked Pickup, Doom Crown, Burning Stage). The ⚡ pedal you hope to see. |
 
 ---
 
@@ -268,8 +268,8 @@ Designed for CORRUPT/EMBER-only decks. Most players play SOME riffs. Is this too
 ## Q6. Dive Bar Sign (Circles I-III only) — front-loaded?
 Cheap and powerful early, dead later. Common tier feels right. Is the limit annoying?
 
-## Q7. Echoplex 25% replay chance
-Replaces Whammy Bar after JV feedback. 25% per card means avg 1.5 replays in a 6-card strike. Feels right for legendary tape-delay flavor (Eddie Van Halen, Page, May). **Tune % up if too rare, down if too consistent.**
+## Q7. Echoplex — RESOLVED
+69% chance per card, 42 herb cost. Locked god-tier. Expected 4.14 replays per 6-card strike — effectively +4 free plays. Will eclipse Looper and Bit Crusher in most builds, which is fine — Balatro has clearly best legendaries too. Sacred number ×2 (69 + 42 = 111, the angelic number). 🤘
 
 ## Q8. Should I draft 5 mythic-tier slots so the 3% drop rate has content?
 With 0 mythics drafted, mythic rolls auto-bump to rare. That's fine but means players never see "MYTHIC ARTIFACT" in shop. **Want me to draft 3-5 mythics?**
@@ -293,3 +293,85 @@ Ship plan: ONE atomic commit `feat(modifiers): 25 artifacts + 15 pedals — Bala
 ---
 
 **END OF DRAFT — JV REVIEW PENDING**
+
+
+---
+
+# 🔒 DESIGN LOCK — Final Decisions (May 2 2026)
+
+JV signed off after store-run review. All open questions resolved. Implementation cleared to begin.
+
+## Locked Decisions
+
+1. **Echoplex** — 69% chance per card retriggers at end of Strike. Cost 42 herb. Rare. God-tier pedal accepted as meta-defining (Triboulet equivalent).
+
+2. **Mythic tier** — 6 unlockables total (3 artifacts + 3 pedals). Locked from shop pool until specific in-game accomplishments fire unlock.
+
+3. **Unlock condition visibility** — HIDDEN. Player discovers conditions through play. Trophies page shows:
+   - **Unseen**: `???` blank silhouette
+   - **Seen** (rumored — appeared briefly in some way): silhouette + cryptic hint flavor text
+   - **Unlocked**: full reveal with effect text
+   - When a mythic unlocks for the first time, dramatic overlay fires: "⛧ MYTHIC UNLOCKED ⛧"
+
+4. **Mythic shop entry** — locked pool gating. If no mythics are unlocked, mythic shop slots auto-bump to rare. As player unlocks more, the 3% mythic rate scales:
+   - 0 unlocked → 0%
+   - 1-2 unlocked → 1.5%
+   - 3-4 unlocked → 2.0%
+   - 5-6 unlocked → 3.0%
+
+5. **Reclassification** — 7 utility artifacts move to pedal pool (Evil Eye, Roadie's Toolbelt, Serpent's Kiss, Stone Tablet, Hellfire Amulet, Sabbath Crown, War Drums). Save format bumps to `vst_save_v3`, old saves invalidated.
+
+6. **Boss loot** — existing 8 boss-loot multipliers stay as-is, NOT folded into new pool. They remain reward-only drops from specific bosses.
+
+7. **Score-enhancing artifacts** — 4 dedicated (Cheap Beer +5%, Tour Sticker +10%, Lucifer's Pact ×1.3 score, Fog Machine +20% per stoned). Sufficient — no dedicated score multiplier category needed yet.
+
+## Final Pool Summary
+
+| Category | Common | Uncommon | Rare | Mythic | Total |
+|---|---|---|---|---|---|
+| Artifacts (mults) | 12 new + 4 existing | 8 new + 5 existing | 5 new + 5 existing | 3 unlockable | **42** |
+| Pedals (enablers) | 8 new + 7 reclassified | 4 new + 4 existing | 3 new (Looper/Bit Crusher/Echoplex) | 3 unlockable | **29** |
+| **Combined** | | | | | **71 modifiers** |
+
+## Unlock Condition Index (DEV REFERENCE — keep this hidden from player UI)
+
+| Mythic | Hidden Condition |
+|---|---|
+| Inverted Cross | First Lucifer kill |
+| Tongue of the Devourer | Beat Devourer (C3) without losing any band members |
+| Sigil of Set | Win Bronze run with only 1 band member alive at run end |
+| Witch's Sabbath | Win a fight with all 4 members Too Stoned at end |
+| The Conduit | Beat Lucifer in ≤3 strikes |
+| Tablet of Az'Tothoth | Fire all 16 unique Riff Chains in one run |
+
+## Cryptic Hints (PLAYER-FACING in Trophies)
+
+| Mythic | Hint Text |
+|---|---|
+| Inverted Cross | "When the King of Hell falls before you for the first time..." |
+| Tongue of the Devourer | "Stand against the third circle's hunger without sacrifice." |
+| Sigil of Set | "Walk the path alone. Burn through Hell with one voice." |
+| Witch's Sabbath | "Let the haze consume them all, and emerge victorious." |
+| The Conduit | "Slay the King swiftly. Mercy is for the weak." |
+| Tablet of Az'Tothoth | "Master every chain in a single descent." |
+
+## Implementation Plan (Now Cleared)
+
+Single atomic commit, ~750 lines:
+
+1. **Phase 1**: Reclassify 7 existing artifacts → pedals (data move)
+2. **Phase 2**: Add 25 new artifacts + 15 new pedals with rarity tags
+3. **Phase 3**: Add 6 mythic unlockables (artifacts + pedals)
+4. **Phase 4**: Wire ~12 new `multTrigger` types in 3 strike-resolution sites
+5. **Phase 5**: Implement pedal effects (Echoplex 69% retrigger, Phaser ember discount, etc.)
+6. **Phase 6**: Shop generator → weighted rarity rolls + mythic-unlock gate + boss-kill discount
+7. **Phase 7**: Trophies page silhouette/hint/reveal UI
+8. **Phase 8**: Mythic unlock overlay + new stat tracking (`bossesKilledNoLoss`, `chainsFiredThisRun`, `luciferStrikeCount`, `soloRunVictory`, `allStonedFightWin`)
+9. **Phase 9**: Sim engine port (mult triggers only — pedals approximated)
+10. **Phase 10**: Save format bump `vst_save_v3`, sim run for balance check
+
+**Estimated time:** 2-3 hours of careful implementation. Will commit per-phase locally and push as one atomic feature commit.
+
+---
+
+**END OF DESIGN. IMPLEMENTATION BEGINS NEXT TURN.**
