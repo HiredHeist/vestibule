@@ -448,6 +448,111 @@ body {
   100% { opacity: 0; transform: scale(1); }
 }
 
+/* ═══ ECHOPLEX / LOOPER / SABBATH REPLAY ANIMATIONS ═══
+   The card slides from member slot (--epx-from-x/y) toward boss (--epx-to-x/y).
+   Uses CSS vars for path: --epx-dx/--epx-dy = delta to apply with translate.
+   Three layers travel in formation:
+   - echoplexCardChromaR: red ghost lagging slightly RIGHT of main
+   - echoplexCardMain: main colored card
+   - echoplexCardChromaB: cyan ghost lagging slightly LEFT of main
+   - echoplexTrail: 5 rainbow trailing card-shaped echoes
+   - echoplexSpark: 8 trailing particle bursts. */
+
+@keyframes echoplexCardMain {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4) rotate(-12deg);
+    opacity: 0;
+  }
+  10% {
+    transform: translate(-50%, -50%) scale(1.15) rotate(0deg);
+    opacity: 1;
+  }
+  20% {
+    transform: translate(-50%, -50%) scale(1.05) rotate(0deg);
+    opacity: 1;
+  }
+  85% {
+    transform: translate(calc(-50% + var(--epx-dx) * 0.92), calc(-50% + var(--epx-dy) * 0.92)) scale(0.85) rotate(8deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--epx-dx)), calc(-50% + var(--epx-dy))) scale(0.4) rotate(15deg);
+    opacity: 0;
+  }
+}
+
+@keyframes echoplexCardChromaR {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4) rotate(-12deg);
+    opacity: 0;
+  }
+  10% {
+    transform: translate(calc(-50% + 8px), calc(-50% + 4px)) scale(1.15) rotate(0deg);
+    opacity: 0.8;
+  }
+  85% {
+    transform: translate(calc(-50% + var(--epx-dx) * 0.92 + 14px), calc(-50% + var(--epx-dy) * 0.92 + 6px)) scale(0.85) rotate(8deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--epx-dx) + 18px), calc(-50% + var(--epx-dy) + 8px)) scale(0.4) rotate(15deg);
+    opacity: 0;
+  }
+}
+
+@keyframes echoplexCardChromaB {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4) rotate(-12deg);
+    opacity: 0;
+  }
+  10% {
+    transform: translate(calc(-50% - 8px), calc(-50% - 4px)) scale(1.15) rotate(0deg);
+    opacity: 0.8;
+  }
+  85% {
+    transform: translate(calc(-50% + var(--epx-dx) * 0.92 - 14px), calc(-50% + var(--epx-dy) * 0.92 - 6px)) scale(0.85) rotate(8deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--epx-dx) - 18px), calc(-50% + var(--epx-dy) - 8px)) scale(0.4) rotate(15deg);
+    opacity: 0;
+  }
+}
+
+@keyframes echoplexTrail {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5) rotate(-15deg);
+    opacity: 0;
+  }
+  15% {
+    transform: translate(-50%, -50%) scale(1.0) rotate(0deg);
+    opacity: 0.85;
+  }
+  90% {
+    transform: translate(calc(-50% + var(--epx-dx) * 0.85), calc(-50% + var(--epx-dy) * 0.85)) scale(0.7) rotate(20deg);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--epx-dx)), calc(-50% + var(--epx-dy))) scale(0.3) rotate(35deg);
+    opacity: 0;
+  }
+}
+
+@keyframes echoplexSpark {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  10% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--epx-dx) * 0.8 + var(--epx-dx) * 0.2 * 0.5), calc(-50% + var(--epx-dy) * 0.8 + var(--epx-dy) * 0.2 * 0.5)) scale(0.2);
+    opacity: 0;
+  }
+}
+
 @keyframes chainGlow {
   0% { opacity: 0; }
   8% { opacity: 1; }

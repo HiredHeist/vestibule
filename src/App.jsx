@@ -2956,14 +2956,19 @@ function ArtifactArtImg({id,emoji,size=40,style={}}){
 
 
 // ═══ SAVE/RESUME SYSTEM ═══
+// SAVE FORMAT v3 — modifier system overhaul (May 2 2026):
+// - 7 utility artifacts (a3,a4,a7,a8,ca2,ca3,wardrums) reclassified to pedals
+// - Old saves with these in activeArtifacts would route through wrong slot
+// - Bumping vst_save → vst_save_v3 invalidates old saves cleanly.
+const SAVE_KEY='vst_save_v3'
 function saveGame(state) {
-  try { localStorage.setItem('vst_save', JSON.stringify(state)) } catch(e) {}
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)) } catch(e) {}
 }
 function loadGame() {
-  try { const s = localStorage.getItem('vst_save'); return s ? JSON.parse(s) : null } catch(e) { return null }
+  try { const s = localStorage.getItem(SAVE_KEY); return s ? JSON.parse(s) : null } catch(e) { return null }
 }
 function clearSave() {
-  try { localStorage.removeItem('vst_save') } catch(e) {}
+  try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem('vst_save') /* old key cleanup */ } catch(e) {}
 }
 function showFirstTimeTip(key, msg, addLog, addFloat) {
   const k = 'vst_tip_' + key
@@ -5274,6 +5279,8 @@ function App(){
   const [showConfetti,setShowConfetti]=useState(false) // victory confetti
   const [cardAbsorb,setCardAbsorb]=useState(null)
   const [flyingCard,setFlyingCard]=useState(null) // {emoji,type,fromX,fromY,toX,toY,key}
+  // Echoplex/Looper/Sabbath replay animations — each has its own card-flight with polychrome trail
+  const [echoplexReplays,setEchoplexReplays]=useState([]) // [{key,cardId,cardName,cardEmoji,cardType,fromX,fromY,toX,toY,kind}]
   const [shakeOffset,setShakeOffset]=useState({x:0,y:0})
   const shakeTimerRef=useRef(null)
   const triggerShake=useCallback((intensity=3,duration=200)=>{
@@ -5339,6 +5346,10 @@ function App(){
   const discardsThisStrikeRef=useRef(0)
   // Wah Pedal: tracks whether first-CORRUPT-free has been used this fight
   const wahPedalUsedRef=useRef(false)
+  // Octave Pedal: tracks whether first chain double has fired this fight
+  const octavePedalFiredRef=useRef(false)
+  // The Looper / Echoplex: queued retriggers for end of strike
+  const queuedReplaysRef=useRef([])  // array of {cardId, kind:'looper'|'echoplex', slotIdx}
   const [comboFlash,setComboFlash]=useState(null)
   const [chainCallout,setChainCallout]=useState(null) // {name,color,emoji}
   const [combosDiscoveredThisRun,setCombosDiscoveredThisRun]=useState([])
@@ -5657,6 +5668,35 @@ function App(){
     else if(key==='highestStrike')highestStrikeThisFightRef.current=Math.max(highestStrikeThisFightRef.current,val)
     else if(key==='totalDamage')damageThisFightRef.current+=val
   }
+  // ── MYTHIC UNLOCK SYSTEM ──
+  // Tracks per-run conditions for unlocking the 6 mythic modifiers (Inverted Cross,
+  // Tongue of the Devourer, Sigil of Set, Witch's Sabbath, The Conduit, Tablet of Az'Tothoth).
+  // Conditions are HIDDEN — discovered through play. localStorage 'vst_mythic_unlocks'.
+  // Per-run trackers
+  const luciferStrikesUsedRef=useRef(0)  // strikes used to defeat Lucifer (lower = better)
+  const fightLossMembersRef=useRef(new Set())  // member uids lost during current fight
+  const chainsFiredThisRunRef=useRef(new Set())  // chain IDs fired this run
+  const allStonedAchievedRef=useRef(false)  // any moment all 4 members were Too Stoned in same fight
+  const soloMembersUsedRef=useRef(new Set())  // unique members ever on stage in this run
+  const [mythicUnlockOverlay,setMythicUnlockOverlay]=useState(null) // {name, emoji, hint}
+  const fireMythicUnlock=useCallback((unlockId)=>{
+    let unlocked=[]
+    try{unlocked=JSON.parse(localStorage.getItem('vst_mythic_unlocks')||'[]')}catch(e){}
+    if(unlocked.includes(unlockId))return // already unlocked
+    unlocked.push(unlockId)
+    localStorage.setItem('vst_mythic_unlocks',JSON.stringify(unlocked))
+    // Find the mythic for the overlay
+    const all=[...MYTHIC_ARTIFACTS,...MYTHIC_PEDALS]
+    const mythic=all.find(m=>m.unlockId===unlockId)
+    if(mythic){
+      setMythicUnlockOverlay({name:mythic.name,emoji:mythic.emoji,effect:mythic.effect})
+      addLog('⛧⛧⛧ MYTHIC UNLOCKED: '+mythic.emoji+' '+mythic.name+' ⛧⛧⛧')
+      playSfx('victory')
+      try{triggerShake(15,800)}catch(e){}
+      // Auto-dismiss overlay after 5 seconds
+      setTimeout(()=>setMythicUnlockOverlay(null),5000)
+    }
+  },[])
   const discover=(mechanic,label)=>{
     if(discoveredRef.current.has(mechanic))return
     discoveredRef.current.add(mechanic)
@@ -6491,6 +6531,29 @@ function App(){
     }
     // ── RIFF CHAIN COMBO DETECTION ──
     cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
+    // ── ECHOPLEX 69% / LOOPER REPLAY QUEUEING ──
+    // Echoplex: 69% chance any card retriggers at end of strike (with _echo: flag).
+    // Looper: first card each strike retriggers at end (deterministic).
+    // Skip queueing if this play IS already a replay (prevents infinite loops).
+    if(!card._isReplay){
+      const _hasEcho=activePassives.some(p=>p.id==='echoplex')
+      const _hasLooper=activePassives.some(p=>p.id==='looperpedal')
+      const _hasSabbath=activePassives.some(p=>p.id==='witchssabbath')  // mythic: 3 replays of first card
+      const _isFirstCardThisStrike=cardsPlayedRef.current.length===1
+      // Echoplex roll
+      if(_hasEcho&&Math.random()<0.69){
+        queuedReplaysRef.current.push({cardId:card.id,slotIdx,kind:'echoplex'})
+      }
+      // Looper: first card always replays
+      if(_hasLooper&&_isFirstCardThisStrike){
+        queuedReplaysRef.current.push({cardId:card.id,slotIdx,kind:'looper'})
+      }
+      // Witch's Sabbath (mythic): first card replays THREE times total (so push twice more)
+      if(_hasSabbath&&_isFirstCardThisStrike){
+        queuedReplaysRef.current.push({cardId:card.id,slotIdx,kind:'sabbath'})
+        queuedReplaysRef.current.push({cardId:card.id,slotIdx,kind:'sabbath'})
+      }
+    }
     const played=cardsPlayedRef.current
     for(const chain of RIFF_CHAINS){
       if(played.includes(chain.cards[0])&&played.includes(chain.cards[1])&&!combosFiredRef.current.includes(chain.id)){
@@ -6502,8 +6565,16 @@ function App(){
         }
         setChainCallout(chain.name);setTimeout(()=>setChainCallout(null),1200)
           setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.78*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
-        playSfx('chain_combo');triggerShake(18,600);setChainFlashActive(true);setTimeout(()=>setChainFlashActive(false),600);setStrikeMult(p=>Math.min(10000,Math.round((p*1.78)*100)/100));showFirstTimeTip('chain','Riff Chains fire when you play BOTH cards of a pair in the same Strike. Check Rules for all 16 chains!',addLog);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×1.78 MULTIPLIER!')
+        playSfx('chain_combo');triggerShake(18,600);setChainFlashActive(true);setTimeout(()=>setChainFlashActive(false),600);
+        // Octave Pedal: first chain each fight has its mult applied twice (×1.78 → ×3.17)
+        const _octaveActive=activePassives.some(p=>p.id==='octavepedal')&&!octavePedalFiredRef.current
+        const _chainMult=_octaveActive?(1.78*1.78):1.78
+        if(_octaveActive){octavePedalFiredRef.current=true;addLog('🎼 Octave Pedal! First chain DOUBLED → ×'+_chainMult.toFixed(2))}
+        setStrikeMult(p=>Math.min(10000,Math.round((p*_chainMult)*100)/100));showFirstTimeTip('chain','Riff Chains fire when you play BOTH cards of a pair in the same Strike. Check Rules for all 16 chains!',addLog);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×'+_chainMult.toFixed(2)+' MULTIPLIER!')
         combosFiredRef.current.push(chain.id)
+        // Mythic unlock tracking: Tablet of Az'Tothoth requires all 16 chains in one run
+        chainsFiredThisRunRef.current.add(chain.id)
+        if(chainsFiredThisRunRef.current.size>=16){fireMythicUnlock('tabletOfAzothoth')}
         // ── SHREDDER SIGNATURE: queue chain for echo on next strike ──
         if((STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).signature==='riff_chain_echo'){
           shredderEchoesPendingRef.current++
@@ -6901,6 +6972,8 @@ function App(){
     if(corruption>=100)tryAchieve('corruption_lord')
     if(stage.filter(m=>m&&!m.tooStoned).length>=5)tryAchieve('full_band')
     if(fightIndex===26){tryAchieve('beat_lucifer');beatStake(activeStake.id);tryAchieve('beat_'+selectedDeck)
+      // Sigil of Set unlock: solo run (only 1 unique member used the whole run)
+      if(soloMembersUsedRef.current.size<=1){fireMythicUnlock('sigilOfSet')}
       const curHeat=parseInt(localStorage.getItem('vst_heat')||'1');if(curHeat<10){localStorage.setItem('vst_heat',(curHeat+1).toString());addLog('🔥 HEAT LEVEL UP! Heat '+(curHeat+1)+' unlocked!')}}
     const bq=BOSS_QUOTES[enemy&&enemy.id];if(bq){setTimeout(()=>addLog('💀 "'+bq+'"'),600);setBossQuoteTypewriter(bq);setTimeout(()=>setBossQuoteTypewriter(null),3500)}
     setTimeout(function(){
@@ -7357,8 +7430,238 @@ function App(){
     setTimeout(()=>setActiveTripEffect(null),4000)
   },[tripUsedThisFight,strikesLeft])
 
+  // ── ECHOPLEX / LOOPER / WITCH'S SABBATH REPLAY ENGINE ──
+  // Replays queued during card plays fire at handleStrike start. Each replay:
+  // 1. Spawns a polychrome card-flight animation (card slides from slot → boss
+  //    with rainbow tracer trails, chromatic aberration, the works)
+  // 2. Adds '_echo:'+cardId to cardsPlayedRef.current (purity-excluded by triggers)
+  // 3. Re-applies the card's most impactful effects (permanent buffs stack,
+  //    direct-damage cards re-deal damage, ATK doubles compound)
+  // 4. Free of ember cost (replays are bonus actions)
+  // Visual timing: 700ms per replay, staggered 200ms apart for cascade effect.
+  const fireQueuedReplays=useCallback(()=>{
+    const queue=queuedReplaysRef.current
+    if(!queue||queue.length===0)return
+    queuedReplaysRef.current=[]
+    // Position references
+    const bc=getCenter(bossRef)
+    queue.forEach(function(replay,replayIdx){
+      const card=ALL_CARDS.find(c=>c.id===replay.cardId)
+      if(!card)return
+      const slotIdx=replay.slotIdx
+      const cx=getCenter(stageRefs.current[slotIdx])
+      const stagger=replayIdx*200  // each replay 200ms after the last
+
+      // ── PHASE 1: Spawn the polychrome card-flight at stagger time ──
+      setTimeout(function(){
+        const replayKey=Date.now()+replayIdx
+        const cardType=card.type||'RIFF'
+        // Push replay animation onto the visual stack
+        setEchoplexReplays(prev=>[...prev,{
+          key:replayKey,
+          cardId:card.id,
+          cardName:card.name,
+          cardEmoji:card.emoji,
+          cardType:cardType,
+          fromX:cx.x,fromY:cx.y,
+          toX:bc.x,toY:bc.y,
+          kind:replay.kind
+        }])
+        // Banner text: which pedal triggered this replay
+        const bannerText=replay.kind==='echoplex'?'🎚 ECHOPLEX RETRIGGER':replay.kind==='looper'?'♾ LOOPER REPLAY':'🌑 SABBATH REPLAY'
+        const bannerColor=replay.kind==='echoplex'?'#ff8800':replay.kind==='looper'?'#44aaff':'#bb44ff'
+        addFloat(bannerText,cx.x,cx.y-110,bannerColor,true)
+        try{playSfx('chain_combo')}catch(e){}
+        // Auto-cleanup the replay animation after 1.2s
+        setTimeout(function(){
+          setEchoplexReplays(prev=>prev.filter(r=>r.key!==replayKey))
+        },1200)
+      },stagger)
+
+      // ── PHASE 2: Apply effects after card visually lands (~700ms after stagger) ──
+      setTimeout(function(){
+        // Mark this play as a retrigger in the cardsPlayedRef for purity exclusions
+        cardsPlayedRef.current=[...cardsPlayedRef.current,'_echo:'+card.id]
+        // Re-apply impactful effects
+        setStage(function(prev){
+          let ns=[...prev]
+          const m=ns[slotIdx]
+          // Battle Cry: +1 (or +2 with Guitar Tech) ATK permanent
+          if(card.id==='battlecry'&&m){
+            const bcBonus=(activePassives.some(p=>p.id==='p7')?2:1)+(card.upgraded?1:0)
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk+bcBonus})
+            addFloat('+'+bcBonus+' ATK',cx.x,cx.y-130,'#ff4400')
+          }
+          // New Strings: +2 ATK permanent
+          else if(card.id==='newstrings'&&m){
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk+2})
+            addFloat('+2 ATK',cx.x,cx.y-130,'#e8a820')
+          }
+          // Sound Wall: all +1 ATK permanent (uses passive p5 for +2)
+          else if(card.id==='soundwall'){
+            const swBonus=activePassives.some(p=>p.id==='p5')?2:1
+            ns=ns.map(mm=>mm&&!mm.tooStoned?Object.assign({},mm,{atk:mm.atk+swBonus}):mm)
+            addFloat('ALL +'+swBonus+' ATK',window.innerWidth/2,window.innerHeight*0.4,'#ff4400',true)
+          }
+          // Whisper / Hungering Flame / etc — permanent ATK
+          else if(card.id==='whispercard'&&m){
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2})
+          }
+          else if(card.id==='hungercard'){
+            ns=ns.map(mm=>mm&&!mm.tooStoned?Object.assign({},mm,{atk:mm.atk+1,tempAtkBonus:(mm.tempAtkBonus||0)+1}):mm)
+          }
+          else if(card.id==='dialtoeleven'){
+            const dtBonus=card.upgraded?4:3
+            ns=ns.map(mm=>mm&&!mm.tooStoned?Object.assign({},mm,{atk:mm.atk+dtBonus,tempAtkBonus:(mm.tempAtkBonus||0)+dtBonus}):mm)
+          }
+          // Skull Splitter, Doom Chord, Heavy Riff, Feedback Scream — perm +ATK to target
+          else if(card.id==='skullsplitter'&&m){
+            const ssBonus=m.atk>=10?5:3
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk+ssBonus})
+          }
+          else if(card.id==='doomchord'&&m){
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk+4})
+            if(corruption>=50){
+              const adj=[slotIdx-1,slotIdx+1].filter(i=>i>=0&&i<ns.length&&ns[i])
+              adj.forEach(i=>{ns[i]=Object.assign({},ns[i],{atk:ns[i].atk+4})})
+            }
+          }
+          else if(card.id==='heavyriff'&&m){
+            const heavyMax=activePassives.some(p=>p.id==='p5')?25:20
+            const hrBonus=Math.min(heavyMax,Math.floor(m.atk/2))
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk+hrBonus})
+          }
+          else if(card.id==='feedbackscream'&&m){
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk+4,hp:Math.max(1,m.hp-2)})
+          }
+          else if(card.id==='necroticamp'){
+            const necBonus=Math.floor(corruption/20)
+            ns=ns.map(mm=>mm&&!mm.tooStoned?Object.assign({},mm,{atk:mm.atk+necBonus}):mm)
+          }
+          else if(card.id==='soulsacrifice'){
+            ns=ns.map(mm=>mm&&!mm.tooStoned?Object.assign({},mm,{atk:mm.atk+5}):mm)
+          }
+          else if(card.id==='infernalpact'){
+            ns=ns.map(mm=>mm&&!mm.tooStoned?Object.assign({},mm,{atk:mm.atk+2}):mm)
+          }
+          else if(card.id==='soulbargain'&&m){
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk+5,hp:Math.max(0,m.hp-3)})
+            // Soul Bargain death rule: if HP would hit 0, member dies (per locked design D4)
+            if(ns[slotIdx].hp<=0){
+              addFloat('⚠ FATAL ECHO!',cx.x,cx.y-150,'#ff0000',true)
+              ns[slotIdx]=Object.assign({},ns[slotIdx],{tooStoned:true,hp:0})
+            }
+          }
+          else if(card.id==='venomriff'&&m){
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk+3})
+          }
+          else if(card.id==='cursedstrings'&&m){
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk+3})
+          }
+          else if(card.id==='moshpit'){
+            const aliveCount=ns.filter(mm=>mm&&!mm.tooStoned).length
+            const mpBonus=aliveCount>=4?2:1
+            ns=ns.map(mm=>mm&&!mm.tooStoned?Object.assign({},mm,{atk:mm.atk+mpBonus}):mm)
+          }
+          else if(card.id==='sonicboom'){
+            ns=ns.map(mm=>mm&&!mm.tooStoned?Object.assign({},mm,{atk:mm.atk+2}):mm)
+          }
+          else if(card.id==='tremolopick'&&m){
+            const tpBonus=cardsPlayedRef.current.length>=3?4:1
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk+tpBonus})
+          }
+          else if(card.id==='harmonicfb'){
+            const riffsP=cardsPlayedRef.current.filter(id=>{
+              const realId=String(id).startsWith('_echo:')?String(id).slice(6):id
+              const c=ALL_CARDS.find(x=>x.id===realId);return c&&c.type==='RIFF'
+            }).length
+            if(m)ns[slotIdx]=Object.assign({},m,{atk:m.atk+riffsP})
+          }
+          // Encore (target attacks twice — refire encore flag)
+          else if(card.id==='encore'&&m){
+            ns[slotIdx]=Object.assign({},m,{encoreReady:true})
+          }
+          // Amp It Up: ×2 ATK temp
+          else if(card.id==='amp'&&m&&!m.tooStoned){
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk*2,_origAtk:m._origAtk||m.atk,tempBuff:true})
+          }
+          return ns
+        })
+        // Direct damage cards (Stage Dive deals damage = target HP)
+        if(card.id==='stagedive'){
+          const target=stage[slotIdx]
+          if(target){
+            const dmg=target.hp
+            const newHp=Math.max(0,enemyHp-dmg)
+            setEnemyHp(newHp)
+            addFloat(dmg.toLocaleString(),bc.x,bc.y-60,'#ff2200',true)
+            updStat('totalDamage',dmg)
+          }
+        }
+        // Madness Unleashed: 15% max HP direct damage
+        else if(card.id==='madnesscard'){
+          const maxHp=scaledMaxHp||(enemy?enemy.maxHp:100)
+          const dmg=Math.floor(maxHp*0.15)
+          const newHp=Math.max(0,enemyHp-dmg)
+          setEnemyHp(newHp)
+          addFloat(dmg.toLocaleString(),bc.x,bc.y-60,'#cc1144',true)
+          updStat('totalDamage',dmg)
+        }
+        // Death Riff: low corruption = more damage
+        else if(card.id==='deathriff'){
+          const drDmg=Math.max(3,15-Math.floor(corruption/10))
+          const newHp=Math.max(0,enemyHp-drDmg)
+          setEnemyHp(newHp)
+          addFloat(drDmg.toLocaleString(),bc.x,bc.y-60,'#ff2200',true)
+          updStat('totalDamage',drDmg)
+        }
+        // Hex of Decay: 15% current HP direct damage
+        else if(card.id==='hexdecay'){
+          const dmg=Math.floor(enemyHp*0.15)
+          const newHp=Math.max(0,enemyHp-dmg)
+          setEnemyHp(newHp)
+          addFloat(dmg.toLocaleString(),bc.x,bc.y-60,'#88cc44',true)
+          updStat('totalDamage',dmg)
+        }
+        // Corruption-changing cards
+        if(['dialtoeleven','sigdecay','distortion','staticcharge','seance','darktuning','soulbargain','venomriff','soulsacrifice','infernalpact','hellfirerift','offeringpit','hexdecay','possessionriff','carrioncall','corrsiphon'].includes(card.id)){
+          const corrDeltas={dialtoeleven:10,sigdecay:0,distortion:15,staticcharge:0,seance:0,darktuning:0,soulbargain:5,venomriff:5,soulsacrifice:15,infernalpact:0,hellfirerift:20,offeringpit:10,hexdecay:15,possessionriff:10,carrioncall:20,corrsiphon:8}
+          const delta=corrDeltas[card.id]||0
+          if(delta>0){setCorruption(p=>Math.min(100,p+delta))}
+        }
+        // Impact SFX on land
+        try{playHit();triggerShake(6,180)}catch(e){}
+      },stagger+700)
+    })
+    // Summary log after all queued replays start
+    if(queue.length>0){addLog('🎚 '+queue.length+' replay'+(queue.length>1?'s':'')+' fired!')}
+  },[stage,enemyHp,scaledMaxHp,enemy,corruption,activePassives])
+
   const handleStrike=useCallback(()=>{
     setUndoSnapshot(null) // can't undo after striking
+    // Guard: don't allow re-triggering during animation
+    if(animPhase!=='idle'||strikesLeft<=0||enemyHp<=0)return
+    // ── FIRE ECHOPLEX/LOOPER/SABBATH REPLAYS first ──
+    // Replays apply card effects again (stacking permanent buffs, re-dealing
+    // direct damage). Marked with '_echo:' prefix in cardsPlayedRef so artifact
+    // purity checks (Doom Crown allSameType, Solo Sermon cards2exact) ignore them.
+    // The replay animation is staggered: 200ms apart, 700ms each.
+    const _replayQueueLen=(queuedReplaysRef.current||[]).length
+    fireQueuedReplays()
+    // Delay the strike body if replays are firing — let visuals land first.
+    // Each replay takes ~700ms with 200ms stagger; total = queue*200 + 800ms.
+    if(_replayQueueLen>0){
+      // Set animPhase to a non-idle marker so player can't re-click Strike
+      setAnimPhase('replaying')
+      const _replayDelay=_replayQueueLen*200+800
+      setTimeout(()=>{setAnimPhase('idle');handleStrikeBody()},_replayDelay)
+      return
+    }
+    handleStrikeBody()
+  },[stage,hand,deck,discardPile,embers,maxEmbers,corruption,strikesLeft,activeArtifacts,activePassives,enemyHp,enemy,activeStake,strikeMult,collectedLoot,fireQueuedReplays])
+
+  // The actual strike resolution body — extracted so we can delay it for replay animations.
+  const handleStrikeBody=useCallback(()=>{
     // Reset Ritualist's per-strike ember refund cap
     ritualistEmberRefundsThisStrikeRef.current=0
     // CORRUPTION THRESHOLD: 75% — The Madness (15% chance discard random card)
@@ -7406,6 +7709,10 @@ function App(){
     if(debuffTier>0){setBossDebuff(p=>p+debuffTier*2);addLog('🎤 Vocalist debuffs the boss! (-'+(debuffTier*2)+' damage'+(debuffTier>=2?' · STACK ×'+debuffTier:'')+')')}
     cardsToDrawRef.current=cardsPlayedRef.current.length
     setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1)
+    // Mythic tracking: count strikes vs Lucifer for The Conduit unlock (≤3 strikes)
+    if(enemy&&(enemy.passiveId==='luciferBoss'||enemy.id==='lucifer'||enemy.name==='Lucifer')){
+      luciferStrikesUsedRef.current++
+    }
       // #10: LUCKY DRAW — unlocked after first Lucifer kill, toggleable
       const _luckyUnlocked=localStorage.getItem('vst_achievement_beat_lucifer')==='1'&&localStorage.getItem('vst_lucky_draw')!=='off'
       const _luckyRng=((runSeed*7+stats.strikesThrown*13+fightIndex*31)%100)
@@ -7798,13 +8105,68 @@ function App(){
       }
       updStat('totalDamage',finalDmg);updStat('highestStrike',finalDmg,true);if(finalDmg>=500){playSfx('big_hit');triggerShake(8,250)}
 
+      // ── VOLUME KNOB / COMPRESSOR: 4+ cards this strike → next-strike bonuses ──
+      const _cardsThisCount=(cardsPlayedRef.current||[]).filter(id=>!String(id).startsWith('_echo:')).length
+      if(_cardsThisCount>=4){
+        if(activePassives.some(p=>p.id==='volumeknob')){
+          setPendingDraw(p=>p+1)
+          addLog('🔆 Volume Knob! +1 card next strike.')
+        }
+        if(activePassives.some(p=>p.id==='compressorpedal')){
+          setPendingDraw(p=>p+1)
+          setEmbers(p=>Math.min(maxEmbers,p+1))
+          addLog('📊 Compressor! +1 card + 1 ember next strike.')
+        }
+      }
+
+      // Sustain Pedal: temp ATK buffs persist for 1 extra strike
+      const hasSustain=activePassives.some(p=>p.id==='sustainpedal')
       setStage(function(p){return p.map(function(m){
         if(!m)return null
         var nm=Object.assign({},m)
         if(nm.encoreReady)nm=Object.assign({},nm,{encoreReady:false})
-        if(nm.tempBuff&&nm._origAtk!==undefined)nm=Object.assign({},nm,{atk:nm._origAtk,_origAtk:undefined,tempBuff:false})
+        if(nm.tempBuff&&nm._origAtk!==undefined){
+          if(hasSustain&&!nm._sustainUsed){
+            // First strike with buff: mark sustain used, keep buff
+            nm=Object.assign({},nm,{_sustainUsed:true})
+          } else {
+            // Normal expiry (or sustain already used)
+            nm=Object.assign({},nm,{atk:nm._origAtk,_origAtk:undefined,tempBuff:false,_sustainUsed:undefined})
+          }
+        }
         return nm
       })})
+
+      // ── MYTHIC UNLOCK CHECKS — fire after stage state updates ──
+      setTimeout(()=>{
+        // Witch's Sabbath: all 4 members Too Stoned at any moment in a fight
+        const _stoneCheck=stage.filter(m=>m).length>=4&&stage.filter(m=>m&&m.tooStoned).length>=4
+        if(_stoneCheck&&!allStonedAchievedRef.current){
+          allStonedAchievedRef.current=true
+          // Will be confirmed if fight is won
+        }
+      },0)
+
+      if(newEHp<=0){
+        // ── MYTHIC UNLOCKS at fight victory ──
+        // Inverted Cross: first time defeating Lucifer
+        if(enemy&&(enemy.passiveId==='luciferBoss'||enemy.id==='lucifer'||enemy.name==='Lucifer')){
+          if(luciferPhase===2||!enemy.passiveId){
+            // Lucifer phase 2 just died (final kill)
+            fireMythicUnlock('invertedCross')
+            // The Conduit: defeated Lucifer in ≤3 strikes total (across both phases)
+            if(luciferStrikesUsedRef.current<=3){fireMythicUnlock('theConduit')}
+          }
+        }
+        // Tongue of the Devourer: beat Devourer (C3 boss, fight 8) without losing any members
+        if(enemy&&(enemy.id==='devourer'||enemy.name==='Devourer')){
+          if(fightLossMembersRef.current.size===0){fireMythicUnlock('tongueOfDevourer')}
+        }
+        // Witch's Sabbath: all 4 members were Too Stoned at some point and you won the fight
+        if(allStonedAchievedRef.current){
+          fireMythicUnlock('witchsSabbath')
+        }
+      }
 
       if(newEHp<=0){
         // LUCIFER PHASE TRANSITION: Phase 1 → Phase 2
@@ -7989,6 +8351,8 @@ function App(){
                     ns2[ai]=Object.assign({},ns2[ai],{hp:1})
                   } else {
                     ns2[ai]=Object.assign({},ns2[ai],{hp:0,tooStoned:true,bloodOath:false});updStat('tooStonedCount',1);playSfx('member_down');triggerShake(12,400)
+                    // Mythic unlock tracking: member lost during fight
+                    if(ns2[ai]&&ns2[ai].uid)fightLossMembersRef.current.add(ns2[ai].uid)
                     if(activeArtifacts.some(a=>a.id==='a6')){setEnemyHp(ehp=>{const nh=Math.max(0,ehp-8);if(nh<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);return nh});addLog('🕯 Black Candle! 8 damage!')}
                   }
                 }
@@ -8231,6 +8595,11 @@ function App(){
     discardsThisFightRef.current=0
     discardsThisStrikeRef.current=0
     wahPedalUsedRef.current=false
+    octavePedalFiredRef.current=false
+    queuedReplaysRef.current=[]
+    // Mythic unlock per-fight trackers
+    luciferStrikesUsedRef.current=0
+    fightLossMembersRef.current=new Set()
     addLog('══════ FIGHT '+(nextIdx+1)+': '+nextEnemy.name+' ('+_sHp+' HP) ══════')
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
@@ -8510,6 +8879,11 @@ function App(){
     } else if(type==='passive'){
       if(activePassives.length>=5){addLog('⚠ Passive slots full! Max 5.');return}
       setActivePassives(p=>[...p,item])
+      // RECLASSIFIED ARTIFACTS — apply on-equip effects from passive branch too
+      // A7: Serpent's Kiss — permanent +1 max ember
+      if(item.id==='a7')setMaxEmbers(p=>Math.min(8,p+1))
+      // A8: Stone Tablet — permanent +3 max HP all members
+      if(item.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
       addLog('💿 Passive equipped: '+item.name+'!')
     } else if(type==='recruit'){
       let candidates
@@ -8566,6 +8940,9 @@ function App(){
       passives.forEach(p => {
         if(activePassives.length>=5){addLog('⚠ Passive slots full!');return}
         setActivePassives(prev=>[...prev,p])
+        // Reclassified artifact-as-passive equip effects
+        if(p.id==='a7')setMaxEmbers(em=>Math.min(8,em+1))
+        if(p.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
         addLog('💿 Passive equipped: '+p.name+'!')
       })
       // Members — trigger recruit flow (same as buying a recruitment pack)
@@ -8604,6 +8981,8 @@ function App(){
         const withUid={...member,uid:uid(),roleBondWith:[],roleBondBonus:0}
         const bonded=applyMentorLink(withUid,ns)
         ns[idx]=bonded
+        // Mythic unlock tracking: track unique members for solo run condition
+        soloMembersUsedRef.current.add(withUid.uid)
         const tl=tier!=='base'?' ['+tier.toUpperCase()+']':''
         joinMsg='🎸 '+member.name+tl+' joins!'+(bonded.roleBondBonus>0?' 🔗 Bond +'+bonded.roleBondBonus+' ATK!':'')
       }
@@ -8716,6 +9095,12 @@ function App(){
     setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false
     clearSave();setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
+    // Reset mythic unlock per-run trackers
+    chainsFiredThisRunRef.current=new Set()
+    soloMembersUsedRef.current=new Set()
+    allStonedAchievedRef.current=false
+    luciferStrikesUsedRef.current=0
+    fightLossMembersRef.current=new Set()
     setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0,overkillDmg:0,bestMultiplier:1.0});setScaledMaxHp(0);setVenomDotStacks(0);setDblRoll(null);setLastKillingBlow('');setCurrentTip('');setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setSlowBurnStrikes(0);setStashStolenThisFight(0);corrPowerShownRef.current=false
   }
@@ -9711,6 +10096,91 @@ function App(){
           <div style={{fontSize:13,fontWeight:900,color:bc,letterSpacing:2,textTransform:'uppercase'}}>{fc.type}</div>
         </div>
       })()}
+      {/* ═══ ECHOPLEX / LOOPER / SABBATH REPLAY ANIMATIONS ═══
+          Each replay renders a card flying from member slot to boss with:
+          - Polychrome rainbow trail (RGB chromatic aberration via 3 color layers)
+          - Pulsing glow halo in pedal-kind color
+          - Particle tracers behind the card
+          - Card itself with shimmer animation and the card's emoji + name */}
+      {echoplexReplays.map(function(rp){
+        const tc=rp.cardType==='RIFF'?'#9933cc':rp.cardType==='CORRUPT'?'#aa1111':rp.cardType==='UTILITY'?'#22aa44':'#c87820'
+        const kc=rp.kind==='echoplex'?'#ff8800':rp.kind==='looper'?'#44aaff':'#bb44ff'
+        const dx=rp.toX-rp.fromX
+        const dy=rp.toY-rp.fromY
+        const cssVars={'--epx-dx':dx+'px','--epx-dy':dy+'px','--epx-from-x':rp.fromX+'px','--epx-from-y':rp.fromY+'px','--epx-to-x':rp.toX+'px','--epx-to-y':rp.toY+'px','--epx-tc':tc,'--epx-kc':kc}
+        return (<div key={rp.key} style={Object.assign({position:'absolute',left:0,top:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:9100,overflow:'visible'},cssVars)}>
+          {/* Rainbow tracer trail — 5 lagging echoes in shifting hues */}
+          {[0,1,2,3,4].map(function(i){
+            const hue=(i*72)  // 0,72,144,216,288 — full rainbow
+            const trailDelay=i*60  // ms stagger
+            return (<div key={'trail-'+i} style={{
+              position:'absolute',left:rp.fromX,top:rp.fromY,
+              width:96,height:132,
+              transform:'translate(-50%,-50%)',
+              background:'linear-gradient(180deg,hsla('+hue+',95%,55%,0.55) 0%,hsla('+((hue+30)%360)+',95%,45%,0.35) 100%)',
+              border:'2px solid hsla('+hue+',95%,65%,0.75)',
+              borderRadius:8,
+              filter:'blur('+(3+i*1.2)+'px) saturate(1.6)',
+              boxShadow:'0 0 '+(20+i*8)+'px hsla('+hue+',95%,55%,0.7), 0 0 '+(40+i*12)+'px hsla('+hue+',95%,55%,0.4)',
+              animation:'echoplexTrail 1.2s cubic-bezier(0.4,0.05,0.4,0.98) '+trailDelay+'ms forwards',
+              opacity:0.9-i*0.13,
+              mixBlendMode:'screen'
+            }}/>)
+          })}
+          {/* Chromatic aberration: red/cyan offset ghost cards */}
+          <div style={{
+            position:'absolute',left:rp.fromX,top:rp.fromY,
+            transform:'translate(-50%,-50%)',
+            width:128,height:178,
+            background:'rgba(255,40,40,0.5)',border:'3px solid rgba(255,80,80,0.85)',borderRadius:8,
+            filter:'blur(2px)',
+            boxShadow:'0 0 30px rgba(255,40,40,0.7)',
+            animation:'echoplexCardChromaR 1.2s cubic-bezier(0.3,0.05,0.4,0.98) forwards',
+            mixBlendMode:'screen'
+          }}/>
+          <div style={{
+            position:'absolute',left:rp.fromX,top:rp.fromY,
+            transform:'translate(-50%,-50%)',
+            width:128,height:178,
+            background:'rgba(40,255,255,0.5)',border:'3px solid rgba(80,255,255,0.85)',borderRadius:8,
+            filter:'blur(2px)',
+            boxShadow:'0 0 30px rgba(40,255,255,0.7)',
+            animation:'echoplexCardChromaB 1.2s cubic-bezier(0.3,0.05,0.4,0.98) forwards',
+            mixBlendMode:'screen'
+          }}/>
+          {/* MAIN card layer — centered between chroma ghosts */}
+          <div style={{
+            position:'absolute',left:rp.fromX,top:rp.fromY,
+            transform:'translate(-50%,-50%)',
+            width:128,height:178,
+            background:'linear-gradient(180deg,#201408,#100804)',
+            border:'3px solid '+tc,borderRadius:8,
+            display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:6,
+            boxShadow:'0 0 40px '+kc+', 0 0 80px '+kc+'aa, 0 0 120px '+tc+'66',
+            animation:'echoplexCardMain 1.2s cubic-bezier(0.3,0.05,0.4,0.98) forwards',
+            zIndex:2
+          }}>
+            <div style={{fontSize:42,filter:'drop-shadow(0 0 12px '+kc+')'}}>{rp.cardEmoji}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--ink-bone)',textAlign:'center',padding:'0 6px',lineHeight:1.1}}>{rp.cardName}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:kc,letterSpacing:2,textTransform:'uppercase'}}>{rp.kind==='echoplex'?'🎚 ECHO':rp.kind==='looper'?'♾ LOOP':'🌑 SABBATH'}</div>
+          </div>
+          {/* Particle tracers — 8 sparks trailing behind the card */}
+          {[0,1,2,3,4,5,6,7].map(function(i){
+            const sparkDelay=i*40
+            const sparkOff=(i%2===0?-1:1)*((i*3)+5)
+            return (<div key={'spark-'+i} style={{
+              position:'absolute',left:rp.fromX+sparkOff,top:rp.fromY,
+              transform:'translate(-50%,-50%)',
+              width:4+(i%3),height:4+(i%3),
+              borderRadius:'50%',
+              background:'hsl('+((i*45+30)%360)+',95%,65%)',
+              boxShadow:'0 0 '+(8+i)+'px hsl('+((i*45+30)%360)+',95%,55%), 0 0 '+(16+i*2)+'px hsl('+((i*45+30)%360)+',95%,65%)',
+              animation:'echoplexSpark 1.2s cubic-bezier(0.4,0.05,0.4,0.98) '+sparkDelay+'ms forwards',
+              opacity:0
+            }}/>)
+          })}
+        </div>)
+      })}
       {floats.filter(Boolean).map(f=><Float key={f.id} v={f.v} x={f.x} y={f.y} color={f.color} big={f.big} onDone={()=>remFloat(f.id)}/>)}
       {vfxParticles.map(p=><div key={p.id} className="vfx-particle" style={{left:p.x,top:p.y,width:p.size,height:p.size,background:p.color,boxShadow:'0 0 '+(p.size*2)+'px '+p.color,animation:'vfxDrift '+p.dur+'ms ease-out forwards','--vfx-dx':p.dx+'px','--vfx-dy':p.dy+'px'}}/>)}
       {/* ACHIEVEMENT POLAROID — slides in from right */}
@@ -9832,6 +10302,17 @@ function App(){
           </div>
         </div>
       </div>}
+      {/* MYTHIC UNLOCK OVERLAY — dramatic flash when a hidden mythic unlocks */}
+      {mythicUnlockOverlay&&<div style={{position:'absolute',inset:0,zIndex:9999,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:24,animation:'chainGlow 5s ease forwards'}}>
+        <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center, rgba(232,168,32,0.35) 0%, rgba(0,0,0,0.85) 65%)',animation:'chainGlow 5s ease forwards'}}/>
+        <div style={{position:'absolute',inset:0,border:'8px solid var(--gold)',boxShadow:'inset 0 0 200px rgba(232,168,32,0.55), 0 0 100px rgba(232,168,32,0.7)',animation:'chainGlow 5s ease forwards'}}/>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'var(--gold)',letterSpacing:14,textShadow:'0 0 30px rgba(232,168,32,0.9), 0 0 60px rgba(232,168,32,0.6)',zIndex:1,animation:'chainSlam 5s ease forwards'}}>⛧ MYTHIC UNLOCKED ⛧</div>
+        <div style={{fontSize:160,filter:'drop-shadow(0 0 80px var(--gold))',animation:'chainSlam 5s ease forwards',zIndex:1}}>{mythicUnlockOverlay.emoji}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:88,color:'var(--ink-bone)',textShadow:'0 0 40px rgba(232,168,32,0.9), 0 0 80px rgba(196,30,58,0.5), 0 4px 12px rgba(0,0,0,0.95)',letterSpacing:6,zIndex:1,animation:'chainSlam 5s ease forwards',textAlign:'center',padding:'0 60px'}}>{mythicUnlockOverlay.name}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'var(--gold)',maxWidth:1200,padding:'0 80px',textAlign:'center',letterSpacing:2,zIndex:1,animation:'fadeIn 2.5s ease',lineHeight:1.4}}>{mythicUnlockOverlay.effect}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--ink-rust)',letterSpacing:6,textTransform:'uppercase',zIndex:1,animation:'fadeIn 3.5s ease',marginTop:8}}>Will appear in shops on future runs.</div>
+      </div>}
+
       {/* RIFF CHAIN COMBO FLASH */}
       {comboFlash&&<div style={{position:'absolute',inset:0,zIndex:9600,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:0,animation:'chainGlow 3s ease forwards'}}>
         {/* Full-screen dark overlay */}
