@@ -245,7 +245,7 @@ const ENEMIES=[
 const ALL_MUSICIANS=[
   {id:'bjorn',name:'Bjorn',role:'Lead Guitarist',atk:5,hp:6,maxHp:8,emoji:'🎸',keyword:'FRENZIED',desc:'High ATK, fragile. The carry.',bio:'Former blacksmith from Uppsala. Traded his hammer for a guitar at 14. His riffs have literally killed small animals.'},
   {id:'ragnar',name:'Ragnar',role:'Lead Guitarist',atk:4,hp:7,maxHp:9,emoji:'🎸',keyword:'FRENZIED',desc:'Slightly tankier lead.',bio:'Claims to be descended from the real Ragnar Lothbrok. Nobody believes him, but nobody argues when he plays.'},
-  {id:'thor',name:'Thor',role:'Drummer',atk:0,hp:8,maxHp:11,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Attack fires twice per turn.',bio:'Not THAT Thor. This one is louder. Broke three drum kits in one show. The venue banned drums after that.'},
+  {id:'thor',name:'Thor',role:'Drummer',atk:0,hp:8,maxHp:11,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Lucky drummer. Roll high and the whole band hits harder.',bio:'Not THAT Thor. This one is louder. Broke three drum kits in one show. The venue banned drums after that.'},
   {id:'ingrid',name:'Ingrid',role:'Bass Player',atk:3,hp:10,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'High HP. Save a member from a lethal hit.',bio:'The foundation. Ingrid held the band together through two breakups, a lawsuit, and a literal earthquake during a set.'},
   {id:'loki',name:'Loki',role:'Synth Player',atk:3,hp:6,maxHp:8,emoji:'🎹',keyword:'CORRUPT',desc:'Damage scales with Corruption.',bio:'Found a cursed synthesizer in a pawn shop. The more corrupt the signal, the harder it hits. He sleeps with it.'},
   {id:'grimnir',name:'Grimnir',role:'Vocalist',atk:2,hp:7,maxHp:9,emoji:'🎤',keyword:'DEBUFF',desc:'The Masked One. Reduces boss passive each turn.',bio:'Nobody has seen his face. His voice strips the will from anything that hears it. Even the sound guy wears earplugs.'},
@@ -5862,7 +5862,7 @@ function App(){
     }
     else if(card.id==='russianroulette'){
       if(!m)return false;const roll=Math.floor(Math.random()*6)+1
-      if(roll===1){ns[slotIdx]=Object.assign({},m,{tooStoned:true,hp:0});msg='🔫 Russian Roulette: '+m.name+' rolled 1... TOO STONED! 💀'}
+      if(roll===1){ns[slotIdx]=Object.assign({},m,{tooStoned:true,hp:0});msg='🔫 Russian Roulette: '+m.name+' rolled 1... TOO STONED! 💨'}
       else if(roll<=5){ns[slotIdx]=Object.assign({},m,{atk:m.atk+4,tempBuff:true});msg='🔫 Russian Roulette: '+m.name+' rolled '+roll+'! +4 ATK!'}
       else{ns[slotIdx]=Object.assign({},m,{atk:m.atk+8,tempBuff:true,stoneShield:2});msg='🔫 Russian Roulette: '+m.name+' rolled 6! +8 ATK + Shield! 🛡️'}
     }
@@ -8084,9 +8084,9 @@ function App(){
             ['↓ Discards','You get 4 Discards per fight. Select unwanted cards and discard them to draw fresh ones. Strategic discarding is key to finding your best cards.'],
             ['🔥 Embers','Cards cost Embers to play. You refill to your max Embers at the start of each Strike. Max Embers increases by +1 after each boss kill.'],
             ['🌿 Stash','Your currency. Earned after victories (scales with circle depth). Spent in the shop on recruit packs, cards, artifacts, passives, and drugs. Capped at 420.'],
-            ['💀 Too Stoned','When a member reaches 0 HP, they go Too Stoned and can\'t attack or be targeted. If ALL members go Too Stoned, the run ends.'],
+            ['💨 Too Stoned','When a member reaches 0 HP, they go Too Stoned and can\'t attack or be targeted for the rest of this fight. They recover at full HP next fight. If ALL members go Too Stoned at once, the run ends.'],
             ['👥 Band Members','Your band has up to 5 slots (6 with the Sixth Slot pact). Each member has ATK, HP, and a keyword ability. Recruit new members from packs in the shop.'],
-            ['🏷 Member Keywords','FRENZIED: +ATK per RIFF played each Strike (×1/2/4 by stack tier). DOUBLE TIME: Drummer d6 multiplier; at 3+ stacks ALL members attack twice. ANCHOR: Saves from lethal damage 1/2/any-member by stack tier (per fight). CORRUPT: +ATK from Corruption (×1/2/4 by stack tier). DEBUFF: Reduces boss damage. FOLK MAGIC: 20% chance to refill all Embers. SHREDDER: +ATK per consecutive same-type card chain (×1/2/4 by stack tier). HEXED: Auto-raises corruption, gains ATK from it.'],
+            ['🏷 Member Keywords','FRENZIED: +ATK per RIFF played each Strike (×1/2/4 by stack tier). DOUBLE TIME: Drummer rolls d6 each fight (5-6 doubles ATK, 3-4 ×1.5, 1-2 ×1). Only one drummer per band. ANCHOR: Saves from lethal damage 1/2/any-member by stack tier (per fight). CORRUPT: +ATK from Corruption (×1/2/4 by stack tier). DEBUFF: Reduces boss damage. FOLK MAGIC: 20% chance to refill all Embers. SHREDDER: +ATK per consecutive same-type card chain (×1/2/4 by stack tier). HEXED: Auto-raises corruption, gains ATK from it.'],
             ['⛓ Mentor Links','Place a Foil/Mythic/Demonic member directly LEFT of a basic member with the same role. They form a Mentor Link — a permanent damage multiplier that fires every Strike while both are alive.'],
             ['✨ Member Tiers','Members come in tiers: Basic (standard), Foil (+1 ATK/HP, -1 Ember on cards), Mythic (+3 ATK/HP), Demonic (+5 ATK/HP, golden glow). Higher tiers appear in better packs.'],
             ['🃏 Card Types','RIFF (purple): Direct damage and ATK buffs. CORRUPT (red): Corruption-scaling power. UTILITY (green): Healing, draw, and economy. EMBER (orange): Ember management and recovery.'],
@@ -9396,6 +9396,7 @@ function App(){
             },0)
             dmg+=encDmg
             // 3.5) DOUBLE TIME tier-3 (4e): at 3+ Drummer stacks, all members attack twice
+            //   NOTE: dormant — recruit screen blocks 2nd drummer. Mirrors handleStrike line ~6868.
             const _previewDtTier=_previewKw.tier('DOUBLE TIME')
             if(_previewDtTier>=4){
               const _dtBonus=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>s+getEffectiveAtk(m,_previewCtx),0)
