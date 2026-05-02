@@ -124,7 +124,51 @@ Cost range: 24–32 herb. These are build-locking picks.
 |---|---|---|---|---|
 | 13 | **The Looper ♾️** | First card each Strike replays at end of Strike (free) | 28 | Effectively +1 free card → 6-card combos easier |
 | 14 | **Bit Crusher 💥** | Each card you discard gives +5% Corruption | 26 | Corruption rocket → Hellmouth, Inverted Pentacle |
-| 15 | **The Whammy Bar 🎸** | Every 3rd card you play in a Strike costs 0 Embers | 30 | Card spam without ember drought → Burning Stage stable |
+| 15 | **Echoplex 🎚** | When you play a card, 25% chance it triggers a second time at end of Strike (free) | 30 | Random combo extension → Doom Crown, Pentagram Shrine, Burning Stage |
+
+---
+
+
+---
+
+# 💎 MYTHIC TIER — UNLOCKABLES (6 total)
+
+These are NOT in the shop pool by default. Each is gated behind a specific in-game accomplishment. After unlock, they enter the mythic 3% drop rate (which itself scales with how many mythics you've unlocked).
+
+## 🜏 Mythic Artifacts (3)
+
+| # | Name | Effect | Unlock Condition |
+|---|---|---|---|
+| **M1** | **The Inverted Cross ✟** | ×69 damage if Corruption is exactly 100% AND no member is Too Stoned. Run score ×1.5. | Beat Lucifer for the first time |
+| **M2** | **Tongue of the Devourer 👅** | Every card you play deals damage equal to your highest member's ATK. Stacks WITH all multipliers. | Beat Devourer (C3) without losing any band members |
+| **M3** | **The Sigil of Set 𓂀** | First Strike of every fight automatically triggers as if all multiplier conditions are met (peak roll). One-shot per fight. | Win a Bronze run using only ONE band member |
+
+## 🎛 Mythic Pedals (3)
+
+| # | Name | Effect | Unlock Condition |
+|---|---|---|---|
+| **MP1** | **The Witch's Sabbath 🌑** | First card each Strike replays THREE times (Looper × Echoplex on steroids) | Win a fight with all 4 members Too Stoned at the end |
+| **MP2** | **The Conduit ⚡** | Start each fight at MAX Embers. All cards cost half (rounded down) | Beat Lucifer in under 4 strikes |
+| **MP3** | **Tablet of Az'Tothoth 📜** | First Riff Chain each fight permanently upgrades a random card for the rest of the run | Fire all 16 unique Riff Chains in a single run |
+
+## Mythic Drop Rate (Scales With Unlocks)
+
+| Unlocks Owned | Per-shop-slot Mythic Rate |
+|---|---|
+| 0 | 0% (auto-bumps to rare) |
+| 1-2 | 1.5% |
+| 3-4 | 2.0% |
+| 5-6 | 3.0% |
+
+Even at full unlock, mythic appears ~1× per run on average. They stay sacred.
+
+## Implementation Requirements
+
+1. **New stat tracking:** `bossesKilledNoLoss`, `luciferStrikeCount`, `chainsFiredThisRun`, `soloRunCompleted`, `allStonedFightWin`
+2. **Unlock storage:** `localStorage['vst_mythic_unlocks']` — array of unlocked IDs
+3. **Shop pool gate:** filter mythic rolls to only include unlocked entries
+4. **Unlock event UI:** dramatic overlay on first-time trigger
+5. **Trophies page:** show locked mythics as silhouettes with hint, revealed mythics with full effect
 
 ---
 
@@ -206,8 +250,8 @@ Build: Sacrifice members, ride the comeback artifact.
 
 # 🚨 Open Questions for JV
 
-## Q1. Is Mythic tier intentionally empty?
-Current draft has 0 mythic artifacts. The previous design doc had **The Inverted Cross ✟ ×69** as a mythic. Should I add it back? Or save mythic for the next content drop?
+## Q1. Mythic tier — RESOLVED
+6 mythic unlockables added (3 artifacts + 3 pedals). All gated behind in-game accomplishments. See MYTHIC TIER section above.
 
 ## Q2. Score-enhancing artifacts — is this enough?
 Currently 4 artifacts directly affect score (Cheap Beer, Tour Sticker, Lucifer's Pact, Fog Machine). The rest indirectly enhance score by enabling more damage. **Should there be a dedicated score-multiplier artifact category?**
@@ -224,8 +268,8 @@ Designed for CORRUPT/EMBER-only decks. Most players play SOME riffs. Is this too
 ## Q6. Dive Bar Sign (Circles I-III only) — front-loaded?
 Cheap and powerful early, dead later. Common tier feels right. Is the limit annoying?
 
-## Q7. Whammy Bar (every 3rd card free)
-Strong with Burning Stage (need 6 cards = 2 free). Maybe too efficient? Compared to Reverb Tank (1 free per strike), this is 2 free per strike at 6-card plays. **Cost 30 might need bumping to 35.**
+## Q7. Echoplex 25% replay chance
+Replaces Whammy Bar after JV feedback. 25% per card means avg 1.5 replays in a 6-card strike. Feels right for legendary tape-delay flavor (Eddie Van Halen, Page, May). **Tune % up if too rare, down if too consistent.**
 
 ## Q8. Should I draft 5 mythic-tier slots so the 3% drop rate has content?
 With 0 mythics drafted, mythic rolls auto-bump to rare. That's fine but means players never see "MYTHIC ARTIFACT" in shop. **Want me to draft 3-5 mythics?**
