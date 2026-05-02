@@ -3770,6 +3770,55 @@ function TrophyWall({onClose}){
       </div>
     </div>
 
+    {/* ═══ MYTHIC MODIFIERS — HIDDEN UNTIL UNLOCKED ═══
+        Three states per mythic:
+        - Unseen (not in unlocks): blank silhouette ???
+        - Seen (in unlocks): full reveal with effect text
+        Players discover unlock conditions through play (Balatro-style).
+        Cryptic hint shown only to seen+unlocked items. */}
+    {(()=>{
+      let unlocked=[]
+      try{unlocked=JSON.parse(localStorage.getItem('vst_mythic_unlocks')||'[]')}catch(e){}
+      const allMythics=[...MYTHIC_ARTIFACTS,...MYTHIC_PEDALS]
+      const unlockedCount=allMythics.filter(m=>unlocked.includes(m.unlockId)).length
+      return (<div style={{width:'100%',maxWidth:1180,marginTop:18,padding:'14px 20px 16px',background:'linear-gradient(180deg,rgba(40,20,5,0.5),rgba(20,10,3,0.7))',border:'2px solid '+(unlockedCount>0?'#e8a820':'#4a3010'),borderRadius:8,boxShadow:unlockedCount>0?'0 0 24px rgba(232,168,32,0.25)':'none'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:14,marginBottom:12}}>
+          <div style={{fontSize:24,filter:unlockedCount>0?'drop-shadow(0 0 12px rgba(232,168,32,0.7))':'opacity(0.4) brightness(0.6)'}}>⛧</div>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:unlockedCount>0?'var(--gold)':'var(--ink-dim)',letterSpacing:6,textShadow:unlockedCount>0?'0 0 12px rgba(232,168,32,0.6)':'none'}}>MYTHIC MODIFIERS</div>
+          <div style={{fontSize:24,filter:unlockedCount>0?'drop-shadow(0 0 12px rgba(232,168,32,0.7))':'opacity(0.4) brightness(0.6)'}}>⛧</div>
+        </div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-rust)',textAlign:'center',marginBottom:14,letterSpacing:3,textTransform:'uppercase'}}>{unlockedCount} / {allMythics.length} discovered</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3, 1fr)',gap:14}}>
+          {allMythics.map((m,i)=>{
+            const isUnlocked=unlocked.includes(m.unlockId)
+            return (<div key={m.id} style={{
+              background:isUnlocked?'linear-gradient(180deg,rgba(60,40,15,0.7),rgba(30,18,5,0.85))':'linear-gradient(180deg,rgba(15,8,3,0.9),rgba(5,3,1,0.95))',
+              border:isUnlocked?'2px solid var(--gold)':'1px dashed rgba(80,55,20,0.4)',
+              borderRadius:6,padding:'12px 14px',
+              boxShadow:isUnlocked?'0 0 16px rgba(232,168,32,0.3), inset 0 0 24px rgba(232,168,32,0.08)':'none',
+              minHeight:140,display:'flex',flexDirection:'column',gap:6
+            }}>
+              <div style={{display:'flex',alignItems:'center',gap:10}}>
+                <div style={{fontSize:38,filter:isUnlocked?'drop-shadow(0 0 8px rgba(232,168,32,0.6))':'opacity(0.15) brightness(0.3) blur(2px)'}}>{isUnlocked?m.emoji:'⛌'}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:18,color:isUnlocked?'var(--ink-bone)':'var(--ink-dim)',letterSpacing:1,lineHeight:1.1}}>{isUnlocked?m.name:'???'}</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:isUnlocked?'var(--gold)':'var(--ink-dim)',letterSpacing:3,textTransform:'uppercase',marginTop:2}}>
+                    {isUnlocked?(MYTHIC_ARTIFACTS.includes(m)?'Mythic Artifact':'Mythic Pedal'):'Locked'}
+                  </div>
+                </div>
+              </div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:isUnlocked?'var(--ink-bone)':'var(--ink-rust)',lineHeight:1.4,fontStyle:isUnlocked?'normal':'italic',marginTop:4}}>
+                {isUnlocked?m.effect:m.hint}
+              </div>
+            </div>)
+          })}
+        </div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',textAlign:'center',marginTop:12,fontStyle:'italic',letterSpacing:1}}>
+          Mythic modifiers reveal themselves only through deeds.
+        </div>
+      </div>)
+    })()}
+
     <button onClick={onClose} style={{marginTop:4,fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,padding:'8px 40px',flexShrink:0,background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'var(--text-secondary)',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
       Close
     </button>
@@ -5348,6 +5397,8 @@ function App(){
   const wahPedalUsedRef=useRef(false)
   // Octave Pedal: tracks whether first chain double has fired this fight
   const octavePedalFiredRef=useRef(false)
+  // Tablet of Az'Tothoth (mythic): tracks first-chain-of-fight upgrade
+  const tabletFiredRef=useRef(false)
   // The Looper / Echoplex: queued retriggers for end of strike
   const queuedReplaysRef=useRef([])  // array of {cardId, kind:'looper'|'echoplex', slotIdx}
   const [comboFlash,setComboFlash]=useState(null)
@@ -6575,6 +6626,19 @@ function App(){
         // Mythic unlock tracking: Tablet of Az'Tothoth requires all 16 chains in one run
         chainsFiredThisRunRef.current.add(chain.id)
         if(chainsFiredThisRunRef.current.size>=16){fireMythicUnlock('tabletOfAzothoth')}
+        // Tablet of Az'Tothoth (mythic): first chain each fight upgrades a random card permanently
+        if(activePassives.some(p=>p.id==='tabletofazothoth')&&!tabletFiredRef.current){
+          tabletFiredRef.current=true
+          // Find an upgradeable card from current deck/hand/discard that isn't already upgraded
+          const allDeckCards=[...deckRef.current,...hand,...discRef.current]
+          const upgradeable=allDeckCards.filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i).filter(c=>!c.consumable&&CARD_UPGRADES[c.id]&&!upgradedCards.includes(c.id))
+          if(upgradeable.length>0){
+            const target=upgradeable[Math.floor(Math.random()*upgradeable.length)]
+            setUpgradedCards(p=>[...p,target.id])
+            addLog('📜 Tablet of Az\'Tothoth! '+target.name+' permanently upgraded!')
+            addFloat('⛧ '+target.name+' UPGRADED!',getCenter(bossRef).x,getCenter(bossRef).y-160,'#bb44ff',true)
+          }
+        }
         // ── SHREDDER SIGNATURE: queue chain for echo on next strike ──
         if((STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).signature==='riff_chain_echo'){
           shredderEchoesPendingRef.current++
@@ -8596,6 +8660,7 @@ function App(){
     discardsThisStrikeRef.current=0
     wahPedalUsedRef.current=false
     octavePedalFiredRef.current=false
+    tabletFiredRef.current=false
     queuedReplaysRef.current=[]
     // Mythic unlock per-fight trackers
     luciferStrikesUsedRef.current=0

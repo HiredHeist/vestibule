@@ -220,13 +220,35 @@ const UPGRADE_HP={
 
 // ── ARTIFACTS (shop items, max 3 equipped) ──
 const ARTIFACTS=[
-  {id:'a1',name:'Vintage Guitar',cost:8,effect:'leadAtk1'},    // Lead guitarist +1 ATK per fight
-  {id:'a3',name:'Evil Eye',cost:20,effect:'firstCardFree'},     // First card each strike free
-  {id:'a5',name:'Haunted Radio',cost:10,effect:'tapBoost'},     // Tapped Out +6, Power Tap +2
-  {id:'a6',name:'Black Candle',cost:12,effect:'deathDmg8'},     // 8 dmg when member dies
-  {id:'a8',name:'Stone Tablet',cost:15,effect:'allHp3'},        // All members +3 max HP
-  {id:'a9',name:'Resonance Coil',cost:10,effect:'resonanceBoost'}, // Resonance refunds 2 + draw
-  {id:'a10',name:'Burning Stage',cost:14,effect:'perfectBonus'}, // 1-strike win = +5 embers next
+  // ── Existing mult artifacts (unchanged) ──
+  {id:'a1',name:'Vintage Guitar',cost:8,effect:'leadAtk1',multTrigger:'cards3',mult:1.3},
+  {id:'a3',name:'Evil Eye',cost:20,effect:'firstCardFree'},  // RECLASSIFIED to pedal in live, kept here for sim continuity
+  {id:'a5',name:'Haunted Radio',cost:10,effect:'tapBoost',multTrigger:'perChain',mult:1.2},
+  {id:'a6',name:'Black Candle',cost:12,effect:'deathDmg8',multTrigger:'perStoned',mult:1.4},
+  {id:'a8',name:'Stone Tablet',cost:15,effect:'allHp3'},  // RECLASSIFIED
+  {id:'a9',name:'Resonance Coil',cost:10,effect:'resonanceBoost',multTrigger:'perDupe',mult:1.15},
+  {id:'a10',name:'Burning Stage',cost:14,effect:'perfectBonus',multTrigger:'cards5',mult:3.0},
+  // ── NEW MULT ARTIFACTS — common ──
+  {id:'crackedpickup',name:'Cracked Pickup',cost:10,multTrigger:'playedRiff',mult:1.2,rarity:'common'},
+  {id:'distortioncab',name:'Distortion Cab',cost:14,multTrigger:'alwaysOn',mult:1.25,rarity:'common'},
+  {id:'ashtray',name:'Ash Tray',cost:12,multTrigger:'anyStoned',mult:1.3,rarity:'common'},
+  {id:'crowdnoise',name:'Crowd Noise',cost:14,multTrigger:'perAliveMember',mult:1.15,rarity:'common'},
+  {id:'tapehiss',name:'Tape Hiss',cost:8,multTrigger:'noRiff',mult:1.2,rarity:'common'},
+  {id:'cheapbeer',name:'Cheap Beer',cost:10,multTrigger:'alwaysOn',mult:1.15,rarity:'common'},
+  {id:'setlistart',name:'Set List Art',cost:12,multTrigger:'firstCardEmber',mult:1.4,rarity:'common'},
+  {id:'gaffertape',name:'Gaffer Tape',cost:10,multTrigger:'allHealthy',mult:1.2,rarity:'common'},
+  // ── NEW — uncommon ──
+  {id:'pentagramshrine',name:'Pentagram Shrine',cost:22,multTrigger:'perCorruptCard',mult:1.4,rarity:'uncommon'},
+  {id:'doomchoir',name:'Doom Choir',cost:24,multTrigger:'perSameRole',mult:1.5,rarity:'uncommon'},
+  {id:'solosermon',name:'Solo Sermon',cost:26,multTrigger:'cards2exact',mult:6.0,rarity:'uncommon'},
+  {id:'blackmassbell',name:'Black Mass Bell',cost:22,multTrigger:'chains3',mult:2.5,rarity:'uncommon'},
+  {id:'fogmachine',name:'Fog Machine',cost:24,multTrigger:'perStoned',mult:1.4,rarity:'uncommon'},
+  {id:'chromeskull',name:'Chrome Skull',cost:28,multTrigger:'lastMemberStanding',mult:3.0,rarity:'uncommon'},
+  // ── NEW — rare ──
+  {id:'doomcrown',name:'The Doom Crown',cost:38,multTrigger:'allSameType',mult:8.0,rarity:'rare'},
+  {id:'triplesixes',name:'Triple Sixes',cost:35,multTrigger:'perOtherArtifact',mult:3.0,rarity:'rare'},
+  {id:'invertedpentacle',name:'Inverted Pentacle',cost:36,multTrigger:'corrupt100exact',mult:5.0,rarity:'rare'},
+  {id:'blackgoat',name:'The Black Goat',cost:42,multTrigger:'goatStackOther',mult:2.0,rarity:'rare'},
 ]
 const PASSIVES=[
   {id:'p1',name:'Power Chord',cost:6,effect:'extraEmber'},      // +1 ember per fight
@@ -842,6 +864,24 @@ function simFight(gs,phaseHp,luciferPhase){
     const _cpc=(gs._cardsPlayedIds||[]).length
     const _cf=gs._firedChains?gs._firedChains.size:0
     const _sc=gs.stage.filter(m=>m.tooStoned).length
+    // Extended sim context for new modifier triggers (minimum viable port)
+    const _cardsThis=(gs._cardsPlayedIds||[]).map(id=>{
+      const isEcho=typeof id==='string'&&id.startsWith('_echo:')
+      const realId=isEcho?id.slice(6):id
+      const c=ALL_CARDS.find(x=>x.id===realId)
+      return c?Object.assign({},c,{_isEchoplexRetrigger:isEcho}):null
+    }).filter(Boolean)
+    const _realPlays=_cardsThis.filter(c=>!c._isEchoplexRetrigger)
+    const _corrCount=_cardsThis.filter(c=>c.type==='CORRUPT').length
+    const _riffCount=_cardsThis.filter(c=>c.type==='RIFF').length
+    const _allSame=_realPlays.length>=3&&_realPlays.every(c=>c.type===_realPlays[0].type)
+    const _aliveNS=gs.stage.filter(m=>!m.tooStoned&&m.hp>0).length
+    const _aliveAll=gs.stage.filter(m=>m.hp>0).length
+    const _firstType=_cardsThis.length>0?_cardsThis[0].type:null
+    const _allHealthy=gs.stage.filter(m=>m).every(m=>m.hp>=Math.ceil((m.maxHp||m.hp)/2))
+    const _roleCnts={}
+    gs.stage.forEach(m=>{if(m&&m.role)_roleCnts[m.role]=(_roleCnts[m.role]||0)+1})
+    const _maxRole=Math.max(0,...Object.values(_roleCnts))
     for(const art of gs.artifacts){
       if(!art.multTrigger)continue
       let fires=0
@@ -851,9 +891,34 @@ function simFight(gs,phaseHp,luciferPhase){
       if(art.multTrigger==='corrupt80'&&gs.corruption>=80)fires=1
       if(art.multTrigger==='perChain')fires=_cf
       if(art.multTrigger==='perStoned')fires=_sc
+      // ── NEW TRIGGERS (minimum viable port) ──
+      if(art.multTrigger==='alwaysOn')fires=1
+      if(art.multTrigger==='playedRiff'&&_riffCount>0)fires=1
+      if(art.multTrigger==='anyStoned'&&_sc>0)fires=1
+      if(art.multTrigger==='perAliveMember')fires=_aliveNS
+      if(art.multTrigger==='noRiff'&&_riffCount===0&&_cpc>0)fires=1
+      if(art.multTrigger==='firstCardEmber'&&_firstType==='EMBER')fires=1
+      if(art.multTrigger==='allHealthy'&&_allHealthy)fires=1
+      if(art.multTrigger==='lastMemberStanding'&&_aliveAll===1)fires=1
+      if(art.multTrigger==='perCorruptCard')fires=_corrCount
+      if(art.multTrigger==='perSameRole')fires=Math.max(0,_maxRole)
+      if(art.multTrigger==='cards2exact'&&_realPlays.length===2)fires=1
+      if(art.multTrigger==='chains3'&&_cf>=3)fires=1
+      if(art.multTrigger==='allSameType'&&_allSame)fires=1
+      if(art.multTrigger==='perOtherArtifact')fires=Math.max(0,gs.artifacts.length-1)
+      if(art.multTrigger==='corrupt100exact'&&gs.corruption===100)fires=1
+      if(art.multTrigger==='corruptedClean'&&gs.corruption===100&&_sc===0)fires=1
+      if(art.multTrigger==='goatStackOther'){
+        const others=Math.max(0,gs.artifacts.length-1)
+        artMult*=(art.mult||2.0)*Math.pow(1.3,others)
+        continue
+      }
+      // Skip in sim (need full game state):
+      // - embers5, discardedFight, earlyCircle, perDiscardStrike, doubleTimeRolled,
+      //   luciferOnStage, sigilOpener, tongueDamage
       if(fires>0)artMult*=Math.pow(art.mult,fires)
     }
-    if(gs.artifacts.some(a=>a.id==='ca1'))artMult*=1.5
+    // ca1 'always' legacy trigger now handled by alwaysOn above
     if(artMult>1)strikeDmg=Math.round(strikeDmg*artMult)
     // Boss loot multiplier triggers
     const _lootAlive=gs.stage.filter(m=>!m.tooStoned)
