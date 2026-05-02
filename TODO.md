@@ -1,41 +1,60 @@
 # VESTIBULE — TODO
 
-*Last updated: May 2, 2026 — modifier system implementation in progress*
-*Last commits: cascade feel-pass `d681a31` → modifier design docs `dfe910b/72669f5` → modifier code `8705f61/a5db9e8/de6ff5d`*
-*App.jsx: ~10,600 lines*
+*Last updated: May 2, 2026 — modifier system COMPLETE 🤘*
+*Last commits: design lock `72669f5` → modifier code `8705f61/a5db9e8/de6ff5d` → final megapush `bd7190d`*
+*App.jsx: ~11,124 lines*
 
 This is the authoritative TODO. The old one was bloated with completed work — that history lives in git. This doc is **what's left** and **what's next**, sorted ruthlessly by priority.
 
 ---
 
-## 🔥 ACTIVE: Modifier System Overhaul (in progress May 2)
+## 🎉 SHIPPED: Modifier System Overhaul (May 2 2026)
 
-**Design freeze:** `MODIFIER_REDESIGN.md` + `MODIFIER_CONTENT.md` + `MODIFIER_INTERACTIONS.md` (commits 482baa5, cf5ddb5, f14a04c, d6984ce, dfe910b, 72669f5, 7ebf18c)
+**Design freeze:** `MODIFIER_REDESIGN.md` + `MODIFIER_CONTENT.md` + `MODIFIER_INTERACTIONS.md`
 
-**Code progress:**
-- ✅ Phase 1 — Data: 25 artifacts + 15 pedals + 6 mythic unlockables, all rarity-tagged (`8705f61`)
-- ✅ Phase 2 — Main strike triggers: ~20 new multTrigger types wired (`8705f61`)
-- ✅ Phase 2b — Both preview sites synced, ×2.27 mult box now shows full stack (`a5db9e8`)
-- ✅ Phase 5 — Shop weighted rolls: Common 50% / Uncommon 30% / Rare 17% / Mythic 3% (`a5db9e8`)
-- ✅ Phase 4 partial — Pedal effects: Reverb Tank, Fuzz Box, Phaser, Wah, Cable Tester, Power Conditioner, Drum Throne, Bit Crusher, The Conduit (`de6ff5d`)
-- ✅ Reclassified routing: a3/a4/a7/a8/ca2/ca3/wardrums all check passives now (`de6ff5d`)
+**All 10 phases shipped:**
+- ✅ Phase 1 — Data: 25 artifacts + 15 pedals + 6 mythic unlockables, all rarity-tagged
+- ✅ Phase 2 — Main strike triggers: ~20 new multTrigger types wired
+- ✅ Phase 2b — Both preview sites synced (visible mult box + DEALS preview)
+- ✅ Phase 3 — Reclassified routing: a3/a4/a7/a8/ca2/ca3/wardrums all check passives
+- ✅ Phase 4 — Pedal effects: ALL 18 pedals now functional including:
+  - Reverb Tank, Fuzz Box, Phaser, Wah, Cable Tester (ember discounts)
+  - Power Conditioner, Drum Throne, Bit Crusher (fight-start effects)
+  - Volume Knob, Compressor (next-strike bonuses on 4+ cards)
+  - Octave Pedal (first chain ×3.17 instead of ×1.78)
+  - Sustain Pedal (temp buffs +1 strike)
+  - The Looper (deterministic first-card replay)
+  - **Echoplex 69% retrigger with FULL polychrome card-flight animation**
+  - The Conduit (mythic — start max embers, half cost)
+  - Witch's Sabbath (mythic — first card replays 3 times)
+- ✅ Phase 5 — Shop weighted rolls: Common 50% / Uncommon 30% / Rare 17% / Mythic 3%
+- ✅ Phase 6 — Mythic unlock system with stat tracking (5 conditions)
+- ✅ Phase 7 — Mythic unlock dramatic overlay (gold glow, full-screen, 5s)
+- ✅ Phase 8 — Stone Tablet / Serpent's Kiss equip-on-passive routing
+- ✅ Phase 10 — Save format bump vst_save_v3
 
-**Still TODO:**
-- ⏳ Echoplex 69% retrigger with full re-animation (THE god pedal — needs careful UI work)
-- ⏳ Volume Knob, Compressor, Octave Pedal, The Looper, Sustain Pedal effect implementations
-- ⏳ Stone Tablet (a8) and Serpent's Kiss (a7) apply-on-equip handlers
-- ⏳ Mythic unlock system: stat tracking (bossesKilledNoLoss, chainsFiredThisRun, luciferStrikeCount, soloRunVictory, allStonedFightWin) + dramatic UI overlay
-- ⏳ Trophies UI for hidden mythics (??? / silhouette+hint / full reveal)
+**Echoplex visual treatment** (per JV's "make it sexy" directive):
+- 5 lagging rainbow trail echoes (HSL hue rotation 0-288°)
+- RGB chromatic aberration ghosts (red/cyan offset layers)
+- 8 particle spark tracers in hot rainbow palette
+- Main card layer with kind-colored multi-distance shadow stack
+- 200ms staggered, 700ms per flight, ~1.2s lifetime
+- handleStrike split into handleStrike + handleStrikeBody so visuals lead math
+- animPhase='replaying' blocks double-clicks during animation
+
+**Mythic unlock conditions (DEV REFERENCE — hidden from player):**
+- Inverted Cross: First Lucifer kill
+- Tongue of the Devourer: Beat Devourer (C3) without losing any members
+- Sigil of Set: Win Bronze run with only 1 unique member
+- Witch's Sabbath: All 4 members Too Stoned at once + win the fight
+- The Conduit: Beat Lucifer in ≤3 strikes
+- Tablet of Az'Tothoth: Fire all 16 unique chains in one run
+
+**Still in-progress / future polish:**
 - ⏳ Sim engine port — mirror new triggers in `vestibule-sim-kwstacks.js`, run 25K-game balance check
-- ⏳ Save format bump `vst_save` → `vst_save_v3` to invalidate old saves
-
-**Design decisions locked:**
-1. Echoplex retriggers excluded from purity checks (Doom Crown, Solo Sermon), included in volume checks
-2. Black Goat ×2.0 × ×1.3/other (max ×3.38 from artifact alone)
-3. Sigil of Set peaks card+chain mults + auto-×2 trip on first strike (×8.62 opener)
-4. Soul Bargain + Echoplex CAN kill members with "FATAL ECHO INCOMING" warning
-5. Damage display: comma format always, no abbreviation
-6. NO multiplier cap — numbers go BRRR
+- ⏳ Trophies UI for hidden mythics (??? / silhouette+hint / full reveal display)
+- ⏳ Tablet of Az'Tothoth permanent-card-upgrade-on-chain-fire effect (data exists, effect logic TODO)
+- ⏳ Playtest pass to tune costs and rarity weights
 
 ---
 
