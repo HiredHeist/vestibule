@@ -122,7 +122,10 @@ function calcRunScore(stats, won){
   // Stake multiplier
   const stakeId=localStorage.getItem('vst_active_stake')||'bronze'
   const stakeMult=(STAKES.find(s=>s.id===stakeId)||STAKES[0]).scoreMult
-  return Math.max(0, Math.round(baseScore*streakMult*stakeMult))
+  // Deck multiplier (Shredder ×1.4, Ritualist ×1.6, Engineer ×1.5, Survivor ×1.3, Standard ×1.0)
+  const deckId=localStorage.getItem('vst_active_deck')||'standard'
+  const deckMult=(STARTER_DECKS.find(d=>d.id===deckId)||{}).scoreMult||1.0
+  return Math.max(0, Math.round(baseScore*streakMult*stakeMult*deckMult))
 }
 const SCORE_GRADES=[
   {min:0,     label:'GARAGE BAND',  color:'#888888'},
@@ -4891,6 +4894,18 @@ function App(){
     anchorSavesUsedRef.current++
     return true
   }
+  // ── DECK SIGNATURES (commit 2/4) ──
+  // Shredder: every Riff Chain fired this strike → echo for 50% of strike damage on
+  //   the NEXT strike. shredderEchoesPendingRef stores number of pending chains; the
+  //   echo damage = (next strike's base damage) × 0.5 × pendingChainCount.
+  const shredderEchoesPendingRef=useRef(0)
+  // Ritualist: every 10% of corruption GAINED refunds 1 ember (max 3/strike).
+  //   Tracked via a useEffect watching corruption changes. Resets each strike.
+  const ritualistPrevCorruptionRef=useRef(0)
+  const ritualistEmberRefundsThisStrikeRef=useRef(0)
+  // Survivor: first member who would go tooStoned this fight is healed to 50% HP
+  //   instead. Detected via useEffect watching stage for new tooStoned members.
+  const survivorSecondWindUsedRef=useRef(false)
   const [nextCardFree,setNextCardFree]=useState(false)
   const nextCardFreeRef=useRef(false)
   useEffect(()=>{nextCardFreeRef.current=nextCardFree},[nextCardFree])
@@ -4963,7 +4978,9 @@ function App(){
 
   const speedMult=speedMode?0.5:1.0
   const [showCollection,setShowCollection]=useState(false)
-  const [selectedDeck,setSelectedDeck]=useState('standard')
+  const [selectedDeck,setSelectedDeck]=useState(()=>localStorage.getItem('vst_active_deck')||'standard')
+  // Persist deck selection so calcRunScore can apply deck.scoreMult on game-over
+  useEffect(()=>{localStorage.setItem('vst_active_deck',selectedDeck)},[selectedDeck])
   const [encoreMode,setEncoreMode]=useState(false)
   const [encoreCircle,setEncoreCircle]=useState(0)
   const [showTrophies,setShowTrophies]=useState(false)
@@ -5994,6 +6011,11 @@ function App(){
           setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.78*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
         playSfx('chain_combo');triggerShake(18,600);setChainFlashActive(true);setTimeout(()=>setChainFlashActive(false),600);setStrikeMult(p=>Math.min(6.66,Math.round((p*1.78)*100)/100));showFirstTimeTip('chain','Riff Chains fire when you play BOTH cards of a pair in the same Strike. Check Rules for all 16 chains!',addLog);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×1.78 MULTIPLIER!')
         combosFiredRef.current.push(chain.id)
+        // ── SHREDDER SIGNATURE: queue chain for echo on next strike ──
+        if((STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).signature==='riff_chain_echo'){
+          shredderEchoesPendingRef.current++
+          addLog('⚡ Shredder Echo queued — '+chain.name+' fires again next strike at 50%')
+        }
           // #7: Track lifetime chain discovery
           const _allDisc=JSON.parse(localStorage.getItem('vst_chains_discovered')||'[]')
           if(!_allDisc.includes(chain.id)){_allDisc.push(chain.id);localStorage.setItem('vst_chains_discovered',JSON.stringify(_allDisc))
@@ -6025,6 +6047,21 @@ function App(){
     if(!card)return
     // ── UNDO SNAPSHOT — save state before card play ──
     setUndoSnapshot({hand:[...hand],deck:[...deckRef.current],disc:[...discRef.current],stage:stage.map(m=>m?Object.assign({},m):null),embers,corruption,strikeMult:strikeMultRef.current,selected:[...selected],nextCardFree:nextCardFreeRef.current})
+
+    // ── ENGINEER SIGNATURE: COPIER — 25% chance to add a copy of UTILITY card to hand ──
+    // Fires BEFORE downstream branching so it works regardless of which sub-handler runs.
+    // The copy is added to hand asynchronously (setTimeout 50ms) to avoid mutating hand
+    // mid-play and confusing the discard flow. The copy's uid is fresh.
+    if(card.type==='UTILITY'&&(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).signature==='copier'){
+      if(Math.random()<0.25){
+        const _copy=Object.assign({},card,{uid:uid()})
+        setTimeout(()=>{
+          setHand(h=>[...h,_copy])
+          addLog('🔧 Copier! '+card.name+' duplicated into your hand.')
+          addFloat('🔧 COPY!',window.innerWidth/2,window.innerHeight*0.45,'#44aaff',true)
+        },50)
+      }
+    }
 
     // ── SMOKE BREAK: handle entirely here to avoid double setHand race ──
     if(card.id==='setbreak'){
@@ -6818,6 +6855,8 @@ function App(){
 
   const handleStrike=useCallback(()=>{
     setUndoSnapshot(null) // can't undo after striking
+    // Reset Ritualist's per-strike ember refund cap
+    ritualistEmberRefundsThisStrikeRef.current=0
     // CORRUPTION THRESHOLD: 75% — The Madness (15% chance discard random card)
     if(corruption>=75&&Math.random()<0.15&&handRef.current.length>1){
       const idx=Math.floor(Math.random()*handRef.current.length)
@@ -7082,7 +7121,21 @@ function App(){
       const finalDmg=Math.round(dmg*tripMult*currentMult*corruptionMult*artifactMult)
       if(tripMult>1){const _tr=Math.round(dmg*tripMult);_breakdownLines.push({type:'multiply',label:(fightTripBuff||'Trip')+' ×'+tripMult,label2:'= '+_tr.toLocaleString(),runningAfter:_tr,color:'#ff44ff'})}
       if(corruptionMult>1){_breakdownLines.push({type:'multiply',label:'Corruption ×'+corruptionMult.toFixed(1),label2:'= '+Math.round(dmg*tripMult*corruptionMult).toLocaleString(),runningAfter:Math.round(dmg*tripMult*corruptionMult),color:'#cc44ff'})}
-      if(currentMult>1.0){_breakdownLines.push({type:'multiply',label:'Strike ×'+currentMult.toFixed(2),label2:'= '+finalDmg.toLocaleString(),runningAfter:finalDmg,color:'#ff4400'})};const newEHp=Math.max(0,startHp-finalDmg)
+      if(currentMult>1.0){_breakdownLines.push({type:'multiply',label:'Strike ×'+currentMult.toFixed(2),label2:'= '+finalDmg.toLocaleString(),runningAfter:finalDmg,color:'#ff4400'})}
+      // ── SHREDDER SIGNATURE: apply echo damage from chains queued PREVIOUS strike ──
+      // Echo = 50% of this strike's final damage × pending chain count.
+      // Chains queued THIS strike (combosFiredRef populated in playCard) won't echo
+      // until the strike AFTER next, because shredderEchoesPendingRef is read here
+      // BEFORE we add this strike's chains to it (additions happen at end of strike).
+      let _shredderEchoDmg=0
+      if(shredderEchoesPendingRef.current>0){
+        _shredderEchoDmg=Math.round(finalDmg*0.5*shredderEchoesPendingRef.current)
+        _breakdownLines.push({type:'multiply',label:'⚡ Shredder Echo ×'+shredderEchoesPendingRef.current+' (50%)',label2:'+ '+_shredderEchoDmg.toLocaleString(),runningAfter:finalDmg+_shredderEchoDmg,color:'#ff8800'})
+        addLog('⚡ Shredder Echo: '+shredderEchoesPendingRef.current+' chain(s) replay for '+_shredderEchoDmg+' bonus damage!')
+        shredderEchoesPendingRef.current=0
+      }
+      const _totalStrikeDmg=finalDmg+_shredderEchoDmg
+      const newEHp=Math.max(0,startHp-_totalStrikeDmg)
       if(newEHp<=0){const _ok=Math.abs(newEHp);updStat('overkillDmg',_ok)}
       setEnemyHp(prev=>Math.min(prev,newEHp))
       // damageScaleAtk: boss gains ATK per 20 damage taken
@@ -7091,8 +7144,8 @@ function App(){
         const phaseTotalDmg=Math.max(0,scaledMaxHp-newEHp)
         setBossRageAtk(Math.floor(Math.max(0,phaseTotalDmg)/20)*atkGain)
       }
-      if(_breakdownLines.length>1){setDmgBreakdown({lines:_breakdownLines,total:finalDmg})}
-      addFloat(finalDmg.toLocaleString(),bc.x,bc.y-60,'#ff2200',true)
+      if(_breakdownLines.length>1){setDmgBreakdown({lines:_breakdownLines,total:_totalStrikeDmg})}
+      addFloat(_totalStrikeDmg.toLocaleString(),bc.x,bc.y-60,'#ff2200',true)
       if(folkMagicFired){
         setEmbers(maxEmbers)
         addFloat('🪈 FOLK MAGIC! Full Embers!',window.innerWidth/2,window.innerHeight*0.35,'#44ddaa',true)
@@ -7524,6 +7577,11 @@ function App(){
       anchorTierRef.current=_stackTier(_anchorCount)
       anchorSavesUsedRef.current=0
     }
+    // ── DECK SIGNATURES — reset per-fight state ──
+    shredderEchoesPendingRef.current=0
+    ritualistPrevCorruptionRef.current=corruption
+    ritualistEmberRefundsThisStrikeRef.current=0
+    survivorSecondWindUsedRef.current=false
     addLog('══════ FIGHT '+(nextIdx+1)+': '+nextEnemy.name+' ('+_sHp+' HP) ══════')
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
@@ -8002,6 +8060,46 @@ function App(){
     else if(pct<=0.25&&!mf.quarter){mf.quarter=true;setMilestoneFlash({text:'ALMOST',color:'#ff8800'});triggerShake(4,200);setTimeout(()=>setMilestoneFlash(null),1500)}
     else if(pct<=0.50&&!mf.half){mf.half=true;setMilestoneFlash({text:'HALFWAY',color:'#e8a820'});setTimeout(()=>setMilestoneFlash(null),1500)}
   },[enemyHp,enemy])
+
+  // ── RITUALIST SIGNATURE: Corruption Feeds ──
+  // Every 10% corruption GAINED refunds 1 ember, capped at 3 refunds per strike.
+  // The ref is reset at fight start. Per-strike cap reset in handleStrike (see below).
+  useEffect(()=>{
+    if((STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).signature!=='corruption_feeds')return
+    const prev=ritualistPrevCorruptionRef.current
+    const gained=corruption-prev
+    if(gained<=0){ritualistPrevCorruptionRef.current=corruption;return}
+    // How many full 10% steps were crossed? e.g. 18→32 = 2 steps (20, 30)
+    const stepsBefore=Math.floor(prev/10)
+    const stepsAfter=Math.floor(corruption/10)
+    const newSteps=Math.max(0,stepsAfter-stepsBefore)
+    if(newSteps>0){
+      const remaining=Math.max(0,3-ritualistEmberRefundsThisStrikeRef.current)
+      const refund=Math.min(newSteps,remaining)
+      if(refund>0){
+        setEmbers(p=>Math.min(maxEmbers,p+refund))
+        ritualistEmberRefundsThisStrikeRef.current+=refund
+        addLog('💀 Corruption Feeds: +'+refund+' ember'+(refund>1?'s':'')+' from corruption surge')
+      }
+    }
+    ritualistPrevCorruptionRef.current=corruption
+  },[corruption,selectedDeck,maxEmbers])
+
+  // ── SURVIVOR SIGNATURE: Second Wind ──
+  // First member who would go tooStoned this fight is healed to 50% HP instead.
+  // Detected by watching stage; once per fight; ref resets at fight start.
+  useEffect(()=>{
+    if((STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).signature!=='second_wind')return
+    if(survivorSecondWindUsedRef.current)return
+    const stoned=stage.find(m=>m&&m.tooStoned)
+    if(!stoned)return
+    survivorSecondWindUsedRef.current=true
+    const reviveHp=Math.max(1,Math.ceil(stoned.maxHp*0.5))
+    setStage(p=>p.map(m=>m&&m.uid===stoned.uid?Object.assign({},m,{tooStoned:false,hp:reviveHp,bloodOath:false}):m))
+    addLog('🛡️ SECOND WIND! '+stoned.name+' refuses to stay down — healed to '+reviveHp+' HP!')
+    addFloat('🛡 SECOND WIND',window.innerWidth/2,window.innerHeight*0.4,'#44cc44',true)
+    playSfx&&playSfx('member_revive')
+  },[stage,selectedDeck])
 
   // Phase banner sync
   useEffect(()=>{
