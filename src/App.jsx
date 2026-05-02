@@ -1147,10 +1147,10 @@ const STARTER_PASSIVES=[
 //   scoreMult       — final-score multiplier for leaderboard (stacks with stake.scoreMult)
 const STARTER_DECKS=[
   {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. The honest fight.',requirement:null,color:'#c8a060',hpScale:1.85,scoreMult:1.0},
-  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. +1 hand size. +1 starting ember. Band starts at 85% HP — glass cannons. SIGNATURE: Riff Chain Echo — every chain fires a second time at 50% damage on the next strike.',requirement:'beat_standard',color:'#ff4400',hpScale:2.00,memberHpPct:0.85,handSize:6,startEmbers:6,signature:'riff_chain_echo',scoreMult:1.4},
-  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Start each fight at 25% corruption (Whispers fires immediately). 4 starting embers. SIGNATURE: Corruption Feeds — every 10% corruption gained refunds 1 ember (max 3/strike).',requirement:'beat_shredder',color:'#cc44ff',hpScale:1.65,startEmbers:4,startCorruption:25,signature:'corruption_feeds',scoreMult:1.6},
-  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Combo nerd. 18 UTILITY cards. +2 hand size (7 cards). Start with a free Tier 1 artifact. SIGNATURE: Copier — every UTILITY card has a 25% chance to add a copy of itself to your hand.',requirement:'beat_ritualist',color:'#44aaff',hpScale:1.85,handSize:7,freeArtifact:true,signature:'copier',scoreMult:1.5},
-  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Each band member starts with +2 max HP. +1 max strike per fight (5 instead of 4). SIGNATURE: Second Wind — once per fight, the first member who would go Too Stoned heals to 50% HP instead.',requirement:'beat_engineer',color:'#44cc44',hpScale:1.75,memberHpMod:2,maxStrikesMod:1,signature:'second_wind',scoreMult:1.3},
+  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. +1 hand size. Band starts at 80% HP — glass cannons. SIGNATURE: Riff Chain Echo — every chain fires a second time at 33% damage on the next strike.',requirement:'beat_standard',color:'#ff4400',hpScale:2.00,memberHpPct:0.80,handSize:6,signature:'riff_chain_echo',scoreMult:1.4},
+  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Start each fight at 15% corruption. 4 starting embers. SIGNATURE: Corruption Feeds — every 10% corruption gained refunds 1 ember (max 5/strike).',requirement:'beat_shredder',color:'#cc44ff',hpScale:1.65,startEmbers:4,startCorruption:15,signature:'corruption_feeds',scoreMult:1.6},
+  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Combo nerd. 18 UTILITY cards. SIGNATURE: Copier — every UTILITY card has a 25% chance to add a copy of itself to your hand. Copies can\'t re-copy. Stack the engine.',requirement:'beat_ritualist',color:'#44aaff',hpScale:1.85,signature:'copier',scoreMult:1.2},
+  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Each band member starts with +2 max HP. SIGNATURE: Second Wind — each member gets ONE per-fight save: when they would go Too Stoned, they instead heal to 25% HP. Stacks across the band.',requirement:'beat_engineer',color:'#44cc44',hpScale:1.75,memberHpMod:2,maxStrikesMod:0,signature:'second_wind',scoreMult:1.3},
 ]
 function getUnlockedDecks(){
   const achs=getAchievements()
@@ -4903,9 +4903,10 @@ function App(){
   //   Tracked via a useEffect watching corruption changes. Resets each strike.
   const ritualistPrevCorruptionRef=useRef(0)
   const ritualistEmberRefundsThisStrikeRef=useRef(0)
-  // Survivor: first member who would go tooStoned this fight is healed to 50% HP
-  //   instead. Detected via useEffect watching stage for new tooStoned members.
-  const survivorSecondWindUsedRef=useRef(false)
+  // Survivor: each member gets ONE per-fight save when they would go tooStoned —
+  // they're healed to 25% maxHp instead. Tracked via Set of member uids that have
+  // already used their save this fight. Reset at fight start.
+  const survivorSavesUsedRef=useRef(new Set())
   const [nextCardFree,setNextCardFree]=useState(false)
   const nextCardFreeRef=useRef(false)
   useEffect(()=>{nextCardFreeRef.current=nextCardFree},[nextCardFree])
@@ -6052,9 +6053,10 @@ function App(){
     // Fires BEFORE downstream branching so it works regardless of which sub-handler runs.
     // The copy is added to hand asynchronously (setTimeout 50ms) to avoid mutating hand
     // mid-play and confusing the discard flow. The copy's uid is fresh.
-    if(card.type==='UTILITY'&&(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).signature==='copier'){
+    // _copied flag prevents copies from re-copying (no infinite chain).
+    if(card.type==='UTILITY'&&!card._copied&&(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).signature==='copier'){
       if(Math.random()<0.25){
-        const _copy=Object.assign({},card,{uid:uid()})
+        const _copy=Object.assign({},card,{uid:uid(),_copied:true})
         setTimeout(()=>{
           setHand(h=>[...h,_copy])
           addLog('🔧 Copier! '+card.name+' duplicated into your hand.')
@@ -7129,8 +7131,8 @@ function App(){
       // BEFORE we add this strike's chains to it (additions happen at end of strike).
       let _shredderEchoDmg=0
       if(shredderEchoesPendingRef.current>0){
-        _shredderEchoDmg=Math.round(finalDmg*0.5*shredderEchoesPendingRef.current)
-        _breakdownLines.push({type:'multiply',label:'⚡ Shredder Echo ×'+shredderEchoesPendingRef.current+' (50%)',label2:'+ '+_shredderEchoDmg.toLocaleString(),runningAfter:finalDmg+_shredderEchoDmg,color:'#ff8800'})
+        _shredderEchoDmg=Math.round(finalDmg*0.33*shredderEchoesPendingRef.current)
+        _breakdownLines.push({type:'multiply',label:'⚡ Shredder Echo ×'+shredderEchoesPendingRef.current+' (33%)',label2:'+ '+_shredderEchoDmg.toLocaleString(),runningAfter:finalDmg+_shredderEchoDmg,color:'#ff8800'})
         addLog('⚡ Shredder Echo: '+shredderEchoesPendingRef.current+' chain(s) replay for '+_shredderEchoDmg+' bonus damage!')
         shredderEchoesPendingRef.current=0
       }
@@ -7581,7 +7583,7 @@ function App(){
     shredderEchoesPendingRef.current=0
     ritualistPrevCorruptionRef.current=corruption
     ritualistEmberRefundsThisStrikeRef.current=0
-    survivorSecondWindUsedRef.current=false
+    survivorSavesUsedRef.current=new Set()
     addLog('══════ FIGHT '+(nextIdx+1)+': '+nextEnemy.name+' ('+_sHp+' HP) ══════')
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
@@ -8074,7 +8076,7 @@ function App(){
     const stepsAfter=Math.floor(corruption/10)
     const newSteps=Math.max(0,stepsAfter-stepsBefore)
     if(newSteps>0){
-      const remaining=Math.max(0,3-ritualistEmberRefundsThisStrikeRef.current)
+      const remaining=Math.max(0,5-ritualistEmberRefundsThisStrikeRef.current)
       const refund=Math.min(newSteps,remaining)
       if(refund>0){
         setEmbers(p=>Math.min(maxEmbers,p+refund))
@@ -8086,15 +8088,14 @@ function App(){
   },[corruption,selectedDeck,maxEmbers])
 
   // ── SURVIVOR SIGNATURE: Second Wind ──
-  // First member who would go tooStoned this fight is healed to 50% HP instead.
-  // Detected by watching stage; once per fight; ref resets at fight start.
+  // Each member gets ONE per-fight save: when they would go tooStoned, they heal
+  // to 25% maxHp instead. Tracked per-member via a Set of uids in survivorSavesUsedRef.
   useEffect(()=>{
     if((STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).signature!=='second_wind')return
-    if(survivorSecondWindUsedRef.current)return
-    const stoned=stage.find(m=>m&&m.tooStoned)
+    const stoned=stage.find(m=>m&&m.tooStoned&&!survivorSavesUsedRef.current.has(m.uid))
     if(!stoned)return
-    survivorSecondWindUsedRef.current=true
-    const reviveHp=Math.max(1,Math.ceil(stoned.maxHp*0.5))
+    survivorSavesUsedRef.current.add(stoned.uid)
+    const reviveHp=Math.max(1,Math.ceil(stoned.maxHp*0.25))
     setStage(p=>p.map(m=>m&&m.uid===stoned.uid?Object.assign({},m,{tooStoned:false,hp:reviveHp,bloodOath:false}):m))
     addLog('🛡️ SECOND WIND! '+stoned.name+' refuses to stay down — healed to '+reviveHp+' HP!')
     addFloat('🛡 SECOND WIND',window.innerWidth/2,window.innerHeight*0.4,'#44cc44',true)

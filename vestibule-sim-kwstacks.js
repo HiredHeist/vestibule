@@ -182,6 +182,19 @@ const DECK_MANIFESTS={
 const ACTIVE_DECK=DECK_MANIFESTS[DECK_ID]||DECK_MANIFESTS.standard
 const DECK_HP_SCALE={standard:1.85,shredder:2.00,ritualist:1.65,engineer:1.85,survivor:1.75}
 const HP_SCALE=DECK_HP_SCALE[DECK_ID]||1.0
+
+// ── DECK IDENTITY (commit 3/4 — synced with src/App.jsx STARTER_DECKS) ──
+// Mirrors the schema from main app. Each deck overrides opening conditions
+// and may have a signature mechanic that fires during combat.
+const DECK_IDENTITY={
+  standard: {handSize:5, startEmbers:5, startCorruption:0, memberHpMod:0, memberHpPct:1.0, maxStrikesMod:0, signature:null,                 scoreMult:1.0},
+  shredder: {handSize:6, startEmbers:5, startCorruption:0, memberHpMod:0, memberHpPct:0.80,maxStrikesMod:0, signature:'riff_chain_echo',    scoreMult:1.4},
+  ritualist:{handSize:5, startEmbers:4, startCorruption:15,memberHpMod:0, memberHpPct:1.0, maxStrikesMod:0, signature:'corruption_feeds',   scoreMult:1.6},
+  engineer: {handSize:5, startEmbers:5, startCorruption:0, memberHpMod:0, memberHpPct:1.0, maxStrikesMod:0, signature:'copier',             scoreMult:1.2},
+  survivor: {handSize:5, startEmbers:5, startCorruption:0, memberHpMod:2, memberHpPct:1.0, maxStrikesMod:0, signature:'second_wind',        scoreMult:1.3},
+}
+const DECK_ID_DEF=DECK_IDENTITY[DECK_ID]||DECK_IDENTITY.standard
+
 // ── PACT REWARDS (12 options, sim picks best 1 of 2 offered) ──
 const PACT_IDS=['ember_surge','iron_strings','thick_skin','dark_bargain','speed_demon','blood_price','clean_living','corruption_engine','merchants_eye','stone_wall','sixth_slot','war_drums'];
 
@@ -289,6 +302,11 @@ function isUpgraded(m){return m.foil||m.mythic||m.demonic}
 function makeMember(base,foil,mythic,demonic){
   const m={...base,hp:base.maxHp,tooStoned:false,stoneShield:false,foil:!!foil,mythic:!!mythic,demonic:!!demonic,mentorBonusApplied:false,permAtkBonus:0,tempAtkBonus:0,uid:Math.random().toString(36).slice(2)};
   if(demonic){m.atk+=4;m.maxHp+=8;m.hp=m.maxHp}else if(mythic){m.atk+=2;m.maxHp+=4;m.hp=m.maxHp}else if(foil){m.atk+=1;m.maxHp+=2;m.hp=m.maxHp}
+  // ── DECK IDENTITY: apply HP modifiers (Survivor +2, Shredder ×0.85) ──
+  if(DECK_ID_DEF.memberHpMod||DECK_ID_DEF.memberHpPct!==1){
+    m.maxHp=Math.max(1,Math.round((m.maxHp+(DECK_ID_DEF.memberHpMod||0))*(DECK_ID_DEF.memberHpPct||1)))
+    m.hp=m.maxHp
+  }
   return m;
 }
 function buildDeck(){const d=[];for(const[id,copies]of Object.entries(ACTIVE_DECK)){const card=ALL_CARDS.find(c=>c.id===id);if(card)for(let i=0;i<copies;i++)d.push({...card,uid:Math.random().toString(36).slice(2)})}return shuffle(d)}
@@ -609,8 +627,13 @@ function simFight(gs,phaseHp,luciferPhase){
   const enemy={...baseEnemy,maxHp:effectiveMaxHp,_hp:effectiveMaxHp,_atkBuff:0,_immolateStacks:0}
   const circleNum=Math.floor(fightIdx/3)+1,isBoss=(fightIdx+1)%3===0
   gs.embers=gs.maxEmbers;gs._tappedOutNext=false;gs._drawNextStrike=0;gs._discardsLeft=MAX_DISCARDS;gs.stashStolen=0;gs._tripBuff=null;gs._corruptCardsGiven=[]
-  let maxStrikes=STAKE.maxStrikes+(gs._warDrums?1:0)+(gs._extraStrikes||0);gs._extraStrikes=0
+  let maxStrikes=STAKE.maxStrikes+(gs._warDrums?1:0)+(gs._extraStrikes||0)+(DECK_ID_DEF.maxStrikesMod||0);gs._extraStrikes=0
   gs._strikesLeft=maxStrikes
+  // ── DECK SIGNATURES — reset per-fight state ──
+  gs._shredderEchoesPending=0
+  gs._ritualistPrevCorruption=gs.corruption
+  gs._ritualistRefundsThisStrike=0
+  gs._survivorSavesUsed=new Set()
   gs.stage=arrangeStage(gs.stage)
 
   // Fight start artifacts
@@ -672,7 +695,11 @@ function simFight(gs,phaseHp,luciferPhase){
   for(let strike=0;strike<maxStrikes;strike++){
     gs.stage.forEach(m=>{m.tempAtkBonus=0;m.ampedThisStrike=false;m.encoreThisStrike=false});
     gs._directDmg=0;gs._overdriveActive=false;gs._infencoreActive=false;gs._possessedActive=false;gs._nextCardFree=false;
-    const handSize=HAND_SIZE+(gs._speedDemon?1:0)+(gs._drawNextStrike||0);
+    // ── DECK IDENTITY: hand size override (Engineer 7, Shredder 6) ──
+    const _baseHand=DECK_ID_DEF.handSize||HAND_SIZE
+    const handSize=_baseHand+(gs._speedDemon?1:0)+(gs._drawNextStrike||0);
+    // ── RITUALIST SIGNATURE: reset per-strike ember refund cap ──
+    gs._ritualistRefundsThisStrike=0
     drawCards(gs,Math.max(0,handSize-gs.hand.length));gs._drawNextStrike=0;
     if(gs._tappedOutNext){gs.embers=Math.min(gs.maxEmbers,gs.embers+5);gs._tappedOutNext=false}
     if(gs._slowBurnStrikes>0){gs.embers=Math.min(gs.maxEmbers,gs.embers+1);gs._slowBurnStrikes--}
@@ -714,6 +741,28 @@ function simFight(gs,phaseHp,luciferPhase){
       gs._strikeMult=Math.min(10000,Math.round((gs._strikeMult*1.05)*100)/100)
       gs._cardsPlayedIds.push(card.id)
       if(card.type==='EMBER'&&gs.passives.some(p=>p.id==='p4'))gs.embers=Math.min(gs.maxEmbers,gs.embers+1)
+      // ── RITUALIST SIGNATURE: Corruption Feeds — refund 1 ember per 10% gained ──
+      if(DECK_ID_DEF.signature==='corruption_feeds'){
+        const _prev=gs._ritualistPrevCorruption||0
+        if(gs.corruption>_prev){
+          const stepsBefore=Math.floor(_prev/10)
+          const stepsAfter=Math.floor(gs.corruption/10)
+          const newSteps=Math.max(0,stepsAfter-stepsBefore)
+          const remaining=Math.max(0,5-(gs._ritualistRefundsThisStrike||0))
+          const refund=Math.min(newSteps,remaining)
+          if(refund>0){
+            gs.embers=Math.min(gs.maxEmbers,gs.embers+refund)
+            gs._ritualistRefundsThisStrike=(gs._ritualistRefundsThisStrike||0)+refund
+          }
+        }
+        gs._ritualistPrevCorruption=gs.corruption
+      }
+      // ── ENGINEER SIGNATURE: Copier — 25% chance to dup UTILITY card to hand ──
+      // Copies marked _copied to prevent infinite duplication chains.
+      if(DECK_ID_DEF.signature==='copier'&&card.type==='UTILITY'&&!card._copied&&Math.random()<0.25){
+        gs.hand.push({...card,uid:Math.random().toString(36).slice(2),_copied:true})
+        gs._engineerCopies=(gs._engineerCopies||0)+1
+      }
       // Riff chain detection
       for(const chain of RIFF_CHAINS_SIM){
         if(gs._cardsPlayedIds.includes(chain[0])&&gs._cardsPlayedIds.includes(chain[1])){
@@ -723,6 +772,10 @@ function simFight(gs,phaseHp,luciferPhase){
             gs._firedChains.add(ck);gs._strikeMult=Math.min(10000,Math.round((gs._strikeMult*1.78)*100)/100)
             gs._directDmg=(gs._directDmg||0)+Math.round(gs.stage.filter(m=>!m.tooStoned).reduce((s,m)=>s+m.atk,0)*0.10)
             TRACK.combosTriggered=(TRACK.combosTriggered||0)+1
+            // ── SHREDDER SIGNATURE: queue echo for next strike ──
+            if(DECK_ID_DEF.signature==='riff_chain_echo'){
+              gs._shredderEchoesPending=(gs._shredderEchoesPending||0)+1
+            }
           }
         }
       }
@@ -825,7 +878,13 @@ function simFight(gs,phaseHp,luciferPhase){
     if(enemy.passiveId==='soulThief'){const st=aliveNow.filter(m=>(m.permAtkBonus||0)>0);if(st.length>0){const v=pick(st);v.atk-=1;v.permAtkBonus=(v.permAtkBonus||0)-1;gs.stolenAtkPool++;enemy._atkBuff+=1}}
     if(enemy.passiveId==='luciferBoss'){const ag=luciferPhase===1?1:2;enemy._atkBuff=Math.floor(Math.max(0,(enemy.maxHp-Math.max(0,enemy._hp-strikeDmg)))/20)*ag}
 
-    enemy._hp-=strikeDmg;if(enemy._hp<=0)break;
+    // ── SHREDDER SIGNATURE: apply pending echoes from PREVIOUS strike's chains ──
+    let _echoDmg=0
+    if(DECK_ID_DEF.signature==='riff_chain_echo'&&gs._shredderEchoesPending>0){
+      _echoDmg=Math.round(strikeDmg*0.33*gs._shredderEchoesPending)
+      gs._shredderEchoesPending=0
+    }
+    enemy._hp-=(strikeDmg+_echoDmg);if(enemy._hp<=0)break;
 
     // BOSS ATTACKS
     let bossDmg=enemy.baseDmg+enemy._atkBuff+STAKE.dmgAdd+(gs.corruption>=100?3:0);
@@ -871,10 +930,21 @@ function simFight(gs,phaseHp,luciferPhase){
       if(cap<4&&t.keyword!=='ANCHOR')return false
       t.hp=1;gs._anchorSavesUsed++;TRACK.anchorSaves=(TRACK.anchorSaves||0)+1;return true
     }
+    // ── SURVIVOR SIGNATURE: Second Wind — first member to go tooStoned this fight is healed to 50% HP instead.
+    // Returns true if saved. Once per fight.
+    function _survivorSecondWindTry(t){
+      if(DECK_ID_DEF.signature!=='second_wind')return false
+      if(!gs._survivorSavesUsed)gs._survivorSavesUsed=new Set()
+      if(gs._survivorSavesUsed.has(t.uid))return false
+      gs._survivorSavesUsed.add(t.uid)
+      t.hp=Math.max(1,Math.ceil(t.maxHp*0.25))
+      TRACK.survivorSaves=(TRACK.survivorSaves||0)+1
+      return true
+    }
 
     if(enemy.passiveId==='luciferBoss'&&luciferPhase===2){
       const splitDmg=Math.ceil(bossDmg/aliveNow.length)
-      for(const t of aliveNow){t.hp-=splitDmg;if(t.hp<=0){if(t.stoneShield){t.hp=1;const ns=typeof t.stoneShield==='number'?t.stoneShield-1:0;t.stoneShield=ns>0?ns:false}else if(_anchorTrySave(t)){/* saved */}else{t.tooStoned=true;t.hp=0;gs.tooStonedCount++}}}
+      for(const t of aliveNow){t.hp-=splitDmg;if(t.hp<=0){if(t.stoneShield){t.hp=1;const ns=typeof t.stoneShield==='number'?t.stoneShield-1:0;t.stoneShield=ns>0?ns:false}else if(_anchorTrySave(t)){/* saved */}else if(_survivorSecondWindTry(t)){/* saved */}else{t.tooStoned=true;t.hp=0;gs.tooStonedCount++}}}
     } else {
       let targets;
       if(enemy.passiveId&&enemy.passiveId.startsWith('targetHighestHp')){targets=[[...aliveNow].sort((a,b)=>b.hp-a.hp)[0]];if(enemy.passiveId==='targetHighestHp2')bossDmg=Math.floor(bossDmg*1.2);if(enemy.passiveId==='targetHighestHp3')bossDmg=Math.floor(bossDmg*1.5);}else{targets=[aliveNow[rand(aliveNow.length)]]}
@@ -883,7 +953,7 @@ function simFight(gs,phaseHp,luciferPhase){
       for(let _r=0;_r<_attackRounds;_r++){
         if(_r===1){const _stillAlive=gs.stage.filter(m=>!m.tooStoned);if(_stillAlive.length===0)break;targets=[_stillAlive[rand(_stillAlive.length)]]}
         for(const t of targets){const d=targets.length===1?bossDmg:Math.ceil(bossDmg/targets.length);t.hp-=d;
-          if(t.hp<=0){if(t.stoneShield){t.hp=1;const ns=typeof t.stoneShield==='number'?t.stoneShield-1:0;t.stoneShield=ns>0?ns:false}else if(_anchorTrySave(t)){/* saved */}else{t.tooStoned=true;t.hp=0;gs.tooStonedCount++;
+          if(t.hp<=0){if(t.stoneShield){t.hp=1;const ns=typeof t.stoneShield==='number'?t.stoneShield-1:0;t.stoneShield=ns>0?ns:false}else if(_anchorTrySave(t)){/* saved */}else if(_survivorSecondWindTry(t)){/* saved */}else{t.tooStoned=true;t.hp=0;gs.tooStonedCount++;
             if(gs.artifacts.some(a=>a.id==='a6'))enemy._hp-=8;if(gs.passives.some(p=>p.id==='p6'))gs.stash=Math.min(MAX_STASH,gs.stash+3)}}}
       }
     }
@@ -1033,9 +1103,19 @@ function simShop(gs){
   burnWeakCards(gs);
 }
 
-function newGame(){return{stage:pickStartingPair(),deck:buildDeck(),discard:[],hand:[],stash:3,embers:STAKE.startEmbers,maxEmbers:STAKE.startEmbers,corruption:STAKE.startCorruption,fightIndex:0,bossKills:0,artifacts:[],passives:[],fightsSurvived:0,totalDamage:0,highestStrike:0,stashEarned:0,tooStonedCount:0,won:false,mentorLinks:[],lastCircle:1,stashStolen:0,
+function newGame(){
+  const _sE=DECK_ID_DEF.startEmbers!=null?DECK_ID_DEF.startEmbers:STAKE.startEmbers
+  const _sC=DECK_ID_DEF.startCorruption!=null&&DECK_ID_DEF.startCorruption>STAKE.startCorruption?DECK_ID_DEF.startCorruption:STAKE.startCorruption
+  return{stage:pickStartingPair(),deck:buildDeck(),discard:[],hand:[],stash:3,embers:_sE,maxEmbers:_sE,corruption:_sC,fightIndex:0,bossKills:0,artifacts:[],passives:[],fightsSurvived:0,totalDamage:0,highestStrike:0,stashEarned:0,tooStonedCount:0,won:false,mentorLinks:[],lastCircle:1,stashStolen:0,
   heldShrooms:false,heldAcid:false,stolenAtkPool:0,circleArtBought:false,circlePassBought:false,
-  _pacts:[],_speedDemon:false,_warDrums:false,_genreCounts:{RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0},_activeGenre:null,_wthFight:false,_contractsPlayed:0,_upgradedCards:[],artifacts:[],passives:[],loot:[],_strikeMult:1.0,_cardsPlayedIds:[],_firstStrike:true,_allCardsFree:false,_nextCardFree:false,_pendingBurnStage:false,_eventsSeenThisRun:[],_corruptionLocked:false,_bloodOathUid:null,_possessionFired:false}}
+  _pacts:[],_speedDemon:false,_warDrums:false,_genreCounts:{RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0},_activeGenre:null,_wthFight:false,_contractsPlayed:0,_upgradedCards:[],artifacts:[],passives:[],loot:[],_strikeMult:1.0,_cardsPlayedIds:[],_firstStrike:true,_allCardsFree:false,_nextCardFree:false,_pendingBurnStage:false,_eventsSeenThisRun:[],_corruptionLocked:false,_bloodOathUid:null,_possessionFired:false,
+  // ── DECK SIGNATURE TRACKING ──
+  _shredderEchoesPending:0,        // chains queued for next-strike echo (Shredder)
+  _ritualistPrevCorruption:_sC,    // corruption snapshot for refund-step calc (Ritualist)
+  _ritualistRefundsThisStrike:0,   // per-strike refund cap (Ritualist)
+  _survivorSecondWindUsed:false,   // once-per-fight flag (Survivor)
+  _engineerCopies:0                // diagnostic: how many UTILITY copies created
+}}
 
 function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
   for(let f=0;f<27;f++){gs.fightIndex=f;
