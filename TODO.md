@@ -1,14 +1,60 @@
 # VESTIBULE — TODO
 
-*Last updated: May 2, 2026 — modifier system COMPLETE 🤘*
-*Last commits: design lock `72669f5` → modifier code `8705f61/a5db9e8/de6ff5d` → final megapush `bd7190d`*
-*App.jsx: ~11,124 lines*
+*Last updated: May 2, 2026 — fight 1 training-wheels tuning + free Welcome Pack 🤘*
+*Latest commits: Wanderer hard nerf `64ecb85` ← Pass 2 + Choice B `e70ad1f` ← Pass 1 audit `efce274`*
+*App.jsx: ~11,339 lines · Wanderer locked at 45 HP / 2 dmg · Shop 1 ships free Welcome Pack*
 
 This is the authoritative TODO. The old one was bloated with completed work — that history lives in git. This doc is **what's left** and **what's next**, sorted ruthlessly by priority.
 
 ---
 
-## 🎉 SHIPPED: Modifier System Overhaul (May 2 2026)
+## 📬 LATE-NIGHT STATUS (May 2 — for morning JV)
+
+**Locked in for you while you slept it off:**
+
+### Fight 1 — Training Wheels Match (per JV's design vision)
+> "r1 should be a training wheels match, then in the shop you get a 3rd member and start to pop off"
+
+- ✅ **The Wanderer hard nerf (commit `64ecb85`):**
+  - `maxHp: 45` (was 90 → 65 → finally 45) · with deck 1.85 scale = **83 HP displayed**
+  - `baseDmg: 2` (was 4 → 3 → finally 2) · max 8 band damage over 4 strikes
+  - Tutorial system enemies (Shade/Wraith/Revenant) UNCHANGED — they handle brand-new players
+- ✅ **Shop 1 — free Welcome Pack:** new branch in `genRecruitPack()` line 1484. When `fightIndex===0`, returns a free `🎸 Welcome Pack` (cost 0, special name + desc) instead of paid Garage Band Pack. Players guaranteed a 3rd member entering fight 2 regardless of stash earned.
+- ✅ **`boss_hp_override.json` synced** — auto-extracted from live `src/App.jsx` ENEMIES array. Sim now matches live boss HPs exactly (Wanderer 45, Lost Soul 150, Drifter 340, etc.).
+
+### 50,000-Game Sim Validation (10k × 5 decks, Bronze)
+
+**Wanderer survival rate by deck — all 100.0% (zero deaths in 50k attempts) ✅**
+
+| Deck      | F1 Wanderer | F2 Lost Soul | F4 Siren | F7 Glutton | F10 Miser | Lucifer Win |
+|-----------|-------------|--------------|----------|------------|-----------|-------------|
+| Standard  | 100.0%      | 77.8%        | 65.8%    | 60.9%      | 44.7%     | 9.14%       |
+| Shredder  | 100.0%      | 70.8%        | 58.8%    | 54.6%      | 42.2%     | 11.04%      |
+| Ritualist | 100.0%      | 90.0%        | 82.7%    | 74.7%      | 48.6%     | 8.61%       |
+| Engineer  | 100.0%      | 85.0%        | 79.8%    | 75.9%      | 59.6%     | 11.42%      |
+| Survivor  | 100.0%      | 85.8%        | 81.1%    | 77.6%      | 54.3%     | 7.95%       |
+
+**Curve summary:**
+- ✅ Fight 1 = pure tutorial, 0% rage-quit risk
+- ⚠ Fight 2 (Lost Soul, 150 HP) = NEW WALL, 10-29% death rate by deck — **this is intentional**, it's the "real game starts here" moment after the free Welcome Pack
+- ⚠ C4 Miser → Hoarder = build-crafting wall (drop ~60% → ~45% across decks). Known difficulty spike.
+- ✅ Lucifer 8-11% win rate (target ~10% = perfect)
+- ✅ Engineer is strongest (11.42%) / Survivor weakest (7.95%) → 4-pt spread is healthy
+
+### What to do in the morning (priority order)
+1. **`git pull`** — gets `64ecb85` with the Wanderer nerf and Welcome Pack
+2. **`rm -rf node_modules/.vite && npm run dev`** — Vite HMR doesn't refresh the BOSSES const array, hard restart needed
+3. **Hard reload browser (Cmd+Shift+R)**, clear any saved run, start fresh Bronze
+4. **Verify in fight 1:** Wanderer should show **83/83 HP · 2 PER STRIKE**
+5. **Win it** (should feel trivial), enter shop, verify **🎸 Welcome Pack** at cost 0
+6. **If Lost Soul (fight 2) at 22% death feels too punishing** in playtests, consider cutting to 130 HP. But ship as-is and watch first — that's the new "tutorial graduation" fight, ~22% is on par with Slay the Spire's first elite kill rates.
+
+### Don't tune anything else right now
+The Wanderer nerf produced exactly the curve you wanted. Locked. Move on to art and music.
+
+---
+
+## 🎉 SHIPPED EARLIER (May 2 daytime — modifier system + audits)
 
 **Design freeze:** `MODIFIER_REDESIGN.md` + `MODIFIER_CONTENT.md` + `MODIFIER_INTERACTIONS.md`
 

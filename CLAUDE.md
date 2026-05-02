@@ -1,6 +1,6 @@
 # VESTIBULE — Developer Notes
 
-*Last updated: May 2, 2026 · Latest commit: overnight P1 fixes · App.jsx: 9,603 lines*
+*Last updated: May 2, 2026 · Latest commit: `64ecb85` (Wanderer training-wheels + Welcome Pack) · App.jsx: ~11,339 lines*
 
 This is the canonical dev reference. If something here conflicts with another doc, this wins. If you find this doc out of sync with the code, **fix the doc in the same commit as the code**.
 
@@ -34,7 +34,7 @@ This is the canonical dev reference. If something here conflicts with another do
 
 ## FILE STRUCTURE
 
-- `src/App.jsx` — 9,603 lines, single-file architecture (split TODO'd, see TODO 3.1)
+- `src/App.jsx` — ~11,339 lines, single-file architecture (split TODO'd, see TODO 3.1)
 - `src/main.jsx` — root mount, CRT/VHS overlay, scale wrapper
 - `src/App.css` — design tokens (`:root` CSS vars), global animations
 - `public/vestibule/` — game assets (cards, artifacts, passives, pacts, loot, packs, fx)
@@ -51,6 +51,14 @@ This is the canonical dev reference. If something here conflicts with another do
 ## KEY CODE LOCATIONS
 
 Approximate, but maintained per session. Re-grep before relying.
+
+> ⚠️ **Line numbers below are based on App.jsx ~9,600 lines.** Post `64ecb85` the file is ~11,339 lines, so anything past line ~5000 is shifted by 1500–1800 lines. **Always `grep -n` first** when looking for current locations.
+
+### Recent changes (May 2 late-night, commit `64ecb85`)
+| Live line | What |
+|---|---|
+| 211–216 | `ENEMIES[0]` Wanderer entry — `maxHp:45, baseDmg:2` (training-wheels nerf, with rationale comment) |
+| 1474–1494 | `genRecruitPack(fightIndex)` — `fightIndex===0` returns free `🎸 Welcome Pack` (cost 0) at shop 1 |
 
 ### Top-level data
 | Line | What |

@@ -286,15 +286,33 @@ Currently shipped:
 
 ## TUTORIAL FLOW
 
-3 scripted fights with predetermined hands (~5 minutes):
+3 scripted fights with `TUTORIAL_ENEMIES` (separate from main Circle I) (~5 minutes):
 
-1. **Fight 1** (Wanderer) — Cards, embers, Strike basics. Corruption hidden. Members: Bjorn (FRENZIED) + Gunnar (SHREDDER).
-2. **Fight 2** — Corruption introduced. Enemy raises corruption per Strike.
-3. **Fight 3** — Ember management sequence ending with a Riff Chain discovery.
+1. **Fight 1** (The Shade, 30 HP / 2 dmg) — Cards, embers, Strike basics. Corruption hidden. Members: Bjorn (FRENZIED) + Gunnar (SHREDDER).
+2. **Fight 2** (The Wraith, 45 HP / 3 dmg) — Corruption introduced. Enemy raises corruption per Strike.
+3. **Fight 3** (The Revenant, 55 HP / 3 dmg) — Ember management sequence ending with a Riff Chain discovery.
 
 After tutorial, FIRST_TIPS fire on first encounter with: pacts, shop, events, descent map.
 
-Skip Tutorial option for experienced players.
+Skip Tutorial option for experienced players. `localStorage.setItem('vst_tutorial','done')` bypasses.
+
+---
+
+## CIRCLE I — TRAINING WHEELS PROGRESSION (post-tutorial)
+
+Per design vision: "r1 = training wheels match, then in the shop you get a 3rd member and start to pop off."
+
+| Fight | Boss | Base HP | Base Dmg | Display HP (Standard 1.85×) | Notes |
+|---|---|---|---|---|---|
+| C1 F1 | The Wanderer | **45** | **2** | **83** | Training-wheels fight. ~100% survive in 50k sim. |
+| C1 F2 | The Lost Soul | 150 | 5 | 278 | The "real game starts here" wall (~22% death) |
+| C1 F3 | The Drifter (boss) | 340 | 7 | 629 | Build-check before Pact + Doom Forge |
+
+### Shop 1 — "Pop Off" Moment
+
+After fight 1 victory, the shop offers a **🎸 Welcome Pack** (free, 1 of 2 musicians) instead of the paid Garage Band Pack. Players guaranteed a 3rd member entering fight 2 regardless of stash earned. This is the "you're a band now" power spike.
+
+Implementation: `genRecruitPack(fightIndex)` at `src/App.jsx:1474` — special-cases `fightIndex===0` to return `{...packs[0], cost:0, name:'🎸 Welcome Pack', desc:'FREE — Pick 1 of 2 musicians. Welcome to your band!'}`.
 
 ---
 
