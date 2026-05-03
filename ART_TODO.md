@@ -1,303 +1,243 @@
 # VESTIBULE — ART TODO
 
-*Last updated: May 2, 2026 — consolidated from ART_GUIDE / ART_TODO / CARD_ART_GUIDE*
+*Generated: May 3, 2026 evening (post-trip-system push)*
+*Supersedes the older ART_TODO from May 2 — backup at /tmp/ART_TODO_old.md*
 
-This is the art asset spec — the **how-to** companion to `TODO.md` Priority 5 + 6 (which has the high-level overview). Drop PNGs at the listed paths and they auto-load via `import.meta.env.BASE_URL`. No code changes needed unless explicitly noted.
-
----
-
-## STYLE GUIDE
-
-**Visual reference:** Darkest Dungeon meets pixel art doom metal album covers.
-
-**Palette per card type:**
-- RIFF → purple accent `#9933CC`
-- CORRUPT → blood red `#AA1111`
-- UTILITY → green `#22AA44`
-- EMBER → orange `#C87820`
-
-**Backgrounds:** Transparent or near-black (`#0A0602`). Card frames provide the border.
-
-**Color discipline:** Muted base palette with one strong accent color per piece. Don't fight the frame — let the art do its job in 128×128.
+This is the **complete inventory** of every piece of art Vestibule still needs. Sizes match existing PNGs in the repo — your source files should be at this size or proportionally bigger if you want headroom for re-export. Place each PNG in the path shown.
 
 ---
 
-## PRIORITY 1 — MISSING CARD ART (6 cards)
+## 📊 SUMMARY
 
-**Path:** `public/vestibule/cards/{id}.png`
-**Size:** 128×128px transparent PNG
-**Status:** All 6 currently render as procedural placeholder icons (under 1KB each).
-
-| ID | Card name | Type | Direction |
+| Category | Missing | Already Done | Total |
 |---|---|---|---|
-| `hungercard` | Hungering Flame | CORRUPT | Roaring black flame with a hungry maw inside it, biting outward. Reds/blacks. |
-| `madnesscard` | Madness Unleashed | CORRUPT | Cracked head with maggots/eyes pouring out. Pure madness. Disturbing. |
-| `whispercard` | Dark Whisper | CORRUPT | Shadowy mouth at an ear, smoke-tendrils as the whisper. Subtle, creepy. |
-| `void_pact` | Void Pact | CORRUPT | Pure black hole consuming light. Stars warping inward at the edge. |
-| `skullsplitter` | Skull Splitter | RIFF | Axe (the instrument!) embedded in cracked skull. Purple energy at impact. |
-| `tappedout` | Tapped Out | EMBER | Empty Marshall amp, power light dim but glowing through cracks. Pre-surge moment. |
+| **Cards** | 0 | 82 | 82 ✅ |
+| **Members** | 0 | 18 | 18 ✅ |
+| **Bosses** | 0 | 27 (+ Lucifer p1/p2) | 27 ✅ |
+| **Pacts** | 0 | 13 (+10 extras) | 13 ✅ |
+| **Booster Packs** | 0 | 5 | 5 ✅ |
+| **Artifacts** | **26** | 12 | 38 ⚠ |
+| **Pedals (passives)** | **22** | 10 | 32 ⚠ |
+| **Boss Loot** | **3** | 5 | 8 ⚠ |
+| **Trip Effects (NEW)** | **24** | 0 | 24 ❌ |
+| **Achievements** | **17** | 0 | 17 ❌ |
+| **Stakes** | **6** | 0 | 6 ❌ |
+| **GRAND TOTAL TO MAKE** | **98** | | |
 
-**Note:** 4 orphan card art files exist for cards that no longer exist in code: `blood_price.png`, `contract.png`, `dark_whisper.png`, `void_pact.png` (the latter is both placeholder AND in code — keep, replace). Safe to delete the other 3.
+98 pieces is a lot. Suggested order: trip effects → stakes → achievements (highest visibility, smallest files) → artifacts → pedals → boss loot.
 
 ---
 
-## PRIORITY 2 — ARTIFACT ART (12 items)
+## 🗂 SOURCE-OF-TRUTH SIZES (sampled from existing PNGs)
 
-**Path:** `public/vestibule/artifacts/{id}.png`
-**Size:** 128×128px (renders 28-80px in tray and shop)
-**Status:** All 12 currently procedural.
-**Order:** Do shop-shown first (a1, a3, a5, a6, ca1, ca2, ca3, ca4) — players see them in the buy menu most.
-
-| ID | Name | Direction |
+| Asset class | Folder | Size |
 |---|---|---|
-| `a1` | Vintage Guitar | Old Les Paul, glowing gold aura. |
-| `a3` | The Evil Eye | Single glowing teal iris in a triangular frame. |
-| `a5` | Haunted Radio | Old tube radio, ghostly static, single visible face in the screen. |
-| `a6` | Black Candle | Dripping wax, purple flame, skull in the wax pool. |
-| `a8` | Stone Tablet | Carved runes glowing red. Crumbling at edges. |
-| `a9` | Resonance Coil | Tesla coil arcing gold sparks. Tuning fork base. |
-| `a10` | Burning Stage | Stage on fire, microphone silhouette in flames. |
-| `wardrums` | War Drums | Tribal drums with bone sticks, blood splatter on the skin. |
-| `ca1` | The Goat of Mendes | Goat skull, pentagram between horns, gold inlay. |
-| `ca2` | Hellfire Amulet | Glowing red gem on chain, flames around the setting. |
-| `ca3` | Sabbath Crown | Black crown with red gems and bone thorns. |
-| `ca4` | Wailing Guitar | Ghost guitar mid-scream, sound waves visible. |
+| Cards | `public/vestibule/cards/` | **128×128** |
+| Members (stage portraits) | `public/members/` | **128×128** |
+| Bosses | `public/bosses/` | **128×128** |
+| Booster Packs | `public/vestibule/packs/` | **296×512** (portrait) |
+| Artifacts | `public/vestibule/artifacts/` | **64×64** |
+| Pedals (passives) | `public/vestibule/passives/` | **64×64** |
+| Boss Loot | `public/vestibule/loot/` | **64×64** |
+| Pacts | `public/vestibule/pacts/` | **64×64** |
+| **Trip Effects (NEW)** | `public/vestibule/trips/` | **256×256** *recommended* |
+| **Achievements (NEW)** | `public/vestibule/achievements/` | **64×64** *recommended* |
+| **Stakes (NEW)** | `public/vestibule/stakes/` | **128×128** *recommended* |
 
 ---
 
-## PRIORITY 3 — PASSIVE ART (10 items)
+## 🎴 ARTIFACTS — `public/vestibule/artifacts/` — **64×64 PNG**
 
-**Path:** `public/vestibule/passives/{id}.png`
-**Size:** 128×128px (renders 60-64px in shop and footer)
-**Style:** CD-R / equipment / band-life theme, purple accent.
-**Status:** All 10 currently procedural.
+**Theme:** small icon, transparent background, sits on dark UI. Existing a1/a3/a5/a6/a8/a9/a10 set the style — minimal, readable at small size, gold-on-dark or red-on-dark mostly.
 
-| ID | Name | Direction |
-|---|---|---|
-| `p1` | Power Chord | Lightning striking a power strip. |
-| `p2` | Roadie Crew | Wrench + first aid kit. |
-| `p3` | Merch Table | Band shirt + cash on a table. |
-| `p4` | Feedback Hum | Amp humming with orange wave lines. |
-| `p5` | Amp Stack | Wall of stacked Marshall amps. |
-| `p6` | Cult Following | Hooded figures in a circle, candles. |
-| `p7` | Guitar Tech | Hands adjusting guitar pickup screws. |
-| `p8` | Green Room | Backstage couch, dim lamp, beer cans. |
-| `p9` | Heavy Rotation | Spinning vinyl with motion blur. |
-| `p10` | Stage Fright Reversal | Spotlight beam piercing total darkness. |
+**Missing (26):**
 
----
-
-## PRIORITY 4 — PACT ART (13 items, audit needed)
-
-**Path:** `public/vestibule/pacts/{id}.png`
-**Size:** 128×128px (renders ~120px during pact selection)
-
-23 PNG files exist in folder; many likely procedural placeholders. **Audit by file size first — anything under 1KB needs replacement.** The 13 actual pact slots:
-
-`ember_surge`, `iron_strings`, `thick_skin`, `dark_bargain`, `speed_demon`, `blood_price`, `clean_living`, `corruption_engine`, `merchants_eye`, `stone_wall`, `sixth_slot`, `war_drums`, `atonement`
-
-Pact selection is a high-attention moment between fights — art quality matters here.
-
----
-
-## PRIORITY 5 — BOSS LOOT ART (5+ items, audit needed)
-
-**Path:** `public/vestibule/loot/{id}.png`
-**Size:** 128×128px (renders ~80px on drop)
-
-Existing art for 5 items: `love_letter`, `endless_hunger`, `golden_tooth`, `the_blade`, `mask_of_lies`.
-
-**Verify against current `BOSS_LOOT` array in src/App.jsx** — at least 6 newer loot items added since the v20 balance pass (`limbos_echo`, `berserker_rage`, `heretics_brand` and the corruption gambits). Create art for any missing.
-
----
-
-## PRIORITY 6 — BOOSTER PACK ART (5 packs)
-
-**Path:** `public/vestibule/packs/{id}.png`
-**Size:** 256×384px (vertical pack shape)
-
-**Current state:** Files on disk are `touring`/`underground`/`festival`/`headliner`/`demonic`. In-game pack names are `cassette`/`cdr`/`vinyl`/`rarevinyl`/`cursed`. **Mismatch.**
-
-Recommended: make new art matching the actual format names.
-
-| ID | Name | Cost | Direction |
-|---|---|---|---|
-| `cassette` | Cassette Tape | 6 | Cracked cassette, hand-written label, DIY |
-| `cdr` | CD-R | 12 | Burned CD-R in paper sleeve, marker-scrawled |
-| `vinyl` | Import Vinyl | 22 | Standard vinyl in sleeve, import sticker |
-| `rarevinyl` | Rare Vinyl | 38 | Holographic gold vinyl, collector's edition |
-| `cursed` | Cursed Demo | 60 | Bone/flesh case, glowing runes, hellish |
-
-Alternative: rename the existing 5 files in code (touring → cassette, etc.). Cheaper but less themed.
-
----
-
-## PRIORITY 7 — RECRUIT PACK (1)
-
-**Path:** `public/vestibule/packs/recruit.png`
-**Size:** 256×384px
-
-Sealed envelope with band silhouette behind it, "AUDITION" stamped on front.
-
----
-
-## PRIORITY 8 — CARD BACK (1)
-
-**Path:** `public/vestibule/cardback.png`
-**Size:** 256×384px (renders at draw pile and pack opening)
-
-Inverted pentagram, "VESTIBULE" wordmark, dark with gold/red accents. Players see this every single hand — it's the style anchor for the whole game.
-
----
-
-## PRIORITY 9 — DECK COVERS (5)
-
-**Path:** `public/vestibule/decks/{id}.png`
-**Size:** 384×512px (renders ~280×360 on deck-select screen)
-**Status:** Folder is empty.
-
-| ID | Direction |
+| File | Suggested theme |
 |---|---|
-| `standard` | Electric guitar in single spotlight, clean, balanced |
-| `shredder` | Flying V on fire, lightning, speed lines, aggro |
-| `ritualist` | Guitar on stone altar, black candles, occult |
-| `engineer` | Mechanical guitar made of gears and circuit traces |
-| `survivor` | Battered cracked guitar held together with duct tape |
+| `a2.png` | (Pentagram Shrine) — pentagram glyph |
+| `crackedpickup.png` | guitar pickup with hairline crack |
+| `distortioncab.png` | amp cabinet, fuzzy aura |
+| `ashtray.png` | overflowing ashtray, smoke |
+| `crowdnoise.png` | sound waves, crowd silhouettes |
+| `tapehiss.png` | cassette tape with static lines |
+| `cheapbeer.png` | beer bottle, label peeling |
+| `setlistart.png` | crumpled setlist, scrawled |
+| `gaffertape.png` | roll of black tape, X mark |
+| `powerstrip.png` | overloaded power strip, sparks |
+| `spitcup.png` | red solo cup, spit/foam |
+| `toursticker.png` | layered tour stickers, weathered |
+| `divebarsign.png` | flickering neon "OPEN" sign |
+| `pentagramshrine.png` | candles + pentagram |
+| `doomchoir.png` | hooded chorus, glow |
+| `solosermon.png` | single guitar at altar |
+| `blackmassbell.png` | inverted bell, blood drip |
+| `ouroborospin.png` | snake-eating-tail pin |
+| `drummerstick.png` | broken drumstick, splintered |
+| `fogmachine.png` | dripping fog machine, vapor |
+| `chromeskull.png` | reflective chrome skull |
+| `doomcrown.png` | spiked iron crown |
+| `triplesixes.png` | 666, dripping |
+| `luciferspact.png` | signed scroll, blood seal |
+| `invertedpentacle.png` | upside-down pentagram, glowing |
+| `blackgoat.png` | goat's head, horns, glowing eyes |
 
 ---
 
-## PRIORITY 10 — APP ICON (1)
+## 🎚 PEDALS (passives) — `public/vestibule/passives/` — **64×64 PNG**
 
-**Path:** `public/vestibule/icon.png`
-**Size:** 512×512 (also drop 256×256 and 128×128 alongside for OS scaling)
+**Theme:** stompbox effect pedals — square footprint, knob, LED, label. Existing p1-p10 set the style.
 
-Stylized "V" as inverted pentagram, blood red on black. Must read at 32px on a taskbar.
+**Missing (22):**
+
+**Reclassified from artifacts (PNGs already exist in `/artifacts/` folder — just COPY them over to `/passives/`):**
+- `a3.png` → copy from `public/vestibule/artifacts/a3.png`
+- `a8.png` → copy from `public/vestibule/artifacts/a8.png`
+- `ca2.png` → copy from `public/vestibule/artifacts/ca2.png`
+- `ca3.png` → copy from `public/vestibule/artifacts/ca3.png`
+- `wardrums.png` → copy from `public/vestibule/artifacts/wardrums.png`
+
+**Need new art (no PNG anywhere):**
+- `a4.png` (was artifact, no PNG ever)
+- `a7.png` (was artifact, no PNG ever)
+- `bitcrusher.png` — pixelated lo-fi pedal
+- `cabletester.png` — multimeter-style pedal
+- `compressorpedal.png` — pumping waveform
+- `drumthrone.png` — throne with kick pedal
+- `echoplex.png` — repeating wave loop
+- `fuzzbox.png` — distorted hairy fuzz
+- `looperpedal.png` — circular loop arrow
+- `octavepedal.png` — stacked octave bars
+- `phaserpedal.png` — sweep wave / sine ripple
+- `powerconditioner.png` — rack-mount unit
+- `reverbtank.png` — spring tank with depth
+- `sustainpedal.png` — long flat note hold
+- `tunerpedal.png` — needle and 440Hz mark
+- `volumeknob.png` — single big knob
+- `wahpedal.png` — rocker pedal in motion
 
 ---
 
-## PRIORITY 11 — STEAM CAPSULES (for store page)
+## 💎 BOSS LOOT — `public/vestibule/loot/` — **64×64 PNG**
 
-| Asset | Size | Notes |
+**Theme:** mystical trinket / talisman style. Existing 5 set the tone (golden_tooth, love_letter, etc).
+
+**Missing (3):**
+- `berserker_rage.png` — bloodied gauntlet, fist/claw
+- `heretics_brand.png` — branding iron with sigil
+- `limbos_echo.png` — empty mirror or hollow lantern
+
+---
+
+## 💠 TRIP EFFECTS — `public/vestibule/trips/` (new folder!) — **256×256 PNG**
+
+**Theme:** these display fullscreen at fontSize:100 in the trip-reveal overlay. Source should be larger for clean pixelation. Psychedelic, doom-stoner aesthetic. **256×256 minimum, 512×512 even better since these are hero moments.**
+
+⚠ This folder doesn't exist yet — `mkdir public/vestibule/trips` before you start. Code will need a `TripArtImg` component wired up — I'll build it in a follow-up session once you have art.
+
+### 🍄 Shrooms (8) — gold/orange/violet palette
+
+| File | Effect | Suggested visual |
 |---|---|---|
-| Header capsule | 460×215 | Logo + key art crop, hero element |
-| Small capsule | 231×87 | Just the wordmark, must read tiny |
-| Large capsule | 467×181 | Wider hero variant |
-| Hero graphic | 3840×1240 | Banner for store header |
-| Logo (transparent) | 1280×720 | For overlays |
-| Screenshots (5+) | 1920×1080 each | In-game moments: combo, shop, boss reveal, score, deck building |
+| `ego_death.png` | All +2 ATK | mushroom with cosmic eye |
+| `time_dilation.png` | +1 Strike | melting clock face |
+| `synesthesia.png` | -1 ember costs | rainbow synesthetic burst |
+| `cosmic_unity.png` | full heal + stonewall | conjoined mushroom hands |
+| `blotter_revelation.png` | next 3 cards free | floating tarot cards |
+| `psilocybin_portal.png` | draw 5 | mushroom portal opening |
+| `doom_crystal.png` | top ATK doubled | crystal forming on a fist |
+| `ghost_weed.png` | CORRUPT free | translucent weed leaf |
+
+### 🧪 Acid (8) — magenta/cyan/violet palette
+
+| File | Effect | Suggested visual |
+|---|---|---|
+| `fractal_vision.png` | ×2 damage | fractal kaleidoscope |
+| `dimensional_rift.png` | boss takes ×2 | red tear in space |
+| `ego_dissolution.png` | corruption + perm ATK | dissolving face |
+| `astral_projection.png` | immune | floating soul, body below |
+| `dmt_breakthrough.png` | skip 2 boss attacks | machine elf eye |
+| `reality_glitch.png` | ×2 strike start | corrupted pixelated view |
+| `crystal_shriek.png` | +5 ATK fight | crystal shattering, sound waves |
+| `k_hole.png` | boss frozen | dissociated head, fractal hole |
+
+### 💠 DMT (8) — white/blue-violet/holy palette
+
+| File | Effect | Suggested visual |
+|---|---|---|
+| `hyperspace.png` | all cards free | star tunnel |
+| `overmind.png` | ×3 strike start | giant cosmic eye |
+| `godhead.png` | +10 ATK | radiant halo over band |
+| `rebirth.png` | revive all | phoenix from ashes |
+| `third_eye.png` | draw 8 + max ember | glowing third eye |
+| `sacred_chord.png` | ×3 boss + skip | shattering tuning fork |
+| `timeline_collapse.png` | +2 strikes | converging timelines |
+| `black_sun.png` | +50% per CORRUPT | black sun w/ corona |
 
 ---
 
-## PRIORITY 12 — DAMAGE SPLASH FX (7 tiers)
+## 🏆 ACHIEVEMENTS — `public/vestibule/achievements/` (new folder!) — **64×64 PNG**
 
-**Path:** `public/vestibule/fx/{tier}.webm`
-**Size:** 1920×1080
-**Format:** WebM (VP9 codec, opaque, **black background** — black disappears in-game via `mix-blend-mode: screen`)
-**Duration:** 0.5-3s per tier
-**FPS:** 30 or 60
-**Status:** `fx/` folder is empty — code is wired, just drop files in.
+**Theme:** trophy/badge style, gold-on-dark. Each unique.
 
-| Tier | Trigger | Duration | Direction |
-|---|---|---|---|
-| `solid` | 50+ dmg | 0.5-1s | Single ember floats up, faint pulse ring. Candle flicker. |
-| `heavy` | 200+ dmg | 0.8-1.2s | Quick orange spark burst, small shockwave ring. Match-strike. |
-| `critical` | 500+ dmg | 1-1.5s | Red/orange flash, sparks outward, edges glow red, light cracks radiating. Anvil hammer. |
-| `massive` | 1,000+ dmg | 1.5-2s | Center explosion, fire particles, lightning arcs, debris falling. Pyrotechnics. |
-| `devastating` | 2,500+ dmg | 2-2.5s | Massive shockwave, screen cracks like glass with light pouring through, purple/red vortex. Stage collapsing. |
-| `ultra` | 5,000+ dmg | 2-3s | Full eruption, white-hot center, pentagram sigils burning at edges, energy beams to corners, color cycle red→gold→white. Nuclear at a Sabbath show. |
-| `godlike` | 10,000+ dmg | 2.5-3s | White flash → kaleidoscope, fractals, sacred geometry, inverted pentagram center, ⛧ symbols rain like Matrix code. DMT trip at the gates of Hell. |
+⚠ Folder doesn't exist yet — `mkdir public/vestibule/achievements`.
 
-### After Effects workflow
-
-1. New comp: 1920×1080, black background
-2. Design effect (particles, light rays, etc.)
-3. Export → Media Encoder → WebM, VP9 codec
-4. If AE can't WebM, export ProRes 4444 then convert with FFmpeg:
-   ```
-   ffmpeg -i input.mov -c:v libvpx-vp9 -pix_fmt yuva420p -b:v 2M output.webm
-   ```
-5. Drop in `public/vestibule/fx/`
-6. Test in-game — black should disappear, effect composites over gameplay
+| File | Achievement |
+|---|---|
+| `first_blood.png` | Win your first fight |
+| `circle_3.png` | Reach Circle 3 |
+| `circle_5.png` | Reach Circle 5 |
+| `circle_7.png` | Reach Circle 7 |
+| `circle_9.png` | Reach Circle 9 |
+| `beat_lucifer.png` | Defeat Lucifer (LEGEND tier visual) |
+| `hellquake.png` | Trigger Hellquake and survive |
+| `perfect_strike.png` | Kill boss in 1 strike |
+| `corruption_lord.png` | 100% corruption AND win |
+| `sober_run.png` | Reach Circle 5 with no drugs |
+| `high_score_5k.png` | Score 5,000+ |
+| `high_score_10k.png` | Score 10,000+ |
+| `drug_lord.png` | Use both shrooms + acid |
+| `dmt_traveler.png` | First DMT use |
+| `full_band.png` | 5 members on stage |
+| `mentor_link.png` | Form a Mentor Link |
+| `ten_runs.png` | Complete 10 runs |
 
 ---
 
-## CUT SCENES (TODO 6)
+## 🎖 STAKES — `public/vestibule/stakes/` (new folder!) — **128×128 PNG**
 
-See **TODO.md Priority 6** for the full list of cut scenes (intro, Welcome to Hell, 9 circle entries, 27 boss reveals, Lucifer reveal, victory, 3 death stings) with sizes and direction notes.
+**Theme:** difficulty badges. Bigger size because they appear on the difficulty-select screen prominently. Metal-finish color matching the stake name.
 
-All cut scenes target **1920×1080**, **24-30fps**, **5-15 seconds**, exported as WebM (VP9) or MP4. Same AE workflow as above.
+⚠ Folder doesn't exist yet — `mkdir public/vestibule/stakes`.
 
----
-
-## ASSETS THAT EXIST
-
-For reference — what's already done so we don't redo:
-
-- ✅ **76 of 82 cards** have real PixelLab pixel art (only the 6 above remain)
-- ✅ **18 band members** — stage portraits + idle GIFs (`public/members/{id}_stage.png` + `public/members/idle/{id}_stage_idle.gif`)
-- ✅ **28 boss portraits** (`public/bosses/{id}.png`)
-- ✅ **Sly the Fence** — animated GIF at `public/sly.gif`
-- ✅ **Vestibule logo** — `public/vestibule_logo.png`
-- ✅ **5 boss-loot art** files (audit needed for newer loot items)
-- ✅ **23 pact files** (audit needed for procedural placeholders)
+| File | Color theme |
+|---|---|
+| `bronze.png` | bronze/copper, simple shield |
+| `silver.png` | silver, slightly more ornate |
+| `gold.png` | gold, ornate, glowing |
+| `obsidian.png` | black volcanic glass, sharp edges |
+| `blood.png` | dark red, dripping |
+| `demonic.png` | inverted pentagram, fire/horns |
 
 ---
 
-## FILE NAMING CONVENTIONS
+## 🛠 NOTES & CONVENTIONS
 
-- Always lowercase, snake_case
-- PNG with transparency
-- Match the in-code `id` exactly — code looks up by id
-- No spaces, no special characters
-- 128×128 default for icons, 256×384 for cards/packs, 384×512 for deck covers, 1920×1080 for fullscreen FX/cutscenes
+**Pixel art style:** match existing assets. PixelLab `no_background:true` style for portraits. Smaller icons (artifacts/pedals/loot/pacts) are flatter pixel-art with gold/red/dark palette.
 
----
+**Transparent backgrounds:** all icon-class art (artifacts, pedals, loot, achievements, trips). Member/boss portraits also transparent.
 
-## QUICK WINS BY ROI
+**File format:** PNG, 8-bit indexed if you want the smallest files (existing 64×64 icons are ~700 bytes).
 
-If JV has 3 hours to spend on art, here's the order:
+**Naming:** lowercase, exact id match. `crackedpickup.png` not `CrackedPickup.png`. Underscores for compound words (`first_blood.png`), no hyphens. Match the IDs in src/App.jsx exactly.
 
-1. **6 missing card arts** (1 hour with PixelLab) — closes the visible gap, every shop pull is now fully arted
-2. **5 booster pack arts** (1 hour) — fixes the cassette/cdr/vinyl mismatch, packs are a high-dopamine moment
-3. **Card back** (30 min) — players see this every hand
-4. **App icon** (30 min) — needed for any build that ships
+**To wire up new categories I haven't yet built React components for:**
+After you make art for trips/achievements/stakes, I need to build `TripArtImg`, `AchievementArtImg`, `StakeArtImg` components mirroring `CardArtImg`. ~20 lines each. Do them in one batch after you've made the art so I'm not building empty plumbing.
 
-Everything else is "nice to have" before launch. Steam capsules and cutscenes can wait until pre-launch.
+**The lazy-but-effective starter strategy** — if you want maximum visible impact in minimum time:
+1. **Trip effects first (24)** — most visible because fullscreen reveals
+2. **Stakes (6)** — appear at run-start, set tone immediately
+3. **Achievements (17)** — small but accumulate over time
+4. **Artifacts (26)** + **Pedals (22)** — granular but less prominent in any single moment
+5. **Boss loot (3)** — only 3, easy to knock out
 
----
-
-## PRIORITY 4.5 — STONED ANIMATIONS (18 members)
-
-**Path:** `public/members/stoned/{id}_stage_stoned.gif`
-**Size:** 128×128px (same as `idle/` GIFs), transparent background
-**Status:** CSS smoke-cloud overlay shipped May 2 as the fallback. As you finish each character's stoned animation, drop the GIF in the path above and uncomment the matching line in `STONED_PORTRAITS` at `src/App.jsx` ~line 749. The fallback CSS smoke + "TOO STONED" pill keeps showing on top of the GIF, which is fine — the GIF is the body language, the pill is the status label.
-
-**Direction:** Each character slumped over with smoke clouds. Same Bjorn-as-color-reference style as the idle GIFs. Personality counts:
-- `bjorn` — passed out hugging his guitar, drool optional
-- `ragnar` — slumped against amp stack, sunglasses askew
-- `thor` — face-down on drum kit, drumstick rolling away
-- `rolf` — sliding off drum throne mid-fall
-- `ingrid` — sprawled on couch (the foundation needs a couch)
-- `dag` — sitting cross-legged staring at the void
-- `ulf` — bass player horizontal, bass still resonating
-- `brynja` — meditation pose that became a nap
-- `loki` — devious grin even unconscious
-- `freya` — flowers in hair, peaceful trance
-- `astrid` — leaned against mic stand snoring
-- `grimnir` — mask slipped, just barely visible
-- `sigrid` — guitar is the pillow now
-- `gunnar` — head-banging in slow motion, frozen
-- `vitalik` — surrounded by floating crypto runes (he's got bigger problems)
-- `orm` — folk magic gone wrong, hovering an inch off the ground
-- `tanuki` — back to tanuki form, belly up
-- `lucifer_member` — even the devil takes a break
-
-**Animation length:** 1.5-3s loop. Subtle: breathing, smoke wisps, occasional twitch. Should NOT scream "dead" — should scream "very high right now."
-
-**Why this matters:** JV reproduced the perception bug live (May 2) — the old skull overlay + heavy grayscale read as "this person is permanently dead, the run is half over." The CSS fix removed the skull and added a "Back next fight" subtitle, but the per-character animations are the real polish. Each stoned moment becomes a tiny character vignette instead of a tombstone.
-
----
-
-## QUICK WINS BY ROI (continued)
-
-If you want to add stoned animations into your art queue, slot them as **Priority 4.5** — somewhere between artifact arts and Steam capsules. They're not blocking launch, but they're a high-personality polish item that pays off every time corruption stacks up.
+Let me know what categories you finish first and I'll do the React plumbing.
