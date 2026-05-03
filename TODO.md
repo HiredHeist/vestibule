@@ -1,14 +1,163 @@
 # VESTIBULE — TODO
 
-*Last updated: May 2, 2026 — fight 1 training-wheels tuning + free Welcome Pack 🤘*
-*Latest commits: Wanderer hard nerf `64ecb85` ← Pass 2 + Choice B `e70ad1f` ← Pass 1 audit `efce274`*
-*App.jsx: ~11,339 lines · Wanderer locked at 45 HP / 2 dmg · Shop 1 ships free Welcome Pack*
+*Last updated: May 3, 2026 — Trip system overhaul + DMT tier 💠*
+*Latest commits (branch `hangover-with-teeth`): pending — see below*
+*App.jsx: ~11,659 lines · 24 trip effects (was 8) · DMT premium tier · slot-machine dopamine ON*
 
 This is the authoritative TODO. The old one was bloated with completed work — that history lives in git. This doc is **what's left** and **what's next**, sorted ruthlessly by priority.
 
 ---
 
-## 📬 LATE-NIGHT STATUS (May 2 — for morning JV)
+## 📬 LATE-NIGHT STATUS (May 3 evening — Trip system overhaul)
+
+**Branch: `hangover-with-teeth` — STILL not merged. Big additions on top of the morning's Hangover refactor.**
+
+### Why this exists
+JV asked: "are we lacking anything that is keeping this game from having Balatro/Vampire Survivors slot machine dopamine?" Audit revealed the existing drug system was *80% of the way there* — already had the right architecture (consumable purchases, fight-long buffs, dramatic reveal overlay) but only 8 effects total, 5%/5% bunk/bad rates that felt punishing, and a hard "before first strike" gate that prevented clutch use.
+
+### Tier A — fixed what was already there ✅
+- **Bunk drugs eliminated.** No more 5% "you paid 12 stash for nothing." Players never feel cheated.
+- **Bad-trip rate softened: 5% → 3%.** Bad trips themselves softened too — shrooms bad trip is now -1 ATK (was -2).
+- **Mid-fight activation enabled.** Removed the `strikesLeft===maxStrikes` gate. Players can clutch-drop a trip when a fight goes south. This alone changes the strategic feel — trips are now panic buttons, not opening moves.
+- **TRIP_EFFECTS registry refactor.** Was nested if/else; now a clean data structure for adding effects easily.
+
+### Tier B — expanded the pool ✅ (8 → 24 effects total)
+
+**Shrooms (4 new, 8 total):**
+- BLOTTER REVELATION — next 3 cards play FREE
+- PSILOCYBIN PORTAL — draw 5 cards immediately
+- DOOM CRYSTAL — highest-ATK member's ATK doubled this fight
+- GHOST WEED — all CORRUPT cards cost 0 this fight
+
+**Acid (4 new, 8 total):**
+- DMT BREAKTHROUGH — skip boss's next 2 attacks
+- REALITY GLITCH — strike multiplier starts at ×2.0 every strike
+- CRYSTAL SHRIEK — all members +5 ATK this fight (simplified from "fades to -2" — that needed new flag plumbing)
+- K-HOLE — boss frozen 2 strikes
+
+**DMT — NEW PREMIUM TIER (8 effects, boss-shop only, 25🌿, NO bad trips):**
+- HYPERSPACE — all cards cost 0 this fight
+- OVERMIND — strike multiplier ×3.0 from start, every strike
+- GODHEAD — all members +10 ATK this fight
+- REBIRTH — revive all stoned members at full HP, all +2 perm ATK
+- THIRD EYE — draw 8 cards, max embers +3 this fight
+- SACRED CHORD — boss takes ×3 damage AND skip 1 attack
+- TIMELINE COLLAPSE — +2 bonus strikes
+- BLACK SUN — every CORRUPT card adds +50% strike multiplier on play
+
+### New plumbing
+- `freeCardsLeft` counter for BLOTTER REVELATION (different from existing `nextCardFree` single-shot bool and `allCardsFree` whole-fight bool — this is "next N cards free")
+- `bossSkipStrikes` counter for DMT BREAKTHROUGH / K-HOLE / SACRED CHORD
+- `heldDMT` + `dmtInStock` state with save/load wiring
+- DMT shop tile rendered conditionally on boss-shops
+- DMT in-fight button rendered conditionally when holding
+- `dmt_traveler` achievement registered
+- BLACK SUN hook in card-play handler fires +50% strike mult on CORRUPT cards
+- OVERMIND/REALITY GLITCH wired into per-strike strikeMult initialization
+- GHOST WEED wired into cost-discount chain
+- HYPERSPACE reuses existing `allCardsFree` plumbing
+
+### Phase A4 — louder activation moment ✅
+Trip activation now produces:
+- **Ascending pitch sweep** (200→800Hz shrooms / 300→1200Hz acid / 400→2400Hz DMT)
+- **Sweep duration scales with tier** (0.5s / 0.7s / 1.2s)
+- **Screen shake scales with tier** (20px/500ms shrooms, 25px/600ms acid, 35px/900ms DMT)
+- Layered on top of existing reveal overlay + sfx sting
+
+### 5,000-Game Sim Validation (Bronze, Standard) — TRIP SYSTEM IMPROVES BALANCE
+
+| Metric | Pre-Hangover Baseline | Hangover Only | **Hangover + Trips v0.7.2** |
+|---|---|---|---|
+| Avg fight reached | 13.88 | 14.22 | **14.44** |
+| Lucifer wins | 8.50% | 7.62% | **11.60%** |
+| WTH wins | n/a | 3.14% | **4.94%** |
+
+The slot-machine layer didn't break balance — it *improved* it. Players get powerful tools they actually use. Lucifer wins are above baseline now, which is the right shape for a game with this much variance.
+
+### Bug audit done before push (5 real bugs caught and fixed) ✅
+1. **Missing `dmt_traveler` achievement** — was being called via `tryAchieve` but never registered. Silently no-op'd. Added to ACHIEVEMENTS list.
+2. **BLACK SUN's `addFloat` was nonsense** — used `stage.findIndex(m=>m.uid===card.uid)` which always returned -1 because card.uid is hand-card uid, not stage uid. "Worked" via the `||bossRef` fallback but positioning was broken. Replaced with clean `getCenter(bossRef)`.
+3. **REBIRTH revive incomplete** — wasn't restoring `_origAtk` or clearing `tempBuff`, unlike Wake Up Call's canonical revive. Could leave revived members in stale buff state. Now mirrors Wake Up Call.
+4. **HYPERSPACE's `allCardsFreeRef` not cleared at fight reset** — only React state was cleared; ref persisted. Could bleed HYPERSPACE across fights. Now both clear together.
+5. **PSILOCYBIN PORTAL + THIRD EYE used stale `hand` closure** — switched to `handRef.current` for race-safety if player taps trip button mid-card-play.
+
+### What still needs doing before merge
+- [ ] **Browser playtest** — JV picks this up tomorrow. Specifically check: DMT tile renders at boss-shops only, mid-fight trip activation works, BLACK SUN strike-mult bumps fire visibly, REBIRTH actually revives stoned members, the audio sweep sounds right at all 3 tiers
+- [ ] **Per-deck sim sweep** (5K × 5 decks) — only Standard validated
+- [ ] **Higher-stake hangover scaling** — Demonic should hangover harder
+- [ ] **Audit `addLog` strings** for stale doom-voice references
+- [ ] **HANDOFF.md update**
+
+### Risks flagged for playtest
+- AI in sim hits 100% on 6.21 fights/game. If humans do the same reflexively, the Hangover meter won't feel like a tradeoff — just a knob they max. Tunable post-launch via stronger lingering costs.
+- DMT only activates on 0.07 fights/game in sim because runs that survive to boss-shops *and* save 25 stash are rare. Could lower price to 20🌿 if playtest finds DMT under-encountered.
+- BLACK SUN's +50% per CORRUPT card has no per-strike cap — theoretically could compound to absurd levels with stacked CORRUPT plays. Sim caps strikeMult at 10000 so engine won't break, but worth watching.
+
+---
+
+## 📬 PREVIOUS STATUS (May 3 morning — Hangover system)
+
+**Branch: `hangover-with-teeth` — not yet merged to main. Sit-and-think before merge.**
+
+### Why this exists
+Corruption-as-death-trap was contradicting Vestibule's stoner-doom identity. Player experience: "I lost to corruption and didn't understand why." The whole Whispers/Hunger/Madness/Possession/Blackout system was ~12 things to track, half flavor-text fakes. Reframed corruption as a Hades-style HEAT meter: pushes you for power in-fight, costs you tomorrow. **Cannot end your run.**
+
+### Multiplier cascade font fix ✅ (smaller, also shipped)
+- `src/App.jsx:3560` and `:3580` — `BogartsMetalFont` (no digits) → `MBScribblesFont`
+- Strike multiplier numbers now legible mid-cascade. Was rendering as tofu glyphs.
+
+### Hangover-with-Teeth refactor ✅ (THE BIG ONE)
+
+**What's deleted:**
+- 75% Madness (random discard — punishing RNG with no agency)
+- 25% Whispers threshold (was doc-only fake, never implemented)
+- 100% Possession (+3 boss damage, +3 ATK to CORRUPT members)
+- The brief Blackout countdown I shipped earlier today (still felt like a fail state, just delayed)
+- Old single-tier Hunger (corruption≥50 → ×1.25 prices, read live corruption)
+- Threshold flash banners with stale doom-voice ("THE WHISPERS", "POSSESSION")
+- ~150 lines of state/refs/handlers for above
+
+**What's added:**
+- `hangover` state + `peakCorruptionRef` — peak corruption hit during a fight commits to next-fight + next-shop cost
+- **Shop tax curve:** ≥50% → +20%, ≥75% → +40%, ≥100% → +60% (replaces single-tier Hunger)
+- **HP debuff:** -⌊hangover/33⌋ max HP per member next fight (cap at 3), restored on victory
+- **Stash haircut:** ×0.85 on victory if peak ≥100% (calibrated via 1000-game sim — heavier was nuking Lucifer attempts silently)
+- Hangover preview banner on Descent screen (players see cost before picking next fight)
+- Threshold flash banners rebranded BUZZED (50%) / WASTED (100%) — positive in-fight framing
+- `FIRST_TIPS.corruption` rewritten one final time: one sentence, mentions tomorrow-cost
+- Rules screen text rewritten with new mechanics + "can never end your run"
+- Tube ticks at 50/100 (was misleading 25/50/75)
+
+**In-fight ramp UNTOUCHED.** Original ×1.20/×1.50/×2.00/×3.00 CORRUPT mult curve preserved. Tested softer curves in sim — **all of them broke balance** (avg fight 7.85 vs baseline 14.65 at ×1.75 ceiling). Lesson: cost mechanics ARE the new design teeth. Don't double-nerf.
+
+### 5,000-Game Sim Validation (Bronze, Standard deck) — PASSED
+
+| Metric | Baseline (old) | Hangover (new) | Verdict |
+|---|---|---|---|
+| Avg fight reached | 13.88 | **14.22** | ✅ Better |
+| Lucifer wins | 8.50% | **7.62%** | ✅ Statistical noise |
+| C1 deaths | ~28% | 31.4% | ⚠ +3.4pts (HP debuff bites Lost Soul) |
+| C3 deaths (Devourer wall) | ~20% | 16.8% | ✅ Gentler |
+| WTH wins | — | 3.14% | ✅ Functional |
+
+Hangover stats per game (averages): 7.84 commits at 50%+, 6.13 WASTED commits at 100%, 26.1 stash lost to haircut. AI pushes to 100% aggressively because the in-fight reward (×3.0) is worth the cost — design intent.
+
+### What still needs doing before merge
+
+- [ ] **Per-deck sim sweep** (5K × 5 decks) — only ran Standard. Verify other archetypes don't have outliers.
+- [ ] **Higher-stake scaling** — Demonic stake should hangover *harder*. Currently uniform across stakes; will feel relatively easier on hell-tier. 5-min change to add stake multiplier on hangover effects.
+- [ ] **Audit `addLog` strings** for stale doom-voice ("darkness consumes" etc.)
+- [ ] **Audit `deathCause` paths** in EndScreen for any remaining corruption-kills-you references
+- [ ] **HANDOFF.md update** to reflect new state
+- [ ] **Browser playtest** — verify Hangover preview banner shows correctly on descent, shop labels show dynamic %, HP debuff applies + restores on boss kill
+- [ ] **Decide:** merge `hangover-with-teeth` → main, or sit on it for a week and playtest
+
+### The thing to watch in playtest
+AI hits 100% on 6+ fights per run. If that's also true for human players (i.e., they push reflexively because the math always favors current-fight kills), the meter won't feel like a tradeoff — just a knob they max. Fix is making linger costs bite harder, not redesigning architecture. **Tunable post-launch, no save-breaking changes required.**
+
+---
+
+## 📬 PREVIOUS STATUS (May 2 — for morning JV)
 
 **Locked in for you while you slept it off:**
 

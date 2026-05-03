@@ -193,6 +193,7 @@ const ACHIEVEMENTS=[
   {id:'high_score_5k',label:'Rising Star',desc:'Score over 5,000 in a single run',emoji:'⭐'},
   {id:'high_score_10k',label:'Headliner',desc:'Score over 10,000 in a single run',emoji:'🌟'},
   {id:'drug_lord',label:'Drug Lord',desc:'Use both shrooms and acid in one run',emoji:'🍄'},
+  {id:'dmt_traveler',label:'DMT Traveler',desc:'Break through with DMT for the first time',emoji:'💠'},
   {id:'full_band',label:'Full House',desc:'Have 5 members on stage at once',emoji:'🎸'},
   {id:'mentor_link',label:'Master and Student',desc:'Form a Mentor Link',emoji:'⛓'},
   {id:'ten_runs',label:'Dedicated',desc:'Complete 10 runs',emoji:'🔟'},
@@ -1098,7 +1099,7 @@ const FIRST_TIPS={
   event:"A random event! These offer risky choices with big rewards. Read both options before deciding.",
   descent:"The Descent Map shows your path through Hell. You can skip some fights for alternative rewards.",
   drugs:"The Dealer sells Shrooms and Acid. Drugs give powerful trip effects before fights, but bad trips are possible.",
-  corruption:"⚠ CORRUPTION at 50%! Many cards push corruption higher — at 100%, your band is consumed by darkness and the run ends. Some cards & artifacts get STRONGER at high corruption (50%, 60%, 80%, 100% breakpoints). Manage it carefully: heal it down with Séance, Controlled Feedback, or Smoke Break. Play CORRUPT cards (purple) only when you can afford the risk.",
+  corruption:"⚠ CORRUPT cards (purple) are powerful. Pushing corruption costs you tomorrow — pricier shops, weaker band, smaller stash. But it can't end your run. Push when it's worth it.",
 }
 function hasSeenTip(id){return(JSON.parse(localStorage.getItem('vst_tips')||'[]')).includes(id)}
 function markTipSeen(id){const seen=JSON.parse(localStorage.getItem('vst_tips')||'[]');if(!seen.includes(id)){seen.push(id);localStorage.setItem('vst_tips',JSON.stringify(seen))}}
@@ -2017,7 +2018,7 @@ const SLY_LINES={
 }
 const pickSlyLine=(tag)=>{const p=SLY_LINES[tag]||SLY_LINES.ambient;return p[Math.floor(Math.random()*p.length)]}
 
-function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,shroomsInStock,acidInStock,onBuyShrooms,onBuyAcid,corruption,chosenPacts,addLog,encoreMode}){
+function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,heldDMT,shroomsInStock,acidInStock,dmtInStock,onBuyShrooms,onBuyAcid,onBuyDMT,corruption,hangover,chosenPacts,addLog,encoreMode}){
   const drugMax=isUnlocked('double_dealer')?2:1
   const [hovId,setHovId]=useState(null)
   const [hoveringArtifact,setHoveringArtifact]=useState(false)
@@ -2082,8 +2083,15 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
   },[shopCards])
   const [openPackModal,setOpenPackModal]=useState(null) // {pack, cards, picksLeft, picked}
   const circleNum=Math.floor(fightIndex/3)+1
-  const hungerActive=corruption>=50
-  const hungerMult=hungerActive?1.25:1.0
+  // ── HANGOVER SHOP TAX (v0.7.1) ─────────────────────────────────
+  // Replaces the old single-tier "Hunger" (corruption≥50 → ×1.25). Now reads
+  // from `hangover` (carried-over peak from last fight) with a 3-step curve.
+  // Variable names kept as `hungerActive`/`hungerMult` to minimize prop-rename
+  // diff churn in shop UI components — semantics shifted, name stayed.
+  const hangoverPct=hangover||0
+  const hungerMult=hangoverPct>=100?1.60:hangoverPct>=75?1.40:hangoverPct>=50?1.20:1.00
+  const hungerActive=hungerMult>1.00
+  const hungerLabel=hangoverPct>=100?'WASTED +60%':hangoverPct>=75?'HUNGOVER +40%':hangoverPct>=50?'HUNGOVER +20%':null
   const merchDiscount=chosenPacts&&chosenPacts.includes('merchants_eye')?0.8:1.0
   const realPrice=p=>Math.ceil(p*merchDiscount*hungerMult)
   const can=p=>stash>=realPrice(p)
@@ -2408,7 +2416,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
             {/* hole + string knot */}
             <div style={{position:'absolute',top:3,left:4,width:6,height:6,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'var(--text-inverse)',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{price}</span> <WeedLeaf size={13}/>{realPrice(price)}</>:<><WeedLeaf size={13}/> {price}</>}</div>
-            {hungerActive&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-blood)',fontWeight:900,letterSpacing:0.5,marginTop:-1}}>⚠ HUNGER +25%</div>}
+            {hungerActive&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-blood)',fontWeight:900,letterSpacing:0.5,marginTop:-1}}>⚠ {hungerLabel}</div>}
           </div>
         </div>
         <div onClick={()=>canBuy&&!bought&&buyCard(card)}
@@ -2844,6 +2852,22 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
                   <WeedLeaf size={10}/> {realPrice(12)}</div>
               </div>
             </div>
+            {/* DMT tile — boss shops only (rendered conditionally on dmtInStock from parent) */}
+            {dmtInStock&&<div onClick={()=>{if(heldDMT<drugMax&&can(25)){onSpend(25,'dealer',null);onBuyDMT()}}}
+              style={{display:'flex',alignItems:'center',gap:6,padding:'4px 16px',
+                background:heldDMT<drugMax&&can(25)?'linear-gradient(135deg,rgba(80,180,220,0.55),rgba(180,80,220,0.55))':'rgba(20,15,30,0.3)',
+                border:'1px solid '+(heldDMT<drugMax?'rgba(220,200,255,0.7)':'rgba(80,60,120,0.3)'),
+                borderRadius:6,cursor:heldDMT<drugMax&&can(25)?'pointer':'default',
+                opacity:1,transition:'all 0.15s',
+                boxShadow:heldDMT<drugMax?'0 0 14px rgba(180,200,255,0.4)':'none'}}>
+              <span style={{fontSize:48,filter:'drop-shadow(0 0 8px rgba(220,200,255,0.6))'}}>💠</span>
+              <div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#e8ddff',letterSpacing:1}}>
+                  {heldDMT>=drugMax?'HOLDING':'DMT'}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',display:'flex',alignItems:'center',gap:2}}>
+                  <WeedLeaf size={10}/> {realPrice(25)}</div>
+              </div>
+            </div>}
           </div>
 
           {/* GAP */}
@@ -3557,7 +3581,7 @@ function DamageBreakdown({data,onDone,onSlam}){
         return(<div key={f.id} style={{
           position:'absolute',
           left:finalX,top:finalY,
-          fontFamily:"'BogartsMetalFont',cursive",
+          fontFamily:"'MBScribblesFont',serif",
           fontSize:fontSize,
           fontWeight:900,
           color:f.color,
@@ -3577,7 +3601,7 @@ function DamageBreakdown({data,onDone,onSlam}){
 
       {/* CLIMBING MULTIPLIER — the centerpiece. Grows from ×1 into the thousands. */}
       {!slamming&&visibleCount>0&&<div key={tickerMult} style={{
-        fontFamily:"'BogartsMetalFont',cursive",
+        fontFamily:"'MBScribblesFont',serif",
         fontSize:multSize,
         fontWeight:900,
         color:multColor,
@@ -5465,6 +5489,20 @@ function App(){
   const [allCardsFree,setAllCardsFree]=useState(false) // POSSESSION hellquake: all cards cost 0 this fight
   const allCardsFreeRef=useRef(false)
   useEffect(()=>{allCardsFreeRef.current=allCardsFree},[allCardsFree])
+  // ── FREE CARDS COUNTER (v0.7.2) — used by BLOTTER REVELATION trip ──
+  // Decrements each time a card is played at zero cost via this counter.
+  // Different from `nextCardFree` (single-shot bool) and `allCardsFree`
+  // (whole-fight bool) — this is "next N cards free."
+  const [freeCardsLeft,setFreeCardsLeft]=useState(0)
+  const freeCardsLeftRef=useRef(0)
+  useEffect(()=>{freeCardsLeftRef.current=freeCardsLeft},[freeCardsLeft])
+  // ── BOSS SKIP COUNTER (v0.7.2) — used by DMT BREAKTHROUGH and K-HOLE trips ──
+  // When >0, the boss's incoming attack is fully skipped this strike and the
+  // counter decrements. Boss can still attack normally next strike if hits 0.
+  // Resets on fight end / run reset (search "bossSkipStrikes").
+  const [bossSkipStrikes,setBossSkipStrikes]=useState(0)
+  const bossSkipStrikesRef=useRef(0)
+  useEffect(()=>{bossSkipStrikesRef.current=bossSkipStrikes},[bossSkipStrikes])
   const [setlistOpen,setSetlistOpen]=useState(false)
   const [setlistCards,setSetlistCards]=useState([])
   const [remasterOpen,setRemasterOpen]=useState(false)
@@ -5486,7 +5524,15 @@ function App(){
   const [circleSplash,setCircleSplash]=useState(null)
   const [preFightSplash,setPreFightSplash]=useState(null) // {enemy,circle,quote}
   const [pendingEvent,setPendingEvent]=useState(null)
-  const [possessionFired,setPossessionFired]=useState(false)
+  // ── HANGOVER SYSTEM (v0.7.1) — corruption never kills; it costs you tomorrow ─────
+  // Tracks the peak corruption hit during a fight. On victory, that peak becomes
+  // `hangover`, which costs the player on the *next* fight + shop:
+  //   • Shop tax: prices ×(1 + tier) at 50/75/100% breakpoints
+  //   • Max HP debuff: -floor(hangover/33) per member next fight, restored at boss kill
+  //   • Stash haircut: 90%+ peak halves payout, 100% halves harder
+  // peakCorruptionRef tracks live, hangover state holds the carried-over value.
+  const [hangover,setHangover]=useState(0)
+  const peakCorruptionRef=useRef(0)
   const corruptCardsGivenRef=useRef([]) // track which thresholds have given cards (ref to avoid React 18 double-fire)
   // ═══ CORRUPTION DECK — give free cards at thresholds ═══
   useEffect(()=>{
@@ -5652,6 +5698,12 @@ function App(){
   // ── DEALER: Mushrooms & Acid ──────────────────────────────────
   const [heldShrooms,setHeldShrooms]=useState(0) // player is holding shrooms
   const [heldAcid,setHeldAcid]=useState(0) // player is holding acid
+  // ── DMT (v0.7.2 third drug tier) ─────────────────────────────────
+  // Premium drug, sold only at boss shops (every 3rd shop). 25🌿. No bad
+  // trips at this tier — "you paid for the good shit." Eight high-impact
+  // effects, all variations on "I am god this fight." Same drugMax cap.
+  const [heldDMT,setHeldDMT]=useState(0)
+  const [dmtInStock,setDMTInStock]=useState(false)
   const [drugsUsedThisRun,setDrugsUsedThisRun]=useState({shrooms:0,acid:0})
   const [shroomsInStock,setShroomsInStock]=useState(()=>Math.random()<0.50)
   const [acidInStock,setAcidInStock]=useState(()=>Math.random()<0.50)
@@ -5952,15 +6004,24 @@ function App(){
     const fuzzBoxDiscount=(activePassives.some(p=>p.id==='fuzzbox')&&card.type==='RIFF')?1:0
     // Phaser: all CORRUPT cards cost 1 less
     const phaserDiscount=(activePassives.some(p=>p.id==='phaserpedal')&&card.type==='CORRUPT')?1:0
+    // GHOST WEED trip (v0.7.2): all CORRUPT cards cost 0 this fight
+    const ghostWeedFree=(fightTripBuff==='GHOST WEED'&&card.type==='CORRUPT')?card.embers:0
     // Wah Pedal: first CORRUPT card each fight is FREE (use ref to track)
     const wahFreeFirst=(activePassives.some(p=>p.id==='wahpedal')&&card.type==='CORRUPT'&&!wahPedalUsedRef.current)?card.embers:0
     // Cable Tester: duplicate cards cost 1 less
     const cableTesterDiscount=(activePassives.some(p=>p.id==='cabletester')&&hand.filter(c=>c.id===card.id).length>=2)?1:0
     // The Conduit (mythic): all cards cost half (rounded down)
     const conduitDiscount=activePassives.some(p=>p.id==='theconduit')?Math.floor(card.embers/2):0
-    const effectiveEmbers=(nextCardFreeRef.current&&card.id!=='doubledown')||allCardsFreeRef.current?0:Math.max(0,card.embers-foilDiscount-synesthesiaDiscount-darkBargainDiscount-ampFbDiscount-reverbTankDiscount-fuzzBoxDiscount-phaserDiscount-wahFreeFirst-cableTesterDiscount-conduitDiscount)
+    const effectiveEmbers=(nextCardFreeRef.current&&card.id!=='doubledown')||allCardsFreeRef.current||(freeCardsLeftRef.current>0&&card.id!=='doubledown')?0:Math.max(0,card.embers-foilDiscount-synesthesiaDiscount-darkBargainDiscount-ampFbDiscount-reverbTankDiscount-fuzzBoxDiscount-phaserDiscount-ghostWeedFree-wahFreeFirst-cableTesterDiscount-conduitDiscount)
   if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers, have '+embers+'.');return false}
   if(nextCardFreeRef.current&&card.id!=='doubledown'){setNextCardFree(false)}
+  // ── BLOTTER REVELATION counter consumption ──
+  // Only consume a "free card" charge if we're actually using it (i.e., the card had cost > 0
+  // and another zero-cost mechanic isn't already covering it). nextCardFree consumed first.
+  else if(freeCardsLeftRef.current>0&&card.id!=='doubledown'&&!allCardsFreeRef.current&&card.embers>0){
+    freeCardsLeftRef.current=Math.max(0,freeCardsLeftRef.current-1)
+    setFreeCardsLeft(p=>Math.max(0,p-1))
+  }
     if(card.id==='stagedive'&&stageDiveUsed){addLog('⚠ Stage Dive once per round only.');return false}
     const m=stage[slotIdx]
     let ns=[...stage],spent=effectiveEmbers,msg=''
@@ -6596,6 +6657,13 @@ function App(){
     if(card.type==='CORRUPT'&&!wahPedalUsedRef.current&&activePassives.some(p=>p.id==='wahpedal')){
       wahPedalUsedRef.current=true
     }
+    // ── BLACK SUN trip (v0.7.2): every CORRUPT card supercharges the strike multiplier by +50% ──
+    if(card.type==='CORRUPT'&&fightTripBuff==='BLACK SUN'){
+      setStrikeMult(p=>Math.min(10000,Math.round(p*1.5*100)/100))
+      strikeMultRef.current=Math.min(10000,Math.round(strikeMultRef.current*1.5*100)/100)
+      const _bc=getCenter(bossRef)
+      addFloat('BLACK SUN ×1.5',_bc.x,_bc.y-100,'#aa00ff',true)
+    }
     // ── RIFF CHAIN COMBO DETECTION ──
     cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
     // ── ECHOPLEX 69% / LOOPER REPLAY QUEUEING ──
@@ -7025,8 +7093,31 @@ function App(){
   const circleBaseRange=[3,4,4,3,4,4,5,5,7]
   const baseMin=circleBaseMin[Math.min(circleNum-1,8)]
   const baseRange=circleBaseRange[Math.min(circleNum-1,8)]
-  const stashEarned=baseMin+Math.floor(Math.random()*baseRange)+strikesLeft+perfectBonus
+  const stashEarnedBase=baseMin+Math.floor(Math.random()*baseRange)+strikesLeft+perfectBonus
+  // ── HANGOVER STASH HAIRCUT (v0.7.1) ─────────────────────────────
+  // 100% peak corruption shaves 15% of stash payout. "Blew the gig money on
+  // drugs." Calibrated via 1000-game sim — heavier haircut (×0.5 at 100%,
+  // ×0.75 at 90%) silently nuked Lucifer attempts; ×0.85 at 100% only is
+  // the sweet spot that taxes recklessness without compounding into
+  // run-ending stash starvation.
+  const _peakC=peakCorruptionRef.current
+  const _hairMult=_peakC>=100?0.85:1.0
+  const stashEarned=Math.floor(stashEarnedBase*_hairMult)
+  const _hairLost=stashEarnedBase-stashEarned
     setStash(function(p){return Math.min(MAX_STASH,p+stashEarned)})
+    if(_hairLost>0){
+      addLog('🥴 Hangover ate '+_hairLost+'🌿 of your gig money. (Peaked at '+_peakC+'% corruption.)')
+    }
+    // ── HANGOVER COMMIT ───────────────────────────────────────────
+    // Boss kills clear the hangover entirely — fresh start next circle.
+    // Non-boss victories carry the peak forward as `hangover` for next fight + shop.
+    if(isBossKill){
+      setHangover(0)
+      if(_peakC>=50)addLog('💤 Boss down. The band sleeps it off — hangover cleared.')
+    } else {
+      setHangover(_peakC)
+      if(_peakC>=50)addLog('🥴 Hangover '+_peakC+'%: shops pricier + max HP debuff next fight.')
+    }
     updStat('stashEarned',stashEarned);updStat('fightsSurvived',1)
     if(Math.random()<0.15){setStash(p=>Math.min(MAX_STASH,p+2));addLog('🎽 Found some merch money! +2 Stash.')}
     if(activePassives.some(p=>p.id==='p3')){setStash(p=>Math.min(MAX_STASH,p+2));addLog('💿 Merch Table! +2 Stash.')}
@@ -7107,6 +7198,9 @@ function App(){
         setRecruitPack(genRecruitPack(fightIndex))
         setShroomsInStock(Math.random()<0.50)
         setAcidInStock(Math.random()<0.50)
+        // DMT (v0.7.2): boss-shop only. Always in stock at those shops to ensure
+        // discovery — players will encounter it for the first time on a boss kill.
+        setDMTInStock((fightIndex+1)%3===0)
         setShopSoldIds([]) // clear sold state when shop rotates
         // Rotate circle artifact + passive at each new circle (every 3rd fight)
         const isCircleBoss=(fightIndex+1)%3===0
@@ -7116,6 +7210,15 @@ function App(){
           setCircleCartBought(false)
           setCirCleCpasBought(false)
         }
+        // ── HANGOVER HP DEBUFF — restore on every fight victory ──
+        // Restores any maxHp lost from the per-member debuff. Runs BEFORE the
+        // heal so heal can fill the now-restored maxHp. Next fight's start
+        // re-applies a fresh debuff based on the newly-committed `hangover`.
+        // Boss kills also separately reset hangover state to 0 (see commit logic above).
+        setStage(prev=>prev.map(m=>{
+          if(!m||!m.hangoverHpDebuff)return m
+          return Object.assign({},m,{maxHp:m.maxHp+m.hangoverHpDebuff,hangoverHpDebuff:0})
+        }))
         // Post-fight heal (disabled on higher stakes)
         if(activeStake.healAfterFight){setStage(prev=>prev.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m))}
         // Victory flash before shop (circle cleared extra for bosses)
@@ -7326,11 +7429,14 @@ function App(){
   // ── CORRUPTION THRESHOLD FLASH NOTIFICATIONS ──
   useEffect(()=>{
     if(gameState!=='playing')return
+    // Threshold flash banners — BUZZED at 50%, WASTED at 100%. Positive framing
+    // (these are the band's *high*, the cost comes tomorrow via Hangover).
+    // The actual costs (shop tax, HP debuff, stash haircut) live in the
+    // Hangover system — these flashes are the IN-FIGHT signal that the
+    // multiplier ramp is unlocked.
     const thresholds=[
-      {at:25,name:'THE WHISPERS',desc:'Weakest member takes 1 damage each fight',color:'#cc6677'},
-      {at:50,name:'THE HUNGER',desc:'Shop prices increased by 25%',color:'#dd5566'},
-      {at:75,name:'THE MADNESS',desc:'15% chance to lose a card each Strike',color:'#ee4455'},
-      {at:100,name:'THE POSSESSION',desc:'Boss damage +3. CORRUPT members +3 ATK!',color:'#ff2244'},
+      {at:50,name:'🍺 BUZZED',desc:'CORRUPT cards hit harder. Tomorrow you pay.',color:'#dd5566'},
+      {at:100,name:'🤘 WASTED',desc:'Maximum power. Tomorrow REALLY hurts.',color:'#ff2244'},
     ]
     for(const t of thresholds){
       if(corruption>=t.at&&lastCorruptThreshold.current<t.at){
@@ -7343,7 +7449,7 @@ function App(){
     lastCorruptThreshold.current=Math.max(lastCorruptThreshold.current,...thresholds.filter(t=>corruption>=t.at).map(t=>t.at))
   },[corruption,gameState])
 
-  // ── CORRUPTION 100% POSSESSION — one-time +3 ATK for CORRUPT members ──
+  // ── CORRUPTION 100% POSSESSION — REMOVED in v0.7.1 (replaced by Hangover system) ──
 
   // ── HOLD SPACEBAR — fast-forward while held during combat ──────
   const spaceHeldRef=useRef(false)
@@ -7353,17 +7459,6 @@ function App(){
     window.addEventListener('keydown',down);window.addEventListener('keyup',up)
     return()=>{window.removeEventListener('keydown',down);window.removeEventListener('keyup',up)}
   },[])
-
-  useEffect(()=>{
-    if(corruption>=100&&!possessionFired&&gameState==='playing'){
-      setPossessionFired(true)
-      setStage(p=>p.map(m=>{
-        if(!m||m.tooStoned||m.keyword!=='CORRUPT')return m
-        addLog('☠ POSSESSION! '+m.name+' embraces the darkness! +3 ATK!')
-        return Object.assign({},m,{atk:m.atk+3,permAtkBonus:(m.permAtkBonus||0)+3})
-      }))
-    }
-  },[corruption,possessionFired,gameState])
 
   // ── FIGHT 1 CORRUPTION SAFETY NET + FIRST-TIME TUTORIAL POPUP ─────
   // Per JV's design vision: r1 is training wheels. The corruption->stoned
@@ -7383,6 +7478,18 @@ function App(){
     }
   },[corruption,fightIndex,tutorialFight,welcomeToHell,gameState])
 
+  // ── PEAK CORRUPTION TRACKER — the engine that drives Hangover ─────
+  // Updates every time corruption rises. On fight victory, this peak gets
+  // committed to the `hangover` state which then taxes the next shop +
+  // debuffs the next fight. Resets at fight start (line ~8835) and run
+  // restart (line ~9385). Ref instead of state so we don't re-render
+  // on every tick — only the commit matters.
+  useEffect(()=>{
+    if(gameState==='playing'&&corruption>peakCorruptionRef.current){
+      peakCorruptionRef.current=corruption
+    }
+  },[corruption,gameState])
+
   // ── DEV SHORTCUT: Shift+S = jump to shop ─────────────────────────
   useEffect(function(){
     function onKey(e){
@@ -7394,6 +7501,7 @@ function App(){
         setStash(69)
         setShroomsInStock(Math.random()<0.50)
         setAcidInStock(Math.random()<0.50)
+        setDMTInStock(true) // debug shortcut: always stock DMT for testing
         setGameState('shop')
       }
       if(e.shiftKey&&(e.key==='C'||e.key==='c')){
@@ -7452,83 +7560,205 @@ function App(){
     return function(){window.removeEventListener('keydown',onKey,true)}
   },[])
 
+  // ── TRIP REGISTRY (v0.7.2) ───────────────────────────────────────
+  // Each entry is a self-contained effect definition. Adding a new trip
+  // = add an entry here. The `apply` callback runs at activation time;
+  // `buffName` (if set) is what `fightTripBuff` becomes for combat reads
+  // (e.g., `fightTripBuff==='ASTRAL PROJECTION'` checks elsewhere).
+  // Effects with `instant:true` fire once at activation, no fight-long buff.
+  // Pool sizes: 8 shrooms + 8 acid. Bad-trip rate softened from 5% → 3%.
+  // Bunk (paper acid / fake shrooms) removed entirely — players never feel
+  // robbed of a drug-purchase. Activation is now allowed mid-fight (no
+  // strikesLeft===maxStrikes gate) so trips can be clutch panic buttons.
+  const TRIP_EFFECTS={
+    shrooms:{
+      good:[
+        {name:'EGO DEATH',desc:'All members +2 ATK this fight!',color:'#ffdd44',buffName:'EGO DEATH',
+          apply:()=>{setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+2}):m));addLog('🍄 EGO DEATH! All members +2 ATK!')}},
+        {name:'TIME DILATION',desc:'+1 bonus Strike this fight!',color:'#ff8800',buffName:'TIME DILATION',
+          apply:()=>{setStrikesLeft(p=>p+1);setFightMaxStrikes(p=>p+1);addLog('🍄 TIME DILATION! +1 Strike this fight!')}},
+        {name:'SYNESTHESIA',desc:'All cards cost 1 less ember this fight!',color:'#cc44ff',buffName:'SYNESTHESIA',
+          apply:()=>{addLog('🍄 SYNESTHESIA! All cards cost 1 less ember!')}},
+        {name:'COSMIC UNITY',desc:'All healed to full HP + Stonewall!',color:'#44ddaa',buffName:'COSMIC UNITY',
+          apply:()=>{setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp,stoneShield:2}):m));addLog('🍄 COSMIC UNITY! Full HP + Stonewall for all!')}},
+        // ── New v0.7.2 effects ──
+        {name:'BLOTTER REVELATION',desc:'Next 3 cards play FREE.',color:'#ffaa44',buffName:'BLOTTER REVELATION',instant:true,
+          apply:()=>{setFreeCardsLeft(3);freeCardsLeftRef.current=3;addLog('🍄 BLOTTER REVELATION! The setlist reveals itself — next 3 cards play FREE.')}},
+        {name:'PSILOCYBIN PORTAL',desc:'Draw 5 cards immediately.',color:'#cc66ff',buffName:'PSILOCYBIN PORTAL',instant:true,
+          apply:()=>{
+            // Top up hand by 5 (drawUpTo caps internally at 10). Result shape: {h, d, disc}.
+            // Using handRef for race-safety in case the player taps the button mid-card-play.
+            const _curHand=handRef.current||[]
+            const target=_curHand.length+5
+            const result=drawUpTo(_curHand,deckRef.current,discRef.current,target)
+            if(result){
+              setHand(result.h);handRef.current=result.h
+              setDeck(result.d);deckRef.current=result.d
+              setDiscardPile(result.disc);discRef.current=result.disc
+              const drawn=(result.h?result.h.length:_curHand.length)-_curHand.length
+              addLog('🍄 PSILOCYBIN PORTAL! The mycelium speaks — drew '+drawn+' card'+(drawn===1?'':'s')+'.')
+            }
+          }},
+        {name:'DOOM CRYSTAL',desc:'Highest-ATK member: ATK doubled this fight!',color:'#ff4422',buffName:'DOOM CRYSTAL',
+          apply:()=>{
+            setStage(prev=>{
+              const alive=prev.filter(m=>m&&!m.tooStoned)
+              if(alive.length===0)return prev
+              const top=alive.reduce((a,b)=>a.atk>b.atk?a:b)
+              return prev.map(m=>m&&m.uid===top.uid?Object.assign({},m,{atk:m.atk*2,tempAtkBonus:(m.tempAtkBonus||0)+top.atk}):m)
+            })
+            addLog('🍄 DOOM CRYSTAL! One vision. One blade. Highest ATK doubled.')
+          }},
+        {name:'GHOST WEED',desc:'All CORRUPT cards cost 0 this fight.',color:'#88ddaa',buffName:'GHOST WEED',
+          apply:()=>{addLog('🍄 GHOST WEED! Smoke from the void — CORRUPT cards are free.')}},
+      ],
+      // Bad trip is rare (3%). Softened from -2 ATK to -1 ATK + log-only — should sting, not ruin.
+      bad:{name:'BAD TRIP',desc:'Paranoia! All members -1 ATK this fight.',color:'#cc2222',buffName:'BAD TRIP',
+        apply:()=>{setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:Math.max(1,m.atk-1)}):m));addLog('🍄 BAD TRIP. Paranoia — all members -1 ATK.')}}
+    },
+    acid:{
+      good:[
+        {name:'FRACTAL VISION',desc:'All damage DOUBLED this fight!',color:'#ff44ff',buffName:'FRACTAL VISION',
+          apply:()=>{addLog('🧪 FRACTAL VISION! Every card effect fires twice!')}},
+        {name:'DIMENSIONAL RIFT',desc:'Boss takes DOUBLE damage this fight!',color:'#ff3300',buffName:'DIMENSIONAL RIFT',
+          apply:()=>{addLog('🧪 DIMENSIONAL RIFT! Boss takes double damage!')}},
+        {name:'EGO DISSOLUTION',desc:'Corruption → 69%. All members +3 ATK permanently!',color:'#aa44ff',buffName:'EGO DISSOLUTION',
+          apply:()=>{
+            setCorruption(69)
+            setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3,permAtkBonus:(m.permAtkBonus||0)+3}):m))
+            addLog('🧪 EGO DISSOLUTION! Corruption → 69%. All +3 ATK forever.')
+          }},
+        {name:'ASTRAL PROJECTION',desc:'All immune to boss damage this fight!',color:'#44ddff',buffName:'ASTRAL PROJECTION',
+          apply:()=>{addLog('🧪 ASTRAL PROJECTION! Band is untouchable!')}},
+        // ── New v0.7.2 effects ──
+        {name:'DMT BREAKTHROUGH',desc:'Skip boss\'s next 2 attacks.',color:'#ffffff',buffName:'DMT BREAKTHROUGH',
+          apply:()=>{setBossSkipStrikes(2);bossSkipStrikesRef.current=2;addLog('🧪 DMT BREAKTHROUGH! The machine elves arrive — boss attacks neutralized for 2 strikes.')}},
+        {name:'REALITY GLITCH',desc:'Strike multiplier starts at ×2.0 every strike this fight!',color:'#88ccff',buffName:'REALITY GLITCH',
+          apply:()=>{addLog('🧪 REALITY GLITCH! The simulation stutters — strikes start at ×2.0.')}},
+        {name:'CRYSTAL SHRIEK',desc:'All members +5 ATK this fight!',color:'#ddaaff',buffName:'CRYSTAL SHRIEK',
+          apply:()=>{
+            // Big +5 buff. Differentiates from EGO DEATH's +2 by raw magnitude — this is the "I am the wall" trip.
+            setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+5,tempAtkBonus:(m.tempAtkBonus||0)+5}):m))
+            addLog('🧪 CRYSTAL SHRIEK! The frequencies pierce — all +5 ATK this fight!')
+          }},
+        {name:'K-HOLE',desc:'Boss frozen for 2 strikes. Band cannot heal this fight.',color:'#4466cc',buffName:'K-HOLE',
+          apply:()=>{setBossSkipStrikes(2);bossSkipStrikesRef.current=2;addLog('🧪 K-HOLE. Dissociated. Boss frozen 2 strikes — but no healing.')}},
+      ],
+      // Bad trip: still triggers max corruption. Less catastrophic than before because corruption can't kill you anymore (Hangover).
+      bad:{name:'BAD TRIP',desc:'Corruption hits 100%! Hangover incoming.',color:'#cc2222',buffName:'BAD TRIP',
+        apply:()=>{setCorruption(100);addLog('🧪 BAD TRIP! Corruption maxed — tomorrow is gonna hurt.')}}
+    },
+    dmt:{
+      // No bad trip pool — premium tier, all good outcomes. Boss-shop only at 25🌿.
+      good:[
+        {name:'HYPERSPACE',desc:'All cards cost 0 this fight!',color:'#ffffff',buffName:'HYPERSPACE',
+          apply:()=>{setAllCardsFree(true);allCardsFreeRef.current=true;addLog('💠 HYPERSPACE! Outside time itself — all cards free.')}},
+        {name:'OVERMIND',desc:'Strike multiplier starts at ×3.0 every strike!',color:'#88ddff',buffName:'OVERMIND',
+          apply:()=>{addLog('💠 OVERMIND! The pattern emerges — strikes start at ×3.0.')}},
+        {name:'GODHEAD',desc:'All members +10 ATK this fight!',color:'#ffdd44',buffName:'GODHEAD',
+          apply:()=>{
+            setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+10,tempAtkBonus:(m.tempAtkBonus||0)+10}):m))
+            addLog('💠 GODHEAD! You become the riff — all +10 ATK this fight.')
+          }},
+        {name:'REBIRTH',desc:'Revive all stoned members at full HP, all +2 perm ATK!',color:'#ddffdd',buffName:'REBIRTH',instant:true,
+          apply:()=>{
+            let revivedCount=0
+            setStage(prev=>prev.map(m=>{
+              if(!m)return m
+              if(m.tooStoned){
+                revivedCount++
+                // Mirror Wake Up Call's revive: restore base ATK, clear temp state, then apply +2 perm
+                const baseAtk=m._origAtk!==undefined?m._origAtk:m.atk
+                return Object.assign({},m,{tooStoned:false,hp:m.maxHp,atk:baseAtk+2,_origAtk:undefined,tempBuff:false,permAtkBonus:(m.permAtkBonus||0)+2})
+              }
+              return Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2})
+            }))
+            addLog('💠 REBIRTH! Death is a doorway — '+(revivedCount>0?revivedCount+' revived, ':'')+'all +2 ATK forever.')
+          }},
+        {name:'THIRD EYE',desc:'Draw 8 cards. Max embers +3 this fight.',color:'#aa88ff',buffName:'THIRD EYE',instant:true,
+          apply:()=>{
+            const _curHand=handRef.current||[]
+            const target=_curHand.length+8
+            const result=drawUpTo(_curHand,deckRef.current,discRef.current,target)
+            if(result){
+              setHand(result.h);handRef.current=result.h
+              setDeck(result.d);deckRef.current=result.d
+              setDiscardPile(result.disc);discRef.current=result.disc
+            }
+            setMaxEmbers(p=>Math.min(MAX_EMBERS_CAP,p+3))
+            setEmbers(p=>Math.min(MAX_EMBERS_CAP,p+3))
+            addLog('💠 THIRD EYE! The veil burns — drew 8 cards, +3 max embers.')
+          }},
+        {name:'SACRED CHORD',desc:'Boss takes ×3 damage AND skip its next attack!',color:'#ff88dd',buffName:'SACRED CHORD',
+          apply:()=>{
+            setBossSkipStrikes(p=>Math.max(p,1));bossSkipStrikesRef.current=Math.max(bossSkipStrikesRef.current,1)
+            addLog('💠 SACRED CHORD! The note that splits worlds — boss takes ×3 damage, next attack skipped.')
+          }},
+        {name:'TIMELINE COLLAPSE',desc:'+2 bonus Strikes this fight!',color:'#ffaa00',buffName:'TIMELINE COLLAPSE',instant:true,
+          apply:()=>{
+            setStrikesLeft(p=>p+2);setFightMaxStrikes(p=>p+2)
+            addLog('💠 TIMELINE COLLAPSE! All endings at once — +2 Strikes.')
+          }},
+        {name:'BLACK SUN',desc:'Every CORRUPT card played adds +50% strike multiplier!',color:'#aa00ff',buffName:'BLACK SUN',
+          apply:()=>{addLog('💠 BLACK SUN! The light goes out — CORRUPT cards supercharge the strike.')}},
+      ]
+    }
+  }
+
   // ── TRIP ACTIVATION ──────────────────────────────────────────────
   const activateTrip=useCallback((type)=>{
     if(tripUsedThisFight)return
     setTripUsedThisFight(true)
-    const roll=Math.random()
-    let effectName='',effectDesc='',effectColor='#44dd44'
-
+    // Decrement held count, bump run stat, achievement check
     if(type==='shrooms'){
       setHeldShrooms(p=>Math.max(0,p-1))
       setDrugsUsedThisRun(p=>{const n={...p,shrooms:p.shrooms+1};if(n.shrooms>0&&n.acid>0)tryAchieve('drug_lord');return n})
-      if(roll<0.05){
-        // 5% bad trip
-        effectName='BAD TRIP';effectDesc='Paranoia! All members -2 ATK this fight.';effectColor='#cc2222'
-        setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:Math.max(1,m.atk-2)}):m))
-        addLog('🍄 BAD TRIP! Paranoia — all members -2 ATK!')
-      } else if(roll<0.10){
-        // 5% bunk
-        effectName='BUNK SHROOMS';effectDesc='Nothing happens. You feel slightly disappointed.';effectColor='#888888'
-        addLog('🍄 Bunk shrooms. Nothing happened.')
-      } else {
-        // 90% good trip — roll d4
-        const d4=Math.floor(Math.random()*4)
-        if(d4===0){
-          effectName='EGO DEATH';effectDesc='All +2 ATK this fight!';effectColor='#ffdd44'
-          setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+2}):m))
-          addLog('🍄 EGO DEATH! All members +3 ATK!')
-        } else if(d4===1){
-          effectName='TIME DILATION';effectDesc='+1 bonus Strike this fight!';effectColor='#ff8800'
-          setStrikesLeft(p=>p+1);setFightMaxStrikes(p=>p+1)
-          addLog('🍄 TIME DILATION! +1 Strike this fight!')
-        } else if(d4===2){
-          effectName='SYNESTHESIA';effectDesc='All cards cost 1 less ember this fight!';effectColor='#cc44ff'
-          // Handled via activeTripEffect check in card cost calculation
-          addLog('🍄 SYNESTHESIA! All cards cost 1 less ember!')
-        } else {
-          effectName='COSMIC UNITY';effectDesc='All healed to full HP + Stonewall!';effectColor='#44ddaa'
-          setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp,stoneShield:2}):m))
-          addLog('🍄 COSMIC UNITY! Full HP + Stonewall for all!')
-        }
-      }
-    } else if(type==='acid'){
+    } else if(type==='acid') {
       setHeldAcid(p=>Math.max(0,p-1))
       setDrugsUsedThisRun(p=>{const n={...p,acid:p.acid+1};if(n.shrooms>0&&n.acid>0)tryAchieve('drug_lord');return n})
-      if(roll<0.05){
-        // 5% bad trip — Hellquake
-        effectName='BAD TRIP';effectDesc='Corruption hits 100%! Hellquake!';effectColor='#cc2222'
-        setCorruption(100)
-        addLog('🧪 BAD TRIP! Corruption maxed — Hellquake territory!')
-      } else if(roll<0.10){
-        // 5% bunk
-        effectName='BUNK ACID';effectDesc='Just paper. Nothing happens.';effectColor='#888888'
-        addLog('🧪 Bunk acid. It was just paper.')
-      } else {
-        // 90% good trip — roll d4
-        const d4=Math.floor(Math.random()*4)
-        if(d4===0){
-          effectName='FRACTAL VISION';effectDesc='All damage DOUBLED this fight!';effectColor='#ff44ff'
-          addLog('🧪 FRACTAL VISION! Every card effect fires twice!')
-        } else if(d4===1){
-          effectName='DIMENSIONAL RIFT';effectDesc='Boss takes DOUBLE damage this fight!';effectColor='#ff3300'
-          addLog('🧪 DIMENSIONAL RIFT! Boss takes double damage!')
-        } else if(d4===2){
-          effectName='EGO DISSOLUTION';effectDesc='Corruption → 69%. All members +3 ATK permanently!';effectColor='#aa44ff'
-          setCorruption(69)
-          setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3}):m))
-          addLog('🧪 EGO DISSOLUTION! Corruption → 69%. All +3 ATK!')
-        } else {
-          effectName='ASTRAL PROJECTION';effectDesc='All immune to boss damage this fight!';effectColor='#44ddff'
-          addLog('🧪 ASTRAL PROJECTION! Band is untouchable!')
-        }
-      }
+    } else if(type==='dmt') {
+      setHeldDMT(p=>Math.max(0,p-1))
+      setDrugsUsedThisRun(p=>{const n={...p,dmt:(p.dmt||0)+1};return n})
+      tryAchieve('dmt_traveler')
     }
-
-    playSfx(type==='shrooms'?'shrooms':'acid');setActiveTripEffect({type,name:effectName,desc:effectDesc,color:effectColor})
-    setFightTripBuff(effectName) // persists for entire fight — combat reads this
+    // Roll: 3% bad, 97% good for shrooms/acid. DMT has no bad pool — premium tier.
+    const pool=TRIP_EFFECTS[type]
+    let chosen
+    if(type==='dmt'){
+      chosen=pool.good[Math.floor(Math.random()*pool.good.length)]
+    } else if(Math.random()<0.03){
+      chosen=pool.bad
+    } else {
+      chosen=pool.good[Math.floor(Math.random()*pool.good.length)]
+    }
+    chosen.apply()
+    // ── PHASE A4 (v0.7.2): louder activation moment ──
+    // Existing playSfx call gives the base sting. Add an ascending pitch sweep
+    // on top for pure dopamine — pitch climbs through the reveal, longer
+    // and higher for DMT (the premium tier).
+    playSfx(type==='shrooms'?'shrooms':type==='acid'?'acid':'big_hit')
+    try{
+      const ctx=new(window.AudioContext||window.webkitAudioContext)()
+      const o=ctx.createOscillator(),g=ctx.createGain()
+      o.type='sine'
+      // Shrooms: 200→800 over 0.5s. Acid: 300→1200 over 0.7s. DMT: 400→2400 over 1.2s.
+      const sweepStart=type==='shrooms'?200:type==='acid'?300:400
+      const sweepEnd=type==='shrooms'?800:type==='acid'?1200:2400
+      const sweepDur=type==='shrooms'?0.5:type==='acid'?0.7:1.2
+      o.frequency.setValueAtTime(sweepStart,ctx.currentTime)
+      o.frequency.exponentialRampToValueAtTime(sweepEnd,ctx.currentTime+sweepDur)
+      g.gain.setValueAtTime(0.18,ctx.currentTime)
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+sweepDur)
+      o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+sweepDur)
+    }catch(e){}
+    // Shake: heavier and longer for DMT. Shrooms 20/500, Acid 25/600, DMT 35/900.
+    const shakeAmount=type==='dmt'?35:type==='acid'?25:20
+    const shakeDur=type==='dmt'?900:type==='acid'?600:500
+    triggerShake(shakeAmount,shakeDur)
+    setActiveTripEffect({type,name:chosen.name,desc:chosen.desc,color:chosen.color})
+    setFightTripBuff(chosen.buffName||chosen.name) // combat reads this for ongoing buffs
     setTimeout(()=>setActiveTripEffect(null),4000)
-  },[tripUsedThisFight,strikesLeft])
+  },[tripUsedThisFight,hand,setStage,setHand,setDeck,setDiscardPile,setStrikesLeft,setFightMaxStrikes,setFreeCardsLeft,setCorruption,setBossSkipStrikes,setHeldShrooms,setHeldAcid,setHeldDMT,setMaxEmbers,setAllCardsFree,setDrugsUsedThisRun,setTripUsedThisFight,setActiveTripEffect,setFightTripBuff])
 
   // ── ECHOPLEX / LOOPER / WITCH'S SABBATH REPLAY ENGINE ──
   // Replays queued during card plays fire at handleStrike start. Each replay:
@@ -7872,15 +8102,14 @@ function App(){
   const handleStrikeBody=useCallback(()=>{
     // Reset Ritualist's per-strike ember refund cap
     ritualistEmberRefundsThisStrikeRef.current=0
-    // CORRUPTION THRESHOLD: 75% — The Madness (15% chance discard random card)
-    if(corruption>=75&&Math.random()<0.15&&handRef.current.length>1){
-      const idx=Math.floor(Math.random()*handRef.current.length)
-      const lost=handRef.current[idx]
-      const newHand=[...handRef.current];newHand.splice(idx,1)
-      setHand(newHand);handRef.current=newHand
-      setDiscardPile(p=>[...p,lost]);discRef.current=[...discRef.current,lost]
-      addLog('🌀 MADNESS! Corruption forces you to drop '+lost.name+'!')
-    };const currentMult=strikeMultRef.current;setStrikeMult(1.0);setMemberBuffs({});
+    // (75% Madness random-discard removed in v0.7.1 simplification — punishing RNG with no agency)
+    const currentMult=strikeMultRef.current
+    // v0.7.2: Trip-driven strike-mult start values
+    //   REALITY GLITCH (acid):  ×2.0 every strike
+    //   OVERMIND (DMT):         ×3.0 every strike
+    const _newStrikeStart=fightTripBuff==='OVERMIND'?3.0:fightTripBuff==='REALITY GLITCH'?2.0:1.0
+    setStrikeMult(_newStrikeStart);strikeMultRef.current=_newStrikeStart
+    setMemberBuffs({});
     // animPhase guard removed here — wrapper handleStrike checks it before calling.
     // After replay delay, animPhase=='replaying' in this closure (stale), so checking
     // here would always early-return and strike would never resolve.
@@ -8099,8 +8328,8 @@ function App(){
     setTimeout(function(){
       setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
       setProjectiles([])
-      const tripMult=fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION'?2:1
-      const corruptionMult=corruption>=100?3.0:corruption>=80?2.0:corruption>=60?1.5:corruption>=40?1.2:1.0 // 40%=×1.15, 50%=×1.30, 75%=×1.45, 100%=×1.60
+      const tripMult=fightTripBuff==='SACRED CHORD'?3:(fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION')?2:1
+      const corruptionMult=corruption>=100?3.0:corruption>=80?2.0:corruption>=60?1.5:corruption>=40?1.2:1.0 // v0.7.1: kept original ramp; cost moved to Hangover system (out-of-fight)
       // ── BIG-NUMBERS ENGINE: collect every multiplier as a discrete cascade event ──
       // Each entry = {mult, label, color}. During the cascade, the visible strikeMult
       // counter climbs through each entry one by one, building suspense as it grows
@@ -8536,8 +8765,22 @@ function App(){
           }
         }
         else{scaledBaseDmg=stakeBaseDmg}
-        const possessionBonus=corruption>=100?3:0
-        const actualDmg=(fightTripBuff==='ASTRAL PROJECTION')?0:Math.max(1,Math.round(scaledBaseDmg)+possessionBonus-bossDebuff)
+        // v0.7.1: Possession bonus removed — boss damage no longer scales with player corruption.
+        // The cost lives in Hangover (next fight, next shop), not in this fight.
+        // v0.7.2: bossSkipStrikes — DMT BREAKTHROUGH / K-HOLE trips can fully skip
+        // an incoming attack. Decrements the counter at attack time so the boss
+        // can resume hitting once the trip's window expires.
+        let _bossSkippedThisStrike=false
+        if(bossSkipStrikesRef.current>0){
+          _bossSkippedThisStrike=true
+          bossSkipStrikesRef.current=Math.max(0,bossSkipStrikesRef.current-1)
+          setBossSkipStrikes(p=>Math.max(0,p-1))
+        }
+        const actualDmg=(_bossSkippedThisStrike||fightTripBuff==='ASTRAL PROJECTION')?0:Math.max(1,Math.round(scaledBaseDmg)-bossDebuff)
+        if(_bossSkippedThisStrike){
+          addFloat('FROZEN',getCenter(bossRef).x,getCenter(bossRef).y-60,'#88ddff',true)
+          addLog('❄ Boss frozen — attack skipped.')
+        }
           const ti=targetSlotIdx
           if(luciferAoE&&actualDmg>0){
             // Phase 2: AoE — split damage across ALL alive members
@@ -8788,6 +9031,26 @@ function App(){
     setEnemy(nextEnemy);const _deckScale=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1;const _heatLevel=parseInt(localStorage.getItem('vst_heat')||'1');const _heatMult=1+(Math.max(0,_heatLevel-1)*0.15);const _sHp=Math.ceil(nextEnemy.maxHp*_deckScale*_heatMult*(encoreMode?2.0:1.0));setEnemyHp(_sHp);setScaledMaxHp(_sHp)
     // per-fight tracking resets
     fightStartTimeRef.current=Date.now()
+    // Reset live peak corruption tracker — Hangover commits this on victory.
+    peakCorruptionRef.current=corruption
+    // ── HANGOVER HP DEBUFF (v0.7.1) ──────────────────────────────
+    // Members enter the next fight with reduced max HP based on last fight's
+    // peak corruption. -⌊hangover/33⌋ per member, capped at 3. Restored on
+    // boss kill (see boss-kill branch above). Applied AFTER healAfterFight so
+    // we shrink both maxHp AND clamp current hp to it. The debuff is applied
+    // only once at fight entry — it's carried as a stored value on each
+    // member (`m.hangoverHpDebuff`) so restoration knows exactly what to undo.
+    const _hangHp=Math.min(3,Math.floor((hangover||0)/33))
+    if(_hangHp>0){
+      setStage(p=>p.map(m=>{
+        if(!m||m.tooStoned||m.keyword==='FALLEN')return m
+        // If a debuff is already on the member from a prior fight (failsafe), don't double-apply.
+        if(m.hangoverHpDebuff)return m
+        const newMax=Math.max(1,m.maxHp-_hangHp)
+        return Object.assign({},m,{maxHp:newMax,hp:Math.min(m.hp,newMax),hangoverHpDebuff:_hangHp})
+      }))
+      addLog('🥴 Hangover: each member -'+_hangHp+' max HP this fight.')
+    }
     // ── PRE-FIGHT SPLASH — tour quote loading screen ──
     if(tutorialFight===0){
       setPreFightSplash({enemy:nextEnemy,circle:nextEnemy.circle||('Circle '+(Math.floor(nextIdx/3)+1)),quote:TOUR_QUOTES[Math.floor(Math.random()*TOUR_QUOTES.length)]})
@@ -8834,7 +9097,7 @@ function App(){
     // Don't pre-set to max, or P1/Power Conditioner gains get silently capped.
     playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setNextCardFree(false);setAllCardsFree(false);setLastRiffPlayed(null);lastRiffPlayedRef.current=null;setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);multMilestonesRef.current={2:false,4:false,8:false,16:false}
+    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setNextCardFree(false);setAllCardsFree(false);allCardsFreeRef.current=false;setFreeCardsLeft(0);freeCardsLeftRef.current=0;setBossSkipStrikes(0);bossSkipStrikesRef.current=0;setLastRiffPlayed(null);lastRiffPlayedRef.current=null;setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);multMilestonesRef.current={2:false,4:false,8:false,16:false}
     // AUTO-SAVE at fight start
     setTimeout(()=>{try{saveGame({
       v:1,gs:gameState,fi:fightIndex,seed:runSeed,deck:selectedDeck,
@@ -8844,7 +9107,7 @@ function App(){
       sl:strikesLeft,ms:fightMaxStrikes,dl:discardsLeft,
       pa:chosenPacts,art:activeArtifacts.map(a=>a.id),pas:activePassives.map(p=>p.id),
       loot:collectedLoot,upg:upgradedCards,stats:stats,
-      shrooms:heldShrooms,acid:heldAcid
+      shrooms:heldShrooms,acid:heldAcid,dmt:heldDMT
     })}catch(e){}},100);setMemberBuffs({});victoryFiredRef.current=false;setSlowBurnStrikes(0);setAmpFeedbackDiscount(0);setPyromaniacActive(false)
     // BOSS LOOT effects at fight start
     if(collectedLoot.includes('love_letter'))setNextCardFree(true)
@@ -9273,6 +9536,7 @@ function App(){
     const cn=Math.floor(fightIndex/3)+1
     setShopCards(genShopCards(cn))
     setShroomsInStock(Math.random()<0.50)
+    setDMTInStock(false)
     setAcidInStock(Math.random()<0.50)
     playSfx('reroll');addLog('🔄 Shop rerolled for '+rerollCost+' 🌿')
   },[stash,rerollCost,fightIndex])
@@ -9293,7 +9557,7 @@ function App(){
     setActivePassives((sv.pas||[]).slice(0,2).map(id=>[...STARTER_PASSIVES,...MYTHIC_PEDALS].find(p=>p.id===id)).filter(Boolean))
     if((sv.pas||[]).length>2)addLog('⚠ Loaded save had '+sv.pas.length+' pedals; only first 2 equipped (cap is 2).')
     if(sv.stats)setStats(sv.stats)
-    setHeldShrooms(sv.shrooms||0);setHeldAcid(sv.acid||0)
+    setHeldShrooms(sv.shrooms||0);setHeldAcid(sv.acid||0);setHeldDMT(sv.dmt||0)
     // ── ANCHOR refs (commit 4d): recompute from restored stage on resume.
     //    Save happens at fight start (before any saves used), so saves-used is always 0
     //    at save time. Recomputing tier from stage is deterministic and avoids needing
@@ -9323,15 +9587,15 @@ function App(){
     const _restartDeckStrMod=deckDef?.maxStrikesMod||0
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes+_restartDeckStrMod);setFightMaxStrikes(activeStake.maxStrikes+_restartDeckStrMod);setDiscardsLeft(MAX_DISCARDS);setFightMaxDiscards(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
     setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false
-    clearSave();setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0})
-    setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
+    clearSave();setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setHeldDMT(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0,dmt:0})
+    setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;setFreeCardsLeft(0);freeCardsLeftRef.current=0;setBossSkipStrikes(0);bossSkipStrikesRef.current=0;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
     // Reset mythic unlock per-run trackers
     chainsFiredThisRunRef.current=new Set()
     soloMembersUsedRef.current=new Set()
     runStonedMembersRef.current=new Set()
     luciferStrikesUsedRef.current=0
     fightLossMembersRef.current=new Set()
-    setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setPossessionFired(false);setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
+    setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setHangover(0);peakCorruptionRef.current=0;setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
     setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0,overkillDmg:0,bestMultiplier:1.0});setScaledMaxHp(0);setVenomDotStacks(0);setDblRoll(null);setLastKillingBlow('');setCurrentTip('');setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setSlowBurnStrikes(0);setStashStolenThisFight(0);corrPowerShownRef.current=false
   }
 
@@ -9524,7 +9788,7 @@ function App(){
             ['⛧ Riff Chains','Playing specific card pairs triggers Riff Chains — massive combo bonuses! Chains multiply your Strike damage (e.g., Battle Cry + Stage Dive = DEATH WISH). 16 chains to discover. The celebration shows which cards triggered it.'],
             ['×️ Strike Multiplier','Every card played MULTIPLIES your Strike by ×1.08. Riff Chains multiply by ×1.78. Multiple chains stack multiplicatively. 6 cards + 1 chain = ×2.83. Stack artifacts for the god run. The multiplier resets each Strike.'],
             ['🌀 Corruption','A risk/reward axis from 0-100%. Some cards and enemies raise it. CORRUPT keyword members get stronger at high corruption. Overdrive requires 60%+. Feedback Loop and Amp the Static scale with it.'],
-            ['⚠ Corruption Thresholds','25% THE WHISPERS: Weakest member takes 1 damage each fight. 50% THE HUNGER: All shop prices +25%. 75% THE MADNESS: 15% chance to lose a random card before each Strike. 100% THE POSSESSION: Boss damage +3, but CORRUPT members get one-time +3 ATK.'],
+            ['⚠ Corruption & Hangover','Corruption powers CORRUPT cards (purple). The peak corruption you hit during a fight becomes your HANGOVER for the next fight + shop. Hangover ≥50% = +20% shop prices. ≥75% = +40%. ≥100% = +60%. Each member loses ⌊hangover/33⌋ max HP next fight (restored at boss kill). Peaking at 100% also shaves 15% of that fight\'s stash payout. Corruption can never end your run — the cost is always tomorrow.'],
             ['💀 Corruption = Power','Corruption is a MULTIPLIER. 40%=×1.2, 60%=×1.5, 80%=×2.0, 100%=×3.0 damage but the boss hits +3 harder. Risk vs reward — ride the corruption wave.'],
             ['🧹 Reducing Corruption','Smoke Break: -15%. Herb Money: -15%. Controlled Feedback: Sets to 50%. Signal Decay: -15%. Atonement pact: -15% after each boss kill. Some descent rewards also reduce corruption.'],
             ['⛧ Pacts','After each boss kill, choose 1 of 2 pact offers. Pacts are permanent buffs for the rest of the run. 13 pacts total including Ember Surge, Iron Strings, Thick Skin, Clean Living, Corruption Engine, Atonement, and more.'],
@@ -9934,6 +10198,7 @@ function App(){
           setBoosterPacks(genBoosterPacks(9))
           setRecruitPack(genRecruitPack(26))
           setShroomsInStock(Math.random()<0.50)
+          setDMTInStock(false)
           setAcidInStock(Math.random()<0.50)
           setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false)
           setGameState('shop')
@@ -10031,6 +10296,16 @@ function App(){
         </svg>
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'var(--ink-rust)',fontStyle:'italic',letterSpacing:1,marginTop:6}}>Circle {descentData.circleName} {descentData.circleEmoji}</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--ink-dim)',fontStyle:'italic',letterSpacing:0.5,marginTop:2}}>Choose your path. Skipping a fight forfeits its shop.</div>
+        {/* HANGOVER PREVIEW (v0.7.1) — shows the cost the player carries into the next fight + shop */}
+        {hangover>0&&<div style={{
+          marginTop:8,padding:'8px 18px',borderRadius:6,
+          background:'linear-gradient(180deg, rgba(120,0,30,0.35), rgba(60,0,15,0.45))',
+          border:'1px solid '+(hangover>=100?'var(--blood)':hangover>=75?'#a41528':'var(--ink-rust)'),
+          fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-bone)',
+          letterSpacing:1,textAlign:'center',lineHeight:1.5,
+          boxShadow:hangover>=75?'0 0 12px rgba(196,30,58,0.4)':'none'}}>
+          🥴 Hangover: <b>{hangover}%</b> · Next shop +{hangover>=100?60:hangover>=75?40:hangover>=50?20:0}% · Members -{Math.min(3,Math.floor(hangover/33))} max HP
+        </div>}
         {bestRunCircle>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:3,marginTop:2,textTransform:'uppercase'}}>Personal Best: Circle {bestRunCircle} {Math.floor(fightIndex/3)+1>bestRunCircle?'✔':''}</div>}
       </div>
 
@@ -10224,7 +10499,7 @@ function App(){
   if(victorySummary)return <VictorySummaryScreen summary={victorySummary} onContinue={continueVictorySummary}/>
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} shroomsInStock={shroomsInStock} acidInStock={acidInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)} encoreMode={encoreMode}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} hangover={hangover} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} heldDMT={heldDMT} shroomsInStock={shroomsInStock} acidInStock={acidInStock} dmtInStock={dmtInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)} onBuyDMT={()=>setHeldDMT(p=>p+1)} encoreMode={encoreMode}/>
   if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} devDailyScore={6666} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage} runElapsed={Math.floor((Date.now()-runStartTimeRef.current)/1000)} lastKillingBlow={lastKillingBlow}/></div>
 
   return(
@@ -10261,12 +10536,16 @@ function App(){
             <text x="50%" y="75%" textAnchor="middle" fontFamily="MBScribblesFont" fontSize="10" fill="var(--ink-bone)">✠</text>
             <text x="50%" y="95%" textAnchor="middle" fontFamily="MBScribblesFont" fontSize="10" fill="var(--ink-bone)">⛧</text>
           </svg>
-          {/* Threshold markers */}
-          {[25,50,75].map(t=><div key={t} style={{position:'absolute',left:-3,right:-3,bottom:t+'%',height:1,
-            background:corruption>=t?'var(--blood)':'rgba(90,56,32,0.3)',zIndex:3}}>
-            <div style={{position:'absolute',right:'100%',top:-8,fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,
-              color:corruption>=t?'var(--blood)':'var(--rot)',textShadow:'0 0 4px rgba(0,0,0,0.9)',paddingRight:6,whiteSpace:'nowrap'}}>
-              {t===25?'⚠':t===50?'🔥':'💀'}
+          {/* Threshold markers — the two real breakpoints. 50% = BUZZED (CORRUPT
+              multiplier active), 100% = WASTED (max multiplier + max hangover next
+              fight). Earlier 25/75 ticks taught false thresholds and were removed
+              in the v0.7.1 Hangover refactor. */}
+          {[50,100].map(t=><div key={t} style={{position:'absolute',left:-3,right:-3,bottom:t+'%',height:t===100?2:1,
+            background:corruption>=t?(t===100?'var(--blood)':'#c41e3a'):'rgba(90,56,32,0.45)',
+            boxShadow:corruption>=t&&t===100?'0 0 8px rgba(196,30,58,0.8)':'none',zIndex:3}}>
+            <div style={{position:'absolute',right:'100%',top:-9,fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,
+              color:corruption>=t?'var(--blood)':'var(--rot)',textShadow:'0 0 4px rgba(0,0,0,0.95)',paddingRight:6,whiteSpace:'nowrap'}}>
+              {t===50?'⚠':'⛧'}
             </div>
           </div>)}
           {/* Mercury fill — rises from bottom with meniscus curve at top */}
@@ -10447,7 +10726,7 @@ function App(){
       </div>}
       {/* TRIP EFFECT OVERLAY */}
       {activeTripEffect&&<div style={{position:'absolute',inset:0,zIndex:9600,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:16,background:'rgba(0,0,0,0.88)',animation:'fadeIn 0.15s ease'}}>
-        <div style={{fontSize:100,animation:'throb 0.4s ease-in-out infinite',filter:`drop-shadow(0 0 40px ${activeTripEffect.color})`}}>{activeTripEffect.type==='shrooms'?'🍄':'🧪'}</div>
+        <div style={{fontSize:100,animation:'throb 0.4s ease-in-out infinite',filter:`drop-shadow(0 0 40px ${activeTripEffect.color})`}}>{activeTripEffect.type==='shrooms'?'🍄':activeTripEffect.type==='dmt'?'💠':'🧪'}</div>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,color:activeTripEffect.color,textShadow:`0 0 40px ${activeTripEffect.color},0 0 80px ${activeTripEffect.color}`,animation:'fadeIn 0.3s ease'}}>{activeTripEffect.name}</div>
         <div style={{fontFamily:"'ScratchFont',serif",fontSize:24,color:'rgba(255,255,255,0.9)',textAlign:'center',maxWidth:600,fontStyle:'italic',textShadow:'0 0 20px rgba(0,0,0,0.9)',animation:'fadeIn 0.5s ease',padding:'0 40px',lineHeight:1.5}}>{activeTripEffect.desc}</div>
       </div>}
@@ -10778,12 +11057,12 @@ function App(){
           <div style={{position:'relative'}}
             onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='block'}}
             onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='none'}}>
-            <button onClick={()=>{if(heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight)activateTrip('shrooms')}}
+            <button onClick={()=>{if(heldShrooms&&!tripUsedThisFight)activateTrip('shrooms')}}
               style={{width:86,padding:'10px 4px',fontFamily:"'MBScribblesFont',serif",fontWeight:900,letterSpacing:2,textTransform:'uppercase',
-                background:heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'linear-gradient(180deg, rgba(200,152,56,0.25), rgba(200,152,56,0.08))':'linear-gradient(180deg, rgba(30,18,12,0.5), rgba(15,10,6,0.5))',
+                background:heldShrooms&&!tripUsedThisFight?'linear-gradient(180deg, rgba(200,152,56,0.25), rgba(200,152,56,0.08))':'linear-gradient(180deg, rgba(30,18,12,0.5), rgba(15,10,6,0.5))',
                 border:heldShrooms&&!tripUsedThisFight?'1px solid var(--gold)':'1px solid var(--rot)',
                 borderRadius:2,color:heldShrooms&&!tripUsedThisFight?'var(--gold)':'var(--rot)',
-                cursor:heldShrooms&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'pointer':'not-allowed',
+                cursor:heldShrooms&&!tripUsedThisFight?'pointer':'not-allowed',
                 opacity:heldShrooms?1:0.5,textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
               <span style={{fontSize:22,lineHeight:1,opacity:heldShrooms?1:0.35,filter:heldShrooms?'none':'grayscale(1)'}}>🍄</span>
               <span style={{fontSize:13,letterSpacing:2}}>{heldShrooms?'USE':'⛧'}</span>
@@ -10793,19 +11072,19 @@ function App(){
             </button>
             <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(200,152,56,0.6)',borderRadius:3,padding:'10px 14px',zIndex:99999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--gold)',marginBottom:6,letterSpacing:2,textTransform:'uppercase'}}>🍄 Magic Mushrooms</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--ink-bone)',lineHeight:1.5,fontStyle:'italic'}}>{heldShrooms?'Use before your first Strike. 90% chance of a powerful buff — +2 ATK all, bonus Strike, cheaper cards, or full heal. 5% nothing. 5% bad trip.':'Buy from The Dealer in the shop.'}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--ink-bone)',lineHeight:1.5,fontStyle:'italic'}}>{heldShrooms?'Use anytime in a fight. 1 of 8 effects: +ATK, +Strike, cheaper cards, full heal, free cards, deck draw, ATK doubled, or CORRUPT free. 3% bad trip.':'Buy from The Dealer in the shop.'}</div>
             </div>
           </div>
           {/* Acid tile */}
           <div style={{position:'relative'}}
             onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='block'}}
             onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='none'}}>
-            <button onClick={()=>{if(heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight)activateTrip('acid')}}
+            <button onClick={()=>{if(heldAcid&&!tripUsedThisFight)activateTrip('acid')}}
               style={{width:86,padding:'10px 4px',fontFamily:"'MBScribblesFont',serif",fontWeight:900,letterSpacing:2,textTransform:'uppercase',
-                background:heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'linear-gradient(180deg, rgba(180,80,220,0.25), rgba(180,80,220,0.08))':'linear-gradient(180deg, rgba(30,18,12,0.5), rgba(15,10,6,0.5))',
+                background:heldAcid&&!tripUsedThisFight?'linear-gradient(180deg, rgba(180,80,220,0.25), rgba(180,80,220,0.08))':'linear-gradient(180deg, rgba(30,18,12,0.5), rgba(15,10,6,0.5))',
                 border:heldAcid&&!tripUsedThisFight?'1px solid #cc88ff':'1px solid var(--rot)',
                 borderRadius:2,color:heldAcid&&!tripUsedThisFight?'#cc88ff':'var(--rot)',
-                cursor:heldAcid&&strikesLeft===activeStake.maxStrikes&&!tripUsedThisFight?'pointer':'not-allowed',
+                cursor:heldAcid&&!tripUsedThisFight?'pointer':'not-allowed',
                 opacity:heldAcid?1:0.5,textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
               <span style={{fontSize:22,lineHeight:1,opacity:heldAcid?1:0.35,filter:heldAcid?'none':'grayscale(1)'}}>🧪</span>
               <span style={{fontSize:13,letterSpacing:2}}>{heldAcid?'USE':'⛧'}</span>
@@ -10815,9 +11094,31 @@ function App(){
             </button>
             <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(180,80,220,0.6)',borderRadius:3,padding:'10px 14px',zIndex:99999,pointerEvents:'none',minWidth:240,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--tier-mythic)',marginBottom:6,letterSpacing:2,textTransform:'uppercase'}}>🧪 Blotter Acid</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--ink-bone)',lineHeight:1.5,fontStyle:'italic'}}>{heldAcid?'Use before your first Strike. 90% chance of a game-changing effect — double damage, cards fire twice, +3 ATK all, or total immunity. 5% nothing. 5% Hellquake.':'Buy from The Dealer in the shop.'}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--ink-bone)',lineHeight:1.5,fontStyle:'italic'}}>{heldAcid?'Use anytime in a fight. 1 of 8 effects: ×2 damage, ×2 boss damage, +3 perm ATK, immunity, skip 2 boss attacks, +5 ATK burst, ×2 mult start, or freeze boss. 3% bad trip.':'Buy from The Dealer in the shop.'}</div>
             </div>
           </div>
+          {/* DMT tile — only visible when holding DMT (boss-shop premium drug) */}
+          {heldDMT>0&&<div style={{position:'relative'}}
+            onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='block'}}
+            onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-tip]');if(t)t.style.display='none'}}>
+            <button onClick={()=>{if(heldDMT&&!tripUsedThisFight)activateTrip('dmt')}}
+              style={{width:86,padding:'10px 4px',fontFamily:"'MBScribblesFont',serif",fontWeight:900,letterSpacing:2,textTransform:'uppercase',
+                background:!tripUsedThisFight?'linear-gradient(135deg, rgba(80,180,220,0.5), rgba(180,80,220,0.5))':'linear-gradient(180deg, rgba(30,18,12,0.5), rgba(15,10,6,0.5))',
+                border:!tripUsedThisFight?'1px solid rgba(220,200,255,0.8)':'1px solid var(--rot)',
+                borderRadius:2,color:!tripUsedThisFight?'#e8ddff':'var(--rot)',
+                cursor:!tripUsedThisFight?'pointer':'not-allowed',
+                opacity:1,textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:3,
+                boxShadow:!tripUsedThisFight?'0 0 12px rgba(220,200,255,0.5)':'none'}}>
+              <span style={{fontSize:22,lineHeight:1,filter:!tripUsedThisFight?'drop-shadow(0 0 6px rgba(220,200,255,0.8))':'grayscale(1)'}}>💠</span>
+              <span style={{fontSize:13,letterSpacing:2}}>{!tripUsedThisFight?'USE':'⛧'}</span>
+              <div style={{position:'absolute',top:-3,left:8,width:24,height:7,background:'rgba(220,200,255,0.3)',transform:'rotate(-15deg)',borderRadius:1,pointerEvents:'none'}}/>
+              <div style={{position:'absolute',bottom:-3,right:8,width:24,height:7,background:'rgba(220,200,255,0.3)',transform:'rotate(-15deg)',borderRadius:1,pointerEvents:'none'}}/>
+            </button>
+            <div data-tip="" style={{display:'none',position:'absolute',left:'110%',top:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(220,200,255,0.7)',borderRadius:3,padding:'10px 14px',zIndex:99999,pointerEvents:'none',minWidth:260,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#e8ddff',marginBottom:6,letterSpacing:2,textTransform:'uppercase'}}>💠 DMT</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--ink-bone)',lineHeight:1.5,fontStyle:'italic'}}>Use anytime. Reality breaks. 1 of 8 godhood effects: free cards, ×3 multiplier start, +10 ATK, revive band, deep draw, ×3 boss damage, +2 strikes, or CORRUPT supercharge. NO bad trips.</div>
+            </div>
+          </div>}
           {/* Sort buttons — tight labels with clear hit targets */}
           <div style={{display:'flex',flexDirection:'column',gap:5,marginTop:8,width:'100%'}}>
             <button onClick={()=>setHandSort(p=>{const n=p==='embers'?'none':'embers';localStorage.setItem('vst_handsort',n);return n})}
@@ -10858,7 +11159,7 @@ function App(){
             // Player sees the TRUE damage multiplier they're sitting on, not just card-play.
             // Updated live as artifacts trigger / corruption ticks / cards play.
             const _vmStrike = strikeMult || 1.0
-            const _vmTrip = (fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION')?2:1
+            const _vmTrip = fightTripBuff==='SACRED CHORD'?3:(fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION')?2:1
             const _vmCorr = corruption>=100?3.0:corruption>=80?2.0:corruption>=60?1.5:corruption>=40?1.2:1.0
             // Artifact mult triggers (mirror handleStrike loop)
             let _vmArt = 1.0
