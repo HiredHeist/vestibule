@@ -2018,7 +2018,7 @@ const SLY_LINES={
 }
 const pickSlyLine=(tag)=>{const p=SLY_LINES[tag]||SLY_LINES.ambient;return p[Math.floor(Math.random()*p.length)]}
 
-function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,heldDMT,shroomsInStock,acidInStock,dmtInStock,onBuyShrooms,onBuyAcid,onBuyDMT,corruption,hangover,chosenPacts,addLog,encoreMode}){
+function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,recruitBought,onMarkRecruitBought,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,heldDMT,shroomsInStock,acidInStock,dmtInStock,onBuyShrooms,onBuyAcid,onBuyDMT,corruption,hangover,chosenPacts,addLog,encoreMode}){
   const drugMax=isUnlocked('double_dealer')?2:1
   const [hovId,setHovId]=useState(null)
   const [hoveringArtifact,setHoveringArtifact]=useState(false)
@@ -2760,21 +2760,21 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
         <div style={{width:280,flexShrink:0,display:'flex',flexDirection:'column',gap:8,minHeight:0,overflowY:'auto'}}>
           {/* RECRUITMENT PACK — the star. Flex:1 so it dominates the column. Most important purchase in the game. */}
           <div onClick={()=>{
-              if(leftBought.rec||packsBoughtThisVisit>=1)return
-              if(can(recruitPack.cost)){onSpend(recruitPack.cost,'recruit',recruitPack);setLeftBought(p=>({...p,rec:true}));setPacksBoughtThisVisit(1)}
+              if(leftBought.rec||recruitBought||packsBoughtThisVisit>=1)return
+              if(can(recruitPack.cost)){onSpend(recruitPack.cost,'recruit',recruitPack);setLeftBought(p=>({...p,rec:true}));setPacksBoughtThisVisit(1);if(onMarkRecruitBought)onMarkRecruitBought()}
             }}
-            style={{position:'relative',cursor:can(recruitPack.cost)&&!leftBought.rec&&packsBoughtThisVisit<1?'pointer':'default',
+            style={{position:'relative',cursor:can(recruitPack.cost)&&!leftBought.rec&&!recruitBought&&packsBoughtThisVisit<1?'pointer':'default',
               flex:1,minHeight:0,
-              border:'2px solid '+(leftBought.rec?'rgba(100,65,15,0.3)':hovId==='rec'?'rgba(255,220,120,1)':'rgba(232,168,32,0.6)'),borderRadius:10,
+              border:'2px solid '+(leftBought.rec||recruitBought?'rgba(100,65,15,0.3)':hovId==='rec'?'rgba(255,220,120,1)':'rgba(232,168,32,0.6)'),borderRadius:10,
               background:'linear-gradient(180deg,#1a1408,#0a0604)',overflow:'hidden',
-              opacity:leftBought.rec?0.4:1,
-              transform:hovId==='rec'&&!leftBought.rec?'scale(1.02)':'none',
+              opacity:leftBought.rec||recruitBought?0.4:1,
+              transform:hovId==='rec'&&!leftBought.rec&&!recruitBought?'scale(1.02)':'none',
               transition:'transform 0.15s,border-color 0.15s',
               display:'flex',flexDirection:'column',
-              ...(hovId==='rec'&&!leftBought.rec?{boxShadow:'0 0 30px rgba(232,168,32,0.45),0 0 8px rgba(255,230,150,0.5) inset'}:{boxShadow:'0 0 18px rgba(232,168,32,0.15)'})}}
+              ...(hovId==='rec'&&!leftBought.rec&&!recruitBought?{boxShadow:'0 0 30px rgba(232,168,32,0.45),0 0 8px rgba(255,230,150,0.5) inset'}:{boxShadow:'0 0 18px rgba(232,168,32,0.15)'})}}
             onMouseEnter={()=>setHovId('rec')} onMouseLeave={()=>setHovId(null)}>
-            {leftBought.rec&&<SoldOverlay/>}
-            {packsBoughtThisVisit>=1&&!leftBought.rec&&<SoldOverlay label="SOLD OUT THIS VISIT"/>}
+            {(leftBought.rec||recruitBought)&&<SoldOverlay/>}
+            {packsBoughtThisVisit>=1&&!leftBought.rec&&!recruitBought&&<SoldOverlay label="SOLD OUT THIS VISIT"/>}
             <div style={{flex:'1 1 0',minHeight:0,display:'flex',justifyContent:'center',alignItems:'center',padding:'12px 0 6px'}}>
               <PackArtImg packId={['cassette','cdr','vinyl','rarevinyl','cursed'][Math.min(4,Math.floor(circleNum/2))]} emoji="📦" size={288}/>
             </div>
@@ -5688,6 +5688,11 @@ function App(){
   const [shopCards,setShopCards]=useState(()=>genShopCards(1))
   const [boosterPacks,setBoosterPacks]=useState(()=>genBoosterPacks(1))
   const [recruitPack,setRecruitPack]=useState(()=>genRecruitPack(0))
+  // ── RECRUIT PACK BUY LOCK (v0.7.3) — parent-level so it survives ShopScreen
+  // unmount when gameState→'recruit'. Was a ShopScreen-local `leftBought.rec`
+  // before, which reset on every shop remount → infinite-buy + sell-member
+  // farm exploit. Resets at every shop regen site.
+  const [recruitBought,setRecruitBought]=useState(false)
   const [recruitCandidates,setRecruitCandidates]=useState([])
   const [demonicConflict,setDemonicConflict]=useState(null)
   const [rerollCost,setRerollCost]=useState(2)
@@ -7196,6 +7201,7 @@ function App(){
         setShopCards(genShopCards(nextCn))
         setBoosterPacks(genBoosterPacks(nextCn))
         setRecruitPack(genRecruitPack(fightIndex))
+        setRecruitBought(false) // v0.7.3: parent-level lock — reset on shop rotate
         setShroomsInStock(Math.random()<0.50)
         setAcidInStock(Math.random()<0.50)
         // DMT (v0.7.2): boss-shop only. Always in stock at those shops to ensure
@@ -7497,6 +7503,7 @@ function App(){
         setShopCards(genShopCards(1))
         setBoosterPacks(genBoosterPacks(1))
         setRecruitPack(genRecruitPack(fightIndex))
+        setRecruitBought(false) // v0.7.3: parent-level lock — reset on debug shop entry
         setRerollCost(2)
         setStash(69)
         setShroomsInStock(Math.random()<0.50)
@@ -10200,7 +10207,7 @@ function App(){
           setShroomsInStock(Math.random()<0.50)
           setDMTInStock(false)
           setAcidInStock(Math.random()<0.50)
-          setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false)
+          setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setRecruitBought(false) // v0.7.3
           setGameState('shop')
         }}
           style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,letterSpacing:4,padding:'16px 40px',background:'rgba(130,0,0,0.4)',border:'2px solid #cc1111',borderRadius:6,color:'var(--text-blood)',cursor:'pointer',textShadow:'0 0 14px rgba(200,0,0,0.6)',boxShadow:'0 0 25px rgba(180,0,0,0.4)',transition:'all 0.2s'}}
@@ -10499,7 +10506,7 @@ function App(){
   if(victorySummary)return <VictorySummaryScreen summary={victorySummary} onContinue={continueVictorySummary}/>
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} hangover={hangover} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} heldDMT={heldDMT} shroomsInStock={shroomsInStock} acidInStock={acidInStock} dmtInStock={dmtInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)} onBuyDMT={()=>setHeldDMT(p=>p+1)} encoreMode={encoreMode}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} hangover={hangover} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} recruitBought={recruitBought} onMarkRecruitBought={()=>setRecruitBought(true)} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} heldDMT={heldDMT} shroomsInStock={shroomsInStock} acidInStock={acidInStock} dmtInStock={dmtInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)} onBuyDMT={()=>setHeldDMT(p=>p+1)} encoreMode={encoreMode}/>
   if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} devDailyScore={6666} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage} runElapsed={Math.floor((Date.now()-runStartTimeRef.current)/1000)} lastKillingBlow={lastKillingBlow}/></div>
 
   return(

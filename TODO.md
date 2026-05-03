@@ -1,8 +1,24 @@
 # VESTIBULE — TODO
 
-*Last updated: May 3, 2026 — Trip system overhaul + DMT tier 💠*
-*Latest commits (branch `hangover-with-teeth`): pending — see below*
-*App.jsx: ~11,659 lines · 24 trip effects (was 8) · DMT premium tier · slot-machine dopamine ON*
+*Last updated: May 4, 2026 — v0.7.3 recruit-pack exploit hotfix 🔒*
+*Latest commits: pending — recruit-pack lock lift to parent state*
+*App.jsx: ~11,668 lines · infinite-buy farm exploit closed*
+
+## 🔒 LATEST HOTFIX (v0.7.3) — RECRUIT-PACK EXPLOIT CLOSED
+
+**Bug reported by JV in playtest:** "the band recruitment pack lets you buy it over and over again. the intro free pack let me buy it as many times as i want and sell members to farm for money haha. it needs to be marked as sold once it is used/bought."
+
+**Root cause:** The recruit-pack buy lock (`leftBought.rec`) was ShopScreen-local React state. Buying calls `setGameState('recruit')` which unmounts ShopScreen, killing the local lock. On return to shop, the component remounts with `leftBought.rec=false` again. Players could buy → pick member → sell at pawn shop → buy again → repeat for infinite stash.
+
+**Fix:** Lifted the lock to the parent component as `recruitBought` state. Survives unmount. Wired:
+- Parent state declaration at line 5695
+- Props passed to ShopScreen
+- OR'd into click gate, cursor, border, opacity, transform, glow, and SoldOverlay
+- Reset at all 3 `setRecruitPack(...)` regen sites: normal next-shop transition (line 7204), debug Shift+S (line 7506), restart-from-end (line 10210)
+
+The Welcome Pack at fight 1 (cost 0) was the most exploitable case — it's now locked just like every other shop pack.
+
+---
 
 This is the authoritative TODO. The old one was bloated with completed work — that history lives in git. This doc is **what's left** and **what's next**, sorted ruthlessly by priority.
 
