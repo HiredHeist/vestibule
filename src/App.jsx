@@ -1098,6 +1098,7 @@ const FIRST_TIPS={
   event:"A random event! These offer risky choices with big rewards. Read both options before deciding.",
   descent:"The Descent Map shows your path through Hell. You can skip some fights for alternative rewards.",
   drugs:"The Dealer sells Shrooms and Acid. Drugs give powerful trip effects before fights, but bad trips are possible.",
+  corruption:"⚠ CORRUPTION at 50%! Many cards push corruption higher — at 100%, your band is consumed by darkness and the run ends. Some cards & artifacts get STRONGER at high corruption (50%, 60%, 80%, 100% breakpoints). Manage it carefully: heal it down with Séance, Controlled Feedback, or Smoke Break. Play CORRUPT cards (purple) only when you can afford the risk.",
 }
 function hasSeenTip(id){return(JSON.parse(localStorage.getItem('vst_tips')||'[]')).includes(id)}
 function markTipSeen(id){const seen=JSON.parse(localStorage.getItem('vst_tips')||'[]');if(!seen.includes(id)){seen.push(id);localStorage.setItem('vst_tips',JSON.stringify(seen))}}
@@ -7363,6 +7364,24 @@ function App(){
       }))
     }
   },[corruption,possessionFired,gameState])
+
+  // ── FIGHT 1 CORRUPTION SAFETY NET + FIRST-TIME TUTORIAL POPUP ─────
+  // Per JV's design vision: r1 is training wheels. The corruption->stoned
+  // spiral was killing weak teams before they reached shop 1. This clamps
+  // corruption to 50% during fight 1 ONLY (fightIndex===0, not in tutorial,
+  // not Welcome to Hell encore). Fight 2+ has full corruption mechanics.
+  // Also fires the corruption first-tip popup on first 50% encounter EVER
+  // (any fight) so players understand what corruption does.
+  useEffect(()=>{
+    if(corruption>=50&&!hasSeenTip('corruption')&&gameState==='playing'){
+      setFirstTip({id:'corruption',text:FIRST_TIPS.corruption})
+      markTipSeen('corruption')
+    }
+    if(corruption>50&&fightIndex===0&&tutorialFight===0&&welcomeToHell!=='fighting'&&gameState==='playing'){
+      setCorruption(50)
+      addLog('🛡 Training wheels: corruption capped at 50% in fight 1.')
+    }
+  },[corruption,fightIndex,tutorialFight,welcomeToHell,gameState])
 
   // ── DEV SHORTCUT: Shift+S = jump to shop ─────────────────────────
   useEffect(function(){
