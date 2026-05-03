@@ -1401,19 +1401,31 @@ function rollWeightedFromPool(pool,unlockedMythics){
   return filtered[Math.floor(Math.random()*filtered.length)]
 }
 // Roll an artifact for the shop (pulls from STARTER_ARTIFACTS + CIRCLE_ARTIFACTS + unlocked MYTHIC_ARTIFACTS)
-function rollShopArtifact(){
+function rollShopArtifact(excludeIds){
   let unlockedMythics=[]
   try{unlockedMythics=JSON.parse(localStorage.getItem('vst_mythic_unlocks')||'[]')}catch(e){}
   const pool=[...STARTER_ARTIFACTS,...CIRCLE_ARTIFACTS,...MYTHIC_ARTIFACTS.filter(m=>unlockedMythics.includes(m.unlockId))]
   // Skip artifacts that were reclassified to pedals
-  const artifactPool=pool.filter(a=>!a.reclassifiedToPedal)
+  let artifactPool=pool.filter(a=>!a.reclassifiedToPedal)
+  // v0.7.4: Exclude already-owned artifacts so the rerolled circle artifact doesn't
+  // appear as "sold" because activeArtifacts.some(...) matches the rolled id.
+  if(excludeIds&&excludeIds.length){
+    const filtered=artifactPool.filter(a=>!excludeIds.includes(a.id))
+    if(filtered.length>0)artifactPool=filtered
+  }
   return rollWeightedFromPool(artifactPool,unlockedMythics)||STARTER_ARTIFACTS[0]
 }
 // Roll a pedal for the shop (pulls from STARTER_PASSIVES + unlocked MYTHIC_PEDALS)
-function rollShopPedal(){
+function rollShopPedal(excludeIds){
   let unlockedMythics=[]
   try{unlockedMythics=JSON.parse(localStorage.getItem('vst_mythic_unlocks')||'[]')}catch(e){}
-  const pool=[...STARTER_PASSIVES,...MYTHIC_PEDALS.filter(m=>unlockedMythics.includes(m.unlockId))]
+  let pool=[...STARTER_PASSIVES,...MYTHIC_PEDALS.filter(m=>unlockedMythics.includes(m.unlockId))]
+  // v0.7.4: Same exclusion logic as rollShopArtifact — prevent reroll collision
+  // with active pedals causing the tile to display as sold.
+  if(excludeIds&&excludeIds.length){
+    const filtered=pool.filter(p=>!excludeIds.includes(p.id))
+    if(filtered.length>0)pool=filtered
+  }
   return rollWeightedFromPool(pool,unlockedMythics)||STARTER_PASSIVES[0]
 }
 
@@ -7211,8 +7223,11 @@ function App(){
         // Rotate circle artifact + passive at each new circle (every 3rd fight)
         const isCircleBoss=(fightIndex+1)%3===0
         if(isCircleBoss){
-          setCircleArtifact(rollShopArtifact())
-          setCirclePassive(rollShopPedal())
+          // v0.7.4: Pass active-owned IDs as exclude — prevents the rerolled
+          // artifact/pedal from matching one you already own (which would cause
+          // the tile to render as sold via activeArtifacts.some(...) check).
+          setCircleArtifact(rollShopArtifact(activeArtifacts.map(a=>a.id)))
+          setCirclePassive(rollShopPedal(activePassives.map(p=>p.id)))
           setCircleCartBought(false)
           setCirCleCpasBought(false)
         }

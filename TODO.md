@@ -1,10 +1,28 @@
 # VESTIBULE — TODO
 
-*Last updated: May 4, 2026 — v0.7.3 recruit-pack exploit hotfix 🔒*
-*Latest commits: pending — recruit-pack lock lift to parent state*
-*App.jsx: ~11,668 lines · infinite-buy farm exploit closed*
+*Last updated: May 4, 2026 — v0.7.4 circle-shop reroll-collision hotfix 🔄*
+*Latest commits: pending — exclude already-owned items from circle reroll*
+*App.jsx: ~11,684 lines · circle artifact/pedal tiles refresh cleanly between circles*
 
-## 🔒 LATEST HOTFIX (v0.7.3) — RECRUIT-PACK EXPLOIT CLOSED
+## 🔄 LATEST HOTFIX (v0.7.4) — CIRCLE-SHOP RESET BUG
+
+**Bug reported by JV in playtest:** "artifacts and effect pedals should reset every circle, they are stuck as showing as sold after i beat circle 1"
+
+**Root cause:** The post-circle-boss transition at line 7212 *did* run `setCircleCartBought(false)` and `setCircleArtifact(rollShopArtifact())`. But the new tile's "sold" check OR's together four conditions:
+```
+sold = leftBought.cart || circleCartBought || activeArtifacts.some(a => a.id === circleArtifact.id) || soldIds.includes(...)
+```
+The third condition fires when the new reroll happens to land on an artifact you *already own from a previous circle*. Since `rollShopArtifact()` had no awareness of activeArtifacts, it freely re-rolled duplicates. Same exact bug for pedals.
+
+With ~32 artifacts in the pool and at most 3 owned, collision was probabilistic — not "always sold", but frequent enough to feel persistent. JV experienced this as "stuck as showing as sold".
+
+**Fix:** Added optional `excludeIds` parameter to `rollShopArtifact()` and `rollShopPedal()`. Filters the pool to skip owned items before rolling. Wired at the circle-boss reroll site to pass `activeArtifacts.map(a=>a.id)` and `activePassives.map(p=>p.id)`.
+
+If somehow you owned every artifact in the filtered pool (impossible with the slot cap of 3), the filter falls back to the full pool to avoid an empty-array roll.
+
+---
+
+## 🔒 PREVIOUS HOTFIX (v0.7.3) — RECRUIT-PACK EXPLOIT CLOSED
 
 **Bug reported by JV in playtest:** "the band recruitment pack lets you buy it over and over again. the intro free pack let me buy it as many times as i want and sell members to farm for money haha. it needs to be marked as sold once it is used/bought."
 
