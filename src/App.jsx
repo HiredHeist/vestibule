@@ -7380,10 +7380,24 @@ function App(){
 
   // SAFETY NET: catch ANY case where boss HP hits 0 without victory triggering
   useEffect(()=>{
+    // ── VICTORY AUTO-TRIGGER ──
+    // Wait for the multiplier cascade to fully play out before transitioning.
+    // The killing strike applies HP immediately (line 8585) so enemyHp hits 0
+    // BEFORE the cascade animation gets a chance to slam. If we trigger victory
+    // 300ms later (the old behavior), the screen transitions mid-cascade and
+    // the player sees the multiplier text get cut short, with the next fight's
+    // numbers counting down on top. JV: "the attacks should finish completely
+    // before moving to the shop."
+    //
+    // Fix: while dmgBreakdown is non-null the cascade is still rendering; bail
+    // and let the effect re-run when DamageBreakdown's onDone clears it. Then
+    // wait an additional 600ms beat after the cascade clears so the slam's
+    // final number gets to resonate before the screen changes.
     if(enemyHp<=0&&gameState==='playing'&&!victoryFiredRef.current&&enemy&&enemy.maxHp>0){
-      setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},300)
+      if(dmgBreakdown)return // cascade still running — wait for it to clear
+      setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},600)
     }
-  },[enemyHp,gameState])
+  },[enemyHp,gameState,dmgBreakdown])
 
 
   // ── SQUIGGLE CSS INJECTION ──
