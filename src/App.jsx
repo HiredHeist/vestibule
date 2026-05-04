@@ -8349,6 +8349,28 @@ function App(){
     memberDmgs.forEach(d=>{_breakdownLines.push({type:'member',label:d.m.name,emoji:d.m.emoji,value:d.atk,color:'#c8a060'})})
     _breakdownLines.push({type:'subtotal',label:'BASE ATK',value:dmg,color:'#e8a820'})
     _bkRunning=dmg
+    // ── BASE MULTIPLIER for per-member impact damage (v0.7.11) ──
+    // JV feedback: "the band members attacking do such little damage to the
+    // boss hp bar then all at once the combos trigger and the multiplier kills
+    // the boss. it would be cool if each member did their multiplied damage."
+    //
+    // Old: per-member impact dealt raw md.atk (3-15 dmg each), boss HP barely
+    // moved during the attack animation. THEN a giant slam at the end killed
+    // the boss with the full multiplied total.
+    //
+    // New: each member's impact deals their MULTIPLIED share of damage using
+    // the deterministic base multiplier (strike × trip × corruption). The
+    // artifact multiplier ("joker" reveal) still gets added at the cascade
+    // slam, so the slam still rewards the player with bonus damage on top.
+    // Boss HP drops dramatically with each hit AND the slam still feels good.
+    //
+    // Math: each member's impact = round(md.atk * baseMult). Sum across all
+    // members ≈ dmg * baseMult. The post-strike cascade computes the full
+    // _totalStrikeDmg = dmg * baseMult * artifactMult. At slam, _applyHpDrop
+    // sets HP via Math.min(prev, newEHp), filling in the artifactMult bonus.
+    const _baseTripMult=fightTripBuff==='SACRED CHORD'?3:(fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION')?2:1
+    const _baseCorrMult=corruption>=100?3.0:corruption>=80?2.0:corruption>=60?1.5:corruption>=40?1.2:1.0
+    const _baseImpactMult=currentMult*_baseTripMult*_baseCorrMult
     const speedFast=speedMode
     const memberDelay=speedFast?900:2000
     delay=100 // small initial delay so React commits attacking phase first
@@ -8384,7 +8406,15 @@ function App(){
         try{(ATK_SND[m.role]||ATK_SND['Lead Guitarist'])()}catch(e){}
         playHit()
         triggerShake(8,250)
-        if(md){addFloat(md.atk,bc.x,bc.y-60,'#cc8800',md.atk>=15);setEnemyHp(p=>Math.max(0,p-md.atk))}
+        if(md){
+          // v0.7.11: deal MULTIPLIED damage at impact instead of raw md.atk.
+          // Float text and HP deduction both use the multiplied value so the
+          // boss HP bar moves dramatically with each hit. Artifact multiplier
+          // still adds a slam bonus on top via the cascade.
+          const _imp=Math.max(1,Math.round(md.atk*_baseImpactMult))
+          addFloat(_imp.toLocaleString(),bc.x,bc.y-60,'#cc8800',_imp>=15)
+          setEnemyHp(p=>Math.max(0,p-_imp))
+        }
       },curDelay+(speedFast?550:1200))
       // Phase 5: RETURN (1500ms) — card floats back
       setTimeout(function(){
