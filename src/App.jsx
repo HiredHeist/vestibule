@@ -5736,6 +5736,13 @@ function App(){
   // before, which reset on every shop remount → infinite-buy + sell-member
   // farm exploit. Resets at every shop regen site.
   const [recruitBought,setRecruitBought]=useState(false)
+  // ── SLOT SWAP MODAL (v0.7.10) ───────────────────────────────────
+  // When the player tries to buy an artifact/pedal with full slots, instead
+  // of just blocking and silently eating their stash (the old behavior),
+  // open this modal: shows the 3 current artifacts (or 2 pedals) and the
+  // incoming item; click one to swap. Cancel just closes — no purchase.
+  // Stash is deducted ONLY on confirm. Shape: null | {type:'artifact'|'passive', incoming:item, cost:number}
+  const [slotSwapPrompt,setSlotSwapPrompt]=useState(null)
   const [recruitCandidates,setRecruitCandidates]=useState([])
   const [demonicConflict,setDemonicConflict]=useState(null)
   const [rerollCost,setRerollCost]=useState(2)
@@ -9412,6 +9419,20 @@ function App(){
     const hungerMult=corruption>=50?1.25:1.0
     const effectiveCost=Math.ceil((chosenPacts.includes('merchants_eye')?Math.max(1,Math.floor(cost*0.8)):cost)*hungerMult)
     if(stash<effectiveCost)return
+    // ── SLOT-FULL CHECK FOR ARTIFACTS/PEDALS (v0.7.10) ──
+    // Run BEFORE deducting stash. Old behavior: deduct → check cap → silently
+    // bail with stash gone. Now: if slots full, open the swap modal and don't
+    // deduct anything. Modal's confirm handler will deduct and equip.
+    if(type==='artifact'&&activeArtifacts.length>=3){
+      setSlotSwapPrompt({type:'artifact',incoming:item,cost:effectiveCost})
+      playSfx('select',0.7) // gentle select sound, not the buy "clack"
+      return
+    }
+    if(type==='passive'&&activePassives.length>=2){
+      setSlotSwapPrompt({type:'passive',incoming:item,cost:effectiveCost})
+      playSfx('select',0.7)
+      return
+    }
     setStash(p=>p-effectiveCost)
     playSfx('buy')
     if(type==='card'){
@@ -9420,7 +9441,6 @@ function App(){
       setShopBoughtIds(p=>[...p,nc.uid])
       addLog('🛒 Bought '+item.name+'!')
     } else if(type==='artifact'){
-      if(activeArtifacts.length>=3){addLog('⚠ Artifact slots full! Max 3.');return}
       setActiveArtifacts(p=>[...p,item])
       // A7: Serpent's Kiss — permanent +1 max ember
       if(item.id==='a7')setMaxEmbers(p=>Math.min(8,p+1))
@@ -9428,7 +9448,6 @@ function App(){
       if(item.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
       addLog('⚗ Artifact equipped: '+item.name+'!')
     } else if(type==='passive'){
-      if(activePassives.length>=2){addLog('⚠ Pedal slots full! Max 2 — sell or replace one first.');return}
       setActivePassives(p=>[...p,item])
       // RECLASSIFIED ARTIFACTS — apply on-equip effects from passive branch too
       // A7: Serpent's Kiss — permanent +1 max ember
@@ -9515,6 +9534,34 @@ function App(){
       addLog('🌿 Dealer transaction complete.')
     } else {addLog('📦 Purchased: '+item.name+'!')}
   },[stash])
+
+  // ── SLOT SWAP CONFIRM (v0.7.10) ──
+  // Called when player clicks one of their current artifacts/pedals in the
+  // swap modal. Removes the chosen one, equips the incoming, deducts stash.
+  // Refunds 50% of the removed item's `cost` so it feels like selling.
+  const confirmSlotSwap=useCallback((removedIdx)=>{
+    if(!slotSwapPrompt)return
+    const {type,incoming,cost}=slotSwapPrompt
+    const slots=type==='artifact'?activeArtifacts:activePassives
+    const removed=slots[removedIdx]
+    if(!removed)return
+    const refund=Math.floor((removed.cost||0)*0.5)
+    setStash(p=>Math.max(0,Math.min(MAX_STASH,p-cost+refund)))
+    if(type==='artifact'){
+      setActiveArtifacts(p=>{const np=[...p];np.splice(removedIdx,1);np.push(incoming);return np})
+      // Apply on-equip side-effects of incoming (mirror handleShopSpend artifact branch)
+      if(incoming.id==='a7')setMaxEmbers(p=>Math.min(8,p+1))
+      if(incoming.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
+    } else {
+      setActivePassives(p=>{const np=[...p];np.splice(removedIdx,1);np.push(incoming);return np})
+      if(incoming.id==='a7')setMaxEmbers(p=>Math.min(8,p+1))
+      if(incoming.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
+    }
+    addLog('🔄 Sold '+removed.name+' (+'+refund+'🌿) and equipped '+incoming.name+'.')
+    playSfx('buy')
+    setSlotSwapPrompt(null)
+  },[slotSwapPrompt,activeArtifacts,activePassives])
+  const cancelSlotSwap=useCallback(()=>{setSlotSwapPrompt(null);playSfx('select',0.5)},[])
 
   const recruitPickFiredRef=useRef(false)
   const handleRecruitPick=useCallback((member)=>{
@@ -10887,6 +10934,58 @@ function App(){
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'var(--gold)',maxWidth:1200,padding:'0 80px',textAlign:'center',letterSpacing:2,zIndex:1,animation:'fadeIn 2.5s ease',lineHeight:1.4}}>{mythicUnlockOverlay.effect}</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--ink-rust)',letterSpacing:6,textTransform:'uppercase',zIndex:1,animation:'fadeIn 3.5s ease',marginTop:8}}>Will appear in shops on future runs.</div>
       </div>}
+
+      {/* ── SLOT SWAP MODAL (v0.7.10) ──
+          Pops up when player tries to buy an artifact/pedal with full slots.
+          Shows current 3 artifacts (or 2 pedals); click one to sell it for
+          50% refund and equip the new one. Cancel button to back out. */}
+      {slotSwapPrompt&&(()=>{
+        const isArt=slotSwapPrompt.type==='artifact'
+        const slots=isArt?activeArtifacts:activePassives
+        const incoming=slotSwapPrompt.incoming
+        const cost=slotSwapPrompt.cost
+        const accent=isArt?'#c87820':'#9933cc'
+        const tintBg=isArt?'rgba(40,24,6,0.96)':'rgba(34,12,48,0.96)'
+        return (<div style={{position:'absolute',inset:0,zIndex:9998,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'center',justifyContent:'center',animation:'fadeIn 0.2s ease'}} onClick={cancelSlotSwap}>
+          <div onClick={e=>e.stopPropagation()} style={{minWidth:680,maxWidth:900,background:tintBg,border:'2px solid '+accent,borderRadius:12,padding:'28px 36px 24px',boxShadow:'0 0 60px '+accent+'66, 0 20px 80px rgba(0,0,0,0.9)',display:'flex',flexDirection:'column',gap:20}}>
+            <div style={{textAlign:'center'}}>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:accent,letterSpacing:5,textShadow:'0 0 16px '+accent+'aa, 3px 3px 0 #000'}}>{isArt?'⛧ ARTIFACT SLOTS FULL ⛧':'⚡ PEDAL SLOTS FULL ⚡'}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-secondary)',letterSpacing:2,marginTop:6,fontStyle:'italic'}}>Pick one to sell for 50% refund.</div>
+            </div>
+
+            {/* INCOMING — what they're buying */}
+            <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:6,padding:'10px 14px',background:'rgba(0,0,0,0.4)',border:'1px dashed '+accent+'88',borderRadius:8}}>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:3,color:'var(--text-positive)',textTransform:'uppercase'}}>Incoming · {cost}🌿</div>
+              <div style={{display:'flex',alignItems:'center',gap:14}}>
+                {isArt?<ArtifactArtImg id={incoming.id} emoji={incoming.emoji} size={48}/>:<div style={{fontSize:42}}>{incoming.emoji}</div>}
+                <div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--text-primary)',letterSpacing:2}}>{incoming.name}</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',fontStyle:'italic',maxWidth:520,lineHeight:1.3}}>{incoming.effect}</div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:3,color:accent,textTransform:'uppercase',textAlign:'center'}}>↓ Click an existing one to sell it ↓</div>
+
+            {/* CURRENT — clickable */}
+            <div style={{display:'flex',gap:14,justifyContent:'center'}}>
+              {slots.map((s,i)=>(<div key={i} onClick={()=>confirmSlotSwap(i)}
+                style={{flex:'0 0 auto',width:160,padding:'12px 10px',background:'rgba(0,0,0,0.55)',border:'2px solid '+accent+'aa',borderRadius:8,cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:8,transition:'transform 0.12s, box-shadow 0.12s, border-color 0.12s'}}
+                onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px) scale(1.03)';e.currentTarget.style.borderColor='var(--text-blood)';e.currentTarget.style.boxShadow='0 8px 24px rgba(196,30,58,0.55)'}}
+                onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor=accent+'aa';e.currentTarget.style.boxShadow='none'}}>
+                {isArt?<ArtifactArtImg id={s.id} emoji={s.emoji} size={44}/>:<div style={{fontSize:40}}>{s.emoji}</div>}
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-primary)',letterSpacing:1,textAlign:'center',lineHeight:1.15}}>{s.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontStyle:'italic',color:'var(--ink-dim)',textAlign:'center',lineHeight:1.3,minHeight:32}}>{s.effect}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-positive)',letterSpacing:1,marginTop:'auto'}}>Sell · +{Math.floor((s.cost||0)*0.5)}🌿</div>
+              </div>))}
+            </div>
+
+            <button onClick={cancelSlotSwap} style={{alignSelf:'center',marginTop:6,padding:'8px 28px',background:'rgba(0,0,0,0.6)',border:'1px solid var(--ink-rust)',borderRadius:6,color:'var(--ink-bone)',fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:4,textTransform:'uppercase',cursor:'pointer'}}
+              onMouseEnter={e=>{e.currentTarget.style.background='rgba(60,30,30,0.7)'}}
+              onMouseLeave={e=>{e.currentTarget.style.background='rgba(0,0,0,0.6)'}}>Cancel</button>
+          </div>
+        </div>)
+      })()}
 
       {/* RIFF CHAIN COMBO FLASH */}
       {comboFlash&&<div style={{position:'absolute',inset:0,zIndex:9600,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:0,animation:'chainGlow 3s ease forwards'}}>
