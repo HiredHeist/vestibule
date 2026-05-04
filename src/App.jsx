@@ -7027,31 +7027,24 @@ function App(){
         setFlyingCard(null)
       },400)
       setTimeout(()=>setCardAbsorb(null),900)
-      const playedId=card.id
       const curHand=[...hand]
       const remaining=curHand.filter(c=>c.uid!==dragCardUid)
-      const hasResonanceCoil=activeArtifacts.some(a=>a.id==='a9')
-      const resonantIdx=hasResonanceCoil?remaining.findIndex(c=>c.id===playedId):-1
-      if(resonantIdx!==-1&&!card.consumable){
-        const resonant=remaining[resonantIdx]
-        const withoutResonant=remaining.filter((_,i)=>i!==resonantIdx)
-        setHand(withoutResonant)
-        setDiscardPile(p=>[...p,card,resonant])
-        setEmbers(p=>Math.min(maxEmbers,p+2))
-        setPendingEmbers(p=>p+1)
-        discover('resonance','RESONANCE')
-        setTimeout(()=>{
-          addFloat('RESONANCE +🔥',getCenter(bossRef).x,getCenter(bossRef).y-110,'#e8a820',false)
-          addLog('🎵 Resonance! Duplicate discarded for +2 Embers.')
-        },100)
+      // ── RESONANCE COIL (a9) STALE-LOGIC REMOVED (v0.7.9, May 4 2026) ──
+      // Was: if you have a9 and a duplicate of the played card in hand, both
+      // discard for +2 embers. JV reported as "played 1 card, both got played."
+      // Real bug: the artifact's actual effect (line 1123) is "×1.15 strike
+      // multiplier for each duplicate card in hand when you Strike", wired as
+      // multTrigger:'perDupe' in the cascade engine (line 8476). The on-play
+      // discard was leftover from an earlier design. Worse, eating the
+      // duplicate on play meant the perDupe multiplier had nothing to count.
+      // Fix: removed the on-play branch entirely. Card flows through the
+      // normal "to discard" path. perDupe still fires at strike time.
+      setHand(remaining)
+      if(card.consumable){
+        addLog('⛧ '+card.name+' shatters and vanishes from your deck!')
+        addFloat('CONSUMED!',getCenter(bossRef).x,getCenter(bossRef).y-110,'#ff4400',true)
       } else {
-        setHand(remaining)
-        if(card.consumable){
-          addLog('⛧ '+card.name+' shatters and vanishes from your deck!')
-          addFloat('CONSUMED!',getCenter(bossRef).x,getCenter(bossRef).y-110,'#ff4400',true)
-        } else {
-          setDiscardPile(p=>[...p,card])
-        }
+        setDiscardPile(p=>[...p,card])
       }
     }
     setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
