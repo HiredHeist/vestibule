@@ -4446,7 +4446,7 @@ function CombatLogViewer({log,onClose}){
   )
 }
 
-function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered,newAchievements,enemyHp,stage,chosenPacts,fullRunLog,newTrophies,runElapsed,lastKillingBlow,devDailyScore}){
+function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered,newAchievements,enemyHp,stage,chosenPacts,fullRunLog,newTrophies,runElapsed,lastKillingBlow,devDailyScore,secondAlbumWin,contractsPlayed}){
   const [showEndLog,setShowEndLog]=useState(false)
   const isStoned=cause==='stoned'
   const isBeaten=cause==='beaten'
@@ -4847,8 +4847,14 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'var(--text-blood)',fontStyle:'italic',textShadow:'0 0 12px rgba(180,0,0,0.3)',maxWidth:500,textAlign:'center'}}>"{enemy?.tagline||'The Vestibule claims another soul.'}"</div>
     </>)
     return(<>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:90,color:'var(--text-primary)',textShadow:'0 0 40px rgba(210,160,20,0.5),2px 2px 0 #000'}}>⛧ Victory ⛧</div>
-      <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'var(--text-secondary)',fontStyle:'italic'}}>All 9 circles conquered. Lucifer has fallen.</div>
+      {secondAlbumWin?(<>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:'var(--gold)',letterSpacing:8,textShadow:'0 0 40px rgba(232,168,32,0.95), 0 0 90px rgba(232,168,32,0.5), 4px 4px 0 #000',lineHeight:1}}>⛧ THE SECOND ALBUM ⛧</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:96,color:'var(--ink-bone)',letterSpacing:10,textShadow:'0 0 50px rgba(232,168,32,0.95), 0 0 120px rgba(196,30,58,0.6), 5px 5px 0 #000',marginTop:6}}>You Bled the Suit Dry</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'var(--text-secondary)',fontStyle:'italic',marginTop:8,textAlign:'center',maxWidth:900,lineHeight:1.4}}>The Executive lies broken at your feet. Hell could not contain you.{contractsPlayed>0?' '+contractsPlayed+' contract'+(contractsPlayed>1?'s':'')+' signed — score ×'+(1+contractsPlayed*0.5).toFixed(1)+'.':''}</div>
+      </>):(<>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:90,color:'var(--text-primary)',textShadow:'0 0 40px rgba(210,160,20,0.5),2px 2px 0 #000'}}>⛧ Victory ⛧</div>
+        <div style={{fontFamily:"'ScratchFont',serif",fontSize:22,color:'var(--text-secondary)',fontStyle:'italic'}}>All 9 circles conquered. Lucifer has fallen.</div>
+      </>)}
     </>)
   }
 
@@ -7218,7 +7224,7 @@ function App(){
         // Save second album title
         const stakeUn=getStakeUnlocks();if(!stakeUn.includes('second_album')){stakeUn.push('second_album');localStorage.setItem('vst_stake_unlocks',JSON.stringify(stakeUn))}
         setWelcomeToHell('won')
-        setTimeout(()=>{clearSave();setGameState('end')},3000)
+        setTimeout(()=>{clearSave();setGameState('end')},5500) // bumped from 3000 — cinematic needs time to land
       }
       else if(fightIndex>=26){
       playVictory();setDeathCause('victory')
@@ -9100,6 +9106,17 @@ function App(){
         setHand(allCards.slice(0,hs));setDeck(allCards.slice(hs));setDiscardPile([])
         handTargetRef.current=hs
         setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined}):null))
+        // ── CRITICAL: reset between-fight refs/state (v0.7.12) ──
+        // Without this, victoryFiredRef remained true from the Lucifer kill,
+        // so when the Executive's HP hit 0, triggerVictory() bailed at its
+        // first line ("if(victoryFiredRef.current)return"). Game stuck on
+        // play screen — no end transition, no cinematic. JV hit this and
+        // couldn't progress. Also resetting the other per-fight transients
+        // that the normal between-fight flow handles at line ~9214.
+        victoryFiredRef.current=false
+        setMemberBuffs({});setSlowBurnStrikes(0);setAmpFeedbackDiscount(0);setPyromaniacActive(false)
+        milestonesFiredRef.current={half:false,quarter:false,tenth:false}
+        setStrikeMult(1.0);strikeMultRef.current=1.0
         setWelcomeToHell('fighting')
       },3000)
       return
@@ -10375,6 +10392,37 @@ function App(){
     </div>
   )
 
+  // ── SECOND ALBUM VICTORY CINEMATIC (v0.7.12) ──
+  // Plays for ~5s when player defeats The Executive in the Welcome to Hell
+  // post-game. Held until setTimeout in triggerVictory transitions to 'end'.
+  if(welcomeToHell==='won')return(
+    <div style={{width:1920,height:1080,position:'relative',background:'radial-gradient(ellipse at center, #1a0a04 0%, #050302 60%, #000 100%)',overflow:'hidden',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:18}}>
+      {/* Gold sunburst behind crown */}
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center, rgba(232,168,32,0.22) 0%, transparent 50%)',animation:'fadeIn 1.2s ease',pointerEvents:'none'}}/>
+      {/* Border frame — gold */}
+      <div style={{position:'absolute',inset:24,border:'3px double rgba(232,168,32,0.55)',boxShadow:'inset 0 0 120px rgba(232,168,32,0.25)',borderRadius:4,pointerEvents:'none'}}/>
+
+      {/* Tiny preamble */}
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-rust)',letterSpacing:14,textTransform:'uppercase',opacity:0.85,animation:'fadeIn 0.6s ease'}}>⛧ The Executive Falls ⛧</div>
+
+      {/* Big slamming title */}
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:108,color:'var(--gold)',letterSpacing:14,textShadow:'0 0 40px rgba(232,168,32,0.95), 0 0 90px rgba(232,168,32,0.5), 4px 4px 0 #000',animation:'slamScale 1.1s ease forwards',textAlign:'center',lineHeight:1}}>THE SECOND</div>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:144,color:'var(--ink-bone)',letterSpacing:18,textShadow:'0 0 50px rgba(232,168,32,0.95), 0 0 120px rgba(196,30,58,0.6), 6px 6px 0 #000',animation:'slamScale 1.4s ease 0.2s both',textAlign:'center',lineHeight:1}}>ALBUM</div>
+
+      {/* Crown */}
+      <div style={{fontSize:120,filter:'drop-shadow(0 0 60px rgba(232,168,32,0.95))',animation:'slamScale 1.2s ease 0.5s both, throb 2.4s ease-in-out 1.7s infinite'}}>👑</div>
+
+      {/* Tagline */}
+      <div style={{fontFamily:"'ScratchFont',serif",fontSize:30,color:'var(--text-primary)',fontStyle:'italic',animation:'fadeIn 1.6s ease 1.2s both',textAlign:'center',maxWidth:1400,lineHeight:1.3,padding:'0 60px'}}>You signed in blood. You played anyway. You bled the suit dry.</div>
+
+      {/* Stake unlock */}
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--gold)',letterSpacing:6,marginTop:12,animation:'fadeIn 1.8s ease 2.2s both',textTransform:'uppercase'}}>⛧ Stake Unlocked: <span style={{color:'var(--ink-bone)'}}>Second Album</span> ⛧</div>
+
+      {/* Subtle bottom hint */}
+      <div style={{position:'absolute',bottom:48,fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',letterSpacing:8,opacity:0.6,animation:'fadeIn 2s ease 3.5s both',textTransform:'uppercase'}}>Returning to the void...</div>
+    </div>
+  )
+
   if(firstTip)return(
     <div style={{width:1920,height:1080,position:'relative',overflow:'hidden',background:'#040201',display:'flex',alignItems:'center',justifyContent:'center'}}>
       <div style={{maxWidth:550,background:'linear-gradient(180deg,#1a1208,#0a0704)',border:'3px solid #e8a820',borderRadius:12,padding:'32px 40px',textAlign:'center',boxShadow:'0 0 60px rgba(232,168,32,0.4)'}}>
@@ -10643,7 +10691,7 @@ function App(){
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
   if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} hangover={hangover} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} recruitBought={recruitBought} onMarkRecruitBought={()=>setRecruitBought(true)} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} heldDMT={heldDMT} shroomsInStock={shroomsInStock} acidInStock={acidInStock} dmtInStock={dmtInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)} onBuyDMT={()=>setHeldDMT(p=>p+1)} encoreMode={encoreMode}/>
-  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} devDailyScore={6666} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage} runElapsed={Math.floor((Date.now()-runStartTimeRef.current)/1000)} lastKillingBlow={lastKillingBlow}/></div>
+  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} devDailyScore={6666} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage} runElapsed={Math.floor((Date.now()-runStartTimeRef.current)/1000)} lastKillingBlow={lastKillingBlow} secondAlbumWin={welcomeToHell==='won'} contractsPlayed={contractsPlayed}/></div>
 
   return(
     <div key={'play-'+fightIndex} className="page-transition-in" style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:`${(()=>{const cn=Math.floor(fightIndex/3)+1;const ct=CIRCLE_BG[cn]||CIRCLE_BG[1];return 'radial-gradient(ellipse at 50% 20%, '+ct.glow+', '+ct.base+')'})()}`,overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
