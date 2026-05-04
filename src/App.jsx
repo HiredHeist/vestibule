@@ -6776,10 +6776,16 @@ function App(){
           if(!_allDisc.includes(chain.id)){_allDisc.push(chain.id);localStorage.setItem('vst_chains_discovered',JSON.stringify(_allDisc))
             addFloat('⛧ NEW CHAIN DISCOVERED!',getCenter(bossRef).x,getCenter(bossRef).y-200,'#ffdd00',true)}
         addFloat('⛧ '+chain.name+' ⛧',getCenter(bossRef).x,getCenter(bossRef).y-140,chain.color,true)
-        // Apply combo bonus damage = total stage ATK
-        const comboBonus=ns.filter(m=>m&&!m.tooStoned).reduce((s,m)=>s+m.atk,0)
-        setEnemyHp(p=>{const nh=Math.max(0,p-comboBonus);if(nh<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);return nh})
-        updStat('totalDamage',comboBonus)
+        // ── CHAIN INSTANT DAMAGE REMOVED (v0.7.7, May 4 2026) ──
+        // Pre-Balatro engine, completing a chain dealt instant damage = total
+        // stage ATK on top of setting the strike multiplier. With the new
+        // Balatro-style multiplicative engine (April 2026), the ×1.78 multiplier
+        // IS the payoff — instant damage was double-dipping AND undocumented
+        // (chain log only mentions the multiplier). JV reported this as
+        // "playing Distortion damaged the boss right away" — Distortion +
+        // Feedback Loop = Soul Harvest, which silently dealt total-band-ATK
+        // damage on the second card. Removing keeps the chain log honest:
+        // chains contribute through the multiplier at strike time, not before.
         setTimeout(()=>setComboFlash(null),3000)
         break
       }
