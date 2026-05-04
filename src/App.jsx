@@ -3560,8 +3560,15 @@ function DamageBreakdown({data,onDone,onSlam}){
       @keyframes hpBarCritical{0%,100%{opacity:1}50%{opacity:0.7}}
       @keyframes dmgPreviewPulse{0%{transform:scale(1.15);color:#ff4400}100%{transform:scale(1);color:var(--blood)}}
       @keyframes postStrikeFlash{0%{opacity:0;transform:scale(0.8)}20%{opacity:1;transform:scale(1.05)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(0.95) translateY(-20px)}}
-      @keyframes heartbeat{0%,100%{opacity:0.6}50%{opacity:1}}
+      @keyframes heartbeat{0%,100%{opacity:0.55}50%{opacity:0.85}}
       @keyframes chainSlam{0%{opacity:0;transform:translate(-50%,-50%) scale(2.5)}15%{opacity:1;transform:translate(-50%,-50%) scale(0.9)}25%{transform:translate(-50%,-50%) scale(1.05)}35%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(0.8) translateY(-40px)}}
+      /* slamScale — same dramatic scale/opacity beats as chainSlam, but WITHOUT
+         translate(-50%,-50%). Use for elements that are already centered by their
+         flex parent (mythic unlock overlay, combo flash). chainSlam's translate
+         is meant for position:absolute;left:50%;top:50% elements (chainCallout)
+         and shifts flex children off-center by 50% of their own width, which
+         pushed the mythic-unlock title hard left. */
+      @keyframes slamScale{0%{opacity:0;transform:scale(2.5)}15%{opacity:1;transform:scale(0.9)}25%{transform:scale(1.05)}35%{transform:scale(1)}75%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(0.8) translateY(-40px)}}
       @keyframes artifactTrigger{0%{box-shadow:0 0 0 rgba(232,168,32,0)}50%{box-shadow:0 0 20px rgba(232,168,32,0.8)}100%{box-shadow:0 0 0 rgba(232,168,32,0)}}
       @keyframes memberDistress{0%{transform:translateX(0)}100%{transform:translateX(2px)}}
       @keyframes newBadgePulse{0%,100%{opacity:0.7}50%{opacity:1}} @keyframes dmgSlam{0%{transform:scale(2.5);opacity:0}30%{transform:scale(0.9);opacity:1}50%{transform:scale(1.15)}70%{transform:scale(0.95)}100%{transform:scale(1);opacity:1}}
@@ -10881,9 +10888,9 @@ function App(){
       {mythicUnlockOverlay&&<div style={{position:'absolute',inset:0,zIndex:9999,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:24,animation:'chainGlow 5s ease forwards'}}>
         <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center, rgba(232,168,32,0.35) 0%, rgba(0,0,0,0.85) 65%)',animation:'chainGlow 5s ease forwards'}}/>
         <div style={{position:'absolute',inset:0,border:'8px solid var(--gold)',boxShadow:'inset 0 0 200px rgba(232,168,32,0.55), 0 0 100px rgba(232,168,32,0.7)',animation:'chainGlow 5s ease forwards'}}/>
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'var(--gold)',letterSpacing:14,textShadow:'0 0 30px rgba(232,168,32,0.9), 0 0 60px rgba(232,168,32,0.6)',zIndex:1,animation:'chainSlam 5s ease forwards'}}>⛧ MYTHIC UNLOCKED ⛧</div>
-        <div style={{fontSize:160,filter:'drop-shadow(0 0 80px var(--gold))',animation:'chainSlam 5s ease forwards',zIndex:1}}>{mythicUnlockOverlay.emoji}</div>
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:88,color:'var(--ink-bone)',textShadow:'0 0 40px rgba(232,168,32,0.9), 0 0 80px rgba(196,30,58,0.5), 0 4px 12px rgba(0,0,0,0.95)',letterSpacing:6,zIndex:1,animation:'chainSlam 5s ease forwards',textAlign:'center',padding:'0 60px'}}>{mythicUnlockOverlay.name}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'var(--gold)',letterSpacing:14,textShadow:'0 0 30px rgba(232,168,32,0.9), 0 0 60px rgba(232,168,32,0.6)',zIndex:1,animation:'slamScale 5s ease forwards'}}>⛧ MYTHIC UNLOCKED ⛧</div>
+        <div style={{fontSize:160,filter:'drop-shadow(0 0 80px var(--gold))',animation:'slamScale 5s ease forwards',zIndex:1}}>{mythicUnlockOverlay.emoji}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:88,color:'var(--ink-bone)',textShadow:'0 0 40px rgba(232,168,32,0.9), 0 0 80px rgba(196,30,58,0.5), 0 4px 12px rgba(0,0,0,0.95)',letterSpacing:6,zIndex:1,animation:'slamScale 5s ease forwards',textAlign:'center',padding:'0 60px'}}>{mythicUnlockOverlay.name}</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'var(--gold)',maxWidth:1200,padding:'0 80px',textAlign:'center',letterSpacing:2,zIndex:1,animation:'fadeIn 2.5s ease',lineHeight:1.4}}>{mythicUnlockOverlay.effect}</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--ink-rust)',letterSpacing:6,textTransform:'uppercase',zIndex:1,animation:'fadeIn 3.5s ease',marginTop:8}}>Will appear in shops on future runs.</div>
       </div>}
@@ -10899,17 +10906,17 @@ function App(){
         {/* Horizontal banner — wider, more visible */}
         <div style={{position:'absolute',left:0,right:0,top:'28%',height:280,background:`linear-gradient(180deg, transparent, ${comboFlash.color}18 15%, ${comboFlash.color}30 50%, ${comboFlash.color}18 85%, transparent)`,animation:'chainGlow 3s ease forwards'}}/>
         {/* Chain emoji — MASSIVE, slams in */}
-        <div style={{fontSize:120,filter:`drop-shadow(0 0 60px ${comboFlash.color})`,animation:'chainSlam 3s ease forwards',zIndex:1,marginBottom:0}}>{comboFlash.emoji}</div>
+        <div style={{fontSize:120,filter:`drop-shadow(0 0 60px ${comboFlash.color})`,animation:'slamScale 3s ease forwards',zIndex:1,marginBottom:0}}>{comboFlash.emoji}</div>
         {/* RIFF CHAIN title — screen-wide */}
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:96,color:comboFlash.color,textShadow:`0 0 60px ${comboFlash.color},0 0 120px ${comboFlash.color}88,-4px 0 rgba(255,0,0,0.5),4px 0 rgba(0,80,255,0.4),4px 4px 0 #000`,letterSpacing:14,animation:'chainSlam 3s ease forwards',zIndex:1}}>⛧ RIFF CHAIN ⛧</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:96,color:comboFlash.color,textShadow:`0 0 60px ${comboFlash.color},0 0 120px ${comboFlash.color}88,-4px 0 rgba(255,0,0,0.5),4px 0 rgba(0,80,255,0.4),4px 4px 0 #000`,letterSpacing:14,animation:'slamScale 3s ease forwards',zIndex:1}}>⛧ RIFF CHAIN ⛧</div>
         {/* Chain name — BIG */}
-        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:Math.min(96,48+Math.floor((comboFlash.mult||1)*12)),color:'var(--text-primary)',textShadow:`0 0 40px ${comboFlash.color},0 0 80px ${comboFlash.color}88,4px 4px 0 #000`,letterSpacing:10,animation:'chainSlam 3s ease forwards',zIndex:1,marginTop:4}}>{comboFlash.name}</div>
+        <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:Math.min(96,48+Math.floor((comboFlash.mult||1)*12)),color:'var(--text-primary)',textShadow:`0 0 40px ${comboFlash.color},0 0 80px ${comboFlash.color}88,4px 4px 0 #000`,letterSpacing:10,animation:'slamScale 3s ease forwards',zIndex:1,marginTop:4}}>{comboFlash.name}</div>
         {/* Card combo — the recipe */}
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:comboFlash.color,letterSpacing:4,marginTop:10,animation:'chainSlam 3s ease forwards',zIndex:1,textShadow:`0 0 20px ${comboFlash.color},2px 2px 0 #000`}}>{comboFlash.card1}  +  {comboFlash.card2}</div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:Math.min(42,20+Math.floor((comboFlash.mult||1)*6)),fontWeight:900,color:'var(--text-gold)',letterSpacing:6,marginTop:6,animation:'chainSlam 3s ease forwards',zIndex:1,textShadow:'0 0 20px rgba(255,200,0,0.8),2px 2px 0 #000'}}>×{(comboFlash.mult||1).toFixed(2)} DAMAGE</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:comboFlash.color,letterSpacing:4,marginTop:10,animation:'slamScale 3s ease forwards',zIndex:1,textShadow:`0 0 20px ${comboFlash.color},2px 2px 0 #000`}}>{comboFlash.card1}  +  {comboFlash.card2}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:Math.min(42,20+Math.floor((comboFlash.mult||1)*6)),fontWeight:900,color:'var(--text-gold)',letterSpacing:6,marginTop:6,animation:'slamScale 3s ease forwards',zIndex:1,textShadow:'0 0 20px rgba(255,200,0,0.8),2px 2px 0 #000'}}>×{(comboFlash.mult||1).toFixed(2)} DAMAGE</div>
         {/* Multiplier — THE money shot, biggest element */}
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:80,fontWeight:900,color:'var(--text-primary)',textShadow:`0 0 40px ${comboFlash.color},0 0 80px rgba(255,200,0,0.6),0 0 120px ${comboFlash.color}44,4px 4px 0 #000`,letterSpacing:6,marginTop:12,animation:'chainSlam 3s ease forwards',zIndex:1}}>×{comboFlash.mult?.toFixed(2)||'1.78'}</div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:comboFlash.color,letterSpacing:8,textTransform:'uppercase',marginTop:4,zIndex:1,textShadow:'0 0 15px rgba(0,0,0,0.95)',animation:'chainSlam 3s ease forwards'}}>STRIKE MULTIPLIER</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:80,fontWeight:900,color:'var(--text-primary)',textShadow:`0 0 40px ${comboFlash.color},0 0 80px rgba(255,200,0,0.6),0 0 120px ${comboFlash.color}44,4px 4px 0 #000`,letterSpacing:6,marginTop:12,animation:'slamScale 3s ease forwards',zIndex:1}}>×{comboFlash.mult?.toFixed(2)||'1.78'}</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:comboFlash.color,letterSpacing:8,textTransform:'uppercase',marginTop:4,zIndex:1,textShadow:'0 0 15px rgba(0,0,0,0.95)',animation:'slamScale 3s ease forwards'}}>STRIKE MULTIPLIER</div>
       </div>}
       {/* CIRCLE CLEARED FLASH */}
 
@@ -11583,11 +11590,23 @@ function App(){
         <div style={{color:'var(--text-secondary)'}}>encore:{encoreMode?'Y':'N'} stake:{activeStake?.id||'-'}</div>
         <div style={{borderTop:'1px solid rgba(232,168,32,0.3)',marginTop:6,paddingTop:6,fontSize:13,color:'var(--text-muted)',letterSpacing:1}}>shift+` to close · screenshot for repro</div>
       </div>}
-      {/* CORRUPTION HEARTBEAT VIGNETTE */}
-      {corruption>=40&&gameState==='playing'&&<div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:50,
-        boxShadow:'inset 0 0 '+(corruption>=100?'120':'corruption>=80?80:corruption>=60?50:30')+'px rgba(150,0,20,'+(corruption>=100?'0.5':corruption>=80?'0.35':corruption>=60?'0.25':'0.15')+')',
-        animation:corruption>=100?'none':corruption>=80?'heartbeat 0.6s ease-in-out infinite':corruption>=60?'heartbeat 0.9s ease-in-out infinite':'heartbeat 1.4s ease-in-out infinite',
-        borderRadius:0}}/>}
+      {/* CORRUPTION HEARTBEAT VIGNETTE — toned down May 4 2026 per JV.
+          Old version had a malformed nested ternary that meant 40-99% corruption
+          rendered no vignette at all (invalid CSS string), and only the 100% tier
+          rendered — at full strength (120px inset, 0.5 alpha, no pulse). With the
+          string-ternary bug fixed, ALL tiers were going to render. So scaled the
+          whole curve back: smaller inset, lower alpha, slower pulse. Subtle
+          background pressure, not an eye-stabbing red wash.
+          Tier curve: 50%→light, 70%→medium, 90%→strong, 100%→max but still readable. */}
+      {(()=>{
+        if(corruption<50||gameState!=='playing')return null
+        const _insetPx=corruption>=100?60:corruption>=90?50:corruption>=70?40:30
+        const _alpha=corruption>=100?0.28:corruption>=90?0.22:corruption>=70?0.16:0.10
+        const _anim=corruption>=90?'heartbeat 1.6s ease-in-out infinite':corruption>=70?'heartbeat 2.2s ease-in-out infinite':'none'
+        return <div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:50,
+          boxShadow:'inset 0 0 '+_insetPx+'px rgba(150,0,20,'+_alpha+')',
+          animation:_anim,borderRadius:0}}/>
+      })()}
       {/* PAUSE OPTIONS OVERLAY (ESC key) */}
       {showPauseOptions&&<div style={{position:'absolute',inset:0,zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.85)'}} onClick={()=>setShowPauseOptions(false)}>
         <div onClick={e=>e.stopPropagation()} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16,padding:'40px 60px',background:'rgba(10,6,2,0.98)',border:'2px solid rgba(100,65,15,0.5)',borderRadius:12,maxWidth:500,width:'90%'}}>
