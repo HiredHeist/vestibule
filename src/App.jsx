@@ -258,7 +258,7 @@ const ALL_MUSICIANS=[
   {id:'bjorn',name:'Bjorn',role:'Lead Guitarist',atk:5,hp:6,maxHp:8,emoji:'🎸',keyword:'FRENZIED',desc:'High ATK, fragile. The carry.',bio:'Former blacksmith from Uppsala. Traded his hammer for a guitar at 14. His riffs have literally killed small animals.'},
   {id:'ragnar',name:'Ragnar',role:'Lead Guitarist',atk:4,hp:7,maxHp:9,emoji:'🎸',keyword:'FRENZIED',desc:'Slightly tankier lead.',bio:'Claims to be descended from the real Ragnar Lothbrok. Nobody believes him, but nobody argues when he plays.'},
   {id:'thor',name:'Thor',role:'Drummer',atk:0,hp:8,maxHp:11,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Lucky drummer. Roll high and the whole band hits harder.',bio:'Not THAT Thor. This one is louder. Broke three drum kits in one show. The venue banned drums after that.'},
-  {id:'ingrid',name:'Ingrid',role:'Bass Player',atk:3,hp:10,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'High HP. Save a member from a lethal hit.',bio:'The foundation. Ingrid held the band together through two breakups, a lawsuit, and a literal earthquake during a set.'},
+  {id:'ingrid',name:'Ingrid',role:'Bass Player',atk:3,hp:10,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'High HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).',bio:'The foundation. Ingrid held the band together through two breakups, a lawsuit, and a literal earthquake during a set.'},
   {id:'loki',name:'Loki',role:'Synth Player',atk:3,hp:6,maxHp:8,emoji:'🎹',keyword:'CORRUPT',desc:'Damage scales with Corruption.',bio:'Found a cursed synthesizer in a pawn shop. The more corrupt the signal, the harder it hits. He sleeps with it.'},
   {id:'grimnir',name:'Grimnir',role:'Vocalist',atk:2,hp:7,maxHp:9,emoji:'🎤',keyword:'DEBUFF',desc:'The Masked One. Reduces boss passive each turn.',bio:'Nobody has seen his face. His voice strips the will from anything that hears it. Even the sound guy wears earplugs.'},
   {id:'dag',name:'Dag',role:'Bass Player',atk:2,hp:12,maxHp:16,emoji:'🎵',keyword:'ANCHOR',desc:'Tankiest member.',bio:'16 HP of pure Viking stubbornness. Dag once played a 9-hour set without sitting down. He does not believe in breaks.'},
@@ -653,7 +653,7 @@ function getEffectiveAtk(m,ctx){
 const KEYWORD_DESC={
   'FRENZIED':'+ATK per RIFF played each Strike. Stack more for bigger bonus (1/2/4×).',
   'DOUBLE TIME':'Drummer rolls d6 each fight: 5-6=×2 damage, 3-4=×1.5, 1-2=×1. (Only one drummer per band.)',
-  'ANCHOR':'Saves a member from a lethal hit. 1 save/fight at 1 stack, 2/fight at 2 stacks. 3+ stacks: ANY member can be saved (4 saves/fight).',
+  'ANCHOR':'Saves an ANCHOR member from a lethal hit. 1 stack = save 1 ANCHOR/fight. 2 stacks = save 2 ANCHORs/fight. 3+ stacks = ANY member can be saved (4 saves/fight). Stack 3+ ANCHORs to protect the whole band.',
   'CORRUPT':'+ATK from Corruption (×1/×2/×4 by stack tier). Thrives in chaos.',
   'DEBUFF':'Reduces boss damage by 2 each Strike, stacking permanently this fight.',
   'FOLK MAGIC':'20% chance each Strike to refill all Embers.',
@@ -2988,18 +2988,42 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
 
 
 // ═══ CARD ART — shows pixel art PNG if available, falls back to emoji ═══
+// Module-level cache of which PNGs exist. Without this, every CardArtImg /
+// ArtifactArtImg mount runs through the async Image() probe → hasArt starts
+// false → emoji renders for one paint → flips to PNG. In the shop, hover
+// can trigger parent re-renders that remount these components, causing a
+// visible "emoji flash". Cache the verdict per id so we resolve synchronously.
+const _CARD_ART_CACHE={}      // id → boolean (true if PNG exists)
+const _ARTIFACT_ART_CACHE={}  // id → boolean
 function CardArtImg({id,emoji,size=52,style={}}){
-  const [hasArt,setHasArt]=React.useState(false)
   const src=import.meta.env.BASE_URL+'vestibule/cards/'+id+'.png'
-  React.useEffect(()=>{const img=new window.Image();img.onload=()=>setHasArt(true);img.onerror=()=>setHasArt(false);img.src=src},[id])
+  const cached=_CARD_ART_CACHE[id]
+  const [hasArt,setHasArt]=React.useState(cached===true) // true if known; false otherwise (probe will confirm)
+  React.useEffect(()=>{
+    if(_CARD_ART_CACHE[id]!==undefined){setHasArt(_CARD_ART_CACHE[id]);return}
+    const img=new window.Image()
+    img.onload=()=>{_CARD_ART_CACHE[id]=true;setHasArt(true)}
+    img.onerror=()=>{_CARD_ART_CACHE[id]=false;setHasArt(false)}
+    img.src=src
+  },[id,src])
   if(hasArt)return <img src={src} alt={id} style={{width:size,height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
+  // If cache says PNG exists but state hasn't caught up (cross-component first paint), still render PNG.
+  if(cached===true)return <img src={src} alt={id} style={{width:size,height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
   return <span style={{fontSize:size*0.85,...style}}>{emoji}</span>
 }
 function ArtifactArtImg({id,emoji,size=40,style={}}){
-  const [hasArt,setHasArt]=React.useState(false)
   const src=import.meta.env.BASE_URL+'vestibule/artifacts/'+id+'.png'
-  React.useEffect(()=>{const img=new window.Image();img.onload=()=>setHasArt(true);img.onerror=()=>setHasArt(false);img.src=src},[id])
+  const cached=_ARTIFACT_ART_CACHE[id]
+  const [hasArt,setHasArt]=React.useState(cached===true)
+  React.useEffect(()=>{
+    if(_ARTIFACT_ART_CACHE[id]!==undefined){setHasArt(_ARTIFACT_ART_CACHE[id]);return}
+    const img=new window.Image()
+    img.onload=()=>{_ARTIFACT_ART_CACHE[id]=true;setHasArt(true)}
+    img.onerror=()=>{_ARTIFACT_ART_CACHE[id]=false;setHasArt(false)}
+    img.src=src
+  },[id,src])
   if(hasArt)return <img src={src} alt={id} style={{width:size,height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
+  if(cached===true)return <img src={src} alt={id} style={{width:size,height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
   return <span style={{fontSize:size*0.7,...style}}>{emoji}</span>
 }
 
@@ -10955,13 +10979,13 @@ function App(){
         </div>
         <div style={{position:'relative',zIndex:8,overflow:'visible',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>
           <div style={{display:'flex',alignItems:'center',gap:stage.length>5?16:50,padding:stage.length>5?'0px 10px 0px 100px':'0px 10px 0px 130px',justifyContent:'center',flex:1,position:'relative'}}>
-            <div style={{display:'flex',flexDirection:'column',gap:8,alignSelf:'center',flexShrink:0,background:'rgba(0,0,0,0.22)',borderRadius:'0 6px 6px 0',padding:'8px 10px 8px 10px',borderRight:'1px solid rgba(140,90,20,0.35)',position:'absolute',left:0,top:'50%',transform:'translateY(-50%)'}}>
+            <div style={{display:'flex',flexDirection:'column',gap:6,alignSelf:'flex-start',flexShrink:0,background:'rgba(0,0,0,0.22)',borderRadius:'0 6px 6px 0',padding:'6px 10px 6px 10px',borderRight:'1px solid rgba(140,90,20,0.35)',position:'absolute',left:0,top:8}}>
               {[0,1,2].map(i=>{const a=(activeArtifacts||[])[i];return(
                 <div key={i} style={{position:'relative'}}
                   onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='1'}}
                   onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='0'}}>
-                  {a?<div style={{width:100,height:135,border:'2px solid rgba(200,140,30,0.65)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 14px rgba(200,140,20,0.35),inset 0 0 8px rgba(200,140,20,0.1)',cursor:'help'}}><ArtifactArtImg id={a.id} emoji={a.emoji} size={48} style={{animation:triggeredArtifactId===a.id?'artifactTrigger 0.5s ease-out':'none',transform:triggeredArtifactId===a.id?'scale(1.4)':'scale(1)',transition:'transform 0.15s'}}/><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:0.5,color:'var(--text-secondary)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 4px'}}>{a.name}</div>{a.mult&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-gold)',textShadow:'0 0 8px rgba(255,136,0,0.5)'}}>×{a.mult}</div>}</div>
-                  :<div style={{width:100,height:135,border:'1px dashed rgba(200,160,50,0.4)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:52,opacity:0.45,textShadow:'0 0 12px rgba(255,180,0,0.4)'}}>⛧</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:1.5,color:'rgba(220,170,70,0.65)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,fontWeight:900}}>Artifact</div></div>}
+                  {a?<div style={{width:100,height:108,border:'2px solid rgba(200,140,30,0.65)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 14px rgba(200,140,20,0.35),inset 0 0 8px rgba(200,140,20,0.1)',cursor:'help'}}><ArtifactArtImg id={a.id} emoji={a.emoji} size={36} style={{animation:triggeredArtifactId===a.id?'artifactTrigger 0.5s ease-out':'none',transform:triggeredArtifactId===a.id?'scale(1.4)':'scale(1)',transition:'transform 0.15s'}}/><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:0.5,color:'var(--text-secondary)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 4px'}}>{a.name}</div>{a.mult&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-gold)',textShadow:'0 0 8px rgba(255,136,0,0.5)'}}>×{a.mult}</div>}</div>
+                  :<div style={{width:100,height:108,border:'1px dashed rgba(200,160,50,0.4)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:38,opacity:0.45,textShadow:'0 0 12px rgba(255,180,0,0.4)'}}>⛧</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:1.5,color:'rgba(220,170,70,0.65)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,fontWeight:900}}>Artifact</div></div>}
                   {a&&<div data-artip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:88,top:0,zIndex:99999,pointerEvents:'none',minWidth:200,maxWidth:280,background:'rgba(12,7,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,color:'var(--text-gold)',marginBottom:4}}>{a.emoji} {a.name}</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',fontStyle:'italic',lineHeight:1.4}}>{a.effect}</div>
@@ -10983,12 +11007,12 @@ function App(){
                 <div key={'p'+i} style={{position:'relative'}}
                   onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-passtip]');if(t)t.style.opacity='1'}}
                   onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-passtip]');if(t)t.style.opacity='0'}}>
-                  {p?<div style={{width:100,height:135,border:'2px solid rgba(153,51,204,0.65)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,background:'linear-gradient(180deg,rgba(34,12,48,0.95),rgba(18,6,28,0.95))',boxShadow:'0 0 14px rgba(153,51,204,0.4),inset 0 0 8px rgba(153,51,204,0.12)',cursor:'help'}}>
-                    <div style={{fontSize:48,filter:'drop-shadow(0 0 8px rgba(204,136,255,0.5))',lineHeight:1}}>{p.emoji}</div>
+                  {p?<div style={{width:100,height:108,border:'2px solid rgba(153,51,204,0.65)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,background:'linear-gradient(180deg,rgba(34,12,48,0.95),rgba(18,6,28,0.95))',boxShadow:'0 0 14px rgba(153,51,204,0.4),inset 0 0 8px rgba(153,51,204,0.12)',cursor:'help'}}>
+                    <div style={{fontSize:38,filter:'drop-shadow(0 0 8px rgba(204,136,255,0.5))',lineHeight:1}}>{p.emoji}</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:0.5,color:'var(--tier-mythic)',textTransform:'uppercase',textAlign:'center',lineHeight:1.1,padding:'0 4px'}}>{p.name}</div>
                   </div>
-                  :<div style={{width:100,height:135,border:'1px dashed rgba(153,51,204,0.4)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(20,8,30,0.65)'}}>
-                    <div style={{fontSize:42,opacity:0.5,textShadow:'0 0 12px rgba(204,136,255,0.4)',lineHeight:1}}>⚡</div>
+                  :<div style={{width:100,height:108,border:'1px dashed rgba(153,51,204,0.4)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(20,8,30,0.65)'}}>
+                    <div style={{fontSize:32,opacity:0.5,textShadow:'0 0 12px rgba(204,136,255,0.4)',lineHeight:1}}>⚡</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:1.5,color:'rgba(200,150,235,0.7)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,fontWeight:900}}>Effect<br/>Pedal</div>
                   </div>}
                   {p&&<div data-passtip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:108,top:0,zIndex:99999,pointerEvents:'none',minWidth:200,maxWidth:280,background:'rgba(12,7,18,0.97)',border:'1px solid rgba(153,51,204,0.6)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
@@ -11515,15 +11539,10 @@ function App(){
           ))}
         </div>
       </div>
-      {/* LIVE GRADE TRACKER — top left */}
-      {gameState==='playing'&&<div style={{position:'absolute',top:8,left:8,zIndex:60,fontFamily:"'MBScribblesFont',serif",pointerEvents:'none'}}>
-        <div style={{fontSize:13,color:'var(--ink-dim)',letterSpacing:2,textTransform:'uppercase'}}>Grade</div>
-        <div style={{fontSize:28,fontWeight:900,letterSpacing:2,
-          color:(()=>{const s=stats.totalDamage+(stats.fightsSurvived||0)*500;return s>=15000?'#ff44ff':s>=10000?'#ffdd00':s>=6000?'#ff8800':s>=3000?'#44aaff':s>=1000?'#44cc44':'#888888'})(),
-          textShadow:'0 0 12px currentColor'}}>
-          {(()=>{const s=stats.totalDamage+(stats.fightsSurvived||0)*500;return s>=15000?'SS':s>=10000?'S':s>=6000?'A':s>=3000?'B':s>=1000?'C':'D'})()}
-        </div>
-      </div>}
+      {/* GRADE TRACKER — REMOVED from in-game UI per JV (May 4 2026).
+          Grade still displays prominently on the end screen (line ~4854).
+          Removing it from gameplay reclaims top-left space and lets the
+          artifact/pedal rail breathe — second pedal slot was clipping. */}
       {/* DEBUG HUD — toggle with Shift+` (tilde). Shows live game state for bug-hunting. */}
       {showDebugHud&&<div style={{position:'absolute',top:8,right:8,zIndex:9998,fontFamily:'monospace',fontSize:13,lineHeight:1.5,color:'var(--text-primary)',background:'rgba(0,0,0,0.88)',border:'1px solid var(--text-gold)',borderRadius:4,padding:'10px 14px',minWidth:280,maxWidth:340,boxShadow:'0 0 16px rgba(232,168,32,0.3)',pointerEvents:'none',userSelect:'text'}}>
         <div style={{color:'var(--text-gold)',fontWeight:900,marginBottom:4,letterSpacing:2,fontSize:13}}>━ DEBUG ━</div>
