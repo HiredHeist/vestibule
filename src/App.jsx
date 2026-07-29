@@ -429,20 +429,23 @@ const PACT_REWARDS=[
 ]
 
 // STAKES — difficulty modifier applied on top of the chosen deck.
-// hpMult is DEAD CODE in combat (kept for save compat / future use). The live
+// hpMult is LIVE as of v0.8 — applied via _stakeHpF() in all three HP formulas. The live
 // fight-start formula uses only deck.hpScale × heat × encore. Stake difficulty
 // comes from the OTHER fields: dmgAdd, maxStrikes, startEmbers, startCorruption,
 // healAfterFight, drugPriceMult, badTripChance. Descriptions reflect what actually
 // happens in combat — do not re-add HP-mult promises unless wiring hpMult into
 // the fight formula at line ~7387 + getScaledMaxHp at line ~4959.
 const STAKES=[
-  {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.20,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Baseline difficulty. Full heal between fights. ×1.0 score.',mentorBonus:0},
-  {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.25,dmgAdd:2,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Enemies +2 damage. ×1.5 score.',mentorBonus:0.03},
-  {id:'gold',name:'Gold',color:'#ffd700',border:'#ffd700',hpMult:1.25,dmgAdd:3,priceMult:1.25,scoreMult:2.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Enemies +3 damage. Shop prices +25%. ×2.0 score.',mentorBonus:0.03},
-  {id:'obsidian',name:'Obsidian',color:'#7a7a9a',border:'#6a6a8a',hpMult:1.45,dmgAdd:2,priceMult:1.25,scoreMult:2.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Enemies +2 damage. No free heal between fights. Shop +25%. Drugs +50%. ×2.5 score.',mentorBonus:0.06},
-  {id:'blood',name:'Blood',color:'#8b0000',border:'#cc0000',hpMult:1.70,dmgAdd:2,priceMult:1.25,scoreMult:3.0,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Enemies +2 damage. Start each fight at 4 Embers, 10% Corruption. No heal. Shop +25%. Drugs +50%. ×3.0 score.',mentorBonus:0.15},
-  {id:'demonic',name:'Demonic ⛧',color:'#ff0000',border:'#ff0000',hpMult:1.66,dmgAdd:4,priceMult:1.5,scoreMult:4.0,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,drugPriceMult:2.0,badTripChance:0.15,desc:'Enemies +4 damage. ONLY 3 Strikes per fight. Start at 4 Embers, 15% Corruption. No heal. Shop +50%. Drugs +100%. Bad trips 15%. ×4.0 score. Pure hell.',mentorBonus:0.75},
+  {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.30,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Baseline difficulty. Full heal between fights. ×1.0 score.',mentorBonus:0},
+  {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.30,dmgAdd:2,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Enemies +2 damage. ×1.5 score.',mentorBonus:0.03},
+  {id:'gold',name:'Gold',color:'#ffd700',border:'#ffd700',hpMult:1.43,dmgAdd:3,priceMult:1.25,scoreMult:2.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Enemies +3 damage, +10% HP. Shop prices +25%. ×2.0 score.',mentorBonus:0.03},
+  {id:'obsidian',name:'Obsidian',color:'#7a7a9a',border:'#6a6a8a',hpMult:1.73,dmgAdd:2,priceMult:1.25,scoreMult:2.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Enemies +2 damage, +33% HP. No free heal between fights. Shop +25%. Drugs +50%. ×2.5 score.',mentorBonus:0.06},
+  {id:'blood',name:'Blood',color:'#8b0000',border:'#cc0000',hpMult:2.05,dmgAdd:2,priceMult:1.25,scoreMult:3.0,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Enemies +2 damage, +58% HP. Start each fight at 4 Embers, 10% Corruption. No heal. Shop +25%. Drugs +50%. ×3.0 score.',mentorBonus:0.15},
+  {id:'demonic',name:'Demonic ⛧',color:'#ff0000',border:'#ff0000',hpMult:1.80,dmgAdd:4,priceMult:1.5,scoreMult:4.0,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,drugPriceMult:2.0,badTripChance:0.15,desc:'Enemies +4 damage, +38% HP. ONLY 3 Strikes per fight. Start at 4 Embers, 15% Corruption. No heal. Shop +50%. Drugs +100%. Bad trips 15%. ×4.0 score. Pure hell.',mentorBonus:0.75},
 ]
+// v0.8: stake HP factor relative to bronze (1.30). Resurrects formerly-dead hpMult — sim-tuned ladder:
+// bronze 38% / silver 26% / gold 18% / obsidian 11% / blood 7% / demonic 1.5% (expert full-relic play, 10K sims).
+const _stakeHpF=()=>((STAKES.find(s=>s.id===(localStorage.getItem('vst_active_stake')||'bronze'))||{hpMult:1.3}).hpMult/1.3)
 function getUnlockedStakes(){
   const beaten=JSON.parse(localStorage.getItem('vst_stakes_beaten')||'[]')
   const unlocked=[STAKES[0]] // Bronze always unlocked
@@ -1120,21 +1123,19 @@ const STARTER_ARTIFACTS=[
   {id:'a2',name:"Devil's Tuning Fork",emoji:'🔱',effect:'Start each fight at 15% Corruption. ×1.5 damage when Corruption hits 60%+.',cost:16,multTrigger:'corrupt50',mult:1.5,rarity:'uncommon',startCorr:15},
   {id:'a5',name:'Haunted Radio',emoji:'📻',effect:'×1.2 damage for each Riff Chain fired this Strike.',cost:8,multTrigger:'perChain',mult:1.2,rarity:'common'},
   {id:'a6',name:'Black Candle',emoji:'🕯',effect:'×1.4 damage for each Too Stoned member.',cost:12,multTrigger:'perStoned',mult:1.4,rarity:'uncommon'},
-  {id:'a9',name:'Resonance Coil',emoji:'⚙️',effect:'×1.15 for each duplicate card in your hand when you Strike.',cost:10,multTrigger:'perDupe',mult:1.15,rarity:'common'},
+  {id:'a9',name:'Resonance Coil',emoji:'⚙️',effect:'×1.2 for each duplicate card PLAYED this Strike.',cost:10,multTrigger:'perDupePlayed',mult:1.2,rarity:'common'},
   {id:'a10',name:'Burning Stage',emoji:'🔥',effect:'×3.0 if you play ALL 6 cards before Striking. Total commitment.',cost:22,multTrigger:'cards5',mult:3.0,rarity:'rare'},
   // ── NEW COMMON-TIER (12) ──────────────────────────────────────
-  {id:'crackedpickup',name:'Cracked Pickup',emoji:'🎤',effect:'×1.2 damage if you played a RIFF this strike.',cost:10,multTrigger:'playedRiff',mult:1.2,rarity:'common'},
+  {id:'crackedpickup',name:'Cracked Pickup',emoji:'🎤',effect:'×1.2 damage if you played a RIFF this strike.',cost:12,multTrigger:'playedRiff',mult:1.2,rarity:'common'},
   {id:'distortioncab',name:'Distortion Cab',emoji:'🔊',effect:'×1.25 damage always.',cost:14,multTrigger:'alwaysOn',mult:1.25,rarity:'common'},
   {id:'ashtray',name:'Ash Tray',emoji:'🚬',effect:'×1.3 damage if any member is Too Stoned.',cost:12,multTrigger:'anyStoned',mult:1.3,rarity:'common'},
-  {id:'crowdnoise',name:'Crowd Noise',emoji:'🤘',effect:'×1.15 per alive non-stoned member.',cost:14,multTrigger:'perAliveMember',mult:1.15,rarity:'common'},
+  {id:'crowdnoise',name:'Crowd Noise',emoji:'🤘',effect:'×1.10 per alive non-stoned member.',cost:16,multTrigger:'perAliveMember',mult:1.10,rarity:'common'},
   {id:'tapehiss',name:'Tape Hiss',emoji:'📼',effect:"×1.2 if you DIDN'T play any RIFF this strike.",cost:8,multTrigger:'noRiff',mult:1.2,rarity:'common'},
-  {id:'cheapbeer',name:'Cheap Beer',emoji:'🍺',effect:'×1.15 damage. +5% run score.',cost:10,multTrigger:'alwaysOn',mult:1.15,scoreBump:0.05,rarity:'common'},
   {id:'setlistart',name:'Set List',emoji:'📋',effect:'×1.4 if first card played was an EMBER type.',cost:12,multTrigger:'firstCardEmber',mult:1.4,rarity:'common'},
   {id:'gaffertape',name:'Gaffer Tape',emoji:'🩹',effect:'×1.2 if no member is below half HP.',cost:10,multTrigger:'allHealthy',mult:1.2,rarity:'common'},
   {id:'powerstrip',name:'Power Strip',emoji:'⚡',effect:'×1.25 if you have 5+ Embers when you Strike.',cost:11,multTrigger:'embers5',mult:1.25,rarity:'common'},
-  {id:'spitcup',name:'Spit Cup',emoji:'🥃',effect:'×1.5 damage if you discarded ≥1 card this fight.',cost:10,multTrigger:'discardedFight',mult:1.5,rarity:'common'},
-  {id:'toursticker',name:'Tour Sticker',emoji:'🎟',effect:'+10% run score.',cost:8,scoreBump:0.10,rarity:'common'},
-  {id:'divebarsign',name:'Dive Bar Sign',emoji:'🍻',effect:'×1.2 in Circles I-III only.',cost:9,multTrigger:'earlyCircle',mult:1.2,rarity:'common'},
+  {id:'spitcup',name:'Spit Cup',emoji:'🥃',effect:'×1.5 damage if you discarded ≥1 card this STRIKE.',cost:10,multTrigger:'discardedStrike',mult:1.5,rarity:'common'},
+  {id:'divebarsign',name:'Dive Bar Sign',emoji:'🍻',effect:'×1.35 in Circles I-III. Refunds its cost when you reach Circle IV — the residency ends.',cost:9,multTrigger:'earlyCircle',mult:1.35,rarity:'common',refundAtC4:true},
   // ── NEW UNCOMMON-TIER (8) ─────────────────────────────────────
   {id:'pentagramshrine',name:'Pentagram Shrine',emoji:'🜏',effect:'×1.4 per CORRUPT card played this strike (multiplicative).',cost:22,multTrigger:'perCorruptCard',mult:1.4,rarity:'uncommon'},
   {id:'doomchoir',name:'Doom Choir',emoji:'🎵',effect:'×1.5 per same-role member on stage (multiplicative).',cost:24,multTrigger:'perSameRole',mult:1.5,rarity:'uncommon'},
@@ -4930,7 +4931,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
               const _ds=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1
               const _hl=parseInt(localStorage.getItem('vst_heat')||'1')
               const _hm=1+(Math.max(0,_hl-1)*0.15)
-              const _wHp=Math.ceil(ENEMIES[0].maxHp*_ds*_hm*2.0)
+              const _wHp=Math.ceil(ENEMIES[0].maxHp*_ds*_hm*_stakeHpF()*2.0)
               setEnemyHp(_wHp);setScaledMaxHp(_wHp)
               const _encDeckStrMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
               setStrikesLeft(activeStake.maxStrikes+_encDeckStrMod);setFightMaxStrikes(activeStake.maxStrikes+_encDeckStrMod);setDiscardsLeft(4);setFightMaxDiscards(4)
@@ -5653,7 +5654,7 @@ function App(){
     const _ds=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1
     const _hl=parseInt(localStorage.getItem('vst_heat')||'1')
     const _hm=1+(Math.max(0,_hl-1)*0.15)
-    return Math.ceil(e.maxHp*_ds*_hm*(encoreMode?2.0:1.0))
+    return Math.ceil(e.maxHp*_ds*_hm*_stakeHpF()*(encoreMode?2.0:1.0))
   },[selectedDeck,encoreMode])
 
   const [musicVol,setMusicVol]=useState(()=>parseFloat(localStorage.getItem('vst_music_vol')||'0.3'))
@@ -8527,6 +8528,8 @@ function App(){
         if(art.multTrigger==='allHealthy'&&allMembersHealthy)fires=1
         if(art.multTrigger==='embers5'&&embers>=5)fires=1
         if(art.multTrigger==='discardedFight'&&discardsThisFight>=1)fires=1
+        if(art.multTrigger==='discardedStrike'&&discardsThisStrike>=1)fires=1
+        if(art.multTrigger==='perDupePlayed'){const _s={};let _d=0;(cardsRealPlays||[]).forEach(c=>{_s[c.id]=(_s[c.id]||0)+1;if(_s[c.id]>1)_d++});fires=_d}
         if(art.multTrigger==='earlyCircle'&&earlyCircleCheck)fires=1
         // ── NEW UNCOMMON TRIGGERS ──
         if(art.multTrigger==='perCorruptCard')fires=corruptCardsCount
@@ -9739,7 +9742,7 @@ function App(){
     const ne=ENEMIES[sv.fi]||ENEMIES[0];setEnemy(ne)
     const _ds=(STARTER_DECKS.find(d=>d.id===sv.deck)||{}).hpScale||1
     const _hm=1+(Math.max(0,parseInt(localStorage.getItem('vst_heat')||'1')-1)*0.15)
-    const _hp=Math.ceil(ne.maxHp*_ds*_hm);setEnemyHp(_hp);setScaledMaxHp(_hp)
+    const _hp=Math.ceil(ne.maxHp*_ds*_hm*_stakeHpF());setEnemyHp(_hp);setScaledMaxHp(_hp)
     setGameState('playing');addLog('⛧ Run resumed from save...')
   }
   const handleReset=(retrySeed)=>{
