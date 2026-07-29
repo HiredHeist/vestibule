@@ -347,7 +347,7 @@ const TUTORIAL_POST_FIGHT={
   2:'You felt the corruption creeping in. Learn to use it — or it will consume you.',
   3:'TUTORIAL COMPLETE',
 }
-function isTutorialDone(){return localStorage.getItem('vst_tutorial')==='done'}
+export function isTutorialDone(){return localStorage.getItem('vst_tutorial')==='done'}
 // First-encounter tips — shown once per mechanic
 function getEncounteredRules(){try{return JSON.parse(localStorage.getItem('vst_rules_seen')||'[]')}catch(e){return[]}}
 function markRuleSeen(idx){const seen=getEncounteredRules();if(!seen.includes(idx)){seen.push(idx);localStorage.setItem('vst_rules_seen',JSON.stringify(seen))}}
@@ -360,9 +360,9 @@ const FIRST_TIPS={
   drugs:"The Dealer sells Shrooms and Acid. Drugs give powerful trip effects before fights, but bad trips are possible.",
   corruption:"⚠ CORRUPT cards (purple) are powerful. Pushing corruption costs you tomorrow — pricier shops, weaker band, smaller stash. But it can't end your run. Push when it's worth it.",
 }
-function hasSeenTip(id){return(JSON.parse(localStorage.getItem('vst_tips')||'[]')).includes(id)}
-function markTipSeen(id){const seen=JSON.parse(localStorage.getItem('vst_tips')||'[]');if(!seen.includes(id)){seen.push(id);localStorage.setItem('vst_tips',JSON.stringify(seen))}}
-function markTutorialDone(){localStorage.setItem('vst_tutorial','done')}
+export function hasSeenTip(id){return(JSON.parse(localStorage.getItem('vst_tips')||'[]')).includes(id)}
+export function markTipSeen(id){const seen=JSON.parse(localStorage.getItem('vst_tips')||'[]');if(!seen.includes(id)){seen.push(id);localStorage.setItem('vst_tips',JSON.stringify(seen))}}
+export function markTutorialDone(){localStorage.setItem('vst_tutorial','done')}
 
 // ── STARTER ARTIFACTS A1-A10 ─────────────────────────────────
 // ═══════════════════════════════════════════════════════════
