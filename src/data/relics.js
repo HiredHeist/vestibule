@@ -1,4 +1,4 @@
-// Extracted from App.jsx (v0.8.0 split) — pure data, no behavior change.
+// Extracted from App.jsx (v0.8.0 split, depth-aware parser) — pure data.
 export const STARTER_ARTIFACTS=[
   // ── EXISTING MULTIPLIERS (kept, retagged with rarity) ─────────
   {id:'a1',name:'Vintage Guitar',emoji:'🎸',effect:'×1.3 when you play 4+ cards before Striking.',cost:10,multTrigger:'cards3',mult:1.3,rarity:'common'},

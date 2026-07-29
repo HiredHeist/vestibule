@@ -1,4 +1,4 @@
-// Extracted from App.jsx (v0.8.0 split) — pure data, no behavior change.
+// Extracted from App.jsx (v0.8.0 split, depth-aware parser) — pure data.
 export const ALL_CARDS=[
   {id:'amp',name:'Amp It Up',type:'RIFF',rarity:'Common',emoji:'⚡',embers:2,effect:'Target deals DOUBLE damage.',color:'#9933cc',typeColor:'#7722aa',copies:2},
   {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:0,effect:'+10% Corruption. ALL +3 ATK this strike.',color:'#aa1111',typeColor:'#880000',copies:2},

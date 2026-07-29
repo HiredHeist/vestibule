@@ -84,7 +84,7 @@ import {ENEMIES} from './data/enemies.js'
 import {ALL_MUSICIANS} from './data/members.js'
 import {ALL_CARDS,CARD_UPGRADES,RIFF_CHAINS,CORRUPTION_CARDS} from './data/cards.js'
 import {STARTER_ARTIFACTS,MYTHIC_ARTIFACTS,CIRCLE_ARTIFACTS,STARTER_PASSIVES,MYTHIC_PEDALS,BOSS_LOOT,PACT_REWARDS} from './data/relics.js'
-import {SLY_LINES,TOUR_QUOTES,BOSS_QUOTES,BOSS_BIOS,LOADING_TIPS,REWARD_TIPS,TUTORIAL_TIPS,BOSS_PORTRAITS,STONED_PORTRAITS,STAGE_PORTRAITS,MEMBER_PORTRAITS,IDLE_PORTRAITS,TUTORIAL_MEMBERS,ACHIEVEMENTS,HELL_EVENTS,isTutorialDone,hasSeenTip,markTipSeen,markTutorialDone} from './data/flavor.js'
+import {SLY_LINES,TOUR_QUOTES,BOSS_QUOTES,BOSS_BIOS,LOADING_TIPS,REWARD_TIPS,TUTORIAL_TIPS,BOSS_PORTRAITS,STONED_PORTRAITS,STAGE_PORTRAITS,MEMBER_PORTRAITS,IDLE_PORTRAITS,TUTORIAL_MEMBERS,ACHIEVEMENTS,HELL_EVENTS} from './data/flavor.js'
 let _uidCounter=Date.now()
 function uid(){return(++_uidCounter).toString(36)}
 import './App.css'
@@ -184,7 +184,8 @@ function saveRunHistory(stats,won,enemy,seed){
 function getRunHistory(){try{return JSON.parse(localStorage.getItem('vst_history')||'[]')}catch(e){return[]}}
 
 // ── ACHIEVEMENT SYSTEM ──────────────────────────────────────────
-// → ACHIEVEMENTS moved to src/data/flavor.js (v0.8.0 split)
+// → ACHIEVEMENTS moved to src/data/flavor.js
+
 function getAchievements(){try{return JSON.parse(localStorage.getItem('vst_achievements')||'[]')}catch(e){return[]}}
 function unlockAchievement(id){
   const current=getAchievements()
@@ -194,9 +195,11 @@ function unlockAchievement(id){
   return true
 }
 
-// → ENEMIES moved to src/data/enemies.js (v0.8.0 split)
+// → ENEMIES moved to src/data/enemies.js
 
-// → ALL_MUSICIANS moved to src/data/members.js (v0.8.0 split)
+
+// → ALL_MUSICIANS moved to src/data/members.js
+
 
 // ── UNLOCK MILESTONES ──────────────────────────────────────────
 const UNLOCK_MILESTONES=[
@@ -216,7 +219,8 @@ const CIRCLE_NAMES=['','I — Limbo','II — Lust','III — Gluttony','IV — Gr
 const CIRCLE_EMOJIS=['','🌑','🌹','🍖','💰','⚔','⛪','🗡','🎭','❄']
 
 // Skip rewards for The Descent map (fight 1 = small, fight 2 = medium)
-// → REWARD_TIPS moved to src/data/flavor.js (v0.8.0 split)
+// → REWARD_TIPS moved to src/data/flavor.js
+
 
 const DESCENT_REWARDS_1=[ // Fight 1 skip rewards (small) — 9 options
   {id:'s_stash',name:'+15 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>Math.min(420,p+15));gs.addLog('🌿 Skipped fight: +15 Stash')}},
@@ -242,10 +246,12 @@ const DESCENT_REWARDS_2=[ // Fight 2 skip rewards (medium) — 9 options
 ]
 
 // -- CARD UPGRADES: Doom Forge after each boss --
-// → CARD_UPGRADES moved to src/data/cards.js (v0.8.0 split)
+// → CARD_UPGRADES moved to src/data/cards.js
+
 
 // -- BOSS LOOT: unique drops per circle boss --
-// → BOSS_LOOT moved to src/data/relics.js (v0.8.0 split)
+// → BOSS_LOOT moved to src/data/relics.js
+
 const STREAK_BONUSES=[
   null, // 0 wins
   null, // 1 win
@@ -255,7 +261,8 @@ const STREAK_BONUSES=[
   {desc:'Start with a Mythic member',effect:'mythic'}, // 5+ wins
 ]
 
-// → PACT_REWARDS moved to src/data/relics.js (v0.8.0 split)
+// → PACT_REWARDS moved to src/data/relics.js
+
 
 // STAKES — difficulty modifier applied on top of the chosen deck.
 // hpMult is LIVE as of v0.8 — applied via _stakeHpF() in all three HP formulas. The live
@@ -317,8 +324,10 @@ function beatStake(stakeId,deckId){
 // ── RIFF CHAINS: 2-card combos that trigger bonus damage + visual feedback ──
 
 // ═══ CORRUPTION DECK — cards added to hand when crossing corruption thresholds ═══
-// → CORRUPTION_CARDS moved to src/data/cards.js (v0.8.0 split)
-// → RIFF_CHAINS moved to src/data/cards.js (v0.8.0 split)
+// → CORRUPTION_CARDS moved to src/data/cards.js
+
+// → RIFF_CHAINS moved to src/data/cards.js
+
 
 // Chain lookup: given a card id, return chains it participates in + partner card name
 function getChainHints(cardId){
@@ -329,7 +338,8 @@ function getChainHints(cardId){
   })
 }
 
-// → ALL_CARDS moved to src/data/cards.js (v0.8.0 split)
+// → ALL_CARDS moved to src/data/cards.js
+
 
 // ═══════════════════════════════════════════════════════════
 // KEYWORD STACK SYSTEM — centralized helpers for tier-scaled
@@ -461,17 +471,22 @@ function getTotalMastery(){
 // ═══════════════════════════════════════════════════════════
 // MEMBER PORTRAITS — replaces emoji with ink art + Dr. Katz wiggle
 // ═══════════════════════════════════════════════════════════
-// → MEMBER_PORTRAITS moved to src/data/flavor.js (v0.8.0 split)
-// → STAGE_PORTRAITS moved to src/data/flavor.js (v0.8.0 split)
+// → MEMBER_PORTRAITS moved to src/data/flavor.js
 
-// → IDLE_PORTRAITS moved to src/data/flavor.js (v0.8.0 split)
+// → STAGE_PORTRAITS moved to src/data/flavor.js
+
+
+// → IDLE_PORTRAITS moved to src/data/flavor.js
+
 // STONED_PORTRAITS — per-character "Too Stoned" state animations.
 // JV's plan: each character slumped over with smoke clouds. Drop GIFs at
 // public/members/stoned/{id}_stage_stoned.gif and they auto-load.
 // Currently empty — falls back to CSS smoke-cloud overlay (see StageSlot).
 // As you finish each character's stoned animation, just uncomment the line.
-// → STONED_PORTRAITS moved to src/data/flavor.js (v0.8.0 split)
-// → BOSS_PORTRAITS moved to src/data/flavor.js (v0.8.0 split)
+// → STONED_PORTRAITS moved to src/data/flavor.js
+
+// → BOSS_PORTRAITS moved to src/data/flavor.js
+
 // ═══ CIRCLE BACKGROUND THEMES ═══
 const CIRCLE_BG={
   1:{base:'#0c0a14',glow:'rgba(80,60,120,0.35)',name:'Limbo'},           // grey-purple fog
@@ -676,7 +691,8 @@ function LogLine({text}){
 
 
 // ═══ TOUR QUOTES — pre-fight loading screen flavor ═══════════════════════
-// → TOUR_QUOTES moved to src/data/flavor.js (v0.8.0 split)
+// → TOUR_QUOTES moved to src/data/flavor.js
+
 
 // ═══ TUTORIAL SYSTEM ═══════════════════════════════════════════════════════
 const TUTORIAL_ENEMIES=[
@@ -685,19 +701,115 @@ const TUTORIAL_ENEMIES=[
   {id:'tut_revenant',name:'The Revenant',circle:'TUTORIAL',subtitle:'Fight 3 of 3',maxHp:55,baseDmg:3,emoji:'💀',passive:'Stronger, but beatable. Find the combo.',passiveId:null},
 ]
 // Members the player starts with in the tutorial
-// → TUTORIAL_MEMBERS moved to src/data/flavor.js (v0.8.0 split)
+// → TUTORIAL_MEMBERS moved to src/data/flavor.js
+ // Lead Guitarist (FRENZIED) + Rhythm Guitarist (SHREDDER)
+// Predetermined hands for each tutorial fight
+const TUTORIAL_HANDS={
+  1:['battlecry','amp','newstrings','groupie','distortion','heavyriff','moshpit'], // basics: buff + attack
+  2:['battlecry','darktuning','setbreak','distortion','encore','roadie','groupie'], // corruption cards + heals
+  3:['battlecry','stagedive','encore','amp','heavyriff','distortion','groupie'], // battlecry+stagedive = DEATH WISH chain
+}
+// Tooltip sequences per fight
+// → TUTORIAL_TIPS moved to src/data/flavor.js
+
+const TUTORIAL_POST_FIGHT={
+  1:'Nice work! That was just a warm-up. The real darkness lies ahead...',
+  2:'You felt the corruption creeping in. Learn to use it — or it will consume you.',
+  3:'TUTORIAL COMPLETE',
+}
+function isTutorialDone(){return localStorage.getItem('vst_tutorial')==='done'}
+// First-encounter tips — shown once per mechanic
+function getEncounteredRules(){try{return JSON.parse(localStorage.getItem('vst_rules_seen')||'[]')}catch(e){return[]}}
+function markRuleSeen(idx){const seen=getEncounteredRules();if(!seen.includes(idx)){seen.push(idx);localStorage.setItem('vst_rules_seen',JSON.stringify(seen))}}
+const FIRST_TIPS={
+  pact:"After each boss, choose a Pact — a permanent buff for the rest of your run. Choose wisely, you can only pick one.",
+  forge:"The Doom Forge lets you upgrade one card permanently. Upgraded cards have enhanced effects. Pick your best card.",
+  shop:"Welcome to the Shop. Spend Stash to buy new cards, recruit members, and find artifacts. Browse carefully.",
+  event:"A random event! These offer risky choices with big rewards. Read both options before deciding.",
+  descent:"The Descent Map shows your path through Hell. You can skip some fights for alternative rewards.",
+  drugs:"The Dealer sells Shrooms and Acid. Drugs give powerful trip effects before fights, but bad trips are possible.",
+  corruption:"⚠ CORRUPT cards (purple) are powerful. Pushing corruption costs you tomorrow — pricier shops, weaker band, smaller stash. But it can't end your run. Push when it's worth it.",
+}
+function hasSeenTip(id){return(JSON.parse(localStorage.getItem('vst_tips')||'[]')).includes(id)}
+function markTipSeen(id){const seen=JSON.parse(localStorage.getItem('vst_tips')||'[]');if(!seen.includes(id)){seen.push(id);localStorage.setItem('vst_tips',JSON.stringify(seen))}}
+function markTutorialDone(){localStorage.setItem('vst_tutorial','done')}
+
+// ── STARTER ARTIFACTS A1-A10 ─────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// ARTIFACTS — DAMAGE/SCORE MULTIPLIERS (3 slots, max equipped)
+// ═══════════════════════════════════════════════════════════
+// Framing: ARTIFACTS PAYOUT, PEDALS ENABLE.
+// All artifacts here produce a multiplier (mult/multTrigger) or
+// score bump (scoreBump). Utility effects moved to STARTER_PASSIVES.
+// Rarity weights: Common 50%, Uncommon 30%, Rare 17%, Mythic 3%.
+// Mythic tier locked behind in-game accomplishments — see MYTHIC_ARTIFACTS.
+// → STARTER_ARTIFACTS moved to src/data/relics.js
+
+
+// ── MYTHIC ARTIFACTS (3) — UNLOCK-GATED ────────────────────────
+// Not in shop pool until corresponding unlock fires. See unlock conditions
+// in MODIFIER_CONTENT.md. Discovered via play, not displayed in trophies
+// until "seen" or "unlocked".
+// → MYTHIC_ARTIFACTS moved to src/data/relics.js
+
+
+// ═══════════════════════════════════════════════════════════
+// PEDALS (PASSIVES) — STRATEGY ENABLERS (2 slots, max equipped)
+// ═══════════════════════════════════════════════════════════
+// Framing: PEDALS ENABLE, ARTIFACTS PAYOUT.
+// All pedals here change rules / economy / draw / cost / structure.
+// No multipliers in this pool (those are artifacts).
+// Some pedals were reclassified from artifacts (former a3/a4/a7/a8/ca2/ca3/wardrums).
+// → STARTER_PASSIVES moved to src/data/relics.js
+
+
+// ── MYTHIC PEDALS (3) — UNLOCK-GATED ───────────────────────────
+// → MYTHIC_PEDALS moved to src/data/relics.js
+
+
+
+// ═══════════════════════════════════════════════════════════
+// RANDOM EVENTS — Hell-themed encounters between non-boss fights
+// ═══════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
+// STARTER DECKS — achievement-gated alternate starting decks
+// ═══════════════════════════════════════════════════════════
+// STARTER_DECKS — each deck has a distinct identity beyond just card pool.
+//   hpScale         — boss HP scaling (canonical difficulty knob)
+//   memberHpMod     — flat HP added to each band member at run start (Survivor +2)
+//   memberHpPct     — % HP modifier applied to each band member (Shredder -15%)
+//   handSize        — opening hand size (default HAND_SIZE = 5)
+//   startEmbers     — fight-start ember count (default = maxEmbers, usually 5)
+//   startCorruption — fight-start corruption (default 0)
+//   maxStrikesMod   — bonus strikes per fight (Survivor +1)
+//   freeArtifact    — start run with a random Tier 1 artifact (Engineer)
+//   signature       — id of the unique mechanic ('riff_chain_echo', 'corruption_feeds',
+//                     'copier', 'second_wind'). Wired in their respective handlers.
+//   scoreMult       — final-score multiplier for leaderboard (stacks with stake.scoreMult)
+const STARTER_DECKS=[
+  {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. The honest fight.',requirement:null,color:'#c8a060',hpScale:1.85,scoreMult:1.0},
+  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. +1 hand size. Band starts at 80% HP — glass cannons. SIGNATURE: Riff Chain Echo — every chain fires a second time at 33% damage on the next strike.',requirement:'beat_standard',color:'#ff4400',hpScale:2.00,memberHpPct:0.80,handSize:6,signature:'riff_chain_echo',scoreMult:1.4},
+  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Start each fight at 15% corruption. 4 starting embers. SIGNATURE: Corruption Feeds — every 10% corruption gained refunds 1 ember (max 5/strike).',requirement:'beat_shredder',color:'#cc44ff',hpScale:1.65,startEmbers:4,startCorruption:15,signature:'corruption_feeds',scoreMult:1.6},
+  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Combo nerd. 18 UTILITY cards. SIGNATURE: Copier — every UTILITY card has a 25% chance to add a copy of itself to your hand. Copies can\'t re-copy. Stack the engine.',requirement:'beat_ritualist',color:'#44aaff',hpScale:1.85,signature:'copier',scoreMult:1.2},
+  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Each band member starts with +2 max HP. SIGNATURE: Second Wind — each member gets ONE per-fight save: when they would go Too Stoned, they instead heal to 25% HP. Stacks across the band.',requirement:'beat_engineer',color:'#44cc44',hpScale:1.75,memberHpMod:2,maxStrikesMod:0,signature:'second_wind',scoreMult:1.3},
+]
 function getUnlockedDecks(){
   const achs=getAchievements()
   return STARTER_DECKS.filter(d=>!d.requirement||achs.includes(d.requirement))
 }
 
-// → HELL_EVENTS moved to src/data/flavor.js (v0.8.0 split)
+// → HELL_EVENTS moved to src/data/flavor.js
 
-// → BOSS_QUOTES moved to src/data/flavor.js (v0.8.0 split)
 
-// → BOSS_BIOS moved to src/data/flavor.js (v0.8.0 split)
+// → BOSS_QUOTES moved to src/data/flavor.js
 
-// → CIRCLE_ARTIFACTS moved to src/data/relics.js (v0.8.0 split)
+
+// → BOSS_BIOS moved to src/data/flavor.js
+
+
+// → CIRCLE_ARTIFACTS moved to src/data/relics.js
+
 
 // Card prices by rarity
 function cardPrice(card){
@@ -1302,7 +1414,8 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
 // ── SLY REACTIVE DIALOGUE ──
 // Sly comments on what JV is *actually doing* — categorized line pools keyed off live state.
 // First match wins (priority order in slyContext). Falls through to ambient when nothing notable is happening.
-// → SLY_LINES moved to src/data/flavor.js (v0.8.0 split)
+// → SLY_LINES moved to src/data/flavor.js
+
 const pickSlyLine=(tag)=>{const p=SLY_LINES[tag]||SLY_LINES.ambient;return p[Math.floor(Math.random()*p.length)]}
 
 function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePassive,recruitPack,recruitBought,onMarkRecruitBought,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,heldDMT,shroomsInStock,acidInStock,dmtInStock,onBuyShrooms,onBuyAcid,onBuyDMT,corruption,hangover,chosenPacts,addLog,encoreMode}){
@@ -2342,7 +2455,8 @@ function showFirstTimeTip(key, msg, addLog, addFloat) {
 }
 
 // ═══ LOADING TIPS — doom metal wisdom ═══
-// → LOADING_TIPS moved to src/data/flavor.js (v0.8.0 split)
+// → LOADING_TIPS moved to src/data/flavor.js
+
 
 // ═══ PACK ART — maps pack IDs to art files ═══
 const PACK_ART_MAP={cassette:'touring',cdr:'underground',vinyl:'festival',rarevinyl:'headliner',cursed:'demonic'}
@@ -10364,7 +10478,7 @@ function App(){
                 onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor=accent+'aa';e.currentTarget.style.boxShadow='none'}}>
                 {isArt?<ArtifactArtImg id={s.id} emoji={s.emoji} size={44}/>:<div style={{fontSize:40}}>{s.emoji}</div>}
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-primary)',letterSpacing:1,textAlign:'center',lineHeight:1.15}}>{s.name}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontStyle:'italic',color:'var(--ink-dim)',textAlign:'center',lineHeight:1.3,minHeight:32}}>{s.effect}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontStyle:'italic',color:'var(--ink-dim)',textAlign:'center',lineHeight:1.3,minHeight:32}}>{s.effect}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-positive)',letterSpacing:1,marginTop:'auto'}}>Sell · +{Math.floor((s.cost||0)*0.5)}🌿</div>
               </div>))}
             </div>

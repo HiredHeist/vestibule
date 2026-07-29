@@ -1,4 +1,4 @@
-// Extracted from App.jsx (v0.8.0 split) — pure data, no behavior change.
+// Extracted from App.jsx (v0.8.0 split, depth-aware parser) — pure data.
 export const SLY_LINES={
   multiBuy:[
     "Easy on the trigger, kid. I gotta restock.",
@@ -333,93 +333,7 @@ export const IDLE_PORTRAITS={
   tanuki:import.meta.env.BASE_URL+'members/idle/tanuki_stage_idle.gif',
   lucifer_member:import.meta.env.BASE_URL+'members/idle/lucifer_member_stage_idle.gif',
 }
-export const TUTORIAL_MEMBERS=['bjorn','gunnar'] // Lead Guitarist (FRENZIED) + Rhythm Guitarist (SHREDDER)
-// Predetermined hands for each tutorial fight
-const TUTORIAL_HANDS={
-  1:['battlecry','amp','newstrings','groupie','distortion','heavyriff','moshpit'], // basics: buff + attack
-  2:['battlecry','darktuning','setbreak','distortion','encore','roadie','groupie'], // corruption cards + heals
-  3:['battlecry','stagedive','encore','amp','heavyriff','distortion','groupie'], // battlecry+stagedive = DEATH WISH chain
-}
-// Tooltip sequences per fight
-// → TUTORIAL_TIPS moved to src/data/flavor.js (v0.8.0 split)
-const TUTORIAL_POST_FIGHT={
-  1:'Nice work! That was just a warm-up. The real darkness lies ahead...',
-  2:'You felt the corruption creeping in. Learn to use it — or it will consume you.',
-  3:'TUTORIAL COMPLETE',
-}
-export function isTutorialDone(){return localStorage.getItem('vst_tutorial')==='done'}
-// First-encounter tips — shown once per mechanic
-function getEncounteredRules(){try{return JSON.parse(localStorage.getItem('vst_rules_seen')||'[]')}catch(e){return[]}}
-function markRuleSeen(idx){const seen=getEncounteredRules();if(!seen.includes(idx)){seen.push(idx);localStorage.setItem('vst_rules_seen',JSON.stringify(seen))}}
-const FIRST_TIPS={
-  pact:"After each boss, choose a Pact — a permanent buff for the rest of your run. Choose wisely, you can only pick one.",
-  forge:"The Doom Forge lets you upgrade one card permanently. Upgraded cards have enhanced effects. Pick your best card.",
-  shop:"Welcome to the Shop. Spend Stash to buy new cards, recruit members, and find artifacts. Browse carefully.",
-  event:"A random event! These offer risky choices with big rewards. Read both options before deciding.",
-  descent:"The Descent Map shows your path through Hell. You can skip some fights for alternative rewards.",
-  drugs:"The Dealer sells Shrooms and Acid. Drugs give powerful trip effects before fights, but bad trips are possible.",
-  corruption:"⚠ CORRUPT cards (purple) are powerful. Pushing corruption costs you tomorrow — pricier shops, weaker band, smaller stash. But it can't end your run. Push when it's worth it.",
-}
-export function hasSeenTip(id){return(JSON.parse(localStorage.getItem('vst_tips')||'[]')).includes(id)}
-export function markTipSeen(id){const seen=JSON.parse(localStorage.getItem('vst_tips')||'[]');if(!seen.includes(id)){seen.push(id);localStorage.setItem('vst_tips',JSON.stringify(seen))}}
-export function markTutorialDone(){localStorage.setItem('vst_tutorial','done')}
-
-// ── STARTER ARTIFACTS A1-A10 ─────────────────────────────────
-// ═══════════════════════════════════════════════════════════
-// ARTIFACTS — DAMAGE/SCORE MULTIPLIERS (3 slots, max equipped)
-// ═══════════════════════════════════════════════════════════
-// Framing: ARTIFACTS PAYOUT, PEDALS ENABLE.
-// All artifacts here produce a multiplier (mult/multTrigger) or
-// score bump (scoreBump). Utility effects moved to STARTER_PASSIVES.
-// Rarity weights: Common 50%, Uncommon 30%, Rare 17%, Mythic 3%.
-// Mythic tier locked behind in-game accomplishments — see MYTHIC_ARTIFACTS.
-// → STARTER_ARTIFACTS moved to src/data/relics.js (v0.8.0 split)
-
-// ── MYTHIC ARTIFACTS (3) — UNLOCK-GATED ────────────────────────
-// Not in shop pool until corresponding unlock fires. See unlock conditions
-// in MODIFIER_CONTENT.md. Discovered via play, not displayed in trophies
-// until "seen" or "unlocked".
-// → MYTHIC_ARTIFACTS moved to src/data/relics.js (v0.8.0 split)
-
-// ═══════════════════════════════════════════════════════════
-// PEDALS (PASSIVES) — STRATEGY ENABLERS (2 slots, max equipped)
-// ═══════════════════════════════════════════════════════════
-// Framing: PEDALS ENABLE, ARTIFACTS PAYOUT.
-// All pedals here change rules / economy / draw / cost / structure.
-// No multipliers in this pool (those are artifacts).
-// Some pedals were reclassified from artifacts (former a3/a4/a7/a8/ca2/ca3/wardrums).
-// → STARTER_PASSIVES moved to src/data/relics.js (v0.8.0 split)
-
-// ── MYTHIC PEDALS (3) — UNLOCK-GATED ───────────────────────────
-// → MYTHIC_PEDALS moved to src/data/relics.js (v0.8.0 split)
-
-
-// ═══════════════════════════════════════════════════════════
-// RANDOM EVENTS — Hell-themed encounters between non-boss fights
-// ═══════════════════════════════════════════════════════════
-
-// ═══════════════════════════════════════════════════════════
-// STARTER DECKS — achievement-gated alternate starting decks
-// ═══════════════════════════════════════════════════════════
-// STARTER_DECKS — each deck has a distinct identity beyond just card pool.
-//   hpScale         — boss HP scaling (canonical difficulty knob)
-//   memberHpMod     — flat HP added to each band member at run start (Survivor +2)
-//   memberHpPct     — % HP modifier applied to each band member (Shredder -15%)
-//   handSize        — opening hand size (default HAND_SIZE = 5)
-//   startEmbers     — fight-start ember count (default = maxEmbers, usually 5)
-//   startCorruption — fight-start corruption (default 0)
-//   maxStrikesMod   — bonus strikes per fight (Survivor +1)
-//   freeArtifact    — start run with a random Tier 1 artifact (Engineer)
-//   signature       — id of the unique mechanic ('riff_chain_echo', 'corruption_feeds',
-//                     'copier', 'second_wind'). Wired in their respective handlers.
-//   scoreMult       — final-score multiplier for leaderboard (stacks with stake.scoreMult)
-const STARTER_DECKS=[
-  {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. The honest fight.',requirement:null,color:'#c8a060',hpScale:1.85,scoreMult:1.0},
-  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. +1 hand size. Band starts at 80% HP — glass cannons. SIGNATURE: Riff Chain Echo — every chain fires a second time at 33% damage on the next strike.',requirement:'beat_standard',color:'#ff4400',hpScale:2.00,memberHpPct:0.80,handSize:6,signature:'riff_chain_echo',scoreMult:1.4},
-  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Start each fight at 15% corruption. 4 starting embers. SIGNATURE: Corruption Feeds — every 10% corruption gained refunds 1 ember (max 5/strike).',requirement:'beat_shredder',color:'#cc44ff',hpScale:1.65,startEmbers:4,startCorruption:15,signature:'corruption_feeds',scoreMult:1.6},
-  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Combo nerd. 18 UTILITY cards. SIGNATURE: Copier — every UTILITY card has a 25% chance to add a copy of itself to your hand. Copies can\'t re-copy. Stack the engine.',requirement:'beat_ritualist',color:'#44aaff',hpScale:1.85,signature:'copier',scoreMult:1.2},
-  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Each band member starts with +2 max HP. SIGNATURE: Second Wind — each member gets ONE per-fight save: when they would go Too Stoned, they instead heal to 25% HP. Stacks across the band.',requirement:'beat_engineer',color:'#44cc44',hpScale:1.75,memberHpMod:2,maxStrikesMod:0,signature:'second_wind',scoreMult:1.3},
-]
+export const TUTORIAL_MEMBERS=['bjorn','gunnar']
 export const ACHIEVEMENTS=[
   {id:'first_blood',label:'First Blood',desc:'Win your first fight',emoji:'🗡'},
   {id:'circle_3',label:'Into the Deep',desc:'Reach Circle 3',emoji:'🔥'},

@@ -1,4 +1,4 @@
-// Extracted from App.jsx (v0.8.0 split) — pure data, no behavior change.
+// Extracted from App.jsx (v0.8.0 split, depth-aware parser) — pure data.
 export const ENEMIES=[
   // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
   // Wanderer — TRAINING WHEELS FIGHT. Per JV's design vision: r1 should be a
