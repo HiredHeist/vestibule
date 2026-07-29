@@ -80,6 +80,11 @@
 // ═══════════════════════════
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import {ENEMIES} from './data/enemies.js'
+import {ALL_MUSICIANS} from './data/members.js'
+import {ALL_CARDS,CARD_UPGRADES,RIFF_CHAINS,CORRUPTION_CARDS} from './data/cards.js'
+import {STARTER_ARTIFACTS,MYTHIC_ARTIFACTS,CIRCLE_ARTIFACTS,STARTER_PASSIVES,MYTHIC_PEDALS,BOSS_LOOT,PACT_REWARDS} from './data/relics.js'
+import {SLY_LINES,TOUR_QUOTES,BOSS_QUOTES,BOSS_BIOS,LOADING_TIPS,REWARD_TIPS,TUTORIAL_TIPS,BOSS_PORTRAITS,STONED_PORTRAITS,STAGE_PORTRAITS,MEMBER_PORTRAITS,IDLE_PORTRAITS,TUTORIAL_MEMBERS,ACHIEVEMENTS,HELL_EVENTS} from './data/flavor.js'
 let _uidCounter=Date.now()
 function uid(){return(++_uidCounter).toString(36)}
 import './App.css'
@@ -179,25 +184,7 @@ function saveRunHistory(stats,won,enemy,seed){
 function getRunHistory(){try{return JSON.parse(localStorage.getItem('vst_history')||'[]')}catch(e){return[]}}
 
 // ── ACHIEVEMENT SYSTEM ──────────────────────────────────────────
-const ACHIEVEMENTS=[
-  {id:'first_blood',label:'First Blood',desc:'Win your first fight',emoji:'🗡'},
-  {id:'circle_3',label:'Into the Deep',desc:'Reach Circle 3',emoji:'🔥'},
-  {id:'circle_5',label:'Halfway to Hell',desc:'Reach Circle 5',emoji:'⛧'},
-  {id:'circle_7',label:'The Abyss',desc:'Reach Circle 7',emoji:'🕳'},
-  {id:'circle_9',label:'Treachery',desc:'Reach Circle 9',emoji:'🗝'},
-  {id:'beat_lucifer',label:'Lucifer Slayer',desc:'Defeat Lucifer',emoji:'👑'},
-  {id:'hellquake',label:'Hellquake Survivor',desc:'Trigger a Hellquake and survive',emoji:'⛧'},
-  {id:'perfect_strike',label:'Perfect Strike',desc:'Kill a boss in 1 Strike',emoji:'⚔'},
-  {id:'corruption_lord',label:'Corruption Lord',desc:'Reach 100% Corruption and win the fight',emoji:'🌀'},
-  {id:'sober_run',label:'Sober Run',desc:'Reach Circle 5 without using any drugs',emoji:'☕'},
-  {id:'high_score_5k',label:'Rising Star',desc:'Score over 5,000 in a single run',emoji:'⭐'},
-  {id:'high_score_10k',label:'Headliner',desc:'Score over 10,000 in a single run',emoji:'🌟'},
-  {id:'drug_lord',label:'Drug Lord',desc:'Use both shrooms and acid in one run',emoji:'🍄'},
-  {id:'dmt_traveler',label:'DMT Traveler',desc:'Break through with DMT for the first time',emoji:'💠'},
-  {id:'full_band',label:'Full House',desc:'Have 5 members on stage at once',emoji:'🎸'},
-  {id:'mentor_link',label:'Master and Student',desc:'Form a Mentor Link',emoji:'⛓'},
-  {id:'ten_runs',label:'Dedicated',desc:'Complete 10 runs',emoji:'🔟'},
-]
+// → ACHIEVEMENTS moved to src/data/flavor.js (v0.8.0 split)
 function getAchievements(){try{return JSON.parse(localStorage.getItem('vst_achievements')||'[]')}catch(e){return[]}}
 function unlockAchievement(id){
   const current=getAchievements()
@@ -207,73 +194,9 @@ function unlockAchievement(id){
   return true
 }
 
-const ENEMIES=[
-  // ── CIRCLE I: LIMBO — No passives, intro difficulty ──────────
-  // Wanderer — TRAINING WHEELS FIGHT. Per JV's design vision: r1 should be a
-  // tutorial fight EVERY player wins, then shop 1 delivers a free 3rd member
-  // (Welcome Pack at line 1484) so the band "starts popping off" in fight 2+.
-  // Live playtest with 9-ATK team (Ulf 4 + Bjorn 5) STILL LOST at the previous
-  // 65 HP / 2 dmg tuning — corruption-stoning + ember scarcity killed Bjorn.
-  // Hard nerf: 45 HP base × 1.85 deck = 83 displayed; 2 dmg/strike means
-  // members at 6 HP survive 4 hits comfortably. Goal: ~95% win rate.
-  // Lost Soul (278) and Drifter (629) UNCHANGED — real game starts fight 2.
-  {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:45,baseDmg:2,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
-  {id:'lostsoul',tagline:'You were lost before you started.',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:150,baseDmg:5,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
-  {id:'drifter',tagline:'110 HP and pure aggression.',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:340,baseDmg:7,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
-  // ── CIRCLE II: LUST — Enemy buffs itself each strike ─────────
-  {id:'siren',tagline:'She sang. You listened. You lost.',name:'The Siren',circle:'Circle II — Lust',subtitle:'Fight 1 of 3',maxHp:330,baseDmg:5,emoji:'🌊',passive:'Seductive. Gains +1 damage each Strike.',passiveId:'selfbuff'},
-  {id:'tempter',tagline:'Temptation wins again.',name:'The Tempter',circle:'Circle II — Lust',subtitle:'Fight 2 of 3',maxHp:500,baseDmg:6,emoji:'🌹',passive:'Enthralling. Gains +1 damage each Strike. Starts stronger.',passiveId:'selfbuff'},
-  {id:'lust_boss',tagline:'Irresistible to the end.',name:'The Seducer',circle:'Circle II — Lust',subtitle:'Circle Boss — Fight 3 of 3',maxHp:1300,baseDmg:7,emoji:'💋',passive:'Irresistible. Gains +2 damage each Strike. Dangerous if left alive.',passiveId:'selfbuff2'},
-  // ── CIRCLE III: GLUTTONY — Heals when you play cards ─────────
-  {id:'glutton',tagline:'It ate your strikes for breakfast.',name:'The Glutton',circle:'Circle III — Gluttony',subtitle:'Fight 1 of 3',maxHp:775,baseDmg:5,emoji:'🍖',passive:'Insatiable. Heals 8 HP every time a card is played.',passiveId:'cardHeal3b'},
-  {id:'feaster',tagline:'Still hungry. Always hungry.',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:1120,baseDmg:6,emoji:'🦷',passive:'Voracious. Heals 15 HP every time a card is played.',passiveId:'cardHeal5'},
-  {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:3536,baseDmg:7,emoji:'🕳',passive:'Endless hunger. Heals 25 HP per card played. Strike fast.',passiveId:'cardHeal8'},
-  // ── CIRCLE IV: GREED — Steals stash each strike ──────────────
-  {id:'miser',tagline:'You could not afford to win.',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:770,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1🌿 from your Stash each Strike. Win to take it back.',passiveId:'stashSteal'},
-  {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:1220,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2🌿 per Strike. Your stash is its stash.',passiveId:'stashSteal2'},
-  {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:3550,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3🌿 per Strike. Pure greed compounded.',passiveId:'stashSteal3'},
-  // ── CIRCLE V: ANGER — Hits harder the more you buff ─────────
-  {id:'wrathful',tagline:'It rages itself to death.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:1090,baseDmg:5,emoji:'🔥',passive:'Self-immolating rage. Loses 8% HP each Strike but deals +50% damage cumulatively. Outlast it.',passiveId:'selfImmolate'},
-  {id:'berserker',tagline:'Wounded fury — strike fast or weather the storm.',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:1680,baseDmg:6,emoji:'⚔️',passive:'Bloodlust. Below 50% HP, attacks deal double damage.',passiveId:'bloodlust'},
-  {id:'anger_boss',tagline:'The commander of the damned.',name:'The Warlord',circle:'Circle V — Anger',subtitle:'Circle Boss — Fight 3 of 3',maxHp:3840,baseDmg:7,emoji:'💢',passive:'Commands. Each Strike, applies a random debuff: -1 ATK to all members, lose 1 ember, OR discard 1 hand card.',passiveId:'commands'},
-  // ── CIRCLE VI: HERESY — Corrupts your corruption system ──────
-  {id:'heretic',tagline:'Your soul is sufficiently corrupted now.',name:'The Heretic',circle:'Circle VI — Heresy',subtitle:'Fight 1 of 3',maxHp:1550,baseDmg:5,emoji:'🔱',passive:'Blasphemous. Each Strike raises your Corruption by 10%.',passiveId:'corruptPlayer'},
-  {id:'apostate',tagline:'Corruption claimed another believer.',name:'The Apostate',circle:'Circle VI — Heresy',subtitle:'Fight 2 of 3',maxHp:2340,baseDmg:6,emoji:'⛧',passive:'Corrupting. Raises Corruption by 15% each Strike.',passiveId:'corruptPlayer15'},
-  {id:'heresy_boss',tagline:'Even your chaos served its doctrine.',name:'The False Prophet',circle:'Circle VI — Heresy',subtitle:'Circle Boss — Fight 3 of 3',maxHp:3780,baseDmg:7,emoji:'📖',passive:'Toxic doctrine. Corruption +20% per Strike. Hellquake territory every fight.',passiveId:'corruptPlayer20'},
-  // ── CIRCLE VII: VIOLENCE — Targets your healthiest member ────
-  {id:'brute',tagline:'Your healthiest fell first.',name:'The Brute',circle:'Circle VII — Violence',subtitle:'Fight 1 of 3',maxHp:2000,baseDmg:6,emoji:'🗡️',passive:'Calculated. Always targets the member with highest HP.',passiveId:'targetHighestHp'},
-  {id:'hunter',tagline:'Prey spotted. Prey eliminated.',name:'The Hunter',circle:'Circle VII — Violence',subtitle:'Fight 2 of 3',maxHp:2850,baseDmg:7,emoji:'🏹',passive:'Predatory. Targets highest HP member. Deals +50% damage to them.',passiveId:'targetHighestHp2'},
-  {id:'violence_boss',tagline:'The sentence was carried out.',name:'The Executioner',circle:'Circle VII — Violence',subtitle:'Circle Boss — Fight 3 of 3',maxHp:4180,baseDmg:8,emoji:'🩸',passive:'Methodical. Targets highest HP and deals double damage. Protect your strongest.',passiveId:'targetHighestHp3'},
-  // ── CIRCLE VIII: FRAUD — Shuffles your hand after each strike ──
-  {id:'trickster',tagline:'You played right into its hands.',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:3960,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle'},
-  {id:'deceiver',tagline:'Nothing was what it seemed.',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:5040,baseDmg:7,emoji:'🎭',passive:'Manipulative. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle2'},
-  {id:'fraud_boss',tagline:'The greatest con: you thought you could win.',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:6400,baseDmg:8,emoji:'🪞',passive:'Master of lies. After each Strike, 2 cards in hand are discarded and replaced.',passiveId:'fraudShuffle3'},
-  // ── CIRCLE IX: TREACHERY ──────────────────────────────────────
-  {id:'traitor',tagline:'Your own band turned on you.',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:2000,baseDmg:6,emoji:'🗝️',passive:'Paranoia. Each Strike, 1 random member refuses to attack and deals 3 damage to an ally.',passiveId:'paranoia'},
-  {id:'betrayer',tagline:'It stole everything you built.',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:2100,baseDmg:7,emoji:'🔒',passive:'Soul Thief. Each Strike, steals 1 permanent ATK from a random member. Returned on victory.',passiveId:'soulThief'},
-  {id:'lucifer',tagline:'He has seen better challengers. A lot of them.',name:'Lucifer',circle:'Circle IX — Treachery',subtitle:'⛧ The Final Circle — Fight 3 of 3',maxHp:100000,baseDmg:9,emoji:'😈',passive:'The Lord of Hell. Your victories weaken him. Two phases. The ultimate test.',passiveId:'luciferBoss'},
-]
+// → ENEMIES moved to src/data/enemies.js (v0.8.0 split)
 
-const ALL_MUSICIANS=[
-  {id:'bjorn',name:'Bjorn',role:'Lead Guitarist',atk:5,hp:6,maxHp:8,emoji:'🎸',keyword:'FRENZIED',desc:'High ATK, fragile. The carry.',bio:'Former blacksmith from Uppsala. Traded his hammer for a guitar at 14. His riffs have literally killed small animals.'},
-  {id:'ragnar',name:'Ragnar',role:'Lead Guitarist',atk:4,hp:7,maxHp:9,emoji:'🎸',keyword:'FRENZIED',desc:'Slightly tankier lead.',bio:'Claims to be descended from the real Ragnar Lothbrok. Nobody believes him, but nobody argues when he plays.'},
-  {id:'thor',name:'Thor',role:'Drummer',atk:0,hp:8,maxHp:11,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Lucky drummer. Roll high and the whole band hits harder.',bio:'Not THAT Thor. This one is louder. Broke three drum kits in one show. The venue banned drums after that.'},
-  {id:'ingrid',name:'Ingrid',role:'Bass Player',atk:3,hp:10,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'High HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).',bio:'The foundation. Ingrid held the band together through two breakups, a lawsuit, and a literal earthquake during a set.'},
-  {id:'loki',name:'Loki',role:'Synth Player',atk:3,hp:6,maxHp:8,emoji:'🎹',keyword:'CORRUPT',desc:'Damage scales with Corruption.',bio:'Found a cursed synthesizer in a pawn shop. The more corrupt the signal, the harder it hits. He sleeps with it.'},
-  {id:'grimnir',name:'Grimnir',role:'Vocalist',atk:2,hp:7,maxHp:9,emoji:'🎤',keyword:'DEBUFF',desc:'The Masked One. Reduces boss passive each turn.',bio:'Nobody has seen his face. His voice strips the will from anything that hears it. Even the sound guy wears earplugs.'},
-  {id:'dag',name:'Dag',role:'Bass Player',atk:2,hp:12,maxHp:16,emoji:'🎵',keyword:'ANCHOR',desc:'Tankiest member.',bio:'16 HP of pure Viking stubbornness. Dag once played a 9-hour set without sitting down. He does not believe in breaks.'},
-  {id:'vitalik',name:'Vitalik',role:'Dark Minstrel',atk:6,hp:9,maxHp:12,emoji:'🪈',keyword:'FOLK MAGIC',desc:'Nobody asked. Nobody complained twice.',bio:'Showed up backstage with a carved bone flute. When asked to leave, he played one note. Everyone sat down and listened.'},
-  {id:'sigrid',name:'Sigrid',role:'Rhythm Guitarist',atk:3,hp:8,maxHp:11,emoji:'🎸',keyword:'SHREDDER',desc:'+ATK on every same-type chain. Stack riffs.',bio:'Ex-military. Applied the same discipline to guitar that she applied to combat. Each riff is a controlled burst.'},
-  {id:'gunnar',name:'Gunnar',role:'Rhythm Guitarist',atk:4,hp:7,maxHp:9,emoji:'🎸',keyword:'SHREDDER',desc:'Rhythm? He makes the rhythm.',bio:'Gunnar does not follow tempo. Tempo follows Gunnar. Three metronomes have broken trying to keep up with him.'},
-  {id:'astrid',name:'Astrid',role:'Vocalist',atk:3,hp:8,maxHp:11,emoji:'🎤',keyword:'DEBUFF',desc:'Her voice alone can break a curse.',bio:'Trained as an opera singer. Got bored. Now she shatters demonic wards with a B-flat. The opera house still calls.'},
-  {id:'freya',name:'Freya',role:'Synth Player',atk:4,hp:5,maxHp:7,emoji:'🎹',keyword:'CORRUPT',desc:'She plays the dark frequencies.',bio:'Freya heard the frequency that drives men mad. Instead of going mad, she tuned her synth to it. Glass cannon.'},
-  {id:'ulf',name:'Ulf',role:'Bass Player',atk:4,hp:9,maxHp:12,emoji:'🎵',keyword:'ANCHOR',desc:'The anchor that also bites.',bio:'Most bass players hold the line. Ulf holds the line and then crosses it. His low-end hits like a freight train.'},
-  {id:'brynja',name:'Brynja',role:'Bass Player',atk:1,hp:14,maxHp:19,emoji:'🎵',keyword:'ANCHOR',desc:'An immovable wall. The bass never stops.',bio:'19 HP. She once tanked a full drum kit falling on her mid-set and kept playing. The wall of Valhalla.'},
-  {id:'rolf',name:'Rolf',role:'Drummer',atk:1,hp:9,maxHp:12,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Hits harder than the rest combined. Statistically speaking.',bio:'A mathematician who discovered the optimal striking frequency. Each hit is precisely calculated for maximum devastation.'},
-  {id:'orm',name:'Orm',role:'Dark Minstrel',atk:2,hp:11,maxHp:15,emoji:'🪈',keyword:'HEXED',desc:'The longer he plays, the worse it gets. For everyone.',bio:'Orm plays an instrument nobody can name. It has too many strings and not enough frets. The sound haunts your dreams.'},
-  {id:'tanuki',name:'Tanuki',role:'Bass Player',atk:8,hp:8,maxHp:11,emoji:'🦝',keyword:'ANCHOR',desc:'The heaviest bass in Hell. Built like a tank, hits like a truck.',locked:true,unlockAt:3000,bio:'A raccoon-dog from Japanese folklore. How he ended up in a Norse doom metal band is a question nobody dares ask.'},
-  {id:'lucifer_member',name:'Lucifer',role:'The Devil',atk:20,hp:69,maxHp:96,emoji:'😈',keyword:'FALLEN',desc:'Cannot be healed. Loses 1 HP per strike. If he dies, game over. Max 3 band members. Sell for 69 herb.',locked:true,unlockAt:100000,bio:'The actual Devil. Joined the band out of boredom. Unstoppable power, but his HP drains every strike. A ticking time bomb of pure evil.'},
-]
+// → ALL_MUSICIANS moved to src/data/members.js (v0.8.0 split)
 
 // ── UNLOCK MILESTONES ──────────────────────────────────────────
 const UNLOCK_MILESTONES=[
@@ -293,26 +216,7 @@ const CIRCLE_NAMES=['','I — Limbo','II — Lust','III — Gluttony','IV — Gr
 const CIRCLE_EMOJIS=['','🌑','🌹','🍖','💰','⚔','⛪','🗡','🎭','❄']
 
 // Skip rewards for The Descent map (fight 1 = small, fight 2 = medium)
-const REWARD_TIPS={
-  's_stash':'Adds 15 to your permanent stash balance.',
-  's_ember':'Permanently increases your max embers by 1 for the rest of the run.',
-  's_corrupt':'Reduces your current corruption by 15% immediately.',
-  's_atk':'One random alive band member gains +1 ATK permanently.',
-  's_draw1':'Draw 1 extra card at the start of your next fight.',
-  's_discard':'Start the next fight with 5 discards instead of 4.',
-  's_card':'A random Common rarity card is added to your deck permanently.',
-  's_stashper':'Gain 5 stash for each alive band member (2-6 members = 10-30 stash).',
-  's_embers2':'Start the next fight with 2 extra embers (one-time bonus).',
-  'm_stash':'Adds 25 to your permanent stash balance.',
-  'm_corrupt':'Resets your corruption to 0% immediately.',
-  'm_draw2':'Draw 2 extra cards at the start of your next fight.',
-  'm_card':'A random Uncommon rarity card is added to your deck permanently.',
-  'm_allatk':'Every alive band member gains +1 ATK permanently.',
-  'm_stash40':'Adds 40 to your permanent stash balance.',
-  'm_delete':'Permanently removes a random Common card from your deck. Thins your deck!',
-  'm_free':'The first card you play next fight costs 0 embers.',
-  'm_stonewall':'All are shielded from Too Stoned for 2 strikes next fight.',
-}
+// → REWARD_TIPS moved to src/data/flavor.js (v0.8.0 split)
 
 const DESCENT_REWARDS_1=[ // Fight 1 skip rewards (small) — 9 options
   {id:'s_stash',name:'+15 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>Math.min(420,p+15));gs.addLog('🌿 Skipped fight: +15 Stash')}},
@@ -338,71 +242,10 @@ const DESCENT_REWARDS_2=[ // Fight 2 skip rewards (medium) — 9 options
 ]
 
 // -- CARD UPGRADES: Doom Forge after each boss --
-const CARD_UPGRADES={
-  battlecry:{desc:'+2 ATK (was +1). +1 max HP to target.',hp:'target',hpAmt:1},
-  amp:{desc:'Doubles ATK AND +2 max HP to target.',hp:'target',hpAmt:2},
-  newstrings:{desc:'+3 ATK (was +2). +1 max HP to target.',hp:'target',hpAmt:1},
-  encore:{desc:'Attacks again + +1 perm ATK. +2 max HP to target.',hp:'target',hpAmt:2},
-  resonancecard:{desc:'Copies highest ATK. +2 max HP to target.',hp:'target',hpAmt:2},
-  crowdsurf:{desc:'4 damage per card (was 3).'},
-  heavyriff:{desc:'60% of total ATK (was 50%).'},
-  stagedive:{desc:'Damage = HP. Member heals back 50%.'},
-  infencore:{desc:'Doubles strike damage. +1 max HP to all.',hp:'all',hpAmt:1},
-  possessedperf:{desc:'Triples ATK. Stone shield all. +2 max HP to all.',hp:'all',hpAmt:2},
-  overdrive:{desc:'Doubles ATK at 50% corruption (was 60%).'},
-  moshpit:{desc:'5 damage per member (was 3).'},
-  demotape:{desc:'Copies 75% ATK (was 50%).'},
-  burnset:{desc:'Draw 2 cards (was 1).'},
-  herbmoney:{desc:'Full stash as damage. Keep half stash.'},
-  goingbroke:{desc:'Stash x1.5 as damage.'},
-  soundwall:{desc:'+4 base damage at all tiers.'},
-  doubledown:{desc:'Next TWO cards cost 0 (was 1).'},
-  distortion:{desc:'+2 temp ATK/member (was +1). +1 max HP to all.',hp:'all',hpAmt:1},
-  dialtoeleven:{desc:'+10% corruption. All members +3 ATK this Strike (was +2).'},
-  deathriff:{desc:'80 base damage (was 60).'},
-  feedbackloop:{desc:'Corruption / 1.5 damage (was / 2).'},
-  ampstatic:{desc:'Corruption / 8 ATK (was / 10).'},
-  darktuning:{desc:'Corruption / 8 buffs (was / 10).'},
-  sigdecay:{desc:'Draw 3 (was 2).'},
-  controlfeedback:{desc:'Corruption to 50%. Heal ALL to full. +1 max HP to all.',hp:'all',hpAmt:1},
-  sabbathsigil:{desc:'Roll d10 twice, pick better result.'},
-  bloodritual:{desc:'8x sacrificed HP as damage (was 6x).'},
-  seance:{desc:'Heal corruption/3 per member (was /4). +1 max HP to all.',hp:'all',hpAmt:1},
-  soundcheck:{desc:'Heal 6 HP (was 4). +1 max HP to hurt members.',hp:'hurt',hpAmt:1},
-  roadie:{desc:'Shield 3 strikes (was 2). Heal 4 HP. +2 max HP.',hp:'target',hpAmt:2},
-  wakeup:{desc:'Revive + heal all to 75%. +2 max HP to ALL.',hp:'all',hpAmt:2},
-  setlist:{desc:'Draw 4 (was 3).'},
-  setbreak:{desc:'Gain 3 Embers (was 2). +1 max HP to weakest.',hp:'weakest',hpAmt:1},
-  remaster:{desc:'Draw 4 (was 3).'},
-  powertap:{desc:'Gain 3 Embers (was 2).'},
-  staticcharge:{desc:'Gain 5 Embers at 0% corruption (was 4).'},
-  tappedout:{desc:'Gain 6 Embers next strike (was 5).'},
-  ampoverload:{desc:'Gain 4 Embers (was 3).'},
-  groupie:{desc:'Gain 3 Embers. Draw 2 (was 1).'},
-  soundboard:{desc:'Gain 3 Embers. Draw 2 next strike (was 1). +1 max HP to random.',hp:'random',hpAmt:1},
-}
+// → CARD_UPGRADES moved to src/data/cards.js (v0.8.0 split)
 
 // -- BOSS LOOT: unique drops per circle boss --
-const BOSS_LOOT=[
-  null, null,
-  {id:'limbos_echo',name:"Limbo's Echo",emoji:'👁',desc:'×1.3 per Strike remaining when you hit.',effect:'multStrikesLeft',circle:1,mult:1.3,multTrigger:'perStrikesLeft'},
-  null, null,
-  {id:'love_letter',name:'Love Letter',emoji:'💋',desc:'First card each fight is free. ×1.2 if you play it.',effect:'freeFirst',circle:2,mult:1.2,multTrigger:'firstCardFree'},
-  null, null,
-  {id:'endless_hunger',name:'Endless Hunger',emoji:'🕳',desc:'×2.0 when your band has 4+ alive members.',effect:'mult4alive',circle:3,mult:2.0,multTrigger:'alive4'},
-  null, null,
-  {id:'golden_tooth',name:'Golden Tooth',emoji:'🪙',desc:'+5 Stash per boss kill. ×1.1 per 20 Stash.',effect:'stashBoss',circle:4,mult:1.1,multTrigger:'perStash20'},
-  null, null,
-  {id:'berserker_rage',name:"Berserker's Rage",emoji:'🔥',desc:'×2.5 if any member has 20+ ATK.',effect:'atk20mult',circle:5,mult:2.5,multTrigger:'memberAtk20'},
-  null, null,
-  {id:'heretics_brand',name:"Heretic's Brand",emoji:'⛧',desc:'×1.5 per corruption threshold passed (25/50/75/100).',effect:'corrThresholds',circle:6,mult:1.5,multTrigger:'perCorrThreshold'},
-  null, null,
-  {id:'the_blade',name:'The Blade',emoji:'🗡',desc:'×3.0 if you play exactly 1 card then Strike. Surgical.',effect:'singleCard',circle:7,mult:3.0,multTrigger:'cards1'},
-  null, null,
-  {id:'mask_of_lies',name:'Mask of Lies',emoji:'🎭',desc:'×1.2 per member with a different keyword on stage.',effect:'uniqueKeywords',circle:8,mult:1.2,multTrigger:'perUniqueKeyword'},
-  null, null,
-  null,
-]
+// → BOSS_LOOT moved to src/data/relics.js (v0.8.0 split)
 const STREAK_BONUSES=[
   null, // 0 wins
   null, // 1 win
@@ -412,21 +255,7 @@ const STREAK_BONUSES=[
   {desc:'Start with a Mythic member',effect:'mythic'}, // 5+ wins
 ]
 
-const PACT_REWARDS=[
-  {id:'ember_surge',name:'Ember Surge',emoji:'🔥',desc:'+1 max Embers permanently.',color:'#ff6600'},
-  {id:'iron_strings',name:'Iron Strings',emoji:'🎸',desc:'All +1 ATK permanently.',color:'#ee2222'},
-  {id:'thick_skin',name:'Thick Skin',emoji:'🛡',desc:'All +3 max HP permanently.',color:'#33dd33'},
-  {id:'dark_bargain',name:'Dark Bargain',emoji:'🌑',desc:'All CORRUPT cards cost 1 less Ember.',color:'#cc44ff'},
-  {id:'speed_demon',name:'Speed Demon',emoji:'⚡',desc:'Draw 1 extra card per Strike.',color:'#ffdd00'},
-  {id:'blood_price',name:'Blood Price',emoji:'🩸',desc:'Blood Ritual deals 9× instead of 6×.',color:'#cc0000'},
-  {id:'clean_living',name:'Clean Living',emoji:'✨',desc:'At fight start: all members +2 ATK and +2 HP.',color:'#ffffff'},
-  {id:'corruption_engine',name:'Corruption Engine',emoji:'☠',desc:'+5% Corruption at start of each fight.',color:'#aa00ff'},
-  {id:'merchants_eye',name:'Merchants Eye',emoji:'💰',desc:'All shop items cost 20% less.',color:'#44cc44'},
-  {id:'stone_wall',name:'Stone Wall',emoji:'🧱',desc:'Members take 1 less damage per Strike (min 1).',color:'#8888aa'},
-  {id:'sixth_slot',name:'Sixth Slot',emoji:'👥',desc:'+1 band member slot. Recruit at next shop.',color:'#e8a820'},
-  {id:'war_drums',name:'War Drums',emoji:'🥁',desc:'+1 Strike per fight permanently.',color:'#dd2222'},
-  {id:'atonement',name:'Atonement',emoji:'🕊',desc:'-15% Corruption after every boss kill.',color:'#88ccff'},
-]
+// → PACT_REWARDS moved to src/data/relics.js (v0.8.0 split)
 
 // STAKES — difficulty modifier applied on top of the chosen deck.
 // hpMult is LIVE as of v0.8 — applied via _stakeHpF() in all three HP formulas. The live
@@ -488,29 +317,8 @@ function beatStake(stakeId,deckId){
 // ── RIFF CHAINS: 2-card combos that trigger bonus damage + visual feedback ──
 
 // ═══ CORRUPTION DECK — cards added to hand when crossing corruption thresholds ═══
-const CORRUPTION_CARDS={
-  25:{id:'dark_whisper',name:'Dark Whisper',type:'CORRUPT',rarity:'Common',emoji:'👁',embers:0,effect:'FREE. Target +2 ATK. +5% Corruption.',color:'#aa1111',typeColor:'#880000'},
-  50:{id:'blood_price',name:'Blood Price',type:'CORRUPT',rarity:'Uncommon',emoji:'🩸',embers:0,effect:'FREE. Target +4 ATK permanently. -3 HP to that member.',color:'#aa1111',typeColor:'#880000'},
-  75:{id:'void_pact',name:'Void Pact',type:'CORRUPT',rarity:'Rare',emoji:'🌀',embers:0,effect:'FREE. All members +2 ATK this Strike. +10% Corruption.',color:'#aa1111',typeColor:'#880000'},
-}
-const RIFF_CHAINS=[
-  {id:'shred_storm',name:'SHRED STORM',cards:['resonancecard','infencore'],color:'#ffdd00',emoji:'⚡'},
-  {id:'hellfire',name:'HELLFIRE',cards:['darktuning','overdrive'],color:'#ff4400',emoji:'🔥'},
-  {id:'blood_pact',name:'BLOOD PACT',cards:['bloodritual','wakeup'],color:'#cc0000',emoji:'🩸'},
-  {id:'triple_threat',name:'TRIPLE THREAT',cards:['possessedperf','encore'],color:'#ff00ff',emoji:'👿'},
-  {id:'soul_harvest',name:'SOUL HARVEST',cards:['distortion','feedbackloop'],color:'#aa00ff',emoji:'💀'},
-  {id:'death_wish',name:'DEATH WISH',cards:['battlecry','stagedive'],color:'#ff2222',emoji:'☠'},
-  {id:'eternal_encore',name:'ETERNAL ENCORE',cards:['encore','infencore'],color:'#ff8800',emoji:'🔁'},
-  {id:'clean_machine',name:'CLEAN MACHINE',cards:['staticcharge','deathriff'],color:'#ffffff',emoji:'✨'},
-  {id:'wall_of_sound',name:'WALL OF SOUND',cards:['soundwall','amp'],color:'#4488ff',emoji:'🔊'},
-  {id:'feedback_hell',name:'FEEDBACK HELL',cards:['feedbackloop','ampstatic'],color:'#cc44ff',emoji:'🎛'},
-  {id:'mosh_madness',name:'MOSH MADNESS',cards:['moshpit','battlecry'],color:'#44ff44',emoji:'🤘'},
-  {id:'dark_sacrifice',name:'DARK SACRIFICE',cards:['bloodritual','seance'],color:'#880044',emoji:'🔮'},
-  {id:'noise_gate',name:'NOISE GATE',cards:['burnset','groupie'],color:'#ffaa00',emoji:'🎸'},
-  {id:'power_surge',name:'POWER SURGE',cards:['powertap','newstrings'],color:'#ff6600',emoji:'🔌'},
-  {id:'demon_core',name:'DEMON CORE',cards:['sabbathsigil','overdrive'],color:'#ff0044',emoji:'⛧'},
-  {id:'last_stand',name:'LAST STAND',cards:['stagedive','wakeup'],color:'#00ddff',emoji:'💪'},
-]
+// → CORRUPTION_CARDS moved to src/data/cards.js (v0.8.0 split)
+// → RIFF_CHAINS moved to src/data/cards.js (v0.8.0 split)
 
 // Chain lookup: given a card id, return chains it participates in + partner card name
 function getChainHints(cardId){
@@ -521,94 +329,7 @@ function getChainHints(cardId){
   })
 }
 
-const ALL_CARDS=[
-  {id:'amp',name:'Amp It Up',type:'RIFF',rarity:'Common',emoji:'⚡',embers:2,effect:'Target deals DOUBLE damage.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'dialtoeleven',name:'Dial to Eleven',type:'CORRUPT',rarity:'Common',emoji:'📻',embers:0,effect:'+10% Corruption. ALL +3 ATK this strike.',color:'#aa1111',typeColor:'#880000',copies:2},
-  {id:'soundcheck',name:'Sound Check',type:'UTILITY',rarity:'Common',emoji:'🔊',embers:2,effect:'ALL +4 HP. Injured members also get +1 ATK.',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'sigdecay',name:'Signal Decay',type:'CORRUPT',rarity:'Common',emoji:'📡',embers:1,effect:'Discard 1, draw 2. Trade up.',color:'#aa1111',typeColor:'#880000',copies:1},
-  {id:'battlecry',name:'Battle Cry',type:'RIFF',rarity:'Common',emoji:'🤘',embers:1,effect:'Target: +1 ATK permanently.',color:'#9933cc',typeColor:'#7722aa',copies:4},
-  {id:'roadie',name:'Roadie',type:'UTILITY',rarity:'Common',emoji:'🛡',embers:1,effect:'+2 HP. Stonewall shield (immune to KO for 2 strikes).',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'setlist',name:'Setlist',type:'UTILITY',rarity:'Common',emoji:'📋',embers:0,effect:'Draw 3. Discard 1 of choice.',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'groupie',name:'Groupie',type:'EMBER',rarity:'Uncommon',emoji:'🍯',embers:1,effect:'+2 Embers. Draw 1 card.',color:'#c87820',typeColor:'#a05a10',copies:2},
-  {id:'demotape',name:'Demo Tape',type:'RIFF',rarity:'Common',emoji:'📼',embers:1,effect:'Replay your last RIFF card for free.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'newstrings',name:'New Strings',type:'RIFF',rarity:'Uncommon',emoji:'🎸',embers:2,effect:'+2 ATK permanently to target.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'encore',name:'Encore',type:'RIFF',rarity:'Uncommon',emoji:'🔁',embers:2,effect:'Target attacks TWICE.',color:'#9933cc',typeColor:'#7722aa',copies:3},
-  {id:'wakeup',name:'Wake Up Call',type:'UTILITY',rarity:'Uncommon',emoji:'☕',embers:1,effect:'ALL +2 HP. Revives knocked-out members.',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'feedbackloop',name:'Feedback Loop',type:'CORRUPT',rarity:'Uncommon',emoji:'🎛',embers:2,effect:'Deal direct damage equal to half your Corruption.',color:'#aa1111',typeColor:'#880000',copies:1},
-  {id:'tappedout',name:'Tapped Out',type:'EMBER',rarity:'Uncommon',emoji:'🪙',embers:0,effect:'Gain 5 Embers at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
-  {id:'controlfeedback',name:'Controlled Feedback',type:'CORRUPT',rarity:'Uncommon',emoji:'🎚',embers:2,effect:'Reset Corruption to 50%. Fully heal target. A second chance.',color:'#aa1111',typeColor:'#880000',copies:1},
-  {id:'burnset',name:'Burn the Set',type:'RIFF',rarity:'Uncommon',emoji:'🔥',embers:0,effect:'Select up to 3 cards first, then play this to discard them and draw that many +1. (No selection = draw 1 card.)',color:'#9933cc',typeColor:'#7722aa',copies:1},
-  {id:'soundwall',name:'Sound Wall',type:'RIFF',rarity:'Uncommon',emoji:'🔈',embers:2,effect:'+1 ATK permanently to ALL. The whole band gets louder.',color:'#9933cc',typeColor:'#7722aa',copies:1},
-  {id:'stagedive',name:'Stage Dive',type:'RIFF',rarity:'Rare',emoji:'🤘',embers:3,effect:'Deal damage equal to target HP. Once per round.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'overdrive',name:'Overdrive',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'Requires 60% Corruption. DOUBLE all damage.',color:'#9933cc',typeColor:'#7722aa',copies:0,shopOnly:true,corrReq:60},
-  {id:'infencore',name:'Infernal Encore',type:'RIFF',rarity:'Rare',emoji:'👿',embers:3,effect:'ALL members attack TWICE. Total carnage.',color:'#9933cc',typeColor:'#7722aa',copies:3},
-  {id:'remaster',name:'The Remaster',type:'UTILITY',rarity:'Rare',emoji:'🎙',embers:0,effect:'Select 1 card in hand, then play this to delete it and draw 3 cards.',color:'#22aa44',typeColor:'#118833',copies:0,shopOnly:true},
-  {id:'whispercard',name:'Dark Whisper',type:'CORRUPT',rarity:'Rare',emoji:'🌀',embers:0,effect:'FREE. Target member +2 ATK permanently. Corruption gift at 25%.',color:'#aa1111',typeColor:'#880000',copies:0},
-  {id:'hungercard',name:'Hungering Flame',type:'CORRUPT',rarity:'Rare',emoji:'🔥',embers:0,effect:'FREE. All members +1 ATK this Strike. Draw 2 cards. Corruption gift at 50%.',color:'#aa1111',typeColor:'#880000',copies:0},
-  {id:'madnesscard',name:'Madness Unleashed',type:'CORRUPT',rarity:'Rare',emoji:'💀',embers:0,effect:'FREE. Deal 15% of enemy max HP as direct damage. Corruption gift at 75%.',color:'#aa1111',typeColor:'#880000',copies:0},
-  {id:'sabbathsigil',name:'Black Sabbath Sigil',type:'CORRUPT',rarity:'Rare',emoji:'⛧',embers:0,effect:'FREE. Corruption → 100%. Hellquake d10. Card is destroyed after use. EMBRACE THE VOID.',color:'#aa1111',typeColor:'#880000',copies:0,consumable:true,shopCost:20,shopOnly:true},
-  {id:'possessedperf',name:'Possessed Performance',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:3,effect:'ALL members deal ×3 ATK. Full demon mode.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'crowdsurf',name:'Crowd Surf',type:'RIFF',rarity:'Common',emoji:'🏄',embers:2,effect:'Target gains +1 ATK permanently per card in hand. Big hands = big gains.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'doubledown',name:'Double Down',type:'RIFF',rarity:'Uncommon',emoji:'🎰',embers:1,effect:'The next card played this Strike costs 0 Embers.',color:'#9933cc',typeColor:'#7722aa',copies:2,shopOnly:true},
-  {id:'deathriff',name:'Death Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'💀',embers:1,effect:'Direct damage. Low corruption = more damage. +10% Corruption.',color:'#aa1111',typeColor:'#880000',copies:2},
-  {id:'ampoverload',name:'Amp Overload',type:'EMBER',rarity:'Uncommon',emoji:'🔋',embers:0,effect:'+3 Embers. Costs 1 discard.',color:'#c87820',typeColor:'#a06010',copies:1},
-  {id:'ampstatic',name:'Amp the Static',type:'CORRUPT',rarity:'Uncommon',emoji:'📶',embers:2,effect:'Target gains ATK equal to Corruption ÷ 10.',color:'#aa1111',typeColor:'#880000',copies:2},
-  // ── NEW CARDS ──────────────────────────────────────────────────
-  {id:'distortion',name:'Distortion',type:'CORRUPT',rarity:'Common',emoji:'🎸',embers:1,effect:'Corruption +15%. All members +1 ATK this Strike.',color:'#aa1111',typeColor:'#880000',copies:3},
-  {id:'seance',name:'Séance',type:'CORRUPT',rarity:'Uncommon',emoji:'🔮',embers:1,effect:'Heal ALL members (Corruption ÷ 4 HP). More corrupt = more healed.',color:'#aa1111',typeColor:'#880000',copies:1},
-  {id:'staticcharge',name:'Static Charge',type:'CORRUPT',rarity:'Common',emoji:'⚡',embers:0,effect:'Gain 2 Embers. Gain 4 instead if Corruption is 0%.',color:'#aa1111',typeColor:'#880000',copies:2},
-  {id:'darktuning',name:'Dark Tuning',type:'CORRUPT',rarity:'Uncommon',emoji:'🌑',embers:2,effect:'Needs ≥40% Corruption. +1 ATK to random members. More corruption = more buffed.',color:'#aa1111',typeColor:'#880000',copies:2,corrReq:40},
-  {id:'powertap',name:'Power Tap',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'Gain 2 Embers.',color:'#c87820',typeColor:'#a05a10',copies:2},
-  {id:'soundboard',name:'Soundboard',type:'EMBER',rarity:'Uncommon',emoji:'🎛',embers:1,effect:'Gain 2 Embers. Draw 1 extra card at the start of next Strike.',color:'#c87820',typeColor:'#a05a10',copies:2},
-  {id:'setbreak',name:'Smoke Break',type:'UTILITY',rarity:'Common',emoji:'🎼',embers:0,effect:'Select 1 card first, then play to discard it. Gain 2 Embers. -15% Corruption. Draw 1 card. (Random if no selection)',color:'#22aa44',typeColor:'#118833',copies:2},
-  {id:'heavyriff',name:'Heavy Riff',type:'RIFF',rarity:'Uncommon',emoji:'🥊',embers:2,effect:'Target gains +ATK perm equal to HALF target current ATK (max +20). The stronger they are, the harder this hits.',color:'#9933cc',typeColor:'#7722aa',copies:2},
-  {id:'resonancecard',name:'Resonance',type:'RIFF',rarity:'Uncommon',emoji:'🌀',embers:1,effect:'Target member ATK becomes equal to highest ATK on stage.',color:'#9933cc',typeColor:'#7722aa',copies:3},
-  {id:'herbmoney',name:'Herb Money',type:'RIFF',rarity:'Uncommon',emoji:'🌿',embers:1,effect:'Spend 10 Stash. Target +3 ATK permanently. Cash into power.',color:'#9933cc',typeColor:'#7722aa',copies:1},
-  {id:'goingbroke',name:'Going Broke',type:'RIFF',rarity:'Rare',emoji:'💸',embers:0,effect:'Spend ALL your Stash. Deal that much damage to the boss.',color:'#9933cc',typeColor:'#7722aa',copies:0,shopOnly:true},
-  // ── UNLOCKABLE CARDS ───────────────────────────────────────────
-  {id:'moshpit',name:'Mosh Pit',type:'RIFF',rarity:'Uncommon',emoji:'🤘',embers:1,effect:'+1 ATK permanently to ALL alive members. 4+ alive = +2 each.',color:'#9933cc',typeColor:'#7722aa',copies:2,locked:true,unlockAt:1000},
-  {id:'bloodritual',name:'Blood Ritual',type:'CORRUPT',rarity:'Rare',emoji:'🩸',embers:2,effect:'Sacrifice 25% of target HP. Deal 6x that HP as damage to the boss. Corruption +15%.',color:'#aa1111',typeColor:'#880000',copies:1,locked:true,unlockAt:10000},
-  // ── NEW CARDS (for alternate decks, copies:0 = not in Standard) ──
-  {id:'echopedal',name:'Echo Pedal',type:'RIFF',rarity:'Uncommon',emoji:'🔁',embers:1,effect:'Replay your last card again (free). Combo enabler.',color:'#4488ff',typeColor:'#2266cc',copies:0},
-  {id:'riffthief',name:'Riff Thief',type:'RIFF',rarity:'Rare',emoji:'🎭',embers:2,effect:'Copy last card played this strike. Cast the copy free.',color:'#cc44ff',typeColor:'#aa22dd',copies:0},
-  {id:'feedbackscream',name:'Feedback Scream',type:'RIFF',rarity:'Uncommon',emoji:'📢',embers:2,effect:'+4 ATK permanently. Costs 2 HP. Power at a price.',color:'#ff4444',typeColor:'#cc2222',copies:0},
-  {id:'skullsplitter',name:'Skull Splitter',type:'RIFF',rarity:'Uncommon',emoji:'💀',embers:2,effect:'+3 ATK permanently. 10+ ATK target? +5 instead.',color:'#cc2222',typeColor:'#aa0000',copies:0},
-  {id:'doomchord',name:'Doom Chord',type:'RIFF',rarity:'Uncommon',emoji:'🎵',embers:2,effect:'+4 ATK. At ≥50% corruption, also +4 to adjacent members.',color:'#6622aa',typeColor:'#440088',copies:0},
-  {id:'bloodharmony',name:'Blood Harmony',type:'RIFF',rarity:'Common',emoji:'🩸',embers:1,effect:'+2 ATK to target + neighbor. Same keyword? +3 instead.',color:'#cc4466',typeColor:'#aa2244',copies:0},
-  {id:'sonicboom',name:'Sonic Boom',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'ALL members +2 ATK permanently. Draw 1.',color:'#ff8800',typeColor:'#cc6600',copies:0},
-  {id:'tremolopick',name:'Tremolo Pick',type:'RIFF',rarity:'Common',emoji:'⚡',embers:1,effect:'+1 ATK. Play 3+ cards first? +4 ATK instead.',color:'#ffcc00',typeColor:'#ccaa00',copies:0},
-  {id:'harmonicfb',name:'Harmonic Feedback',type:'RIFF',rarity:'Uncommon',emoji:'🎶',embers:0,effect:'FREE. +1 ATK permanently per RIFF card played this strike.',color:'#44aaff',typeColor:'#2288dd',copies:0},
-  {id:'shredsolo',name:'Shred Solo',type:'RIFF',rarity:'Rare',emoji:'🎸',embers:2,effect:'Target attacks TWICE (second hit at half ATK).',color:'#ff4400',typeColor:'#cc2200',copies:0},
-  {id:'overdriveped',name:'Overdrive Pedal',type:'RIFF',rarity:'Rare',emoji:'🔊',embers:2,effect:'Strike multiplier ×1.5 (multiplicative). Stacks with chains.',color:'#ff6600',typeColor:'#cc4400',copies:0},
-  {id:'devilsdice',name:"Devil's Dice",type:'RIFF',rarity:'Uncommon',emoji:'🎲',embers:1,effect:'Roll d6. 1-2: nothing. 3-4: +3 all. 5-6: +5 all + draw 2.',color:'#cc0000',typeColor:'#aa0000',copies:0},
-  {id:'necroticamp',name:'Necrotic Amp',type:'RIFF',rarity:'Rare',emoji:'☠️',embers:0,effect:'FREE. All +1 ATK per 20% corruption. At 80% = +4 each.',color:'#44cc44',typeColor:'#22aa22',copies:0},
-  {id:'soulbargain',name:'Soul Bargain',type:'CORRUPT',rarity:'Uncommon',emoji:'👿',embers:0,effect:'+5 ATK. -3 HP. +5% Corruption. Blood for power.',color:'#8800cc',typeColor:'#6600aa',copies:0},
-  {id:'venomriff',name:'Venom Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'🐍',embers:1,effect:'+3 ATK permanently. +5% Corruption.',color:'#44aa44',typeColor:'#228822',copies:0},
-  {id:'offeringpit',name:'Offering to the Pit',type:'CORRUPT',rarity:'Rare',emoji:'🕳️',embers:2,effect:'Target skips next attack. Another member +8 ATK. Corruption +10%.',color:'#660066',typeColor:'#440044',copies:0},
-  {id:'cursedstrings',name:'Cursed Strings',type:'CORRUPT',rarity:'Common',emoji:'🪡',embers:1,effect:'+3 ATK permanently. Target cannot heal this fight.',color:'#880088',typeColor:'#660066',copies:0},
-  {id:'hexdecay',name:'Hex of Decay',type:'CORRUPT',rarity:'Rare',emoji:'🦠',embers:3,effect:'Boss loses 15% of current HP. +15% Corruption.',color:'#448844',typeColor:'#226622',copies:0},
-  {id:'infernalpact',name:'Infernal Pact',type:'CORRUPT',rarity:'Rare',emoji:'📜',embers:0,effect:'FREE. Set corruption to 66%. All members +2 ATK permanently.',color:'#cc4400',typeColor:'#aa2200',copies:0},
-  {id:'carrioncall',name:'Carrion Call',type:'CORRUPT',rarity:'Rare',emoji:'🦅',embers:1,effect:'Revive a Too Stoned member at 1 HP with +5 ATK. Corruption +20%.',color:'#886622',typeColor:'#664400',copies:0},
-  {id:'possessionriff',name:'Possession Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'👁️',embers:1,effect:'+20 ATK this strike. +10% Corruption. Demon mode.',color:'#aa44cc',typeColor:'#8822aa',copies:0},
-
-  {id:'hellfirerift',name:'Hellfire Rift',type:'CORRUPT',rarity:'Rare',emoji:'🌋',embers:0,effect:'FREE. ALL members ×2 ATK this strike. +20% corruption. Go nuclear.',color:'#ff2200',typeColor:'#cc0000',copies:0,shopOnly:true},
-  {id:'soulsacrifice',name:'Soul Sacrifice',type:'CORRUPT',rarity:'Rare',emoji:'⚰️',embers:0,effect:'+5 ATK to ALL permanently. +15% Corruption.',color:'#880044',typeColor:'#660022',copies:0,shopOnly:true},
-  {id:'voidpact',name:'Void Pact',type:'CORRUPT',rarity:'Rare',emoji:'🕳',embers:0,effect:'FREE. Strike multiplier ×2.5 this strike ONLY. +25% corruption. Total commitment.',color:'#440088',typeColor:'#220044',copies:0,shopOnly:true},
-  {id:'darkcrescendo',name:'Dark Crescendo',type:'CORRUPT',rarity:'Rare',emoji:'🌑',embers:0,effect:'FREE. If corruption ≥80%, TRIPLE your strike multiplier.',color:'#220044',typeColor:'#110022',copies:0},
-  {id:'russianroulette',name:'Russian Roulette',type:'CORRUPT',rarity:'Uncommon',emoji:'🔫',embers:0,effect:'FREE. Roll d6. 1: target Too Stoned. 2-5: +4 ATK. 6: +8 ATK + Shield.',color:'#cc2244',typeColor:'#aa0022',copies:0},
-  {id:'gearcheck',name:'Gear Check',type:'UTILITY',rarity:'Common',emoji:'🔧',embers:1,effect:'Draw 2, discard 1. Pick what you need.',color:'#888888',typeColor:'#666666',copies:0},
-  {id:'setlistrewrite',name:'Setlist Rewrite',type:'UTILITY',rarity:'Common',emoji:'📝',embers:0,effect:'FREE. Look at top 3 cards of deck, reorder them.',color:'#88aacc',typeColor:'#6688aa',copies:0},
-  {id:'backstagepass',name:'Backstage Pass',type:'UTILITY',rarity:'Uncommon',emoji:'🎫',embers:2,effect:'Next card is FREE. Draw 1.',color:'#ccaa44',typeColor:'#aa8822',copies:0},
-  {id:'venueswap',name:'Venue Swap',type:'UTILITY',rarity:'Uncommon',emoji:'🏟️',embers:1,effect:'Shuffle hand away. Draw 6 fresh cards.',color:'#4488aa',typeColor:'#226688',copies:0},
-  {id:'doublebooking',name:'Double Booking',type:'UTILITY',rarity:'Rare',emoji:'📅',embers:3,effect:'+1 extra Strike this fight. Game changer.',color:'#ff8844',typeColor:'#dd6622',copies:0},
-  {id:'bootlegcopy',name:'Bootleg Copy',type:'UTILITY',rarity:'Uncommon',emoji:'📀',embers:1,effect:'Copy the selected card. Temporary — gone after fight.',color:'#44cccc',typeColor:'#22aaaa',copies:0},
-  {id:'secondwind',name:'Second Wind',type:'EMBER',rarity:'Common',emoji:'💨',embers:0,effect:'Gain embers equal to your empty ember slots. Better when depleted.',color:'#cc8844',typeColor:'#aa6622',copies:0},
-  {id:'pyromaniac',name:'Pyromaniac',type:'EMBER',rarity:'Uncommon',emoji:'🧨',embers:1,effect:'+2 embers. If you spend ALL embers this strike, all members +3 ATK.',color:'#ff4400',typeColor:'#dd2200',copies:0},
-  {id:'slowburn',name:'Slow Burn',type:'EMBER',rarity:'Common',emoji:'🕯️',embers:0,effect:'+1 ember now. +1 ember at start of next 2 strikes. Delayed investment.',color:'#ff8866',typeColor:'#dd6644',copies:0},
-  {id:'ampfeedback',name:'Amp Feedback',type:'EMBER',rarity:'Common',emoji:'🔌',embers:1,effect:'+2 Embers. Next RIFF costs 1 less.',color:'#88cc44',typeColor:'#66aa22',copies:0},
-  {id:'drainthecrowd',name:'Drain the Crowd',type:'EMBER',rarity:'Common',emoji:'🧛',embers:0,effect:'+2 embers. Random member takes 2 damage. HP cost.',color:'#aa2244',typeColor:'#880022',copies:0},
-  {id:'corrsiphon',name:'Corruption Siphon',type:'EMBER',rarity:'Common',emoji:'🌀',embers:0,effect:'+3 Embers. +8% Corruption.',color:'#8844aa',typeColor:'#662288',copies:0},
-]
+// → ALL_CARDS moved to src/data/cards.js (v0.8.0 split)
 
 // ═══════════════════════════════════════════════════════════
 // KEYWORD STACK SYSTEM — centralized helpers for tier-scaled
@@ -740,122 +461,17 @@ function getTotalMastery(){
 // ═══════════════════════════════════════════════════════════
 // MEMBER PORTRAITS — replaces emoji with ink art + Dr. Katz wiggle
 // ═══════════════════════════════════════════════════════════
-const MEMBER_PORTRAITS={
-  bjorn:import.meta.env.BASE_URL+'members/bjorn_stage.png',
-  ragnar:import.meta.env.BASE_URL+'members/ragnar_stage.png',
-  thor:import.meta.env.BASE_URL+'members/thor_stage.png',
-  rolf:import.meta.env.BASE_URL+'members/rolf_stage.png',
-  ingrid:import.meta.env.BASE_URL+'members/ingrid_stage.png',
-  dag:import.meta.env.BASE_URL+'members/dag_stage.png',
-  ulf:import.meta.env.BASE_URL+'members/ulf_stage.png',
-  brynja:import.meta.env.BASE_URL+'members/brynja_stage.png',
-  loki:import.meta.env.BASE_URL+'members/loki_stage.png',
-  freya:import.meta.env.BASE_URL+'members/freya_stage.png',
-  astrid:import.meta.env.BASE_URL+'members/astrid_stage.png',
-  grimnir:import.meta.env.BASE_URL+'members/grimnir_stage.png',
-  sigrid:import.meta.env.BASE_URL+'members/sigrid_stage.png',
-  gunnar:import.meta.env.BASE_URL+'members/gunnar_stage.png',
-  vitalik:import.meta.env.BASE_URL+'members/vitalik_stage.png',
-  orm:import.meta.env.BASE_URL+'members/orm_stage.png',
-  tanuki:import.meta.env.BASE_URL+'members/tanuki_stage.png',
-  lucifer_member:import.meta.env.BASE_URL+'members/lucifer_member_stage.png',
-}
-const STAGE_PORTRAITS={
-  bjorn:import.meta.env.BASE_URL+'members/bjorn_stage.png',
-  ragnar:import.meta.env.BASE_URL+'members/ragnar_stage.png',
-  thor:import.meta.env.BASE_URL+'members/thor_stage.png',
-  rolf:import.meta.env.BASE_URL+'members/rolf_stage.png',
-  ingrid:import.meta.env.BASE_URL+'members/ingrid_stage.png',
-  dag:import.meta.env.BASE_URL+'members/dag_stage.png',
-  ulf:import.meta.env.BASE_URL+'members/ulf_stage.png',
-  brynja:import.meta.env.BASE_URL+'members/brynja_stage.png',
-  loki:import.meta.env.BASE_URL+'members/loki_stage.png',
-  freya:import.meta.env.BASE_URL+'members/freya_stage.png',
-  astrid:import.meta.env.BASE_URL+'members/astrid_stage.png',
-  grimnir:import.meta.env.BASE_URL+'members/grimnir_stage.png',
-  sigrid:import.meta.env.BASE_URL+'members/sigrid_stage.png',
-  gunnar:import.meta.env.BASE_URL+'members/gunnar_stage.png',
-  vitalik:import.meta.env.BASE_URL+'members/vitalik_stage.png',
-  orm:import.meta.env.BASE_URL+'members/orm_stage.png',
-  tanuki:import.meta.env.BASE_URL+'members/tanuki_stage.png',
-  lucifer_member:import.meta.env.BASE_URL+'members/lucifer_member_stage.png',
-}
+// → MEMBER_PORTRAITS moved to src/data/flavor.js (v0.8.0 split)
+// → STAGE_PORTRAITS moved to src/data/flavor.js (v0.8.0 split)
 
-const IDLE_PORTRAITS={
-  bjorn:import.meta.env.BASE_URL+'members/idle/bjorn_stage_idle.gif',
-  ragnar:import.meta.env.BASE_URL+'members/idle/ragnar_stage_idle.gif',
-  thor:import.meta.env.BASE_URL+'members/idle/thor_stage_idle.gif',
-  rolf:import.meta.env.BASE_URL+'members/idle/rolf_stage_idle.gif',
-  ingrid:import.meta.env.BASE_URL+'members/idle/ingrid_stage_idle.gif',
-  dag:import.meta.env.BASE_URL+'members/idle/dag_stage_idle.gif',
-  ulf:import.meta.env.BASE_URL+'members/idle/ulf_stage_idle.gif',
-  brynja:import.meta.env.BASE_URL+'members/idle/brynja_stage_idle.gif',
-  loki:import.meta.env.BASE_URL+'members/idle/loki_stage_idle.gif',
-  freya:import.meta.env.BASE_URL+'members/idle/freya_stage_idle.gif',
-  astrid:import.meta.env.BASE_URL+'members/idle/astrid_stage_idle.gif',
-  grimnir:import.meta.env.BASE_URL+'members/idle/grimnir_stage_idle.gif',
-  sigrid:import.meta.env.BASE_URL+'members/idle/sigrid_stage_idle.gif',
-  gunnar:import.meta.env.BASE_URL+'members/idle/gunnar_stage_idle.gif',
-  vitalik:import.meta.env.BASE_URL+'members/idle/vitalik_stage_idle.gif',
-  orm:import.meta.env.BASE_URL+'members/idle/orm_stage_idle.gif',
-  tanuki:import.meta.env.BASE_URL+'members/idle/tanuki_stage_idle.gif',
-  lucifer_member:import.meta.env.BASE_URL+'members/idle/lucifer_member_stage_idle.gif',
-}
+// → IDLE_PORTRAITS moved to src/data/flavor.js (v0.8.0 split)
 // STONED_PORTRAITS — per-character "Too Stoned" state animations.
 // JV's plan: each character slumped over with smoke clouds. Drop GIFs at
 // public/members/stoned/{id}_stage_stoned.gif and they auto-load.
 // Currently empty — falls back to CSS smoke-cloud overlay (see StageSlot).
 // As you finish each character's stoned animation, just uncomment the line.
-const STONED_PORTRAITS={
-  // bjorn:import.meta.env.BASE_URL+'members/stoned/bjorn_stage_stoned.gif',
-  // ragnar:import.meta.env.BASE_URL+'members/stoned/ragnar_stage_stoned.gif',
-  // thor:import.meta.env.BASE_URL+'members/stoned/thor_stage_stoned.gif',
-  // rolf:import.meta.env.BASE_URL+'members/stoned/rolf_stage_stoned.gif',
-  // ingrid:import.meta.env.BASE_URL+'members/stoned/ingrid_stage_stoned.gif',
-  // dag:import.meta.env.BASE_URL+'members/stoned/dag_stage_stoned.gif',
-  // ulf:import.meta.env.BASE_URL+'members/stoned/ulf_stage_stoned.gif',
-  // brynja:import.meta.env.BASE_URL+'members/stoned/brynja_stage_stoned.gif',
-  // loki:import.meta.env.BASE_URL+'members/stoned/loki_stage_stoned.gif',
-  // freya:import.meta.env.BASE_URL+'members/stoned/freya_stage_stoned.gif',
-  // astrid:import.meta.env.BASE_URL+'members/stoned/astrid_stage_stoned.gif',
-  // grimnir:import.meta.env.BASE_URL+'members/stoned/grimnir_stage_stoned.gif',
-  // sigrid:import.meta.env.BASE_URL+'members/stoned/sigrid_stage_stoned.gif',
-  // gunnar:import.meta.env.BASE_URL+'members/stoned/gunnar_stage_stoned.gif',
-  // vitalik:import.meta.env.BASE_URL+'members/stoned/vitalik_stage_stoned.gif',
-  // orm:import.meta.env.BASE_URL+'members/stoned/orm_stage_stoned.gif',
-  // tanuki:import.meta.env.BASE_URL+'members/stoned/tanuki_stage_stoned.gif',
-  // lucifer_member:import.meta.env.BASE_URL+'members/stoned/lucifer_member_stage_stoned.gif',
-}
-const BOSS_PORTRAITS={
-  wanderer:import.meta.env.BASE_URL+'bosses/wanderer.png',
-  lostsoul:import.meta.env.BASE_URL+'bosses/lostsoul.png',
-  drifter:import.meta.env.BASE_URL+'bosses/drifter.png',
-  siren:import.meta.env.BASE_URL+'bosses/siren.png',
-  tempter:import.meta.env.BASE_URL+'bosses/tempter.png',
-  lust_boss:import.meta.env.BASE_URL+'bosses/lust_boss.png',
-  glutton:import.meta.env.BASE_URL+'bosses/glutton.png',
-  feaster:import.meta.env.BASE_URL+'bosses/feaster.png',
-  gluttony_boss:import.meta.env.BASE_URL+'bosses/gluttony_boss.png',
-  miser:import.meta.env.BASE_URL+'bosses/miser.png',
-  hoarder:import.meta.env.BASE_URL+'bosses/hoarder.png',
-  greed_boss:import.meta.env.BASE_URL+'bosses/greed_boss.png',
-  wrathful:import.meta.env.BASE_URL+'bosses/wrathful.png',
-  berserker:import.meta.env.BASE_URL+'bosses/berserker.png',
-  anger_boss:import.meta.env.BASE_URL+'bosses/anger_boss.png',
-  heretic:import.meta.env.BASE_URL+'bosses/heretic.png',
-  apostate:import.meta.env.BASE_URL+'bosses/apostate.png',
-  heresy_boss:import.meta.env.BASE_URL+'bosses/heresy_boss.png',
-  brute:import.meta.env.BASE_URL+'bosses/brute.png',
-  hunter:import.meta.env.BASE_URL+'bosses/hunter.png',
-  violence_boss:import.meta.env.BASE_URL+'bosses/violence_boss.png',
-  trickster:import.meta.env.BASE_URL+'bosses/trickster.png',
-  deceiver:import.meta.env.BASE_URL+'bosses/deceiver.png',
-  fraud_boss:import.meta.env.BASE_URL+'bosses/fraud_boss.png',
-  traitor:import.meta.env.BASE_URL+'bosses/traitor.png',
-  betrayer:import.meta.env.BASE_URL+'bosses/betrayer.png',
-  lucifer:import.meta.env.BASE_URL+'bosses/lucifer_p1.png',
-  ar_exec:import.meta.env.BASE_URL+'bosses/ar_exec.png',
-}
+// → STONED_PORTRAITS moved to src/data/flavor.js (v0.8.0 split)
+// → BOSS_PORTRAITS moved to src/data/flavor.js (v0.8.0 split)
 // ═══ CIRCLE BACKGROUND THEMES ═══
 const CIRCLE_BG={
   1:{base:'#0c0a14',glow:'rgba(80,60,120,0.35)',name:'Limbo'},           // grey-purple fog
@@ -1060,38 +676,7 @@ function LogLine({text}){
 
 
 // ═══ TOUR QUOTES — pre-fight loading screen flavor ═══════════════════════
-const TOUR_QUOTES=[
-  "Last seen playing a basement in Cleveland for $40 and a case of beer.",
-  "The van broke down outside Tulsa. We hitched a ride in a hearse.",
-  "Banned from every venue in Reno. Worth it.",
-  "Our rider says 'no brown M&Ms.' We've never had a rider.",
-  "Soundcheck? We don't do soundcheck. We do shots.",
-  "The opening act quit after hearing us tune up.",
-  "Someone threw a shoe. We kept it. It's on the merch table now.",
-  "Three cities. Two flat tires. One pair of clean socks between us.",
-  "We got lost in Detroit. Found ourselves in the process.",
-  "The bartender said we were 'aggressively loud.' We took it as a compliment.",
-  "Hotel? We sleep in the van. The van sleeps in the Walmart parking lot.",
-  "Played a biker bar in Sturgis. They asked us to turn DOWN.",
-  "Our bass player pawned his shoes for gas money. Played barefoot in Omaha.",
-  "The venue had a 'no moshing' sign. We used it as a setlist.",
-  "Got paid in beer and cigarettes. Honestly? Fair deal.",
-  "Somebody called the cops. Turns out the drummer's uncle IS the cops.",
-  "The floor caved in during the encore. Nobody stopped playing.",
-  "We opened for a polka band once. Converted three of them.",
-  "Our merch guy is also our driver, our cook, and our bail fund.",
-  "The monitor guy hated us so much he gave us perfect sound out of spite.",
-  "Slept on a stranger's floor in Memphis. Woke up with a new guitarist.",
-  "The AC broke mid-set. Sweat baptism for everyone in the front row.",
-  "We don't have fans. We have co-conspirators.",
-  "Someone bootlegged our set. It sounds better than the studio album.",
-  "The green room was a broom closet. We've had worse.",
-  "Promoter promised $200. We got $60 and a 'maybe next time, guys.'",
-  "The drummer's kick pedal broke. He finished the set stomping the floor.",
-  "Our t-shirts are printed on stolen blanks. Allegedly.",
-  "Last tour we played 47 shows in 50 days. The other 3 we were lost.",
-  "The venue marquee misspelled our name. We liked their version better.",
-]
+// → TOUR_QUOTES moved to src/data/flavor.js (v0.8.0 split)
 
 // ═══ TUTORIAL SYSTEM ═══════════════════════════════════════════════════════
 const TUTORIAL_ENEMIES=[
@@ -1100,291 +685,19 @@ const TUTORIAL_ENEMIES=[
   {id:'tut_revenant',name:'The Revenant',circle:'TUTORIAL',subtitle:'Fight 3 of 3',maxHp:55,baseDmg:3,emoji:'💀',passive:'Stronger, but beatable. Find the combo.',passiveId:null},
 ]
 // Members the player starts with in the tutorial
-const TUTORIAL_MEMBERS=['bjorn','gunnar'] // Lead Guitarist (FRENZIED) + Rhythm Guitarist (SHREDDER)
-// Predetermined hands for each tutorial fight
-const TUTORIAL_HANDS={
-  1:['battlecry','amp','newstrings','groupie','distortion','heavyriff','moshpit'], // basics: buff + attack
-  2:['battlecry','darktuning','setbreak','distortion','encore','roadie','groupie'], // corruption cards + heals
-  3:['battlecry','stagedive','encore','amp','heavyriff','distortion','groupie'], // battlecry+stagedive = DEATH WISH chain
-}
-// Tooltip sequences per fight
-const TUTORIAL_TIPS={
-  1:[
-    {id:"t1_welcome",text:"Welcome to the Vestibule. Your band must fight through the 9 Circles of Hell. Let us show you how.",target:"boss",position:"below"},
-    {id:"t1_hand",text:"Playing cards is everything. Drag a card onto a band member to buff their ATK, heal them, or trigger special effects. Try it now!",target:"hand",position:"above"},
-    {id:"t1_embers",text:"Cards cost Embers to play. You have 5 per fight. Spend them wisely — every card makes your Strike stronger.",target:"embers",position:"left"},
-    {id:"t1_strike",text:"When you have played your cards, hit STRIKE. Every band member attacks the enemy with their ATK. More buffs = more damage.",target:"strike",position:"left"},
-  ],
-  2:[
-    {id:"t2_corruption",text:"See the meter on the right? That is Corruption. Some cards raise it. Higher corruption means more danger... but also more power.",target:"corruption",position:"left"},
-    {id:"t2_corrupt_card",text:"CORRUPT cards (red) are risky. They raise corruption but can be very powerful.",target:"hand",position:"above"},
-  ],
-  3:[
-    {id:"t3_chain_intro",text:"Certain card pairs trigger Riff Chains — powerful combos that multiply your damage. Battle Cry + Stage Dive is one. But you only have 5 Embers and they cost 6 total...",target:"hand",position:"above"},
-    {id:"t3_ember_mgmt",text:"Here is the trick: play Battle Cry first (2 Embers), then play Groupie (costs 1, but GIVES you 2 back). Now you have enough for Stage Dive (4 Embers). Ember management is key!",target:"embers",position:"left"},
-  ],
-}
-const TUTORIAL_POST_FIGHT={
-  1:'Nice work! That was just a warm-up. The real darkness lies ahead...',
-  2:'You felt the corruption creeping in. Learn to use it — or it will consume you.',
-  3:'TUTORIAL COMPLETE',
-}
-function isTutorialDone(){return localStorage.getItem('vst_tutorial')==='done'}
-// First-encounter tips — shown once per mechanic
-function getEncounteredRules(){try{return JSON.parse(localStorage.getItem('vst_rules_seen')||'[]')}catch(e){return[]}}
-function markRuleSeen(idx){const seen=getEncounteredRules();if(!seen.includes(idx)){seen.push(idx);localStorage.setItem('vst_rules_seen',JSON.stringify(seen))}}
-const FIRST_TIPS={
-  pact:"After each boss, choose a Pact — a permanent buff for the rest of your run. Choose wisely, you can only pick one.",
-  forge:"The Doom Forge lets you upgrade one card permanently. Upgraded cards have enhanced effects. Pick your best card.",
-  shop:"Welcome to the Shop. Spend Stash to buy new cards, recruit members, and find artifacts. Browse carefully.",
-  event:"A random event! These offer risky choices with big rewards. Read both options before deciding.",
-  descent:"The Descent Map shows your path through Hell. You can skip some fights for alternative rewards.",
-  drugs:"The Dealer sells Shrooms and Acid. Drugs give powerful trip effects before fights, but bad trips are possible.",
-  corruption:"⚠ CORRUPT cards (purple) are powerful. Pushing corruption costs you tomorrow — pricier shops, weaker band, smaller stash. But it can't end your run. Push when it's worth it.",
-}
-function hasSeenTip(id){return(JSON.parse(localStorage.getItem('vst_tips')||'[]')).includes(id)}
-function markTipSeen(id){const seen=JSON.parse(localStorage.getItem('vst_tips')||'[]');if(!seen.includes(id)){seen.push(id);localStorage.setItem('vst_tips',JSON.stringify(seen))}}
-function markTutorialDone(){localStorage.setItem('vst_tutorial','done')}
-
-// ── STARTER ARTIFACTS A1-A10 ─────────────────────────────────
-// ═══════════════════════════════════════════════════════════
-// ARTIFACTS — DAMAGE/SCORE MULTIPLIERS (3 slots, max equipped)
-// ═══════════════════════════════════════════════════════════
-// Framing: ARTIFACTS PAYOUT, PEDALS ENABLE.
-// All artifacts here produce a multiplier (mult/multTrigger) or
-// score bump (scoreBump). Utility effects moved to STARTER_PASSIVES.
-// Rarity weights: Common 50%, Uncommon 30%, Rare 17%, Mythic 3%.
-// Mythic tier locked behind in-game accomplishments — see MYTHIC_ARTIFACTS.
-const STARTER_ARTIFACTS=[
-  // ── EXISTING MULTIPLIERS (kept, retagged with rarity) ─────────
-  {id:'a1',name:'Vintage Guitar',emoji:'🎸',effect:'×1.3 when you play 4+ cards before Striking.',cost:10,multTrigger:'cards3',mult:1.3,rarity:'common'},
-  {id:'a2',name:"Devil's Tuning Fork",emoji:'🔱',effect:'Start each fight at 15% Corruption. ×1.5 damage when Corruption hits 60%+.',cost:16,multTrigger:'corrupt50',mult:1.5,rarity:'uncommon',startCorr:15},
-  {id:'a5',name:'Haunted Radio',emoji:'📻',effect:'×1.2 damage for each Riff Chain fired this Strike.',cost:8,multTrigger:'perChain',mult:1.2,rarity:'common'},
-  {id:'a6',name:'Black Candle',emoji:'🕯',effect:'×1.4 damage for each Too Stoned member.',cost:12,multTrigger:'perStoned',mult:1.4,rarity:'uncommon'},
-  {id:'a9',name:'Resonance Coil',emoji:'⚙️',effect:'×1.2 for each duplicate card PLAYED this Strike.',cost:10,multTrigger:'perDupePlayed',mult:1.2,rarity:'common'},
-  {id:'a10',name:'Burning Stage',emoji:'🔥',effect:'×3.0 if you play ALL 6 cards before Striking. Total commitment.',cost:22,multTrigger:'cards5',mult:3.0,rarity:'rare'},
-  // ── NEW COMMON-TIER (12) ──────────────────────────────────────
-  {id:'crackedpickup',name:'Cracked Pickup',emoji:'🎤',effect:'×1.2 damage if you played a RIFF this strike.',cost:12,multTrigger:'playedRiff',mult:1.2,rarity:'common'},
-  {id:'distortioncab',name:'Distortion Cab',emoji:'🔊',effect:'×1.25 damage always.',cost:14,multTrigger:'alwaysOn',mult:1.25,rarity:'common'},
-  {id:'ashtray',name:'Ash Tray',emoji:'🚬',effect:'×1.3 damage if any member is Too Stoned.',cost:12,multTrigger:'anyStoned',mult:1.3,rarity:'common'},
-  {id:'crowdnoise',name:'Crowd Noise',emoji:'🤘',effect:'×1.10 per alive non-stoned member.',cost:16,multTrigger:'perAliveMember',mult:1.10,rarity:'common'},
-  {id:'tapehiss',name:'Tape Hiss',emoji:'📼',effect:"×1.2 if you DIDN'T play any RIFF this strike.",cost:8,multTrigger:'noRiff',mult:1.2,rarity:'common'},
-  {id:'setlistart',name:'Set List',emoji:'📋',effect:'×1.4 if first card played was an EMBER type.',cost:12,multTrigger:'firstCardEmber',mult:1.4,rarity:'common'},
-  {id:'gaffertape',name:'Gaffer Tape',emoji:'🩹',effect:'×1.2 if no member is below half HP.',cost:10,multTrigger:'allHealthy',mult:1.2,rarity:'common'},
-  {id:'powerstrip',name:'Power Strip',emoji:'⚡',effect:'×1.25 if you have 5+ Embers when you Strike.',cost:11,multTrigger:'embers5',mult:1.25,rarity:'common'},
-  {id:'spitcup',name:'Spit Cup',emoji:'🥃',effect:'×1.5 damage if you discarded ≥1 card this STRIKE.',cost:10,multTrigger:'discardedStrike',mult:1.5,rarity:'common'},
-  {id:'divebarsign',name:'Dive Bar Sign',emoji:'🍻',effect:'×1.35 in Circles I-III. Refunds its cost when you reach Circle IV — the residency ends.',cost:9,multTrigger:'earlyCircle',mult:1.35,rarity:'common',refundAtC4:true},
-  // ── NEW UNCOMMON-TIER (8) ─────────────────────────────────────
-  {id:'pentagramshrine',name:'Pentagram Shrine',emoji:'🜏',effect:'×1.4 per CORRUPT card played this strike (multiplicative).',cost:22,multTrigger:'perCorruptCard',mult:1.4,rarity:'uncommon'},
-  {id:'doomchoir',name:'Doom Choir',emoji:'🎵',effect:'×1.5 per same-role member on stage (multiplicative).',cost:24,multTrigger:'perSameRole',mult:1.5,rarity:'uncommon'},
-  {id:'solosermon',name:'Solo Sermon',emoji:'🎙',effect:'×6.0 if EXACTLY 2 cards played this strike.',cost:26,multTrigger:'cards2exact',mult:6.0,rarity:'uncommon'},
-  {id:'blackmassbell',name:'Black Mass Bell',emoji:'🔔',effect:'×2.5 if 3+ Riff Chains fired this strike.',cost:22,multTrigger:'chains3',mult:2.5,rarity:'uncommon'},
-  {id:'ouroborospin',name:'Ouroboros Pin',emoji:'🐍',effect:'×1.3 per discarded card this strike (multiplicative).',cost:20,multTrigger:'perDiscardStrike',mult:1.3,rarity:'uncommon'},
-  {id:'drummerstick',name:"Drummer's Stick",emoji:'🥁',effect:'×2.5 if your Drummer rolled DOUBLE TIME this fight.',cost:22,multTrigger:'doubleTimeRolled',mult:2.5,rarity:'uncommon'},
-  {id:'fogmachine',name:'Fog Machine',emoji:'💨',effect:'×1.4 per stoned member. +20% run score per stoned at fight end.',cost:24,multTrigger:'perStoned',mult:1.4,scoreBumpPerStoned:0.20,rarity:'uncommon'},
-  {id:'chromeskull',name:'Chrome Skull',emoji:'💀',effect:'×3 if exactly 1 member is alive at strike time.',cost:28,multTrigger:'lastMemberStanding',mult:3.0,rarity:'uncommon'},
-  // ── NEW RARE-TIER (5) ─────────────────────────────────────────
-  {id:'doomcrown',name:'The Doom Crown',emoji:'👑',effect:'×8 if all cards played this strike are SAME TYPE (min 3 cards).',cost:38,multTrigger:'allSameType',mult:8.0,rarity:'rare'},
-  {id:'triplesixes',name:'Triple Sixes',emoji:'⛧',effect:'×3 per OTHER artifact equipped (max ×9 with full slots).',cost:35,multTrigger:'perOtherArtifact',mult:3.0,rarity:'rare'},
-  {id:'luciferspact',name:"Lucifer's Pact",emoji:'😈',effect:'×4 if Lucifer is on stage. Run score ×1.3.',cost:40,multTrigger:'luciferOnStage',mult:4.0,scoreMult:1.3,rarity:'rare'},
-  {id:'invertedpentacle',name:'Inverted Pentacle',emoji:'🜺',effect:'×5 if Corruption is exactly 100% (no over, no under).',cost:36,multTrigger:'corrupt100exact',mult:5.0,rarity:'rare'},
-  {id:'blackgoat',name:'The Black Goat',emoji:'🐐',effect:'×2.0 always × ×1.3 per OTHER artifact owned. Stacks with Goat of Mendes.',cost:42,multTrigger:'goatStackOther',mult:2.0,rarity:'rare'},
-  // ── UNLOCKABLE (kept) ─────────────────────────────────────────
-  {id:'wardrums',name:'War Drums',emoji:'🪘',effect:'+1 Strike per fight permanently (5 Strikes instead of 4).',cost:30,locked:true,unlockAt:5000,reclassifiedToPedal:true},
-]
-
-// ── MYTHIC ARTIFACTS (3) — UNLOCK-GATED ────────────────────────
-// Not in shop pool until corresponding unlock fires. See unlock conditions
-// in MODIFIER_CONTENT.md. Discovered via play, not displayed in trophies
-// until "seen" or "unlocked".
-const MYTHIC_ARTIFACTS=[
-  {id:'invertedcross',name:'The Inverted Cross',emoji:'✟',effect:'×69 damage if Corruption is exactly 100% AND no member is Too Stoned. Run score ×1.5.',cost:50,multTrigger:'corruptedClean',mult:69.0,scoreMult:1.5,rarity:'mythic',unlockId:'invertedCross',hint:'When the King of Hell falls before you for the first time...'},
-  {id:'tongueofdevourer',name:'Tongue of the Devourer',emoji:'👅',effect:"Every card you play deals damage equal to your highest member's ATK. Stacks with all multipliers.",cost:50,multTrigger:'tongueDamage',mult:1.0,rarity:'mythic',unlockId:'tongueOfDevourer',hint:"Stand against the third circle's hunger without sacrifice."},
-  {id:'sigilofset',name:'The Sigil of Set',emoji:'𓂀',effect:'First Strike of every fight, card+chain mults are auto-peaked (×4.31). Plus auto-×2 trip mult if no other trip is active. One-shot per fight.',cost:50,multTrigger:'sigilOpener',mult:4.31,rarity:'mythic',unlockId:'sigilOfSet',hint:'Walk the path alone. Burn through Hell with one voice.'},
-]
-
-// ═══════════════════════════════════════════════════════════
-// PEDALS (PASSIVES) — STRATEGY ENABLERS (2 slots, max equipped)
-// ═══════════════════════════════════════════════════════════
-// Framing: PEDALS ENABLE, ARTIFACTS PAYOUT.
-// All pedals here change rules / economy / draw / cost / structure.
-// No multipliers in this pool (those are artifacts).
-// Some pedals were reclassified from artifacts (former a3/a4/a7/a8/ca2/ca3/wardrums).
-const STARTER_PASSIVES=[
-  // ── ORIGINAL P1-P10 (kept, retagged with rarity) ──────────────
-  {id:'p1',name:'Power Chord',emoji:'⚡',effect:'Gain 1 extra Ember at the start of every fight.',cost:6,rarity:'common'},
-  {id:'p2',name:'Roadie Crew',emoji:'🔧',effect:'At the start of each fight, one random member heals 3 HP.',cost:8,rarity:'common'},
-  {id:'p3',name:'Merch Table',emoji:'👕',effect:'After each fight victory, gain +2 bonus Stash.',cost:6,rarity:'common'},
-  {id:'p4',name:'Feedback Hum',emoji:'🔊',effect:'All EMBER type cards give 1 additional Ember when played.',cost:10,rarity:'uncommon'},
-  {id:'p5',name:'Amp Stack',emoji:'📻',effect:'Sound Wall gives +2 ATK permanently to all (instead of +1). Heavy Riff cap raised to +25 (instead of +20).',cost:10,rarity:'uncommon'},
-  {id:'p6',name:'Cult Following',emoji:'🕯',effect:'Each time any member goes Too Stoned, gain 3 Stash.',cost:10,rarity:'common'},
-  {id:'p7',name:'Guitar Tech',emoji:'🎛',effect:'Battle Cry gives +2 ATK permanently instead of +1.',cost:8,rarity:'common'},
-  {id:'p8',name:'Green Room',emoji:'🛋',effect:'At the start of each fight, all members gain Stonewall (immune to first Too Stoned event).',cost:16,rarity:'uncommon'},
-  {id:'p9',name:'Heavy Rotation',emoji:'🎚',effect:'When you draw a duplicate card into your hand, draw 1 extra card next Strike.',cost:10,rarity:'uncommon'},
-  {id:'p10',name:'Stage Fright Reversal',emoji:'🎙',effect:'The first Strike of every fight deals +10 bonus damage.',cost:14,rarity:'common'},
-  // ── RECLASSIFIED FROM ARTIFACTS (7) ───────────────────────────
-  // Former a3, a4, a7, a8, ca2, ca3, wardrums — all utility/structural.
-  {id:'a3',name:'The Evil Eye',emoji:'🧿',effect:'The first card you play each Strike costs 0 Embers.',cost:20,rarity:'rare',reclassified:true},
-  {id:'a4',name:"Roadie's Toolbelt",emoji:'🧰',effect:'At the start of each fight, one random member gains Stonewall (immune to Too Stoned once).',cost:6,rarity:'common',reclassified:true},
-  {id:'a7',name:"The Serpent's Kiss",emoji:'🐍',effect:'Start each fight with 1 extra Ember permanently (max 8 total).',cost:18,rarity:'uncommon',reclassified:true},
-  {id:'a8',name:'Stone Tablet',emoji:'🪨',effect:'All band members gain +3 max HP permanently.',cost:12,rarity:'uncommon',reclassified:true},
-  {id:'ca2',name:'Hellfire Amulet',emoji:'🔮',effect:'Gain +2 Embers at the start of each fight.',cost:17,rarity:'uncommon',reclassified:true},
-  {id:'ca3',name:'Sabbath Crown',emoji:'👑',effect:'When a member goes Too Stoned, 50% chance to revive them at 1 HP.',cost:22,rarity:'rare',reclassified:true},
-  {id:'wardrums',name:'War Drums',emoji:'🪘',effect:'+1 Strike per fight permanently (5 Strikes instead of 4).',cost:30,rarity:'rare',locked:true,unlockAt:5000,reclassified:true},
-  // ── NEW COMMON PEDALS (8) ─────────────────────────────────────
-  {id:'reverbtank',name:'Reverb Tank',emoji:'〰️',effect:'First card you play each Strike costs 1 less Ember (min 0).',cost:12,rarity:'common'},
-  {id:'fuzzbox',name:'Fuzz Box',emoji:'🌫',effect:'All RIFF cards cost 1 less Ember.',cost:14,rarity:'common'},
-  {id:'tunerpedal',name:'Tuner Pedal',emoji:'🎯',effect:'Discarding a card draws 1 immediately.',cost:12,rarity:'common'},
-  {id:'wahpedal',name:'Wah Pedal',emoji:'🦶',effect:'First CORRUPT card each fight costs 0 Embers.',cost:12,rarity:'common'},
-  {id:'volumeknob',name:'Volume Knob',emoji:'🔆',effect:'If you played 4+ cards last Strike, draw 1 extra next Strike.',cost:11,rarity:'common'},
-  {id:'powerconditioner',name:'Power Conditioner',emoji:'🔌',effect:'Start each fight with +1 Ember.',cost:10,rarity:'common'},
-  {id:'cabletester',name:'Cable Tester',emoji:'🪡',effect:'Duplicate cards cost 1 less Ember.',cost:12,rarity:'common'},
-  {id:'drumthrone',name:'Drum Throne',emoji:'🪑',effect:'Drummer rolls d6 twice and picks higher result.',cost:14,rarity:'common'},
-  // ── NEW UNCOMMON PEDALS (4) ───────────────────────────────────
-  {id:'phaserpedal',name:'Phaser',emoji:'🌊',effect:'All CORRUPT cards cost 1 less Ember.',cost:18,rarity:'uncommon'},
-  {id:'compressorpedal',name:'Compressor',emoji:'📊',effect:'If you play 4+ cards in a Strike, draw 1 next Strike AND gain 1 Ember.',cost:18,rarity:'uncommon'},
-  {id:'octavepedal',name:'Octave Pedal',emoji:'🎼',effect:'First Riff Chain each fight fires twice (double mult).',cost:22,rarity:'uncommon'},
-  {id:'sustainpedal',name:'Sustain Pedal',emoji:'🦶',effect:'Buffs from temp ATK cards last 1 extra Strike.',cost:20,rarity:'uncommon'},
-  // ── NEW RARE PEDALS (3) ───────────────────────────────────────
-  {id:'looperpedal',name:'The Looper',emoji:'♾️',effect:'First card each Strike replays at end of Strike (free).',cost:28,rarity:'rare'},
-  {id:'bitcrusher',name:'Bit Crusher',emoji:'💥',effect:'Each card you discard gives +5% Corruption.',cost:26,rarity:'rare'},
-  {id:'echoplex',name:'Echoplex',emoji:'🎚',effect:'When you play a card, 69% chance it triggers a second time at end of Strike (free). The god-tier pedal.',cost:42,rarity:'rare'},
-]
-
-// ── MYTHIC PEDALS (3) — UNLOCK-GATED ───────────────────────────
-const MYTHIC_PEDALS=[
-  {id:'witchssabbath',name:"The Witch's Sabbath",emoji:'🌑',effect:'First card each Strike replays THREE times instead of once. Looper × Echoplex on steroids.',cost:50,rarity:'mythic',unlockId:'witchsSabbath',hint:'Let the haze consume them all, and emerge victorious.'},
-  {id:'theconduit',name:'The Conduit',emoji:'⚡',effect:'Start each fight at MAX Embers. All cards cost half (rounded down).',cost:50,rarity:'mythic',unlockId:'theConduit',hint:'Slay the King swiftly. Mercy is for the weak.'},
-  {id:'tabletofazothoth',name:"Tablet of Az'Tothoth",emoji:'📜',effect:'First Riff Chain each fight permanently upgrades a random card for the rest of the run.',cost:50,rarity:'mythic',unlockId:'tabletOfAzothoth',hint:'Master every chain in a single descent.'},
-]
-
-
-// ═══════════════════════════════════════════════════════════
-// RANDOM EVENTS — Hell-themed encounters between non-boss fights
-// ═══════════════════════════════════════════════════════════
-
-// ═══════════════════════════════════════════════════════════
-// STARTER DECKS — achievement-gated alternate starting decks
-// ═══════════════════════════════════════════════════════════
-// STARTER_DECKS — each deck has a distinct identity beyond just card pool.
-//   hpScale         — boss HP scaling (canonical difficulty knob)
-//   memberHpMod     — flat HP added to each band member at run start (Survivor +2)
-//   memberHpPct     — % HP modifier applied to each band member (Shredder -15%)
-//   handSize        — opening hand size (default HAND_SIZE = 5)
-//   startEmbers     — fight-start ember count (default = maxEmbers, usually 5)
-//   startCorruption — fight-start corruption (default 0)
-//   maxStrikesMod   — bonus strikes per fight (Survivor +1)
-//   freeArtifact    — start run with a random Tier 1 artifact (Engineer)
-//   signature       — id of the unique mechanic ('riff_chain_echo', 'corruption_feeds',
-//                     'copier', 'second_wind'). Wired in their respective handlers.
-//   scoreMult       — final-score multiplier for leaderboard (stacks with stake.scoreMult)
-const STARTER_DECKS=[
-  {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. The honest fight.',requirement:null,color:'#c8a060',hpScale:1.85,scoreMult:1.0},
-  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. +1 hand size. Band starts at 80% HP — glass cannons. SIGNATURE: Riff Chain Echo — every chain fires a second time at 33% damage on the next strike.',requirement:'beat_standard',color:'#ff4400',hpScale:2.00,memberHpPct:0.80,handSize:6,signature:'riff_chain_echo',scoreMult:1.4},
-  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Start each fight at 15% corruption. 4 starting embers. SIGNATURE: Corruption Feeds — every 10% corruption gained refunds 1 ember (max 5/strike).',requirement:'beat_shredder',color:'#cc44ff',hpScale:1.65,startEmbers:4,startCorruption:15,signature:'corruption_feeds',scoreMult:1.6},
-  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Combo nerd. 18 UTILITY cards. SIGNATURE: Copier — every UTILITY card has a 25% chance to add a copy of itself to your hand. Copies can\'t re-copy. Stack the engine.',requirement:'beat_ritualist',color:'#44aaff',hpScale:1.85,signature:'copier',scoreMult:1.2},
-  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Each band member starts with +2 max HP. SIGNATURE: Second Wind — each member gets ONE per-fight save: when they would go Too Stoned, they instead heal to 25% HP. Stacks across the band.',requirement:'beat_engineer',color:'#44cc44',hpScale:1.75,memberHpMod:2,maxStrikesMod:0,signature:'second_wind',scoreMult:1.3},
-]
+// → TUTORIAL_MEMBERS moved to src/data/flavor.js (v0.8.0 split)
 function getUnlockedDecks(){
   const achs=getAchievements()
   return STARTER_DECKS.filter(d=>!d.requirement||achs.includes(d.requirement))
 }
 
-const HELL_EVENTS=[
-  {id:'mosh_pit',name:'The Mosh Pit',emoji:'🤘',
-    flavor:'A pit of tortured souls writhes before you. Your band could join the fray...',
-    choiceA:{label:'Jump In',desc:'All take 4 damage. Survivors gain +1 ATK permanently.',emoji:'💥'},
-    choiceB:{label:'Walk Away',desc:'Lose 15 Stash. The crowd boos.',emoji:'🚶'}},
-  {id:'cursed_amp',name:'Cursed Amplifier',emoji:'🔊',
-    flavor:'A blood-red amp hums with infernal energy. Its knobs are set to 11...',
-    choiceA:{label:'Plug In',desc:'+2 Max Embers permanently. Corruption locks at current level forever.',emoji:'⚡'},
-    choiceB:{label:'Smash It',desc:'-15% Corruption. Sometimes silence is golden.',emoji:'🔨'}},
-  {id:'blood_oath',name:'Blood Oath',emoji:'🩸',
-    flavor:'A hooded figure offers a crimson contract. One name. One signature. One promise.',
-    choiceA:{label:'Sign It',desc:'Your strongest member gains +5 ATK. But if they take ANY boss damage, they die instantly.',emoji:'✍'},
-    choiceB:{label:'Refuse',desc:'Smart. The figure dissolves into smoke.',emoji:'🚫'}},
-  {id:'hellfire_baptism',name:'Hellfire Baptism',emoji:'🔥',
-    flavor:'A river of fire blocks your path. The flames whisper: "Let us in."',
-    choiceA:{label:'Walk Through',desc:'Corruption set to 69%. All members gain +2 ATK permanently.',emoji:'🌊'},
-    choiceB:{label:'Find Another Way',desc:'Nothing happens. You press on.',emoji:'↩'}},
-  {id:'sabbath_offering',name:'Sabbath Offering',emoji:'⛧',
-    flavor:'An altar of black stone demands sacrifice. Three cards, chosen by fate.',
-    choiceA:{label:'Make the Offering',desc:'Remove 3 weakest cards from your deck permanently. All members +1 ATK. Thin your deck, sharpen your band.',emoji:'🪦'},
-    choiceB:{label:'Keep Your Cards',desc:'The altar crumbles. You keep your deck intact.',emoji:'🃏'}},
-  {id:'devils_wager',name:"The Devil\'s Wager",emoji:'🎲',
-    flavor:'Old Scratch himself appears, flipping a coin. "Feeling lucky, mortal?"',
-    choiceA:{label:'Take the Bet',desc:'Coin flip. HEADS: All members +3 ATK. TAILS: Your strongest member dies.',emoji:'🪙'},
-    choiceB:{label:'Walk Away',desc:'"Coward." He vanishes. But your band is intact.',emoji:'🚶'}},
-]
+// → HELL_EVENTS moved to src/data/flavor.js (v0.8.0 split)
 
-const BOSS_QUOTES={
-  'wanderer':'Finally... rest.',
-  'lostsoul':'I was looking for something. I forgot what.',
-  'drifter':'The road ends here. For now.',
-  'siren':'You resisted. No one resists forever.',
-  'tempter':'The flesh is weak. Even mine.',
-  'lust_boss':'Desire never truly dies. Remember that.',
-  'glutton':'Still... hungry...',
-  'feaster':'There is always... more...',
-  'gluttony_boss':'I consumed everything. Even myself.',
-  'miser':'My stash... my beautiful stash...',
-  'hoarder':'I was saving that for later...',
-  'greed_boss':'You cannot take it with you. Neither could I.',
-  'wrathful':'The rage remains. It always remains.',
-  'berserker':'I felt nothing but fury. Was that living?',
-  'anger_boss':'Your anger will outlast you. I promise.',
-  'heretic':'The truth was never yours to know.',
-  'apostate':'I chose the wrong side. Or the right one.',
-  'heresy_boss':'The doctrine... was flawed. I see that now.',
-  'brute':'Strong. But not strong enough.',
-  'hunter':'I never missed. Until today.',
-  'violence_boss':'I executed thousands. You executed me.',
-  'trickster':'Ha. Good trick.',
-  'deceiver':'Was anything real? No. Nothing was.',
-  'fraud_boss':'The greatest fraud was believing I could win.',
-  'traitor':'I betrayed everyone. Fitting that I fall last.',
-  'betrayer':'Trust no one. I never did. Still lost.',
-  'lucifer':'Impressive. I\'ll be seeing you again. Soon.',
-}
+// → BOSS_QUOTES moved to src/data/flavor.js (v0.8.0 split)
 
-const BOSS_BIOS={
-  wanderer:'A soul who never chose a side. Drifts through Limbo endlessly, attacking out of confusion rather than malice.',
-  lostsoul:'Once a musician herself. Lost her voice, then her mind, then her name. Now she lashes out at anything that reminds her of what she was.',
-  drifter:'The gatekeeper of Limbo. Pure pressure, no strategy. If you can\'t handle this, Hell will eat you alive.',
-  siren:'Her voice was the last beautiful thing many heard. Now she sings to lure the damned deeper into the circles.',
-  tempter:'Offers everything you want, takes everything you have. His charm is a weapon sharper than any blade.',
-  lust_boss:'The embodiment of desire. Every buff you gain makes you want more. That\'s exactly how she wins.',
-  glutton:'Consumes your damage like a buffet. The more you feed it, the hungrier it gets.',
-  feaster:'Three stomachs. Each one heals what the others digest. A biological war of attrition.',
-  gluttony_boss:'The mouth at the bottom of the food chain. Everything in Gluttony flows into the Devourer eventually.',
-  miser:'Counts every coin twice. Steals your stash not out of need, but out of principle.',
-  hoarder:'Has more wealth than any demon in Hell. Still steals from the damned. Old habits.',
-  greed_boss:'Invented interest rates in the afterlife. Your debt to him grows faster than your damage.',
-  wrathful:'Rage given physical form. The more you prepare, the angrier he gets.',
-  berserker:'No strategy. No hesitation. Just fury. Every buff you stack is fuel for his fire.',
-  anger_boss:'Commanded armies in life. Commands rage in death. Your strength is his weapon.',
-  heretic:'Challenged God. Lost. Now he challenges everyone else. His corruption is contagious.',
-  apostate:'A former priest who found the wrong truth. His faith corrupts everything it touches.',
-  heresy_boss:'Wrote the book on corruption. Literally. Reading it costs 20% of your soul per page.',
-  brute:'Precision violence. Always targets the strongest. Believes in cutting the head off the snake.',
-  hunter:'Tracked souls across nine circles for centuries. His patience is his deadliest weapon.',
-  violence_boss:'Executioner of Hell. Methodical. Doubles his damage against your strongest. There is no hiding.',
-  trickster:'Nothing is what it seems. Your hand, your strategy, your plan — he scrambles all of it.',
-  deceiver:'The second-best liar in Hell. Manipulates your cards, your confidence, your hope.',
-  fraud_boss:'The greatest con artist who ever lived — or died. His lies are indistinguishable from truth.',
-  traitor:'Betrayed his own circle to survive. Now he turns your band against each other.',
-  betrayer:'Steals what you\'ve built. Your permanent ATK, your strategy, your progress. All of it.',
-  lucifer:'The Morning Star. Fell from Heaven. Rules Hell. Two phases. The ultimate test of everything you\'ve built.',
-}
+// → BOSS_BIOS moved to src/data/flavor.js (v0.8.0 split)
 
-const CIRCLE_ARTIFACTS=[
-  {id:'ca1',name:'The Goat of Mendes',emoji:'🐐',effect:'All Strikes deal ×1.5 damage. Stacks with other multipliers.',cost:28,multTrigger:'alwaysOn',mult:1.5,rarity:'rare'},
-  // ca2 (Hellfire Amulet) RECLASSIFIED to pedal pool
-  // ca3 (Sabbath Crown) RECLASSIFIED to pedal pool
-  {id:'ca4',name:'Wailing Guitar',emoji:'🎸',effect:'First Strike each fight deals double damage.',cost:16,multTrigger:'firstStrikeOfFight',mult:2.0,rarity:'uncommon'},
-  {id:'ca5',name:'Hellmouth Amplifier',emoji:'🌋',effect:'×5.0 damage when Corruption is 80%+. The sound of Hell itself.',cost:40,multTrigger:'corrupt80',mult:5.0,rarity:'rare'},
-  {id:'ca6',name:'Void Engine',emoji:'🕳',effect:'×3.0 for each Too Stoned member. Feed the machine your bandmates.',cost:35,multTrigger:'perStoned',mult:3.0,rarity:'rare'},
-]
+// → CIRCLE_ARTIFACTS moved to src/data/relics.js (v0.8.0 split)
 
 // Card prices by rarity
 function cardPrice(card){
@@ -1989,84 +1302,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
 // ── SLY REACTIVE DIALOGUE ──
 // Sly comments on what JV is *actually doing* — categorized line pools keyed off live state.
 // First match wins (priority order in slyContext). Falls through to ambient when nothing notable is happening.
-const SLY_LINES={
-  multiBuy:[
-    "Easy on the trigger, kid. I gotta restock.",
-    "Slow down — Sly likes a slow burn.",
-    "Buyin' me out tonight. I respect that.",
-    "Christ kid, leave somethin' for the next sucker.",
-  ],
-  boughtPack:[
-    "Open it here, open it there — just don't open it at home.",
-    "Pack's sealed. Mostly. Probably. Mostly probably.",
-    "If somethin' crawls out — that's a feature.",
-    "Heh. Tell me what's in it. ...Wait, no, don't.",
-  ],
-  boughtCard:[
-    "Solid pick. Or not. I don't read the cards.",
-    "That one's been in three bands. Two of 'em died.",
-    "Pleasure doin' business. Don't make eye contact on the way out.",
-    "Take it. Forget where you got it.",
-  ],
-  highCorruption:[
-    "You're glowin', kid. Not in a good way.",
-    "Hungerin' bad, huh? Hunger tax. Everything's marked up.",
-    "I can smell the rot on you. Hot merch for hot souls.",
-    "Stand back a little, will ya? You're leakin'.",
-  ],
-  flushStash:[
-    "Damn kid, you're loaded. C'mere.",
-    "That's a lotta green. Spend it before it spends you.",
-    "Pockets jangling like that, somebody'll notice.",
-    "Whole bandana full. Hope you didn't earn it honest.",
-  ],
-  brokeStash:[
-    "Looking light tonight? I got financing options. (I don't.)",
-    "Pawn somethin'. I take guitars, kidneys, regrets.",
-    "Light pockets, kid. Don't waste my time.",
-  ],
-  deepCircle:[
-    "You made it past Greed? Hell of a thing. Hell of a price too.",
-    "Most kids don't get this far. Most kids don't come back either.",
-    "Down here the markup's worse but the merch is meaner.",
-  ],
-  firstVisit:[
-    "First time? Don't make a habit of it. Or do — I don't care.",
-    "Heard about me from who? ...Don't answer that.",
-    "Look around, kid. Don't touch nothin' unless you're buyin'.",
-  ],
-  hoverArtifact:[
-    "That thing's got a curse on it. Probably.",
-    "Eyes off, kid. Or pay up.",
-    "Found it in a dumpster behind a strip mall. No questions.",
-    "Last guy who held one — we don't talk about it.",
-    "It hums at night. Just so you know.",
-  ],
-  cleanedOut:[
-    "You bought me out, kid. Get gone.",
-    "Nothin' left but lint. Come back next circle.",
-    "Show's over. Door's that way.",
-    "I respect the hustle. Now scram.",
-  ],
-  encore:[
-    "Back already? Most don't make it once.",
-    "Heard you killed the big guy. Word travels.",
-    "Round two on the house. Just kiddin'. Pay up.",
-    "Different kid, same bullshit. Welcome back.",
-    "You smell different now. Less alive.",
-  ],
-  ambient:[
-    "Five-finger discount on everything tonight.",
-    "Don't ask, don't tell, don't bring cops.",
-    "Got these off a guy who 'doesn't need em anymore'.",
-    "You buy, you walk, you forget you saw me.",
-    "I take stash, herb, blood — your call, kid.",
-    "Cash only. And by cash I mean stash.",
-    "My cousin works at the venue. Don't worry about it.",
-    "Half off if you don't ask where it came from.",
-    "Stuff just falls into my van, you know how it is.",
-  ],
-}
+// → SLY_LINES moved to src/data/flavor.js (v0.8.0 split)
 const pickSlyLine=(tag)=>{const p=SLY_LINES[tag]||SLY_LINES.ambient;return p[Math.floor(Math.random()*p.length)]}
 
 function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePassive,recruitPack,recruitBought,onMarkRecruitBought,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,heldDMT,shroomsInStock,acidInStock,dmtInStock,onBuyShrooms,onBuyAcid,onBuyDMT,corruption,hangover,chosenPacts,addLog,encoreMode}){
@@ -3106,26 +2342,7 @@ function showFirstTimeTip(key, msg, addLog, addFloat) {
 }
 
 // ═══ LOADING TIPS — doom metal wisdom ═══
-const LOADING_TIPS=[
-  'Corruption above 40% MULTIPLIES your damage. Risk = reward.',
-  'Burning cards from your deck means you draw combos faster.',
-  'Riff Chains fire when you play BOTH cards of a pair. Check the Rules for all 16 chains.',
-  'Artifacts with ×MULT triggers are your Jokers. Stack them for nuclear damage.',
-  'Playing 4+ cards before Striking activates Vintage Guitar (×1.3).',
-  'The Pawn Shop lets you burn bad cards. A 50-card deck beats a 69-card deck.',
-  "Devil's Tuning Fork starts you at 15% corruption AND gives ×1.5 at 60%+. Double value.",
-  'Ctrl+Z undoes your last card play. Use it.',
-  'Boss loot gives permanent multiplier triggers. Each circle boss drops a unique one.',
-  'Mastery grows with every card play. At 100 plays a card becomes Gold (permanently upgraded).',
-  'The Goat of Mendes gives ×1.25 on EVERY strike. Most powerful artifact in the game.',
-  'Gambit cards (Hellfire Rift, Soul Sacrifice, Void Pact) appear rarely in shops. They are nuclear.',
-  'Heat increases after each win. Higher heat = harder bosses + better bragging rights.',
-  'Press S to Strike, D to Discard, 1-6 to select cards, ESC for pause menu.',
-  'Encore members attack TWICE. Look for the 🔁×2 badge.',
-  'Foil members have boosted stats. Mythic members are even stronger.',
-  'Band Synergy: buff 3+ members and your whole band deals bonus damage.',
-  'Corruption Gambit: play Void Pact (×2.5 mult) when corruption is already at 60% for maximum carnage.',
-]
+// → LOADING_TIPS moved to src/data/flavor.js (v0.8.0 split)
 
 // ═══ PACK ART — maps pack IDs to art files ═══
 const PACK_ART_MAP={cassette:'touring',cdr:'underground',vinyl:'festival',rarevinyl:'headliner',cursed:'demonic'}
@@ -10153,7 +9370,7 @@ function App(){
                 textShadow:'0 0 30px rgba(220,0,0,0.7)',
                 boxShadow:'0 0 50px rgba(180,0,0,0.3)',
                 animation:'throb 2s ease-in-out infinite',transition:'all 0.2s',marginBottom:16}}>
-              {allDecksDemonic()?<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:32,color:'#ffd700',textShadow:'0 0 24px rgba(255,215,0,0.8),0 0 48px rgba(255,0,68,0.5)',letterSpacing:8,marginBottom:8,animation:'throb 2s ease-in-out infinite'}}>⛧ PANTHEON ⛧</div>
+              {allDecksDemonic()?<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:32,color:'var(--gold)',textShadow:'0 0 24px rgba(255,215,0,0.8),0 0 48px rgba(255,0,68,0.5)',letterSpacing:8,marginBottom:8,animation:'throb 2s ease-in-out infinite'}}>⛧ PANTHEON ⛧</div>
               :getStakeUnlocks().includes('demonic')&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'var(--text-blood)',textShadow:'0 0 20px rgba(255,0,68,0.6),0 0 40px rgba(255,0,68,0.3)',letterSpacing:6,marginBottom:8,animation:'throb 3s ease-in-out infinite'}}>⛧ GOD KILLER ⛧</div>}
               ⛧ Enter the Vestibule ⛧
             </button>
