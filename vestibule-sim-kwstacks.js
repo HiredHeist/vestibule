@@ -314,11 +314,10 @@ function auraAtkMap(stage,ctx){const map={}
   for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue;let a=0
     for(const j of[i-1,i+1]){const n=stage[j];if(!n||n.tooStoned)continue
       switch(n.keyword){
-        case 'FRENZIED':case 'DEBUFF':a+=1;break
+        case 'FRENZIED':case 'DEBUFF':case 'DOUBLE TIME':a+=1;break
         case 'CORRUPT':if(ctx.corruption>=50)a+=1;break
         case 'HEXED':if(ctx.corruption>=25)a+=1;break
         case 'SHREDDER':if(ctx.shredderHits>0)a+=1;break
-        case 'DOUBLE TIME':if(ctx.drumRollOk)a+=1;break
       }}
     if(a>0)map[m.uid]=a}
   return map}
@@ -330,9 +329,9 @@ function folkAuraHeal(stage){for(let i=0;i<stage.length;i++){const m=stage[i];if
 function auraStaticScore(stage){let s=0
   for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue
     for(const j of[i-1,i+1]){const n=stage[j];if(!n||n.tooStoned)continue
-      switch(n.keyword){case 'FRENZIED':case 'DEBUFF':s+=3;break
+      switch(n.keyword){case 'FRENZIED':case 'DEBUFF':case 'DOUBLE TIME':s+=3;break
         case 'ANCHOR':case 'FOLK MAGIC':s+=2;break
-        case 'CORRUPT':case 'HEXED':case 'SHREDDER':case 'DOUBLE TIME':s+=1.5;break}}}
+        case 'CORRUPT':case 'HEXED':case 'SHREDDER':s+=1.5;break}}}
   return s}
 function improveOrdering(gs){const stage=gs.stage
   const linkPairs=(gs.mentorLinks||[]).map(l=>({m:stage[l.mentorIdx]&&stage[l.mentorIdx].uid,p:stage[l.protegeIdx]&&stage[l.protegeIdx].uid}))

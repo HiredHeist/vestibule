@@ -662,18 +662,44 @@ function getEffectiveAtk(m,ctx){
     const tier=ctx.tier?ctx.tier('SHREDDER'):0
     if(tier>0)atk+=(ctx.shredderHits||0)*tier
   }
+  // v0.8 Band Auras — adjacency bonus computed once per strike into ctx.auraAtk
+  if(ctx.auraAtk)atk+=ctx.auraAtk[m.uid]||0
   return atk
 }
 
+
+// ═══ BAND AURAS (v0.8) — every member radiates a small bonus to ADJACENT stage slots.
+// Stoned members neither emit nor receive. Edge slots have 1 neighbor, center 2.
+// Mirrors vestibule-sim-kwstacks.js aura engine (sim-validated at 10K games/deck).
+function _auraAtkMap(stage,ctx){const map={}
+  for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue;let a=0
+    for(const j of[i-1,i+1]){const n=stage[j];if(!n||n.tooStoned)continue
+      switch(n.keyword){
+        case 'FRENZIED':case 'DEBUFF':case 'DOUBLE TIME':a+=1;break
+        case 'CORRUPT':if((ctx.corruption||0)>=50)a+=1;break
+        case 'HEXED':if((ctx.corruption||0)>=25)a+=1;break
+        case 'SHREDDER':if((ctx.shredderHits||0)>0)a+=1;break
+      }}
+    if(a>0)map[m.uid]=a}
+  return map}
+function _anchorAuraRed(stage,uid){
+  const i=stage.findIndex(m=>m&&m.uid===uid);if(i<0)return 0;let r=0
+  for(const j of[i-1,i+1]){const n=stage[j];if(n&&!n.tooStoned&&n.keyword==='ANCHOR')r+=1}
+  return r}
+function _folkAuraHealMap(stage){let any=false;const map={}
+  for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue;let h=0
+    for(const j of[i-1,i+1]){const n=stage[j];if(n&&!n.tooStoned&&n.keyword==='FOLK MAGIC')h+=1}
+    if(h>0){map[i]=h;any=true}}
+  return any?map:null}
 const KEYWORD_DESC={
-  'FRENZIED':'+ATK per RIFF played each Strike. Stack more for bigger bonus (1/2/4×).',
-  'DOUBLE TIME':'Drummer rolls d6 each fight: 5-6=×2 damage, 3-4=×1.5, 1-2=×1. (Only one drummer per band.)',
-  'ANCHOR':'Saves an ANCHOR member from a lethal hit. 1 stack = save 1 ANCHOR/fight. 2 stacks = save 2 ANCHORs/fight. 3+ stacks = ANY member can be saved (4 saves/fight). Stack 3+ ANCHORs to protect the whole band.',
-  'CORRUPT':'+ATK from Corruption (×1/×2/×4 by stack tier). Thrives in chaos.',
-  'DEBUFF':'Reduces boss damage by 2 each Strike, stacking permanently this fight.',
-  'FOLK MAGIC':'20% chance each Strike to refill all Embers.',
-  'SHREDDER':'+ATK per consecutive same-type card chain played each Strike (1/2/4×).',
-  'HEXED':'Gains +Corruption each Strike, ATK scales with Corruption.',
+  'FRENZIED':'+ATK per RIFF played each Strike. Stack more for bigger bonus (1/2/4×). ⟡AURA: neighbors +1 ATK.',
+  'DOUBLE TIME':'Drummer rolls d6 each fight: 5-6=×2 damage, 3-4=×1.5, 1-2=×1. (Only one drummer per band.) ⟡AURA: neighbors +1 ATK.',
+  'ANCHOR':'Saves an ANCHOR member from a lethal hit. 1 stack = save 1 ANCHOR/fight. 2 stacks = save 2 ANCHORs/fight. 3+ stacks = ANY member can be saved (4 saves/fight). Stack 3+ ANCHORs to protect the whole band. ⟡AURA: neighbors take −1 boss damage.',
+  'CORRUPT':'+ATK from Corruption (×1/×2/×4 by stack tier). Thrives in chaos. ⟡AURA: neighbors +1 ATK at ≥50% Corruption.',
+  'DEBUFF':'Reduces boss damage by 2 each Strike, stacking permanently this fight. ⟡AURA: neighbors +1 ATK.',
+  'FOLK MAGIC':'20% chance each Strike to refill all Embers. ⟡AURA: neighbors heal 1 each Strike.',
+  'SHREDDER':'+ATK per consecutive same-type card chain played each Strike (1/2/4×). ⟡AURA: neighbors +1 ATK when a chain fires.',
+  'HEXED':'Gains +Corruption each Strike, ATK scales with Corruption. ⟡AURA: neighbors +1 ATK at ≥25% Corruption.',
   'FALLEN':'Cannot be healed. Loses 1 HP per Strike. If Lucifer dies, game over. Max 3 band members.',
 }
 
@@ -2043,7 +2069,7 @@ const SLY_LINES={
 }
 const pickSlyLine=(tag)=>{const p=SLY_LINES[tag]||SLY_LINES.ambient;return p[Math.floor(Math.random()*p.length)]}
 
-function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitPack,recruitBought,onMarkRecruitBought,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,heldDMT,shroomsInStock,acidInStock,dmtInStock,onBuyShrooms,onBuyAcid,onBuyDMT,corruption,hangover,chosenPacts,addLog,encoreMode}){
+function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePassive,recruitPack,recruitBought,onMarkRecruitBought,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,heldDMT,shroomsInStock,acidInStock,dmtInStock,onBuyShrooms,onBuyAcid,onBuyDMT,corruption,hangover,chosenPacts,addLog,encoreMode}){
   const drugMax=isUnlocked('double_dealer')?2:1
   const [hovId,setHovId]=useState(null)
   const [hoveringArtifact,setHoveringArtifact]=useState(false)
@@ -2814,6 +2840,17 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
           </div>
 
           {/* GEAR PANELS — Artifact above, Effect Pedal below. Both fixed-height, sit at bottom of column. */}
+          {stage&&stage.filter(Boolean).length>1&&onSwapMembers&&<div style={{flexShrink:0,border:'1px solid rgba(120,200,160,0.3)',borderRadius:8,padding:'6px 8px',background:'rgba(4,10,6,0.4)',marginBottom:6}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#66ccaa',letterSpacing:2,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>⟡ Stage Order — auras reach adjacent slots</div>
+            <div style={{display:'flex',gap:4,justifyContent:'center',flexWrap:'wrap'}}>
+              {stage.map((m,i)=>m&&<div key={m.uid} style={{display:'flex',alignItems:'center',gap:3,border:'1px solid rgba(120,200,160,0.25)',borderRadius:4,padding:'2px 5px',background:'rgba(10,20,14,0.5)'}}>
+                <span onClick={()=>{if(i>0&&stage[i-1])onSwapMembers(i,i-1)}} style={{cursor:i>0&&stage[i-1]?'pointer':'default',opacity:i>0&&stage[i-1]?1:0.25,fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#66ccaa',padding:'0 2px'}}>⟨</span>
+                <span style={{fontSize:14}}>{m.emoji}</span>
+                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:m.tooStoned?'var(--text-muted)':'var(--ink-bone)'}}>{m.name}</span>
+                <span onClick={()=>{if(i<stage.length-1&&stage[i+1])onSwapMembers(i,i+1)}} style={{cursor:i<stage.length-1&&stage[i+1]?'pointer':'default',opacity:i<stage.length-1&&stage[i+1]?1:0.25,fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#66ccaa',padding:'0 2px'}}>⟩</span>
+              </div>)}
+            </div>
+          </div>}
           {circleArtifact&&<div onMouseEnter={()=>setHoveringArtifact(true)} onMouseLeave={()=>setHoveringArtifact(false)} style={{flexShrink:0,border:'1px solid rgba(200,120,32,0.4)',borderRadius:8,padding:'8px',background:'rgba(10,6,2,0.4)'}}>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-blood)',letterSpacing:2,textTransform:'uppercase',textAlign:'center',marginBottom:4,textShadow:'0 0 8px rgba(196,30,58,0.6)'}}>⛧ This circle only</div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:'var(--type-ember)',textAlign:'center',textTransform:'uppercase',marginBottom:4}}>⛧ Artifact</div>
@@ -8233,7 +8270,7 @@ function App(){
     for(let _si=1;_si<_cardIdsThisStrike.length;_si++){
       if(CARD_TYPE_BY_ID[_cardIdsThisStrike[_si]]===CARD_TYPE_BY_ID[_cardIdsThisStrike[_si-1]])_shredderHits++
     }
-    const _atkCtx={corruption,tier:_kwStacks.tier,riffsThisStrike:_riffsThisStrike,shredderHits:_shredderHits}
+    const _atkCtx={corruption,tier:_kwStacks.tier,riffsThisStrike:_riffsThisStrike,shredderHits:_shredderHits,auraAtk:_auraAtkMap(stage,{corruption,shredderHits:_shredderHits})}
 
     if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
     if(slowBurnStrikes>0){setEmbers(p=>Math.min(maxEmbers,p+1));addLog('🕯️ Slow Burn: +1 ember');setSlowBurnStrikes(p=>p-1)}
@@ -8652,6 +8689,8 @@ function App(){
         shredderEchoesPendingRef.current=0
       }
       const _totalStrikeDmg=finalDmg+_shredderEchoDmg
+      // v0.8 FOLK MAGIC aura — adjacent members heal 1 per folk neighbor after each strike
+      setStage(p=>{const hm=_folkAuraHealMap(p);return hm?p.map((m,i)=>m&&hm[i]?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+hm[i])}):m):p})
       const newEHp=Math.max(0,startHp-_totalStrikeDmg)
       if(newEHp<=0){const _ok=Math.abs(newEHp);updStat('overkillDmg',_ok)}
       // ── HP DROP DEFERRED TO CASCADE SLAM (Option B / Balatro-style) ──
@@ -8828,6 +8867,8 @@ function App(){
           // Apply enemy passive scaling effects before damage
         const stakeBaseDmg=enemy.baseDmg+activeStake.dmgAdd
         let scaledBaseDmg=Math.max(1,stakeBaseDmg-(chosenPacts.includes('stone_wall')?1:0))+(enemy.passiveId&&enemy.passiveId.startsWith('damageScaleAtk')?bossRageAtk:0)
+        // v0.8 ANCHOR aura — adjacent ANCHOR members shield the target (-1 each, floor 1)
+        scaledBaseDmg=Math.max(1,scaledBaseDmg-_anchorAuraRed(stage,target.uid))
         // selfbuff: boss gains +1/+2 dmg per Strike
         if(enemy.passiveId==='selfbuff'){scaledBaseDmg=stakeBaseDmg+strikesLeft}
         else if(enemy.passiveId==='selfbuff2'){scaledBaseDmg=stakeBaseDmg+(activeStake.maxStrikes-strikesLeft)*2}
@@ -8930,7 +8971,7 @@ function App(){
             for(let ai=0;ai<stage.length;ai++){
               const _m=stage[ai]
               if(!_m||_m.tooStoned)continue
-              const _newHp=_m.hp-splitDmg
+              const _newHp=_m.hp-Math.max(1,splitDmg-_anchorAuraRed(stage,_m.uid))
               if(_newHp<=0&&!_m.stoneShield){
                 _aoeAnchorSaved[ai]=_tryAnchorSave(_m)
               }
@@ -8939,7 +8980,7 @@ function App(){
               const ns2=[...prev]
               for(let ai=0;ai<ns2.length;ai++){
                 if(!ns2[ai]||ns2[ai].tooStoned)continue
-                const newHp=ns2[ai].hp-splitDmg
+                const newHp=ns2[ai].hp-Math.max(1,splitDmg-_anchorAuraRed(stage,ns2[ai].uid))
                 if(newHp<=0&&!ns2[ai].stoneShield){
                   if(_aoeAnchorSaved[ai]){
                     addLog('⚓ ANCHOR! '+ns2[ai].name+' barely survives the lethal blow!')
@@ -9969,7 +10010,7 @@ function App(){
             ['🌿 Stash','Your currency. Earned after victories (scales with circle depth). Spent in the shop on recruit packs, cards, artifacts, passives, and drugs. Capped at 420.'],
             ['💨 Too Stoned','When a member reaches 0 HP, they go Too Stoned and can\'t attack or be targeted for the rest of this fight. They recover at full HP next fight. If ALL members go Too Stoned at once, the run ends.'],
             ['👥 Band Members','Your band has up to 5 slots (6 with the Sixth Slot pact). Each member has ATK, HP, and a keyword ability. Recruit new members from packs in the shop.'],
-            ['🏷 Member Keywords','FRENZIED: +ATK per RIFF played each Strike (×1/2/4 by stack tier). DOUBLE TIME: Drummer rolls d6 each fight (5-6 doubles ATK, 3-4 ×1.5, 1-2 ×1). Only one drummer per band. ANCHOR: Saves from lethal damage 1/2/any-member by stack tier (per fight). CORRUPT: +ATK from Corruption (×1/2/4 by stack tier). DEBUFF: Reduces boss damage. FOLK MAGIC: 20% chance to refill all Embers. SHREDDER: +ATK per consecutive same-type card chain (×1/2/4 by stack tier). HEXED: Auto-raises corruption, gains ATK from it.'],
+            ['🏷 Member Keywords','FRENZIED: +ATK per RIFF played each Strike (×1/2/4 by stack tier). DOUBLE TIME: Drummer rolls d6 each fight (5-6 doubles ATK, 3-4 ×1.5, 1-2 ×1). Only one drummer per band. ANCHOR: Saves from lethal damage 1/2/any-member by stack tier (per fight). CORRUPT: +ATK from Corruption (×1/2/4 by stack tier). DEBUFF: Reduces boss damage. FOLK MAGIC: 20% chance to refill all Embers. SHREDDER: +ATK per consecutive same-type card chain (×1/2/4 by stack tier). HEXED: Auto-raises corruption, gains ATK from it. ⟡ AURAS: every member radiates a small bonus to ADJACENT slots — reorder your stage in the shop to stack them.'],
             ['⛓ Mentor Links','Place a Foil/Mythic/Demonic member directly LEFT of a basic member with the same role. They form a Mentor Link — a permanent damage multiplier that fires every Strike while both are alive.'],
             ['✨ Member Tiers','Members come in tiers: Basic (standard), Foil (+1 ATK/HP, -1 Ember on cards), Mythic (+3 ATK/HP), Demonic (+5 ATK/HP, golden glow). Higher tiers appear in better packs.'],
             ['🃏 Card Types','RIFF (purple): Direct damage and ATK buffs. CORRUPT (red): Corruption-scaling power. UTILITY (green): Healing, draw, and economy. EMBER (orange): Ember management and recovery.'],
@@ -10743,7 +10784,7 @@ function App(){
   if(victorySummary)return <VictorySummaryScreen summary={victorySummary} onContinue={continueVictorySummary}/>
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
   if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} corruption={corruption} hangover={hangover} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} recruitBought={recruitBought} onMarkRecruitBought={()=>setRecruitBought(true)} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} heldDMT={heldDMT} shroomsInStock={shroomsInStock} acidInStock={acidInStock} dmtInStock={dmtInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)} onBuyDMT={()=>setHeldDMT(p=>p+1)} encoreMode={encoreMode}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onSwapMembers={(i,j)=>setStage(p=>{const n=[...p];const t=n[i];n[i]=n[j];n[j]=t;return n})} corruption={corruption} hangover={hangover} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} recruitBought={recruitBought} onMarkRecruitBought={()=>setRecruitBought(true)} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} heldDMT={heldDMT} shroomsInStock={shroomsInStock} acidInStock={acidInStock} dmtInStock={dmtInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)} onBuyDMT={()=>setHeldDMT(p=>p+1)} encoreMode={encoreMode}/>
   if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} devDailyScore={6666} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage} runElapsed={Math.floor((Date.now()-runStartTimeRef.current)/1000)} lastKillingBlow={lastKillingBlow} secondAlbumWin={welcomeToHell==='won'} contractsPlayed={contractsPlayed}/></div>
 
   return(
@@ -11490,7 +11531,7 @@ function App(){
             // Build ad-hoc atk context for preview damage calc — mirrors handleStrikeBody
             const _vmKwStacks=getKeywordStacks(stage)
             const _vmRiffsThis=_vmCardsThisStrike.filter(c=>c.type==='RIFF').length
-            const _vmAtkCtx={corruption,tier:_vmKwStacks.tier,riffsThisStrike:_vmRiffsThis,shredderHits:0}
+            const _vmAtkCtx={corruption,tier:_vmKwStacks.tier,riffsThisStrike:_vmRiffsThis,shredderHits:0,auraAtk:_auraAtkMap(stage,{corruption,shredderHits:0})}
             const _vmHighestAtk = Math.max(0, ...stage.filter(m=>m).map(m=>getEffectiveAtk(m,_vmAtkCtx)))
 
             for(const art of activeArtifacts){
@@ -11620,7 +11661,7 @@ function App(){
             for(let _psi=1;_psi<_previewCardIds.length;_psi++){
               if(CARD_TYPE_BY_ID[_previewCardIds[_psi]]===CARD_TYPE_BY_ID[_previewCardIds[_psi-1]])_previewShredHits++
             }
-            const _previewCtx={corruption,tier:_previewKw.tier,riffsThisStrike:_previewRiffs,shredderHits:_previewShredHits}
+            const _previewCtx={corruption,tier:_previewKw.tier,riffsThisStrike:_previewRiffs,shredderHits:_previewShredHits,auraAtk:_auraAtkMap(stage,{corruption,shredderHits:_previewShredHits})}
             // 1) base sum (non-Drummer; paranoia is random so excluded from preview)
             const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===fightMaxStrikes?10:0
             let dmg=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
