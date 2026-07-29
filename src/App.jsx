@@ -7599,7 +7599,7 @@ function App(){
         setTimeout(()=>{setVictoryCinematic(null);setCreditsRoll(true)},10000)
       }
       if(e.shiftKey&&(e.key==='D'||e.key==='d')){
-        setDeathCause('stoned');setLastKillingBlow('All band members went Too Stoned from corruption damage')
+        setDeathCause('stoned');setLastKillingBlow('All band members went Too Stoned')
         setStats({fightsSurvived:6,strikesThrown:24,totalDamage:420,highestStrike:69,tooStonedCount:2,maxCorruption:66,stashEarned:42,cardsPlayed:99})
         clearSave();setGameState('end')
       }

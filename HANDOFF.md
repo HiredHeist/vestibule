@@ -1,52 +1,55 @@
-# HANDOFF — May 3 evening (Trip System Overhaul)
+# HANDOFF — July 29, 2026 (State-of-reality audit)
 
-*30-second read for tomorrow-JV. Full details in TODO.md "LATE-NIGHT STATUS" section.*
+*30-second read. This replaces the stale May 3 handoff, which described a
+pre-merge world. Everything below was verified against the actual code and
+fresh sim runs on July 29 — not copied from old notes.*
 
 ---
 
-## State of the branch: `hangover-with-teeth`
+## Where main actually is: `v0.7.12` (commit bd2985e)
 
-**Two big systems shipped on this branch (not yet merged to main):**
+**Everything you remembered as "deferred" is DONE and merged:**
 
-1. **Morning session — Hangover system.** Corruption can no longer end your run. Costs deferred to next fight + next shop (HP debuff, shop tax, small stash haircut). Validated at 5K games — within statistical noise of baseline.
+1. **Keyword stack rework — SHIPPED.** `getEffectiveAtk()` centralized
+   (src/App.jsx ~line 627). CORRUPT / FRENZIED / SHREDDER on ×1/×2/×4 tier
+   scaling, ANCHOR tiered lethal saves (1/2/any-member), DOUBLE TIME tier 3
+   (all members attack twice at 3+ drummer stacks). Wired into BOTH the
+   strike calc (~8203-8500) and the cascade preview (~11563-11647).
+2. **Hangover system + Trip overhaul — MERGED** (84f5df2). Corruption cannot
+   end a run. 24 trip effects incl. DMT premium tier. The
+   `hangover-with-teeth` branch pointer still exists on remote but is fully
+   contained in main — safe to delete.
+3. **Shop fixes shipped:** recruit-pack infinite-buy exploit (v0.7.3),
+   circle-shop reroll collision (v0.7.4), plus polish through v0.7.12.
+4. **App.jsx is now 11,911 lines.**
 
-2. **Evening session — Trip system overhaul + DMT tier.** 8 → 24 trip effects. Bunk drugs eliminated. Mid-fight activation enabled. New premium DMT tier (boss-shop only, 25🌿). Audio sweep + screen shake on activation. Validated at 5K games — Lucifer wins jumped from 7.62% to 11.60%.
+## Verified July 29 (this audit)
 
-## What to playtest first tomorrow
+- **Per-deck 5K sim sweep on bronze — PASSED.** Lucifer win rates:
+  Standard 9.00% · Shredder 10.48% · Ritualist 9.08% · Engineer 11.82% ·
+  Survivor 8.28%. Target ~10%; all decks within band, no broken archetype.
+- **Stale-text audits — CLEAN.** No corruption-kills-you strings in addLog
+  or EndScreen. Only fix needed was a debug-shortcut string (Shift+D),
+  corrected in this commit.
+- **GitHub PAT expired ~June 17, 2026.** Repo is public so clones work;
+  pushes need a new token.
 
-**The order I'd hit it (~30 min):**
+## The real remaining list before Early Access
 
-1. **Buy shrooms in fight-1 shop, use it mid-fight in fight 2.** Confirms mid-fight gating works (was previously `strikesLeft===maxStrikes`-locked).
-2. **Survive to first boss kill, hit boss-shop, look for the 💠 DMT tile** at 25🌿. Buy if you can afford. Tile should glow with a blue-violet gradient.
-3. **Try to roll BLOTTER REVELATION or PSILOCYBIN PORTAL** — these are instant-effect trips. Watch for the audio sweep + screen shake.
-4. **Watch the activation overlay** — should show emoji + name in BogartsMetalFont + flavor text in ScratchFont. DMT uses the 💠 emoji (was hardcoded shrooms/acid only — fixed).
-5. **If a member goes stoned, save a DMT for REBIRTH** — should fully restore them with +2 perm ATK.
-6. **Try BLACK SUN with a CORRUPT-heavy hand** — every CORRUPT card should pump strike multiplier by 50%. Watch for the float text.
-
-## Bugs caught and fixed during pre-push audit (5)
-1. `dmt_traveler` achievement was unregistered — added
-2. BLACK SUN `addFloat` used nonsense uid lookup — fixed
-3. REBIRTH wasn't restoring `_origAtk` on revived members — fixed to mirror Wake Up Call
-4. HYPERSPACE's `allCardsFreeRef` not cleared on fight reset — fixed
-5. PSILOCYBIN PORTAL + THIRD EYE used stale `hand` closure — switched to `handRef.current`
-
-## Things to watch (untested integration risks)
-- DMT tile rendering exclusively at boss-shops (every 3rd shop)
-- BLACK SUN compounding with stacked CORRUPT plays (engine caps at 10000× strike mult)
-- AI in sim still pushes to 100% corruption 6.21 times/game — humans might do same, would mean Hangover doesn't feel like a real tradeoff
-- DMT activation rate in sim is only 0.07/game — too low? Could lower price from 25🌿 to 20🌿 post-playtest
-
-## Files changed
-- `src/App.jsx` (~11,659 lines, parse OK)
-- `vestibule-sim-hangover.js` (v20.1-trips, parse OK)
-- `TODO.md` (head updated with both sessions)
-- `HANDOFF.md` (this file)
+1. **Band Auras** — the ONLY approved feature with zero code. Needs design
+   refinement (JV) then implementation.
+2. **Card tuning backlog (non-blocking):** Record Deal near-dead in every
+   deck (~0.15 plays/game). Carrion Call dead in Survivor (0.03/g) though
+   healthy in Ritualist. Sabbath Sigil's low usage is mostly a sim-AI
+   artifact, not a card problem.
+3. **App.jsx split** — optional pre-EA, recommended post-EA.
+4. **Steam packaging** — see STEAM.md.
+5. **Animator cutscenes** — brief exists (19 transitions, 4 tiers);
+   deal structure TBD (flat fee vs. rev share).
 
 ## Sacred constants (unchanged)
-- 420 (stash cap, card height), 69 (deck size)
-- Fonts: BogartsMetalFont (display, NO numbers), MBScribblesFont (default+numbers), ScratchFont (flavor)
+
+- 420 (stash cap, card height), 69 (deck size), 6666 (endgame Lucifer HP)
+- Fonts: BogartsMetalFont (display, NO digits), MBScribblesFont
+  (default + digits), ScratchFont (flavor)
 - React 18 Strict Mode: no side effects inside `setX(prev => ...)` updaters
-
----
-
-*Branch sits at /home/claude/vestibule (Claude's sandbox). Diff against main shows the full Hangover + trips changeset. Push the branch, hammer it, file issues — I'll re-tune from playtest data.*
