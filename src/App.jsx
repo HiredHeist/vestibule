@@ -446,12 +446,21 @@ const STAKES=[
 // v0.8: stake HP factor relative to bronze (1.30). Resurrects formerly-dead hpMult — sim-tuned ladder:
 // bronze 38% / silver 26% / gold 18% / obsidian 11% / blood 7% / demonic 1.5% (expert full-relic play, 10K sims).
 const _stakeHpF=()=>((STAKES.find(s=>s.id===(localStorage.getItem('vst_active_stake')||'bronze'))||{hpMult:1.3}).hpMult/1.3)
-function getUnlockedStakes(){
-  const beaten=JSON.parse(localStorage.getItem('vst_stakes_beaten')||'[]')
+// v0.8: per-deck stake progression (Balatro-style completion grid).
+// v1 flat 'vst_stakes_beaten' migrates once -> credited to Standard.
+function _stakesBeatenMap(){
+  try{const v2=JSON.parse(localStorage.getItem('vst_stakes_beaten_v2')||'null');if(v2)return v2}catch(e){}
+  let old=[];try{old=JSON.parse(localStorage.getItem('vst_stakes_beaten')||'[]')}catch(e){}
+  const m={standard:old};localStorage.setItem('vst_stakes_beaten_v2',JSON.stringify(m));return m
+}
+function getStakesBeaten(deckId){const m=_stakesBeatenMap();return m[deckId]||[]}
+function getUnlockedStakes(deckId){
+  const beaten=getStakesBeaten(deckId||'standard')
   const unlocked=[STAKES[0]] // Bronze always unlocked
   for(let i=1;i<STAKES.length;i++){if(beaten.includes(STAKES[i-1].id))unlocked.push(STAKES[i])}
   return unlocked
 }
+function allDecksDemonic(){const m=_stakesBeatenMap();return STARTER_DECKS.every(d=>(m[d.id]||[]).includes('demonic'))}
 // ── WELCOME TO HELL: The Executive bonus boss ──────────────────────
 const AR_EXECUTIVE={id:'ar_exec',name:'The Executive',emoji:'🕴',maxHp:89700,baseDmg:8,
   passive:'Corporate Pressure. Every 2 strikes, a Record Deal contract appears in your hand.',
@@ -466,9 +475,12 @@ const STAKE_UNLOCKS={
   demonic:{id:'su_demonic',name:'⛧ GOD KILLER ⛧',type:'title',emoji:'⛧',desc:'Permanent title on main menu. You are a god.',color:'#ff0044'},
 }
 function getStakeUnlocks(){return JSON.parse(localStorage.getItem('vst_stake_unlocks')||'[]')}
-function beatStake(stakeId){
+function beatStake(stakeId,deckId){
   const beaten=JSON.parse(localStorage.getItem('vst_stakes_beaten')||'[]')
   if(!beaten.includes(stakeId)){beaten.push(stakeId);localStorage.setItem('vst_stakes_beaten',JSON.stringify(beaten))}
+  // v0.8 per-deck record — difficulty access is per deck; unlock REWARDS stay global
+  const m=_stakesBeatenMap();const dk=deckId||'standard';m[dk]=m[dk]||[]
+  if(!m[dk].includes(stakeId)){m[dk].push(stakeId);localStorage.setItem('vst_stakes_beaten_v2',JSON.stringify(m))}
   const unlocks=getStakeUnlocks()
   if(STAKE_UNLOCKS[stakeId]&&!unlocks.includes(stakeId)){unlocks.push(stakeId);localStorage.setItem('vst_stake_unlocks',JSON.stringify(unlocks))}
 }
@@ -2803,6 +2815,7 @@ function ShopScreen({stash,onSpend,onLeave,circleArtifact,circlePassive,recruitP
 
           {/* GEAR PANELS — Artifact above, Effect Pedal below. Both fixed-height, sit at bottom of column. */}
           {circleArtifact&&<div onMouseEnter={()=>setHoveringArtifact(true)} onMouseLeave={()=>setHoveringArtifact(false)} style={{flexShrink:0,border:'1px solid rgba(200,120,32,0.4)',borderRadius:8,padding:'8px',background:'rgba(10,6,2,0.4)'}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-blood)',letterSpacing:2,textTransform:'uppercase',textAlign:'center',marginBottom:4,textShadow:'0 0 8px rgba(196,30,58,0.6)'}}>⛧ This circle only</div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:'var(--type-ember)',textAlign:'center',textTransform:'uppercase',marginBottom:4}}>⛧ Artifact</div>
             <LeftCard item={circleArtifact} price={circleArtifact.cost}
               label="" accent='#c87820' id='cart'
@@ -5616,6 +5629,7 @@ function App(){
   const [deckViewOpen,setDeckViewOpen]=useState(false)
   const [discardViewOpen,setDiscardViewOpen]=useState(false)
   const [circleArtifact,setCircleArtifact]=useState(()=>rollShopArtifact())
+  const relicsSeenRef=useRef(new Set()) // v0.8 scarcity: each relic offered once per run
   const [circlePassive,setCirclePassive]=useState(()=>rollShopPedal())
   const [activeArtifacts,setActiveArtifacts]=useState([])
   const [triggeredArtifactId,setTriggeredArtifactId]=useState(null) // max 3
@@ -7212,7 +7226,7 @@ function App(){
     if(strikesLeft>=3&&(fightIndex+1)%3===0)tryAchieve('perfect_strike')
     if(corruption>=100)tryAchieve('corruption_lord')
     if(stage.filter(m=>m&&!m.tooStoned).length>=5)tryAchieve('full_band')
-    if(fightIndex===26){tryAchieve('beat_lucifer');beatStake(activeStake.id);tryAchieve('beat_'+selectedDeck)
+    if(fightIndex===26){tryAchieve('beat_lucifer');beatStake(activeStake.id,selectedDeck);tryAchieve('beat_'+selectedDeck)
       // Sigil of Set unlock: solo run (only 1 unique member used the whole run)
       if(soloMembersUsedRef.current.size<=1){fireMythicUnlock('sigilOfSet')}
       const curHeat=parseInt(localStorage.getItem('vst_heat')||'1');if(curHeat<10){localStorage.setItem('vst_heat',(curHeat+1).toString());addLog('🔥 HEAT LEVEL UP! Heat '+(curHeat+1)+' unlocked!')}}
@@ -7277,8 +7291,12 @@ function App(){
           // v0.7.4: Pass active-owned IDs as exclude — prevents the rerolled
           // artifact/pedal from matching one you already own (which would cause
           // the tile to render as sold via activeArtifacts.some(...) check).
-          setCircleArtifact(rollShopArtifact(activeArtifacts.map(a=>a.id)))
+          {const _ex=[...activeArtifacts.map(a=>a.id),...relicsSeenRef.current]
+          const _next=rollShopArtifact(_ex);relicsSeenRef.current.add(_next.id)
+          setCircleArtifact(_next)}
           setCirclePassive(rollShopPedal(activePassives.map(p=>p.id)))
+          if(fightIndex===8){const _db=activeArtifacts.find(a=>a.refundAtC4)
+            if(_db){setActiveArtifacts(p=>p.filter(a=>!a.refundAtC4));setStash(p=>Math.min(420,p+(_db.cost||9)));addLog('🍻 '+_db.name+' — the residency ends. '+(_db.cost||9)+' stash refunded.')}}
           setCircleCartBought(false)
           setCirCleCpasBought(false)
         }
@@ -9756,7 +9774,7 @@ function App(){
     setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
     const _restartDeckStrMod=deckDef?.maxStrikesMod||0
     setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes+_restartDeckStrMod);setFightMaxStrikes(activeStake.maxStrikes+_restartDeckStrMod);setDiscardsLeft(MAX_DISCARDS);setFightMaxDiscards(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
-    setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false
+    setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;relicsSeenRef.current=new Set()
     clearSave();setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setHeldDMT(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0,dmt:0})
     setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;setFreeCardsLeft(0);freeCardsLeftRef.current=0;setBossSkipStrikes(0);bossSkipStrikesRef.current=0;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
     // Reset mythic unlock per-run trackers
@@ -10094,7 +10112,8 @@ function App(){
                 textShadow:'0 0 30px rgba(220,0,0,0.7)',
                 boxShadow:'0 0 50px rgba(180,0,0,0.3)',
                 animation:'throb 2s ease-in-out infinite',transition:'all 0.2s',marginBottom:16}}>
-              {getStakeUnlocks().includes('demonic')&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'var(--text-blood)',textShadow:'0 0 20px rgba(255,0,68,0.6),0 0 40px rgba(255,0,68,0.3)',letterSpacing:6,marginBottom:8,animation:'throb 3s ease-in-out infinite'}}>⛧ GOD KILLER ⛧</div>}
+              {allDecksDemonic()?<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:32,color:'#ffd700',textShadow:'0 0 24px rgba(255,215,0,0.8),0 0 48px rgba(255,0,68,0.5)',letterSpacing:8,marginBottom:8,animation:'throb 2s ease-in-out infinite'}}>⛧ PANTHEON ⛧</div>
+              :getStakeUnlocks().includes('demonic')&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:'var(--text-blood)',textShadow:'0 0 20px rgba(255,0,68,0.6),0 0 40px rgba(255,0,68,0.3)',letterSpacing:6,marginBottom:8,animation:'throb 3s ease-in-out infinite'}}>⛧ GOD KILLER ⛧</div>}
               ⛧ Enter the Vestibule ⛧
             </button>
             {loadGame()&&<button onClick={handleContinueSave}
@@ -10153,7 +10172,7 @@ function App(){
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-secondary)',letterSpacing:3,textTransform:'uppercase'}}>Difficulty Stake</div>
             <div style={{display:'flex',gap:8}}>
               {STAKES.map((sk,i)=>{
-                const unlocked=getUnlockedStakes().some(u=>u.id===sk.id)
+                const unlocked=getUnlockedStakes(selectedDeck).some(u=>u.id===sk.id)
                 const active=activeStakeId===sk.id
                 return <div key={sk.id} onClick={()=>{if(unlocked){setActiveStakeId(sk.id);localStorage.setItem('vst_active_stake',sk.id)}}}
                   style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,
@@ -10168,7 +10187,31 @@ function App(){
               })}
             </div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:activeStake.color,fontStyle:'italic',textAlign:'center',maxWidth:500}}>{activeStake.desc}{activeStake.scoreMult>1?' Score ×'+activeStake.scoreMult:''}</div>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',letterSpacing:2}}>DECK: Demo Deck</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-secondary)',letterSpacing:3,textTransform:'uppercase',marginTop:6}}>Deck</div>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center',maxWidth:760}}>
+              {STARTER_DECKS.map((dk,di)=>{
+                const dkUnlocked=getUnlockedDecks().some(x=>x.id===dk.id)
+                const dkActive=selectedDeck===dk.id
+                const seals=getStakesBeaten(dk.id)
+                const prevName=di>0?STARTER_DECKS[di-1].name.replace(/^[^ ]+ /,''):''
+                return <div key={dk.id} onClick={()=>{if(!dkUnlocked)return
+                    setSelectedDeck(dk.id);localStorage.setItem('vst_active_deck',dk.id)
+                    const un=getUnlockedStakes(dk.id)
+                    if(!un.some(u=>u.id===activeStakeId)){const top=un[un.length-1].id;setActiveStakeId(top);localStorage.setItem('vst_active_stake',top)}}}
+                  title={dkUnlocked?dk.desc:('Beat '+prevName+' to unlock')}
+                  style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,minWidth:104,textAlign:'center',
+                    color:dkActive?'#000':dkUnlocked?(dk.color||'var(--ink-bone)'):'#6a5a30',
+                    background:dkActive?(dk.color||'#c8a040'):'rgba(20,12,4,0.6)',
+                    border:'2px solid '+(dkUnlocked?(dk.color||'#c8a040'):'rgba(60,40,15,0.3)'),
+                    borderRadius:6,padding:'7px 10px',cursor:dkUnlocked?'pointer':'default',
+                    opacity:dkUnlocked?1:0.4,letterSpacing:1,transition:'all 0.15s',
+                    boxShadow:dkActive?'0 0 16px '+(dk.color||'#c8a040')+'66':'none'}}>
+                  <div>{dkUnlocked?(dk.emoji+' '+dk.name.replace(/^[^ ]+ /,'')):'🔒 ???'}</div>
+                  <div style={{display:'flex',gap:2,justifyContent:'center',marginTop:3,minHeight:12}}>
+                    {STAKES.map(sk=>seals.includes(sk.id)&&<span key={sk.id} title={sk.name+' conquered'} style={{fontSize:11,color:dkActive?'#000':sk.color,textShadow:dkActive?'none':'0 0 4px '+sk.color}}>⛧</span>)}
+                  </div>
+                </div>})}
+            </div>
             {/* HEAT — earned permanent difficulty/score modifier. +1 per Lucifer kill, +15% boss HP per level. */}
             {(()=>{const heat=parseInt(localStorage.getItem('vst_heat')||'1');const hpBonus=Math.round((heat-1)*15);const maxHeat=10;return(
               <div title={"Beat Lucifer to raise Heat. Each level: +15% boss HP. Higher Heat = harder fights, bigger bragging rights."} style={{marginTop:8,display:'flex',flexDirection:'column',alignItems:'center',gap:4,padding:'8px 16px',background:'rgba(40,15,5,0.6)',border:'1px solid rgba(255,100,30,0.3)',borderRadius:6,cursor:'help'}}>
