@@ -23,6 +23,8 @@ const SCRATCH_FONT_FLOOR = 20  // ScratchFont is decorative — illegible below 
 
 // Sanctioned text colors — anything else inside a JSX style is a violation
 const ALLOWED_TOKENS = new Set([
+  '#44ddaa', // v0.8 Band Aura UI — FOLK MAGIC bond green (Stage Order strip)
+  '#e8ddff', // trip-UI lavender (pre-existing, registered during v0.8 audit)
   'var(--text-primary)',
   'var(--text-secondary)',
   'var(--text-muted)',
