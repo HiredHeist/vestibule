@@ -2076,14 +2076,14 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
           </div>
 
           {/* GEAR PANELS — Artifact above, Effect Pedal below. Both fixed-height, sit at bottom of column. */}
-          {stage&&stage.filter(Boolean).length>1&&onSwapMembers&&<div style={{flexShrink:0,border:'1px solid rgba(120,200,160,0.3)',borderRadius:8,padding:'6px 8px',background:'rgba(4,10,6,0.4)',marginBottom:6}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#66ccaa',letterSpacing:2,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>⟡ Stage Order — auras reach adjacent slots</div>
+          {stage&&stage.filter(Boolean).length>1&&onSwapMembers&&<div style={{flexShrink:0,border:'1px solid rgba(68,221,170,0.3)',borderRadius:8,padding:'6px 8px',background:'rgba(4,10,6,0.4)',marginBottom:6}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#44ddaa',letterSpacing:2,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>⟡ Stage Order — auras reach adjacent slots</div>
             <div style={{display:'flex',gap:4,justifyContent:'center',flexWrap:'wrap'}}>
-              {stage.map((m,i)=>m&&<div key={m.uid} style={{display:'flex',alignItems:'center',gap:3,border:'1px solid rgba(120,200,160,0.25)',borderRadius:4,padding:'2px 5px',background:'rgba(10,20,14,0.5)'}}>
-                <span onClick={()=>{if(i>0&&stage[i-1])onSwapMembers(i,i-1)}} style={{cursor:i>0&&stage[i-1]?'pointer':'default',opacity:i>0&&stage[i-1]?1:0.25,fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#66ccaa',padding:'0 2px'}}>⟨</span>
+              {stage.map((m,i)=>m&&<div key={m.uid} style={{display:'flex',alignItems:'center',gap:3,border:'1px solid rgba(68,221,170,0.25)',borderRadius:4,padding:'2px 5px',background:'rgba(10,20,14,0.5)'}}>
+                <span onClick={()=>{if(i>0&&stage[i-1])onSwapMembers(i,i-1)}} style={{cursor:i>0&&stage[i-1]?'pointer':'default',opacity:i>0&&stage[i-1]?1:0.25,fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#44ddaa',padding:'0 2px'}}>⟨</span>
                 <span style={{fontSize:14}}>{m.emoji}</span>
                 <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:m.tooStoned?'var(--text-muted)':'var(--ink-bone)'}}>{m.name}</span>
-                <span onClick={()=>{if(i<stage.length-1&&stage[i+1])onSwapMembers(i,i+1)}} style={{cursor:i<stage.length-1&&stage[i+1]?'pointer':'default',opacity:i<stage.length-1&&stage[i+1]?1:0.25,fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#66ccaa',padding:'0 2px'}}>⟩</span>
+                <span onClick={()=>{if(i<stage.length-1&&stage[i+1])onSwapMembers(i,i+1)}} style={{cursor:i<stage.length-1&&stage[i+1]?'pointer':'default',opacity:i<stage.length-1&&stage[i+1]?1:0.25,fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#44ddaa',padding:'0 2px'}}>⟩</span>
               </div>)}
             </div>
           </div>}
