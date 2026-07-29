@@ -10,7 +10,7 @@ import{readFileSync}from'fs'
 const NUM_GAMES=parseInt(process.argv[2])||5000;
 const STAKE_ID=process.argv[3]||'bronze';
 const DECK_ID=process.argv[4]||'standard';
-const HP_OVERRIDE=parseFloat(process.argv[4])||0;
+const HP_OVERRIDE=parseFloat(process.argv[5])||0;
 let BOSS_HP_OVERRIDE=null;
 // Try repo root first (committed file with current live HPs), then /tmp (legacy/manual override)
 try{BOSS_HP_OVERRIDE=JSON.parse(readFileSync('./boss_hp_override.json','utf8'))}catch(e){
@@ -220,31 +220,30 @@ const UPGRADE_HP={
 
 // ── ARTIFACTS (shop items, max 3 equipped) ──
 const ARTIFACTS=[
-  // ── Existing mult artifacts (unchanged) ──
-  {id:'a1',name:'Vintage Guitar',cost:8,effect:'leadAtk1',multTrigger:'cards3',mult:1.3},
-  {id:'a3',name:'Evil Eye',cost:20,effect:'firstCardFree'},  // RECLASSIFIED to pedal in live, kept here for sim continuity
-  {id:'a5',name:'Haunted Radio',cost:10,effect:'tapBoost',multTrigger:'perChain',mult:1.2},
-  {id:'a6',name:'Black Candle',cost:12,effect:'deathDmg8',multTrigger:'perStoned',mult:1.4},
-  {id:'a8',name:'Stone Tablet',cost:15,effect:'allHp3'},  // RECLASSIFIED
-  {id:'a9',name:'Resonance Coil',cost:10,effect:'resonanceBoost',multTrigger:'perDupe',mult:1.15},
-  {id:'a10',name:'Burning Stage',cost:14,effect:'perfectBonus',multTrigger:'cards5',mult:3.0},
-  // ── NEW MULT ARTIFACTS — common ──
-  {id:'crackedpickup',name:'Cracked Pickup',cost:10,multTrigger:'playedRiff',mult:1.2,rarity:'common'},
+  {id:'a1',name:'Vintage Guitar',cost:10,effect:'leadAtk1',multTrigger:'cards3',mult:1.3,rarity:'common'},
+  {id:'a2',name:"Devil's Tuning Fork",cost:16,multTrigger:'corrupt50',mult:1.5,rarity:'uncommon',startCorr:15},
+  {id:'a5',name:'Haunted Radio',cost:10,effect:'tapBoost',multTrigger:'perChain',mult:1.2,rarity:'common'},
+  {id:'a6',name:'Black Candle',cost:12,effect:'deathDmg8',multTrigger:'perStoned',mult:1.4,rarity:'uncommon'},
+  {id:'a9',name:'Resonance Coil',cost:10,effect:'resonanceBoost',multTrigger:'perDupePlayed',mult:1.2,rarity:'common'},
+  {id:'a10',name:'Burning Stage',cost:22,effect:'perfectBonus',multTrigger:'cards5',mult:3.0,rarity:'rare'},
+  {id:'crackedpickup',name:'Cracked Pickup',cost:12,multTrigger:'playedRiff',mult:1.2,rarity:'common'},
   {id:'distortioncab',name:'Distortion Cab',cost:14,multTrigger:'alwaysOn',mult:1.25,rarity:'common'},
   {id:'ashtray',name:'Ash Tray',cost:12,multTrigger:'anyStoned',mult:1.3,rarity:'common'},
-  {id:'crowdnoise',name:'Crowd Noise',cost:14,multTrigger:'perAliveMember',mult:1.15,rarity:'common'},
+  {id:'crowdnoise',name:'Crowd Noise',cost:16,multTrigger:'perAliveMember',mult:1.10,rarity:'common'},
   {id:'tapehiss',name:'Tape Hiss',cost:8,multTrigger:'noRiff',mult:1.2,rarity:'common'},
-  {id:'cheapbeer',name:'Cheap Beer',cost:10,multTrigger:'alwaysOn',mult:1.15,rarity:'common'},
   {id:'setlistart',name:'Set List Art',cost:12,multTrigger:'firstCardEmber',mult:1.4,rarity:'common'},
   {id:'gaffertape',name:'Gaffer Tape',cost:10,multTrigger:'allHealthy',mult:1.2,rarity:'common'},
-  // ── NEW — uncommon ──
+  {id:'powerstrip',name:'Power Strip',cost:11,multTrigger:'embers5',mult:1.25,rarity:'common'},
+  {id:'spitcup',name:'Spit Cup',cost:10,multTrigger:'discardedStrike',mult:1.5,rarity:'common'},
+  {id:'divebarsign',name:'Dive Bar Sign',cost:9,multTrigger:'earlyCircle',mult:1.35,rarity:'common',refundAtC4:true},
   {id:'pentagramshrine',name:'Pentagram Shrine',cost:22,multTrigger:'perCorruptCard',mult:1.4,rarity:'uncommon'},
   {id:'doomchoir',name:'Doom Choir',cost:24,multTrigger:'perSameRole',mult:1.5,rarity:'uncommon'},
   {id:'solosermon',name:'Solo Sermon',cost:26,multTrigger:'cards2exact',mult:6.0,rarity:'uncommon'},
   {id:'blackmassbell',name:'Black Mass Bell',cost:22,multTrigger:'chains3',mult:2.5,rarity:'uncommon'},
+  {id:'ouroborospin',name:'Ouroboros Pin',cost:20,multTrigger:'perDiscardStrike',mult:1.3,rarity:'uncommon'},
+  {id:'drummerstick',name:"Drummer's Stick",cost:22,multTrigger:'doubleTimeRolled',mult:2.5,rarity:'uncommon'},
   {id:'fogmachine',name:'Fog Machine',cost:24,multTrigger:'perStoned',mult:1.4,rarity:'uncommon'},
   {id:'chromeskull',name:'Chrome Skull',cost:28,multTrigger:'lastMemberStanding',mult:3.0,rarity:'uncommon'},
-  // ── NEW — rare ──
   {id:'doomcrown',name:'The Doom Crown',cost:38,multTrigger:'allSameType',mult:8.0,rarity:'rare'},
   {id:'triplesixes',name:'Triple Sixes',cost:35,multTrigger:'perOtherArtifact',mult:3.0,rarity:'rare'},
   {id:'invertedpentacle',name:'Inverted Pentacle',cost:36,multTrigger:'corrupt100exact',mult:5.0,rarity:'rare'},
@@ -923,6 +922,7 @@ function simFight(gs,phaseHp,luciferPhase){
     const _roleCnts={}
     gs.stage.forEach(m=>{if(m&&m.role)_roleCnts[m.role]=(_roleCnts[m.role]||0)+1})
     const _maxRole=Math.max(0,...Object.values(_roleCnts))
+    const _discPlays=_cardsThis.filter(c=>['sigdecay','tappedout','doubledown','goingbroke','burnset'].includes(c.id)).length
     for(const art of gs.artifacts){
       if(!art.multTrigger)continue
       let fires=0
@@ -946,6 +946,12 @@ function simFight(gs,phaseHp,luciferPhase){
       if(art.multTrigger==='cards2exact'&&_realPlays.length===2)fires=1
       if(art.multTrigger==='chains3'&&_cf>=3)fires=1
       if(art.multTrigger==='allSameType'&&_allSame)fires=1
+      if(art.multTrigger==='perDupePlayed'){const _seen={};let _d=0;_realPlays.forEach(c=>{_seen[c.id]=(_seen[c.id]||0)+1;if(_seen[c.id]>1)_d++});fires=_d}
+      if(art.multTrigger==='embers5'&&gs.embers>=5)fires=1
+      if(art.multTrigger==='discardedStrike'&&_discPlays>0)fires=1
+      if(art.multTrigger==='perDiscardStrike')fires=_discPlays
+      if(art.multTrigger==='earlyCircle'&&gs.fightIndex<9)fires=1
+      if(art.multTrigger==='doubleTimeRolled'&&Object.values(dtMult).some(v=>v>=1.5))fires=1
       if(art.multTrigger==='perOtherArtifact')fires=Math.max(0,gs.artifacts.length-1)
       if(art.multTrigger==='corrupt100exact'&&gs.corruption===100)fires=1
       if(art.multTrigger==='corruptedClean'&&gs.corruption===100&&_sc===0)fires=1
@@ -1185,11 +1191,48 @@ function simShop(gs){
             if(!placed)gs.stage.push(chosen)}}}}
   }
 
-  // Artifacts
-  if(!gs.circleArtBought){
-    const pool=[{id:'a3',cost:20},{id:'a7',cost:18},{id:'a8',cost:12},{id:'a1',cost:10},{id:'a6',cost:12},{id:'a4',cost:6},{id:'a2',cost:8},{id:'a10',cost:10}];
-    for(const art of pool){const c=Math.ceil(art.cost*discount);if(gs.stash>=c&&!gs.artifacts.some(a=>a.id===art.id)){gs.stash-=c;gs.artifacts.push(art);gs.circleArtBought=true;
-      if(art.id==='a8')gs.stage.forEach(m=>{m.maxHp+=3;m.hp=Math.min(m.maxHp,m.hp+3)});break}}}
+  // ═══ RELIC OFFER (v0.8) — ONE artifact rolled per circle, this circle only, then gone ═══
+  if(gs._relicOfferCircle!==circleNum){
+    gs._relicOfferCircle=circleNum
+    const rw=Math.random(),want=rw<0.60?'common':rw<0.90?'uncommon':'rare'
+    const avail=ARTIFACTS.filter(a=>!gs.artifacts.some(o=>o.id===a.id)&&!(gs._relicsSeen||[]).includes(a.id))
+    const tier=avail.filter(a=>a.rarity===want)
+    gs._relicOffer=(tier.length?tier:avail)[rand((tier.length?tier:avail).length)]||null
+    if(gs._relicOffer){gs._relicsSeen=gs._relicsSeen||[];gs._relicsSeen.push(gs._relicOffer.id)}
+  }
+  if(gs._relicOffer&&!gs.circleArtBought){
+    // Expert valuation: expected multiplier from trigger reliability priors, per deck
+    const _pri={alwaysOn:1.0,playedRiff:0.9,cards3:0.8,allHealthy:0.5,anyStoned:0.25,perChain:1.2,
+      perStoned:0.3,perAliveMember:4.3,perDupePlayed:0.5,firstCardEmber:0.3,embers5:0.35,cards5:0.25,
+      corrupt50:DECK_ID==='ritualist'?0.75:0.25,noRiff:0.05,cards2exact:0.08,chains3:0.35,
+      perCorruptCard:DECK_ID==='ritualist'?2.2:0.8,perSameRole:1.6,allSameType:0.05,
+      corrupt100exact:DECK_ID==='ritualist'?0.25:0.04,lastMemberStanding:0.02,
+      discardedStrike:0.55,perDiscardStrike:0.6,earlyCircle:gs.fightIndex<9?1.0:0,
+      doubleTimeRolled:gs.stage.some(m=>m.keyword==='DOUBLE TIME')?0.44:0,
+      perOtherArtifact:gs.artifacts.length,goatStackOther:1.0}
+    const o=gs._relicOffer
+    const eF=_pri[o.multTrigger]!==undefined?_pri[o.multTrigger]:0.3
+    let eMult=o.multTrigger==='goatStackOther'?o.mult*Math.pow(1.3,gs.artifacts.length):Math.pow(o.mult,eF)
+    const val=(eMult-1)/Math.ceil(o.cost*discount)
+    const c=Math.ceil(o.cost*discount)
+    if(gs.stash>=c&&(gs.artifacts.length<3?val>0.006:false)){
+      gs.stash-=c;gs.artifacts.push(o);gs.circleArtBought=true
+      TRACK.artPicks=TRACK.artPicks||{};TRACK.artPicks[o.id]=(TRACK.artPicks[o.id]||0)+1
+      gs._relicOffer=null
+      if(o.startCorr&&gs.corruption<o.startCorr)gs.corruption=o.startCorr
+    }else if(gs.stash>=c&&gs.artifacts.length>=3){
+      // consider replacing the weakest owned relic if the offer is clearly stronger
+      let wi=-1,wv=1e9
+      gs.artifacts.forEach((a2,i)=>{const f2=_pri[a2.multTrigger]!==undefined?_pri[a2.multTrigger]:0.3
+        const m2=a2.multTrigger==='goatStackOther'?a2.mult*Math.pow(1.3,2):Math.pow(a2.mult||1,f2)
+        if(m2<wv){wv=m2;wi=i}})
+      if(wi>=0&&eMult>wv*1.35){gs.artifacts.splice(wi,1);gs.stash-=c;gs.artifacts.push(o);gs.circleArtBought=true
+        TRACK.artPicks=TRACK.artPicks||{};TRACK.artPicks[o.id]=(TRACK.artPicks[o.id]||0)+1;gs._relicOffer=null}
+    }
+  }
+  // Dive Bar Sign residency refund at Circle IV
+  if(circleNum>=4){const di=gs.artifacts.findIndex(a=>a.refundAtC4)
+    if(di>=0){gs.artifacts.splice(di,1);gs.stash=Math.min(MAX_STASH,gs.stash+9)}}
   if(!gs.circlePassBought){
     const pool=[{id:'p8',cost:16},{id:'p10',cost:14},{id:'p1',cost:6},{id:'p4',cost:10},{id:'p3',cost:6},{id:'p7',cost:8},{id:'p5',cost:10},{id:'p2',cost:8}];
     for(const pas of pool){const c=Math.ceil(pas.cost*discount);if(gs.stash>=c&&!gs.passives.some(p=>p.id===pas.id)){gs.stash-=c;gs.passives.push(pas);gs.circlePassBought=true;break}}}
@@ -1412,3 +1455,5 @@ for(const [id,plays] of sorted){
   console.log(`${name} ${String(plays).padStart(9)} ${perGame.padStart(8)}/g ${(pctAll+'%').padStart(6)}  ${verdict}`)}
 console.log('─'.repeat(80));
 console.log(`\n⛧ Simulation complete.\n`);
+
+process.on('exit',()=>{if(TRACK.artPicks)console.log('RELIC PICKS',JSON.stringify(TRACK.artPicks))})
