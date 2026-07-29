@@ -3214,20 +3214,26 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       onDragOver={e=>{e.preventDefault();onHandDragOver&&onHandDragOver()}}
       onDrop={e=>{e.stopPropagation();onHandDrop&&onHandDrop()}}
       onMouseEnter={onHover} onMouseLeave={onLeave} onClick={e=>{e.stopPropagation();onClick()}}
-      style={{width:210,height:310,flexShrink:0,position:'relative',display:'flex',flexDirection:'column',
+      style={{width:210,height:310,flexShrink:0,position:'relative',cursor:'grab',userSelect:'none',
+        zIndex:isDragging?0:isHovered?9999:isSelected?50+index:10+index,
+        margin:total>HAND_SIZE?'0 -28px':'0 -22px'}}>
+      {/* v0.7.13 hover-jitter fix: this outer wrapper NEVER transforms, so the hover
+          hitbox stays put. All visuals + transform live on the inner div below.
+          Hit-testing treats a transformed child as part of its parent, so hover covers
+          the static slot AND the popped-up card — no more enter/leave feedback loop. */}
+      <div style={{width:'100%',height:'100%',position:'relative',display:'flex',flexDirection:'column',
         background:isSelected?'linear-gradient(180deg, #2a0c10, #160608)':'linear-gradient(180deg, var(--altar-raised), var(--altar-recess))',
         border:isSelected?'2px solid var(--blood)':unaffordable?'1px solid var(--rot)':corrLocked?'1px solid #6622aa':isHovered?'1px solid var(--ink-bone)':'1px solid var(--ink-rust)',
-        borderRadius:4,cursor:'grab',position:'relative',
+        borderRadius:4,
         outline:isHovered||isSelected?'1px solid rgba(232,216,184,0.2)':'1px solid rgba(232,216,184,0.06)',
         outlineOffset:'-5px',
         transformOrigin:'bottom center',
         transform:isDragging?'scale(0.85) rotate(5deg)':isHovered?(hoverZoomOn?'translateY(-80px) scale(1.5) rotate(0deg)':'translateY(-40px) scale(1.0) rotate(0deg)'):isSelected?`rotate(${rot}deg) translateY(-50px)`:`rotate(${rot}deg) translateY(${yOff}px)`,
         transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1),border-color 0.15s,box-shadow 0.15s',
-        zIndex:isDragging?0:isHovered?9999:isSelected?50+index:10+index,
         boxShadow:isSelected?'0 0 0 2px #cc0000,0 0 22px rgba(200,0,0,0.75),0 0 45px rgba(180,0,0,0.4)':isShopBought?`0 0 12px ${bc}44`:isHovered?`0 36px 72px rgba(0,0,0,0.95),0 0 36px ${glow}`:chainReady&&canAfford?'2px 4px 16px rgba(0,0,0,0.75),0 0 14px rgba(255,220,50,0.5),0 0 28px rgba(255,200,0,0.2)':(mastery.glow?'2px 4px 16px rgba(0,0,0,0.75),0 0 8px '+mastery.glow:'2px 4px 16px rgba(0,0,0,0.75)'),
         opacity:isDragging?0.4:unaffordable?0.55:corrLocked?0.6:1,filter:(corruption||0)>=80?'hue-rotate(-10deg) saturate(1.4) brightness(0.95)':(corruption||0)>=60?'saturate(1.2)':'none',
         animation:chainReady&&canAfford?'riffChainGlow 1.2s ease-in-out infinite':shimmerAnim,
-        margin:total>HAND_SIZE?'0 -28px':'0 -22px',userSelect:'none',willChange:isHovered?'transform':'auto'}}>
+        willChange:isHovered?'transform':'auto'}}>
       {/* Hand-drawn top stripe — SVG path with wobble */}
       <svg style={{position:'absolute',top:0,left:0,right:0,width:'100%',height:8,pointerEvents:'none',zIndex:2}} viewBox="0 0 210 8" preserveAspectRatio="none">
         <path d="M 0 0 L 210 0 L 210 4 Q 160 6, 105 4 T 0 4 Z" fill={unaffordable?'var(--rot)':bc} opacity="0.9"/>
@@ -3261,6 +3267,7 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,color:'var(--ink-bone)',textAlign:'center',padding:'4px 8px 6px',lineHeight:1.2,flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',overflow:'hidden'}}>{card.id==='demotape'?(lastRiffPlayed?'📼 Will replay: '+lastRiffPlayed.name+' (free)':'📼 No riff recorded yet — play a RIFF card first'):(<>{card.effect||card.desc||''}{card.upgraded&&CARD_UPGRADES[card.id]&&<div style={{marginTop:6,padding:'3px 8px',background:'rgba(200,152,56,0.15)',border:'1px solid rgba(200,152,56,0.4)',borderRadius:2,color:'var(--gold)',fontSize:13,fontWeight:900,letterSpacing:1,textTransform:'uppercase'}}>⛧ {CARD_UPGRADES[card.id].desc}</div>}</>)}</div>
       {/* Chain hints tooltip — absolutely positioned BELOW the card so it never clips card content */}
       {isHovered&&chainHintsOn&&(()=>{const hints=getChainHints(card.id);return hints.length>0?<div style={{position:'absolute',top:'calc(100% + 6px)',left:'50%',transform:'translateX(-50%)',width:230,zIndex:99999,pointerEvents:'none',display:'flex',flexDirection:'column',gap:3}}>{hints.map((h,i)=><div key={i} style={{padding:'5px 8px',background:'rgba(8,4,2,0.96)',border:'1px solid var(--gold)',borderRadius:3,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-gold)',fontWeight:900,textAlign:'center',letterSpacing:1,boxShadow:'0 4px 16px rgba(0,0,0,0.9), 0 0 12px rgba(232,168,32,0.3)'}}>⛧ {h.name} — needs {h.partnerName}</div>)}</div>:null})()}
+    </div>
     </div>
   )
 }
