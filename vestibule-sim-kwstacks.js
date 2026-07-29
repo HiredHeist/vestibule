@@ -310,6 +310,43 @@ function rollHellquake(gs){
 const MAX_STRIKES=4,MAX_DISCARDS=4,HAND_SIZE=6,MAX_STASH=420,MAX_EMBERS_CAP=8;
 const circleBaseMin=[8,6,7,8,9,9,11,11,14],circleBaseRange=[3,4,4,3,4,4,5,5,7]; // v12 stash tightening
 const MENTOR_LINK_BONUS={foil:{atk:1,hp:2,mult:1.25},mythic:{atk:2,hp:4,mult:1.5},demonic:{atk:4,hp:8,mult:2.0}};
+// ═══ BAND AURAS (v0.8) — adjacency bonuses radiating to neighboring stage slots ═══
+function auraAtkMap(stage,ctx){const map={}
+  for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue;let a=0
+    for(const j of[i-1,i+1]){const n=stage[j];if(!n||n.tooStoned)continue
+      switch(n.keyword){
+        case 'FRENZIED':case 'DEBUFF':a+=1;break
+        case 'CORRUPT':if(ctx.corruption>=50)a+=1;break
+        case 'HEXED':if(ctx.corruption>=25)a+=1;break
+        case 'SHREDDER':if(ctx.shredderHits>0)a+=1;break
+        case 'DOUBLE TIME':if(ctx.drumRollOk)a+=1;break
+      }}
+    if(a>0)map[m.uid]=a}
+  return map}
+function anchorAuraReduction(stage,uid){for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.uid!==uid)continue;let r=0
+  for(const j of[i-1,i+1]){const n=stage[j];if(n&&!n.tooStoned&&n.keyword==='ANCHOR')r+=1}return r}return 0}
+function folkAuraHeal(stage){for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue;let h=0
+  for(const j of[i-1,i+1]){const n=stage[j];if(n&&!n.tooStoned&&n.keyword==='FOLK MAGIC')h+=1}
+  if(h>0)m.hp=Math.min(m.maxHp,m.hp+h)}}
+function auraStaticScore(stage){let s=0
+  for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue
+    for(const j of[i-1,i+1]){const n=stage[j];if(!n||n.tooStoned)continue
+      switch(n.keyword){case 'FRENZIED':case 'DEBUFF':s+=3;break
+        case 'ANCHOR':case 'FOLK MAGIC':s+=2;break
+        case 'CORRUPT':case 'HEXED':case 'SHREDDER':case 'DOUBLE TIME':s+=1.5;break}}}
+  return s}
+function improveOrdering(gs){const stage=gs.stage
+  const linkPairs=(gs.mentorLinks||[]).map(l=>({m:stage[l.mentorIdx]&&stage[l.mentorIdx].uid,p:stage[l.protegeIdx]&&stage[l.protegeIdx].uid}))
+  let improved=true,guard=0
+  while(improved&&guard++<30){improved=false
+    for(let i=0;i+1<stage.length;i++){const cur=auraStaticScore(stage)
+      ;[stage[i],stage[i+1]]=[stage[i+1],stage[i]]
+      if(auraStaticScore(stage)>cur)improved=true
+      else[stage[i],stage[i+1]]=[stage[i+1],stage[i]]}}
+  if(gs.mentorLinks)gs.mentorLinks.forEach((l,k)=>{const lp=linkPairs[k];if(!lp)return
+    const mi=stage.findIndex(m=>m&&m.uid===lp.m),pi=stage.findIndex(m=>m&&m.uid===lp.p)
+    if(mi>=0)l.mentorIdx=mi;if(pi>=0)l.protegeIdx=pi})}
+
 let TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
@@ -691,6 +728,7 @@ function simFight(gs,phaseHp,luciferPhase){
   const stoneWallActive=gs._pacts.includes('stone_wall');
 
   const links=scanMentorLinks(gs.stage);gs.mentorLinks=links;
+  improveOrdering(gs)
   const dtMult={};gs.stage.filter(m=>m.keyword==='DOUBLE TIME'&&!m.tooStoned).forEach(m=>{const roll=rand(6)+1;dtMult[m.uid]=roll<=2?1.0:roll<=4?1.5:2.0});
   gs.deck=shuffle([...gs.deck,...gs.discard]);gs.discard=[];gs.hand=[];
 
@@ -826,6 +864,7 @@ function simFight(gs,phaseHp,luciferPhase){
     if(_cardsPlayed.length>=2){let _run=1;for(let _i=1;_i<_cardsPlayed.length;_i++){
       if(CARD_TYPE_BY_ID[_cardsPlayed[_i]]===CARD_TYPE_BY_ID[_cardsPlayed[_i-1]]){_run++;_shredderHits++}else _run=1
     }}
+    const _auraAtk=auraAtkMap(gs.stage,{corruption:gs.corruption,shredderHits:_shredderHits,drumRollOk:Object.values(dtMult).some(v=>v>=1.5)})
     // DOUBLE TIME stack-3: all members attack twice this strike
     if(_doubleTimeTier>=4){for(const _m of aliveNow)_m._kwDoubleStrike=true}
     // Tracking: which keyword stack tiers fired this strike
@@ -842,12 +881,14 @@ function simFight(gs,phaseHp,luciferPhase){
       if(m.keyword==='FRENZIED'&&_frenziedTier>0)atk+=_riffsThisStrike*_frenziedTier
       if(m.keyword==='CORRUPT')atk+=Math.floor(gs.corruption/12)*Math.max(1,_corruptTier)
       if(m.keyword==='SHREDDER'&&_shredderTier>0)atk+=_shredderHits*_shredderTier
+      atk+=_auraAtk[m.uid]||0
       if(m.ampedThisStrike)atk*=2;if(gs._possessedActive)atk*=3;if(gs._overdriveActive)atk*=2;
       if(dtMult[m.uid]!==undefined)atk=Math.floor(atk*dtMult[m.uid]);
       strikeDmg+=Math.max(0,atk);
       if(m.encoreThisStrike||m._kwDoubleStrike)strikeDmg+=Math.max(0,atk);
     }
     if(gs._infencoreActive)strikeDmg*=2;
+    folkAuraHeal(gs.stage)
     let mentorMult=1.0;for(const link of links){const mn=gs.stage[link.mentorIdx],pr=gs.stage[link.protegeIdx];
       if(mn&&!mn.tooStoned&&pr&&!pr.tooStoned){mentorMult*=link.mult;TRACK.linkStrikesFired++}}
     const preLinkDmg=strikeDmg;strikeDmg=Math.floor(strikeDmg*mentorMult);TRACK.linkBonusDmg+=(strikeDmg-preLinkDmg);
@@ -1009,7 +1050,7 @@ function simFight(gs,phaseHp,luciferPhase){
 
     if(enemy.passiveId==='luciferBoss'&&luciferPhase===2){
       const splitDmg=Math.ceil(bossDmg/aliveNow.length)
-      for(const t of aliveNow){t.hp-=splitDmg;if(t.hp<=0){if(t.stoneShield){t.hp=1;const ns=typeof t.stoneShield==='number'?t.stoneShield-1:0;t.stoneShield=ns>0?ns:false}else if(_anchorTrySave(t)){/* saved */}else if(_survivorSecondWindTry(t)){/* saved */}else{t.tooStoned=true;t.hp=0;gs.tooStonedCount++}}}
+      for(const t of aliveNow){t.hp-=Math.max(1,splitDmg-anchorAuraReduction(gs.stage,t.uid));if(t.hp<=0){if(t.stoneShield){t.hp=1;const ns=typeof t.stoneShield==='number'?t.stoneShield-1:0;t.stoneShield=ns>0?ns:false}else if(_anchorTrySave(t)){/* saved */}else if(_survivorSecondWindTry(t)){/* saved */}else{t.tooStoned=true;t.hp=0;gs.tooStonedCount++}}}
     } else {
       let targets;
       if(enemy.passiveId&&enemy.passiveId.startsWith('targetHighestHp')){targets=[[...aliveNow].sort((a,b)=>b.hp-a.hp)[0]];if(enemy.passiveId==='targetHighestHp2')bossDmg=Math.floor(bossDmg*1.2);if(enemy.passiveId==='targetHighestHp3')bossDmg=Math.floor(bossDmg*1.5);}else{targets=[aliveNow[rand(aliveNow.length)]]}
@@ -1017,7 +1058,7 @@ function simFight(gs,phaseHp,luciferPhase){
       const _attackRounds=_bloodlustDouble?2:1
       for(let _r=0;_r<_attackRounds;_r++){
         if(_r===1){const _stillAlive=gs.stage.filter(m=>!m.tooStoned);if(_stillAlive.length===0)break;targets=[_stillAlive[rand(_stillAlive.length)]]}
-        for(const t of targets){const d=targets.length===1?bossDmg:Math.ceil(bossDmg/targets.length);t.hp-=d;
+        for(const t of targets){const d=Math.max(1,(targets.length===1?bossDmg:Math.ceil(bossDmg/targets.length))-anchorAuraReduction(gs.stage,t.uid));t.hp-=d;
           if(t.hp<=0){if(t.stoneShield){t.hp=1;const ns=typeof t.stoneShield==='number'?t.stoneShield-1:0;t.stoneShield=ns>0?ns:false}else if(_anchorTrySave(t)){/* saved */}else if(_survivorSecondWindTry(t)){/* saved */}else{t.tooStoned=true;t.hp=0;gs.tooStonedCount++;
             if(gs.artifacts.some(a=>a.id==='a6'))enemy._hp-=8;if(gs.passives.some(p=>p.id==='p6'))gs.stash=Math.min(MAX_STASH,gs.stash+3)}}}
       }
