@@ -21,9 +21,9 @@ if(BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE._comment)delete BOSS_HP_OVERRIDE._comment;
 const STAKES={
   bronze:{id:'bronze',name:'Bronze',hpMult:1.30,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.0,mentorBonus:0},
   silver:{id:'silver',name:'Silver',hpMult:1.30,dmgAdd:2,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.5,mentorBonus:0.05},
-  gold:{id:'gold',name:'Gold',hpMult:1.30,dmgAdd:3,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:2.0,mentorBonus:0.05},
-  obsidian:{id:'obsidian',name:'Obsidian',hpMult:1.50,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,scoreMult:2.5,mentorBonus:0.12},
-  blood:{id:'blood',name:'Blood',hpMult:1.60,dmgAdd:2,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:true,scoreMult:3.0,mentorBonus:0.35},
+  gold:{id:'gold',name:'Gold',hpMult:1.43,dmgAdd:3,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:2.0,mentorBonus:0.05},
+  obsidian:{id:'obsidian',name:'Obsidian',hpMult:1.73,dmgAdd:2,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,scoreMult:2.5,mentorBonus:0.12},
+  blood:{id:'blood',name:'Blood',hpMult:2.05,dmgAdd:2,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:true,scoreMult:3.0,mentorBonus:0.20},
   demonic:{id:'demonic',name:'Demonic ⛧',hpMult:1.8,dmgAdd:4,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,scoreMult:4.0,mentorBonus:0.75}
 };
 const STAKE=STAKES[STAKE_ID]||STAKES.bronze;
@@ -676,7 +676,7 @@ function simFight(gs,phaseHp,luciferPhase){
   // Progressive HP scaling — per-boss calibrated values or circle-based fallback
   let effectiveMaxHp
   if(BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE[fightIdx]){
-    effectiveMaxHp=phaseHp||Math.ceil(BOSS_HP_OVERRIDE[fightIdx]*HP_SCALE)
+    effectiveMaxHp=phaseHp||Math.ceil(BOSS_HP_OVERRIDE[fightIdx]*HP_SCALE*(STAKE.hpMult/1.30))
   } else {
     const CIRCLE_HP_SCALE=[1.5, 3.5, 7.0, 14.0, 25.0, 40.0, 60.0, 85.0, 120.0]
     const circleScale=CIRCLE_HP_SCALE[Math.min(8,Math.floor(fightIdx/3))]
@@ -1285,7 +1285,7 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
 
     if(f===26){
       TRACK.luciferReached++
-      const actualHp=BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE[26]?Math.ceil(BOSS_HP_OVERRIDE[26]*HP_SCALE):Math.ceil(Math.max(666,420666-8*51750)*STAKE.hpMult)
+      const actualHp=BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE[26]?Math.ceil(BOSS_HP_OVERRIDE[26]*HP_SCALE*(STAKE.hpMult/1.30)):Math.ceil(Math.max(666,420666-8*51750)*STAKE.hpMult)
       const phase1Hp=Math.ceil(actualHp/2)
       const phase2Hp=actualHp-phase1Hp
       const r1=simFight(gs,phase1Hp,1)
