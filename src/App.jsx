@@ -8620,7 +8620,7 @@ function App(){
     setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setNextCardFree(false);setAllCardsFree(false);allCardsFreeRef.current=false;setFreeCardsLeft(0);freeCardsLeftRef.current=0;setBossSkipStrikes(0);bossSkipStrikesRef.current=0;setLastRiffPlayed(null);lastRiffPlayedRef.current=null;setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);multMilestonesRef.current={2:false,4:false,8:false,16:false}
     // AUTO-SAVE at fight start
     setTimeout(()=>{try{saveGame({
-      v:1,gs:gameState,fi:fightIndex,seed:runSeed,deck:selectedDeck,
+      v:1,gs:gameState,fi:fightIndex,seed:runSeed,deck:selectedDeck,relicsSeen:[...relicsSeenRef.current],
       stage:stage.map(m=>m?{id:m.id,name:m.name,hp:m.hp,maxHp:m.maxHp,atk:m.atk,role:m.role,keyword:m.keyword,tooStoned:m.tooStoned,uid:m.uid,foil:m.foil,mythic:m.mythic,demonic:m.demonic,permAtkBonus:m.permAtkBonus||0,encoreReady:m.encoreReady,stoneShield:m.stoneShield,isMentor:m.isMentor,mentorMult:m.mentorMult,mentorLinkedToUid:m.mentorLinkedToUid,mentorAlive:m.mentorAlive,buffCount:m.buffCount||0}:null),
       dk:deck.map(c=>c.id),hand:hand.map(c=>c.id),disc:discardPile.map(c=>c.id),
       em:embers,mx:maxEmbers,st:stash,co:corruption,
@@ -9104,6 +9104,7 @@ function App(){
   const handleContinueSave=()=>{
     const sv=loadGame();if(!sv)return
     setRunSeed(sv.seed);setSelectedDeck(sv.deck);setFightIndex(sv.fi)
+    relicsSeenRef.current=new Set(sv.relicsSeen||[]) // v0.8.1: relic scarcity survives save/load
     setStage(sv.stage.map(m=>m?Object.assign({},ALL_MUSICIANS.find(mu=>mu.id===m.id)||{},m):null))
     setDeck(sv.dk.map(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c?Object.assign({},c,{uid:uid()}):null}).filter(Boolean))
     setHand(sv.hand.map(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c?Object.assign({},c,{uid:uid()}):null}).filter(Boolean))
