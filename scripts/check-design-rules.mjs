@@ -23,8 +23,6 @@ const SCRATCH_FONT_FLOOR = 20  // ScratchFont is decorative — illegible below 
 
 // Sanctioned text colors — anything else inside a JSX style is a violation
 const ALLOWED_TOKENS = new Set([
-  '#44ddaa', // v0.8 Band Aura UI — FOLK MAGIC bond green (Stage Order strip)
-  '#e8ddff', // trip-UI lavender (pre-existing, registered during v0.8 audit)
   'var(--text-primary)',
   'var(--text-secondary)',
   'var(--text-muted)',
@@ -61,6 +59,8 @@ const TYPE_IDENTITY_HEX = new Set([
 // Effect colors that are deferred (positive-feedback green, mythic purple, etc.)
 const DEFERRED_HEX = new Set([
   '#33dd33', '#44cc44', '#cc44ff',
+  '#44ddaa', // v0.8 aura UI — FOLK MAGIC bond green
+  '#e8ddff', // trip-UI lavender (pre-existing, registered in v0.8 audit)
 ])
 
 function walk(dir) {
