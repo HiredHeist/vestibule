@@ -36,7 +36,7 @@ async function hand() {
     const seen = {}
     const cards = [...document.querySelectorAll('div')].filter(d => {
       const t = d.textContent || ''; const r = d.getBoundingClientRect()
-      return /RIFF|UTILITY|EMBER|CORRUPT/.test(t) && t.length < 200 && r.y > 700 && r.height > 150
+      return /RIFF|UTILITY|EMBER|CORRUPT/.test(t) && t.length < 200 && r.y > innerHeight * 0.62 && r.height > innerHeight * 0.13
     })
     return cards.map(c => { const r = c.getBoundingClientRect(); const t = c.textContent.replace(/\\s+/g, ' ')
       const m = t.match(/^(\\d+)(.*?)(RIFF|UTILITY|EMBER|CORRUPT)/)
@@ -49,7 +49,7 @@ async function members() {
     const seen = {}
     return [...document.querySelectorAll('div')].filter(d => {
       const t = d.textContent || ''; const r = d.getBoundingClientRect()
-      return /ATK\\s*\\d/.test(t) && /HP\\s*\\d/.test(t) && t.length < 400 && r.y > 230 && r.y < 700 && r.height > 120 && r.width < 450
+      return /ATK\\s*\\d/.test(t) && /HP\\s*\\d/.test(t) && t.length < 400 && r.y > innerHeight * 0.2 && r.y < innerHeight * 0.66 && r.height > innerHeight * 0.11 && r.width < innerWidth * 0.24
     }).map(d => { const r = d.getBoundingClientRect(); const t = d.textContent.replace(/\\s+/g, ' ')
       const nm = t.match(/([A-Z][a-z]+)\\s*(?:Rhythm|Lead|Bass|Synth|Drummer|Vocalist|Dark|[A-Z]{2})/) || t.match(/^\\W*([A-Z][a-z]+)/)
       const atk = t.match(/ATK\\s*(\\d+)(?:\\+(\\d+))?/); const hp = t.match(/HP\\s*(\\d+)/)
@@ -70,7 +70,8 @@ async function combatTick(s) {
   const h = await hand(); let mem = await members()
   if (!mem.length) {
     ev('warn', { msg: 'no members parsed — using fixed slot fallback' })
-    mem = [{ name: 'slot1', atk: 1, hp: 5, x: 735, y: 470 }, { name: 'slot2', atk: 0, hp: 5, x: 1018, y: 470 }]
+    const vp = await P.evaljs('({w:innerWidth,h:innerHeight})')
+    mem = [{ name: 'slot1', atk: 1, hp: 5, x: Math.round(vp.w * 0.38), y: Math.round(vp.h * 0.44) }, { name: 'slot2', atk: 0, hp: 5, x: Math.round(vp.w * 0.53), y: Math.round(vp.h * 0.44) }]
   }
   // ── EXPERT BRAIN (ported sim scoreCard policy) ──
   // gs-lite from the live screen; sim stop-rule: play best card while score > 3
@@ -146,7 +147,7 @@ async function modalTick(s) {
   const cards = await P.evaljs(`(() => {
     return [...document.querySelectorAll('div')].filter(d => {
       const t = d.textContent || ''; const r = d.getBoundingClientRect()
-      return /RIFF|UTILITY|EMBER|CORRUPT/.test(t) && t.length < 200 && r.y < 720 && r.height > 100 && r.width < 400
+      return /RIFF|UTILITY|EMBER|CORRUPT/.test(t) && t.length < 200 && r.y < innerHeight * 0.67 && r.height > innerHeight * 0.09 && r.width < innerWidth * 0.21
     }).map(d => { const r = d.getBoundingClientRect(); return { t: d.textContent.replace(/\\s+/g, ' ').slice(0, 60), x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } })
   })()`)
   if (cards.length) {
@@ -248,7 +249,7 @@ async function recruitTick(s) {
     const seen = {}
     return [...document.querySelectorAll('div')].filter(d => {
       const t = d.textContent || ''; const r = d.getBoundingClientRect()
-      return /ATK\\s*\\d/.test(t) && /HP\\s*\\d/.test(t) && t.length < 350 && r.height > 130 && r.width > 120 && r.width < 420
+      return /ATK\\s*\\d/.test(t) && /HP\\s*\\d/.test(t) && t.length < 350 && r.height > innerHeight * 0.12 && r.width > innerWidth * 0.06 && r.width < innerWidth * 0.22
     }).map(d => { const r = d.getBoundingClientRect(); return { t: d.textContent.replace(/\\s+/g, ' ').slice(0, 120), x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } })
       .filter(c => { const k = c.t.slice(0, 25); return seen[k] ? false : (seen[k] = 1) })
   })()`).catch(() => [])
