@@ -313,3 +313,139 @@
 {"ts":"2026-07-30T01:46:52.955Z","ev":"play_fail","card":"Chain Resonance","cost":1}
 {"ts":"2026-07-30T01:46:53.527Z","ev":"play","card":"NEED  Crowd Surf","cardType":"RIFF","cost":2,"target":"Ingrid"}
 {"ts":"2026-07-30T01:46:54.499Z","ev":"play","card":"Distortion","cardType":"CORRUPT","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:47:14.516Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:47:16.054Z","ev":"play","card":"NEED   Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:47:16.731Z","ev":"play","card":"NEED  Crowd Surf","cardType":"RIFF","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:47:17.406Z","ev":"play","card":"NEED   Amp the Static","cardType":"CORRUPT","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:47:17.415Z","ev":"strike","strikes":"4","bossHp":"84","played":3,"embers":0,"preview":"24"}
+{"ts":"2026-07-30T01:47:21.036Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:47:21.686Z","ev":"play","card":"Crowd Surf","cardType":"RIFF","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:47:22.531Z","ev":"play","card":"Amp the Static","cardType":"CORRUPT","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:47:22.551Z","ev":"strike","strikes":"3","bossHp":"75","played":3,"embers":5}
+{"ts":"2026-07-30T01:47:45.562Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:47:47.195Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Ingrid"}
+{"ts":"2026-07-30T01:47:48.211Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:48:08.229Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:48:09.817Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:48:10.680Z","ev":"play","card":"Crowd Surf","cardType":"RIFF","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:48:11.982Z","ev":"play","card":"Death Riff","cardType":"CORRUPT","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:48:31.994Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:48:32.794Z","ev":"heartbeat","tick":30}
+{"ts":"2026-07-30T01:48:33.727Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:48:34.767Z","ev":"play","card":"Death Riff","cardType":"CORRUPT","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:48:35.549Z","ev":"play_fail","card":"Amp the Static","cost":2}
+{"ts":"2026-07-30T01:48:36.396Z","ev":"play_fail","card":"Dark Tuning","cost":2}
+{"ts":"2026-07-30T01:48:36.405Z","ev":"strike","strikes":"3","bossHp":"60","played":2,"embers":1}
+{"ts":"2026-07-30T01:48:36.416Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T01:48:41.219Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:48:42.124Z","ev":"play","card":"Blood Price","cardType":"CORRUPT","cost":0,"target":"Ingrid"}
+{"ts":"2026-07-30T01:49:02.143Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:49:03.753Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:49:04.441Z","ev":"play","card":"Amp the Static","cardType":"CORRUPT","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:49:05.466Z","ev":"play","card":"Dark Tuning","cardType":"CORRUPT","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:49:05.478Z","ev":"strike","strikes":"3","bossHp":"60","played":3,"embers":0,"preview":"46"}
+{"ts":"2026-07-30T01:49:28.520Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:49:30.458Z","ev":"play","card":"Burn the Set","cardType":"RIFF","cost":0,"target":"Ingrid"}
+{"ts":"2026-07-30T01:49:31.735Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:49:33.033Z","ev":"play","card":"RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:49:53.078Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:49:54.770Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:49:55.769Z","ev":"play","card":"Battle Cry","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:50:15.796Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:50:17.472Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:50:18.167Z","ev":"play","card":"NEED  RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:50:19.115Z","ev":"play","card":"Dark Tuning","cardType":"CORRUPT","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:50:39.131Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:50:40.578Z","ev":"play","card":"NEED   Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:50:41.337Z","ev":"play","card":"NEED  RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:50:42.173Z","ev":"play","card":"NEED   Controlled Feedback","cardType":"CORRUPT","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:50:42.198Z","ev":"strike","strikes":"2","bossHp":"14","played":3,"embers":0,"preview":"38"}
+{"ts":"2026-07-30T01:50:45.880Z","ev":"play","card":"NEED   Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:50:46.829Z","ev":"play","card":"NEED  RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:50:49.988Z","ev":"play","card":"NEED   Controlled Feedback","cardType":"CORRUPT","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:50:50.001Z","ev":"strike","strikes":"1","bossHp":"7","played":3,"embers":0}
+{"ts":"2026-07-30T01:50:50.003Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T01:50:52.603Z","ev":"heartbeat","tick":40}
+{"ts":"2026-07-30T01:50:55.879Z","ev":"shop_seen","text":"⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧\nSTASH\n💵\n12\n🚬 SLY'S MERCH 🚬\nHey kid... wanna see what fell off the truck?\n\"You're glowin', kid. Not in a good way.\" —Sly\n🎲 REROLL\n2  3\n⛧\n🚪 BACK TO THE PIT\n⛧\nBand Recruitment\n🎸 Welcome Pack\nFREE — Pick 1 of 2 musicians. Welcome to your band!\n0\n⟡ STAGE ORDER — AURAS REACH ADJACENT SLOTS\n⟨\n🎵\nDag\n⟩\n⟨\n🎵\nIngrid\n⟩\n⛧ THIS CIRCLE ONLY\n⛧ ARTIFACT\n9\n11\n🍻\nDive Bar Sign\n×1.35 in Circles I-III. Refunds its cost when you reach Circle IV — the residency ends.\n×1.35 MULTIPLIER\n⛧ EFFECT PEDAL\n22\n27\n🎼\nOctave Pedal\nFirst Riff Chain each fight fires twice (double mult).\n🎸 CARDS FOR SALE\n4\n5\n⚠ HUNGOVER +20%\n1\nDemo TapeNEW!\nRIFF · COMMON\nReplay your last RIFF card for free.\nIN DECK: 2\n4\n5\n⚠ HUNGOVER +20%\n1\nGear CheckNEW!\nUTILITY · COMMON\nDraw 2, discard 1. Pick what you need.\nNEW CARD\n8\n10\n⚠ HUNGOVER +20%\n✦\n2\nHeavy Riff\nRIFF · UNCOMMON\nTarget gains +ATK perm equal to HALF target current ATK (max +20). The stronger they are, the harder this hits.\nIN DECK: 2\n42\n51\n⚠ HUNGOVER +20%\nRARE\n0\nBlack Sabbath SigilNEW!\nCORRUPT · RARE\nFREE. Corruption → 100%. Hellquake d10. Card is destroyed after use. EMBRACE THE VOID.\nNEW CARD\nSLY'S STASH:\n🍄\nDRY\n8\n🧪\nAcid\n15\n📦 BOOSTERS + PAWN SHOP\n6\n8\nVESTIBULE\nCassette Tape\n⛧ CONTAINS ⛧\n3 Common cards. Pick 1.\n12\n15\nVESTIBULE\nCD-R\n⛧ CONTAINS ⛧\n2 Common + 1 Uncommon. Pick 1.\n💸 Sly's Buyback\n🏧\nCommon\n1\nUncommon\n2\nRare\n4\nFoil\n+3\nMythic\n+8\nMember\n5\nArtifact\n50% buyback\n—No questions asked. Sly takes","note":"v1 log-only; buy policy TODO","shot":"/tmp/shots/shop-1785376253863.png"}
+{"ts":"2026-07-30T01:50:59.556Z","ev":"play","card":"Power Tap","cardType":"EMBER","cost":0,"target":"Ingrid"}
+{"ts":"2026-07-30T01:51:19.575Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:51:21.228Z","ev":"play","card":"Soundboard","cardType":"EMBER","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:51:41.247Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:51:42.803Z","ev":"play","card":"Heavy Riff","cardType":"RIFF","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:51:43.732Z","ev":"play","card":"RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:51:45.082Z","ev":"play","card":"RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:51:45.781Z","ev":"play","card":"Wake Up Call","cardType":"UTILITY","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:51:45.800Z","ev":"strike","strikes":"4","bossHp":"278","played":4,"embers":3,"preview":"128"}
+{"ts":"2026-07-30T01:51:49.740Z","ev":"play","card":"NEED   Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:51:50.397Z","ev":"play","card":"NEED  RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:51:51.365Z","ev":"play","card":"NEED   Wake Up Call","cardType":"UTILITY","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:51:51.381Z","ev":"strike","strikes":"3","bossHp":"265","played":3,"embers":0}
+{"ts":"2026-07-30T01:51:55.526Z","ev":"play","card":"Power Tap","cardType":"EMBER","cost":0,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:15.556Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:52:17.859Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T01:52:18.890Z","ev":"play","card":"NEED  RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:20.225Z","ev":"play","card":"Wake Up Call","cardType":"UTILITY","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:40.242Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:52:41.747Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:42.509Z","ev":"play","card":"NEED  RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:43.259Z","ev":"play","card":"NEED  Sound Check","cardType":"UTILITY","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:44.036Z","ev":"play","card":"S ance","cardType":"CORRUPT","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:44.050Z","ev":"strike","strikes":"3","bossHp":"151","played":4,"embers":0,"preview":"59"}
+{"ts":"2026-07-30T01:52:47.720Z","ev":"play","card":"NEED   Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:48.468Z","ev":"play","card":"NEED  RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:49.851Z","ev":"play","card":"NEED  Sound Check","cardType":"UTILITY","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:49.868Z","ev":"strike","strikes":"2","bossHp":"145","played":3,"embers":0}
+{"ts":"2026-07-30T01:52:52.848Z","ev":"heartbeat","tick":50}
+{"ts":"2026-07-30T01:52:54.286Z","ev":"play","card":"NEED   Groupie","cardType":"EMBER","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:55.223Z","ev":"play","card":"NEED   Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:55.973Z","ev":"play","card":"NEED  Demo Tape","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:56.885Z","ev":"play","card":"NEED  RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:57.887Z","ev":"play","card":"NEED  RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:58.814Z","ev":"play","card":"NEED  Sound Check","cardType":"UTILITY","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:52:58.835Z","ev":"strike","strikes":"2","bossHp":"92","played":6,"embers":0,"preview":"47"}
+{"ts":"2026-07-30T01:53:02.629Z","ev":"play","card":"NEED   Groupie","cardType":"EMBER","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:53:03.535Z","ev":"play","card":"NEED   Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:53:05.414Z","ev":"play","card":"NEED  Demo Tape","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:53:06.545Z","ev":"play","card":"NEED  RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:53:08.737Z","ev":"play","card":"NEED  RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:53:09.727Z","ev":"play","card":"NEED  Sound Check","cardType":"UTILITY","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:53:09.750Z","ev":"strike","strikes":"1","bossHp":"87","played":6,"embers":0,"preview":"47"}
+{"ts":"2026-07-30T01:53:13.790Z","ev":"play","card":"NEED   Groupie","cardType":"EMBER","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:53:15.117Z","ev":"play","card":"NEED   Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:53:18.108Z","ev":"play","card":"NEED  Demo Tape","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:53:19.067Z","ev":"play_fail","card":"NEED  RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T01:53:19.632Z","ev":"play_fail","card":"NEED  RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T01:53:20.530Z","ev":"play_fail","card":"NEED  Sound Check","cost":2}
+{"ts":"2026-07-30T01:53:20.547Z","ev":"strike","strikes":"0","bossHp":"40","played":3,"embers":0}
+{"ts":"2026-07-30T01:53:20.558Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T01:53:25.593Z","ev":"unknown_screen","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:26.458Z","ev":"unknown_screen","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:27.294Z","ev":"unknown_screen","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:28.153Z","ev":"unknown_screen","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:29.033Z","ev":"unknown_screen","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:29.834Z","ev":"heartbeat","tick":60}
+{"ts":"2026-07-30T01:53:29.918Z","ev":"unknown_screen","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:33.026Z","ev":"stuck","type":"unknown","shot":"/tmp/shots/stuck-1785376410724.png","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:33.172Z","ev":"unknown_screen","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:35.432Z","ev":"stuck","type":"unknown","shot":"/tmp/shots/stuck-1785376413978.png","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:35.537Z","ev":"unknown_screen","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:37.713Z","ev":"stuck","type":"unknown","shot":"/tmp/shots/stuck-1785376416345.png","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:37.842Z","ev":"unknown_screen","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:40.146Z","ev":"stuck","type":"unknown","shot":"/tmp/shots/stuck-1785376418655.png","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:40.270Z","ev":"unknown_screen","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:42.517Z","ev":"stuck","type":"unknown","shot":"/tmp/shots/stuck-1785376421076.png","text":"🤘\nThe Mosh Pit\nA pit of tortured souls writhes before you. Your band could join the fray...\n💥\nJump In\nAll take 4 damage. Survivors gain +1 ATK permanently.\n— OR —\n🚶\nWalk Away\nLose 15 Stash. The crowd boos."}
+{"ts":"2026-07-30T01:53:42.577Z","ev":"abort","msg":"hard stuck"}
+{"ts":"2026-07-30T01:53:42.578Z","ev":"session","msg":"autopilot loop end","minutes":"11.6"}
+{"ts":"2026-07-30T01:56:50.889Z","ev":"session","msg":"autopilot v1 start"}
+{"ts":"2026-07-30T01:56:50.999Z","ev":"event_choice","pick":"💥Jump InAll take 4 damage. Survivors gain +1 ATK permanentl","all":["💥Jump InAll take 4 damage. Survivors ga","🚶Walk AwayLose 15 Stash. The crowd boos"]}
+{"ts":"2026-07-30T01:56:52.181Z","ev":"event_choice","pick":"💥Jump InAll take 4 damage. Survivors gain +1 ATK permanentl","all":["💥Jump InAll take 4 damage. Survivors ga","🚶Walk AwayLose 15 Stash. The crowd boos"]}
+{"ts":"2026-07-30T01:56:55.849Z","ev":"shop_seen","text":"⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧\nSTASH\n💵\n22\n🚬 SLY'S MERCH 🚬\nHey kid... wanna see what fell off the truck?\n\"Hungerin' bad, huh? Hunger tax. Everything's marked up.\" —Sly\n🎲 REROLL\n2  3\n⛧\n🚪 BACK TO THE PIT\n⛧\nBand Recruitment\nGarage Band Pack\nPick 1 of 2 musicians.\n12\n⟡ STAGE ORDER — AURAS REACH ADJACENT SLOTS\n⟨\n🎵\nDag\n⟩\n⟨\n🎵\nIngrid\n⟩\n⛧ THIS CIRCLE ONLY\n⛧ ARTIFACT\n9\n11\n🍻\nDive Bar Sign\n×1.35 in Circles I-III. Refunds its cost when you reach Circle IV — the residency ends.\n×1.35 MULTIPLIER\n⛧ EFFECT PEDAL\n22\n27\n🎼\nOctave Pedal\nFirst Riff Chain each fight fires twice (double mult).\n🎸 CARDS FOR SALE\n4\n5\n⚠ HUNGOVER +20%\n0\nSlow BurnNEW!\nEMBER · COMMON\n+1 ember now. +1 ember at start of next 2 strikes. Delayed investment.\nNEW CARD\n8\n10\n⚠ HUNGOVER +20%\n✦\n2\nDark Tuning\nCORRUPT · UNCOMMON\nNeeds ≥40% Corruption. +1 ATK to random members. More corruption = more buffed.\nIN DECK: 2\n4\n5\n⚠ HUNGOVER +20%\n1\nBattle Cry\nRIFF · COMMON\nTarget: +1 ATK permanently.\nIN DECK: 4 (STACKED!)\nSLY'S STASH:\n🍄\nShrooms\n8\n🧪\nDRY\n15\n📦 BOOSTERS + PAWN SHOP\n6\n8\nVESTIBULE\nCassette Tape\n⛧ CONTAINS ⛧\n3 Common cards. Pick 1.\n12\n15\nVESTIBULE\nCD-R\n⛧ CONTAINS ⛧\n2 Common + 1 Uncommon. Pick 1.\n💸 Sly's Buyback\n🏧\nCommon\n1\nUncommon\n2\nRare\n4\nFoil\n+3\nMythic\n+8\nMember\n5\nArtifact\n50% buyback\n—No questions asked. Sly takes a cut.\nMax 2 sales per visit · Cannot sell last 2 members\n→ Tap Sly to make a deal\nSLY\n💸 MAKE A DEAL (2 LEFT)\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ","note":"v1 log-only; buy policy TODO","shot":"/tmp/shots/shop-1785376613356.png"}
+{"ts":"2026-07-30T01:56:58.770Z","ev":"play","card":"Power Tap","cardType":"EMBER","cost":0,"target":"Ingrid"}
+{"ts":"2026-07-30T01:57:18.786Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:57:20.319Z","ev":"play","card":"ChainBattle Cry","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:57:21.115Z","ev":"play","card":"Herb Money","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:57:22.877Z","ev":"play","card":"RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:57:23.783Z","ev":"play","card":"ChainRareStage Dive","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:57:43.798Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:58:04.629Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:58:25.446Z","ev":"error","msg":"op timeout: drag","type":"combat"}
