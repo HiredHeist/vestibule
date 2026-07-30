@@ -8470,7 +8470,7 @@ function App(){
             // Check out-of-strikes death AFTER this strike resolves
             setStrikesLeft(function(cur){
               if(cur<=0){
-                if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins. But you already conquered Hell.')}else{setDeathCause('beaten');setLastKillingBlow((enemy?.name||'The boss')+' hit for '+(enemy?.atk||0)+' damage');playSfx('defeat')};
+                if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins. But you already conquered Hell.')}else{setDeathCause('beaten');setLastKillingBlow((enemy?.name||'The boss')+' hit for '+((enemy?.baseDmg||0)+(activeStake?.dmgAdd||0))+' damage');playSfx('defeat')};
                 {const _rs=calcRunScore(stats,false);saveRunHistory(stats,false,enemy,runSeed);
                 // Achievement checks at game end
                 if(_rs>=5000)unlockAchievement('high_score_5k')
