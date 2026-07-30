@@ -1,7 +1,7 @@
 // e2e/pilot.cjs — session 3 driver core. Trusted-input hand over CDP.
 // Lesson from session 2 baked in: NEVER synthetic DOM events. All clicks go
 // through CDP Input domain (playwright page.mouse) = browser-level trusted input.
-const pw = require('playwright')
+let pw; try { pw = require('playwright') } catch (e) { pw = require('playwright-core') }
 const fs = require('fs')
 
 let browser, page
