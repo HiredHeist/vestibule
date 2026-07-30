@@ -267,17 +267,33 @@ async function recruitTick(s) {
 }
 
 async function draftTick(s) {
-  // pick pair sharing a keyword w/ max ATK+HP/2
-  const cand = s.clickables.filter(c => /ATK\d/.test(c.t.replace(/\s/g, ''))).map(c => {
-    const { p, kw } = memberScoreFromText(c.t)
-    return { ...c, kw, score: p } // sim memberScore: atk*3 + hp + keyword weight
-  })
-  let best = null
-  for (const a of cand) for (const b of cand) if (a !== b) {
-    const sc = a.score + b.score + (a.kw && a.kw === b.kw ? 40 : 0) // stack tier-2 gain
-    if (!best || sc > best.sc) best = { a, b, sc }
+  // v2 (Jul 30): VERIFY-AFTER-EACH-CLICK. Candidate clicks TOGGLE selection and the
+  // layout shifts on select — blind double-clicks can toggle forever (the "spaz").
+  // Ground truth: the confirm button reads "SELECT 2 MUSICIANS" until exactly 2 are
+  // selected, then becomes "TAKE THE STAGE". Click one candidate at a time, re-read.
+  const stageBtn = st => st.clickables.find(c => /take the stage/i.test(c.t))
+  let st = s
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const ready = stageBtn(st)
+    if (ready) { ev('draft_confirm', { attempt }); await P.click(ready.x, ready.y); return }
+    const cand = st.clickables.filter(c => /ATK\d/.test(c.t.replace(/\s/g, ''))).map(c => {
+      const { p, kw } = memberScoreFromText(c.t)
+      return { ...c, kw, score: p }
+    }).sort((a, b) => b.score - a.score)
+    if (!cand.length) { ev('draft_confused', { msg: 'no candidates parsed' }); return }
+    // prefer keyword-pair: if top pick's keyword has a partner, boost the partner
+    const top = cand[0]
+    const partner = cand.find(c => c !== top && c.kw && c.kw === top.kw)
+    const order = partner ? [top, partner, ...cand.filter(c => c !== top && c !== partner)] : cand
+    // click ONE candidate, then re-read and let the loop decide the next move
+    const pick = order[attempt % order.length]
+    ev('draft_click', { attempt, pick: pick.t.slice(0, 30) })
+    await P.click(pick.x, pick.y)
+    await P.connect().then(p => p.waitForTimeout(500))
+    st = await P.state()
   }
-  if (best) { ev('draft', { pick: [best.a.t.slice(0, 30), best.b.t.slice(0, 30)] }); await P.click(best.a.x, best.a.y); await P.click(best.b.x, best.b.y); await P.clickText('take the stage').catch(() => {}) }
+  const f = await P.shot('draft-confused-' + Date.now())
+  ev('draft_confused', { msg: '8 attempts, no TAKE THE STAGE', shot: f })
 }
 
 async function main() {
