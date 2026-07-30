@@ -2889,3 +2889,123 @@
 {"ts":"2026-07-30T09:59:57.565Z","ev":"play_fail","card":"NoviceRoadie","cost":1}
 {"ts":"2026-07-30T09:59:57.986Z","ev":"strike","strikes":"0","bossHp":"24","played":0,"embers":2,"chains":0}
 {"ts":"2026-07-30T10:00:00.968Z","ev":"session","msg":"autopilot loop end","minutes":"4.1"}
+{"ts":"2026-07-30T10:28:43.627Z","ev":"session","msg":"autopilot v2 start"}
+{"ts":"2026-07-30T10:28:45.296Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785407323878.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n4\nMAX STRIKE\n18\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n10 HP\nfrom killing The Wanderer!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 19 damage. Stack more buffs before each strike.\n1,316\nLOCAL LEGEND\n🔥 Streak Bonus: +20% score\nYour Best: 4,470 — 3,154 to beat\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n58,002 / 100,000\n👑 Lucifer Playable\n7 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n4\nDAMAGE\n74\nBEST HIT\n18\nSTONED\n0\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n38\nOVERKILL\n—\nVS LAST RUN:\nSCORE +2\nDMG +17\n(C1)\n📻\nDial to Eleven\n9/10 → Novice\n🎭\nPossessed Performance\n9/10 → Novice\n🎸\nDistortion\n9/10 → Novice\n🔥 38 DAY STREAK\n2/17 achievements\n▶ PAST RUNS (20)\nSEED: E737E3\n📋 Copy Seed"}
+{"ts":"2026-07-30T10:28:46.567Z","ev":"draft","pick":["TanukiBass PlayerATK8ANCHORHP8","UlfBass PlayerATK4ANCHORHP9"]}
+{"ts":"2026-07-30T10:28:48.558Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T10:28:50.605Z","ev":"play_fail","card":"NoviceEncore","cost":2}
+{"ts":"2026-07-30T10:28:51.704Z","ev":"play","card":"crowdsurf","score":74,"cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T10:28:52.423Z","ev":"play_fail","card":"NoviceCrowd Surf","cost":2}
+{"ts":"2026-07-30T10:28:53.523Z","ev":"play","card":"sigdecay","score":48,"cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T10:28:54.246Z","ev":"play_fail","card":"Signal Decay","cost":1}
+{"ts":"2026-07-30T10:28:55.374Z","ev":"play_fail","card":"NoviceSetlist","cost":0}
+{"ts":"2026-07-30T10:28:56.451Z","ev":"play_fail","card":"NEED  Distortion","cost":1}
+{"ts":"2026-07-30T10:28:56.857Z","ev":"strike","strikes":"4","bossHp":"84","played":2,"embers":5,"preview":"35","chains":0}
+{"ts":"2026-07-30T10:29:00.590Z","ev":"play_fail","card":"NoviceSmoke Break","cost":0}
+{"ts":"2026-07-30T10:29:01.703Z","ev":"play_fail","card":"NoviceSetlist","cost":0}
+{"ts":"2026-07-30T10:29:02.096Z","ev":"strike","strikes":"3","bossHp":"54","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T10:29:06.049Z","ev":"play_fail","card":"NoviceSmoke Break","cost":0}
+{"ts":"2026-07-30T10:29:06.476Z","ev":"modal_pick","card":"Smoke BreakUTILITY"}
+{"ts":"2026-07-30T10:29:07.294Z","ev":"strike","strikes":"3","bossHp":"24","played":0,"embers":0,"preview":"17","chains":0}
+{"ts":"2026-07-30T10:29:10.397Z","ev":"no_play","handSeen":5,"matched":4,"embers":0,"names":["NEED  RarePossesse","NEED  Distortion","NEED   Heavy Riff","NEED   Sound Wall","NEED   Controlled "]}
+{"ts":"2026-07-30T10:29:10.413Z","ev":"strike","strikes":"2","bossHp":"11","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T10:29:13.453Z","ev":"no_play","handSeen":5,"matched":4,"embers":0,"names":["NEED  RarePossesse","NEED  Distortion","NEED   Heavy Riff","NEED   Sound Wall","NEED   Controlled "]}
+{"ts":"2026-07-30T10:29:13.485Z","ev":"strike","strikes":"2","bossHp":"0","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T10:29:17.849Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T10:29:17.912Z","ev":"warn","msg":"no members parsed — using fixed slot fallback"}
+{"ts":"2026-07-30T10:29:17.920Z","ev":"no_play","handSeen":0,"matched":0,"embers":5,"names":[]}
+{"ts":"2026-07-30T10:29:17.936Z","ev":"strike","played":0,"embers":5,"chains":0}
+{"ts":"2026-07-30T10:29:20.986Z","ev":"shop_buy","label":"Band Recruitment🎸 Welcome PackFREE — Pick 1 of 2 ","why":"free member","stash":3,"bandSize":2}
+{"ts":"2026-07-30T10:29:22.250Z","ev":"recruit_pick","pick":"OrmDark MinstrelATK2HEXEDHP11The longer he plays, ","score":20}
+{"ts":"2026-07-30T10:29:23.594Z","ev":"shop_skip","tile":"welcome","why":"not in clickables"}
+{"ts":"2026-07-30T10:29:26.001Z","ev":"shop_leave","stash":3,"bandSize":3,"bought":[],"shot":"/tmp/shots/shop-final-1785407363594.png"}
+{"ts":"2026-07-30T10:29:28.219Z","ev":"play_fail","card":"RareStage Dive","cost":3}
+{"ts":"2026-07-30T10:29:29.489Z","ev":"play","card":"encore","score":80,"cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T10:29:30.295Z","ev":"play_fail","card":"NoviceEncore","cost":2}
+{"ts":"2026-07-30T10:29:31.520Z","ev":"play","card":"newstrings","score":67,"cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T10:29:32.340Z","ev":"play_fail","card":"NEED   New Strings","cost":2}
+{"ts":"2026-07-30T10:29:33.472Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T10:29:34.568Z","ev":"play_fail","card":"NEED  Sound Check","cost":2}
+{"ts":"2026-07-30T10:29:34.950Z","ev":"strike","strikes":"4","bossHp":"278","played":2,"embers":5,"preview":"35","chains":0}
+{"ts":"2026-07-30T10:29:38.746Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T10:29:39.145Z","ev":"strike","strikes":"3","bossHp":"268","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T10:29:43.015Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T10:29:43.435Z","ev":"strike","strikes":"3","bossHp":"212","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T10:29:47.211Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T10:29:47.628Z","ev":"strike","strikes":"3","bossHp":"212","played":0,"embers":0,"preview":"18","chains":0}
+{"ts":"2026-07-30T10:29:51.409Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T10:29:51.815Z","ev":"trip_used","btn":"🍄⛧","bossPct":"71"}
+{"ts":"2026-07-30T10:29:53.688Z","ev":"strike","strikes":"2","bossHp":"210","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T10:29:57.480Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T10:29:57.946Z","ev":"trip_used","btn":"🍄⛧","bossPct":"67"}
+{"ts":"2026-07-30T10:29:59.837Z","ev":"strike","strikes":"2","bossHp":"186","played":0,"embers":0,"preview":"19","chains":0}
+{"ts":"2026-07-30T10:30:02.852Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T10:30:03.602Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T10:30:04.036Z","ev":"trip_used","btn":"🍄⛧","bossPct":"62"}
+{"ts":"2026-07-30T10:30:05.917Z","ev":"strike","strikes":"1","bossHp":"183","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T10:30:09.697Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T10:30:10.219Z","ev":"trip_used","btn":"🍄⛧","bossPct":"57"}
+{"ts":"2026-07-30T10:30:12.103Z","ev":"strike","strikes":"1","bossHp":"159","played":0,"embers":0,"preview":"19","chains":0}
+{"ts":"2026-07-30T10:30:15.852Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T10:30:16.285Z","ev":"trip_used","btn":"🍄⛧","bossPct":"52"}
+{"ts":"2026-07-30T10:30:18.159Z","ev":"strike","strikes":"0","bossHp":"156","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T10:30:21.928Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T10:30:22.396Z","ev":"trip_used","btn":"🍄⛧","bossPct":"47"}
+{"ts":"2026-07-30T10:30:24.299Z","ev":"strike","strikes":"0","bossHp":"132","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T10:30:24.321Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T10:30:28.610Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785407426939.png","text":"Vestibule\n\"I was looking for something. I forgot what.\"\nDEFEATED BY\nThe Lost Soul\nCIRCLE I — LIMBO\n\"A stronger damned spirit. Hunger drives its blows.\"\nFIGHTS\n1\nCHAINS\n0\nCARDS PLAYED\n6\nMAX STRIKE\n35\n\"You were lost before you started.\"\nSO CLOSE\n💀\n132 HP\nleft on The Lost Soul\n😰\nTanuki survived with just 1 HP!\n☠ The Lost Soul hit for 5 damage\n💀 WHAT WENT WRONG\nOnly 6 cards played across 6 strikes. Play more cards to build stronger strikes.\n1,634\nLOCAL LEGEND\n🔥 Streak Bonus: +20% score\nYour Best: 4,470 — 2,836 to beat\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n59,952 / 100,000\n👑 Lucifer Playable\n7 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n1\nSTRIKES\n6\nCARDS\n6\nDAMAGE\n151\nBEST HIT\n35\nSTONED\n0\nCORRUPT\n20%\nSTASH\n11🌿\nRUN #\n39\nOVERKILL\n—\nVS LAST RUN:\nSCORE +2\nDMG +19\n(C1)\n📻\nDial to Eleven\n9/10 → Novice\n🎭\nPossessed Performance\n9/10 → Novice\n🎸\nDistortion\n9/10 → Novice\n🔥 39 DAY STREAK\n💀 3 losses in a row...\n2/17 achievements\n▶ PAST RUNS (20)\nSEED: 8B7125\n📋 Copy Seed"}
+{"ts":"2026-07-30T10:30:29.960Z","ev":"draft","pick":["RagnarLead GuitaristATK4FRENZI","BjornLead GuitaristATK5FRENZIE"]}
+{"ts":"2026-07-30T10:30:31.961Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T10:30:34.170Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T10:30:35.377Z","ev":"play","card":"moshpit","score":38,"cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T10:30:36.202Z","ev":"play_fail","card":"Mosh Pit","cost":1}
+{"ts":"2026-07-30T10:30:37.390Z","ev":"play","card":"powertap","score":38,"cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T10:30:38.172Z","ev":"play_fail","card":"NoviceSetlist","cost":4}
+{"ts":"2026-07-30T10:30:39.303Z","ev":"play","card":"powertap","score":38,"cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T10:30:40.045Z","ev":"play_fail","card":"NovicePower Tap","cost":0}
+{"ts":"2026-07-30T10:30:41.186Z","ev":"play","card":"soundcheck","score":30,"cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T10:30:41.971Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T10:30:42.411Z","ev":"strike","strikes":"4","bossHp":"84","played":4,"embers":5,"preview":"31","chains":0}
+{"ts":"2026-07-30T10:30:46.148Z","ev":"play_fail","card":"NoviceSetlist","cost":2}
+{"ts":"2026-07-30T10:30:47.267Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T10:30:47.687Z","ev":"strike","strikes":"3","bossHp":"69","played":0,"embers":5,"chains":0}
+{"ts":"2026-07-30T10:30:51.542Z","ev":"play","card":"tappedout","score":78,"cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T10:30:52.338Z","ev":"play_fail","card":"NoviceTapped Out","cost":0}
+{"ts":"2026-07-30T10:30:53.516Z","ev":"play","card":"demotape","score":52,"cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T10:30:54.268Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T10:30:55.431Z","ev":"play","card":"setlist","score":47,"cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T10:30:56.273Z","ev":"play_fail","card":"NoviceSetlist","cost":0}
+{"ts":"2026-07-30T10:30:56.705Z","ev":"strike","strikes":"3","bossHp":"53","played":3,"embers":5,"preview":"33","chains":0}
+{"ts":"2026-07-30T10:30:59.752Z","ev":"heartbeat","tick":30}
+{"ts":"2026-07-30T10:31:00.537Z","ev":"play_fail","card":"NoviceSetlist","cost":0}
+{"ts":"2026-07-30T10:31:01.001Z","ev":"strike","strikes":"2","bossHp":"37","played":0,"embers":5,"chains":0}
+{"ts":"2026-07-30T10:31:04.773Z","ev":"play_fail","card":"NoviceSetlist","cost":0}
+{"ts":"2026-07-30T10:31:06.137Z","ev":"play_fail","card":"RareStage Dive","cost":3}
+{"ts":"2026-07-30T10:31:06.576Z","ev":"modal_pick","card":"Dark TuningCORRUPT"}
+{"ts":"2026-07-30T10:31:08.256Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T10:31:08.679Z","ev":"strike","strikes":"2","bossHp":"20","played":0,"embers":5,"preview":"22","chains":0}
+{"ts":"2026-07-30T10:31:12.534Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T10:31:13.799Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T10:31:14.994Z","ev":"play_fail","card":"RareBlood Ritual","cost":2}
+{"ts":"2026-07-30T10:31:15.403Z","ev":"strike","strikes":"1","bossHp":"10","played":0,"embers":5,"chains":0}
+{"ts":"2026-07-30T10:31:19.633Z","ev":"event_choice","pick":"🌊Walk ThroughCorruption set to 69%. All members gain +2 ATK","all":["🌊Walk ThroughCorruption set to 69%. All","↩Find Another WayNothing happens. You pr"]}
+{"ts":"2026-07-30T10:31:20.810Z","ev":"event_choice","pick":"🌊Walk ThroughCorruption set to 69%. All members gain +2 ATK","all":["🌊Walk ThroughCorruption set to 69%. All","↩Find Another WayNothing happens. You pr"]}
+{"ts":"2026-07-30T10:31:22.075Z","ev":"warn","msg":"no members parsed — using fixed slot fallback"}
+{"ts":"2026-07-30T10:31:22.079Z","ev":"no_play","handSeen":0,"matched":0,"embers":5,"names":[]}
+{"ts":"2026-07-30T10:31:22.084Z","ev":"strike","played":0,"embers":5,"chains":0}
+{"ts":"2026-07-30T10:31:25.189Z","ev":"shop_buy","label":"Band Recruitment🎸 Welcome PackFREE — Pick 1 of 2 ","why":"free member","stash":2,"bandSize":2}
+{"ts":"2026-07-30T10:31:26.436Z","ev":"recruit_pick","pick":"UlfBass PlayerATK4ANCHORHP9The anchor that also bi","score":22}
+{"ts":"2026-07-30T10:31:28.109Z","ev":"shop_skip","tile":"welcome","why":"not in clickables"}
+{"ts":"2026-07-30T10:31:30.084Z","ev":"shop_leave","stash":2,"bandSize":2,"bought":[],"shot":"/tmp/shots/shop-final-1785407488110.png"}
+{"ts":"2026-07-30T10:31:31.375Z","ev":"heartbeat","tick":40}
+{"ts":"2026-07-30T10:31:32.265Z","ev":"play_fail","card":"NoviceEncore","cost":2}
+{"ts":"2026-07-30T10:31:33.470Z","ev":"play","card":"distortion","score":57,"cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T10:31:34.268Z","ev":"play_fail","card":"Distortion","cost":1}
+{"ts":"2026-07-30T10:31:35.457Z","ev":"play_fail","card":"NovicePower Tap","cost":0}
+{"ts":"2026-07-30T10:31:36.618Z","ev":"play_fail","card":"RareVoid Pact","cost":0}
+{"ts":"2026-07-30T10:31:37.022Z","ev":"strike","strikes":"4","bossHp":"278","played":1,"embers":5,"preview":"108","chains":0}
+{"ts":"2026-07-30T10:31:40.819Z","ev":"play_fail","card":"NovicePower Tap","cost":0}
+{"ts":"2026-07-30T10:31:41.991Z","ev":"play_fail","card":"Soundboard","cost":1}
+{"ts":"2026-07-30T10:31:43.138Z","ev":"play_fail","card":"RareVoid Pact","cost":0}
+{"ts":"2026-07-30T10:31:43.558Z","ev":"strike","strikes":"3","bossHp":"245","played":0,"embers":2,"chains":0}
+{"ts":"2026-07-30T10:31:46.533Z","ev":"session","msg":"autopilot loop end","minutes":"3.0"}

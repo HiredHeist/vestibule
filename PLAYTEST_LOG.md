@@ -121,3 +121,14 @@ trigger). Real players can hit this by quitting mid-fight at 0 strikes.
 locked/doomed run can't be abandoned without dev tools.
 Bot workaround shipped (zombie guard clears save, forces new run) — but the
 game itself needs: death-check on load + an Abandon Run button.
+
+## GAME BUG #1 ROOT-CAUSED AND FIXED (July 30, ~10:20 UTC)
+
+The fight-start auto-save was a STALE CLOSURE (violates CLAUDE.md rule #3): the
+setTimeout captured the PREVIOUS fight's ending state — sl:0 (zombie fights),
+un-healed stage, pre-redeal hand, stale fightIndex. One bug, many bogus stats.
+FIX (src/App.jsx): (1) auto-save is now a useEffect keyed on [fightIndex,
+gameState] — runs post-commit, reads fresh state; (2) loadGame() invalidates any
+save with sl<=0 (kills existing poisoned saves for all players). VERIFIED LIVE:
+save now coherent (sl:1/4 + matching band/hand), reload resumes into the same
+sane state instead of a locked fight. Abandon-Run button (bug #2) still TODO.

@@ -2441,7 +2441,16 @@ function saveGame(state) {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)) } catch(e) {}
 }
 function loadGame() {
-  try { const s = localStorage.getItem(SAVE_KEY); return s ? JSON.parse(s) : null } catch(e) { return null }
+  try {
+    const s = localStorage.getItem(SAVE_KEY)
+    if (!s) return null
+    const sv = JSON.parse(s)
+    // ZOMBIE-SAVE GUARD (Jul 30 2026): the old stale-closure auto-save could write
+    // sl:0 (previous fight's spent strikes) → reload = soft-locked fight with no
+    // death trigger. Any save without strikes to spend is unresumable — invalidate.
+    if (sv && sv.sl !== undefined && sv.sl <= 0) { clearSave(); return null }
+    return sv
+  } catch(e) { return null }
 }
 function clearSave() {
   try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem('vst_save_v3'); localStorage.removeItem('vst_save') /* old key cleanup */ } catch(e) {}
@@ -6950,6 +6959,25 @@ function App(){
     }
   },[corruption,fightIndex,tutorialFight,welcomeToHell,gameState])
 
+  // ── AUTO-SAVE v4.1 (Jul 30 2026) — EFFECT-BASED, replaces the stale-closure
+  // setTimeout save at fight start. That save captured the PREVIOUS fight's ending
+  // state (sl:0 zombie fights, un-healed stage, pre-redeal hand, stale fightIndex).
+  // An effect keyed on fightIndex runs post-commit and reads FRESH state.
+  useEffect(()=>{
+    if(gameState!=='playing'||tutorialFight>0)return
+    const t=setTimeout(()=>{try{saveGame({
+      v:1,gs:'playing',fi:fightIndex,seed:runSeed,deck:selectedDeck,relicsSeen:[...relicsSeenRef.current],
+      stage:stage.map(m=>m?{id:m.id,name:m.name,hp:m.hp,maxHp:m.maxHp,atk:m.atk,role:m.role,keyword:m.keyword,tooStoned:m.tooStoned,uid:m.uid,foil:m.foil,mythic:m.mythic,demonic:m.demonic,permAtkBonus:m.permAtkBonus||0,encoreReady:m.encoreReady,stoneShield:m.stoneShield,isMentor:m.isMentor,mentorMult:m.mentorMult,mentorLinkedToUid:m.mentorLinkedToUid,mentorAlive:m.mentorAlive,buffCount:m.buffCount||0}:null),
+      dk:deck.map(c=>c.id),hand:hand.map(c=>c.id),disc:discardPile.map(c=>c.id),
+      em:embers,mx:maxEmbers,st:stash,co:corruption,
+      sl:strikesLeft,ms:fightMaxStrikes,dl:discardsLeft,
+      pa:chosenPacts,art:activeArtifacts.map(a=>a.id),pas:activePassives.map(p=>p.id),
+      loot:collectedLoot,upg:upgradedCards,stats:stats,
+      shrooms:heldShrooms,acid:heldAcid,dmt:heldDMT
+    })}catch(e){}},150)
+    return ()=>clearTimeout(t)
+  },[fightIndex,gameState])
+
   // ── PEAK CORRUPTION TRACKER — the engine that drives Hangover ─────
   // Updates every time corruption rises. On fight victory, this peak gets
   // committed to the `hangover` state which then taxes the next shop +
@@ -8618,17 +8646,10 @@ function App(){
     playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
     if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
     setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setNextCardFree(false);setAllCardsFree(false);allCardsFreeRef.current=false;setFreeCardsLeft(0);freeCardsLeftRef.current=0;setBossSkipStrikes(0);bossSkipStrikesRef.current=0;setLastRiffPlayed(null);lastRiffPlayedRef.current=null;setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);multMilestonesRef.current={2:false,4:false,8:false,16:false}
-    // AUTO-SAVE at fight start
-    setTimeout(()=>{try{saveGame({
-      v:1,gs:gameState,fi:fightIndex,seed:runSeed,deck:selectedDeck,relicsSeen:[...relicsSeenRef.current],
-      stage:stage.map(m=>m?{id:m.id,name:m.name,hp:m.hp,maxHp:m.maxHp,atk:m.atk,role:m.role,keyword:m.keyword,tooStoned:m.tooStoned,uid:m.uid,foil:m.foil,mythic:m.mythic,demonic:m.demonic,permAtkBonus:m.permAtkBonus||0,encoreReady:m.encoreReady,stoneShield:m.stoneShield,isMentor:m.isMentor,mentorMult:m.mentorMult,mentorLinkedToUid:m.mentorLinkedToUid,mentorAlive:m.mentorAlive,buffCount:m.buffCount||0}:null),
-      dk:deck.map(c=>c.id),hand:hand.map(c=>c.id),disc:discardPile.map(c=>c.id),
-      em:embers,mx:maxEmbers,st:stash,co:corruption,
-      sl:strikesLeft,ms:fightMaxStrikes,dl:discardsLeft,
-      pa:chosenPacts,art:activeArtifacts.map(a=>a.id),pas:activePassives.map(p=>p.id),
-      loot:collectedLoot,upg:upgradedCards,stats:stats,
-      shrooms:heldShrooms,acid:heldAcid,dmt:heldDMT
-    })}catch(e){}},100);setMemberBuffs({});victoryFiredRef.current=false;setSlowBurnStrikes(0);setAmpFeedbackDiscount(0);setPyromaniacActive(false)
+    // AUTO-SAVE moved to effect-based save keyed on fightIndex (v4.1, Jul 30 2026).
+    // The setTimeout save that lived here captured STALE closure state (previous
+    // fight's sl/hand/stage/fightIndex) → zombie-fight saves. See effect ~line 6962.
+    setMemberBuffs({});victoryFiredRef.current=false;setSlowBurnStrikes(0);setAmpFeedbackDiscount(0);setPyromaniacActive(false)
     // BOSS LOOT effects at fight start
     if(collectedLoot.includes('love_letter'))setNextCardFree(true)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────

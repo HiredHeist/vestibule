@@ -15,9 +15,10 @@ recruit picks, panic trips. Full loop verified. Overnight Lucifer grind awaits J
   artifacts/passives in newGame) — values were identical, sim behavior unchanged
 - e2e/: pilot + autopilot (new; see HANDOFF.md for ops + hard-won rig lessons)
 
-**NEW GAME BUGS (July 30, from bot playtest):** (1) save at 0-strikes reloads into
-soft-locked zombie fight (no death trigger on load); (2) no Abandon Run option in
-pause menu. Fixes needed: death-check on load + abandon button. Details PLAYTEST_LOG.md.
+**GAME BUGS (July 30, from bot playtest):** (1) ✅ FIXED — stale-closure auto-save
+wrote previous fight's state (0-strike zombie fights, un-healed stage, wrong
+fightIndex); now an effect keyed on fightIndex + loadGame guard invalidating sl<=0
+saves. Verified live. (2) ⬜ no Abandon Run option in pause menu — still needed.
 
 **Open items:** sim winrate discrepancy (2K fresh run says 39.95% Lucifer on Bronze/
 Standard vs July 29 doc's 8.3–11.8% claim — reconcile before balance work) · aura-ATK
