@@ -37,3 +37,51 @@ Tutorial 2–3 → first real run → SHOP (Stage Order arrows, relic
 "THIS CIRCLE ONLY" + expiry on descent) → deck-switch stake clamp →
 FOLK/ANCHOR aura visuals → descent/pact/forge/trips → circle boss →
 hangover → save/reload mid-run → full Lucifer run.
+
+---
+
+# SESSION 3 — July 29/30, 2026 (rig resurrection + first autonomous runs)
+
+*Context: session 2's chat died server-side; its container (rig + save) was lost.
+Rebuilt from repo in a fresh cloud container. Everything below re-verified live.*
+
+## 🔧 RIG v2 (e2e/pilot.cjs + e2e/autopilot.cjs)
+- Playwright connectOverCDP → Electron. ALL input via CDP Input domain
+  (trusted events) — session 2's synthetic-event failure baked in as doctrine.
+- **Card→target drag CONFIRMED WORKING** (session 1's open rig limitation is
+  dead): Battle Cry dragged onto Gunnar → "ATK 4+1", mult 1.00→1.08.
+- autopilot.cjs: full state machine (menu/draft/descent/combat/shop/modals/
+  death/victory), SHREDDER-chain card policy, op timeouts, stuck detection,
+  JSONL event ledger (e2e/session3-events.jsonl), auto-restart on death.
+
+## ✅ VERIFIED LIVE THIS SESSION
+- Session 2's death-blow fix (465f2b5) in production: "hit for 2 damage" ✓
+- Descent Map: first-ever traversal. Fight/skip columns, reward previews,
+  DESCEND flow all work.
+- Opening Night draft (2 seeds), daily seed + streak badge, locked
+  Lucifer/Tanuki tease cards.
+- Fight victory → shop transition; shop first-encounter popup.
+- Death screen: stats, coach tips, personal best, unlock progress, VS-last-run.
+- Member card shows card-buffs as "ATK 4+1" (aura display still the open item).
+
+## 🐛/⚖️ NEW FINDINGS
+1. **BALANCE — training wheels reverted?** The Wanderer is 84 HP in v0.8.0.
+   May's 64ecb85 deliberately nerfed it to 45 ("fight-1 training wheels").
+   Stake retune appears to have undone the onboarding philosophy. Run #1
+   (weak draft, mediocre play) DIED to fight 1, 38 HP short. JV's call.
+2. **Setlist text vs behavior**: says "Draw 3", drew 2 (hand cap). Modal
+   honestly reports "You drew 2 cards" but the card overpromises. Minor.
+3. Out-of-strikes with healthy band = run over (by design, but the death
+   screen says "DEFEATED BY The Wanderer" — reads odd when nobody died).
+
+## 📊 RUN DATA (Bronze/Standard, all legit)
+- Run #1: Sigrid+Gunnar (2×SHREDDER). DEAD fight 1 — 46/84 dmg, best 22.
+- Run #2: Ulf+Vitalik. DEAD fight 1 (rig bug: member parse fail → blind
+  strikes; fixed in v1.3, data excluded from balance conclusions).
+- Run #3: Ragnar+Bjorn (2×FRENZIED). Fight 1 KILLED (~3 strikes, previews
+  55/92). Shop traversed. Fight 2 Lost Soul in progress at ledger time.
+
+## ▶ NEXT
+- Autopilot grinding runs continuously; shop buy-policy is v1 log-only (TODO:
+  packs-first doctrine), aura-chip UX finding still open, sim duplicate keys
+  unaudited. Full run data compiles into the final report.
