@@ -3,7 +3,8 @@
 // Usage: node e2e/autopilot.cjs [maxMinutes]
 const P0 = require('./pilot.cjs')
 const fs = require('fs')
-const LOG = '/home/claude/vestibule/e2e/session3-events.jsonl'
+const path = require('path')
+const LOG = path.join(__dirname, 'session3-events.jsonl')
 const ev = (type, data) => { fs.appendFileSync(LOG, JSON.stringify({ ts: new Date().toISOString(), ev: type, ...data }) + '\n') }
 // every pilot op gets a hard timeout — a hung CDP call must never freeze the loop
 const TMO = 20000
@@ -257,9 +258,11 @@ async function main() {
     opTimeouts++
     if (opTimeouts >= 3) {
       origEv('rig_heal', { msg: 'restarting electron after ' + opTimeouts + ' op timeouts' })
-      try {
-        require('child_process').execSync('pkill -f "electron ./e2e/driver" 2>/dev/null; pkill Xvfb 2>/dev/null; sleep 2; bash /home/claude/vestibule/e2e/up.sh', { timeout: 60000 })
-      } catch (e) { origEv('rig_heal_err', { msg: e.message.slice(0, 100) }) }
+      if (process.platform === 'linux') {
+        try {
+          require('child_process').execSync('pkill -f "electron ./e2e/driver" 2>/dev/null; pkill Xvfb 2>/dev/null; sleep 2; bash ' + path.join(__dirname, 'up.sh'), { timeout: 60000 })
+        } catch (e) { origEv('rig_heal_err', { msg: e.message.slice(0, 100) }) }
+      }
       await P0.reset(); opTimeouts = 0
       await new Promise(r => setTimeout(r, 4000))
     }

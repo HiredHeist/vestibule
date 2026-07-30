@@ -26,8 +26,9 @@ async function state() {
 }
 async function shot(name) {
   const p = await connect()
-  const f = `/tmp/shots/${name || Date.now()}.png`
-  fs.mkdirSync('/tmp/shots', { recursive: true })
+  const dir = require('path').join(require('os').tmpdir(), 'shots')
+  const f = require('path').join(dir, `${name || Date.now()}.png`)
+  fs.mkdirSync(dir, { recursive: true })
   await p.screenshot({ path: f })
   return f
 }
