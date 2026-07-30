@@ -2336,3 +2336,14 @@
 {"ts":"2026-07-30T05:50:15.221Z","ev":"play_fail","card":"NEED   NoviceEncore","cost":2}
 {"ts":"2026-07-30T05:50:16.304Z","ev":"play_fail","card":"NEED  Sound Check","cost":2}
 {"ts":"2026-07-30T05:50:16.705Z","ev":"strike","strikes":"1","bossHp":"27","played":0,"embers":0,"preview":"11"}
+{"ts":"2026-07-30T05:50:20.419Z","ev":"play_fail","card":"NoviceTapped Out","cost":0}
+{"ts":"2026-07-30T05:50:21.520Z","ev":"play_fail","card":"NEED   NoviceEncore","cost":2}
+{"ts":"2026-07-30T05:50:22.639Z","ev":"play_fail","card":"NEED  Sound Check","cost":2}
+{"ts":"2026-07-30T05:50:23.076Z","ev":"strike","strikes":"0","bossHp":"24","played":0,"embers":0}
+{"ts":"2026-07-30T05:50:26.071Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T05:50:27.712Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785390626081.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n3\nMAX STRIKE\n24\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n16 HP\nfrom killing The Wanderer!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 17 damage. Stack more buffs before each strike.\n0\nLOCAL LEGEND\n🔥 Streak Bonus: +20% score\nYour Best: 4,470 — 3,119 to beat\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n52,159 / 100,000\n👑 Lucifer Playable\n7 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n3\nDAMAGE\n68\nBEST HIT\n24\nSTONED\n0\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n34\nOVERKILL\n—\nVS LAST RUN:\nSCORE +1\nDMG +11\n(C1)\n🎭\nPossessed Performance\n9/10 → Novice\n🎼\nSmoke Break\n9/10 → Novice\n📻\nDial to Eleven\n8/10 → Novice\n🔥 34 DAY STREAK\n2/17 achievements\n▶ PAST RUNS (20)\nSEED: 8F7CA1\n📋 Copy Seed"}
+{"ts":"2026-07-30T05:50:28.995Z","ev":"draft","pick":["BrynjaBass PlayerATK1ANCHORHP1","TanukiBass PlayerATK8ANCHORHP8"]}
+{"ts":"2026-07-30T05:50:31.000Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T05:50:33.076Z","ev":"play_fail","card":"NoviceTapped Out","cost":0}
+{"ts":"2026-07-30T05:50:34.255Z","ev":"play","card":"Soundboard","cardType":"EMBER","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T05:50:34.999Z","ev":"play_fail","card":"Soundboard","cost":1}
