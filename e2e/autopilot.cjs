@@ -22,7 +22,7 @@ async function screenType(s) {
   if (btn('strike')) return 'combat'
   if (t.includes('BACK TO THE PIT') || t.includes('SLY')) return 'shop'
   if (t.includes('START TUTORIAL') || t.includes('ENTER THE VESTIBULE')) return 'menu'
-  if (t.includes('TRY AGAIN') || t.includes('CAUSE OF DEATH') || t.includes('RUN ENDED') || t.includes('TOO STONED')) return 'death'
+  if (t.includes('DEFEATED BY') || t.includes('PLAY AGAIN') || t.includes('TRY AGAIN') || t.includes('CAUSE OF DEATH')) return 'death'
   if (t.includes('LUCIFER IS DEAD') || t.includes('VICTORY')) return 'victory'
   return 'unknown'
 }
@@ -59,19 +59,24 @@ async function combatTick(s) {
   const h = await hand(); const mem = await members()
   if (!mem.length) { ev('warn', { msg: 'no members parsed' }); return P.clickText('strike').catch(() => {}) }
   const target = mem.sort((a, b) => b.atk - a.atk)[0]
-  // policy: free cards first, then ember gen, then riffs (chains), then cheap utility. skip corr-gated.
+  const embers = +((s.text.match(/(\d+)\s*\/\s*\d+\s*\n?FIGHT/) || [])[1] || 99)
+  // SHREDDER doctrine: embers first, then EVERY affordable RIFF back-to-back (chains
+  // pay 1/2/4x per consecutive pair), buffs onto the carry, skip corr-gated dead cards.
+  const rank = { EMBER: 0, RIFF: 1, UTILITY: 2, CORRUPT: 3 }
   const playable = h.filter(c => !/Need \d+% Corr/i.test(c.desc))
-    .sort((a, b) => (a.cost - b.cost) || (a.type === 'EMBER' ? -1 : b.type === 'EMBER' ? 1 : 0) || (a.type === 'RIFF' ? -1 : b.type === 'RIFF' ? 1 : 0))
-  let played = 0
+    .sort((a, b) => (rank[a.type] - rank[b.type]) || (a.cost - b.cost))
+  let played = 0, failStreak = 0
   for (const c of playable) {
     const before = (await P.state()).text
     await P.drag(c.x, c.y, target.x, target.y)
     const after = (await P.state()).text
-    if (before !== after) { played++; ev('play', { card: c.name, cardType: c.type, cost: c.cost, target: target.name }) }
-    else ev('play_fail', { card: c.name, cost: c.cost })
-    if (played >= 4) break // don't dump whole hand every strike; keep chain fodder
+    if (before !== after) { played++; failStreak = 0; ev('play', { card: c.name, cardType: c.type, cost: c.cost, target: target.name }) }
+    else { failStreak++; ev('play_fail', { card: c.name, cost: c.cost }) }
+    if ((await P.state()).text.toUpperCase().includes('DISCARD & CONTINUE')) { await modalTick(await P.state()) }
+    if (failStreak >= 3 || played >= 6) break
   }
-  ev('strike', { strikes, bossHp: bossHp[1], played })
+  const preview = ((await P.state()).text.match(/DEALS\s*(\d+)/) || [])[1]
+  ev('strike', { strikes, bossHp: bossHp[1], played, embers, preview })
   await P.clickText('strike').catch(e => ev('warn', { msg: 'strike btn: ' + e.message }))
   await P.connect().then(p => p.waitForTimeout(1800))
 }
@@ -147,7 +152,7 @@ async function main() {
       else if (type === 'shop') await shopTick(s)
       else if (type === 'draft') await draftTick(s)
       else if (type === 'menu') { ev('run_start', {}); await P.clickText('skip tutorial').catch(() => P.clickText('enter the vestibule')) }
-      else if (type === 'death') { const f = await P.shot('death-' + Date.now()); ev('run_end', { result: 'death', shot: f, text: s.text.slice(0, 1200) }); await P.clickText('try again').catch(() => {}) }
+      else if (type === 'death') { const f = await P.shot('death-' + Date.now()); ev('run_end', { result: 'death', shot: f, text: s.text.slice(0, 1200) }); await P.clickText('play again').catch(() => P.clickText('try again').catch(() => {})) }
       else if (type === 'victory') { const f = await P.shot('VICTORY-' + Date.now()); ev('run_end', { result: 'VICTORY', shot: f, text: s.text.slice(0, 2000) }); break }
       else { for (const b of OVERLAY_BTNS) { try { await P.clickText(b); break } catch (e) {} } ev('unknown_screen', { text: s.text.slice(0, 300) }) }
     } catch (e) { ev('error', { msg: e.message, type }) }
