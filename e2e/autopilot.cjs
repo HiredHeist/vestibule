@@ -1,10 +1,14 @@
 // e2e/autopilot.cjs — session 3 autonomous player. Runs the state machine loop.
 // Doctrine: legit play only (no debug keys, no HP edits). Logs every decision.
 // Usage: node e2e/autopilot.cjs [maxMinutes]
-const P = require('./pilot.cjs')
+const P0 = require('./pilot.cjs')
 const fs = require('fs')
 const LOG = '/home/claude/vestibule/e2e/session3-events.jsonl'
-const ev = (type, data) => { fs.appendFileSync(LOG, JSON.stringify({ ts: new Date().toISOString(), type, ...data }) + '\n') }
+const ev = (type, data) => { fs.appendFileSync(LOG, JSON.stringify({ ts: new Date().toISOString(), ev: type, ...data }) + '\n') }
+// every pilot op gets a hard timeout — a hung CDP call must never freeze the loop
+const TMO = 20000
+const wrap = fn => (...a) => Promise.race([fn(...a), new Promise((_, rej) => setTimeout(() => rej(new Error('op timeout: ' + fn.name)), TMO))])
+const P = { connect: P0.connect, state: wrap(P0.state), shot: wrap(P0.shot), click: wrap(P0.click), clickText: wrap(P0.clickText), drag: wrap(P0.drag), key: wrap(P0.key), evaljs: wrap(P0.evaljs) }
 
 const OVERLAY_BTNS = ['got it', 'onward', 'continue', 'collect', 'claim', 'next fight', 'descend', 'take the stage', 'ok']
 
@@ -12,6 +16,7 @@ async function screenType(s) {
   const t = s.text.toUpperCase()
   const btn = txt => s.clickables.some(c => c.t.toLowerCase().includes(txt))
   if (btn('got it')) return 'popup'
+  if (btn('discard & continue') || btn('✓ confirm')) return 'modal'
   if (t.includes('THE DESCENT') && t.includes('SELECT THIS PATH')) return 'descent'
   if (t.includes('OPENING NIGHT')) return 'draft'
   if (btn('strike')) return 'combat'
@@ -62,13 +67,29 @@ async function combatTick(s) {
     const before = (await P.state()).text
     await P.drag(c.x, c.y, target.x, target.y)
     const after = (await P.state()).text
-    if (before !== after) { played++; ev('play', { card: c.name, type: c.type, cost: c.cost, target: target.name }) }
+    if (before !== after) { played++; ev('play', { card: c.name, cardType: c.type, cost: c.cost, target: target.name }) }
     else ev('play_fail', { card: c.name, cost: c.cost })
     if (played >= 4) break // don't dump whole hand every strike; keep chain fodder
   }
   ev('strike', { strikes, bossHp: bossHp[1], played })
   await P.clickText('strike').catch(e => ev('warn', { msg: 'strike btn: ' + e.message }))
   await P.connect().then(p => p.waitForTimeout(1800))
+}
+
+async function modalTick(s) {
+  // discard-picker / confirm modals: pick the deadest card (corr-gated first), then continue
+  const cards = await P.evaljs(`(() => {
+    return [...document.querySelectorAll('div')].filter(d => {
+      const t = d.textContent || ''; const r = d.getBoundingClientRect()
+      return /RIFF|UTILITY|EMBER|CORRUPT/.test(t) && t.length < 200 && r.y < 720 && r.height > 100 && r.width < 400
+    }).map(d => { const r = d.getBoundingClientRect(); return { t: d.textContent.replace(/\\s+/g, ' ').slice(0, 60), x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } })
+  })()`)
+  if (cards.length) {
+    const pick = cards.find(c => /Need \d+% Corr|Dark Tuning/i.test(c.t)) || cards[0]
+    ev('modal_pick', { card: pick.t.slice(0, 40) })
+    await P.click(pick.x, pick.y)
+  }
+  await P.clickText('discard & continue').catch(() => P.clickText('confirm').catch(() => {}))
 }
 
 async function descentTick(s) {
@@ -105,7 +126,10 @@ async function main() {
   const t0 = Date.now()
   let lastHash = '', stuck = 0
   ev('session', { msg: 'autopilot v1 start' })
+  let tick = 0
   while (Date.now() - t0 < maxMs) {
+    tick++
+    if (tick % 10 === 0) ev('heartbeat', { tick })
     let s; try { s = await P.state() } catch (e) { ev('error', { msg: e.message }); await new Promise(r => setTimeout(r, 3000)); continue }
     const hash = s.text.slice(0, 500)
     stuck = (hash === lastHash) ? stuck + 1 : 0; lastHash = hash
@@ -117,6 +141,7 @@ async function main() {
     }
     try {
       if (type === 'popup') { for (const b of OVERLAY_BTNS) { try { await P.clickText(b); break } catch (e) {} } }
+      else if (type === 'modal') await modalTick(s)
       else if (type === 'descent') await descentTick(s)
       else if (type === 'combat') await combatTick(s)
       else if (type === 'shop') await shopTick(s)

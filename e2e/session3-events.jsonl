@@ -1,0 +1,108 @@
+{"ts":"2026-07-30T01:23:16.357Z","type":"session","msg":"autopilot v1 start"}
+{"ts":"2026-07-30T01:23:17.277Z","type":"EMBER","card":"Power Tap","cost":0,"target":"Sigrid"}
+{"ts":"2026-07-30T01:28:17.020Z","ev":"session","msg":"autopilot v1 start"}
+{"ts":"2026-07-30T01:28:18.145Z","ev":"play","card":"Setlist","cardType":"UTILITY","cost":0,"target":"Sigrid"}
+{"ts":"2026-07-30T01:28:19.861Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:28:21.323Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:28:21.324Z","ev":"strike","strikes":"4","bossHp":"84","played":1}
+{"ts":"2026-07-30T01:28:25.755Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:28:27.166Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:28:28.599Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:28:30.062Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:28:30.062Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:28:34.778Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:28:36.431Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:28:37.965Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:28:39.494Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:28:39.495Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:28:44.024Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:28:45.512Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:28:46.866Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:28:48.295Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:28:48.296Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:28:52.622Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:28:54.046Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:28:55.527Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:28:57.416Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:28:57.416Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:29:01.917Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:29:03.355Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:29:04.898Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:29:06.259Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:29:06.259Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:29:10.725Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:29:12.177Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:29:13.626Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:29:14.971Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:29:14.971Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:29:19.182Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785374957939.png","text":"Setlist\nYou drew 2 cards. Now discard 1 to continue.\nDark Tuning\nCORRUPT\nSound Check\nUTILITY\nStatic Charge\nCORRUPT\nStage Dive\nRIFF\nRoadie\nUTILITY\nStage Dive\nRIFF\n✓ DISCARD & CONTINUE\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+1 ATK\nSigrid\nRHYTHM GUITARIST\nATK\n3\nSHREDDER\nHP\n8\n+1 ATK\n+1\nGunnar\nRHYTHM GUITARIST\nATK\n4+1\nSHREDDER\nHP\n7\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n57\nDECK\n⛧\n3\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n↩ UNDO (Ctrl+Z)\n4/4\nEMBERS\n💨\n💨\n🔥\n🔥\n🔥\n3/5\nFIGHT\n1/3\nSTASH\n3\nMULTIPLIER\n×1.26\n⛧ STRIKE ⛧\n4/4\nDEALS\n10DMG\n6/6\n2\n✦\n🌑 NEED 40% CORR\nDark Tuning\nC"}
+{"ts":"2026-07-30T01:29:21.159Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:29:22.493Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:29:24.118Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:29:25.554Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:29:25.554Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:29:29.973Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:29:31.300Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:29:32.883Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:29:34.186Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:29:34.186Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:29:37.165Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T01:29:38.644Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:29:40.048Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:29:41.663Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:29:43.203Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:29:43.203Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:29:47.799Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:29:49.230Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:29:50.756Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:29:52.212Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:29:52.212Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:29:56.796Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:29:58.262Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:29:59.723Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:30:01.210Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:30:01.210Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:30:05.690Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:30:07.245Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:30:08.947Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:30:10.354Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:30:10.354Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:30:14.450Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785375013323.png","text":"Setlist\nYou drew 2 cards. Now discard 1 to continue.\nDark Tuning\nCORRUPT\nSound Check\nUTILITY\nStatic Charge\nCORRUPT\nStage Dive\nRIFF\nRoadie\nUTILITY\nStage Dive\nRIFF\n✓ DISCARD & CONTINUE\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+1 ATK\nSigrid\nRHYTHM GUITARIST\nATK\n3\nSHREDDER\nHP\n8\n+1 ATK\n+1\nGunnar\nRHYTHM GUITARIST\nATK\n4+1\nSHREDDER\nHP\n7\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n57\nDECK\n⛧\n3\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n↩ UNDO (Ctrl+Z)\n4/4\nEMBERS\n💨\n💨\n🔥\n🔥\n🔥\n3/5\nFIGHT\n1/3\nSTASH\n3\nMULTIPLIER\n×1.26\n⛧ STRIKE ⛧\n4/4\nDEALS\n10DMG\n6/6\n2\n✦\n🌑 NEED 40% CORR\nDark Tuning\nC"}
+{"ts":"2026-07-30T01:30:16.183Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:30:17.588Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:30:18.932Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:30:20.508Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:30:20.508Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:30:25.032Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:30:26.438Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:30:28.134Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:30:29.866Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:30:29.867Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:30:34.351Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:30:35.973Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:30:37.418Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:30:39.163Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:30:39.163Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:30:43.613Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:30:45.007Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:30:46.418Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:30:47.739Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:30:47.739Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:30:52.151Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:30:53.777Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:30:55.231Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:30:56.834Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:30:56.835Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:31:01.234Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:31:02.821Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:31:04.127Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:31:05.703Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:31:05.703Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:31:08.667Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T01:31:10.036Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785375068678.png","text":"Setlist\nYou drew 2 cards. Now discard 1 to continue.\nDark Tuning\nCORRUPT\nSound Check\nUTILITY\nStatic Charge\nCORRUPT\nStage Dive\nRIFF\nRoadie\nUTILITY\nStage Dive\nRIFF\n✓ DISCARD & CONTINUE\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+1 ATK\nSigrid\nRHYTHM GUITARIST\nATK\n3\nSHREDDER\nHP\n8\n+1 ATK\n+1\nGunnar\nRHYTHM GUITARIST\nATK\n4+1\nSHREDDER\nHP\n7\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n57\nDECK\n⛧\n3\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n↩ UNDO (Ctrl+Z)\n4/4\nEMBERS\n💨\n💨\n🔥\n🔥\n🔥\n3/5\nFIGHT\n1/3\nSTASH\n3\nMULTIPLIER\n×1.26\n⛧ STRIKE ⛧\n4/4\nDEALS\n10DMG\n6/6\n2\n✦\n🌑 NEED 40% CORR\nDark Tuning\nC"}
+{"ts":"2026-07-30T01:31:11.892Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T01:31:13.315Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T01:31:14.758Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T01:31:16.100Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T01:31:16.100Z","ev":"strike","strikes":"4","bossHp":"84","played":0}
+{"ts":"2026-07-30T01:31:19.060Z","ev":"session","msg":"autopilot loop end","minutes":"3.0"}
