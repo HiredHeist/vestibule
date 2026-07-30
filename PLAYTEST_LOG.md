@@ -106,3 +106,18 @@ rig self-heal, single-instance rule.
 
 **NEW FLAG:** fresh 2K sim Bronze/Standard = 39.95% Lucifer wins vs July 29 doc
 claim of 8.3–11.8%. Reconcile before balance decisions.
+
+## SESSION 3 — EXPERT BRAIN + 2 NEW GAME BUGS (July 30, ~10:00 UTC)
+
+**Combat brain transplant DONE:** sim's scoreCard policy (82 cards), chain
+bonuses (16 chains), per-card targeting now drive the live bot (e2e/brain.cjs
++ carddata.json). Verified live: staticcharge 86 when embers low, wakeup 8
+when nobody stoned, heavyriff 78 onto carry — real expert decisions.
+
+**GAME BUG #1 — zombie fight on reload:** save written at 0 strikes left
+reloads into a soft-locked fight (boss alive, 0 strikes, 0 embers, no death
+trigger). Real players can hit this by quitting mid-fight at 0 strikes.
+**GAME BUG #2 — no abandon-run option:** pause (Esc) has toggles only; a
+locked/doomed run can't be abandoned without dev tools.
+Bot workaround shipped (zombie guard clears save, forces new run) — but the
+game itself needs: death-check on load + an Abandon Run button.

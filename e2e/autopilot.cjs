@@ -58,34 +58,58 @@ async function members() {
   })()`)
 }
 
+const BRAIN = require('./brain.cjs')
+let strikeNumThisFight = 0, lastBossHp = null
+let zeroStrikeTicks = 0, preferNewRun = false
+
 async function combatTick(s) {
   const strikes = (s.text.match(/STRIKE ⛧\s*(\d+)\s*\/\s*(\d+)/) || [])[1]
   const bossHp = (s.text.match(/(\d+)\s*\/\s*(\d+)\s*HP/) || [])
+  if (lastBossHp !== null && bossHp[2] && +bossHp[1] === +bossHp[2]) { strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set() } // full-HP boss = new fight
+  lastBossHp = bossHp[1] ? +bossHp[1] : null
   const h = await hand(); let mem = await members()
   if (!mem.length) {
-    // fallback: known stage-slot coords — never strike blind again
     ev('warn', { msg: 'no members parsed — using fixed slot fallback' })
-    mem = [{ name: 'slot1', atk: 1, x: 735, y: 470 }, { name: 'slot2', atk: 0, x: 1018, y: 470 }]
+    mem = [{ name: 'slot1', atk: 1, hp: 5, x: 735, y: 470 }, { name: 'slot2', atk: 0, hp: 5, x: 1018, y: 470 }]
   }
-  const target = mem.sort((a, b) => b.atk - a.atk)[0]
-  const embers = +((s.text.match(/(\d+)\s*\/\s*\d+\s*\n?FIGHT/) || [])[1] || 99)
-  // SHREDDER doctrine: embers first, then EVERY affordable RIFF back-to-back (chains
-  // pay 1/2/4x per consecutive pair), buffs onto the carry, skip corr-gated dead cards.
-  const rank = { EMBER: 0, RIFF: 1, UTILITY: 2, CORRUPT: 3 }
+  // ── EXPERT BRAIN (ported sim scoreCard policy) ──
+  // gs-lite from the live screen; sim stop-rule: play best card while score > 3
+  const gsLite = () => ({
+    alive: mem.map(m => ({ ...m, maxHp: m.hp })), // maxHp approximation (parse limit)
+    corruption: +((s.text.match(/^(\d+)%/) || [0, 0])[1]),
+    stash: +((s.text.match(/STASH\s*\n?(\d+)/) || [0, 0])[1]),
+    embers: +((s.text.match(/(\d+)\s*\/\s*\d+\s*\n?FIGHT/) || [0, 5])[1]),
+    discardsLeft: +((s.text.match(/(\d+)\s*\/\s*\d+\s*\n?EMBERS/) || [0, 4])[1]),
+    strikeMult: +((s.text.match(/MULTIPLIER\s*\n?×([\d.]+)/) || [0, 1])[1]),
+    bossHp: +(bossHp[1] || 0), fightIndex: 0,
+    anyStoned: /TOO STONED/i.test(s.text),
+    handIds: [], handLen: 0, cardsPlayedIds: playedIdsThisFight, firedChains: firedChainsThisFight, discardLen: +((s.text.match(/(\d+)\s*\n?DISCARD/) || [0, 0])[1]),
+  })
+  const embers = gsLite().embers
   let played = 0, failStreak = 0
   const failed = new Set()
-  // re-perceive hand each iteration — card positions re-fan after every play
-  for (let iter = 0; iter < 8 && played < 6 && failStreak < 3; iter++) {
+  for (let iter = 0; iter < 10 && played < 8 && failStreak < 3; iter++) {
     const cur = await hand()
-    const playable = cur.filter(c => !/Need \d+% Corr/i.test(c.desc) && !failed.has(c.name))
+    const known = cur.map(c => ({ ...c, card: BRAIN.matchCard(c.name) })).filter(c => c.card && !failed.has(c.name))
+      .filter(c => !/Need \d+% Corr/i.test(c.desc) || gsLite().corruption >= 40)
       .filter(c => { const n = c.desc.match(/NEED\s*(\d)(?!\d|%)/); return !n || mem.length >= +n[1] })
-      .sort((a, b) => (rank[a.type] - rank[b.type]) || (a.cost - b.cost))
-    const c = playable[0]
-    if (!c) break
-    await P.playCard(c.x, c.y, target.x, target.y) // quick-play: click card, click member
+    const gs = gsLite()
+    gs.handIds = known.map(k => k.card.id); gs.handLen = cur.length
+    const affordable = known.filter(k => k.cost <= gs.embers)
+    if (!affordable.length) { if (iter === 0) ev('no_play', { handSeen: cur.length, matched: known.length, embers: gs.embers, names: cur.map(x => x.name.slice(0, 18)) }); break }
+    affordable.forEach(k => { k.score = BRAIN.scoreCard(k.card, gs, strikeNumThisFight, played) })
+    affordable.sort((a, b) => b.score - a.score)
+    const c = affordable[0]
+    if (c.score <= 3) break // sim stop-rule: nothing worth playing, save the hand
+    const tgt = BRAIN.pickTarget(c.card, mem)
+    await P.playCard(c.x, c.y, tgt.x, tgt.y)
     const after = (await hand()).length
-    if (after < cur.length) { played++; failStreak = 0; ev('play', { card: c.name, cardType: c.type, cost: c.cost, target: target.name }) }
-    else { failStreak++; failed.add(c.name); ev('play_fail', { card: c.name, cost: c.cost }); await P.click(c.x, c.y).catch(() => {}) } // deselect
+    if (after < cur.length) {
+      played++; failStreak = 0; playedIdsThisFight.push(c.card.id)
+      for (const ch of BRAIN.RIFF_CHAINS) { const ck = ch[0] + '+' + ch[1]; if (!firedChainsThisFight.has(ck) && playedIdsThisFight.includes(ch[0]) && playedIdsThisFight.includes(ch[1])) firedChainsThisFight.add(ck) }
+      ev('play', { card: c.card.id, score: c.score, cost: c.cost, target: tgt.name })
+    }
+    else { failStreak++; failed.add(c.name); ev('play_fail', { card: c.name, cost: c.cost }); await P.click(c.x, c.y).catch(() => {}) }
     if ((await P.state()).text.toUpperCase().includes('DISCARD & CONTINUE')) { await modalTick(await P.state()) }
   }
   // PANIC BUTTON (sim doctrine: clutch trips when the fight goes south) —
@@ -97,11 +121,25 @@ async function combatTick(s) {
     const trip = sNow.clickables.find(c => /🍄|🧪|💠/.test(c.t) && c.t.length < 30)
     if (trip) { ev('trip_used', { btn: trip.t, bossPct: (100 * hpm[1] / hpm[2]).toFixed(0) }); await P.click(trip.x, trip.y); await P.connect().then(p => p.waitForTimeout(1500)) }
   }
+  // ZOMBIE-FIGHT GUARD (game bug logged Jul 30): save made at 0 strikes reloads into a
+  // locked fight — 0 strikes, boss alive, no death trigger, and no abandon option in pause.
+  if (strikes === '0' && played === 0) { zeroStrikeTicks++ } else zeroStrikeTicks = 0
+  if (zeroStrikeTicks >= 3) {
+    ev('zombie_fight', { msg: 'save-at-0-strikes soft-lock — clearing save, forcing new run' })
+    await P.evaljs("localStorage.removeItem('vst_save'); setTimeout(()=>location.reload(),50); 'x'").catch(() => {})
+    preferNewRun = true; zeroStrikeTicks = 0
+    await P.connect().then(p => p.waitForTimeout(4000))
+    return
+  }
   const preview = (sNow.text.match(/DEALS\s*(\d+)/) || [])[1]
-  ev('strike', { strikes, bossHp: bossHp[1], played, embers, preview })
+  ev('strike', { strikes, bossHp: bossHp[1], played, embers, preview, chains: firedChainsThisFight.size })
+  strikeNumThisFight++
   await P.clickText('strike').catch(e => ev('warn', { msg: 'strike btn: ' + e.message }))
   await P.connect().then(p => p.waitForTimeout(1800))
 }
+// per-fight brain state (sim: _cardsPlayedIds persists across strikes within a fight)
+const playedIdsThisFight = []
+let firedChainsThisFight = new Set()
 
 async function modalTick(s) {
   // discard-picker / confirm modals: pick the deadest card (corr-gated first), then continue
@@ -288,7 +326,11 @@ async function main() {
       else if (type === 'shop') await shopTick(s)
       else if (type === 'recruit') await recruitTick(s)
       else if (type === 'draft') await draftTick(s)
-      else if (type === 'menu') { ev('run_start', {}); await P.clickText('continue').catch(() => P.clickText('skip tutorial').catch(() => P.clickText('enter the vestibule'))) }
+      else if (type === 'menu') {
+        ev('run_start', { preferNewRun })
+        if (preferNewRun) { preferNewRun = false; await P.clickText('enter the vestibule').catch(() => P.clickText('skip tutorial').catch(() => {})) }
+        else await P.clickText('continue').catch(() => P.clickText('skip tutorial').catch(() => P.clickText('enter the vestibule')))
+      }
       else if (type === 'death') { const f = await P.shot('death-' + Date.now()); ev('run_end', { result: 'death', shot: f, text: s.text.slice(0, 1200) }); await P.clickText('play again').catch(() => P.clickText('try again').catch(() => {})) }
       else if (type === 'victory') { const f = await P.shot('VICTORY-' + Date.now()); ev('run_end', { result: 'VICTORY', shot: f, text: s.text.slice(0, 2000) }); break }
       else { for (const b of OVERLAY_BTNS) { try { await P.clickText(b); break } catch (e) {} } ev('unknown_screen', { text: s.text.slice(0, 300) }) }

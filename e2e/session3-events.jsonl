@@ -2639,3 +2639,253 @@
 {"ts":"2026-07-30T07:51:26.886Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785397885383.png","text":"35%\n⛧\n✠\n⛧\n✠\n⛧\n⚠\n⛧\nWHISPERS\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+4\nTanuki\nBASS PLAYER\nATK\n8+8\nANCHOR\nHP\n6\n+1\nDag\nBASS PLAYER\nATK\n2+3\nANCHOR\nHP\n12\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n58\nDECK\n⛧\n10\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n↩ UNDO (Ctrl+Z)\n4/4\nEMBERS\n🔥\n🔥\n🔥\n🔥\n🔥\n0/5\nFIGHT\n1/3\nSTASH\n12\nMULTIPLIER\n×1.08\n⛧ STRIKE ⛧\n0/4\n+2 TEMP ATK\n2/6\n2\nNEED 2\n✦\nFeedback Loop\nCORRUPT\nDeal direct damage equal to half your Corruption.\n2\nNEED 2\n✦\nAmp the Static\nCORRUPT\nTarget gains ATK equal to Corruption ÷ 10."}
 {"ts":"2026-07-30T07:51:26.928Z","ev":"abort","msg":"hard stuck"}
 {"ts":"2026-07-30T07:51:26.928Z","ev":"session","msg":"autopilot loop end","minutes":"1.5"}
+{"ts":"2026-07-30T09:51:44.266Z","ev":"session","msg":"autopilot v2 start"}
+{"ts":"2026-07-30T09:51:44.472Z","ev":"run_start"}
+{"ts":"2026-07-30T09:51:46.772Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:51:47.145Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:51:49.004Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:51:52.677Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:51:53.056Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:51:54.916Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:51:58.558Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:51:58.934Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:52:00.797Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:52:04.480Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:52:04.853Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:52:06.710Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:52:10.406Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:52:10.772Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:52:12.631Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:52:16.284Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:52:16.691Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:52:18.557Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:52:22.218Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:52:22.604Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:52:24.464Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:52:29.162Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785405147429.png","text":"30%\n⛧\n✠\n⛧\n✠\n⛧\n⚠\n⛧\nWHISPERS\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+3\nTanuki\nBASS PLAYER\nATK\n8+6\nANCHOR\nHP\n6\n+1\nDag\nBASS PLAYER\nATK\n2+3\nANCHOR\nHP\n12\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n58\nDECK\n⛧\n9\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n4/4\nEMBERS\n🔥\n🔥\n🔥\n🔥\n🔥\n0/5\nFIGHT\n1/3\nSTASH\n12\nMULTIPLIER\n×1.00\n⛧ STRIKE ⛧\n0/4\n3/6\n2\nNEED 2\n✦\nFeedback Loop\nCORRUPT\nDeal direct damage equal to half your Corruption.\n2\nNEED 2\n✦\nAmp the Static\nCORRUPT\nTarget gains ATK equal to Corruption ÷ 10.\n0\nDark Whisper\nCORRUPT\nFREE. Target +2 ATK. +5% Corruption."}
+{"ts":"2026-07-30T09:52:29.901Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:52:30.304Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:52:32.171Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:52:35.131Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T09:52:36.704Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785405155138.png","text":"30%\n⛧\n✠\n⛧\n✠\n⛧\n⚠\n⛧\nWHISPERS\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+3\nTanuki\nBASS PLAYER\nATK\n8+6\nANCHOR\nHP\n6\n+1\nDag\nBASS PLAYER\nATK\n2+3\nANCHOR\nHP\n12\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n58\nDECK\n⛧\n9\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n4/4\nEMBERS\n🔥\n🔥\n🔥\n🔥\n🔥\n0/5\nFIGHT\n1/3\nSTASH\n12\nMULTIPLIER\n×1.00\n⛧ STRIKE ⛧\n0/4\n3/6\n2\nNEED 2\n✦\nFeedback Loop\nCORRUPT\nDeal direct damage equal to half your Corruption.\n2\nNEED 2\n✦\nAmp the Static\nCORRUPT\nTarget gains ATK equal to Corruption ÷ 10.\n0\nDark Whisper\nCORRUPT\nFREE. Target +2 ATK. +5% Corruption."}
+{"ts":"2026-07-30T09:52:37.435Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:52:37.822Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:52:39.703Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:52:44.152Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785405162665.png","text":"30%\n⛧\n✠\n⛧\n✠\n⛧\n⚠\n⛧\nWHISPERS\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+3\nTanuki\nBASS PLAYER\nATK\n8+6\nANCHOR\nHP\n6\n+1\nDag\nBASS PLAYER\nATK\n2+3\nANCHOR\nHP\n12\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n58\nDECK\n⛧\n9\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n4/4\nEMBERS\n🔥\n🔥\n🔥\n🔥\n🔥\n0/5\nFIGHT\n1/3\nSTASH\n12\nMULTIPLIER\n×1.00\n⛧ STRIKE ⛧\n0/4\n3/6\n2\nNEED 2\n✦\nFeedback Loop\nCORRUPT\nDeal direct damage equal to half your Corruption.\n2\nNEED 2\n✦\nAmp the Static\nCORRUPT\nTarget gains ATK equal to Corruption ÷ 10.\n0\nDark Whisper\nCORRUPT\nFREE. Target +2 ATK. +5% Corruption."}
+{"ts":"2026-07-30T09:52:44.931Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:52:45.302Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:52:47.158Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:52:51.759Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785405170133.png","text":"30%\n⛧\n✠\n⛧\n✠\n⛧\n⚠\n⛧\nWHISPERS\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+3\nTanuki\nBASS PLAYER\nATK\n8+6\nANCHOR\nHP\n6\n+1\nDag\nBASS PLAYER\nATK\n2+3\nANCHOR\nHP\n12\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n58\nDECK\n⛧\n9\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n4/4\nEMBERS\n🔥\n🔥\n🔥\n🔥\n🔥\n0/5\nFIGHT\n1/3\nSTASH\n12\nMULTIPLIER\n×1.00\n⛧ STRIKE ⛧\n0/4\n3/6\n2\nNEED 2\n✦\nFeedback Loop\nCORRUPT\nDeal direct damage equal to half your Corruption.\n2\nNEED 2\n✦\nAmp the Static\nCORRUPT\nTarget gains ATK equal to Corruption ÷ 10.\n0\nDark Whisper\nCORRUPT\nFREE. Target +2 ATK. +5% Corruption."}
+{"ts":"2026-07-30T09:52:52.477Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:52:52.880Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:52:54.751Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:52:59.223Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785405177730.png","text":"30%\n⛧\n✠\n⛧\n✠\n⛧\n⚠\n⛧\nWHISPERS\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+3\nTanuki\nBASS PLAYER\nATK\n8+6\nANCHOR\nHP\n6\n+1\nDag\nBASS PLAYER\nATK\n2+3\nANCHOR\nHP\n12\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n58\nDECK\n⛧\n9\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n4/4\nEMBERS\n🔥\n🔥\n🔥\n🔥\n🔥\n0/5\nFIGHT\n1/3\nSTASH\n12\nMULTIPLIER\n×1.00\n⛧ STRIKE ⛧\n0/4\n3/6\n2\nNEED 2\n✦\nFeedback Loop\nCORRUPT\nDeal direct damage equal to half your Corruption.\n2\nNEED 2\n✦\nAmp the Static\nCORRUPT\nTarget gains ATK equal to Corruption ÷ 10.\n0\nDark Whisper\nCORRUPT\nFREE. Target +2 ATK. +5% Corruption."}
+{"ts":"2026-07-30T09:52:59.263Z","ev":"abort","msg":"hard stuck"}
+{"ts":"2026-07-30T09:52:59.263Z","ev":"session","msg":"autopilot loop end","minutes":"1.2"}
+{"ts":"2026-07-30T09:54:10.596Z","ev":"session","msg":"autopilot v2 start"}
+{"ts":"2026-07-30T09:54:10.711Z","ev":"run_start"}
+{"ts":"2026-07-30T09:54:12.711Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:54:13.105Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:54:14.962Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:54:18.639Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:54:19.022Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:54:20.903Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:54:24.559Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:54:24.932Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:54:26.792Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:54:30.440Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:54:30.807Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:54:32.667Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:54:36.318Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:54:36.688Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:54:38.546Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:54:42.197Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:54:42.563Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:54:44.420Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:54:48.062Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:54:48.432Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:54:50.296Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:54:54.950Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785405293269.png","text":"30%\n⛧\n✠\n⛧\n✠\n⛧\n⚠\n⛧\nWHISPERS\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+3\nTanuki\nBASS PLAYER\nATK\n8+6\nANCHOR\nHP\n6\n+1\nDag\nBASS PLAYER\nATK\n2+3\nANCHOR\nHP\n12\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n58\nDECK\n⛧\n9\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n4/4\nEMBERS\n🔥\n🔥\n🔥\n🔥\n🔥\n0/5\nFIGHT\n1/3\nSTASH\n12\nMULTIPLIER\n×1.00\n⛧ STRIKE ⛧\n0/4\n3/6\n2\nNEED 2\n✦\nFeedback Loop\nCORRUPT\nDeal direct damage equal to half your Corruption.\n2\nNEED 2\n✦\nAmp the Static\nCORRUPT\nTarget gains ATK equal to Corruption ÷ 10.\n0\nDark Whisper\nCORRUPT\nFREE. Target +2 ATK. +5% Corruption."}
+{"ts":"2026-07-30T09:54:55.675Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:54:56.045Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:54:57.902Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:55:00.864Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T09:55:02.338Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785405300874.png","text":"30%\n⛧\n✠\n⛧\n✠\n⛧\n⚠\n⛧\nWHISPERS\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+3\nTanuki\nBASS PLAYER\nATK\n8+6\nANCHOR\nHP\n6\n+1\nDag\nBASS PLAYER\nATK\n2+3\nANCHOR\nHP\n12\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n58\nDECK\n⛧\n9\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n4/4\nEMBERS\n🔥\n🔥\n🔥\n🔥\n🔥\n0/5\nFIGHT\n1/3\nSTASH\n12\nMULTIPLIER\n×1.00\n⛧ STRIKE ⛧\n0/4\n3/6\n2\nNEED 2\n✦\nFeedback Loop\nCORRUPT\nDeal direct damage equal to half your Corruption.\n2\nNEED 2\n✦\nAmp the Static\nCORRUPT\nTarget gains ATK equal to Corruption ÷ 10.\n0\nDark Whisper\nCORRUPT\nFREE. Target +2 ATK. +5% Corruption."}
+{"ts":"2026-07-30T09:55:03.075Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:55:03.448Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:55:05.312Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:55:09.803Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785405308278.png","text":"30%\n⛧\n✠\n⛧\n✠\n⛧\n⚠\n⛧\nWHISPERS\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+3\nTanuki\nBASS PLAYER\nATK\n8+6\nANCHOR\nHP\n6\n+1\nDag\nBASS PLAYER\nATK\n2+3\nANCHOR\nHP\n12\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n58\nDECK\n⛧\n9\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n4/4\nEMBERS\n🔥\n🔥\n🔥\n🔥\n🔥\n0/5\nFIGHT\n1/3\nSTASH\n12\nMULTIPLIER\n×1.00\n⛧ STRIKE ⛧\n0/4\n3/6\n2\nNEED 2\n✦\nFeedback Loop\nCORRUPT\nDeal direct damage equal to half your Corruption.\n2\nNEED 2\n✦\nAmp the Static\nCORRUPT\nTarget gains ATK equal to Corruption ÷ 10.\n0\nDark Whisper\nCORRUPT\nFREE. Target +2 ATK. +5% Corruption."}
+{"ts":"2026-07-30T09:55:10.511Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:55:10.881Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:55:12.739Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:55:17.192Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785405315714.png","text":"30%\n⛧\n✠\n⛧\n✠\n⛧\n⚠\n⛧\nWHISPERS\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+3\nTanuki\nBASS PLAYER\nATK\n8+6\nANCHOR\nHP\n6\n+1\nDag\nBASS PLAYER\nATK\n2+3\nANCHOR\nHP\n12\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n58\nDECK\n⛧\n9\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n4/4\nEMBERS\n🔥\n🔥\n🔥\n🔥\n🔥\n0/5\nFIGHT\n1/3\nSTASH\n12\nMULTIPLIER\n×1.00\n⛧ STRIKE ⛧\n0/4\n3/6\n2\nNEED 2\n✦\nFeedback Loop\nCORRUPT\nDeal direct damage equal to half your Corruption.\n2\nNEED 2\n✦\nAmp the Static\nCORRUPT\nTarget gains ATK equal to Corruption ÷ 10.\n0\nDark Whisper\nCORRUPT\nFREE. Target +2 ATK. +5% Corruption."}
+{"ts":"2026-07-30T09:55:17.894Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:55:18.273Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:55:20.132Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:55:24.640Z","ev":"stuck","type":"combat","shot":"/tmp/shots/stuck-1785405323103.png","text":"30%\n⛧\n✠\n⛧\n✠\n⛧\n⚠\n⛧\nWHISPERS\n⛧\n✠\n⛧\n✠\nCIRCLE I — LIMBO · FIGHT 1 OF 3\nThe Wanderer\n\"Could not even find the exit.\"\nBASE DAMAGE · 2 PER STRIKE\nNEXT: 2 DMG\n→ random\n84 / 84 HP\n⛧\nARTIFACT\n⛧\nARTIFACT\n⛧\nARTIFACT\n⚡\nEFFECT\nPEDAL\n⚡\nEFFECT\nPEDAL\nEMPTY\n+3\nTanuki\nBASS PLAYER\nATK\n8+6\nANCHOR\nHP\n6\n+1\nDag\nBASS PLAYER\nATK\n2+3\nANCHOR\nHP\n12\nEMPTY\nEMPTY\n▼ HIDE\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧\n⛧\n58\nDECK\n⛧\n9\nDISCARD\n🍄\n⛧\n🧪\n⛧\n⚡ COST\n✦ RARITY\n↓ DISCARD\n4/4\nEMBERS\n🔥\n🔥\n🔥\n🔥\n🔥\n0/5\nFIGHT\n1/3\nSTASH\n12\nMULTIPLIER\n×1.00\n⛧ STRIKE ⛧\n0/4\n3/6\n2\nNEED 2\n✦\nFeedback Loop\nCORRUPT\nDeal direct damage equal to half your Corruption.\n2\nNEED 2\n✦\nAmp the Static\nCORRUPT\nTarget gains ATK equal to Corruption ÷ 10.\n0\nDark Whisper\nCORRUPT\nFREE. Target +2 ATK. +5% Corruption."}
+{"ts":"2026-07-30T09:55:24.692Z","ev":"abort","msg":"hard stuck"}
+{"ts":"2026-07-30T09:55:24.692Z","ev":"session","msg":"autopilot loop end","minutes":"1.2"}
+{"ts":"2026-07-30T09:55:55.429Z","ev":"session","msg":"autopilot v2 start"}
+{"ts":"2026-07-30T09:55:56.269Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:55:56.674Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:55:58.539Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:56:02.230Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:56:02.617Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:56:04.487Z","ev":"strike","strikes":"0","bossHp":"84","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:56:08.167Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T09:56:08.562Z","ev":"trip_used","btn":"🍄⛧","bossPct":"100"}
+{"ts":"2026-07-30T09:56:10.428Z","ev":"zombie_fight","msg":"save-at-0-strikes soft-lock — clearing save, forcing new run"}
+{"ts":"2026-07-30T09:56:15.252Z","ev":"run_start","preferNewRun":true}
+{"ts":"2026-07-30T09:56:16.467Z","ev":"draft","pick":["BjornLead GuitaristATK5FRENZIE","RagnarLead GuitaristATK4FRENZI"]}
+{"ts":"2026-07-30T09:56:18.407Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T09:56:20.389Z","ev":"play_fail","card":"RareNoviceInfernal Encore","cost":3}
+{"ts":"2026-07-30T09:56:21.507Z","ev":"play","card":"battlecry","score":62,"cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T09:56:22.205Z","ev":"play_fail","card":"NoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T09:56:23.298Z","ev":"play","card":"distortion","score":57,"cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T09:56:24.004Z","ev":"play_fail","card":"Distortion","cost":1}
+{"ts":"2026-07-30T09:56:25.096Z","ev":"play","card":"heavyriff","score":55,"cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T09:56:25.829Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T09:56:26.906Z","ev":"play_fail","card":"NovicePower Tap","cost":0}
+{"ts":"2026-07-30T09:56:27.980Z","ev":"play_fail","card":"NEED   NoviceGroupie","cost":1}
+{"ts":"2026-07-30T09:56:28.356Z","ev":"strike","strikes":"4","bossHp":"84","played":3,"embers":5,"preview":"55","chains":0}
+{"ts":"2026-07-30T09:56:32.055Z","ev":"play_fail","card":"NovicePower Tap","cost":0}
+{"ts":"2026-07-30T09:56:32.441Z","ev":"strike","strikes":"3","bossHp":"54","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:56:36.120Z","ev":"play_fail","card":"NovicePower Tap","cost":0}
+{"ts":"2026-07-30T09:56:36.515Z","ev":"strike","strikes":"3","bossHp":"24","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:56:39.486Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T09:56:40.215Z","ev":"play_fail","card":"NovicePower Tap","cost":0}
+{"ts":"2026-07-30T09:56:41.378Z","ev":"play","card":"ampoverload","score":81,"cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T09:56:42.158Z","ev":"play_fail","card":"Amp Overload","cost":0}
+{"ts":"2026-07-30T09:56:42.561Z","ev":"strike","strikes":"3","bossHp":"24","played":1,"embers":0,"preview":"13","chains":0}
+{"ts":"2026-07-30T09:56:46.293Z","ev":"play_fail","card":"Amp Overload","cost":0}
+{"ts":"2026-07-30T09:56:47.433Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T09:56:48.597Z","ev":"play_fail","card":"NoviceGroupie","cost":1}
+{"ts":"2026-07-30T09:56:49.005Z","ev":"strike","strikes":"2","bossHp":"16","played":0,"embers":2,"chains":0}
+{"ts":"2026-07-30T09:56:52.762Z","ev":"play_fail","card":"Chain Mosh Pit","cost":1}
+{"ts":"2026-07-30T09:56:53.897Z","ev":"play_fail","card":"Amp Overload","cost":0}
+{"ts":"2026-07-30T09:56:55.047Z","ev":"play","card":"heavyriff","score":78,"cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T09:56:55.759Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T09:56:56.890Z","ev":"play_fail","card":"ChainNoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T09:56:57.980Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T09:56:58.357Z","ev":"strike","strikes":"2","bossHp":"8","played":1,"embers":2,"preview":"24","chains":0}
+{"ts":"2026-07-30T09:57:02.142Z","ev":"play_fail","card":"Chain Mosh Pit","cost":1}
+{"ts":"2026-07-30T09:57:03.221Z","ev":"play","card":"battlecry","score":62,"cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T09:57:03.231Z","ev":"strike","strikes":"1","bossHp":"0","played":1,"embers":3,"chains":0}
+{"ts":"2026-07-30T09:57:03.233Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T09:57:07.034Z","ev":"event_choice","pick":"🌊Walk ThroughCorruption set to 69%. All members gain +2 ATK","all":["🌊Walk ThroughCorruption set to 69%. All","↩Find Another WayNothing happens. You pr"]}
+{"ts":"2026-07-30T09:57:08.208Z","ev":"event_choice","pick":"🌊Walk ThroughCorruption set to 69%. All members gain +2 ATK","all":["🌊Walk ThroughCorruption set to 69%. All","↩Find Another WayNothing happens. You pr"]}
+{"ts":"2026-07-30T09:57:09.382Z","ev":"warn","msg":"no members parsed — using fixed slot fallback"}
+{"ts":"2026-07-30T09:57:09.392Z","ev":"strike","played":0,"embers":5,"chains":0}
+{"ts":"2026-07-30T09:57:12.420Z","ev":"shop_buy","label":"Band Recruitment🎸 Welcome PackFREE — Pick 1 of 2 ","why":"free member","stash":1,"bandSize":2}
+{"ts":"2026-07-30T09:57:13.644Z","ev":"recruit_pick","pick":"LokiSynth PlayerATK3CORRUPTHP6Damage scales with C","score":19}
+{"ts":"2026-07-30T09:57:15.200Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T09:57:15.214Z","ev":"shop_skip","tile":"welcome","why":"not in clickables"}
+{"ts":"2026-07-30T09:57:17.122Z","ev":"shop_leave","stash":1,"bandSize":2,"bought":[],"shot":"/tmp/shots/shop-final-1785405435214.png"}
+{"ts":"2026-07-30T09:57:19.165Z","ev":"play_fail","card":"Sound Wall","cost":2}
+{"ts":"2026-07-30T09:57:20.328Z","ev":"play","card":"newstrings","score":67,"cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T09:57:21.085Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T09:57:22.196Z","ev":"play","card":"resonancecard","score":54,"cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T09:57:22.952Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T09:57:24.064Z","ev":"play_fail","card":"NoviceTapped Out","cost":0}
+{"ts":"2026-07-30T09:57:25.141Z","ev":"play_fail","card":"NoviceSetlist","cost":0}
+{"ts":"2026-07-30T09:57:25.516Z","ev":"strike","strikes":"4","bossHp":"278","played":2,"embers":5,"preview":"55","chains":0}
+{"ts":"2026-07-30T09:57:29.349Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T09:57:30.466Z","ev":"play_fail","card":"NoviceSmoke Break","cost":0}
+{"ts":"2026-07-30T09:57:31.620Z","ev":"play_fail","card":"NoviceTapped Out","cost":0}
+{"ts":"2026-07-30T09:57:32.022Z","ev":"strike","strikes":"3","bossHp":"245","played":0,"embers":1,"chains":0}
+{"ts":"2026-07-30T09:57:35.777Z","ev":"play","card":"staticcharge","score":80,"cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T09:57:36.478Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T09:57:37.605Z","ev":"play","card":"resonancecard","score":54,"cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T09:57:38.325Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T09:57:39.408Z","ev":"play_fail","card":"NoviceSmoke Break","cost":0}
+{"ts":"2026-07-30T09:57:40.496Z","ev":"play_fail","card":"NoviceSetlist","cost":0}
+{"ts":"2026-07-30T09:57:40.871Z","ev":"strike","strikes":"3","bossHp":"212","played":2,"embers":1,"preview":"13","chains":0}
+{"ts":"2026-07-30T09:57:44.762Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T09:57:45.877Z","ev":"play_fail","card":"NoviceSetlist","cost":0}
+{"ts":"2026-07-30T09:57:47.097Z","ev":"play_fail","card":"NoviceSmoke Break","cost":0}
+{"ts":"2026-07-30T09:57:47.523Z","ev":"trip_used","btn":"🍄⛧","bossPct":"72"}
+{"ts":"2026-07-30T09:57:49.413Z","ev":"strike","strikes":"2","bossHp":"200","played":0,"embers":5,"preview":"11","chains":0}
+{"ts":"2026-07-30T09:57:53.199Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T09:57:54.358Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T09:57:55.482Z","ev":"play_fail","card":"NoviceSetlist","cost":0}
+{"ts":"2026-07-30T09:57:56.002Z","ev":"trip_used","btn":"🍄⛧","bossPct":"68"}
+{"ts":"2026-07-30T09:57:57.878Z","ev":"strike","strikes":"1","bossHp":"189","played":0,"embers":5,"chains":0}
+{"ts":"2026-07-30T09:57:57.901Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T09:58:02.017Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785405480512.png","text":"Vestibule\nStoned to the Bone\nThe band ran out of herb.\nSO CLOSE\n💀\n189 HP\nleft on The Lost Soul\n💀 WHAT WENT WRONG\nOnly 11 cards played across 6 strikes. Play more cards to build stronger strikes.\n1,631\nLOCAL LEGEND\n🔥 Streak Bonus: +20% score\nYour Best: 4,470 — 2,839 to beat\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n55,660 / 100,000\n👑 Lucifer Playable\n7 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n1\nSTRIKES\n6\nCARDS\n11\nDAMAGE\n169\nBEST HIT\n55\nSTONED\n2\nCORRUPT\n35%\nSTASH\n9🌿\nRUN #\n36\nOVERKILL\n—\nVS LAST RUN:\nSCORE -246\nDMG -73\n(C1)\n🎭\nPossessed Performance\n9/10 → Novice\n🎸\nDistortion\n9/10 → Novice\n⚡\nStatic Charge\n9/10 → Novice\nNEW: allstoned\n🔥 36 DAY STREAK\n2/17 achievements\n▶ PAST RUNS (20)\nSEED: FBDCF6\n📋 Copy Seed"}
+{"ts":"2026-07-30T09:58:03.240Z","ev":"draft","pick":["IngridBass PlayerATK3ANCHORHP1","UlfBass PlayerATK4ANCHORHP9"]}
+{"ts":"2026-07-30T09:58:05.249Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T09:58:07.239Z","ev":"play_fail","card":"ChainAmp It Up","cost":2}
+{"ts":"2026-07-30T09:58:08.391Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T09:58:09.600Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T09:58:09.985Z","ev":"strike","strikes":"4","bossHp":"84","played":0,"embers":5,"preview":"12","chains":0}
+{"ts":"2026-07-30T09:58:12.994Z","ev":"heartbeat","tick":30}
+{"ts":"2026-07-30T09:58:13.748Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T09:58:14.842Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T09:58:15.955Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T09:58:16.336Z","ev":"strike","strikes":"3","bossHp":"81","played":0,"embers":3,"chains":0}
+{"ts":"2026-07-30T09:58:20.079Z","ev":"play","card":"amp","score":72,"cost":2,"target":"Ulf"}
+{"ts":"2026-07-30T09:58:20.824Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T09:58:21.938Z","ev":"play","card":"heavyriff","score":55,"cost":2,"target":"Ulf"}
+{"ts":"2026-07-30T09:58:22.689Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T09:58:23.777Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T09:58:24.869Z","ev":"play_fail","card":"NEED   Controlled Feedback","cost":2}
+{"ts":"2026-07-30T09:58:25.262Z","ev":"strike","strikes":"3","bossHp":"72","played":2,"embers":3,"preview":"23","chains":0}
+{"ts":"2026-07-30T09:58:29.011Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T09:58:29.431Z","ev":"trip_used","btn":"🍄⛧","bossPct":"69"}
+{"ts":"2026-07-30T09:58:31.310Z","ev":"strike","strikes":"2","bossHp":"65","played":0,"embers":1,"chains":0}
+{"ts":"2026-07-30T09:58:35.107Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T09:58:36.212Z","ev":"play_fail","card":"NoviceSetlist","cost":0}
+{"ts":"2026-07-30T09:58:36.636Z","ev":"trip_used","btn":"🍄⛧","bossPct":"58"}
+{"ts":"2026-07-30T09:58:38.514Z","ev":"strike","strikes":"2","bossHp":"49","played":0,"embers":1,"preview":"13","chains":0}
+{"ts":"2026-07-30T09:58:42.334Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T09:58:43.464Z","ev":"play_fail","card":"NoviceSetlist","cost":0}
+{"ts":"2026-07-30T09:58:43.892Z","ev":"strike","strikes":"1","bossHp":"43","played":0,"embers":1,"chains":0}
+{"ts":"2026-07-30T09:58:47.743Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T09:58:48.184Z","ev":"modal_pick","card":"Dark TuningCORRUPT"}
+{"ts":"2026-07-30T09:58:49.717Z","ev":"play_fail","card":"NoviceSmoke Break","cost":0}
+{"ts":"2026-07-30T09:58:50.856Z","ev":"play","card":"wakeup","score":8,"cost":1,"target":"Ulf"}
+{"ts":"2026-07-30T09:58:51.716Z","ev":"play_fail","card":"Wake Up Call","cost":1}
+{"ts":"2026-07-30T09:58:52.156Z","ev":"strike","strikes":"1","bossHp":"36","played":1,"embers":1,"preview":"15","chains":0}
+{"ts":"2026-07-30T09:58:55.973Z","ev":"play_fail","card":"Sound Wall","cost":2}
+{"ts":"2026-07-30T09:58:57.183Z","ev":"play_fail","card":"NoviceEncore","cost":2}
+{"ts":"2026-07-30T09:58:58.358Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T09:58:58.774Z","ev":"strike","strikes":"0","bossHp":"29","played":0,"embers":4,"chains":0}
+{"ts":"2026-07-30T09:59:04.194Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785405541807.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n5\nMAX STRIKE\n23\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n21 HP\nfrom killing The Wanderer!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 16 damage. Stack more buffs before each strike.\n340\nLOCAL LEGEND\n🔥 Streak Bonus: +20% score\nYour Best: 4,470 — 3,125 to beat\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n56,717 / 100,000\n👑 Lucifer Playable\n7 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n5\nDAMAGE\n63\nBEST HIT\n23\nSTONED\n0\nCORRUPT\n30%\nSTASH\n0🌿\nRUN #\n37\nOVERKILL\n—\nVS LAST RUN:\nSCORE +2\nDMG +15\n(C1)\n📻\nDial to Eleven\n9/10 → Novice\n🎭\nPossessed Performance\n9/10 → Novice\n🎸\nDistortion\n9/10 → Novice\n🔥 37 DAY STREAK\n2/17 achievements\n▶ PAST RUNS (20)\nSEED: B03987\n📋 Copy Seed"}
+{"ts":"2026-07-30T09:59:05.490Z","ev":"draft","pick":["IngridBass PlayerATK3ANCHORHP1","TanukiBass PlayerATK8ANCHORHP8"]}
+{"ts":"2026-07-30T09:59:07.453Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T09:59:08.741Z","ev":"heartbeat","tick":40}
+{"ts":"2026-07-30T09:59:09.516Z","ev":"play_fail","card":"RareStage Dive","cost":3}
+{"ts":"2026-07-30T09:59:10.686Z","ev":"play","card":"heavyriff","score":78,"cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T09:59:11.471Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T09:59:12.629Z","ev":"play","card":"newstrings","score":67,"cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T09:59:13.413Z","ev":"play_fail","card":"NEED   New Strings","cost":2}
+{"ts":"2026-07-30T09:59:14.538Z","ev":"play_fail","card":"NEED   Resonance","cost":1}
+{"ts":"2026-07-30T09:59:15.690Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T09:59:16.095Z","ev":"strike","strikes":"4","bossHp":"84","played":2,"embers":5,"preview":"18","chains":0}
+{"ts":"2026-07-30T09:59:19.872Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T09:59:20.989Z","ev":"play_fail","card":"NoviceSmoke Break","cost":0}
+{"ts":"2026-07-30T09:59:21.450Z","ev":"strike","strikes":"3","bossHp":"72","played":0,"embers":0,"chains":0}
+{"ts":"2026-07-30T09:59:25.272Z","ev":"play","card":"staticcharge","score":86,"cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T09:59:26.056Z","ev":"play_fail","card":"NoviceTapped Out","cost":0}
+{"ts":"2026-07-30T09:59:26.463Z","ev":"strike","strikes":"3","bossHp":"58","played":1,"embers":0,"preview":"16","chains":0}
+{"ts":"2026-07-30T09:59:30.249Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T09:59:31.401Z","ev":"play_fail","card":"NoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T09:59:32.604Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T09:59:33.014Z","ev":"trip_used","btn":"🍄⛧","bossPct":"50"}
+{"ts":"2026-07-30T09:59:34.889Z","ev":"strike","strikes":"2","bossHp":"55","played":0,"embers":3,"chains":0}
+{"ts":"2026-07-30T09:59:38.790Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T09:59:40.179Z","ev":"play_fail","card":"ChainNoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T09:59:41.400Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T09:59:41.841Z","ev":"strike","strikes":"1","bossHp":"39","played":0,"embers":3,"chains":0}
+{"ts":"2026-07-30T09:59:45.689Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T09:59:46.838Z","ev":"play_fail","card":"ChainNoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T09:59:48.014Z","ev":"play","card":"resonancecard","score":54,"cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T09:59:48.787Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T09:59:49.919Z","ev":"play_fail","card":"NoviceRoadie","cost":1}
+{"ts":"2026-07-30T09:59:51.060Z","ev":"play_fail","card":"NoviceTapped Out","cost":0}
+{"ts":"2026-07-30T09:59:51.473Z","ev":"strike","strikes":"1","bossHp":"27","played":1,"embers":3,"preview":"17","chains":0}
+{"ts":"2026-07-30T09:59:55.222Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T09:59:56.424Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T09:59:57.565Z","ev":"play_fail","card":"NoviceRoadie","cost":1}
+{"ts":"2026-07-30T09:59:57.986Z","ev":"strike","strikes":"0","bossHp":"24","played":0,"embers":2,"chains":0}
+{"ts":"2026-07-30T10:00:00.968Z","ev":"session","msg":"autopilot loop end","minutes":"4.1"}
