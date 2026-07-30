@@ -905,3 +905,101 @@
 {"ts":"2026-07-30T02:36:52.328Z","ev":"play","card":"Distortion","cardType":"CORRUPT","cost":1,"target":"Tanuki"}
 {"ts":"2026-07-30T02:36:52.357Z","ev":"strike","strikes":"4","bossHp":"278","played":4,"embers":5,"preview":"50"}
 {"ts":"2026-07-30T02:36:55.435Z","ev":"session","msg":"autopilot loop end","minutes":"2.2"}
+{"ts":"2026-07-30T02:37:19.729Z","ev":"session","msg":"autopilot v2 start"}
+{"ts":"2026-07-30T02:37:20.923Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T02:37:22.164Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T02:37:23.303Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T02:37:23.719Z","ev":"strike","strikes":"3","bossHp":"210","played":0,"embers":5,"preview":"25"}
+{"ts":"2026-07-30T02:37:27.576Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T02:37:28.783Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T02:37:29.971Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T02:37:30.408Z","ev":"trip_used","btn":"🍄⛧","bossPct":"65"}
+{"ts":"2026-07-30T02:37:32.292Z","ev":"strike","strikes":"2","bossHp":"204","played":0,"embers":5}
+{"ts":"2026-07-30T02:37:36.266Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:37:37.015Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T02:37:38.174Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T02:37:39.324Z","ev":"play_fail","card":"ChainDistortion","cost":1}
+{"ts":"2026-07-30T02:37:39.725Z","ev":"trip_used","btn":"🍄⛧","bossPct":"65"}
+{"ts":"2026-07-30T02:37:41.598Z","ev":"strike","strikes":"2","bossHp":"182","played":1,"embers":5,"preview":"32"}
+{"ts":"2026-07-30T02:37:45.362Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T02:37:46.528Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T02:37:47.763Z","ev":"play_fail","card":"ChainDistortion","cost":1}
+{"ts":"2026-07-30T02:37:48.205Z","ev":"trip_used","btn":"🍄⛧","bossPct":"52"}
+{"ts":"2026-07-30T02:37:50.081Z","ev":"strike","strikes":"1","bossHp":"173","played":0,"embers":3}
+{"ts":"2026-07-30T02:37:54.006Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T02:37:55.260Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T02:37:56.531Z","ev":"play","card":"Distortion","cardType":"CORRUPT","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:37:57.328Z","ev":"play_fail","card":"NEED   Resonance","cost":1}
+{"ts":"2026-07-30T02:37:58.473Z","ev":"play_fail","card":"NEED  Distortion","cost":1}
+{"ts":"2026-07-30T02:37:59.618Z","ev":"play_fail","card":"NEED   Death Riff","cost":1}
+{"ts":"2026-07-30T02:38:00.078Z","ev":"trip_used","btn":"🍄⛧","bossPct":"52"}
+{"ts":"2026-07-30T02:38:01.955Z","ev":"strike","strikes":"1","bossHp":"145","played":1,"embers":3,"preview":"59"}
+{"ts":"2026-07-30T02:38:05.867Z","ev":"play_fail","card":"NEED   Resonance","cost":1}
+{"ts":"2026-07-30T02:38:07.101Z","ev":"play_fail","card":"NEED  Distortion","cost":1}
+{"ts":"2026-07-30T02:38:08.274Z","ev":"play_fail","card":"NEED   Death Riff","cost":1}
+{"ts":"2026-07-30T02:38:08.713Z","ev":"strike","strikes":"0","bossHp":"131","played":0,"embers":0}
+{"ts":"2026-07-30T02:38:12.648Z","ev":"play_fail","card":"NEED   Resonance","cost":1}
+{"ts":"2026-07-30T02:38:13.946Z","ev":"play","card":"NEED   Mosh Pit","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:38:13.969Z","ev":"strike","strikes":"0","bossHp":"73","played":1,"embers":0}
+{"ts":"2026-07-30T02:38:13.979Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T02:38:18.856Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785379096599.png","text":"Vestibule\n\"I was looking for something. I forgot what.\"\nDEFEATED BY\nThe Lost Soul\nCIRCLE I — LIMBO\n\"A stronger damned spirit. Hunger drives its blows.\"\nFIGHTS\n1\nCHAINS\n0\nCARDS PLAYED\n11\nMAX STRIKE\n138\n\"You were lost before you started.\"\nSO CLOSE\n💀\n73 HP\nfrom killing The Lost Soul!\n⚡\n67 PTS from your personal best!\n😰\nTanuki survived with just 1 HP!\n☠ The Lost Soul hit for 5 damage\n💀 WHAT WENT WRONG\nOnly 11 cards played across 5 strikes. Play more cards to build stronger strikes.\n2,088\nTOURING ACT\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 67 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n19,756 / 25,000\n😈 Demonic Pack from C3\n5 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n1\nSTRIKES\n5\nCARDS\n11\nDAMAGE\n304\nBEST HIT\n138\nSTONED\n0\nCORRUPT\n45%\nSTASH\n14🌿\nRUN #\n13\nOVERKILL\n—\nVS LAST RUN:\nSCORE +7\nDMG +59\n(C1)\n🤘\nBattle Cry\n8/10 → Novice\n🔌\nPower Tap\n7/10 → Novice\n🪙\nTapped Out\n6/10 → Novice\n🔥 13 DAY STREAK\n💀 13 losses in a row...\n2/17 achievements\n▶ PAST RUNS (13)\nSEED: 59A106\n📋 Copy Seed"}
+{"ts":"2026-07-30T02:38:20.181Z","ev":"draft","pick":["TanukiBass PlayerATK8ANCHORHP8","UlfBass PlayerATK4ANCHORHP9"]}
+{"ts":"2026-07-30T02:38:22.172Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T02:38:22.188Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T02:38:24.308Z","ev":"play_fail","card":"Mosh Pit","cost":1}
+{"ts":"2026-07-30T02:38:25.497Z","ev":"play","card":"Herb Money","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:38:26.301Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:38:27.422Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T02:38:28.513Z","ev":"play_fail","card":"Crowd Surf","cost":2}
+{"ts":"2026-07-30T02:38:28.911Z","ev":"strike","strikes":"4","bossHp":"84","played":1,"embers":4,"preview":"15"}
+{"ts":"2026-07-30T02:38:32.695Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:38:33.867Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T02:38:35.099Z","ev":"play_fail","card":"Crowd Surf","cost":2}
+{"ts":"2026-07-30T02:38:35.503Z","ev":"strike","strikes":"3","bossHp":"74","played":0,"embers":4}
+{"ts":"2026-07-30T02:38:39.333Z","ev":"play","card":"Herb Money","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:38:40.163Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:38:41.285Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T02:38:42.401Z","ev":"play_fail","card":"Distortion","cost":1}
+{"ts":"2026-07-30T02:38:42.834Z","ev":"strike","strikes":"3","bossHp":"64","played":1,"embers":4,"preview":"21"}
+{"ts":"2026-07-30T02:38:46.611Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:38:47.769Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T02:38:49.226Z","ev":"play_fail","card":"Distortion","cost":1}
+{"ts":"2026-07-30T02:38:49.665Z","ev":"strike","strikes":"2","bossHp":"49","played":0,"embers":2}
+{"ts":"2026-07-30T02:38:53.539Z","ev":"play","card":"Herb Money","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:38:54.320Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:38:55.465Z","ev":"play_fail","card":"NEED  Amp It Up","cost":2}
+{"ts":"2026-07-30T02:38:56.630Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T02:38:57.042Z","ev":"strike","strikes":"2","bossHp":"34","played":1,"embers":2,"preview":"23"}
+{"ts":"2026-07-30T02:39:00.898Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:39:02.145Z","ev":"play_fail","card":"NEED  Amp It Up","cost":2}
+{"ts":"2026-07-30T02:39:03.420Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T02:39:03.897Z","ev":"strike","strikes":"1","bossHp":"18","played":0,"embers":1}
+{"ts":"2026-07-30T02:39:07.756Z","ev":"play","card":"Herb Money","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:39:08.572Z","ev":"play_fail","card":"NEED   Herb Money","cost":1}
+{"ts":"2026-07-30T02:39:09.750Z","ev":"play_fail","card":"NEED  Amp It Up","cost":2}
+{"ts":"2026-07-30T02:39:10.893Z","ev":"play_fail","card":"Setlist","cost":0}
+{"ts":"2026-07-30T02:39:11.294Z","ev":"strike","strikes":"1","bossHp":"2","played":1,"embers":1,"preview":"21"}
+{"ts":"2026-07-30T02:39:15.182Z","ev":"play_fail","card":"NEED   Herb Money","cost":1}
+{"ts":"2026-07-30T02:39:16.257Z","ev":"play","card":"NEED  Amp It Up","cardType":"RIFF","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T02:39:16.283Z","ev":"strike","strikes":"0","bossHp":"0","played":1,"embers":0}
+{"ts":"2026-07-30T02:39:16.298Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T02:39:20.238Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T02:39:20.263Z","ev":"shop_buy","label":"Band Recruitment🎸 Welcome PackFREE — Pick 1 of 2 ","why":"free member","stash":11,"bandSize":2}
+{"ts":"2026-07-30T02:39:21.524Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRU"}
+{"ts":"2026-07-30T02:39:22.376Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRU"}
+{"ts":"2026-07-30T02:39:23.226Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRU"}
+{"ts":"2026-07-30T02:39:24.130Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRU"}
+{"ts":"2026-07-30T02:39:24.982Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRU"}
+{"ts":"2026-07-30T02:39:25.867Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRU"}
+{"ts":"2026-07-30T02:39:27.821Z","ev":"stuck","type":"recruit","shot":"/tmp/shots/stuck-1785379166672.png","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T02:39:27.924Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRU"}
+{"ts":"2026-07-30T02:39:29.723Z","ev":"stuck","type":"recruit","shot":"/tmp/shots/stuck-1785379168731.png","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T02:39:29.814Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRU"}
+{"ts":"2026-07-30T02:39:31.764Z","ev":"stuck","type":"recruit","shot":"/tmp/shots/stuck-1785379170626.png","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T02:39:31.824Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRU"}
+{"ts":"2026-07-30T02:39:32.625Z","ev":"heartbeat","tick":30}
+{"ts":"2026-07-30T02:39:33.515Z","ev":"stuck","type":"recruit","shot":"/tmp/shots/stuck-1785379172630.png","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T02:39:33.653Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRU"}
+{"ts":"2026-07-30T02:39:35.325Z","ev":"stuck","type":"recruit","shot":"/tmp/shots/stuck-1785379174459.png","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T02:39:35.352Z","ev":"abort","msg":"hard stuck"}
+{"ts":"2026-07-30T02:39:35.353Z","ev":"session","msg":"autopilot loop end","minutes":"2.3"}
