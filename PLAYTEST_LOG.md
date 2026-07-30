@@ -85,3 +85,24 @@ Rebuilt from repo in a fresh cloud container. Everything below re-verified live.
 - Autopilot grinding runs continuously; shop buy-policy is v1 log-only (TODO:
   packs-first doctrine), aura-chip UX finding still open, sim duplicate keys
   unaudited. Full run data compiles into the final report.
+
+---
+
+## SESSION 3 ADDENDUM — July 30 audit (pre-overnight-grind gate)
+
+**CORRECTION:** Wanderer "84 HP training-wheels regression" was a FALSE ALARM.
+maxHp:45 intact in src/data/enemies.js; 84 = 45 × 1.85 Standard hpScale (same as
+May). Early bot deaths at fight 1 were the broken-input rig, not balance.
+
+**Audit results:** npm run check ALL CLEAN (fixed 1 pre-existing 12px font) ·
+build clean · console clean ~20 runs · sim dupe keys fixed (benign) · dupe-style
+warning not reproducible (closed) · death-screen fix verified live.
+
+**Rig verified end-to-end (03:35 UTC):** draft → descent → combat quick-play
+(59-dmg strike) → shop buy (Welcome Pack) → recruit pick (Gunnar joined) →
+Wanderer VICTORY. Rig-side fixes this session: quick-play replaces drag (native
+drag loop swallows CDP input), recruit dispatch, SOLD-stamp bleed in shop parser,
+rig self-heal, single-instance rule.
+
+**NEW FLAG:** fresh 2K sim Bronze/Standard = 39.95% Lucifer wins vs July 29 doc
+claim of 8.3–11.8%. Reconcile before balance decisions.
