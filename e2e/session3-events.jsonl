@@ -236,3 +236,80 @@
 {"ts":"2026-07-30T01:41:01.593Z","ev":"warn","msg":"no members parsed"}
 {"ts":"2026-07-30T01:41:04.015Z","ev":"run_end","result":"VICTORY","shot":"/tmp/shots/VICTORY-1785375662760.png","text":"⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧\nVICTORY\nVICTORY\nTHE WANDERER DESTROYED\nDAMAGE DEALT\n147\nSTRIKES USED\n2 / 4\nCARDS PLAYED\n5\nHIGHEST STRIKE\n92\nEMBERS SPENT\n10\nCORRUPTION GAINED\n+0%\nTIME TAKEN\n0:51\nRIFF CHAINS\n0\nMVP: 🎸 Bjorn\n⛧\nCONTINUE\n⛧\nPress SPACE or ENTER\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧"}
 {"ts":"2026-07-30T01:41:04.015Z","ev":"session","msg":"autopilot loop end","minutes":"2.8"}
+{"ts":"2026-07-30T01:42:09.111Z","ev":"session","msg":"autopilot v1 start"}
+{"ts":"2026-07-30T01:42:12.258Z","ev":"shop_seen","text":"⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧\nSTASH\n💵\n14\n🚬 SLY'S MERCH 🚬\nHey kid... wanna see what fell off the truck?\n\"Light pockets, kid. Don't waste my time.\" —Sly\n🎲 REROLL\n 2\n⛧\n🚪 BACK TO THE PIT\n⛧\nBand Recruitment\n🎸 Welcome Pack\nFREE — Pick 1 of 2 musicians. Welcome to your band!\n0\n⟡ STAGE ORDER — AURAS REACH ADJACENT SLOTS\n⟨\n🎸\nRagnar\n⟩\n⟨\n🎸\nBjorn\n⟩\n⛧ THIS CIRCLE ONLY\n⛧ ARTIFACT\n9\n🍻\nDive Bar Sign\n×1.35 in Circles I-III. Refunds its cost when you reach Circle IV — the residency ends.\n×1.35 MULTIPLIER\n⛧ EFFECT PEDAL\n22\n🎼\nOctave Pedal\nFirst Riff Chain each fight fires twice (double mult).\n🎸 CARDS FOR SALE\n4\n1\nTremolo PickNEW!\nRIFF · COMMON\n+1 ATK. Play 3+ cards first? +4 ATK instead.\nNEW CARD\n8\n✦\n0\nTapped Out\nEMBER · UNCOMMON\nGain 5 Embers at the start of next Strike.\nIN DECK: 2\n4\n1\nRoadie\nUTILITY · COMMON\n+2 HP. Stonewall shield (immune to KO for 2 strikes).\nIN DECK: 1\n42\nRARE\n0\nBlack Sabbath SigilNEW!\nCORRUPT · RARE\nFREE. Corruption → 100%. Hellquake d10. Card is destroyed after use. EMBRACE THE VOID.\nNEW CARD\nSLY'S STASH:\n🍄\nDRY\n6\n🧪\nDRY\n12\n📦 BOOSTERS + PAWN SHOP\n6\nVESTIBULE\nCassette Tape\n⛧ CONTAINS ⛧\n3 Common cards. Pick 1.\n12\nVESTIBULE\nCD-R\n⛧ CONTAINS ⛧\n2 Common + 1 Uncommon. Pick 1.\n💸 Sly's Buyback\n🏧\nCommon\n1\nUncommon\n2\nRare\n4\nFoil\n+3\nMythic\n+8\nMember\n5\nArtifact\n50% buyback\n—No questions asked. Sly takes a cut.\nMax 2 sales per visit · Cannot sell last 2 members\n→ Tap Sly to make a deal\nSLY\n💸 MAKE A DEAL (2 LEFT)\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ ·","note":"v1 log-only; buy policy TODO","shot":"/tmp/shots/shop-1785375730546.png"}
+{"ts":"2026-07-30T01:42:15.119Z","ev":"play","card":"Mosh Pit","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:42:35.136Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:42:36.666Z","ev":"play","card":"Herb Money","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:42:37.378Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:42:57.409Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:42:58.888Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:42:59.566Z","ev":"play","card":"New Strings","cardType":"RIFF","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:00.308Z","ev":"play","card":"RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:20.317Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:43:21.701Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T01:43:22.272Z","ev":"play","card":"NEED  RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:23.018Z","ev":"play","card":"NEED  Sound Check","cardType":"UTILITY","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:23.027Z","ev":"strike","strikes":"4","bossHp":"278","played":2,"embers":0,"preview":"42"}
+{"ts":"2026-07-30T01:43:26.632Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:27.227Z","ev":"play","card":"NEED  RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:28.293Z","ev":"play","card":"NEED  Sound Check","cardType":"UTILITY","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:28.331Z","ev":"strike","strikes":"3","bossHp":"263","played":3,"embers":1}
+{"ts":"2026-07-30T01:43:32.115Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:32.761Z","ev":"play","card":"NEED  RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:33.469Z","ev":"play","card":"Smoke Break","cardType":"UTILITY","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:34.148Z","ev":"play","card":"NEED  Sound Check","cardType":"UTILITY","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:54.160Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:43:55.646Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:56.423Z","ev":"play","card":"NEED  Sound Check","cardType":"UTILITY","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:57.189Z","ev":"play","card":"Static Charge","cardType":"CORRUPT","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T01:43:57.207Z","ev":"strike","strikes":"3","bossHp":"236","played":3,"embers":1,"preview":"79"}
+{"ts":"2026-07-30T01:44:00.222Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T01:44:00.827Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:44:20.843Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:44:22.604Z","ev":"play","card":"Power Tap","cardType":"EMBER","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T01:44:42.623Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:44:44.200Z","ev":"play_fail","card":"Chain Resonance","cost":1}
+{"ts":"2026-07-30T01:44:44.927Z","ev":"play","card":"Wake Up Call","cardType":"UTILITY","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:44:45.610Z","ev":"play","card":"Sound Check","cardType":"UTILITY","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T01:44:47.447Z","ev":"play","card":"Amp the Static","cardType":"CORRUPT","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T01:44:47.458Z","ev":"strike","strikes":"2","bossHp":"157","played":3,"embers":4,"preview":"29"}
+{"ts":"2026-07-30T01:44:51.121Z","ev":"play","card":"Chain Resonance","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:44:51.914Z","ev":"play","card":"Amp the Static","cardType":"CORRUPT","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T01:44:51.938Z","ev":"strike","strikes":"1","bossHp":"148","played":2,"embers":2}
+{"ts":"2026-07-30T01:44:55.849Z","ev":"play","card":"Chain Resonance","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:45:15.868Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:45:17.560Z","ev":"play","card":"Chain Resonance","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:45:18.463Z","ev":"play","card":"NEED  RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T01:45:19.453Z","ev":"play","card":"S ance","cardType":"CORRUPT","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:45:39.473Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:45:41.047Z","ev":"play","card":"Chain Resonance","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:45:41.894Z","ev":"play","card":"NEED  RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T01:45:42.915Z","ev":"play","card":"NEED   Amp the Static","cardType":"CORRUPT","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T01:45:42.931Z","ev":"strike","strikes":"1","bossHp":"128","played":3,"embers":0,"preview":"23"}
+{"ts":"2026-07-30T01:45:46.725Z","ev":"play","card":"Chain Resonance","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:45:47.565Z","ev":"play","card":"NEED  RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T01:45:48.422Z","ev":"play","card":"NEED   Amp the Static","cardType":"CORRUPT","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T01:45:48.432Z","ev":"strike","strikes":"0","bossHp":"122","played":3,"embers":1}
+{"ts":"2026-07-30T01:45:52.198Z","ev":"play","card":"Chain Resonance","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:45:53.793Z","ev":"play","card":"NEED  RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T01:45:54.600Z","ev":"play","card":"NEED   Amp the Static","cardType":"CORRUPT","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T01:45:55.272Z","ev":"play_fail","card":"NEED   Feedback Loop","cost":2}
+{"ts":"2026-07-30T01:45:55.280Z","ev":"strike","strikes":"0","bossHp":"105","played":3,"embers":1}
+{"ts":"2026-07-30T01:45:55.298Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T01:45:59.464Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785375957904.png","text":"Vestibule\n\"I was looking for something. I forgot what.\"\nDEFEATED BY\nThe Lost Soul\nCIRCLE I — LIMBO\n\"A stronger damned spirit. Hunger drives its blows.\"\nFIGHTS\n1\nCHAINS\n0\nCARDS PLAYED\n15\nMAX STRIKE\n92\n\"You were lost before you started.\"\nSO CLOSE\n💀\n105 HP\nleft on The Lost Soul\n☠ The Lost Soul hit for 5 damage\n💀 WHAT WENT WRONG\nOnly 15 cards played across 6 strikes. Play more cards to build stronger strikes.\n1,695\nLOCAL LEGEND\n🔥 Streak Bonus: +5% score\n🏆 NEW PERSONAL BEST! +34\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n5,599 / 10,000\n🩸 New Card: Blood Ritual\n3 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n1\nSTRIKES\n6\nCARDS\n15\nDAMAGE\n320\nBEST HIT\n92\nSTONED\n1\nCORRUPT\n20%\nSTASH\n11🌿\nRUN #\n3\nOVERKILL\n—\nVS LAST RUN:\nSCORE +34\nDMG +23\n(C1)\nNEW TROPHY\nThe Wanderer\n💀\n🔊\nSound Check\n2/10 → Novice\n🪙\nTapped Out\n2/10 → Novice\n👿\nInfernal Encore\n2/10 → Novice\n🗡 First Blood\n🔥 3 DAY STREAK\n💀 3 losses in a row...\n1/17 achievements\n▶ PAST RUNS (3)\nSEED: 3E1B7F\n📋 Copy Seed"}
+{"ts":"2026-07-30T01:46:00.717Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T01:46:00.735Z","ev":"draft","pick":["DagBass PlayerATK2ANCHORHP12","IngridBass PlayerATK3ANCHORHP1"]}
+{"ts":"2026-07-30T01:46:02.688Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T01:46:05.040Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Ingrid"}
+{"ts":"2026-07-30T01:46:05.997Z","ev":"play","card":"Battle Cry","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:46:06.819Z","ev":"play","card":"Chain Resonance","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T01:46:08.572Z","ev":"play","card":"ChainRareInfernal Encore","cardType":"RIFF","cost":3,"target":"Ingrid"}
+{"ts":"2026-07-30T01:46:28.584Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:46:29.993Z","ev":"play_fail","card":"Chain Resonance","cost":1}
+{"ts":"2026-07-30T01:46:30.716Z","ev":"play","card":"Setlist","cardType":"UTILITY","cost":0,"target":"Ingrid"}
+{"ts":"2026-07-30T01:46:30.753Z","ev":"modal_pick","card":"RoadieUTILITY"}
+{"ts":"2026-07-30T01:46:51.521Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:46:52.955Z","ev":"play_fail","card":"Chain Resonance","cost":1}
+{"ts":"2026-07-30T01:46:53.527Z","ev":"play","card":"NEED  Crowd Surf","cardType":"RIFF","cost":2,"target":"Ingrid"}
+{"ts":"2026-07-30T01:46:54.499Z","ev":"play","card":"Distortion","cardType":"CORRUPT","cost":1,"target":"Ingrid"}
