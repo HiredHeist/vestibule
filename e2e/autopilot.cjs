@@ -8,7 +8,7 @@ const ev = (type, data) => { fs.appendFileSync(LOG, JSON.stringify({ ts: new Dat
 // every pilot op gets a hard timeout — a hung CDP call must never freeze the loop
 const TMO = 20000
 const wrap = fn => (...a) => Promise.race([fn(...a), new Promise((_, rej) => setTimeout(() => rej(new Error('op timeout: ' + fn.name)), TMO))])
-const P = { connect: P0.connect, state: wrap(P0.state), shot: wrap(P0.shot), click: wrap(P0.click), clickText: wrap(P0.clickText), drag: wrap(P0.drag), key: wrap(P0.key), evaljs: wrap(P0.evaljs) }
+const P = { connect: P0.connect, state: wrap(P0.state), shot: wrap(P0.shot), click: wrap(P0.click), clickText: wrap(P0.clickText), drag: wrap(P0.drag), key: wrap(P0.key), evaljs: wrap(P0.evaljs), playCard: wrap(P0.playCard) }
 
 const OVERLAY_BTNS = ['got it', 'onward', 'continue', 'collect', 'claim', 'next fight', 'descend', 'take the stage', 'ok']
 
@@ -71,18 +71,21 @@ async function combatTick(s) {
   // SHREDDER doctrine: embers first, then EVERY affordable RIFF back-to-back (chains
   // pay 1/2/4x per consecutive pair), buffs onto the carry, skip corr-gated dead cards.
   const rank = { EMBER: 0, RIFF: 1, UTILITY: 2, CORRUPT: 3 }
-  const playable = h.filter(c => !/Need \d+% Corr/i.test(c.desc))
-    .filter(c => { const n = c.desc.match(/NEED\s*(\d)(?!\d|%)/); return !n || mem.length >= +n[1] }) // member-count gates
-    .sort((a, b) => (rank[a.type] - rank[b.type]) || (a.cost - b.cost))
   let played = 0, failStreak = 0
-  for (const c of playable) {
-    const before = (await P.state()).text
-    await P.drag(c.x, c.y, target.x, target.y)
-    const after = (await P.state()).text
-    if (before !== after) { played++; failStreak = 0; ev('play', { card: c.name, cardType: c.type, cost: c.cost, target: target.name }) }
-    else { failStreak++; ev('play_fail', { card: c.name, cost: c.cost }) }
+  const failed = new Set()
+  // re-perceive hand each iteration — card positions re-fan after every play
+  for (let iter = 0; iter < 8 && played < 6 && failStreak < 3; iter++) {
+    const cur = await hand()
+    const playable = cur.filter(c => !/Need \d+% Corr/i.test(c.desc) && !failed.has(c.name))
+      .filter(c => { const n = c.desc.match(/NEED\s*(\d)(?!\d|%)/); return !n || mem.length >= +n[1] })
+      .sort((a, b) => (rank[a.type] - rank[b.type]) || (a.cost - b.cost))
+    const c = playable[0]
+    if (!c) break
+    await P.playCard(c.x, c.y, target.x, target.y) // quick-play: click card, click member
+    const after = (await hand()).length
+    if (after < cur.length) { played++; failStreak = 0; ev('play', { card: c.name, cardType: c.type, cost: c.cost, target: target.name }) }
+    else { failStreak++; failed.add(c.name); ev('play_fail', { card: c.name, cost: c.cost }); await P.click(c.x, c.y).catch(() => {}) } // deselect
     if ((await P.state()).text.toUpperCase().includes('DISCARD & CONTINUE')) { await modalTick(await P.state()) }
-    if (failStreak >= 3 || played >= 6) break
   }
   // PANIC BUTTON (sim doctrine: clutch trips when the fight goes south) —
   // <=2 strikes left and boss above ~45%: drop a held trip before striking
@@ -221,7 +224,10 @@ async function main() {
   const maxMs = (+(process.argv[2] || 14)) * 60000
   const t0 = Date.now()
   let lastHash = '', stuck = 0
-  ev('session', { msg: 'autopilot v1 start' })
+  ev('session', { msg: 'autopilot v2 start' })
+  // player-settings for a steadier hand: hover-zoom off (cards stop re-fanning under
+  // the cursor), damage numbers on. Same toggles a human sets in OPTIONS.
+  try { await P.evaljs("localStorage.setItem('vst_hoverzoom','off'); localStorage.setItem('vst_shake','off'); 'ok'") } catch (e) {}
   let tick = 0, opTimeouts = 0
   const origEv = ev
   // rig self-heal: 3 consecutive op timeouts = degraded CDP session → restart Electron,

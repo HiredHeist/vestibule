@@ -607,3 +607,301 @@
 {"ts":"2026-07-30T02:25:10.048Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
 {"ts":"2026-07-30T02:25:10.064Z","ev":"strike","strikes":"4","bossHp":"84","played":1,"embers":5,"preview":"11"}
 {"ts":"2026-07-30T02:25:13.072Z","ev":"session","msg":"autopilot loop end","minutes":"2.1"}
+{"ts":"2026-07-30T02:25:54.111Z","ev":"session","msg":"autopilot v1 start"}
+{"ts":"2026-07-30T02:25:55.562Z","ev":"play","card":"Amp Overload","cardType":"EMBER","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T02:25:56.689Z","ev":"play_fail","card":"RareStage Dive","cost":3}
+{"ts":"2026-07-30T02:25:57.791Z","ev":"play_fail","card":"RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T02:25:58.908Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T02:25:58.928Z","ev":"strike","strikes":"3","bossHp":"72","played":1,"embers":5,"preview":"11"}
+{"ts":"2026-07-30T02:26:03.080Z","ev":"play","card":"Amp Overload","cardType":"EMBER","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:04.296Z","ev":"play","card":"RareStage Dive","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:05.495Z","ev":"play","card":"RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:06.658Z","ev":"play","card":"RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:07.799Z","ev":"play","card":"Feedback Loop","cardType":"CORRUPT","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:07.815Z","ev":"trip_used","btn":"🍄⛧","bossPct":"71"}
+{"ts":"2026-07-30T02:26:09.685Z","ev":"strike","strikes":"2","bossHp":"66","played":5,"embers":5,"preview":"11"}
+{"ts":"2026-07-30T02:26:13.862Z","ev":"play","card":"Amp Overload","cardType":"EMBER","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:15.008Z","ev":"play","card":"RareStage Dive","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:16.149Z","ev":"play","card":"RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:17.282Z","ev":"play","card":"RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:18.465Z","ev":"play","card":"Feedback Loop","cardType":"CORRUPT","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:18.488Z","ev":"trip_used","btn":"🍄⛧","bossPct":"57"}
+{"ts":"2026-07-30T02:26:20.355Z","ev":"strike","strikes":"1","bossHp":"54","played":5,"embers":5,"preview":"11"}
+{"ts":"2026-07-30T02:26:24.521Z","ev":"play","card":"Amp Overload","cardType":"EMBER","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:25.667Z","ev":"play","card":"RareStage Dive","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:27.010Z","ev":"play","card":"RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:28.215Z","ev":"play","card":"RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:29.379Z","ev":"play","card":"Feedback Loop","cardType":"CORRUPT","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T02:26:29.430Z","ev":"strike","strikes":"0","bossHp":"42","played":5,"embers":5}
+{"ts":"2026-07-30T02:26:29.439Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T02:26:34.102Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785378392049.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n0\nMAX STRIKE\n11\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n36 HP\nfrom killing The Wanderer!\n⚡\n1,043 PTS from your personal best!\n😰\nBjorn survived with just 2 HP!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 11 damage. Stack more buffs before each strike.\n1,112\nLOCAL LEGEND\n🔥 Streak Bonus: +5% score\nSO CLOSE! Only 1,043 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n9,398 / 10,000\n🩸 New Card: Blood Ritual\n3 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n0\nDAMAGE\n44\nBEST HIT\n11\nSTONED\n0\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n6\nOVERKILL\n—\nVS LAST RUN:\nSCORE +1\nDMG +11\n(C1)\n🔌\nPower Tap\n5/10 → Novice\n🤘\nBattle Cry\n4/10 → Novice\n🪙\nTapped Out\n4/10 → Novice\n🔥 6 DAY STREAK\n💀 6 losses in a row...\n1/17 achievements\n▶ PAST RUNS (6)\nSEED: A0A81E\n📋 Copy Seed"}
+{"ts":"2026-07-30T02:26:35.421Z","ev":"draft","pick":["IngridBass PlayerATK3ANCHORHP1","TanukiBass PlayerATK8ANCHORHP8"]}
+{"ts":"2026-07-30T02:26:37.515Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T02:26:40.052Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T02:26:41.202Z","ev":"play_fail","card":"Amp Overload","cost":0}
+{"ts":"2026-07-30T02:26:42.399Z","ev":"play_fail","card":"Groupie","cost":1}
+{"ts":"2026-07-30T02:26:43.544Z","ev":"play_fail","card":"Distortion","cost":1}
+{"ts":"2026-07-30T02:26:43.587Z","ev":"strike","strikes":"4","bossHp":"84","played":1,"embers":5,"preview":"11"}
+{"ts":"2026-07-30T02:26:47.778Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T02:26:48.962Z","ev":"play","card":"Amp Overload","cardType":"EMBER","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T02:26:50.138Z","ev":"play","card":"Groupie","cardType":"EMBER","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:26:51.270Z","ev":"play","card":"Distortion","cardType":"CORRUPT","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:26:52.402Z","ev":"play","card":"Controlled Feedback","cardType":"CORRUPT","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T02:26:53.536Z","ev":"play","card":"Amp the Static","cardType":"CORRUPT","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T02:26:53.585Z","ev":"strike","strikes":"3","bossHp":"81","played":6,"embers":5,"preview":"14"}
+{"ts":"2026-07-30T02:26:56.549Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T02:26:57.690Z","ev":"play_fail","card":"Tapped Out","cost":0}
+{"ts":"2026-07-30T02:26:58.799Z","ev":"play_fail","card":"Amp Overload","cost":0}
+{"ts":"2026-07-30T02:26:59.918Z","ev":"play_fail","card":"Groupie","cost":1}
+{"ts":"2026-07-30T02:26:59.931Z","ev":"strike","strikes":"3","bossHp":"73","played":0,"embers":3,"preview":"14"}
+{"ts":"2026-07-30T02:27:04.062Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:05.209Z","ev":"play","card":"Amp Overload","cardType":"EMBER","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:06.388Z","ev":"play","card":"Groupie","cardType":"EMBER","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:07.540Z","ev":"play","card":"Distortion","cardType":"CORRUPT","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:08.688Z","ev":"play","card":"Amp the Static","cardType":"CORRUPT","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:08.732Z","ev":"trip_used","btn":"🍄⛧","bossPct":"70"}
+{"ts":"2026-07-30T02:27:10.645Z","ev":"strike","strikes":"2","bossHp":"69","played":5,"embers":3,"preview":"13"}
+{"ts":"2026-07-30T02:27:14.825Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:15.974Z","ev":"play","card":"Amp Overload","cardType":"EMBER","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:17.152Z","ev":"play","card":"Groupie","cardType":"EMBER","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:18.337Z","ev":"play","card":"Distortion","cardType":"CORRUPT","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:19.491Z","ev":"play","card":"Death Riff","cardType":"CORRUPT","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:20.645Z","ev":"play","card":"Amp the Static","cardType":"CORRUPT","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:20.665Z","ev":"trip_used","btn":"🍄⛧","bossPct":"55"}
+{"ts":"2026-07-30T02:27:22.541Z","ev":"strike","strikes":"1","bossHp":"55","played":6,"embers":3,"preview":"13"}
+{"ts":"2026-07-30T02:27:26.710Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:27.857Z","ev":"play","card":"Amp Overload","cardType":"EMBER","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:29.007Z","ev":"play","card":"Groupie","cardType":"EMBER","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:30.162Z","ev":"play","card":"Distortion","cardType":"CORRUPT","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:31.378Z","ev":"play","card":"Death Riff","cardType":"CORRUPT","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:32.525Z","ev":"play","card":"Amp the Static","cardType":"CORRUPT","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T02:27:32.564Z","ev":"strike","strikes":"0","bossHp":"42","played":6,"embers":3}
+{"ts":"2026-07-30T02:27:32.571Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T02:27:37.184Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785378455188.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n1\nMAX STRIKE\n14\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n33 HP\nfrom killing The Wanderer!\n⚡\n972 PTS from your personal best!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 13 damage. Stack more buffs before each strike.\n1,183\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 972 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n10,596 / 15,000\n✨ Brynja Foil Available\n4 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n1\nDAMAGE\n51\nBEST HIT\n14\nSTONED\n0\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n7\nOVERKILL\n—\nVS LAST RUN:\nSCORE +56\nDMG +13\n(C1)\n🔌\nPower Tap\n5/10 → Novice\n🤘\nBattle Cry\n4/10 → Novice\n🪙\nTapped Out\n4/10 → Novice\n🔥 7 DAY STREAK\n💀 7 losses in a row...\n1/17 achievements\n▶ PAST RUNS (7)\nSEED: B7190\n📋 Copy Seed"}
+{"ts":"2026-07-30T02:27:38.550Z","ev":"draft","pick":["GunnarRhythm GuitaristATK4SHRE","SigridRhythm GuitaristATK3SHRE"]}
+{"ts":"2026-07-30T02:27:40.563Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T02:27:43.082Z","ev":"play","card":"Chain Mosh Pit","cardType":"RIFF","cost":1,"target":"Gunnar"}
+{"ts":"2026-07-30T02:27:44.260Z","ev":"play","card":"RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Gunnar"}
+{"ts":"2026-07-30T02:27:45.395Z","ev":"play_fail","card":"Setlist","cost":0}
+{"ts":"2026-07-30T02:27:46.531Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T02:27:47.668Z","ev":"play_fail","card":"Controlled Feedback","cost":2}
+{"ts":"2026-07-30T02:27:47.684Z","ev":"strike","strikes":"4","bossHp":"84","played":2,"embers":5,"preview":"10"}
+{"ts":"2026-07-30T02:27:51.833Z","ev":"play","card":"Mosh Pit","cardType":"RIFF","cost":1,"target":"Gunnar"}
+{"ts":"2026-07-30T02:27:52.975Z","ev":"play","card":"RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Gunnar"}
+{"ts":"2026-07-30T02:27:54.113Z","ev":"play","card":"Setlist","cardType":"UTILITY","cost":0,"target":"Gunnar"}
+{"ts":"2026-07-30T02:27:55.257Z","ev":"play","card":"Static Charge","cardType":"CORRUPT","cost":0,"target":"Gunnar"}
+{"ts":"2026-07-30T02:27:56.400Z","ev":"play","card":"Controlled Feedback","cardType":"CORRUPT","cost":2,"target":"Gunnar"}
+{"ts":"2026-07-30T02:27:56.426Z","ev":"strike","strikes":"3","bossHp":"79","played":5,"embers":4,"preview":"9"}
+{"ts":"2026-07-30T02:28:00.609Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:01.761Z","ev":"play","card":"Mosh Pit","cardType":"RIFF","cost":1,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:02.929Z","ev":"play","card":"RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:04.095Z","ev":"play","card":"Setlist","cardType":"UTILITY","cost":0,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:05.271Z","ev":"play","card":"Static Charge","cardType":"CORRUPT","cost":0,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:06.430Z","ev":"play","card":"Controlled Feedback","cardType":"CORRUPT","cost":2,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:06.465Z","ev":"trip_used","btn":"🍄⛧","bossPct":"76"}
+{"ts":"2026-07-30T02:28:08.342Z","ev":"strike","strikes":"2","bossHp":"69","played":6,"embers":4,"preview":"9"}
+{"ts":"2026-07-30T02:28:11.350Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T02:28:12.531Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:13.730Z","ev":"play","card":"Mosh Pit","cardType":"RIFF","cost":1,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:14.928Z","ev":"play","card":"RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:16.067Z","ev":"play","card":"Setlist","cardType":"UTILITY","cost":0,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:17.228Z","ev":"play","card":"Static Charge","cardType":"CORRUPT","cost":0,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:18.389Z","ev":"play","card":"Controlled Feedback","cardType":"CORRUPT","cost":2,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:18.417Z","ev":"trip_used","btn":"🍄⛧","bossPct":"64"}
+{"ts":"2026-07-30T02:28:20.298Z","ev":"strike","strikes":"1","bossHp":"59","played":6,"embers":4,"preview":"9"}
+{"ts":"2026-07-30T02:28:24.501Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:25.660Z","ev":"play","card":"Mosh Pit","cardType":"RIFF","cost":1,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:26.896Z","ev":"play","card":"RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:28.056Z","ev":"play","card":"Setlist","cardType":"UTILITY","cost":0,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:29.202Z","ev":"play","card":"Static Charge","cardType":"CORRUPT","cost":0,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:30.401Z","ev":"play","card":"Controlled Feedback","cardType":"CORRUPT","cost":2,"target":"Gunnar"}
+{"ts":"2026-07-30T02:28:30.422Z","ev":"strike","strikes":"0","bossHp":"49","played":6,"embers":4}
+{"ts":"2026-07-30T02:28:30.434Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T02:28:34.732Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785378513048.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n2\nMAX STRIKE\n10\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n44 HP\nfrom killing The Wanderer!\n⚡\n997 PTS from your personal best!\n😰\nGunnar survived with just 1 HP!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 9 damage. Stack more buffs before each strike.\n1,158\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 997 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n11,728 / 15,000\n✨ Brynja Foil Available\n4 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n2\nDAMAGE\n37\nBEST HIT\n10\nSTONED\n0\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n8\nOVERKILL\n—\nVS LAST RUN:\nSCORE +1\nDMG +9\n(C1)\n🔌\nPower Tap\n5/10 → Novice\n🤘\nBattle Cry\n4/10 → Novice\n🪙\nTapped Out\n4/10 → Novice\n🔥 8 DAY STREAK\n💀 8 losses in a row...\n1/17 achievements\n▶ PAST RUNS (8)\nSEED: 414A24\n📋 Copy Seed"}
+{"ts":"2026-07-30T02:28:36.041Z","ev":"draft","pick":["RagnarLead GuitaristATK4FRENZI","BjornLead GuitaristATK5FRENZIE"]}
+{"ts":"2026-07-30T02:28:38.195Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T02:28:40.639Z","ev":"play","card":"Power Tap","cardType":"EMBER","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T02:28:41.767Z","ev":"play_fail","card":"Groupie","cost":1}
+{"ts":"2026-07-30T02:28:42.913Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T02:28:44.049Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T02:28:44.074Z","ev":"strike","strikes":"4","bossHp":"84","played":1,"embers":3,"preview":"11"}
+{"ts":"2026-07-30T02:28:48.287Z","ev":"play","card":"Power Tap","cardType":"EMBER","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T02:28:49.426Z","ev":"play","card":"Groupie","cardType":"EMBER","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T02:28:50.853Z","ev":"play","card":"Battle Cry","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T02:28:52.015Z","ev":"play","card":"Heavy Riff","cardType":"RIFF","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T02:28:53.229Z","ev":"play","card":"Chain Wake Up Call","cardType":"UTILITY","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T02:28:54.374Z","ev":"play","card":"ChainRareBlood Ritual","cardType":"CORRUPT","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T02:28:54.393Z","ev":"strike","strikes":"3","bossHp":"79","played":6,"embers":5,"preview":"12"}
+{"ts":"2026-07-30T02:28:58.592Z","ev":"play","card":"Power Tap","cardType":"EMBER","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T02:28:59.770Z","ev":"play","card":"Groupie","cardType":"EMBER","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T02:29:00.901Z","ev":"play","card":"Battle Cry","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T02:29:02.074Z","ev":"play","card":"Heavy Riff","cardType":"RIFF","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T02:29:03.199Z","ev":"play","card":"Wake Up Call","cardType":"UTILITY","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T02:29:03.219Z","ev":"trip_used","btn":"🍄⛧","bossPct":"65"}
+{"ts":"2026-07-30T02:29:05.090Z","ev":"strike","strikes":"2","bossHp":"62","played":5,"embers":3,"preview":"11"}
+{"ts":"2026-07-30T02:29:09.258Z","ev":"play","card":"Power Tap","cardType":"EMBER","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T02:32:06.375Z","ev":"session","msg":"autopilot v1 start"}
+{"ts":"2026-07-30T02:32:07.325Z","ev":"play_fail","card":"Power Tap","cost":0}
+{"ts":"2026-07-30T02:32:08.514Z","ev":"play","card":"Groupie","cardType":"EMBER","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T02:32:09.270Z","ev":"play_fail","card":"Groupie","cost":1}
+{"ts":"2026-07-30T02:32:10.448Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T02:32:11.595Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T02:32:11.975Z","ev":"trip_used","btn":"🍄⛧","bossPct":"52"}
+{"ts":"2026-07-30T02:32:13.844Z","ev":"strike","strikes":"1","bossHp":"44","played":1,"embers":3,"preview":"13"}
+{"ts":"2026-07-30T02:32:17.566Z","ev":"play_fail","card":"Groupie","cost":1}
+{"ts":"2026-07-30T02:32:18.677Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T02:32:19.808Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T02:32:20.225Z","ev":"strike","strikes":"0","bossHp":"38","played":0,"embers":5}
+{"ts":"2026-07-30T02:32:25.174Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785378743216.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n3\nMAX STRIKE\n13\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n31 HP\nfrom killing The Wanderer!\n⚡\n978 PTS from your personal best!\n😰\nBjorn survived with just 1 HP!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 13 damage. Stack more buffs before each strike.\n0\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 978 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n12,917 / 15,000\n✨ Brynja Foil Available\n4 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n3\nDAMAGE\n53\nBEST HIT\n13\nSTONED\n0\nCORRUPT\n15%\nSTASH\n0🌿\nRUN #\n9\nOVERKILL\n—\nVS LAST RUN:\nSCORE +7\nDMG +13\n(C1)\n🔌\nPower Tap\n6/10 → Novice\n🤘\nBattle Cry\n4/10 → Novice\n🪙\nTapped Out\n4/10 → Novice\n🔥 9 DAY STREAK\n💀 9 losses in a row...\n1/17 achievements\n▶ PAST RUNS (9)\nSEED: 625552\n📋 Copy Seed"}
+{"ts":"2026-07-30T02:32:26.455Z","ev":"draft","pick":["TanukiBass PlayerATK8ANCHORHP8","UlfBass PlayerATK4ANCHORHP9"]}
+{"ts":"2026-07-30T02:32:28.528Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T02:32:30.642Z","ev":"play_fail","card":"Groupie","cost":1}
+{"ts":"2026-07-30T02:32:31.821Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T02:32:33.031Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T02:32:33.425Z","ev":"strike","strikes":"4","bossHp":"84","played":0,"embers":5,"preview":"13"}
+{"ts":"2026-07-30T02:32:37.230Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T02:32:38.391Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T02:32:39.599Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T02:32:40.056Z","ev":"strike","strikes":"3","bossHp":"75","played":0,"embers":5}
+{"ts":"2026-07-30T02:32:43.857Z","ev":"play","card":"Demo Tape","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:32:44.625Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T02:32:45.816Z","ev":"play","card":"Battle Cry","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:32:46.580Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T02:32:47.770Z","ev":"play","card":"Amp It Up","cardType":"RIFF","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T02:32:48.583Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T02:32:49.772Z","ev":"play","card":"Encore","cardType":"RIFF","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T02:32:50.508Z","ev":"play_fail","card":"NEED   Encore","cost":2}
+{"ts":"2026-07-30T02:32:50.929Z","ev":"strike","strikes":"3","bossHp":"66","played":4,"embers":5,"preview":"41"}
+{"ts":"2026-07-30T02:32:54.686Z","ev":"play_fail","card":"NEED   Encore","cost":2}
+{"ts":"2026-07-30T02:32:55.889Z","ev":"play_fail","card":"NEED  Distortion","cost":2}
+{"ts":"2026-07-30T02:32:56.349Z","ev":"strike","strikes":"2","bossHp":"31","played":0,"embers":0}
+{"ts":"2026-07-30T02:32:59.331Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T02:33:00.730Z","ev":"warn","msg":"no members parsed — using fixed slot fallback"}
+{"ts":"2026-07-30T02:33:00.756Z","ev":"strike","played":0,"embers":99}
+{"ts":"2026-07-30T02:33:06.836Z","ev":"shop_leave","stash":5,"bandSize":2,"bought":[],"shot":"/tmp/shots/shop-final-1785378783845.png"}
+{"ts":"2026-07-30T02:33:09.161Z","ev":"play_fail","card":"ChainBattle Cry","cost":1}
+{"ts":"2026-07-30T02:33:10.325Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T02:33:11.492Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T02:33:11.904Z","ev":"strike","strikes":"4","bossHp":"278","played":0,"embers":5,"preview":"19"}
+{"ts":"2026-07-30T02:33:15.707Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T02:33:16.910Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T02:33:18.107Z","ev":"play_fail","card":"Crowd Surf","cost":2}
+{"ts":"2026-07-30T02:33:18.508Z","ev":"strike","strikes":"3","bossHp":"263","played":0,"embers":4}
+{"ts":"2026-07-30T02:33:22.451Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:33:23.305Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T02:33:24.422Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T02:33:25.550Z","ev":"play_fail","card":"Wake Up Call","cost":1}
+{"ts":"2026-07-30T02:33:25.967Z","ev":"strike","strikes":"3","bossHp":"248","played":1,"embers":4,"preview":"25"}
+{"ts":"2026-07-30T02:33:29.716Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T02:33:30.930Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T02:33:32.110Z","ev":"play_fail","card":"Wake Up Call","cost":1}
+{"ts":"2026-07-30T02:33:32.507Z","ev":"trip_used","btn":"🍄⛧","bossPct":"74"}
+{"ts":"2026-07-30T02:33:34.397Z","ev":"strike","strikes":"2","bossHp":"227","played":0,"embers":2}
+{"ts":"2026-07-30T02:33:38.278Z","ev":"play_fail","card":"Tapped Out","cost":0}
+{"ts":"2026-07-30T02:33:39.450Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T02:33:40.644Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T02:33:41.070Z","ev":"trip_used","btn":"🍄⛧","bossPct":"60"}
+{"ts":"2026-07-30T02:33:42.946Z","ev":"strike","strikes":"1","bossHp":"187","played":0,"embers":2}
+{"ts":"2026-07-30T02:33:46.847Z","ev":"play_fail","card":"Tapped Out","cost":0}
+{"ts":"2026-07-30T02:33:48.025Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T02:33:49.194Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T02:33:49.605Z","ev":"trip_used","btn":"🍄⛧","bossPct":"47"}
+{"ts":"2026-07-30T02:33:51.480Z","ev":"strike","strikes":"0","bossHp":"149","played":0,"embers":2}
+{"ts":"2026-07-30T02:33:56.607Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785378834554.png","text":"Vestibule\n\"I was looking for something. I forgot what.\"\nDEFEATED BY\nThe Lost Soul\nCIRCLE I — LIMBO\n\"A stronger damned spirit. Hunger drives its blows.\"\nFIGHTS\n1\nCHAINS\n0\nCARDS PLAYED\n7\nMAX STRIKE\n41\n\"You were lost before you started.\"\nSO CLOSE\n💀\n130 HP\nleft on The Lost Soul\n⚡\n627 PTS from your personal best!\n😰\nTanuki survived with just 1 HP!\n☠ The Lost Soul hit for 5 damage\n💀 WHAT WENT WRONG\nOnly 7 cards played across 6 strikes. Play more cards to build stronger strikes.\n1,528\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 627 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n14,794 / 15,000\n✨ Brynja Foil Available\n4 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n1\nSTRIKES\n6\nCARDS\n7\nDAMAGE\n144\nBEST HIT\n41\nSTONED\n0\nCORRUPT\n20%\nSTASH\n10🌿\nRUN #\n10\nOVERKILL\n—\nVS LAST RUN:\nSCORE +2\nDMG +23\n(C1)\n🤘\nBattle Cry\n6/10 → Novice\n🔌\nPower Tap\n6/10 → Novice\n🪙\nTapped Out\n4/10 → Novice\n🔥 10 DAY STREAK\n💀 10 losses in a row...\n2/17 achievements\n▶ PAST RUNS (10)\nSEED: 486EA2\n📋 Copy Seed"}
+{"ts":"2026-07-30T02:33:57.943Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T02:33:57.958Z","ev":"draft","pick":["FreyaSynth PlayerATK4CORRUPTHP","LokiSynth PlayerATK3CORRUPTHP6"]}
+{"ts":"2026-07-30T02:33:59.962Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T02:34:02.070Z","ev":"play_fail","card":"Power Tap","cost":0}
+{"ts":"2026-07-30T02:34:03.269Z","ev":"play","card":"Chain Groupie","cardType":"EMBER","cost":1,"target":"Freya"}
+{"ts":"2026-07-30T02:34:04.007Z","ev":"play_fail","card":"Chain Groupie","cost":1}
+{"ts":"2026-07-30T02:34:05.180Z","ev":"play_fail","card":"Chain Burn the Set","cost":0}
+{"ts":"2026-07-30T02:34:06.366Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T02:34:06.759Z","ev":"strike","strikes":"4","bossHp":"84","played":1,"embers":5,"preview":"8"}
+{"ts":"2026-07-30T02:34:09.803Z","ev":"session","msg":"autopilot loop end","minutes":"2.1"}
+{"ts":"2026-07-30T02:34:44.587Z","ev":"session","msg":"autopilot v2 start"}
+{"ts":"2026-07-30T02:34:45.615Z","ev":"play","card":"Burn the Set","cardType":"RIFF","cost":0,"target":"Freya"}
+{"ts":"2026-07-30T02:34:46.333Z","ev":"play_fail","card":"Burn the Set","cost":0}
+{"ts":"2026-07-30T02:34:47.503Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T02:34:48.600Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:34:48.974Z","ev":"strike","strikes":"3","bossHp":"74","played":1,"embers":5,"preview":"9"}
+{"ts":"2026-07-30T02:34:52.692Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:34:53.827Z","ev":"play_fail","card":"RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T02:34:55.016Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T02:34:55.438Z","ev":"trip_used","btn":"🍄⛧","bossPct":"74"}
+{"ts":"2026-07-30T02:34:57.313Z","ev":"strike","strikes":"2","bossHp":"68","played":0,"embers":4}
+{"ts":"2026-07-30T02:35:01.120Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:35:02.269Z","ev":"play_fail","card":"RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T02:35:03.431Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T02:35:03.883Z","ev":"trip_used","btn":"🍄⛧","bossPct":"62"}
+{"ts":"2026-07-30T02:35:05.764Z","ev":"strike","strikes":"1","bossHp":"57","played":0,"embers":4}
+{"ts":"2026-07-30T02:35:09.639Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:35:10.793Z","ev":"play_fail","card":"RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T02:35:11.983Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T02:35:12.401Z","ev":"trip_used","btn":"🍄⛧","bossPct":"50"}
+{"ts":"2026-07-30T02:35:14.284Z","ev":"strike","strikes":"0","bossHp":"47","played":0,"embers":4}
+{"ts":"2026-07-30T02:35:19.328Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785378917309.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n4\nMAX STRIKE\n9\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n42 HP\nfrom killing The Wanderer!\n⚡\n1,002 PTS from your personal best!\n😰\nFreya survived with just 1 HP!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 8 damage. Stack more buffs before each strike.\n1,153\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 1,002 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n15,571 / 25,000\n😈 Demonic Pack from C3\n5 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n4\nDAMAGE\n33\nBEST HIT\n9\nSTONED\n0\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n11\nOVERKILL\n—\nVS LAST RUN:\nSCORE +1\nDMG +8\n(C1)\n🤘\nBattle Cry\n7/10 → Novice\n🔌\nPower Tap\n7/10 → Novice\n🪙\nTapped Out\n4/10 → Novice\n🔥 11 DAY STREAK\n💀 11 losses in a row...\n2/17 achievements\n▶ PAST RUNS (11)\nSEED: 16DBE\n📋 Copy Seed"}
+{"ts":"2026-07-30T02:35:20.652Z","ev":"draft","pick":["DagBass PlayerATK2ANCHORHP12","TanukiBass PlayerATK8ANCHORHP8"]}
+{"ts":"2026-07-30T02:35:22.640Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T02:35:24.877Z","ev":"play_fail","card":"Groupie","cost":1}
+{"ts":"2026-07-30T02:35:26.107Z","ev":"play","card":"Herb Money","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:35:26.873Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:35:28.024Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T02:35:29.157Z","ev":"play_fail","card":"ChainBattle Cry","cost":1}
+{"ts":"2026-07-30T02:35:29.545Z","ev":"strike","strikes":"4","bossHp":"84","played":1,"embers":5,"preview":"11"}
+{"ts":"2026-07-30T02:35:33.327Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:35:34.500Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T02:35:35.762Z","ev":"play_fail","card":"ChainBattle Cry","cost":1}
+{"ts":"2026-07-30T02:35:36.243Z","ev":"strike","strikes":"3","bossHp":"82","played":0,"embers":5}
+{"ts":"2026-07-30T02:35:39.326Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T02:35:40.147Z","ev":"play","card":"Herb Money","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:35:40.932Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:35:42.051Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T02:35:43.240Z","ev":"play_fail","card":"Chain Mosh Pit","cost":1}
+{"ts":"2026-07-30T02:35:43.648Z","ev":"strike","strikes":"3","bossHp":"73","played":1,"embers":5,"preview":"12"}
+{"ts":"2026-07-30T02:35:47.480Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:35:48.675Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T02:35:50.083Z","ev":"play_fail","card":"Mosh Pit","cost":1}
+{"ts":"2026-07-30T02:35:50.523Z","ev":"trip_used","btn":"🍄⛧","bossPct":"73"}
+{"ts":"2026-07-30T02:35:52.401Z","ev":"strike","strikes":"2","bossHp":"71","played":0,"embers":4}
+{"ts":"2026-07-30T02:35:56.197Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:35:57.388Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T02:35:58.576Z","ev":"play_fail","card":"Mosh Pit","cost":1}
+{"ts":"2026-07-30T02:35:59.020Z","ev":"trip_used","btn":"🍄⛧","bossPct":"60"}
+{"ts":"2026-07-30T02:36:00.897Z","ev":"strike","strikes":"1","bossHp":"59","played":0,"embers":4}
+{"ts":"2026-07-30T02:36:04.772Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T02:36:06.066Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T02:36:07.399Z","ev":"play_fail","card":"Mosh Pit","cost":1}
+{"ts":"2026-07-30T02:36:07.879Z","ev":"trip_used","btn":"🍄⛧","bossPct":"46"}
+{"ts":"2026-07-30T02:36:09.764Z","ev":"strike","strikes":"0","bossHp":"48","played":0,"embers":4}
+{"ts":"2026-07-30T02:36:09.875Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T02:36:14.899Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785378972547.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n2\nMAX STRIKE\n12\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n39 HP\nfrom killing The Wanderer!\n⚡\n985 PTS from your personal best!\n😰\nTanuki survived with just 2 HP!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 11 damage. Stack more buffs before each strike.\n1,170\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 985 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n16,757 / 25,000\n😈 Demonic Pack from C3\n5 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n2\nDAMAGE\n45\nBEST HIT\n12\nSTONED\n0\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n12\nOVERKILL\n—\nVS LAST RUN:\nSCORE +1\nDMG +11\n(C1)\n🤘\nBattle Cry\n8/10 → Novice\n🔌\nPower Tap\n7/10 → Novice\n🍯\nGroupie\n4/10 → Novice\n🔥 12 DAY STREAK\n💀 12 losses in a row...\n2/17 achievements\n▶ PAST RUNS (12)\nSEED: 552E80\n📋 Copy Seed"}
+{"ts":"2026-07-30T02:36:16.229Z","ev":"draft","pick":["TanukiBass PlayerATK8ANCHORHP8","IngridBass PlayerATK3ANCHORHP1"]}
+{"ts":"2026-07-30T02:36:18.298Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T02:36:20.528Z","ev":"play_fail","card":"Tapped Out","cost":0}
+{"ts":"2026-07-30T02:36:21.770Z","ev":"play","card":"Chain Encore","cardType":"RIFF","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T02:36:22.587Z","ev":"play_fail","card":"Chain Encore","cost":2}
+{"ts":"2026-07-30T02:36:23.744Z","ev":"play","card":"ChainRarePossessed Performance","cardType":"RIFF","cost":3,"target":"Tanuki"}
+{"ts":"2026-07-30T02:36:24.523Z","ev":"play_fail","card":"ChainRarePossessed Performance","cost":3}
+{"ts":"2026-07-30T02:36:25.845Z","ev":"play","card":"Setlist","cardType":"UTILITY","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T02:36:26.623Z","ev":"play_fail","card":"Setlist","cost":0}
+{"ts":"2026-07-30T02:36:27.985Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T02:36:28.398Z","ev":"modal_pick","card":"Dial to ElevenCORRUPT"}
+{"ts":"2026-07-30T02:36:29.210Z","ev":"strike","strikes":"4","bossHp":"84","played":3,"embers":5,"preview":"138"}
+{"ts":"2026-07-30T02:36:33.175Z","ev":"play_fail","card":"Groupie","cost":1}
+{"ts":"2026-07-30T02:36:34.325Z","ev":"play","card":"Wake Up Call","cardType":"UTILITY","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:36:34.354Z","ev":"strike","strikes":"3","bossHp":"0","played":1,"embers":5}
+{"ts":"2026-07-30T02:36:34.358Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T02:36:38.267Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T02:36:38.288Z","ev":"shop_buy","label":"Band Recruitment🎸 Welcome PackFREE — Pick 1 of 2 ","why":"free member","stash":17,"bandSize":2}
+{"ts":"2026-07-30T02:36:39.961Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nBrynja\nBASS PLAYER\nATK\n1\nANCHOR\nHP\n14\nAn immovable wall. The bass never stops.\nLoki\nSYNTH PLAYER\nATK\n3\nCORRUPT\nHP\n6\nDamage scales with Corruption.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T02:36:42.953Z","ev":"shop_leave","stash":17,"bandSize":3,"bought":[],"shot":"/tmp/shots/shop-final-1785379000783.png"}
+{"ts":"2026-07-30T02:36:45.176Z","ev":"play_fail","card":"Tapped Out","cost":0}
+{"ts":"2026-07-30T02:36:46.420Z","ev":"play","card":"Soundboard","cardType":"EMBER","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:36:47.179Z","ev":"play_fail","card":"Soundboard","cost":1}
+{"ts":"2026-07-30T02:36:48.356Z","ev":"play","card":"Encore","cardType":"RIFF","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T02:36:49.176Z","ev":"play_fail","card":"Encore","cost":2}
+{"ts":"2026-07-30T02:36:50.373Z","ev":"play","card":"Dial to Eleven","cardType":"CORRUPT","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T02:36:51.119Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T02:36:52.328Z","ev":"play","card":"Distortion","cardType":"CORRUPT","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T02:36:52.357Z","ev":"strike","strikes":"4","bossHp":"278","played":4,"embers":5,"preview":"50"}
+{"ts":"2026-07-30T02:36:55.435Z","ev":"session","msg":"autopilot loop end","minutes":"2.2"}

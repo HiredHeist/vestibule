@@ -76,11 +76,19 @@ async function drag(x1, y1, x2, y2) {
   await p.waitForTimeout(450)
 }
 async function key(k) { const p = await connect(); await p.keyboard.press(k); await p.waitForTimeout(250) }
+// card play via the game's QUICK-PLAY path: click hand card (selects, sets
+// quickPlayCardUid) then click the target StageSlot (fires handleDropOnStage).
+// Same engine path as drag-drop, but pure CDP clicks — no native drag loop.
+async function playCard(cx, cy, tx, ty) {
+  const p = await connect()
+  await p.mouse.click(cx, cy); await p.waitForTimeout(250)
+  await p.mouse.click(tx, ty); await p.waitForTimeout(400)
+}
 async function evaljs(code) { const p = await connect(); return p.evaluate(code) }
 
 async function reset() { try { if (browser) await browser.close() } catch (e) {} browser = null; page = null; _cdp = null }
 
-module.exports = { connect, state, shot, locate, click, clickText, drag, key, evaljs, reset }
+module.exports = { connect, state, shot, locate, click, clickText, drag, key, evaljs, reset, playCard }
 
 // CLI: node pilot.cjs state | shot NAME | click X Y | clicktext TXT | key K | eval CODE
 if (require.main === module) {
@@ -91,6 +99,7 @@ if (require.main === module) {
     else if (cmd === 'click') await click(+a[0], +a[1])
     else if (cmd === 'clicktext') console.log(JSON.stringify(await clickText(a.join(' '))))
     else if (cmd === 'drag') await drag(+a[0], +a[1], +a[2], +a[3])
+    else if (cmd === 'playcard') await playCard(+a[0], +a[1], +a[2], +a[3])
     else if (cmd === 'key') await key(a[0])
     else if (cmd === 'eval') console.log(JSON.stringify(await evaljs(a.join(' '))))
     process.exit(0)
