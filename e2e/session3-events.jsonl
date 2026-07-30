@@ -164,3 +164,75 @@
 {"ts":"2026-07-30T01:33:46.111Z","ev":"stuck","type":"unknown","shot":"/tmp/shots/stuck-1785375224542.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n6\nMAX STRIKE\n22\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n38 HP\nfrom killing The Wanderer!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 12 damage. Stack more buffs before each strike.\n1,114\nLOCAL LEGEND\n🏆 NEW PERSONAL BEST! +1\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n2,227 / 3,000\n🪈 Unlock Vitalik\n1 unlock earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n6\nDAMAGE\n46\nBEST HIT\n22\nSTONED\n0\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n1\nOVERKILL\n—\nVS LAST RUN:\nSCORE +1\nDMG +8\n(C1)\n🔊\nSound Check\n1/10 → Novice\n🤘\nBattle Cry\n1/10 → Novice\n"}
 {"ts":"2026-07-30T01:33:46.255Z","ev":"abort","msg":"hard stuck"}
 {"ts":"2026-07-30T01:33:46.255Z","ev":"session","msg":"autopilot loop end","minutes":"1.3"}
+{"ts":"2026-07-30T01:38:15.544Z","ev":"session","msg":"autopilot v1 start"}
+{"ts":"2026-07-30T01:38:17.131Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785375495719.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n6\nMAX STRIKE\n22\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n38 HP\nfrom killing The Wanderer!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 12 damage. Stack more buffs before each strike.\n1,114\nLOCAL LEGEND\n🏆 NEW PERSONAL BEST! +1\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n2,227 / 3,000\n🪈 Unlock Vitalik\n1 unlock earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n6\nDAMAGE\n46\nBEST HIT\n22\nSTONED\n0\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n1\nOVERKILL\n—\nVS LAST RUN:\nSCORE +1\nDMG +8\n(C1)\n🔊\nSound Check\n1/10 → Novice\n🤘\nBattle Cry\n1/10 → Novice\n🛡\nRoadie\n1/10 → Novice\n0/17 achievements\nSEED: 4B8D7F\n📋 Copy Seed"}
+{"ts":"2026-07-30T01:38:18.345Z","ev":"draft","pick":["UlfBass PlayerATK4ANCHORHP9","VitalikDark MinstrelATK6FOLK M"]}
+{"ts":"2026-07-30T01:38:20.353Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T01:38:22.668Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Vitalik"}
+{"ts":"2026-07-30T01:38:23.651Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Vitalik"}
+{"ts":"2026-07-30T01:38:43.680Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:38:45.138Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Vitalik"}
+{"ts":"2026-07-30T01:38:45.807Z","ev":"play","card":"Crowd Surf","cardType":"RIFF","cost":2,"target":"Vitalik"}
+{"ts":"2026-07-30T01:39:05.824Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:39:07.317Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Ulf"}
+{"ts":"2026-07-30T01:39:27.353Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:39:28.168Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:29.378Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:30.556Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:31.720Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T01:39:31.745Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:32.959Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:34.152Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:35.335Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:36.528Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:37.759Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:38.964Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:40.147Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:41.342Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:42.600Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:43.779Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T01:39:43.800Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:44.995Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:46.209Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:47.396Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:48.631Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:49.834Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:51.036Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:52.238Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:53.461Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:54.702Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:55.887Z","ev":"heartbeat","tick":30}
+{"ts":"2026-07-30T01:39:55.956Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:57.180Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:58.421Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:39:59.642Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:40:00.879Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:40:02.080Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:40:06.122Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785375603271.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n3\nMAX STRIKE\n25\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n16 HP\nfrom killing The Wanderer!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 17 damage. Stack more buffs before each strike.\n737\nLOCAL LEGEND\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n3,374 / 5,000\n⛧ 6th Artifact Slot\n2 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n3\nDAMAGE\n67\nBEST HIT\n25\nSTONED\n0\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n2\nOVERKILL\n—\nVS LAST RUN:\nSCORE +1\nDMG +14\n(C1)\n🔊\nSound Check\n1/10 → Novice\n🤘\nBattle Cry\n1/10 → Novice\n🛡\nRoadie\n1/10 → Novice\n🔥 2 DAY STREAK\n0/17 achievements\n▶ PAST RUNS (2)\nSEED: 62D3B\n📋 Copy Seed"}
+{"ts":"2026-07-30T01:40:08.453Z","ev":"draft","pick":["RagnarLead GuitaristATK4FRENZI","BjornLead GuitaristATK5FRENZIE"]}
+{"ts":"2026-07-30T01:40:10.530Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T01:40:13.093Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T01:40:33.126Z","ev":"error","msg":"op timeout: drag","type":"combat"}
+{"ts":"2026-07-30T01:40:33.926Z","ev":"heartbeat","tick":40}
+{"ts":"2026-07-30T01:40:34.576Z","ev":"play","card":"Heavy Riff","cardType":"RIFF","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T01:40:35.343Z","ev":"play","card":"ChainRareInfernal Encore","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T01:40:36.752Z","ev":"play","card":"RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T01:40:37.329Z","ev":"play","card":"Death Riff","cardType":"CORRUPT","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T01:40:37.339Z","ev":"strike","strikes":"4","bossHp":"84","played":4,"embers":3,"preview":"55"}
+{"ts":"2026-07-30T01:40:40.366Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:40:41.544Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:40:43.343Z","ev":"play","card":"RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Ragnar"}
+{"ts":"2026-07-30T01:40:44.240Z","ev":"play","card":"RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ragnar"}
+{"ts":"2026-07-30T01:40:44.867Z","ev":"play","card":"Death Riff","cardType":"CORRUPT","cost":1,"target":"Ragnar"}
+{"ts":"2026-07-30T01:40:44.883Z","ev":"strike","strikes":"3","bossHp":"38","played":3,"embers":5}
+{"ts":"2026-07-30T01:40:48.738Z","ev":"play","card":"Chain Encore","cardType":"RIFF","cost":2,"target":"Ragnar"}
+{"ts":"2026-07-30T01:40:49.593Z","ev":"play","card":"ChainRareInfernal Encore","cardType":"RIFF","cost":3,"target":"Ragnar"}
+{"ts":"2026-07-30T01:40:53.424Z","ev":"play","card":"ChainRarePossessed Performance","cardType":"RIFF","cost":3,"target":"Ragnar"}
+{"ts":"2026-07-30T01:40:55.947Z","ev":"play","card":"Roadie","cardType":"UTILITY","cost":1,"target":"Ragnar"}
+{"ts":"2026-07-30T01:40:56.726Z","ev":"play","card":"Death Riff","cardType":"CORRUPT","cost":1,"target":"Ragnar"}
+{"ts":"2026-07-30T01:40:57.324Z","ev":"play","card":"Signal Decay","cardType":"CORRUPT","cost":1,"target":"Ragnar"}
+{"ts":"2026-07-30T01:40:57.350Z","ev":"strike","strikes":"3","bossHp":"29","played":6,"embers":5,"preview":"92"}
+{"ts":"2026-07-30T01:41:00.394Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:41:01.593Z","ev":"warn","msg":"no members parsed"}
+{"ts":"2026-07-30T01:41:04.015Z","ev":"run_end","result":"VICTORY","shot":"/tmp/shots/VICTORY-1785375662760.png","text":"⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧\nVICTORY\nVICTORY\nTHE WANDERER DESTROYED\nDAMAGE DEALT\n147\nSTRIKES USED\n2 / 4\nCARDS PLAYED\n5\nHIGHEST STRIKE\n92\nEMBERS SPENT\n10\nCORRUPTION GAINED\n+0%\nTIME TAKEN\n0:51\nRIFF CHAINS\n0\nMVP: 🎸 Bjorn\n⛧\nCONTINUE\n⛧\nPress SPACE or ENTER\n⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧ · ✠ · ⛧ · ☥ · ⛧"}
+{"ts":"2026-07-30T01:41:04.015Z","ev":"session","msg":"autopilot loop end","minutes":"2.8"}

@@ -23,7 +23,8 @@ async function screenType(s) {
   if (t.includes('BACK TO THE PIT') || t.includes('SLY')) return 'shop'
   if (t.includes('START TUTORIAL') || t.includes('ENTER THE VESTIBULE')) return 'menu'
   if (t.includes('DEFEATED BY') || t.includes('PLAY AGAIN') || t.includes('TRY AGAIN') || t.includes('CAUSE OF DEATH')) return 'death'
-  if (t.includes('LUCIFER IS DEAD') || t.includes('VICTORY')) return 'victory'
+  if (t.includes('LUCIFER IS DEAD') || (t.includes('VICTORY') && t.includes('LUCIFER'))) return 'victory'
+  if (t.includes('VICTORY') || t.includes('ONWARD')) return 'popup' // fight-victory summary → click through
   return 'unknown'
 }
 
@@ -45,9 +46,10 @@ async function members() {
     const seen = {}
     return [...document.querySelectorAll('div')].filter(d => {
       const t = d.textContent || ''; const r = d.getBoundingClientRect()
-      return /ATK\\s*\\d/.test(t) && /HP\\s*\\d/.test(t) && t.length < 160 && r.y > 250 && r.y < 700 && r.height > 150
+      return /ATK\\s*\\d/.test(t) && /HP\\s*\\d/.test(t) && t.length < 400 && r.y > 230 && r.y < 700 && r.height > 120 && r.width < 450
     }).map(d => { const r = d.getBoundingClientRect(); const t = d.textContent.replace(/\\s+/g, ' ')
-      const nm = t.match(/^([A-Z][a-z]+)/); const atk = t.match(/ATK\\s*(\\d+)(?:\\+(\\d+))?/); const hp = t.match(/HP\\s*(\\d+)/)
+      const nm = t.match(/([A-Z][a-z]+)\\s*(?:Rhythm|Lead|Bass|Synth|Drummer|Vocalist|Dark|[A-Z]{2})/) || t.match(/^\\W*([A-Z][a-z]+)/)
+      const atk = t.match(/ATK\\s*(\\d+)(?:\\+(\\d+))?/); const hp = t.match(/HP\\s*(\\d+)/)
       return nm && atk ? { name: nm[1], atk: (+atk[1]) + (+(atk[2] || 0)), hp: hp ? +hp[1] : 0, x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } : null
     }).filter(Boolean).filter(m => seen[m.name] ? false : (seen[m.name] = 1))
   })()`)
@@ -56,8 +58,12 @@ async function members() {
 async function combatTick(s) {
   const strikes = (s.text.match(/STRIKE ⛧\s*(\d+)\s*\/\s*(\d+)/) || [])[1]
   const bossHp = (s.text.match(/(\d+)\s*\/\s*(\d+)\s*HP/) || [])
-  const h = await hand(); const mem = await members()
-  if (!mem.length) { ev('warn', { msg: 'no members parsed' }); return P.clickText('strike').catch(() => {}) }
+  const h = await hand(); let mem = await members()
+  if (!mem.length) {
+    // fallback: known stage-slot coords — never strike blind again
+    ev('warn', { msg: 'no members parsed — using fixed slot fallback' })
+    mem = [{ name: 'slot1', atk: 1, x: 735, y: 470 }, { name: 'slot2', atk: 0, x: 1018, y: 470 }]
+  }
   const target = mem.sort((a, b) => b.atk - a.atk)[0]
   const embers = +((s.text.match(/(\d+)\s*\/\s*\d+\s*\n?FIGHT/) || [])[1] || 99)
   // SHREDDER doctrine: embers first, then EVERY affordable RIFF back-to-back (chains
