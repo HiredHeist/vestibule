@@ -1,6 +1,6 @@
 # VESTIBULE — Developer Notes
 
-*Last updated: May 2, 2026 · Latest commit: `64ecb85` (Wanderer training-wheels + Welcome Pack) · App.jsx: ~11,339 lines*
+*Last updated: July 30, 2026 · v0.8.0 era (Band Auras, per-deck stakes, split phase 1 → src/data/) · App.jsx: ~11,3xx lines + src/data/ extraction · Bot playtest rig lives in e2e/ (ops + lessons: HANDOFF.md)*
 
 This is the canonical dev reference. If something here conflicts with another doc, this wins. If you find this doc out of sync with the code, **fix the doc in the same commit as the code**.
 
@@ -242,6 +242,19 @@ vst_achievement_*         Per-achievement unlock flags
 - Sim is fast: 5K games in ~17 seconds, 10K in ~35 seconds
 
 When changing game balance, run sim before committing.
+
+⚠ July 30, 2026: fresh 2K Bronze/Standard sim = 39.95% Lucifer wins, but the July 29
+audit claimed 8.3–11.8%. Params of the old sweep unknown — reconcile before balance work.
+
+---
+
+## E2E BOT RIG (July 30, 2026)
+
+`e2e/` contains an autonomous playtester (Electron+CDP+Playwright under Xvfb). Boot with
+`bash e2e/up.sh`; manual hand `node e2e/pilot.cjs`; autonomous play `node e2e/autopilot.cjs N`
+(N minutes). Decision ledger: `e2e/session3-events.jsonl`. CRITICAL: play cards via the
+quick-play click path (click card → click member), never mouse-drag (native drag loop
+swallows CDP input). Full ops guide + rig lessons: HANDOFF.md.
 
 ---
 

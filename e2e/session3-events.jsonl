@@ -1003,3 +1003,763 @@
 {"ts":"2026-07-30T02:39:35.325Z","ev":"stuck","type":"recruit","shot":"/tmp/shots/stuck-1785379174459.png","text":"Recruit a Member\nChoose one musician to join your band — or pass\nIngrid\nBASS PLAYER\nATK\n3\nANCHOR\nHP\n10\nHigh HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).\nThor\nDRUMMER\nATK\n0\nDOUBLE TIME\nHP\n8\nLucky drummer. Roll high and the whole band hits harder.\nPASS — NO RECRUITMENT"}
 {"ts":"2026-07-30T02:39:35.352Z","ev":"abort","msg":"hard stuck"}
 {"ts":"2026-07-30T02:39:35.353Z","ev":"session","msg":"autopilot loop end","minutes":"2.3"}
+{"ts":"2026-07-30T03:08:09.368Z","ev":"session","msg":"autopilot v2 start"}
+{"ts":"2026-07-30T03:08:09.427Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:12.436Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:15.444Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:18.451Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:21.462Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:24.468Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:27.474Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:30.486Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:33.497Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:36.499Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T03:08:36.506Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:39.517Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:42.526Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:45.535Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:48.543Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:51.554Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:54.562Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:08:57.568Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:00.572Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:03.579Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:06.581Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T03:09:06.583Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:09.590Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:12.598Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:15.606Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:18.611Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:21.622Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:24.629Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:27.636Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:30.647Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:33.658Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:36.659Z","ev":"heartbeat","tick":30}
+{"ts":"2026-07-30T03:09:36.662Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:39.670Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:42.681Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:45.688Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:48.695Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:51.702Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:54.707Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:09:57.723Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:00.728Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:03.736Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:06.738Z","ev":"heartbeat","tick":40}
+{"ts":"2026-07-30T03:10:06.741Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:09.747Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:12.755Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:15.763Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:18.768Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:21.773Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:24.778Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:27.782Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:30.787Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:33.795Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:36.797Z","ev":"heartbeat","tick":50}
+{"ts":"2026-07-30T03:10:36.800Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:39.805Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:42.810Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:45.814Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:48.820Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:51.824Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:54.827Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:10:57.831Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:00.836Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:03.842Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:06.843Z","ev":"heartbeat","tick":60}
+{"ts":"2026-07-30T03:11:06.846Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:09.852Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:12.860Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:15.865Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:18.875Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:21.882Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:24.889Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:27.893Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:30.897Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:33.901Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:36.903Z","ev":"heartbeat","tick":70}
+{"ts":"2026-07-30T03:11:36.907Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:39.912Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:42.918Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:45.923Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:48.928Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:51.933Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:54.937Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:11:57.942Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:00.948Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:03.955Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:06.957Z","ev":"heartbeat","tick":80}
+{"ts":"2026-07-30T03:12:06.961Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:09.965Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:12.971Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:15.977Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:18.982Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:21.991Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:24.997Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:28.004Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:31.011Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:34.020Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:37.028Z","ev":"heartbeat","tick":90}
+{"ts":"2026-07-30T03:12:37.058Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:40.111Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:43.135Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:46.152Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:49.173Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:52.181Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:55.189Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:12:58.197Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:01.206Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:04.212Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:07.214Z","ev":"heartbeat","tick":100}
+{"ts":"2026-07-30T03:13:07.219Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:10.221Z","ev":"session","msg":"autopilot loop end","minutes":"5.0"}
+{"ts":"2026-07-30T03:13:28.297Z","ev":"session","msg":"autopilot v2 start"}
+{"ts":"2026-07-30T03:13:28.347Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:31.355Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:34.363Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:37.372Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:40.380Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:43.385Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:46.392Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:49.405Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:52.413Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:55.414Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T03:13:55.417Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:13:58.421Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:14:01.427Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:14:04.436Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:14:07.441Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:14:10.446Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:14:13.456Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:14:16.460Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:14:19.466Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:14:22.475Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:14:25.477Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T03:14:25.481Z","ev":"error","msg":"browserType.connectOverCDP: connect ECONNREFUSED 127.0.0.1:9222\nCall log:\n\u001b[2m  - <ws preparing> retrieving websocket url from http://localhost:9222\u001b[22m\n"}
+{"ts":"2026-07-30T03:15:24.179Z","ev":"session","msg":"autopilot v2 start"}
+{"ts":"2026-07-30T03:15:24.505Z","ev":"run_start"}
+{"ts":"2026-07-30T03:15:27.874Z","ev":"play_fail","card":"Soundboard","cost":1}
+{"ts":"2026-07-30T03:15:29.138Z","ev":"play","card":"Battle Cry","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:15:29.867Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T03:15:30.950Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:15:31.685Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:15:32.838Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T03:15:33.899Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T03:15:34.304Z","ev":"strike","strikes":"4","bossHp":"84","played":2,"embers":5,"preview":"15"}
+{"ts":"2026-07-30T03:15:38.131Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:15:39.297Z","ev":"play_fail","card":"Encore","cost":2}
+{"ts":"2026-07-30T03:15:40.466Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T03:15:40.856Z","ev":"strike","strikes":"3","bossHp":"73","played":0,"embers":4}
+{"ts":"2026-07-30T03:15:44.686Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:15:45.495Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:15:46.665Z","ev":"play_fail","card":"Encore","cost":2}
+{"ts":"2026-07-30T03:15:47.814Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T03:15:48.217Z","ev":"strike","strikes":"3","bossHp":"62","played":1,"embers":4,"preview":"14"}
+{"ts":"2026-07-30T03:15:52.025Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:15:53.184Z","ev":"play_fail","card":"Encore","cost":2}
+{"ts":"2026-07-30T03:15:54.393Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T03:15:54.847Z","ev":"trip_used","btn":"🍄⛧","bossPct":"50"}
+{"ts":"2026-07-30T03:15:56.744Z","ev":"strike","strikes":"2","bossHp":"52","played":0,"embers":3}
+{"ts":"2026-07-30T03:16:00.560Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:16:01.748Z","ev":"play_fail","card":"Encore","cost":2}
+{"ts":"2026-07-30T03:16:02.901Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T03:16:03.314Z","ev":"strike","strikes":"1","bossHp":"33","played":0,"embers":3}
+{"ts":"2026-07-30T03:16:07.341Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:16:08.139Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:16:09.297Z","ev":"play_fail","card":"Encore","cost":2}
+{"ts":"2026-07-30T03:16:10.562Z","ev":"play_fail","card":"Death Riff","cost":1}
+{"ts":"2026-07-30T03:16:11.000Z","ev":"strike","strikes":"1","bossHp":"24","played":1,"embers":3,"preview":"21"}
+{"ts":"2026-07-30T03:16:14.885Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:16:16.140Z","ev":"play_fail","card":"Encore","cost":2}
+{"ts":"2026-07-30T03:16:17.337Z","ev":"play_fail","card":"Death Riff","cost":1}
+{"ts":"2026-07-30T03:16:17.769Z","ev":"strike","strikes":"0","bossHp":"11","played":0,"embers":3}
+{"ts":"2026-07-30T03:16:22.395Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T03:16:22.430Z","ev":"warn","msg":"no members parsed — using fixed slot fallback"}
+{"ts":"2026-07-30T03:16:22.449Z","ev":"strike","played":0,"embers":99}
+{"ts":"2026-07-30T03:16:28.646Z","ev":"shop_leave","stash":7,"bandSize":2,"bought":[],"shot":"/tmp/shots/shop-final-1785381385545.png"}
+{"ts":"2026-07-30T03:16:30.939Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:16:32.113Z","ev":"play","card":"Smoke Break","cardType":"UTILITY","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T03:16:32.886Z","ev":"play_fail","card":"Smoke Break","cost":0}
+{"ts":"2026-07-30T03:16:34.206Z","ev":"play","card":"Wake Up Call","cardType":"UTILITY","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:16:34.955Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T03:16:36.193Z","ev":"play","card":"Chain Amp the Static","cardType":"CORRUPT","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T03:16:36.979Z","ev":"play_fail","card":"Chain Amp the Static","cost":2}
+{"ts":"2026-07-30T03:16:37.418Z","ev":"strike","strikes":"4","bossHp":"278","played":3,"embers":5,"preview":"79"}
+{"ts":"2026-07-30T03:16:41.295Z","ev":"play_fail","card":"Chain Amp the Static","cost":2}
+{"ts":"2026-07-30T03:16:41.714Z","ev":"strike","strikes":"3","bossHp":"229","played":0,"embers":5}
+{"ts":"2026-07-30T03:16:45.654Z","ev":"play_fail","card":"Chain Amp the Static","cost":2}
+{"ts":"2026-07-30T03:16:46.833Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:16:48.057Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:16:48.529Z","ev":"strike","strikes":"3","bossHp":"180","played":0,"embers":5,"preview":"27"}
+{"ts":"2026-07-30T03:16:52.545Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:16:53.908Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:16:55.194Z","ev":"play_fail","card":"Encore","cost":2}
+{"ts":"2026-07-30T03:16:55.639Z","ev":"trip_used","btn":"🍄⛧","bossPct":"54"}
+{"ts":"2026-07-30T03:16:57.528Z","ev":"strike","strikes":"2","bossHp":"165","played":0,"embers":3}
+{"ts":"2026-07-30T03:17:01.484Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:17:02.933Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:17:04.221Z","ev":"play_fail","card":"Chain Encore","cost":2}
+{"ts":"2026-07-30T03:17:04.668Z","ev":"trip_used","btn":"🍄⛧","bossPct":"45"}
+{"ts":"2026-07-30T03:17:06.561Z","ev":"strike","strikes":"1","bossHp":"138","played":0,"embers":3}
+{"ts":"2026-07-30T03:17:10.635Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:17:12.010Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:17:13.334Z","ev":"play_fail","card":"Chain Encore","cost":2}
+{"ts":"2026-07-30T03:17:13.814Z","ev":"strike","strikes":"0","bossHp":"114","played":0,"embers":3}
+{"ts":"2026-07-30T03:17:19.477Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785381436846.png","text":"Vestibule\n\"I was looking for something. I forgot what.\"\nDEFEATED BY\nThe Lost Soul\nCIRCLE I — LIMBO\n\"A stronger damned spirit. Hunger drives its blows.\"\nFIGHTS\n1\nCHAINS\n0\nCARDS PLAYED\n8\nMAX STRIKE\n79\n\"You were lost before you started.\"\nSO CLOSE\n⚡\n411 PTS\nfrom your personal best!\n💀\n102 HP left on The Lost Soul\n😰\nTanuki survived with just 1 HP!\n☠ The Lost Soul hit for 5 damage\n💀 WHAT WENT WRONG\nOnly 8 cards played across 8 strikes. Play more cards to build stronger strikes.\n0\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 411 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n22,340 / 25,000\n😈 Demonic Pack from C3\n5 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n1\nSTRIKES\n8\nCARDS\n8\nDAMAGE\n203\nBEST HIT\n79\nSTONED\n0\nCORRUPT\n20%\nSTASH\n10🌿\nRUN #\n15\nOVERKILL\n—\nVS LAST RUN:\nSCORE +3\nDMG +19\n(C1)\n🤘\nBattle Cry\n9/10 → Novice\n🔌\nPower Tap\n7/10 → Novice\n🪙\nTapped Out\n6/10 → Novice\n🔥 15 DAY STREAK\n2/17 achievements\n▶ PAST RUNS (15)\nSEED: F53C2\n📋 Copy Seed"}
+{"ts":"2026-07-30T03:17:20.757Z","ev":"draft","pick":["TanukiBass PlayerATK8ANCHORHP8","IngridBass PlayerATK3ANCHORHP1"]}
+{"ts":"2026-07-30T03:17:22.875Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T03:17:22.887Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T03:17:25.156Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:17:26.610Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T03:17:27.756Z","ev":"play_fail","card":"Smoke Break","cost":0}
+{"ts":"2026-07-30T03:17:28.236Z","ev":"strike","strikes":"4","bossHp":"84","played":0,"embers":5,"preview":"11"}
+{"ts":"2026-07-30T03:17:32.177Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:17:33.436Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T03:17:34.703Z","ev":"play_fail","card":"Smoke Break","cost":0}
+{"ts":"2026-07-30T03:17:35.129Z","ev":"strike","strikes":"3","bossHp":"76","played":0,"embers":5}
+{"ts":"2026-07-30T03:17:38.983Z","ev":"play","card":"Herb Money","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:17:39.771Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T03:17:40.186Z","ev":"strike","strikes":"3","bossHp":"68","played":1,"embers":5,"preview":"12"}
+{"ts":"2026-07-30T03:17:44.041Z","ev":"play_fail","card":"ChainRareStage Dive","cost":3}
+{"ts":"2026-07-30T03:17:44.507Z","ev":"trip_used","btn":"🍄⛧","bossPct":"60"}
+{"ts":"2026-07-30T03:17:46.414Z","ev":"strike","strikes":"2","bossHp":"59","played":0,"embers":5}
+{"ts":"2026-07-30T03:17:50.560Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T03:17:51.426Z","ev":"play_fail","card":"Tapped Out","cost":0}
+{"ts":"2026-07-30T03:17:52.772Z","ev":"play","card":"Crowd Surf","cardType":"RIFF","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T03:17:53.749Z","ev":"play_fail","card":"Crowd Surf","cost":2}
+{"ts":"2026-07-30T03:17:54.253Z","ev":"trip_used","btn":"🍄⛧","bossPct":"50"}
+{"ts":"2026-07-30T03:17:56.166Z","ev":"strike","strikes":"2","bossHp":"50","played":2,"embers":5,"preview":"13"}
+{"ts":"2026-07-30T03:18:00.110Z","ev":"play_fail","card":"Crowd Surf","cost":2}
+{"ts":"2026-07-30T03:18:00.633Z","ev":"strike","strikes":"1","bossHp":"33","played":0,"embers":5}
+{"ts":"2026-07-30T03:18:04.683Z","ev":"play_fail","card":"Crowd Surf","cost":2}
+{"ts":"2026-07-30T03:18:06.023Z","ev":"play_fail","card":"ChainBattle Cry","cost":1}
+{"ts":"2026-07-30T03:18:07.450Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:18:08.327Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:18:08.838Z","ev":"strike","strikes":"1","bossHp":"24","played":1,"embers":5,"preview":"17"}
+{"ts":"2026-07-30T03:18:12.773Z","ev":"play_fail","card":"ChainBattle Cry","cost":1}
+{"ts":"2026-07-30T03:18:14.292Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:18:14.783Z","ev":"strike","strikes":"0","bossHp":"10","played":0,"embers":3}
+{"ts":"2026-07-30T03:18:19.463Z","ev":"heartbeat","tick":30}
+{"ts":"2026-07-30T03:18:19.517Z","ev":"warn","msg":"no members parsed — using fixed slot fallback"}
+{"ts":"2026-07-30T03:18:19.557Z","ev":"strike","played":0,"embers":99}
+{"ts":"2026-07-30T03:18:26.597Z","ev":"shop_leave","stash":7,"bandSize":2,"bought":[],"shot":"/tmp/shots/shop-final-1785381502636.png"}
+{"ts":"2026-07-30T03:18:28.953Z","ev":"play_fail","card":"Tapped Out","cost":0}
+{"ts":"2026-07-30T03:18:30.216Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:18:31.049Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:18:32.248Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:18:33.396Z","ev":"play_fail","card":"Smoke Break","cost":0}
+{"ts":"2026-07-30T03:18:33.825Z","ev":"strike","strikes":"4","bossHp":"278","played":1,"embers":5,"preview":"21"}
+{"ts":"2026-07-30T03:18:37.753Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:18:39.000Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:18:40.256Z","ev":"play_fail","card":"Smoke Break","cost":0}
+{"ts":"2026-07-30T03:18:40.653Z","ev":"strike","strikes":"3","bossHp":"264","played":0,"embers":5}
+{"ts":"2026-07-30T03:18:44.809Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:18:45.639Z","ev":"play_fail","card":"Chain Encore","cost":2}
+{"ts":"2026-07-30T03:18:46.866Z","ev":"play","card":"ChainRarePossessed Performance","cardType":"RIFF","cost":3,"target":"Tanuki"}
+{"ts":"2026-07-30T03:18:47.692Z","ev":"play_fail","card":"ChainRarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:18:48.958Z","ev":"play","card":"Sound Check","cardType":"UTILITY","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T03:18:49.785Z","ev":"play_fail","card":"NEED  Sound Check","cost":2}
+{"ts":"2026-07-30T03:18:50.246Z","ev":"strike","strikes":"3","bossHp":"250","played":3,"embers":5,"preview":"195"}
+{"ts":"2026-07-30T03:18:54.142Z","ev":"play_fail","card":"NEED  Sound Check","cost":2}
+{"ts":"2026-07-30T03:18:54.656Z","ev":"strike","strikes":"2","bossHp":"75","played":0,"embers":0}
+{"ts":"2026-07-30T03:19:04.439Z","ev":"shop_leave","stash":19,"bandSize":2,"bought":[],"shot":"/tmp/shots/shop-final-1785381539433.png"}
+{"ts":"2026-07-30T03:19:06.706Z","ev":"play_fail","card":"Chain Resonance","cost":1}
+{"ts":"2026-07-30T03:19:07.910Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T03:19:09.102Z","ev":"play_fail","card":"ChainRareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:19:09.529Z","ev":"strike","strikes":"4","bossHp":"629","played":0,"embers":5,"preview":"16"}
+{"ts":"2026-07-30T03:19:13.391Z","ev":"play_fail","card":"Chain Resonance","cost":1}
+{"ts":"2026-07-30T03:19:14.601Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T03:19:15.845Z","ev":"play_fail","card":"ChainRareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:19:16.298Z","ev":"strike","strikes":"3","bossHp":"616","played":0,"embers":5}
+{"ts":"2026-07-30T03:19:19.276Z","ev":"heartbeat","tick":40}
+{"ts":"2026-07-30T03:19:20.134Z","ev":"play","card":"Chain Resonance","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:19:20.931Z","ev":"play_fail","card":"Chain Resonance","cost":1}
+{"ts":"2026-07-30T03:19:22.127Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T03:19:23.258Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T03:19:23.678Z","ev":"strike","strikes":"3","bossHp":"603","played":1,"embers":5,"preview":"35"}
+{"ts":"2026-07-30T03:19:27.606Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:19:28.873Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T03:19:30.070Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T03:19:30.513Z","ev":"trip_used","btn":"🍄⛧","bossPct":"87"}
+{"ts":"2026-07-30T03:19:32.453Z","ev":"strike","strikes":"2","bossHp":"575","played":0,"embers":2}
+{"ts":"2026-07-30T03:19:36.449Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:19:37.702Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T03:19:38.962Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T03:19:39.396Z","ev":"trip_used","btn":"🍄⛧","bossPct":"83"}
+{"ts":"2026-07-30T03:19:41.289Z","ev":"strike","strikes":"1","bossHp":"534","played":0,"embers":2}
+{"ts":"2026-07-30T03:19:45.212Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:19:46.440Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T03:19:47.664Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T03:19:48.123Z","ev":"trip_used","btn":"🍄⛧","bossPct":"79"}
+{"ts":"2026-07-30T03:19:49.999Z","ev":"strike","strikes":"0","bossHp":"508","played":0,"embers":2}
+{"ts":"2026-07-30T03:19:56.357Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785381593207.png","text":"Vestibule\n\"The road ends here. For now.\"\nDEFEATED BY\nThe Drifter\nCIRCLE I — LIMBO\n\"Pure relentless pressure.\"\nFIGHTS\n2\nCHAINS\n0\nCARDS PLAYED\n9\nMAX STRIKE\n195\n\"110 HP and pure aggression.\"\nSO CLOSE\n💀\n495 HP\nleft on The Drifter\n🔥\n1 FIGHT from clearing Circle 1\n😰\nTanuki survived with just 1 HP!\n☠ The Drifter hit for 7 damage\n💀 WHAT WENT WRONG\nOnly 9 cards played across 10 strikes. Play more cards to build stronger strikes.\n2,589\nTOURING ACT\n🔥 Streak Bonus: +10% score\n🏆 NEW PERSONAL BEST! +1\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n26,949 / 50,000\n❓ ???\n6 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n2\nSTRIKES\n10\nCARDS\n9\nDAMAGE\n356\nBEST HIT\n195\nSTONED\n0\nCORRUPT\n0%\nSTASH\n22🌿\nRUN #\n17\nOVERKILL\n—\nVS LAST RUN:\nSCORE +1\nDMG +16\n(C1)\n🤘\nBattle Cry\n9/10 → Novice\n🪙\nTapped Out\n8/10 → Novice\n🔌\nPower Tap\n7/10 → Novice\n🔥 17 DAY STREAK\n💀 4 losses in a row...\n2/17 achievements\n▶ PAST RUNS (17)\nSEED: D9F3F2\n📋 Copy Seed"}
+{"ts":"2026-07-30T03:19:57.731Z","ev":"draft","pick":["GrimnirVocalistATK2DEBUFFHP7","AstridVocalistATK3DEBUFFHP8"]}
+{"ts":"2026-07-30T03:19:59.857Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T03:20:02.125Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:20:03.337Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:20:04.598Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:20:05.029Z","ev":"strike","strikes":"4","bossHp":"84","played":0,"embers":5,"preview":"7"}
+{"ts":"2026-07-30T03:20:08.901Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:20:10.068Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:20:11.221Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:20:11.649Z","ev":"strike","strikes":"3","bossHp":"81","played":0,"embers":5}
+{"ts":"2026-07-30T03:20:15.518Z","ev":"play","card":"Demo Tape","cardType":"RIFF","cost":1,"target":"Astrid"}
+{"ts":"2026-07-30T03:20:16.335Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:20:17.546Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:20:18.759Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T03:20:19.175Z","ev":"strike","strikes":"3","bossHp":"77","played":1,"embers":5,"preview":"20"}
+{"ts":"2026-07-30T03:20:22.215Z","ev":"heartbeat","tick":50}
+{"ts":"2026-07-30T03:20:23.027Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:20:24.253Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:20:25.495Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T03:20:26.006Z","ev":"trip_used","btn":"🍄⛧","bossPct":"68"}
+{"ts":"2026-07-30T03:20:27.887Z","ev":"strike","strikes":"2","bossHp":"69","played":0,"embers":2}
+{"ts":"2026-07-30T03:20:30.965Z","ev":"session","msg":"autopilot loop end","minutes":"5.1"}
+{"ts":"2026-07-30T03:21:22.055Z","ev":"session","msg":"autopilot v2 start"}
+{"ts":"2026-07-30T03:21:23.090Z","ev":"play","card":"Demo Tape","cardType":"RIFF","cost":1,"target":"Astrid"}
+{"ts":"2026-07-30T03:21:23.911Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:21:25.051Z","ev":"play","card":"NEED   Heavy Riff","cardType":"RIFF","cost":2,"target":"Astrid"}
+{"ts":"2026-07-30T03:21:25.823Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:21:26.930Z","ev":"play_fail","card":"Signal Decay","cost":1}
+{"ts":"2026-07-30T03:21:28.083Z","ev":"play_fail","card":"S ance","cost":1}
+{"ts":"2026-07-30T03:21:28.506Z","ev":"trip_used","btn":"🍄⛧","bossPct":"60"}
+{"ts":"2026-07-30T03:21:30.402Z","ev":"strike","strikes":"1","bossHp":"50","played":2,"embers":2,"preview":"11"}
+{"ts":"2026-07-30T03:21:34.183Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:21:35.339Z","ev":"play_fail","card":"Signal Decay","cost":1}
+{"ts":"2026-07-30T03:21:36.507Z","ev":"play_fail","card":"S ance","cost":1}
+{"ts":"2026-07-30T03:21:36.907Z","ev":"trip_used","btn":"🍄⛧","bossPct":"46"}
+{"ts":"2026-07-30T03:21:38.786Z","ev":"strike","strikes":"0","bossHp":"46","played":0,"embers":1}
+{"ts":"2026-07-30T03:21:44.046Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785381701869.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n4\nMAX STRIKE\n20\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n39 HP\nfrom killing The Wanderer!\n⚡\n1,374 PTS from your personal best!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 11 damage. Stack more buffs before each strike.\n1,214\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 1,374 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n26,787 / 50,000\n❓ ???\n6 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n4\nDAMAGE\n45\nBEST HIT\n20\nSTONED\n0\nCORRUPT\n20%\nSTASH\n0🌿\nRUN #\n18\nOVERKILL\n—\nVS LAST RUN:\nSCORE +1\nDMG +11\n(C1)\n🤘\nBattle Cry\n9/10 → Novice\n🪙\nTapped Out\n8/10 → Novice\n🔌\nPower Tap\n7/10 → Novice\n🔥 18 DAY STREAK\n💀 5 losses in a row...\n2/17 achievements\n▶ PAST RUNS (18)\nSEED: 74BCAE\n📋 Copy Seed"}
+{"ts":"2026-07-30T03:21:45.346Z","ev":"draft","pick":["IngridBass PlayerATK3ANCHORHP1","UlfBass PlayerATK4ANCHORHP9"]}
+{"ts":"2026-07-30T03:21:47.371Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T03:21:49.455Z","ev":"play_fail","card":"Groupie","cost":1}
+{"ts":"2026-07-30T03:21:50.634Z","ev":"play_fail","card":"Mosh Pit","cost":1}
+{"ts":"2026-07-30T03:21:51.875Z","ev":"play_fail","card":"RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:21:52.279Z","ev":"strike","strikes":"4","bossHp":"84","played":0,"embers":5,"preview":"8"}
+{"ts":"2026-07-30T03:21:56.075Z","ev":"play_fail","card":"Mosh Pit","cost":1}
+{"ts":"2026-07-30T03:21:57.283Z","ev":"play_fail","card":"RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:21:58.448Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T03:21:58.856Z","ev":"strike","strikes":"3","bossHp":"81","played":0,"embers":5}
+{"ts":"2026-07-30T03:22:02.745Z","ev":"play","card":"Mosh Pit","cardType":"RIFF","cost":1,"target":"Ulf"}
+{"ts":"2026-07-30T03:22:03.571Z","ev":"play_fail","card":"Mosh Pit","cost":1}
+{"ts":"2026-07-30T03:22:04.817Z","ev":"play","card":"RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Ulf"}
+{"ts":"2026-07-30T03:22:05.578Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T03:22:06.984Z","ev":"play","card":"Controlled Feedback","cardType":"CORRUPT","cost":2,"target":"Ulf"}
+{"ts":"2026-07-30T03:22:07.739Z","ev":"play_fail","card":"Controlled Feedback","cost":2}
+{"ts":"2026-07-30T03:22:09.104Z","ev":"play_fail","card":"RareBlood Ritual","cost":2}
+{"ts":"2026-07-30T03:22:10.299Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T03:22:10.703Z","ev":"strike","strikes":"3","bossHp":"76","played":3,"embers":5,"preview":"26"}
+{"ts":"2026-07-30T03:22:14.578Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T03:22:15.810Z","ev":"play_fail","card":"Blood Price","cost":0}
+{"ts":"2026-07-30T03:22:17.085Z","ev":"play_fail","card":"NEED  RareBlood Ritual","cost":2}
+{"ts":"2026-07-30T03:22:17.542Z","ev":"trip_used","btn":"🍄⛧","bossPct":"60"}
+{"ts":"2026-07-30T03:22:19.425Z","ev":"strike","strikes":"2","bossHp":"63","played":0,"embers":0}
+{"ts":"2026-07-30T03:22:22.464Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T03:22:23.409Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:22:24.751Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T03:22:26.156Z","ev":"play_fail","card":"Blood Price","cost":0}
+{"ts":"2026-07-30T03:22:26.592Z","ev":"strike","strikes":"1","bossHp":"46","played":0,"embers":0}
+{"ts":"2026-07-30T03:22:30.561Z","ev":"play","card":"NEED   Heavy Riff","cardType":"RIFF","cost":2,"target":"Ulf"}
+{"ts":"2026-07-30T03:22:31.559Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:22:32.821Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T03:22:34.165Z","ev":"play_fail","card":"NEED  RareBlood Ritual","cost":2}
+{"ts":"2026-07-30T03:22:34.594Z","ev":"strike","strikes":"1","bossHp":"37","played":1,"embers":0,"preview":"19"}
+{"ts":"2026-07-30T03:22:38.510Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:22:39.940Z","ev":"play_fail","card":"Dark Whisper","cost":0}
+{"ts":"2026-07-30T03:22:41.359Z","ev":"play_fail","card":"NEED  RareBlood Ritual","cost":2}
+{"ts":"2026-07-30T03:22:41.916Z","ev":"strike","strikes":"0","bossHp":"33","played":0,"embers":0}
+{"ts":"2026-07-30T03:22:47.110Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785381764949.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n6\nMAX STRIKE\n26\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n18 HP\nfrom killing The Wanderer!\n⚡\n1,338 PTS from your personal best!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 17 damage. Stack more buffs before each strike.\n0\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 1,338 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n28,070 / 50,000\n❓ ???\n6 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n6\nDAMAGE\n66\nBEST HIT\n26\nSTONED\n0\nCORRUPT\n70%\nSTASH\n0🌿\nRUN #\n19\nOVERKILL\n—\nVS LAST RUN:\nSCORE +3\nDMG +19\n(C1)\n🤘\nBattle Cry\n9/10 → Novice\n🪙\nTapped Out\n8/10 → Novice\n🔌\nPower Tap\n7/10 → Novice\n🔥 19 DAY STREAK\n💀 6 losses in a row...\n2/17 achievements\n▶ PAST RUNS (19)\nSEED: B0C0A0\n📋 Copy Seed"}
+{"ts":"2026-07-30T03:22:48.577Z","ev":"draft","pick":["BrynjaBass PlayerATK1ANCHORHP1","TanukiBass PlayerATK8ANCHORHP8"]}
+{"ts":"2026-07-30T03:22:50.675Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T03:22:53.031Z","ev":"play_fail","card":"Burn the Set","cost":0}
+{"ts":"2026-07-30T03:22:54.371Z","ev":"play","card":"Sound Wall","cardType":"RIFF","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T03:22:55.201Z","ev":"play_fail","card":"Encore","cost":2}
+{"ts":"2026-07-30T03:22:56.434Z","ev":"play","card":"Sound Check","cardType":"UTILITY","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T03:22:57.206Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T03:22:58.517Z","ev":"play","card":"ChainStatic Charge","cardType":"CORRUPT","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T03:22:59.353Z","ev":"play_fail","card":"ChainStatic Charge","cost":0}
+{"ts":"2026-07-30T03:23:00.557Z","ev":"play_fail","card":"NEED   Amp the Static","cost":2}
+{"ts":"2026-07-30T03:23:01.023Z","ev":"strike","strikes":"4","bossHp":"84","played":3,"embers":5,"preview":"23"}
+{"ts":"2026-07-30T03:23:04.999Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T03:23:06.321Z","ev":"play_fail","card":"Chain Amp the Static","cost":2}
+{"ts":"2026-07-30T03:23:07.600Z","ev":"play_fail","card":"Chain Feedback Loop","cost":2}
+{"ts":"2026-07-30T03:23:08.124Z","ev":"strike","strikes":"3","bossHp":"83","played":0,"embers":5}
+{"ts":"2026-07-30T03:23:12.021Z","ev":"play","card":"Mosh Pit","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:23:12.867Z","ev":"play_fail","card":"Mosh Pit","cost":1}
+{"ts":"2026-07-30T03:23:14.128Z","ev":"play","card":"Heavy Riff","cardType":"RIFF","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T03:23:15.040Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:23:16.310Z","ev":"play","card":"Setlist","cardType":"UTILITY","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T03:23:17.181Z","ev":"play_fail","card":"Setlist","cost":0}
+{"ts":"2026-07-30T03:23:18.483Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T03:23:18.984Z","ev":"modal_pick","card":"Amp the StaticCORRUPT"}
+{"ts":"2026-07-30T03:23:20.573Z","ev":"play_fail","card":"NEED  Battle Cry","cost":1}
+{"ts":"2026-07-30T03:23:20.997Z","ev":"strike","strikes":"3","bossHp":"61","played":3,"embers":5,"preview":"27"}
+{"ts":"2026-07-30T03:23:24.968Z","ev":"play_fail","card":"NEED  Battle Cry","cost":1}
+{"ts":"2026-07-30T03:23:26.266Z","ev":"play_fail","card":"NEED  Crowd Surf","cost":2}
+{"ts":"2026-07-30T03:23:27.559Z","ev":"play_fail","card":"Smoke Break","cost":0}
+{"ts":"2026-07-30T03:23:28.056Z","ev":"strike","strikes":"2","bossHp":"58","played":0,"embers":0}
+{"ts":"2026-07-30T03:23:31.126Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T03:23:32.091Z","ev":"play","card":"NEED  Battle Cry","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:23:33.038Z","ev":"play_fail","card":"Crowd Surf","cost":2}
+{"ts":"2026-07-30T03:23:34.345Z","ev":"play","card":"New Strings","cardType":"RIFF","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T03:23:35.355Z","ev":"play_fail","card":"NEED   New Strings","cost":2}
+{"ts":"2026-07-30T03:23:36.551Z","ev":"play_fail","card":"ChainStatic Charge","cost":0}
+{"ts":"2026-07-30T03:23:37.732Z","ev":"play_fail","card":"Chain Death Riff","cost":1}
+{"ts":"2026-07-30T03:23:38.172Z","ev":"strike","strikes":"2","bossHp":"34","played":2,"embers":0,"preview":"27"}
+{"ts":"2026-07-30T03:23:42.023Z","ev":"play_fail","card":"NEED   New Strings","cost":2}
+{"ts":"2026-07-30T03:23:43.274Z","ev":"play_fail","card":"ChainStatic Charge","cost":0}
+{"ts":"2026-07-30T03:23:44.544Z","ev":"play_fail","card":"Chain Death Riff","cost":1}
+{"ts":"2026-07-30T03:23:45.038Z","ev":"strike","strikes":"1","bossHp":"32","played":0,"embers":1}
+{"ts":"2026-07-30T03:23:49.002Z","ev":"play","card":"NEED   New Strings","cardType":"RIFF","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T03:23:49.800Z","ev":"play_fail","card":"NEED   New Strings","cost":2}
+{"ts":"2026-07-30T03:23:51.541Z","ev":"play_fail","card":"NEED  Amp It Up","cost":2}
+{"ts":"2026-07-30T03:23:52.754Z","ev":"play_fail","card":"ChainStatic Charge","cost":0}
+{"ts":"2026-07-30T03:23:53.168Z","ev":"strike","strikes":"1","bossHp":"7","played":1,"embers":1,"preview":"29"}
+{"ts":"2026-07-30T03:23:57.144Z","ev":"play_fail","card":"NEED   New Strings","cost":2}
+{"ts":"2026-07-30T03:23:58.687Z","ev":"play_fail","card":"NEED  Amp It Up","cost":2}
+{"ts":"2026-07-30T03:23:59.968Z","ev":"play_fail","card":"Static Charge","cost":0}
+{"ts":"2026-07-30T03:24:00.362Z","ev":"strike","strikes":"0","bossHp":"3","played":0,"embers":0}
+{"ts":"2026-07-30T03:24:00.372Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T03:24:04.414Z","ev":"warn","msg":"no members parsed — using fixed slot fallback"}
+{"ts":"2026-07-30T03:24:04.442Z","ev":"strike","played":0,"embers":99}
+{"ts":"2026-07-30T03:24:11.557Z","ev":"shop_leave","stash":5,"bandSize":2,"bought":[],"shot":"/tmp/shots/shop-final-1785381847532.png"}
+{"ts":"2026-07-30T03:24:14.075Z","ev":"play_fail","card":"Power Tap","cost":0}
+{"ts":"2026-07-30T03:24:15.330Z","ev":"play","card":"Battle Cry","cardType":"RIFF","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:24:16.114Z","ev":"play_fail","card":"Battle Cry","cost":1}
+{"ts":"2026-07-30T03:24:17.374Z","ev":"play","card":"Amp It Up","cardType":"RIFF","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T03:24:18.200Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T03:24:19.389Z","ev":"play","card":"Setlist","cardType":"UTILITY","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T03:24:20.176Z","ev":"play_fail","card":"Setlist","cost":0}
+{"ts":"2026-07-30T03:24:21.454Z","ev":"play_fail","card":"Chain S ance","cost":1}
+{"ts":"2026-07-30T03:24:21.897Z","ev":"modal_pick","card":"Blood RitualCORRUPT"}
+{"ts":"2026-07-30T03:24:22.736Z","ev":"strike","strikes":"4","bossHp":"278","played":3,"embers":5,"preview":"71"}
+{"ts":"2026-07-30T03:24:26.627Z","ev":"play_fail","card":"Power Tap","cost":0}
+{"ts":"2026-07-30T03:24:27.968Z","ev":"play_fail","card":"Crowd Surf","cost":2}
+{"ts":"2026-07-30T03:24:29.315Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T03:24:29.797Z","ev":"strike","strikes":"3","bossHp":"273","played":0,"embers":2}
+{"ts":"2026-07-30T03:24:33.711Z","ev":"play","card":"Power Tap","cardType":"EMBER","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T03:24:34.475Z","ev":"play_fail","card":"Power Tap","cost":0}
+{"ts":"2026-07-30T03:24:35.765Z","ev":"play","card":"Crowd Surf","cardType":"RIFF","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T03:24:36.603Z","ev":"play_fail","card":"Crowd Surf","cost":2}
+{"ts":"2026-07-30T03:24:37.867Z","ev":"play","card":"RareInfernal Encore","cardType":"RIFF","cost":3,"target":"Tanuki"}
+{"ts":"2026-07-30T03:24:38.726Z","ev":"play_fail","card":"Wake Up Call","cost":1}
+{"ts":"2026-07-30T03:24:39.983Z","ev":"play","card":"S ance","cardType":"CORRUPT","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:24:40.061Z","ev":"strike","strikes":"3","bossHp":"207","played":4,"embers":2,"preview":"50"}
+{"ts":"2026-07-30T03:24:43.075Z","ev":"heartbeat","tick":30}
+{"ts":"2026-07-30T03:24:43.181Z","ev":"trip_used","btn":"🍄⛧","bossPct":"71"}
+{"ts":"2026-07-30T03:24:45.058Z","ev":"strike","strikes":"2","bossHp":"197","played":0,"embers":1}
+{"ts":"2026-07-30T03:24:49.225Z","ev":"play_fail","card":"Tapped Out","cost":0}
+{"ts":"2026-07-30T03:24:50.673Z","ev":"play","card":"Soundboard","cardType":"EMBER","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:24:51.527Z","ev":"play_fail","card":"Soundboard","cost":1}
+{"ts":"2026-07-30T03:24:52.758Z","ev":"play","card":"Roadie","cardType":"UTILITY","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:24:53.587Z","ev":"play_fail","card":"RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:24:54.973Z","ev":"play","card":"Roadie","cardType":"UTILITY","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:24:55.840Z","ev":"play_fail","card":"NEED  Roadie","cost":1}
+{"ts":"2026-07-30T03:24:57.053Z","ev":"play_fail","card":"NEED   S ance","cost":1}
+{"ts":"2026-07-30T03:24:57.525Z","ev":"trip_used","btn":"🍄⛧","bossPct":"56"}
+{"ts":"2026-07-30T03:24:59.432Z","ev":"strike","strikes":"2","bossHp":"157","played":3,"embers":1,"preview":"93"}
+{"ts":"2026-07-30T03:25:03.372Z","ev":"play_fail","card":"Sound Wall","cost":2}
+{"ts":"2026-07-30T03:25:04.823Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T03:25:06.391Z","ev":"play_fail","card":"S ance","cost":1}
+{"ts":"2026-07-30T03:25:06.910Z","ev":"strike","strikes":"1","bossHp":"139","played":0,"embers":5}
+{"ts":"2026-07-30T03:25:10.865Z","ev":"play","card":"Tapped Out","cardType":"EMBER","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T03:25:11.685Z","ev":"play_fail","card":"Tapped Out","cost":0}
+{"ts":"2026-07-30T03:25:12.989Z","ev":"play","card":"Sound Wall","cardType":"RIFF","cost":2,"target":"Tanuki"}
+{"ts":"2026-07-30T03:25:13.856Z","ev":"play_fail","card":"Sound Wall","cost":2}
+{"ts":"2026-07-30T03:25:15.257Z","ev":"play","card":"Roadie","cardType":"UTILITY","cost":1,"target":"Tanuki"}
+{"ts":"2026-07-30T03:25:16.068Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T03:25:17.370Z","ev":"play","card":"ChainStatic Charge","cardType":"CORRUPT","cost":0,"target":"Tanuki"}
+{"ts":"2026-07-30T03:25:18.175Z","ev":"play_fail","card":"ChainStatic Charge","cost":0}
+{"ts":"2026-07-30T03:25:18.667Z","ev":"strike","strikes":"1","bossHp":"64","played":4,"embers":5,"preview":"53"}
+{"ts":"2026-07-30T03:25:22.693Z","ev":"play_fail","card":"ChainStatic Charge","cost":0}
+{"ts":"2026-07-30T03:25:24.043Z","ev":"play_fail","card":"Chain Death Riff","cost":1}
+{"ts":"2026-07-30T03:25:24.529Z","ev":"strike","strikes":"0","bossHp":"53","played":0,"embers":5}
+{"ts":"2026-07-30T03:25:28.169Z","ev":"warn","msg":"no members parsed — using fixed slot fallback"}
+{"ts":"2026-07-30T03:25:28.299Z","ev":"strike","strikes":"0","bossHp":"11","played":0,"embers":5}
+{"ts":"2026-07-30T03:25:28.434Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T03:25:34.048Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785381931100.png","text":"Vestibule\n\"I was looking for something. I forgot what.\"\nDEFEATED BY\nThe Lost Soul\nCIRCLE I — LIMBO\n\"A stronger damned spirit. Hunger drives its blows.\"\nFIGHTS\n1\nCHAINS\n0\nCARDS PLAYED\n26\nMAX STRIKE\n93\n\"You were lost before you started.\"\nSO CLOSE\n💀\n11 HP\nfrom killing The Lost Soul!\n⚡\n749 PTS from your personal best!\n😰\nTanuki survived with just 1 HP!\n☠ The Lost Soul hit for 5 damage\n💀 WHAT WENT WRONG\nThe Lost Soul got the best of you. Adapt your strategy and try again.\n1,839\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 749 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n30,493 / 50,000\n❓ ???\n6 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n1\nSTRIKES\n8\nCARDS\n26\nDAMAGE\n373\nBEST HIT\n93\nSTONED\n0\nCORRUPT\n35%\nSTASH\n10🌿\nRUN #\n20\nOVERKILL\n—\nVS LAST RUN:\nSCORE +5\nDMG +53\n(C1)\n🔌\nPower Tap\n9/10 → Novice\n🏄\nCrowd Surf\n7/10 → Novice\n👿\nInfernal Encore\n6/10 → Novice\n🔥 20 DAY STREAK\n💀 7 losses in a row...\n2/17 achievements\n▶ PAST RUNS (20)\nSEED: 20DCDD\n📋 Copy Seed"}
+{"ts":"2026-07-30T03:25:35.411Z","ev":"draft","pick":["DagBass PlayerATK2ANCHORHP12","IngridBass PlayerATK3ANCHORHP1"]}
+{"ts":"2026-07-30T03:25:37.521Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T03:25:39.764Z","ev":"play_fail","card":"Burn the Set","cost":0}
+{"ts":"2026-07-30T03:25:40.944Z","ev":"play_fail","card":"RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:25:42.062Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:25:42.486Z","ev":"strike","strikes":"4","bossHp":"84","played":0,"embers":5,"preview":"5"}
+{"ts":"2026-07-30T03:25:45.538Z","ev":"heartbeat","tick":40}
+{"ts":"2026-07-30T03:25:46.326Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:25:47.542Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T03:25:48.871Z","ev":"play_fail","card":"Signal Decay","cost":1}
+{"ts":"2026-07-30T03:25:49.353Z","ev":"strike","strikes":"3","bossHp":"82","played":0,"embers":5}
+{"ts":"2026-07-30T03:25:53.455Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:25:54.655Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:25:55.857Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T03:25:56.293Z","ev":"strike","strikes":"3","bossHp":"79","played":0,"embers":5,"preview":"5"}
+{"ts":"2026-07-30T03:26:00.197Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:26:01.331Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T03:26:02.634Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:26:03.068Z","ev":"trip_used","btn":"🍄⛧","bossPct":"88"}
+{"ts":"2026-07-30T03:26:04.946Z","ev":"strike","strikes":"2","bossHp":"77","played":0,"embers":4}
+{"ts":"2026-07-30T03:26:09.188Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:26:11.249Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T03:26:12.949Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:26:13.463Z","ev":"trip_used","btn":"🍄⛧","bossPct":"82"}
+{"ts":"2026-07-30T03:26:15.342Z","ev":"strike","strikes":"1","bossHp":"72","played":0,"embers":4,"preview":"5"}
+{"ts":"2026-07-30T03:26:19.307Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:26:20.499Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T03:26:21.880Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:26:22.368Z","ev":"trip_used","btn":"🍄⛧","bossPct":"76"}
+{"ts":"2026-07-30T03:26:24.278Z","ev":"strike","strikes":"0","bossHp":"67","played":0,"embers":4}
+{"ts":"2026-07-30T03:26:27.540Z","ev":"session","msg":"autopilot loop end","minutes":"5.1"}
+{"ts":"2026-07-30T03:27:47.744Z","ev":"session","msg":"autopilot v2 start"}
+{"ts":"2026-07-30T03:27:49.837Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785382068007.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n2\nMAX STRIKE\n5\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n64 HP\nfrom killing The Wanderer!\n⚡\n1,458 PTS from your personal best!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 5 damage. Stack more buffs before each strike.\n1,130\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 1,458 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n30,913 / 50,000\n❓ ???\n6 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n2\nDAMAGE\n20\nBEST HIT\n5\nSTONED\n0\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n21\nOVERKILL\n—\nVS LAST RUN:\nSCORE +1\nDMG +5\n(C1)\n🔌\nPower Tap\n9/10 → Novice\n🏄\nCrowd Surf\n7/10 → Novice\n👿\nInfernal Encore\n6/10 → Novice\n🔥 21 DAY STREAK\n💀 8 losses in a row...\n2/17 achievements\n▶ PAST RUNS (20)\nSEED: AC7EE9\n📋 Copy Seed"}
+{"ts":"2026-07-30T03:27:51.119Z","ev":"draft","pick":["BjornLead GuitaristATK5FRENZIE","RagnarLead GuitaristATK4FRENZI"]}
+{"ts":"2026-07-30T03:27:53.176Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T03:27:55.282Z","ev":"play_fail","card":"Power Tap","cost":0}
+{"ts":"2026-07-30T03:27:56.464Z","ev":"play","card":"Groupie","cardType":"EMBER","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T03:27:57.198Z","ev":"play_fail","card":"Groupie","cost":1}
+{"ts":"2026-07-30T03:27:58.388Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:27:59.543Z","ev":"play_fail","card":"NoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:27:59.980Z","ev":"strike","strikes":"4","bossHp":"84","played":1,"embers":5,"preview":"13"}
+{"ts":"2026-07-30T03:28:03.881Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:28:05.081Z","ev":"play_fail","card":"NoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:28:06.298Z","ev":"play_fail","card":"Sound Wall","cost":2}
+{"ts":"2026-07-30T03:28:06.781Z","ev":"strike","strikes":"3","bossHp":"77","played":0,"embers":5}
+{"ts":"2026-07-30T03:28:10.592Z","ev":"play","card":"Herb Money","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T03:28:11.383Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:28:12.511Z","ev":"play_fail","card":"NoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:28:13.649Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T03:28:14.066Z","ev":"strike","strikes":"3","bossHp":"70","played":1,"embers":5,"preview":"18"}
+{"ts":"2026-07-30T03:28:17.865Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:28:19.061Z","ev":"play_fail","card":"NoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:28:20.348Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T03:28:20.829Z","ev":"trip_used","btn":"🍄⛧","bossPct":"60"}
+{"ts":"2026-07-30T03:28:22.719Z","ev":"strike","strikes":"2","bossHp":"60","played":0,"embers":3}
+{"ts":"2026-07-30T03:28:26.617Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:28:27.817Z","ev":"play_fail","card":"NoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:28:29.326Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:28:29.775Z","ev":"strike","strikes":"1","bossHp":"43","played":0,"embers":3}
+{"ts":"2026-07-30T03:28:33.757Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:28:35.060Z","ev":"play_fail","card":"NoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:28:36.329Z","ev":"play","card":"Resonance","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T03:28:37.211Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:28:38.379Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T03:28:39.577Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T03:28:40.033Z","ev":"strike","strikes":"1","bossHp":"36","played":1,"embers":3,"preview":"19"}
+{"ts":"2026-07-30T03:28:43.060Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T03:28:43.926Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:28:45.205Z","ev":"play_fail","card":"Resonance","cost":1}
+{"ts":"2026-07-30T03:28:46.615Z","ev":"play_fail","card":"New Strings","cost":2}
+{"ts":"2026-07-30T03:28:47.103Z","ev":"strike","strikes":"0","bossHp":"25","played":0,"embers":2}
+{"ts":"2026-07-30T03:28:53.654Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785382130149.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n4\nMAX STRIKE\n19\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n14 HP\nfrom killing The Wanderer!\n⚡\n1,432 PTS from your personal best!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 16 damage. Stack more buffs before each strike.\n0\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 1,432 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n32,142 / 50,000\n❓ ???\n6 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n4\nDAMAGE\n63\nBEST HIT\n19\nSTONED\n1\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n22\nOVERKILL\n—\nVS LAST RUN:\nSCORE -47\nDMG +19\n(C1)\n🏄\nCrowd Surf\n7/10 → Novice\n🍯\nGroupie\n6/10 → Novice\n👿\nInfernal Encore\n6/10 → Novice\n🔥 22 DAY STREAK\n💀 9 losses in a row...\n2/17 achievements\n▶ PAST RUNS (20)\nSEED: 299F13\n📋 Copy Seed"}
+{"ts":"2026-07-30T03:28:55.174Z","ev":"draft","pick":["RagnarLead GuitaristATK4FRENZI","BjornLead GuitaristATK5FRENZIE"]}
+{"ts":"2026-07-30T03:28:57.285Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T03:28:59.449Z","ev":"play_fail","card":"NoviceTapped Out","cost":0}
+{"ts":"2026-07-30T03:29:00.784Z","ev":"play","card":"NovicePower Tap","cardType":"EMBER","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T03:29:01.574Z","ev":"play_fail","card":"NovicePower Tap","cost":0}
+{"ts":"2026-07-30T03:29:02.814Z","ev":"play","card":"Amp It Up","cardType":"RIFF","cost":2,"target":"Bjorn"}
+{"ts":"2026-07-30T03:29:03.603Z","ev":"play_fail","card":"Amp It Up","cost":2}
+{"ts":"2026-07-30T03:29:04.955Z","ev":"play","card":"ChainRareInfernal Encore","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T03:29:05.894Z","ev":"play_fail","card":"ChainRareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:29:06.395Z","ev":"strike","strikes":"4","bossHp":"84","played":3,"embers":5,"preview":"25"}
+{"ts":"2026-07-30T03:29:10.317Z","ev":"play_fail","card":"ChainRareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:29:10.756Z","ev":"strike","strikes":"3","bossHp":"75","played":0,"embers":5}
+{"ts":"2026-07-30T03:29:14.744Z","ev":"play_fail","card":"ChainRareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:29:16.332Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:29:17.647Z","ev":"play_fail","card":"Wake Up Call","cost":1}
+{"ts":"2026-07-30T03:29:18.170Z","ev":"strike","strikes":"3","bossHp":"59","played":0,"embers":5,"preview":"32"}
+{"ts":"2026-07-30T03:29:22.049Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:29:23.409Z","ev":"play_fail","card":"Wake Up Call","cost":1}
+{"ts":"2026-07-30T03:29:24.731Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T03:29:25.254Z","ev":"strike","strikes":"2","bossHp":"44","played":0,"embers":2}
+{"ts":"2026-07-30T03:29:29.303Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:29:30.624Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:29:31.875Z","ev":"play_fail","card":"NEED   Wake Up Call","cost":1}
+{"ts":"2026-07-30T03:29:32.312Z","ev":"strike","strikes":"2","bossHp":"27","played":0,"embers":2,"preview":"14"}
+{"ts":"2026-07-30T03:29:36.204Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:29:37.404Z","ev":"play_fail","card":"NEED   Wake Up Call","cost":1}
+{"ts":"2026-07-30T03:29:38.768Z","ev":"play_fail","card":"NEED  Sound Check","cost":2}
+{"ts":"2026-07-30T03:29:39.369Z","ev":"strike","strikes":"1","bossHp":"21","played":0,"embers":0}
+{"ts":"2026-07-30T03:29:42.379Z","ev":"heartbeat","tick":20}
+{"ts":"2026-07-30T03:29:43.244Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:29:44.385Z","ev":"play_fail","card":"NEED  Crowd Surf","cost":2}
+{"ts":"2026-07-30T03:29:45.643Z","ev":"play_fail","card":"NEED   Wake Up Call","cost":1}
+{"ts":"2026-07-30T03:29:46.120Z","ev":"strike","strikes":"1","bossHp":"13","played":0,"embers":0,"preview":"11"}
+{"ts":"2026-07-30T03:29:50.025Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:29:51.380Z","ev":"play_fail","card":"NEED  Crowd Surf","cost":2}
+{"ts":"2026-07-30T03:29:52.681Z","ev":"play_fail","card":"NEED   Wake Up Call","cost":1}
+{"ts":"2026-07-30T03:29:53.159Z","ev":"strike","strikes":"0","bossHp":"8","played":0,"embers":0}
+{"ts":"2026-07-30T03:29:59.195Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785382196237.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n5\nMAX STRIKE\n32\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n2 HP\nfrom killing The Wanderer!\n⚡\n1,303 PTS from your personal best!\n😰\nBjorn survived with just 2 HP!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nOnly 5 cards played across 4 strikes. Play more cards to build stronger strikes.\n0\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 1,303 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n33,555 / 50,000\n❓ ???\n6 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n5\nDAMAGE\n82\nBEST HIT\n32\nSTONED\n0\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n23\nOVERKILL\n—\nVS LAST RUN:\nSCORE +1\nDMG +11\n(C1)\n👿\nInfernal Encore\n7/10 → Novice\n🏄\nCrowd Surf\n7/10 → Novice\n🍯\nGroupie\n6/10 → Novice\n🔥 23 DAY STREAK\n💀 10 losses in a row...\n2/17 achievements\n▶ PAST RUNS (20)\nSEED: EE86DD\n📋 Copy Seed"}
+{"ts":"2026-07-30T03:30:00.629Z","ev":"draft","pick":["UlfBass PlayerATK4ANCHORHP9","IngridBass PlayerATK3ANCHORHP1"]}
+{"ts":"2026-07-30T03:30:02.736Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T03:30:05.012Z","ev":"play_fail","card":"NovicePower Tap","cost":0}
+{"ts":"2026-07-30T03:30:06.307Z","ev":"play","card":"Soundboard","cardType":"EMBER","cost":1,"target":"Ulf"}
+{"ts":"2026-07-30T03:30:07.096Z","ev":"play_fail","card":"Soundboard","cost":1}
+{"ts":"2026-07-30T03:30:08.338Z","ev":"play","card":"Herb Money","cardType":"RIFF","cost":1,"target":"Ulf"}
+{"ts":"2026-07-30T03:30:09.106Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:30:10.307Z","ev":"play_fail","card":"Mosh Pit","cost":1}
+{"ts":"2026-07-30T03:30:11.526Z","ev":"play_fail","card":"Wake Up Call","cost":1}
+{"ts":"2026-07-30T03:30:11.951Z","ev":"strike","strikes":"4","bossHp":"84","played":2,"embers":5,"preview":"8"}
+{"ts":"2026-07-30T03:30:15.867Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:30:17.106Z","ev":"play_fail","card":"Mosh Pit","cost":1}
+{"ts":"2026-07-30T03:30:18.479Z","ev":"play_fail","card":"Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:30:18.924Z","ev":"strike","strikes":"3","bossHp":"79","played":0,"embers":5}
+{"ts":"2026-07-30T03:30:22.825Z","ev":"play","card":"Herb Money","cardType":"RIFF","cost":1,"target":"Ulf"}
+{"ts":"2026-07-30T03:30:23.585Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:30:24.800Z","ev":"play_fail","card":"Chain Mosh Pit","cost":1}
+{"ts":"2026-07-30T03:30:25.989Z","ev":"play_fail","card":"ChainNoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:30:26.399Z","ev":"strike","strikes":"3","bossHp":"74","played":1,"embers":5,"preview":"10"}
+{"ts":"2026-07-30T03:30:30.352Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:30:31.674Z","ev":"play_fail","card":"Chain Mosh Pit","cost":1}
+{"ts":"2026-07-30T03:30:33.022Z","ev":"play_fail","card":"ChainNoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:30:33.570Z","ev":"trip_used","btn":"🍄⛧","bossPct":"74"}
+{"ts":"2026-07-30T03:30:35.464Z","ev":"strike","strikes":"2","bossHp":"68","played":0,"embers":3}
+{"ts":"2026-07-30T03:30:39.451Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:30:40.864Z","ev":"play_fail","card":"Chain Mosh Pit","cost":1}
+{"ts":"2026-07-30T03:30:42.170Z","ev":"play_fail","card":"ChainNoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:30:42.637Z","ev":"trip_used","btn":"🍄⛧","bossPct":"60"}
+{"ts":"2026-07-30T03:30:44.552Z","ev":"strike","strikes":"1","bossHp":"56","played":0,"embers":3}
+{"ts":"2026-07-30T03:30:47.610Z","ev":"heartbeat","tick":30}
+{"ts":"2026-07-30T03:30:48.450Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:30:49.693Z","ev":"play_fail","card":"Chain Mosh Pit","cost":1}
+{"ts":"2026-07-30T03:30:51.019Z","ev":"play_fail","card":"ChainNoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:30:51.529Z","ev":"trip_used","btn":"🍄⛧","bossPct":"45"}
+{"ts":"2026-07-30T03:30:53.420Z","ev":"strike","strikes":"0","bossHp":"44","played":0,"embers":3}
+{"ts":"2026-07-30T03:30:53.596Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T03:30:59.199Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785382256263.png","text":"Vestibule\n\"Finally... rest.\"\nDEFEATED BY\nThe Wanderer\nCIRCLE I — LIMBO\n\"A lost soul with no purpose. Attacks randomly.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n3\nMAX STRIKE\n10\n\"Could not even find the exit.\"\nSO CLOSE\n💀\n38 HP\nfrom killing The Wanderer!\n⚡\n1,430 PTS from your personal best!\n☠ The Wanderer hit for 2 damage\n💀 WHAT WENT WRONG\nLow damage output. Buff your members with Battle Cry and Amp before striking.\nAverage strike was only 9 damage. Stack more buffs before each strike.\n1,138\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 1,430 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n34,585 / 50,000\n❓ ???\n6 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n3\nDAMAGE\n36\nBEST HIT\n10\nSTONED\n0\nCORRUPT\n0%\nSTASH\n0🌿\nRUN #\n24\nOVERKILL\n—\nVS LAST RUN:\nSCORE +1\nDMG +9\n(C1)\n👿\nInfernal Encore\n7/10 → Novice\n🏄\nCrowd Surf\n7/10 → Novice\n🍯\nGroupie\n6/10 → Novice\n🔥 24 DAY STREAK\n💀 11 losses in a row...\n2/17 achievements\n▶ PAST RUNS (20)\nSEED: 8075CF\n📋 Copy Seed"}
+{"ts":"2026-07-30T03:31:00.686Z","ev":"draft","pick":["IngridBass PlayerATK3ANCHORHP1","BrynjaBass PlayerATK1ANCHORHP1"]}
+{"ts":"2026-07-30T03:31:02.762Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T03:31:04.967Z","ev":"play_fail","card":"NovicePower Tap","cost":0}
+{"ts":"2026-07-30T03:31:06.160Z","ev":"play","card":"Demo Tape","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T03:31:06.972Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:31:08.239Z","ev":"play_fail","card":"RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:31:09.455Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T03:31:09.929Z","ev":"strike","strikes":"4","bossHp":"84","played":1,"embers":5,"preview":"4"}
+{"ts":"2026-07-30T03:31:13.849Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:31:15.071Z","ev":"play_fail","card":"RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:31:16.344Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T03:31:16.774Z","ev":"strike","strikes":"3","bossHp":"81","played":0,"embers":5}
+{"ts":"2026-07-30T03:31:20.698Z","ev":"play","card":"Demo Tape","cardType":"RIFF","cost":1,"target":"Ingrid"}
+{"ts":"2026-07-30T03:31:21.504Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:31:22.641Z","ev":"play_fail","card":"ChainRareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:31:23.828Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T03:31:24.286Z","ev":"strike","strikes":"3","bossHp":"78","played":1,"embers":5,"preview":"4"}
+{"ts":"2026-07-30T03:31:28.122Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:31:29.345Z","ev":"play_fail","card":"ChainRareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:31:30.720Z","ev":"play_fail","card":"Sound Check","cost":2}
+{"ts":"2026-07-30T03:31:31.188Z","ev":"trip_used","btn":"🍄⛧","bossPct":"86"}
+{"ts":"2026-07-30T03:31:33.079Z","ev":"strike","strikes":"2","bossHp":"75","played":0,"embers":4}
+{"ts":"2026-07-30T03:31:37.073Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:31:38.383Z","ev":"play_fail","card":"ChainRareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:31:39.758Z","ev":"play_fail","card":"Wake Up Call","cost":1}
+{"ts":"2026-07-30T03:31:40.194Z","ev":"trip_used","btn":"🍄⛧","bossPct":"79"}
+{"ts":"2026-07-30T03:31:42.080Z","ev":"strike","strikes":"1","bossHp":"69","played":0,"embers":4}
+{"ts":"2026-07-30T03:31:46.119Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:31:47.359Z","ev":"play_fail","card":"ChainRareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:31:48.628Z","ev":"play_fail","card":"Wake Up Call","cost":1}
+{"ts":"2026-07-30T03:31:49.052Z","ev":"trip_used","btn":"🍄⛧","bossPct":"71"}
+{"ts":"2026-07-30T03:31:50.948Z","ev":"strike","strikes":"0","bossHp":"63","played":0,"embers":4}
+{"ts":"2026-07-30T03:31:51.113Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T03:31:53.717Z","ev":"session","msg":"autopilot loop end","minutes":"4.1"}
+{"ts":"2026-07-30T03:32:51.713Z","ev":"session","msg":"autopilot v2 start"}
+{"ts":"2026-07-30T03:32:51.961Z","ev":"warn","msg":"no members parsed — using fixed slot fallback"}
+{"ts":"2026-07-30T03:32:52.022Z","ev":"strike","played":0,"embers":99}
+{"ts":"2026-07-30T03:32:55.159Z","ev":"shop_buy","label":"Band Recruitment🎸 Welcome PackFREE — Pick 1 of 2 ","why":"free member","stash":61,"bandSize":2}
+{"ts":"2026-07-30T03:32:56.471Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:32:57.328Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:32:58.173Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:32:59.057Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:32:59.994Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:33:00.858Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:33:02.756Z","ev":"stuck","type":"recruit","shot":"/tmp/shots/stuck-1785382381663.png","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:33:02.831Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:33:03.632Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T03:33:04.665Z","ev":"stuck","type":"recruit","shot":"/tmp/shots/stuck-1785382383636.png","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:33:04.730Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:33:06.717Z","ev":"stuck","type":"recruit","shot":"/tmp/shots/stuck-1785382385537.png","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:33:06.812Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:33:08.749Z","ev":"stuck","type":"recruit","shot":"/tmp/shots/stuck-1785382387616.png","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:33:08.804Z","ev":"unknown_screen","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:33:10.670Z","ev":"stuck","type":"recruit","shot":"/tmp/shots/stuck-1785382389607.png","text":"Recruit a Member\nChoose one musician to join your band — or pass\nGrimnir\nVOCALIST\nATK\n2\nDEBUFF\nHP\n7\nThe Masked One. Reduces boss passive each turn.\nGunnar\nRHYTHM GUITARIST\nATK\n4\nSHREDDER\nHP\n7\nRhythm? He makes the rhythm.\nPASS — NO RECRUITMENT"}
+{"ts":"2026-07-30T03:33:10.692Z","ev":"abort","msg":"hard stuck"}
+{"ts":"2026-07-30T03:33:10.692Z","ev":"session","msg":"autopilot loop end","minutes":"0.3"}
+{"ts":"2026-07-30T03:33:38.753Z","ev":"session","msg":"autopilot v2 start"}
+{"ts":"2026-07-30T03:33:38.934Z","ev":"recruit_pick","pick":"GunnarRhythm GuitaristATK4SHREDDERHP7Rhythm? He ma","score":22}
+{"ts":"2026-07-30T03:33:40.368Z","ev":"shop_skip","tile":"welcome","why":"not in clickables"}
+{"ts":"2026-07-30T03:33:42.825Z","ev":"shop_leave","stash":61,"bandSize":3,"bought":[],"shot":"/tmp/shots/shop-final-1785382420368.png"}
+{"ts":"2026-07-30T03:33:44.877Z","ev":"play_fail","card":"Chain Encore","cost":2}
+{"ts":"2026-07-30T03:33:46.087Z","ev":"play","card":"ChainRarePossessed Performance","cardType":"RIFF","cost":3,"target":"Gunnar"}
+{"ts":"2026-07-30T03:33:46.783Z","ev":"play_fail","card":"ChainRarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:33:47.977Z","ev":"play","card":"ChainRareInfernal Encore","cardType":"RIFF","cost":3,"target":"Gunnar"}
+{"ts":"2026-07-30T03:33:48.723Z","ev":"play_fail","card":"NEED  RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:33:49.951Z","ev":"play_fail","card":"Setlist","cost":0}
+{"ts":"2026-07-30T03:33:51.088Z","ev":"play_fail","card":"Smoke Break","cost":0}
+{"ts":"2026-07-30T03:33:51.494Z","ev":"strike","strikes":"4","bossHp":"278","played":2,"embers":5,"preview":"102"}
+{"ts":"2026-07-30T03:33:55.363Z","ev":"play_fail","card":"NEED  RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:33:56.556Z","ev":"play_fail","card":"Setlist","cost":0}
+{"ts":"2026-07-30T03:33:57.726Z","ev":"play_fail","card":"Smoke Break","cost":0}
+{"ts":"2026-07-30T03:33:58.151Z","ev":"strike","strikes":"3","bossHp":"216","played":0,"embers":0}
+{"ts":"2026-07-30T03:34:02.107Z","ev":"play_fail","card":"NEED  RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:34:03.315Z","ev":"play_fail","card":"NEED   Resonance","cost":1}
+{"ts":"2026-07-30T03:34:04.548Z","ev":"play_fail","card":"Setlist","cost":0}
+{"ts":"2026-07-30T03:34:04.971Z","ev":"strike","strikes":"3","bossHp":"166","played":0,"embers":0,"preview":"9"}
+{"ts":"2026-07-30T03:34:08.883Z","ev":"play_fail","card":"NEED   Resonance","cost":1}
+{"ts":"2026-07-30T03:34:10.053Z","ev":"play_fail","card":"NEED  RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:34:11.245Z","ev":"play_fail","card":"Setlist","cost":0}
+{"ts":"2026-07-30T03:34:11.693Z","ev":"trip_used","btn":"🍄⛧","bossPct":"56"}
+{"ts":"2026-07-30T03:34:13.586Z","ev":"strike","strikes":"2","bossHp":"162","played":0,"embers":0}
+{"ts":"2026-07-30T03:34:17.594Z","ev":"play_fail","card":"NEED   Resonance","cost":1}
+{"ts":"2026-07-30T03:34:18.071Z","ev":"modal_pick","card":"Smoke BreakUTILITY"}
+{"ts":"2026-07-30T03:34:19.709Z","ev":"play_fail","card":"Burn the Set","cost":0}
+{"ts":"2026-07-30T03:34:21.068Z","ev":"play_fail","card":"NEED   Mosh Pit","cost":1}
+{"ts":"2026-07-30T03:34:21.536Z","ev":"trip_used","btn":"🍄⛧","bossPct":"56"}
+{"ts":"2026-07-30T03:34:23.428Z","ev":"strike","strikes":"2","bossHp":"156","played":0,"embers":0,"preview":"12"}
+{"ts":"2026-07-30T03:34:27.486Z","ev":"play_fail","card":"NEED   Groupie","cost":1}
+{"ts":"2026-07-30T03:34:28.814Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:34:30.096Z","ev":"play_fail","card":"NEED  RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:34:30.554Z","ev":"trip_used","btn":"🍄⛧","bossPct":"51"}
+{"ts":"2026-07-30T03:34:32.432Z","ev":"strike","strikes":"1","bossHp":"151","played":0,"embers":0}
+{"ts":"2026-07-30T03:34:36.460Z","ev":"play_fail","card":"NEED   Groupie","cost":1}
+{"ts":"2026-07-30T03:34:37.717Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:34:39.043Z","ev":"play_fail","card":"NEED  RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:34:39.496Z","ev":"trip_used","btn":"🍄⛧","bossPct":"51"}
+{"ts":"2026-07-30T03:34:41.392Z","ev":"strike","strikes":"1","bossHp":"143","played":0,"embers":0,"preview":"6"}
+{"ts":"2026-07-30T03:34:44.471Z","ev":"heartbeat","tick":10}
+{"ts":"2026-07-30T03:34:45.508Z","ev":"play_fail","card":"NEED   Groupie","cost":1}
+{"ts":"2026-07-30T03:34:47.035Z","ev":"play_fail","card":"NEED   Heavy Riff","cost":2}
+{"ts":"2026-07-30T03:34:48.358Z","ev":"play_fail","card":"NEED  RareInfernal Encore","cost":3}
+{"ts":"2026-07-30T03:34:48.815Z","ev":"trip_used","btn":"🍄⛧","bossPct":"49"}
+{"ts":"2026-07-30T03:34:50.721Z","ev":"strike","strikes":"0","bossHp":"140","played":0,"embers":0}
+{"ts":"2026-07-30T03:34:50.757Z","ev":"warn","msg":"strike btn: no clickable matching \"strike\""}
+{"ts":"2026-07-30T03:34:56.216Z","ev":"run_end","result":"death","shot":"/tmp/shots/death-1785382493466.png","text":"Vestibule\n\"I was looking for something. I forgot what.\"\nDEFEATED BY\nThe Lost Soul\nCIRCLE I — LIMBO\n\"A stronger damned spirit. Hunger drives its blows.\"\nFIGHTS\n0\nCHAINS\n0\nCARDS PLAYED\n4\nMAX STRIKE\n102\n\"You were lost before you started.\"\nSO CLOSE\n💀\n137 HP\nleft on The Lost Soul\n⚡\n969 PTS from your personal best!\n☠ The Lost Soul hit for 5 damage\n💀 WHAT WENT WRONG\nOnly 4 cards played across 4 strikes. Play more cards to build stronger strikes.\n1,619\nLOCAL LEGEND\n🔥 Streak Bonus: +10% score\nSO CLOSE! Only 969 pts from your best!\n↺ PLAY AGAIN\n📜 Run Log\n📋 SHARE\n🌍 DAILY\nNEXT UNLOCK\n37,788 / 50,000\n❓ ???\n6 unlocks earned so far\nCIRCLE\n1 / 9\nFIGHTS\n0\nSTRIKES\n4\nCARDS\n4\nDAMAGE\n129\nBEST HIT\n102\nSTONED\n1\nCORRUPT\n20%\nSTASH\n0🌿\nRUN #\n26\nOVERKILL\n—\nVS LAST RUN:\nSCORE 0\nDMG +6\n(C1)\n👿\nInfernal Encore\n7/10 → Novice\n🏄\nCrowd Surf\n7/10 → Novice\n🛡\nRoadie\n6/10 → Novice\n🔥 26 DAY STREAK\n💀 13 losses in a row...\n2/17 achievements\n▶ PAST RUNS (20)\nSEED: AD1A19\n📋 Copy Seed"}
+{"ts":"2026-07-30T03:34:57.620Z","ev":"draft","pick":["BjornLead GuitaristATK5FRENZIE","RagnarLead GuitaristATK4FRENZI"]}
+{"ts":"2026-07-30T03:34:59.744Z","ev":"descent","pick":"Fight 1 of 3The Wanderer84 HP↓ Select This Path"}
+{"ts":"2026-07-30T03:35:01.953Z","ev":"play_fail","card":"Groupie","cost":1}
+{"ts":"2026-07-30T03:35:03.393Z","ev":"play_fail","card":"NoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:35:04.629Z","ev":"play_fail","card":"Chain Burn the Set","cost":0}
+{"ts":"2026-07-30T03:35:05.060Z","ev":"strike","strikes":"4","bossHp":"84","played":0,"embers":5,"preview":"12"}
+{"ts":"2026-07-30T03:35:08.977Z","ev":"play_fail","card":"Burn the Set","cost":0}
+{"ts":"2026-07-30T03:35:10.197Z","ev":"play_fail","card":"NoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:35:11.455Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:35:11.884Z","ev":"strike","strikes":"3","bossHp":"78","played":0,"embers":5}
+{"ts":"2026-07-30T03:35:15.802Z","ev":"play_fail","card":"Burn the Set","cost":0}
+{"ts":"2026-07-30T03:35:16.989Z","ev":"play_fail","card":"NoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:35:18.212Z","ev":"play","card":"Demo Tape","cardType":"RIFF","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T03:35:19.056Z","ev":"play_fail","card":"Demo Tape","cost":1}
+{"ts":"2026-07-30T03:35:20.433Z","ev":"play","card":"RarePossessed Performance","cardType":"RIFF","cost":3,"target":"Bjorn"}
+{"ts":"2026-07-30T03:35:21.319Z","ev":"play_fail","card":"RarePossessed Performance","cost":3}
+{"ts":"2026-07-30T03:35:22.588Z","ev":"play","card":"Roadie","cardType":"UTILITY","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T03:35:23.444Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T03:35:23.854Z","ev":"strike","strikes":"3","bossHp":"72","played":3,"embers":5,"preview":"59"}
+{"ts":"2026-07-30T03:35:27.762Z","ev":"play_fail","card":"Burn the Set","cost":0}
+{"ts":"2026-07-30T03:35:29.103Z","ev":"play_fail","card":"Roadie","cost":1}
+{"ts":"2026-07-30T03:35:30.452Z","ev":"play_fail","card":"Dial to Eleven","cost":0}
+{"ts":"2026-07-30T03:35:30.989Z","ev":"strike","strikes":"2","bossHp":"37","played":0,"embers":1}
+{"ts":"2026-07-30T03:35:35.094Z","ev":"play","card":"Chain Groupie","cardType":"EMBER","cost":1,"target":"Bjorn"}
+{"ts":"2026-07-30T03:35:35.904Z","ev":"play_fail","card":"Chain Groupie","cost":1}
+{"ts":"2026-07-30T03:35:37.285Z","ev":"play","card":"Chain Burn the Set","cardType":"RIFF","cost":0,"target":"Bjorn"}
+{"ts":"2026-07-30T03:35:38.214Z","ev":"play_fail","card":"Chain Burn the Set","cost":0}
+{"ts":"2026-07-30T03:35:39.549Z","ev":"play_fail","card":"NoviceBattle Cry","cost":1}
+{"ts":"2026-07-30T03:35:40.893Z","ev":"play_fail","card":"Herb Money","cost":1}
+{"ts":"2026-07-30T03:35:41.345Z","ev":"strike","strikes":"2","bossHp":"2","played":2,"embers":1,"preview":"29"}
+{"ts":"2026-07-30T03:35:44.375Z","ev":"session","msg":"autopilot loop end","minutes":"2.1"}

@@ -162,12 +162,22 @@ async function shopTick(s) {
     ev('shop_buy', { label: c.t.slice(0, 50), why, stash, bandSize })
     await P.click(c.x, c.y); return true
   }
-  const tryable = l => !BOT.boughtThisShop.has(l) && !new RegExp('SOLD', 'i').test(t.slice(Math.max(0, t.indexOf(l))))
+  const tl = t.toLowerCase()
+  // sold-check: look for SOLD within 200 chars AFTER the label (case-insensitive find)
+  const tryable = l => { if (BOT.boughtThisShop.has(l)) return false; const i = tl.indexOf(l.toLowerCase()); return i < 0 ? true : !/sold/i.test(t.slice(i, i + 60)) } // 60 = tile-local; wider windows bleed into neighboring tiles' SOLD stamps
   // 1. MEMBERS FIRST (sim: needsMembers = band < 5)
   if (bandSize < 5) {
-    if (/FREE — Pick/i.test(t) && tryable('welcome pack') && await buy('welcome pack', 'free member')) return
-    for (const [pk, cost] of [['demonic', 40], ['touring', 22], ['garage', 10]])
-      if (t.toLowerCase().includes(pk) && stash >= cost && tryable(pk) && await buy(pk, 'members-first, band=' + bandSize)) return
+    if (/welcome pack/i.test(t)) {
+      if (tryable('welcome pack')) { if (await buy('welcome pack', 'free member')) return; ev('shop_skip', { tile: 'welcome', why: 'not in clickables' }) }
+      else ev('shop_skip', { tile: 'welcome', why: 'sold/bought' })
+    }
+    for (const [pk, cost] of [['demonic', 40], ['touring', 22], ['garage', 10]]) {
+      if (!tl.includes(pk)) continue
+      if (stash < cost) { ev('shop_skip', { tile: pk, why: `stash ${stash} < ${cost}` }); continue }
+      if (!tryable(pk)) { ev('shop_skip', { tile: pk, why: 'sold/bought' }); continue }
+      if (await buy(pk, 'members-first, band=' + bandSize)) return
+      ev('shop_skip', { tile: pk, why: 'tile not in clickables' })
+    }
   }
   // 2. RELIC (one per circle; sim buys if <3 owned and value clears bar — simplified: keep 4 reserve)
   if (BOT.artifacts < 3 && /THIS CIRCLE ONLY/.test(t) && tryable('artifact')) {
@@ -193,8 +203,16 @@ async function shopTick(s) {
 }
 
 async function recruitTick(s) {
-  // RecruitScreen after buying a pack: pick best candidate (sim pickBestCandidate policy)
-  const cands = s.clickables.filter(c => /ATK\s*\d/i.test(c.t) && /HP\s*\d/i.test(c.t))
+  // RecruitScreen after buying a pack: pick best candidate (sim pickBestCandidate policy).
+  // Candidate cards are plain divs (not cursor:pointer) — query the DOM directly.
+  let cands = await P.evaljs(`(() => {
+    const seen = {}
+    return [...document.querySelectorAll('div')].filter(d => {
+      const t = d.textContent || ''; const r = d.getBoundingClientRect()
+      return /ATK\\s*\\d/.test(t) && /HP\\s*\\d/.test(t) && t.length < 350 && r.height > 130 && r.width > 120 && r.width < 420
+    }).map(d => { const r = d.getBoundingClientRect(); return { t: d.textContent.replace(/\\s+/g, ' ').slice(0, 120), x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } })
+      .filter(c => { const k = c.t.slice(0, 25); return seen[k] ? false : (seen[k] = 1) })
+  })()`).catch(() => [])
   if (cands.length) {
     // stack-tier bonus: favor keywords the band already runs (parsed from stage strip earlier runs — approximate with pair bonus)
     const scored = cands.map(c => { const { p, kw } = memberScoreFromText(c.t); return { ...c, p, kw } })
@@ -203,7 +221,10 @@ async function recruitTick(s) {
     ev('recruit_pick', { pick: best.t.slice(0, 50), score: best.p })
     await P.click(best.x, best.y)
     for (const b of ['add to band', 'recruit', 'confirm', 'take', 'join', 'welcome']) { try { await P.clickText(b); break } catch (e) {} }
-  } else { for (const b of OVERLAY_BTNS) { try { await P.clickText(b); break } catch (e) {} } }
+  } else {
+    ev('recruit_pass', { why: 'no candidates parsed' })
+    try { await P.clickText('pass') } catch (e) { for (const b of OVERLAY_BTNS) { try { await P.clickText(b); break } catch (e2) {} } }
+  }
 }
 
 async function draftTick(s) {
@@ -262,6 +283,7 @@ async function main() {
       else if (type === 'descent') await descentTick(s)
       else if (type === 'combat') await combatTick(s)
       else if (type === 'shop') await shopTick(s)
+      else if (type === 'recruit') await recruitTick(s)
       else if (type === 'draft') await draftTick(s)
       else if (type === 'menu') { ev('run_start', {}); await P.clickText('continue').catch(() => P.clickText('skip tutorial').catch(() => P.clickText('enter the vestibule'))) }
       else if (type === 'death') { const f = await P.shot('death-' + Date.now()); ev('run_end', { result: 'death', shot: f, text: s.text.slice(0, 1200) }); await P.clickText('play again').catch(() => P.clickText('try again').catch(() => {})) }

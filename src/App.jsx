@@ -10479,7 +10479,7 @@ function App(){
                 onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor=accent+'aa';e.currentTarget.style.boxShadow='none'}}>
                 {isArt?<ArtifactArtImg id={s.id} emoji={s.emoji} size={44}/>:<div style={{fontSize:40}}>{s.emoji}</div>}
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-primary)',letterSpacing:1,textAlign:'center',lineHeight:1.15}}>{s.name}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:12,fontStyle:'italic',color:'var(--ink-dim)',textAlign:'center',lineHeight:1.3,minHeight:32}}>{s.effect}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontStyle:'italic',color:'var(--ink-dim)',textAlign:'center',lineHeight:1.3,minHeight:32}}>{s.effect}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-positive)',letterSpacing:1,marginTop:'auto'}}>Sell · +{Math.floor((s.cost||0)*0.5)}🌿</div>
               </div>))}
             </div>

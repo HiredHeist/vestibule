@@ -348,7 +348,7 @@ function improveOrdering(gs){const stage=gs.stage
 let TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
-  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0,eventsTriggered:0,eventMoshPit:0,eventCursedAmp:0,eventBloodOath:0,eventHellfire:0,eventSabbath:0,eventWager:0,whisperDmg:0,hungerExtraCost:0,madnessCards:0,possessionBonus:0,anchorSaves:0,kwStack2Reached:0,kwStack3Reached:0};
+  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0,eventsTriggered:0,eventMoshPit:0,eventCursedAmp:0,eventBloodOath:0,eventHellfire:0,eventSabbath:0,eventWager:0,whisperDmg:0,hungerExtraCost:0,madnessCards:0,possessionBonus:0,anchorSaves:0,kwStack2Reached:0,kwStack3Reached:0};
 let CARD_PLAYS={};
 
 function rand(n){return Math.floor(Math.random()*n)}
@@ -1256,7 +1256,7 @@ function newGame(){
   const _sC=DECK_ID_DEF.startCorruption!=null&&DECK_ID_DEF.startCorruption>STAKE.startCorruption?DECK_ID_DEF.startCorruption:STAKE.startCorruption
   return{stage:pickStartingPair(),deck:buildDeck(),discard:[],hand:[],stash:3,embers:_sE,maxEmbers:_sE,corruption:_sC,fightIndex:0,bossKills:0,artifacts:[],passives:[],fightsSurvived:0,totalDamage:0,highestStrike:0,stashEarned:0,tooStonedCount:0,won:false,mentorLinks:[],lastCircle:1,stashStolen:0,
   heldShrooms:false,heldAcid:false,stolenAtkPool:0,circleArtBought:false,circlePassBought:false,
-  _pacts:[],_speedDemon:false,_warDrums:false,_genreCounts:{RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0},_activeGenre:null,_wthFight:false,_contractsPlayed:0,_upgradedCards:[],artifacts:[],passives:[],loot:[],_strikeMult:1.0,_cardsPlayedIds:[],_firstStrike:true,_allCardsFree:false,_nextCardFree:false,_pendingBurnStage:false,_eventsSeenThisRun:[],_corruptionLocked:false,_bloodOathUid:null,_possessionFired:false,
+  _pacts:[],_speedDemon:false,_warDrums:false,_genreCounts:{RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0},_activeGenre:null,_wthFight:false,_contractsPlayed:0,_upgradedCards:[],loot:[],_strikeMult:1.0,_cardsPlayedIds:[],_firstStrike:true,_allCardsFree:false,_nextCardFree:false,_pendingBurnStage:false,_eventsSeenThisRun:[],_corruptionLocked:false,_bloodOathUid:null,_possessionFired:false,
   // ── DECK SIGNATURE TRACKING ──
   _shredderEchoesPending:0,        // chains queued for next-strike echo (Shredder)
   _ritualistPrevCorruption:_sC,    // corruption snapshot for refund-step calc (Ritualist)
@@ -1378,7 +1378,7 @@ const t0=Date.now();
 TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
-  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0,eventsTriggered:0,eventMoshPit:0,eventCursedAmp:0,eventBloodOath:0,eventHellfire:0,eventSabbath:0,eventWager:0,whisperDmg:0,hungerExtraCost:0,madnessCards:0,possessionBonus:0,anchorSaves:0,kwStack2Reached:0,kwStack3Reached:0};
+  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0,eventsTriggered:0,eventMoshPit:0,eventCursedAmp:0,eventBloodOath:0,eventHellfire:0,eventSabbath:0,eventWager:0,whisperDmg:0,hungerExtraCost:0,madnessCards:0,possessionBonus:0,anchorSaves:0,kwStack2Reached:0,kwStack3Reached:0};
 CARD_PLAYS={};
 const deathsByFight=new Array(27).fill(0),surviveByFight=new Array(27).fill(0);let wins=0,wthWins=0,totalFights=0,gamesWithLinks=0,totalPacts=0;
 for(let i=0;i<NUM_GAMES;i++){const r=simGame();totalFights+=r.fightsSurvived;totalPacts+=r.pacts;if(r.mentorLinks>0)gamesWithLinks++;

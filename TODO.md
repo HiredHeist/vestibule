@@ -1,8 +1,26 @@
 # VESTIBULE — TODO
 
-*Last updated: May 4, 2026 — v0.7.4 circle-shop reroll-collision hotfix 🔄*
-*Latest commits: pending — exclude already-owned items from circle reroll*
-*App.jsx: ~11,684 lines · circle artifact/pedal tiles refresh cleanly between circles*
+*Last updated: July 30, 2026 — bot-playtest rig operational, code audit clean ✅*
+*Branch state: main = audited stable · playtest/session2 = bot rig WIP (see HANDOFF.md)*
+
+## 🤖 CURRENT PHASE — AUTONOMOUS PLAYTEST (July 30)
+
+Bot rig (e2e/) plays real Bronze/Standard runs: drafts via sim memberScore, quick-play
+combat, sim-doctrine shop economy (members-first packs, relics, pedals, drug reserves),
+recruit picks, panic trips. Full loop verified. Overnight Lucifer grind awaits JV's go.
+
+**This session's code changes (audit fixes):**
+- src/App.jsx ~10482: fontSize 12 -> 13 (design-rule floor; npm run check now ALL CLEAN)
+- vestibule-sim-kwstacks.js: removed benign duplicate keys (forgeUpgrades in TRACK,
+  artifacts/passives in newGame) — values were identical, sim behavior unchanged
+- e2e/: pilot + autopilot (new; see HANDOFF.md for ops + hard-won rig lessons)
+
+**Open items:** sim winrate discrepancy (2K fresh run says 39.95% Lucifer on Bronze/
+Standard vs July 29 doc's 8.3–11.8% claim — reconcile before balance work) · aura-ATK
+display chip on member cards · Setlist "Draw 3" vs hand-cap text · relic-SOLD-on-load
+watch item. Details in HANDOFF.md.
+
+---
 
 ## 🔄 LATEST HOTFIX (v0.7.4) — CIRCLE-SHOP RESET BUG
 
