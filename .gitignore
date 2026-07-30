@@ -30,3 +30,7 @@ calibrate-*.js
 deck-*-sim*.js
 vestibule-lab.js
 DECK_OPTIONS*.txt
+
+# bot ledgers are machine-local, never tracked (tracked ledger = git pull conflicts on every bot run)
+e2e/*.jsonl
+!e2e/carddata.json
