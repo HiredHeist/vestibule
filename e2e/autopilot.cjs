@@ -72,6 +72,7 @@ async function combatTick(s) {
   // pay 1/2/4x per consecutive pair), buffs onto the carry, skip corr-gated dead cards.
   const rank = { EMBER: 0, RIFF: 1, UTILITY: 2, CORRUPT: 3 }
   const playable = h.filter(c => !/Need \d+% Corr/i.test(c.desc))
+    .filter(c => { const n = c.desc.match(/NEED\s*(\d)(?!\d|%)/); return !n || mem.length >= +n[1] }) // member-count gates
     .sort((a, b) => (rank[a.type] - rank[b.type]) || (a.cost - b.cost))
   let played = 0, failStreak = 0
   for (const c of playable) {

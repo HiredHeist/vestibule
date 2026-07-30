@@ -41,16 +41,44 @@ async function locate(txt) {
 // ---------- action (all trusted CDP input) ----------
 async function click(x, y) { const p = await connect(); await p.mouse.click(x, y); await p.waitForTimeout(350) }
 async function clickText(txt) { const c = await locate(txt); if (!c) throw new Error(`no clickable matching "${txt}"`); await click(c.x, c.y); return c }
+// HTML5-draggable elements (hand cards) start a NATIVE drag loop on mouse-down+move,
+// which swallows CDP mouse events (observed: hang at first post-down move). Fix:
+// CDP Input.setInterceptDrags — the drag is intercepted and re-dispatched as protocol
+// dragEnter/dragOver/drop events. Still trusted browser input, no synthetic JS events.
+let _cdp = null
+async function cdpSession() {
+  const p = await connect()
+  if (_cdp) return _cdp
+  _cdp = await p.context().newCDPSession(p)
+  return _cdp
+}
+// HTML5-draggable cards start a NATIVE drag loop on mouse-down+move, which swallows
+// CDP mouse events (hang at first post-down move; Input.setInterceptDrags doesn't take
+// in Electron's content layer). Fix: REAL X11 input via xdotool on the Xvfb display —
+// the native drag loop is built for real OS input. Truly native, zero CDP involvement.
+const { execSync } = require('child_process')
+function xEnv() {
+  try {
+    const line = execSync('pgrep -a Xvfb | head -1').toString()
+    const disp = (line.match(/:(\d+)/) || [, '99'])[1]
+    const auth = (line.match(/-auth (\S+)/) || [, ''])[1]
+    return `DISPLAY=:${disp}${auth ? ' XAUTHORITY=' + auth : ''}`
+  } catch (e) { return 'DISPLAY=:99' }
+}
 async function drag(x1, y1, x2, y2) {
   const p = await connect()
-  await p.mouse.move(x1, y1); await p.mouse.down()
-  for (let i = 1; i <= 8; i++) await p.mouse.move(x1 + (x2 - x1) * i / 8, y1 + (y2 - y1) * i / 8)
-  await p.mouse.up(); await p.waitForTimeout(400)
+  const dbg = process.env.PILOT_DEBUG ? m => require('fs').appendFileSync('/tmp/drag-debug.log', `${new Date().toISOString()} ${m}\n`) : () => {}
+  dbg(`xdrag ${x1},${y1} -> ${x2},${y2}`)
+  const steps = []
+  for (let i = 1; i <= 6; i++) steps.push(`mousemove ${Math.round(x1 + (x2 - x1) * i / 6)} ${Math.round(y1 + (y2 - y1) * i / 6)} sleep 0.05`)
+  execSync(`${xEnv()} xdotool mousemove ${x1} ${y1} sleep 0.08 mousedown 1 sleep 0.1 ${steps.join(' ')} sleep 0.12 mouseup 1`, { timeout: 15000 })
+  dbg('done')
+  await p.waitForTimeout(450)
 }
 async function key(k) { const p = await connect(); await p.keyboard.press(k); await p.waitForTimeout(250) }
 async function evaljs(code) { const p = await connect(); return p.evaluate(code) }
 
-async function reset() { try { if (browser) await browser.close() } catch (e) {} browser = null; page = null }
+async function reset() { try { if (browser) await browser.close() } catch (e) {} browser = null; page = null; _cdp = null }
 
 module.exports = { connect, state, shot, locate, click, clickText, drag, key, evaljs, reset }
 
