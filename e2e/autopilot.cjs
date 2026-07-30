@@ -221,11 +221,25 @@ async function main() {
   const t0 = Date.now()
   let lastHash = '', stuck = 0
   ev('session', { msg: 'autopilot v1 start' })
-  let tick = 0
+  let tick = 0, opTimeouts = 0
+  const origEv = ev
+  // rig self-heal: 3 consecutive op timeouts = degraded CDP session → restart Electron,
+  // reconnect. Game state survives in localStorage (vst_save mid-fight snapshot).
+  global.__opTimeout = async () => {
+    opTimeouts++
+    if (opTimeouts >= 3) {
+      origEv('rig_heal', { msg: 'restarting electron after ' + opTimeouts + ' op timeouts' })
+      try {
+        require('child_process').execSync('pkill -f "electron ./e2e/driver" 2>/dev/null; pkill Xvfb 2>/dev/null; sleep 2; bash /home/claude/vestibule/e2e/up.sh', { timeout: 60000 })
+      } catch (e) { origEv('rig_heal_err', { msg: e.message.slice(0, 100) }) }
+      await P0.reset(); opTimeouts = 0
+      await new Promise(r => setTimeout(r, 4000))
+    }
+  }
   while (Date.now() - t0 < maxMs) {
     tick++
     if (tick % 10 === 0) ev('heartbeat', { tick })
-    let s; try { s = await P.state() } catch (e) { ev('error', { msg: e.message }); await new Promise(r => setTimeout(r, 3000)); continue }
+    let s; try { s = await P.state(); opTimeouts = 0 } catch (e) { ev('error', { msg: e.message }); if (/op timeout/.test(e.message)) await global.__opTimeout(); await new Promise(r => setTimeout(r, 3000)); continue }
     const hash = s.text.slice(0, 500)
     stuck = (hash === lastHash) ? stuck + 1 : 0; lastHash = hash
     const type = await screenType(s)
@@ -242,11 +256,11 @@ async function main() {
       else if (type === 'combat') await combatTick(s)
       else if (type === 'shop') await shopTick(s)
       else if (type === 'draft') await draftTick(s)
-      else if (type === 'menu') { ev('run_start', {}); await P.clickText('skip tutorial').catch(() => P.clickText('enter the vestibule')) }
+      else if (type === 'menu') { ev('run_start', {}); await P.clickText('continue').catch(() => P.clickText('skip tutorial').catch(() => P.clickText('enter the vestibule'))) }
       else if (type === 'death') { const f = await P.shot('death-' + Date.now()); ev('run_end', { result: 'death', shot: f, text: s.text.slice(0, 1200) }); await P.clickText('play again').catch(() => P.clickText('try again').catch(() => {})) }
       else if (type === 'victory') { const f = await P.shot('VICTORY-' + Date.now()); ev('run_end', { result: 'VICTORY', shot: f, text: s.text.slice(0, 2000) }); break }
       else { for (const b of OVERLAY_BTNS) { try { await P.clickText(b); break } catch (e) {} } ev('unknown_screen', { text: s.text.slice(0, 300) }) }
-    } catch (e) { ev('error', { msg: e.message, type }) }
+    } catch (e) { ev('error', { msg: e.message, type }); if (/op timeout/.test(e.message)) await global.__opTimeout() }
     await new Promise(r => setTimeout(r, 800))
   }
   ev('session', { msg: 'autopilot loop end', minutes: ((Date.now() - t0) / 60000).toFixed(1) })

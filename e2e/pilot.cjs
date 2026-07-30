@@ -50,7 +50,9 @@ async function drag(x1, y1, x2, y2) {
 async function key(k) { const p = await connect(); await p.keyboard.press(k); await p.waitForTimeout(250) }
 async function evaljs(code) { const p = await connect(); return p.evaluate(code) }
 
-module.exports = { connect, state, shot, locate, click, clickText, drag, key, evaljs }
+async function reset() { try { if (browser) await browser.close() } catch (e) {} browser = null; page = null }
+
+module.exports = { connect, state, shot, locate, click, clickText, drag, key, evaljs, reset }
 
 // CLI: node pilot.cjs state | shot NAME | click X Y | clicktext TXT | key K | eval CODE
 if (require.main === module) {
