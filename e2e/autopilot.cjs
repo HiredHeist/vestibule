@@ -27,7 +27,7 @@ async function screenType(s) {
   if (t.includes('BACK TO THE PIT') || t.includes('SLY')) return 'shop'
   if (t.includes('START TUTORIAL') || t.includes('ENTER THE VESTIBULE')) return 'menu'
   if (t.includes('DEFEATED BY') || t.includes('PLAY AGAIN') || t.includes('TRY AGAIN') || t.includes('CAUSE OF DEATH')) return 'death'
-  if (t.includes('LUCIFER IS DEAD') || (t.includes('VICTORY') && t.includes('LUCIFER'))) return 'victory'
+  if (t.includes('LUCIFER IS DEAD') || /LUCIFER (IS )?(SLAIN|DEAD|DESTROYED|FALLS|DEFEATED)/.test(t)) return 'victory'
   if (t.includes('VICTORY') || t.includes('ONWARD')) return 'popup' // fight-victory summary → click through
   return 'unknown'
 }
@@ -69,6 +69,8 @@ async function combatTick(s) {
   if (lastBossHp !== null && bossHp[2] && +bossHp[1] === +bossHp[2]) { strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set() } // full-HP boss = new fight
   lastBossHp = bossHp[1] ? +bossHp[1] : null
   const h = await hand(); let mem = await members()
+  const real = mem.filter(m => BRAIN.MUSICIANS.some(x => x.name.toLowerCase() === m.name.toLowerCase()))
+  if (real.length) mem = real // drop phantom parses (boss/artifact text like 'Devil')
   if (!mem.length) {
     ev('warn', { msg: 'no members parsed — using fixed slot fallback' })
     const vp = await P.evaljs('({w:innerWidth,h:innerHeight})')
@@ -430,7 +432,7 @@ async function main() {
         else await P.clickText('continue').catch(() => P.clickText('skip tutorial').catch(() => P.clickText('enter the vestibule')))
       }
       else if (type === 'death') { const f = await P.shot('death-' + Date.now()); ev('run_end', { result: 'death', shot: f, text: s.text.slice(0, 1200) }); await P.clickText('play again').catch(() => P.clickText('try again').catch(() => {})) }
-      else if (type === 'victory') { const f = await P.shot('VICTORY-' + Date.now()); ev('run_end', { result: 'VICTORY', shot: f, text: s.text.slice(0, 2000) }); break }
+      else if (type === 'victory') { const f = await P.shot('VICTORY-' + Date.now()); ev('run_end', { result: 'VICTORY', shot: f, text: s.text.slice(0, 2000) }); break } // strict markers only — fight-win screens mentioning Lucifer no longer end the session
       else { for (const b of OVERLAY_BTNS) { try { await P.clickText(b); break } catch (e) {} } ev('unknown_screen', { text: s.text.slice(0, 300) }) }
     } catch (e) { ev('error', { msg: e.message, type }); if (/op timeout/.test(e.message)) await global.__opTimeout() }
     await new Promise(r => setTimeout(r, 800))
