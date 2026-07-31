@@ -94,7 +94,7 @@ async function combatTick(s) {
     const cur = await hand()
     const known = cur.map(c => ({ ...c, card: BRAIN.matchCard(c.name) })).filter(c => c.card && !failed.has(c.name))
       .filter(c => !/Need \d+% Corr/i.test(c.desc) || gsLite().corruption >= 40)
-      .filter(c => { const n = c.desc.match(/NEED\s*(\d)(?!\d|%)/); return !n || mem.length >= +n[1] })
+      .filter(c => { const n = c.desc.match(/NEED\s*(\d)(?!\d|%)/); if (!n) return true; if (+n[1] === c.cost) return true; return mem.length >= +n[1] }) // NEED==cost is the ember badge, not a member gate
     const gs = gsLite()
     gs.handIds = known.map(k => k.card.id); gs.handLen = cur.length
     const affordable = known.filter(k => k.cost <= gs.embers)
@@ -128,14 +128,14 @@ async function combatTick(s) {
     if (junk.length && cur2.length >= 4) {
       for (const j of junk) await P.click(j.x, j.y)
       const before = (await hand()).length
-      await P.clickText('discard').catch(() => {})
+      await P.clickText('↓ discard').catch(() => P.clickText('discard').catch(() => {}))
       await P.connect().then(p => p.waitForTimeout(700))
       ev('discard_dig', { dumped: junk.map(j => j.name.slice(0, 14)), handBefore: before })
       // one bonus play pass on the fresh cards
       const cur3 = await hand()
       const known3 = cur3.map(c => ({ ...c, card: BRAIN.matchCard(c.name) })).filter(c => c.card)
         .filter(c => !/Need \d+% Corr/i.test(c.desc) || gsD.corruption >= 40)
-        .filter(c => { const n = c.desc.match(/NEED\s*(\d)(?!\d|%)/); return !n || mem.length >= +n[1] })
+        .filter(c => { const n = c.desc.match(/NEED\s*(\d)(?!\d|%)/); if (!n) return true; if (+n[1] === c.cost) return true; return mem.length >= +n[1] })
         .filter(k => k.cost <= gsD.embers)
       known3.forEach(k => { k.score = BRAIN.scoreCard(k.card, { ...gsD, handIds: known3.map(x => x.card.id), handLen: cur3.length }, strikeNumThisFight, played) })
       const b3 = known3.sort((a, b) => b.score - a.score)[0]
@@ -350,7 +350,11 @@ async function draftTick(s) {
   let st = s
   for (let attempt = 0; attempt < 8; attempt++) {
     const ready = stageBtn(st)
-    if (ready) { ev('draft_confirm', { attempt }); await P.click(ready.x, ready.y); return }
+    if (ready) {
+      const seed = (st.text.match(/RUN SEED:\s*([A-Z0-9]+)/i) || [])[1]
+      ev('draft_confirm', { attempt, seed })
+      await P.click(ready.x, ready.y); return
+    }
     const cand = st.clickables.filter(c => /ATK\d/.test(c.t.replace(/\s/g, ''))).map(c => {
       const { p, kw } = memberScoreFromText(c.t)
       return { ...c, kw, score: p }
@@ -375,7 +379,9 @@ async function main() {
   const maxMs = (+(process.argv[2] || 14)) * 60000
   const t0 = Date.now()
   let lastHash = '', stuck = 0
-  ev('session', { msg: 'autopilot v2 start' })
+  let build = 'unknown'
+  try { build = require('child_process').execSync('git -C ' + JSON.stringify(path.join(__dirname, '..')) + ' log --oneline -1').toString().trim().slice(0, 50) } catch (e) {}
+  ev('session', { msg: 'autopilot v2 start', build })
   // player-settings for a steadier hand: hover-zoom off (cards stop re-fanning under
   // the cursor), damage numbers on. Same toggles a human sets in OPTIONS.
   try { await P.evaljs("localStorage.setItem('vst_hoverzoom','off'); localStorage.setItem('vst_shake','off'); 'ok'") } catch (e) {}
