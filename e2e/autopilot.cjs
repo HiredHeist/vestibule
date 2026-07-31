@@ -18,11 +18,12 @@ async function screenType(s) {
   const btn = txt => s.clickables.some(c => c.t.toLowerCase().includes(txt))
   if (btn('got it')) return 'popup'
   if (btn('discard & continue') || btn('✓ confirm')) return 'modal'
-  if (t.includes('⛧ CONTAINS ⛧') || (t.includes('PICK 1') && t.includes('BOOSTER'))) return 'boosterpick'
+  const _shopish = t.includes('BACK TO THE PIT') || t.includes("SLY'S MERCH")
+  if (!_shopish && (t.includes('⛧ CONTAINS ⛧') || (t.includes('PICK 1') && t.includes('BOOSTER')))) return 'boosterpick'
   if (t.includes('CLICK ANYWHERE') || (t.includes('CREDITS') && !t.includes('STRIKE'))) return 'credits'
   if (t.includes('WELCOME TO HELL') && !btn('strike')) return 'wth'
   if (t.includes('THE PACT')) return 'pact'
-  if (t.includes('DOOM FORGE')) return 'forge'
+  if (!_shopish && t.includes('DOOM FORGE')) return 'forge'
   if (t.includes('— OR —') || t.includes('OR —')) return 'event'
   if (t.includes('THE DESCENT') && t.includes('SELECT THIS PATH')) return 'descent'
   if (t.includes('OPENING NIGHT')) return 'draft'
@@ -436,7 +437,7 @@ async function draftTick(s) {
 async function main() {
   const maxMs = (+(process.argv[2] || 14)) * 60000
   const t0 = Date.now()
-  let lastHash = '', stuck = 0
+  let lastHash = '', stuck = 0, recoveries = 0
   let build = 'unknown'
   try { build = require('child_process').execSync('git -C ' + JSON.stringify(path.join(__dirname, '..')) + ' log --oneline -1').toString().trim().slice(0, 50) } catch (e) {}
   ev('session', { msg: 'autopilot v2 start', build })
@@ -474,7 +475,18 @@ async function main() {
     if (stuck >= 6) {
       const f = await P.shot('stuck-' + Date.now()); ev('stuck', { type, shot: f, text: s.text.slice(0, 800) })
       for (const b of OVERLAY_BTNS) { try { await P.clickText(b); stuck = 0; break } catch (e) {} }
-      if (stuck >= 10) { ev('abort', { msg: 'hard stuck' }); break }
+      if (stuck >= 10) {
+        recoveries++
+        if (recoveries > 3) { ev('abort', { msg: 'hard stuck after 3 recoveries' }); break }
+        ev('recover', { attempt: recoveries, type })
+        await P.key('Escape').catch(() => {}); await P.key('Escape').catch(() => {})
+        for (const b of ['back to the pit', 'skip', 'continue', 'got it']) { try { await P.clickText(b); break } catch (e) {} }
+        if ((await P.state().catch(() => ({ text: '' }))).text.slice(0, 300) === lastHash) {
+          await P.evaljs("location.reload(); 'x'").catch(() => {}) // save survives — resumes the run
+          await new Promise(r => setTimeout(r, 5000))
+        }
+        stuck = 0; lastHash = ''
+      }
     }
     try {
       if (type === 'popup') { for (const b of OVERLAY_BTNS) { try { await P.clickText(b); break } catch (e) {} } }
