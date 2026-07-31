@@ -1,7 +1,7 @@
 // e2e/brain.cjs — EXPERT COMBAT BRAIN, ported from vestibule-sim-kwstacks.js
 // scoreCard() logic copied from the sim's validated expert policy (the one that wins
 // ~40% of Bronze/Standard runs). Card knowledge: e2e/carddata.json (82 cards, 16 chains).
-const { cards: ALL_CARDS, chains: RIFF_CHAINS } = require('./carddata.json')
+const { cards: ALL_CARDS, chains: RIFF_CHAINS, musicians: MUSICIANS } = require('./carddata.json')
 
 // ---- name matching: screen shows "ChainRareStage Dive" etc — strip badges, fuzzy match
 const norm = s => (s || '').toLowerCase().replace(/[^a-z]/g, '')
@@ -103,4 +103,36 @@ function pickTarget(card, alive) {
   return alive.reduce((a, b) => a.atk > b.atk ? a : b) // carry
 }
 
-module.exports = { matchCard, scoreCard, pickTarget, ALL_CARDS, RIFF_CHAINS }
+// ---- aura-aware stage ordering (ported from sim improveOrdering/auraStaticScore)
+const KW_BY_NAME = {}
+for (const m of MUSICIANS) KW_BY_NAME[m.name.toLowerCase()] = m.keyword
+function auraStaticScore(order) { // order: [{keyword}]
+  let s = 0
+  for (let i = 0; i < order.length; i++) {
+    for (const j of [i - 1, i + 1]) {
+      const n = order[j]; if (!n) continue
+      switch (n.keyword) {
+        case 'FRENZIED': case 'DEBUFF': case 'DOUBLE TIME': s += 3; break
+        case 'ANCHOR': case 'FOLK MAGIC': s += 2; break
+        case 'CORRUPT': case 'HEXED': case 'SHREDDER': s += 1.5; break
+      }
+    }
+  }
+  return s
+}
+function bestOrder(names) { // names in current stage order -> improved name order
+  const order = names.map(n => ({ name: n, keyword: KW_BY_NAME[n.toLowerCase()] || '' }))
+  let improved = true, guard = 0
+  while (improved && guard++ < 30) {
+    improved = false
+    for (let i = 0; i + 1 < order.length; i++) {
+      const cur = auraStaticScore(order)
+      ;[order[i], order[i + 1]] = [order[i + 1], order[i]]
+      if (auraStaticScore(order) > cur) improved = true
+      else [order[i], order[i + 1]] = [order[i + 1], order[i]]
+    }
+  }
+  return order.map(o => o.name)
+}
+
+module.exports = { matchCard, scoreCard, pickTarget, ALL_CARDS, RIFF_CHAINS, MUSICIANS, bestOrder }

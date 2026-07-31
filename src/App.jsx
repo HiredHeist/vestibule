@@ -6220,10 +6220,15 @@ function App(){
     return true
   },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected,fightTripBuff,enemy,enemyHp,maxEmbers,activePassives,activeArtifacts,chosenPacts,fightIndex,collectedLoot])
 
-  const handleDropOnStage=useCallback((slotIdx)=>{
-    if(!dragCardUid||animPhase!=='idle')return
+  const handleDropOnStage=useCallback((slotIdx,uidOverride)=>{
+    // QUICK-PLAY FIX (Jul 31 2026): quick-play called this synchronously after
+    // setDragCardUid — the state read below was one render STALE, so the first
+    // quick-play no-opped and later ones played the PREVIOUSLY selected card
+    // (wrong card, wrong ember charge). Quick-play now passes the uid directly.
+    const _playUid=uidOverride||dragCardUid
+    if(!_playUid||animPhase!=='idle')return
     setQuickPlayCardUid(null)
-    const card=hand.find(c=>c.uid===dragCardUid)
+    const card=hand.find(c=>c.uid===_playUid)
     if(!card)return
     // ── UNDO SNAPSHOT — save state before card play ──
     setUndoSnapshot({hand:[...hand],deck:[...deckRef.current],disc:[...discRef.current],stage:stage.map(m=>m?Object.assign({},m):null),embers,corruption,strikeMult:strikeMultRef.current,selected:[...selected],nextCardFree:nextCardFreeRef.current})
@@ -10688,7 +10693,7 @@ function App(){
                 onDragOver={function(){setDragOverSlotIdx(i)}}
                 onDrop={function(){setDragOverSlotIdx(null);handleStageDrop(i)}}
                 bondColor={m?getBondColor(m,stage):null}
-                onQuickPlay={()=>{if(quickPlayCardUid&&m){setDragCardUid(quickPlayCardUid);handleDropOnStage(i);setQuickPlayCardUid(null)}}}
+                onQuickPlay={()=>{if(quickPlayCardUid&&m){handleDropOnStage(i,quickPlayCardUid);setQuickPlayCardUid(null)}}}
                 mentorState={m&&m.mentorLinkedToUid?(m.mentorAlive?'active':'broken'):m&&m.isMentor&&stage[i+1]&&stage[i+1].mentorLinkedToUid===m.uid&&!m.tooStoned?'mentor':null}
                 corruption={corruption}
                 corruptTier={_kwT('CORRUPT')}

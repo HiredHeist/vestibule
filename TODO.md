@@ -20,6 +20,11 @@ wrote previous fight's state (0-strike zombie fights, un-healed stage, wrong
 fightIndex); now an effect keyed on fightIndex + loadGame guard invalidating sl<=0
 saves. Verified live. (2) ⬜ no Abandon Run option in pause menu — still needed.
 
+**GAME BUG #3 ✅ FIXED (July 31):** quick-play stale dragCardUid — played previous
+selection with wrong ember charge. Now passes uid directly. Verified live.
+**⚠ SIM DESIGN DECISION NEEDED:** sim refills embers every strike; live carries them
+across strikes. Sim economy ~4x richer → winrate estimates inflated. Pick one.
+
 **Open items:** sim winrate discrepancy (2K fresh run says 39.95% Lucifer on Bronze/
 Standard vs July 29 doc's 8.3–11.8% claim — reconcile before balance work) · aura-ATK
 display chip on member cards · Setlist "Draw 3" vs hand-cap text · relic-SOLD-on-load

@@ -132,3 +132,21 @@ gameState] — runs post-commit, reads fresh state; (2) loadGame() invalidates a
 save with sl<=0 (kills existing poisoned saves for all players). VERIFIED LIVE:
 save now coherent (sl:1/4 + matching band/hand), reload resumes into the same
 sane state instead of a locked fight. Abandon-Run button (bug #2) still TODO.
+
+## JV'S EMBER OBSERVATION → 2 REAL FINDINGS (July 31)
+
+**GAME BUG #3 FIXED — quick-play played the WRONG card.** handleDropOnStage read
+stale dragCardUid state when called synchronously from onQuickPlay: first
+quick-play no-opped, later ones played the PREVIOUSLY selected card (wrong card,
+wrong ember charge — source of the "embers look wrong" feel). Fix: quick-play
+passes the uid directly. VERIFIED: 2-cost card charges exactly 2, first click.
+
+**SIM DIVERGENCE FLAGGED (design call for JV):** sim refills embers to max EVERY
+STRIKE (line ~764 gs.embers=gs.maxEmbers); the live game does NOT — embers carry
+across strikes. The sim plays with a ~4x richer economy. Prime suspect for
+sim 40% winrate vs live 56% fight-2 death rate. DECIDE: which is intended?
+
+**Bot upgrades shipped:** discard-digging (replaces junk, verified live: dug 2,
+drew into an 82-score Amp), aura-aware stage ordering (sim improveOrdering via
+shop arrows), pact handler, play-verification via ember/discard deltas (hand
+refills after plays — old hand-count check logged successes as play_fails).

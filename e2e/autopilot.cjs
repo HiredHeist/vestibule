@@ -104,15 +104,47 @@ async function combatTick(s) {
     const c = affordable[0]
     if (c.score <= 3) break // sim stop-rule: nothing worth playing, save the hand
     const tgt = BRAIN.pickTarget(c.card, mem)
+    // success = embers or discard-pile changed (hand REFILLS after plays — count never shrinks)
+    const sigOf = t => ((t.match(/(\d+)\s*\n?DISCARD/) || [0, 0])[1]) + '|' + ((t.match(/(\d+)\s*\/\s*\d+\s*\n?FIGHT/) || [0, 0])[1])
+    const sigBefore = sigOf((await P.state()).text)
     await P.playCard(c.x, c.y, tgt.x, tgt.y)
-    const after = (await hand()).length
-    if (after < cur.length) {
+    const sigAfter = sigOf((await P.state()).text)
+    if (sigAfter !== sigBefore) {
       played++; failStreak = 0; playedIdsThisFight.push(c.card.id)
       for (const ch of BRAIN.RIFF_CHAINS) { const ck = ch[0] + '+' + ch[1]; if (!firedChainsThisFight.has(ck) && playedIdsThisFight.includes(ch[0]) && playedIdsThisFight.includes(ch[1])) firedChainsThisFight.add(ck) }
       ev('play', { card: c.card.id, score: c.score, cost: c.cost, target: tgt.name })
     }
     else { failStreak++; failed.add(c.name); ev('play_fail', { card: c.name, cost: c.cost }); await P.click(c.x, c.y).catch(() => {}) }
     if ((await P.state()).text.toUpperCase().includes('DISCARD & CONTINUE')) { await modalTick(await P.state()) }
+  }
+  // DISCARD-DIGGING (sim weapon #1): burn a discard to replace junk when the hand
+  // is weak — chain-partner draws and playable cards beat dead corr-gated filler.
+  const gsD = gsLite()
+  if (gsD.discardsLeft > 0 && played < 3) {
+    const cur2 = await hand()
+    const scored = cur2.map(c => ({ ...c, card: BRAIN.matchCard(c.name) }))
+      .map(c => ({ ...c, score: c.card ? BRAIN.scoreCard(c.card, { ...gsD, handIds: [], handLen: cur2.length }, strikeNumThisFight, played) : 0 }))
+    const junk = scored.filter(c => c.score < 25 || /Need \d+% Corr/i.test(c.desc)).sort((a, b) => a.score - b.score).slice(0, 2)
+    if (junk.length && cur2.length >= 4) {
+      for (const j of junk) await P.click(j.x, j.y)
+      const before = (await hand()).length
+      await P.clickText('discard').catch(() => {})
+      await P.connect().then(p => p.waitForTimeout(700))
+      ev('discard_dig', { dumped: junk.map(j => j.name.slice(0, 14)), handBefore: before })
+      // one bonus play pass on the fresh cards
+      const cur3 = await hand()
+      const known3 = cur3.map(c => ({ ...c, card: BRAIN.matchCard(c.name) })).filter(c => c.card)
+        .filter(c => !/Need \d+% Corr/i.test(c.desc) || gsD.corruption >= 40)
+        .filter(c => { const n = c.desc.match(/NEED\s*(\d)(?!\d|%)/); return !n || mem.length >= +n[1] })
+        .filter(k => k.cost <= gsD.embers)
+      known3.forEach(k => { k.score = BRAIN.scoreCard(k.card, { ...gsD, handIds: known3.map(x => x.card.id), handLen: cur3.length }, strikeNumThisFight, played) })
+      const b3 = known3.sort((a, b) => b.score - a.score)[0]
+      if (b3 && b3.score > 3) {
+        const t3 = BRAIN.pickTarget(b3.card, mem)
+        await P.playCard(b3.x, b3.y, t3.x, t3.y)
+        if ((await hand()).length < cur3.length) { played++; playedIdsThisFight.push(b3.card.id); ev('play', { card: b3.card.id, score: b3.score, cost: b3.cost, target: t3.name, afterDig: true }) }
+      }
+    }
   }
   // PANIC BUTTON (sim doctrine: clutch trips when the fight goes south) —
   // <=2 strikes left and boss above ~45%: drop a held trip before striking
@@ -255,7 +287,28 @@ async function shopTick(s) {
   // 4. DRUGS (sim: shrooms if stash>=16, acid if stash>=22 — reserve logic)
   if (stash >= 16 && /Shrooms/i.test(t) && !/Shrooms\s*\n?DRY/i.test(t) && tryable('shrooms') && await buy('shrooms', 'panic button reserve')) return
   if (stash >= 22 && /🧪/.test(t) && !/🧪\s*\n?DRY/i.test(t) && tryable('🧪') && await buy('🧪', 'acid reserve')) return
-  // 5. done — leave
+  // 5. AURA-AWARE STAGE ORDERING (sim weapon #2): arrange members so aura emitters
+  // cover the most neighbors (sim improveOrdering). Arrows: ⟨ moves member left.
+  try {
+    for (let moves = 0; moves < 6; moves++) {
+      const strip = await P.evaljs(`(() => {
+        const arrows = [...document.querySelectorAll('*')].filter(el => (el.textContent || '').trim() === '⟨' && el.children.length === 0)
+          .map(el => { const r = el.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } })
+          .filter(a => a.x > 0).sort((a, b) => a.x - b.x || a.y - b.y)
+        const m = (document.body.innerText.match(/STAGE ORDER[\s\S]{0,400}?(?=⛧ THIS CIRCLE|⛧ ARTIFACT|CARDS FOR SALE)/) || [''])[0]
+        const names = [...m.matchAll(/⟨[^⟩]*?([A-Z][a-z]{2,})[^⟩]*?⟩/g)].map(x => x[1])
+        return { names, arrows }
+      })()`)
+      if (!strip.names || strip.names.length < 3) break // ordering only matters at 3+
+      const want = BRAIN.bestOrder(strip.names)
+      if (JSON.stringify(want) === JSON.stringify(strip.names)) { if (moves) ev('stage_ordered', { order: want.join('>') }); break }
+      let i = 0; while (want[i] === strip.names[i]) i++
+      const j = strip.names.indexOf(want[i])
+      if (j <= i || !strip.arrows[j]) break
+      await P.click(strip.arrows[j].x, strip.arrows[j].y) // move him one slot left
+      await P.connect().then(p => p.waitForTimeout(400))
+    }
+  } catch (e) { ev('stage_order_err', { msg: e.message.slice(0, 60) }) }
   const f = await P.shot('shop-final-' + Date.now())
   ev('shop_leave', { stash, bandSize, bought: [...BOT.boughtThisShop], shot: f })
   BOT.boughtThisShop = new Set(); BOT.lastShopSig = ''
