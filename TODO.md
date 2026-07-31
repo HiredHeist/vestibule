@@ -33,6 +33,16 @@ across strikes. Sim economy ~4x richer → winrate estimates inflated. Pick one.
   Lucifer opens the Devil's Contract popup (rules + sacrifice-to-2 option)
 - OPEN: strike preview vs actual damage mismatch on Lucifer phase 1 (3471 shown, 322 dealt) — needs repro
 
+**THE GREAT RETUNE (July 31 — JV-directed, sim-validated at 5K):**
+- EMBER TRUTH: sim no longer refills embers per strike (JV ruling: scarcity IS the game).
+  All historical winrates were inflated by this — true pre-retune rate was 1.42%.
+- HP curve retuned x0.40(early)->x0.65(late), Wanderer + Lucifer untouched:
+  8.56% Lucifer winrate (target ~10%), Lost Soul deaths 63% -> 17.5%, avg run
+  reaches fight 15/26 (deaths pushed later per JV).
+- Lucifer scales with Heat/Encore (666,666 at Heat 1)
+- Abandon Run button in pause menu - booster doctrine (sim+bot buy CD-R when rich)
+- Setlist text honesty - _hrUsed survives save/reload
+
 **Open items:** sim winrate discrepancy (2K fresh run says 39.95% Lucifer on Bronze/
 Standard vs July 29 doc's 8.3–11.8% claim — reconcile before balance work) · aura-ATK
 display chip on member cards · Setlist "Draw 3" vs hand-cap text · relic-SOLD-on-load

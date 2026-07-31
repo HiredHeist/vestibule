@@ -5081,7 +5081,10 @@ function App(){
   const getScaledMaxHp=useCallback((e)=>{
     // LUCIFER (Jul 31 2026, JV): flat 666,666 total — 333,333 per phase. No deck
     // scaling, no boss-kill reduction. The number IS the design.
-    if(e&&(e.passiveId==='luciferBoss'||e.id==='lucifer'))return 333333
+    if(e&&(e.passiveId==='luciferBoss'||e.id==='lucifer')){
+      const _lhl=parseInt(localStorage.getItem('vst_heat')||'1')
+      return Math.ceil(333333*(1+Math.max(0,_lhl-1)*0.15)*(encoreMode?2.0:1.0)) // 666,666 total at Heat 1, scales with NG+
+    }
     if(!e)return 0
     const _ds=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1
     const _hl=parseInt(localStorage.getItem('vst_heat')||'1')
@@ -7016,7 +7019,7 @@ function App(){
     if(gameState!=='playing'||tutorialFight>0)return
     const t=setTimeout(()=>{try{saveGame({
       v:1,gs:'playing',fi:fightIndex,seed:runSeed,deck:selectedDeck,relicsSeen:[...relicsSeenRef.current],
-      stage:stage.map(m=>m?{id:m.id,name:m.name,hp:m.hp,maxHp:m.maxHp,atk:m.atk,role:m.role,keyword:m.keyword,tooStoned:m.tooStoned,uid:m.uid,foil:m.foil,mythic:m.mythic,demonic:m.demonic,permAtkBonus:m.permAtkBonus||0,encoreReady:m.encoreReady,stoneShield:m.stoneShield,isMentor:m.isMentor,mentorMult:m.mentorMult,mentorLinkedToUid:m.mentorLinkedToUid,mentorAlive:m.mentorAlive,buffCount:m.buffCount||0}:null),
+      stage:stage.map(m=>m?{id:m.id,name:m.name,hp:m.hp,maxHp:m.maxHp,atk:m.atk,role:m.role,keyword:m.keyword,tooStoned:m.tooStoned,uid:m.uid,foil:m.foil,mythic:m.mythic,demonic:m.demonic,permAtkBonus:m.permAtkBonus||0,encoreReady:m.encoreReady,stoneShield:m.stoneShield,isMentor:m.isMentor,mentorMult:m.mentorMult,mentorLinkedToUid:m.mentorLinkedToUid,mentorAlive:m.mentorAlive,buffCount:m.buffCount||0,_hrUsed:m._hrUsed||false}:null),
       dk:deck.map(c=>c.id),hand:hand.map(c=>c.id),disc:discardPile.map(c=>c.id),
       em:embers,mx:maxEmbers,st:stash,co:corruption,
       sl:strikesLeft,ms:fightMaxStrikes,dl:discardsLeft,
@@ -8201,7 +8204,7 @@ function App(){
         // LUCIFER PHASE TRANSITION: Phase 1 → Phase 2
         if(enemy.passiveId==='luciferBoss'&&luciferPhase===1){
           setLuciferPhase(2)
-          const _lucP2Hp=333333;setEnemyHp(_lucP2Hp);setScaledMaxHp(_lucP2Hp) // phase 2 of 666,666 total
+          const _lh2=parseInt(localStorage.getItem('vst_heat')||'1');const _lucP2Hp=Math.ceil(333333*(1+Math.max(0,_lh2-1)*0.15)*(encoreMode?2.0:1.0));setEnemyHp(_lucP2Hp);setScaledMaxHp(_lucP2Hp) // phase 2 of 666,666 total (Heat/Encore-scaled)
           setBossRageAtk(0)
           // Full band reset
           setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,stoneShield:false,tempBuff:false,encoreReady:false,ampedThisStrike:false}):null))
@@ -8704,7 +8707,8 @@ function App(){
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
     if(fightIndex===26){
       // 8 circle bosses killed = 8 × 51,750 = 414,000 reduction → 6,666 HP
-      const luciferActualHp=333333 // phase 1 of 2 — 666,666 total (Jul 31 2026, JV)
+      const _lheat=parseInt(localStorage.getItem('vst_heat')||'1')
+      const luciferActualHp=Math.ceil(333333*(1+Math.max(0,_lheat-1)*0.15)*(encoreMode?2.0:1.0)) // phase 1 of 2 — 666,666 total at Heat 1, scales with NG+/Encore
       setEnemyHp(luciferActualHp)
       setLuciferPhase(1)
       addLog('⛧ THE DEVIL HIMSELF — 666,666 HP ACROSS TWO FORMS ⛧')
@@ -11276,6 +11280,8 @@ function App(){
       {showPauseOptions&&<div style={{position:'absolute',inset:0,zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.85)'}} onClick={()=>setShowPauseOptions(false)}>
         <div onClick={e=>e.stopPropagation()} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16,padding:'40px 60px',background:'rgba(10,6,2,0.98)',border:'2px solid rgba(100,65,15,0.5)',borderRadius:12,maxWidth:500,width:'90%'}}>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'var(--text-blood)',textShadow:'0 0 20px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:6}}>Paused</div>
+          {gameState!=='menu'&&<button onClick={()=>{if(window.confirm('Abandon this run? The tour ends here — no refunds from Hell.')){clearSave();setShowPauseOptions(false);handleReset()}}}
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:3,color:'var(--text-blood)',background:'rgba(60,10,10,0.5)',border:'1px solid var(--text-blood)',borderRadius:7,padding:'10px 28px',cursor:'pointer',width:'100%'}}>🏳 ABANDON RUN</button>}
           <div style={{display:'flex',flexDirection:'column',gap:10,width:'100%'}}>
             {[
               ['Scanlines','vst_scanlines',localStorage.getItem('vst_scanlines')!=='off'],

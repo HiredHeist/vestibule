@@ -18,6 +18,7 @@ async function screenType(s) {
   const btn = txt => s.clickables.some(c => c.t.toLowerCase().includes(txt))
   if (btn('got it')) return 'popup'
   if (btn('discard & continue') || btn('✓ confirm')) return 'modal'
+  if (t.includes('⛧ CONTAINS ⛧') || (t.includes('PICK 1') && t.includes('BOOSTER'))) return 'boosterpick'
   if (t.includes('CLICK ANYWHERE') || (t.includes('CREDITS') && !t.includes('STRIKE'))) return 'credits'
   if (t.includes('WELCOME TO HELL') && !btn('strike')) return 'wth'
   if (t.includes('THE PACT')) return 'pact'
@@ -323,6 +324,8 @@ async function shopTick(s) {
   // 4. DRUGS (sim: shrooms if stash>=16, acid if stash>=22 — reserve logic)
   if (stash >= 16 && /Shrooms/i.test(t) && !/Shrooms\s*\n?DRY/i.test(t) && tryable('shrooms') && await buy('shrooms', 'panic button reserve')) return
   if (stash >= 22 && /🧪/.test(t) && !/🧪\s*\n?DRY/i.test(t) && tryable('🧪') && await buy('🧪', 'acid reserve')) return
+  // 4b. BOOSTER DOCTRINE (Jul 31 JV): CD-R when stash-rich — data on booster value
+  if (stash >= 30 && /CD-R/i.test(t) && tryable('cd-r') && await buy('cd-r', 'booster doctrine, stash=' + stash)) return
   // 5. AURA-AWARE STAGE ORDERING (sim weapon #2): arrange members so aura emitters
   // cover the most neighbors (sim improveOrdering). Arrows: ⟨ moves member left.
   try {
@@ -474,6 +477,7 @@ async function main() {
       else if (type === 'event') await eventTick(s)
       else if (type === 'pact') await pactTick(s)
       else if (type === 'forge') await forgeTick(s)
+      else if (type === 'boosterpick') await forgeTick(s) // same shape: card tiles, pick best, confirm
       else if (type === 'credits') { ev('credits_seen', {}); const vp = await P.evaljs('({w:innerWidth,h:innerHeight})'); await P.click(Math.round(vp.w / 2), Math.round(vp.h / 2)) }
       else if (type === 'wth') {
         const f = await P.shot('wth-' + Date.now())

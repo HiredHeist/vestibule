@@ -164,6 +164,8 @@ Unlock progression: each deck unlocks the next on full-game victory.
 
 ## CIRCLE PROGRESSION
 
+*(Jul 31 2026: full HP retune — curve x0.40 early -> x0.65 late vs pre-retune values; ~10% expert winrate target at Bronze with the TRUE no-refill ember economy. Lucifer: flat 666,666 at Heat 1, scales with Heat/Encore.)*
+
 9 Circles, 3 fights each (2 minor enemies + 1 circle boss):
 
 | # | Circle | Theme | Bosses |

@@ -761,7 +761,9 @@ function simFight(gs,phaseHp,luciferPhase){
     drawCards(gs,Math.max(0,handSize-gs.hand.length));gs._drawNextStrike=0;
     if(gs._tappedOutNext){gs.embers=Math.min(gs.maxEmbers,gs.embers+5);gs._tappedOutNext=false}
     if(gs._slowBurnStrikes>0){gs.embers=Math.min(gs.maxEmbers,gs.embers+1);gs._slowBurnStrikes--}
-    gs.embers=gs.maxEmbers;
+    // Jul 31 2026 JV RULING: embers do NOT refill per strike — they persist across
+    // the whole fight; only ember cards / FOLK MAGIC refunds add. (Old refill here
+    // inflated every historical winrate number.)
 
     // WTH: inject contract every 2 strikes
     if(gs._wthFight){wthStrikeCount++;if(wthStrikeCount%2===0&&wthStrikeCount>0)gs.hand.push({id:'contract',type:'CORRUPT',rarity:'Rare',embers:0,uid:'ctr'+wthStrikeCount})}
@@ -1246,6 +1248,18 @@ function simShop(gs){
   // 5% chance sigil appears in shop
   if(Math.random()<0.05&&gs.stash>=42&&!gs.deck.some(c=>c.id==='sabbathsigil')&&!gs.discard.some(c=>c.id==='sabbathsigil')){
     gs.deck.push({id:'sabbathsigil',type:'CORRUPT',rarity:'Rare',embers:2,consumable:true});gs.stash-=42;TRACK.sigilsBought=(TRACK.sigilsBought||0)+1
+  }
+  // BOOSTER DOCTRINE (Jul 31 2026 JV): buy CD-R when stash-rich — generates data
+  // on whether boosters earn their shop slot. 2 commons + 1 uncommon, pick best.
+  if(gs.stash>=30){
+    const pool=ALL_CARDS.filter(c=>!c.consumable)
+    const commons=pool.filter(c=>c.rarity==='Common'),uncs=pool.filter(c=>c.rarity==='Uncommon')
+    if(commons.length&&uncs.length){
+      const offer=[pick(commons),pick(commons),pick(uncs)]
+      const _bv={possessedperf:9,infencore:8,amp:8,encore:7,heavyriff:7,soundwall:7,staticcharge:6,powertap:6,crowdsurf:6,battlecry:6,stagedive:6,sonicboom:6}
+      const best=offer.reduce((a,b)=>((_bv[a.id]||3)>=(_bv[b.id]||3)?a:b))
+      gs.stash-=12;gs.deck.push({...best});TRACK.boostersBought=(TRACK.boostersBought||0)+1
+    }
   }
   // DECK THINNING
   burnWeakCards(gs);

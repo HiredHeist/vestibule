@@ -160,3 +160,12 @@ full-band replace modal + Devil's Contract popup - forge restored for the BOT
 forge_pick live). Sim after patch: 12.70% Lucifer wins (was 39.95%) = on target.
 Bot: braver drug use (boss-fight openers), credits/WTH handlers, declines Lucifer,
 replaces weakest member when upgrading a full band.
+
+
+## THE GREAT RETUNE (July 31)
+
+JV ruling: limited embers ARE the game — sim's phantom per-strike refill removed
+(true winrate was 1.42%, not 40%). HP curve swept empirically to x0.40->x0.65:
+5K-validated 8.56% Lucifer winrate, Lost Soul deaths 63%->17.5%, avg fight 15/26.
+Plus: Lucifer scales with Heat/Encore; Abandon Run button; booster doctrine
+(sim+bot); Devil's Contract + replace-modal shipped earlier same day.

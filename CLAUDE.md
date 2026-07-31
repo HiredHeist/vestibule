@@ -238,13 +238,12 @@ vst_achievement_*         Per-achievement unlock flags
 - Run: `node vestibule-sim-kwstacks.js [numGames] [stake] [deck]`
 - Models: cards, passives, artifacts, pacts, loot, combos, mentor links, drugs, hellquakes, corruption thresholds, random events, blood oath, full keyword stack tier scaling
 - **Live HP sync:** sim reads `boss_hp_override.json` at repo root for current ENEMIES maxHp values, then applies `deck.hpScale` (1.85 default Standard). Matches live `getScaledMaxHp` exactly. **When live boss HPs change, update `boss_hp_override.json` in the same commit.**
-- Latest 5K Bronze sim (May 2 overnight, post-fix): avg fight reached 14.37/26, Wanderer 0% deaths, Lost Soul 20.6% deaths (new wall), Devourer C3 17.9% deaths (second wall), Lucifer wins 17.7%
+- Latest 5K Bronze sim (Jul 31 2026, TRUE ember economy + retune): avg fight 15.05/26, Wanderer 0% deaths, Lost Soul 17.5%, Lucifer wins 8.56% (~10% target). NOTE: sim no longer refills embers per strike (matches live; old numbers were inflated).
 - Sim is fast: 5K games in ~17 seconds, 10K in ~35 seconds
 
 When changing game balance, run sim before committing.
 
-⚠ July 30, 2026: fresh 2K Bronze/Standard sim = 39.95% Lucifer wins, but the July 29
-audit claimed 8.3–11.8%. Params of the old sweep unknown — reconcile before balance work.
+RESOLVED Jul 31 2026: the winrate discrepancy was the sim's phantom per-strike ember refill (sim refilled embers every strike; live does not). Refill removed — sim now matches the live economy, and sim wall data converges with live bot observations.
 
 ---
 
