@@ -18,6 +18,7 @@ async function screenType(s) {
   const btn = txt => s.clickables.some(c => c.t.toLowerCase().includes(txt))
   if (btn('got it')) return 'popup'
   if (btn('discard & continue') || btn('✓ confirm')) return 'modal'
+  if (t.includes('THE PACT')) return 'pact'
   if (t.includes('— OR —') || t.includes('OR —')) return 'event'
   if (t.includes('THE DESCENT') && t.includes('SELECT THIS PATH')) return 'descent'
   if (t.includes('OPENING NIGHT')) return 'draft'
@@ -156,6 +157,26 @@ async function modalTick(s) {
     await P.click(pick.x, pick.y)
   }
   await P.clickText('discard & continue').catch(() => P.clickText('confirm').catch(() => {}))
+}
+
+async function pactTick(s) {
+  // boss-kill pact choice: prefer permanent band-wide power (sim scorePact doctrine).
+  const opts = s.clickables.filter(c => c.w > 150 && c.h > 100 && !/skip/i.test(c.t))
+  const score = c => {
+    const t = c.t.toLowerCase(); let p = 10
+    if (/all .*(\+\d+ )?max hp|max hp perm/i.test(t)) p += 80
+    if (/all .*\+\d+ atk|atk permanently/i.test(t)) p += 75
+    if (/ember/i.test(t)) p += 60
+    if (/permanent/i.test(t)) p += 40
+    if (/strike/i.test(t)) p += 45
+    if (/draw|hand/i.test(t)) p += 35
+    if (/instead of|deals \d+x/i.test(t)) p += 25 // single-card upgrades: meh
+    if (/lose|sacrifice|dies|-\d+/i.test(t)) p -= 40
+    return p
+  }
+  const pick = opts.sort((a, b) => score(b) - score(a))[0]
+  if (pick) { ev('pact_choice', { pick: pick.t.slice(0, 60), score: score(pick) }); await P.click(pick.x, pick.y) }
+  else { ev('pact_skip', {}); await P.clickText('skip').catch(() => {}) }
 }
 
 async function eventTick(s) {
@@ -338,6 +359,7 @@ async function main() {
       if (type === 'popup') { for (const b of OVERLAY_BTNS) { try { await P.clickText(b); break } catch (e) {} } }
       else if (type === 'modal') await modalTick(s)
       else if (type === 'event') await eventTick(s)
+      else if (type === 'pact') await pactTick(s)
       else if (type === 'descent') await descentTick(s)
       else if (type === 'combat') await combatTick(s)
       else if (type === 'shop') await shopTick(s)
