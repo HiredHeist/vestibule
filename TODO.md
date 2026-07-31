@@ -25,6 +25,14 @@ selection with wrong ember charge. Now passes uid directly. Verified live.
 **⚠ SIM DESIGN DECISION NEEDED:** sim refills embers every strike; live carries them
 across strikes. Sim economy ~4x richer → winrate estimates inflated. Pick one.
 
+**BALANCE PATCH (July 31, JV-approved, sim-validated 12.7% Lucifer winrate vs 40% before):**
+- Heavy Riff: ONCE per member per fight (all 3 apply-sites gated; was the one-carry snowball)
+- Lucifer fight: flat 666,666 HP (333,333 x 2 phases), single source of truth in getScaledMaxHp;
+  dead 6,666 boss-kill-reduction code removed
+- Recruit flow: full-band picks open a REPLACE modal (packs were silently wasted at 5 members);
+  Lucifer opens the Devil's Contract popup (rules + sacrifice-to-2 option)
+- OPEN: strike preview vs actual damage mismatch on Lucifer phase 1 (3471 shown, 322 dealt) — needs repro
+
 **Open items:** sim winrate discrepancy (2K fresh run says 39.95% Lucifer on Bronze/
 Standard vs July 29 doc's 8.3–11.8% claim — reconcile before balance work) · aura-ATK
 display chip on member cards · Setlist "Draw 3" vs hand-cap text · relic-SOLD-on-load

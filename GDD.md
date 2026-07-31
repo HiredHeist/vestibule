@@ -208,7 +208,7 @@ Each is a permanent run modifier with a tradeoff (e.g., `blood_price` = +3 ATK a
 
 ## DOOM FORGE
 
-After each circle boss: select one card to upgrade. Upgrade options vary by card:
+After each circle boss (pact first, then forge): select one card to upgrade. Upgrade options vary by card:
 - Cost reduction (most common)
 - Effect amplification (e.g., +ATK becomes +ATK + draw)
 - Type swap (rare, deep upgrade)

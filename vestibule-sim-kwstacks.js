@@ -530,7 +530,7 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
     case 'tappedout':return strikeNum<3?78:18;case 'ampoverload':return(gs._discardsLeft>0&&embers<=2)?81:5;
     case 'groupie':return embers<=3?62:28;
     case 'soundboard':return embers<=3?60:28;case 'setbreak':return embers<=2?52:14;
-    case 'soundwall':return 70;case 'heavyriff':{const best=alive.reduce((a,b)=>(a.permAtkBonus||0)>(b.permAtkBonus||0)?a:b);return(best.permAtkBonus||0)>=3?78:55};case 'crowdsurf':return hand.length>=5?74:hand.length>=3?55:30;
+    case 'soundwall':return 70;case 'heavyriff':{const t2=alive.reduce((a,b)=>(a.atk+(a.permAtkBonus||0)>b.atk+(b.permAtkBonus||0)?a:b));if(t2._hrUsed)return 3;return(t2.permAtkBonus||0)>=3?78:55};case 'crowdsurf':return hand.length>=5?74:hand.length>=3?55:30;
     case 'deathriff':return corruption<50?52:18;case 'feedbackloop':return corruption>=40?57:18;
     case 'herbmoney':return stash>=10?65:0;case 'goingbroke':return stash>=50?62:5;
     case 'resonancecard':return highestAtk>=5?54:24;case 'ampstatic':return corruption>=30?50:10;
@@ -691,7 +691,7 @@ function simFight(gs,phaseHp,luciferPhase){
   gs._ritualistPrevCorruption=gs.corruption
   gs._ritualistRefundsThisStrike=0
   gs._survivorSavesUsed=new Set()
-  gs.stage=arrangeStage(gs.stage)
+  gs.stage=arrangeStage(gs.stage);gs.stage.forEach(m=>{if(m)m._hrUsed=false})
 
   // Fight start artifacts
   if(gs.artifacts.some(a=>a.id==='a1')){const lg=gs.stage.find(m=>m.role==='Lead Guitarist'&&!m.tooStoned);if(lg){lg.atk+=1;lg.permAtkBonus=(lg.permAtkBonus||0)+1}}
@@ -1284,7 +1284,7 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
 
     if(f===26){
       TRACK.luciferReached++
-      const actualHp=BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE[26]?Math.ceil(BOSS_HP_OVERRIDE[26]*HP_SCALE*(STAKE.hpMult/1.30)):Math.ceil(Math.max(666,420666-8*51750)*STAKE.hpMult)
+      const actualHp=666666 // Jul 31 2026 JV: flat, no scaling — 333,333 per phase
       const phase1Hp=Math.ceil(actualHp/2)
       const phase2Hp=actualHp-phase1Hp
       const r1=simFight(gs,phase1Hp,1)

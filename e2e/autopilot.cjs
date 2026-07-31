@@ -18,6 +18,8 @@ async function screenType(s) {
   const btn = txt => s.clickables.some(c => c.t.toLowerCase().includes(txt))
   if (btn('got it')) return 'popup'
   if (btn('discard & continue') || btn('✓ confirm')) return 'modal'
+  if (t.includes('CLICK ANYWHERE') || (t.includes('CREDITS') && !t.includes('STRIKE'))) return 'credits'
+  if (t.includes('WELCOME TO HELL') && !btn('strike')) return 'wth'
   if (t.includes('THE PACT')) return 'pact'
   if (t.includes('DOOM FORGE')) return 'forge'
   if (t.includes('— OR —') || t.includes('OR —')) return 'event'
@@ -154,7 +156,8 @@ async function combatTick(s) {
   const sNow = await P.state()
   const strikesLeft = +((sNow.text.match(/STRIKE ⛧\s*(\d+)\s*\//) || [])[1] || 4)
   const hpm = sNow.text.match(/(\d+)\s*\/\s*(\d+)\s*HP/)
-  if (strikesLeft <= 2 && hpm && (+hpm[1] / +hpm[2]) > 0.45) {
+  const bigFight = hpm && +hpm[2] >= 1500 // circle bosses and beyond
+  if ((strikesLeft <= 2 && hpm && (+hpm[1] / +hpm[2]) > 0.45) || (bigFight && strikeNumThisFight === 0)) {
     const trip = sNow.clickables.find(c => /🍄|🧪|💠/.test(c.t) && c.t.length < 30)
     if (trip) { ev('trip_used', { btn: trip.t, bossPct: (100 * hpm[1] / hpm[2]).toFixed(0) }); await P.click(trip.x, trip.y); await P.connect().then(p => p.waitForTimeout(1500)) }
   }
@@ -226,7 +229,10 @@ async function forgeTick(s) {
     }).map(d => { const r = d.getBoundingClientRect(); return { t: d.textContent.replace(/\s+/g, ' ').slice(0, 40), x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } })
       .filter(c => { const k = c.t.slice(0, 20); return seen[k] ? false : (seen[k] = 1) })
   })()`).catch(() => [])
-  const scored = cards.map(c => ({ ...c, card: BRAIN.matchCard(c.t.replace(/^\d+/, '')) }))
+  const scored = cards.map(c => {
+    const nm = (c.t.match(/^(.*?)\+?\s*(?:RIFF|UTILITY|EMBER|CORRUPT)/) || [, c.t])[1] // name precedes type on forge tiles
+    return { ...c, card: BRAIN.matchCard(nm) }
+  })
     .filter(c => c.card)
     .map(c => ({ ...c, v: ({ possessedperf: 95, infencore: 88, amp: 82, encore: 76, heavyriff: 74, stagedive: 72, soundwall: 70, staticcharge: 66, crowdsurf: 64, battlecry: 62, powertap: 60 })[c.card.id] || 30 }))
     .sort((a, b) => b.v - a.v)
@@ -362,8 +368,26 @@ async function recruitTick(s) {
     const scored = cands.map(c => { const { p, kw } = memberScoreFromText(c.t); return { ...c, p, kw } })
     const counts = {}; scored.forEach(c => { counts[c.kw] = (counts[c.kw] || 0) + 1 })
     const best = scored.sort((a, b) => (b.p + (counts[b.kw] > 1 ? 15 : 0)) - (a.p + (counts[a.kw] > 1 ? 15 : 0)))[0]
-    ev('recruit_pick', { pick: best.t.slice(0, 50), score: best.p })
-    await P.click(best.x, best.y)
+    // never sign Lucifer: 3-member cap + dies-ends-run risk isn't in the sim's model
+    const safe = scored.filter(c => !/FALLEN|The Devil/i.test(c.t))
+    const pickFrom = safe.length ? safe : scored
+    const bestSafe = pickFrom.sort((a, b) => (b.p + (counts[b.kw] > 1 ? 15 : 0)) - (a.p + (counts[a.kw] > 1 ? 15 : 0)))[0]
+    ev('recruit_pick', { pick: bestSafe.t.slice(0, 50), score: bestSafe.p })
+    await P.click(bestSafe.x, bestSafe.y)
+    await P.connect().then(p => p.waitForTimeout(600))
+    const after = await P.state()
+    const at = after.text.toUpperCase()
+    if (at.includes("DEVIL'S CONTRACT")) { ev('lucifer_declined', {}); await P.clickText('walk away').catch(() => {}) }
+    else if (at.includes('BAND IS FULL')) {
+      // replace the weakest current member (upgrade doctrine)
+      const cuts = after.clickables.filter(c => /✂/.test(c.t))
+      if (cuts.length) {
+        const scoredCuts = cuts.map(c => ({ ...c, v: (+(c.t.match(/ATK (\d+)/) || [0, 0])[1]) * 3 + (+(c.t.match(/HP (\d+)/) || [0, 0])[1]) }))
+        const weakest = scoredCuts.sort((a, b) => a.v - b.v)[0]
+        ev('member_replaced', { cut: weakest.t.slice(0, 40) })
+        await P.click(weakest.x, weakest.y)
+      } else await P.clickText('keep current band').catch(() => {})
+    }
     for (const b of ['add to band', 'recruit', 'confirm', 'take', 'join', 'welcome']) { try { await P.clickText(b); break } catch (e) {} }
   } else {
     ev('recruit_pass', { why: 'no candidates parsed' })
@@ -450,6 +474,15 @@ async function main() {
       else if (type === 'event') await eventTick(s)
       else if (type === 'pact') await pactTick(s)
       else if (type === 'forge') await forgeTick(s)
+      else if (type === 'credits') { ev('credits_seen', {}); const vp = await P.evaljs('({w:innerWidth,h:innerHeight})'); await P.click(Math.round(vp.w / 2), Math.round(vp.h / 2)) }
+      else if (type === 'wth') {
+        const f = await P.shot('wth-' + Date.now())
+        ev('wth_screen', { shot: f, text: s.text.slice(0, 600) })
+        // accept the Executive if offered — more coverage; fall back to any big button
+        let done = false
+        for (const b of ['sign', 'accept', 'enter', 'fight', 'bring it']) { try { await P.clickText(b); done = true; break } catch (e) {} }
+        if (!done) { const big = s.clickables.filter(c => c.w > 150 && c.h > 40)[0]; if (big) await P.click(big.x, big.y) }
+      }
       else if (type === 'descent') await descentTick(s)
       else if (type === 'combat') await combatTick(s)
       else if (type === 'shop') await shopTick(s)

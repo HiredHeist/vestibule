@@ -4499,11 +4499,43 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
   const isFull=stage.filter(Boolean).length>=5
   const activeMembers=stage.map((m,i)=>m?{m,i}:null).filter(Boolean).filter(x=>!x.m.tooStoned)
   function fireSellPrice(m){return m.demonic?69:5+(m.foil?3:0)+(m.mythic?8:0)}
+  // Jul 31 2026 (JV): full-band picks open a REPLACE modal (packs were silently
+  // wasted before); Lucifer opens his contract with the sacrifice option.
+  const [pendingPick,setPendingPick]=useState(null)
+  const bandCount=stage.filter(Boolean).length
+  const memberVal=x=>(x.m.atk+(x.m.permAtkBonus||0))*3+x.m.hp
+  const signLucifer=()=>{
+    const keep=[...activeMembers].sort((a,b)=>memberVal(b)-memberVal(a)).slice(0,2).map(x=>x.m.uid)
+    activeMembers.filter(x=>!keep.includes(x.m.uid)).forEach(x=>onFireMember(x.m,x.i))
+    onPick(pendingPick);setPendingPick(null)
+  }
   return(
     <div style={{position:'absolute',inset:0,zIndex:9600,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,padding:'20px 20px',overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'var(--text-secondary)',textShadow:'0 0 30px rgba(200,150,20,0.4)'}}>Recruit a Member</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--text-secondary)',fontStyle:'italic'}}>{isFull?'🔥 Stage is full — fire a member to make room, or pass':'Choose one musician to join your band — or pass'}</div>
       <div style={{display:'flex',gap:20,flexWrap:'wrap',justifyContent:'center',maxWidth:1000}}>
+        {pendingPick&&<div style={{position:'fixed',inset:0,zIndex:9999,background:'rgba(0,0,0,0.88)',display:'flex',alignItems:'center',justifyContent:'center'}} onClick={()=>setPendingPick(null)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:'linear-gradient(180deg,#1a1008,#0a0604)',border:'2px solid '+(pendingPick.keyword==='FALLEN'?'#c41e3a':'#c89838'),borderRadius:12,padding:'28px 34px',maxWidth:560,display:'flex',flexDirection:'column',gap:14,alignItems:'center'}}>
+            {pendingPick.keyword==='FALLEN'?<>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:34,color:'var(--text-blood)',letterSpacing:3}}>The Devil's Contract</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-secondary)',lineHeight:1.7,textAlign:'center'}}>😈 Lucifer joins ONLY a band of two. He cannot be healed. He loses 1 HP every strike. If he dies, your run ends. Unstoppable power — on a burning fuse.</div>
+              {bandCount>2&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'var(--text-blood)',textAlign:'center'}}>Signing him sacrifices {bandCount-2} member{bandCount-2>1?'s':''} — your two strongest stay. The rest are paid out at Sly's rates.</div>}
+              <div style={{display:'flex',gap:14}}>
+                <button onClick={signLucifer} style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:2,color:'var(--text-primary)',background:'#7a1020',border:'1px solid #c41e3a',borderRadius:7,padding:'12px 26px',cursor:'pointer'}}>😈 SIGN THE CONTRACT</button>
+                <button onClick={()=>setPendingPick(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:2,color:'var(--text-muted)',background:'rgba(40,20,5,0.4)',border:'1px solid #444',borderRadius:7,padding:'12px 26px',cursor:'pointer'}}>WALK AWAY</button>
+              </div>
+            </>:<>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:30,color:'var(--text-gold)',letterSpacing:3}}>Band Is Full</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-secondary)',textAlign:'center'}}>Recruit {pendingPick.name} — who gets cut? (Sly pays their buyback)</div>
+              <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
+                {activeMembers.map(x=><button key={x.m.uid} onClick={()=>{onFireMember(x.m,x.i);onPick(pendingPick);setPendingPick(null)}}
+                  style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-primary)',background:'rgba(60,30,10,0.6)',border:'1px solid #886030',borderRadius:7,padding:'10px 14px',cursor:'pointer'}}>
+                  ✂ {x.m.name}<br/><span style={{fontSize:13,color:'var(--ink-dim)'}}>ATK {x.m.atk+(x.m.permAtkBonus||0)} · HP {x.m.hp} · +{fireSellPrice(x.m)}🌿</span></button>)}
+              </div>
+              <button onClick={()=>setPendingPick(null)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:2,color:'var(--text-muted)',background:'none',border:'1px solid #444',borderRadius:7,padding:'8px 22px',cursor:'pointer'}}>KEEP CURRENT BAND</button>
+            </>}
+          </div>
+        </div>}
         {candidates.map(m=>{
           const hasDblTime=stage.some(s=>s&&s.keyword==='DOUBLE TIME')
           const isDblTime=m.keyword==='DOUBLE TIME'
@@ -4514,7 +4546,13 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
           const bondTarget=stage.find(s=>s&&s.role===m.role&&!s.tooStoned)
           const bondBonus=m.demonic?3:m.mythic?2:m.foil?1:0
           return(
-            <div key={m.id} onClick={()=>canAdd&&onPick(m)}
+            <div key={m.id} onClick={()=>{
+              const blockedDbl=isDblTime&&hasDblTime
+              if(blockedDbl)return
+              if(m.keyword==='FALLEN'&&bandCount>2){setPendingPick(m);return}
+              if(emptySlot===-1){setPendingPick(m);return}
+              onPick(m)
+            }}
               style={{width:200,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'1px solid rgba(160,100,25,0.5)',borderRadius:7,overflow:'hidden',cursor:canAdd?'pointer':'not-allowed',opacity:canAdd?1:0.4,transition:'all 0.2s',transform:canAdd?'none':'none'}}
               onMouseEnter={e=>{if(canAdd)e.currentTarget.style.transform='translateY(-6px) scale(1.03)';e.currentTarget.style.boxShadow='0 0 30px rgba(232,168,32,0.4)'}}
               onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none'}}>
@@ -5041,6 +5079,9 @@ function App(){
   // If we ever want stake.hpMult to actually affect combat, wire it into the fight-start
   // formula AND this helper at the same time.
   const getScaledMaxHp=useCallback((e)=>{
+    // LUCIFER (Jul 31 2026, JV): flat 666,666 total — 333,333 per phase. No deck
+    // scaling, no boss-kill reduction. The number IS the design.
+    if(e&&(e.passiveId==='luciferBoss'||e.id==='lucifer'))return 333333
     if(!e)return 0
     const _ds=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1
     const _hl=parseInt(localStorage.getItem('vst_heat')||'1')
@@ -5634,8 +5675,8 @@ function App(){
         ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+1,tempBuff:true,_origAtk:s._origAtk||s.atk,buffCount:(s.buffCount||0)+1}):s)
       } else if(lr.id==='doubledown'){
         setNextCardFree(true)
-      } else if(lr.id==='heavyriff'&&lrTarget&&!lrTarget.tooStoned){
-        ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk+3,buffCount:(lrTarget.buffCount||0)+1})
+      } else if(lr.id==='heavyriff'&&lrTarget&&!lrTarget.tooStoned&&!lrTarget._hrUsed){
+        ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk+3,buffCount:(lrTarget.buffCount||0)+1,_hrUsed:true})
       } else if(lr.id==='moshpit'){
         ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+1,buffCount:(s.buffCount||0)+1}):s)
       } else if(lr.id==='shredsolo'&&lrTarget&&!lrTarget.tooStoned){
@@ -5777,8 +5818,11 @@ function App(){
     }
     else if(card.id==='heavyriff'){
       if(!m)return false
+      // BALANCE (Jul 31 2026, JV): once per member per fight — self-compounding
+      // +half-current-ATK stacking was the one-carry snowball that trivialized C3+.
+      if(m._hrUsed){addLog('⚠ '+m.name+' already rode the Heavy Riff this fight!');return false}
       const bonus=Math.min(20,Math.ceil((m.atk+(m.permAtkBonus||0))/2))+(card.upgraded?2:0)
-      ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus,buffCount:(m.buffCount||0)+1})
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus,buffCount:(m.buffCount||0)+1,_hrUsed:true})
       addBuff(m.uid,'+'+bonus+' ATK','#9933cc');addFloat('+'+bonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#9933cc')
       msg='🥊 Heavy Riff! '+m.name+' +'+bonus+' ATK permanently! (half ATK, max +20)'
     }
@@ -7362,10 +7406,10 @@ function App(){
               adj.forEach(i=>{ns[i]=Object.assign({},ns[i],{atk:ns[i].atk+4})})
             }
           }
-          else if(card.id==='heavyriff'&&m){
+          else if(card.id==='heavyriff'&&m&&!m._hrUsed){
             const heavyMax=activePassives.some(p=>p.id==='p5')?25:20
             const hrBonus=Math.min(heavyMax,Math.floor(m.atk/2))
-            ns[slotIdx]=Object.assign({},m,{atk:m.atk+hrBonus})
+            ns[slotIdx]=Object.assign({},m,{atk:m.atk+hrBonus,_hrUsed:true})
           }
           else if(card.id==='feedbackscream'&&m){
             ns[slotIdx]=Object.assign({},m,{atk:m.atk+4,hp:Math.max(1,m.hp-2)})
@@ -8157,7 +8201,7 @@ function App(){
         // LUCIFER PHASE TRANSITION: Phase 1 → Phase 2
         if(enemy.passiveId==='luciferBoss'&&luciferPhase===1){
           setLuciferPhase(2)
-          const _lucP2Hp=Math.ceil(100000*((STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1)*0.5);setEnemyHp(_lucP2Hp);setScaledMaxHp(_lucP2Hp)
+          const _lucP2Hp=333333;setEnemyHp(_lucP2Hp);setScaledMaxHp(_lucP2Hp) // phase 2 of 666,666 total
           setBossRageAtk(0)
           // Full band reset
           setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,stoneShield:false,tempBuff:false,encoreReady:false,ampedThisStrike:false}):null))
@@ -8660,15 +8704,13 @@ function App(){
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
     if(fightIndex===26){
       // 8 circle bosses killed = 8 × 51,750 = 414,000 reduction → 6,666 HP
-      const bossKillReduction=8*51750
-      const luciferActualHp=Math.max(666,420666-bossKillReduction) // 6,666
+      const luciferActualHp=333333 // phase 1 of 2 — 666,666 total (Jul 31 2026, JV)
       setEnemyHp(luciferActualHp)
       setLuciferPhase(1)
-      addLog('⛧ YOUR VICTORIES ECHO THROUGH HELL ⛧')
-      addLog('⛧ 8 Circle Bosses defeated — Lucifer weakened to '+luciferActualHp+' HP!')
-      addLog('🧊 Phase 1: Lucifer, Frozen in Cocytus')
+      addLog('⛧ THE DEVIL HIMSELF — 666,666 HP ACROSS TWO FORMS ⛧')
+      addLog('🧊 Phase 1: Lucifer, Frozen in Cocytus — 333,333 HP')
       // Show cinematic overlay
-      setLuciferCinematic({text:'YOUR VICTORIES ECHO THROUGH HELL',hp:luciferActualHp})
+      setLuciferCinematic({text:'666,666 HP. BRING EVERYTHING.',hp:luciferActualHp})
       setTimeout(()=>setLuciferCinematic(null),5000)
     } else {
       setLuciferPhase(0)
@@ -8678,7 +8720,7 @@ function App(){
     const ndCount=stage.filter(m=>m&&m.role==='Drummer').length
     if(nd){let r=Math.floor(Math.random()*6)+1;if(ndCount>=2&&r<=2)r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
     setStage(p=>{
-      const reset=p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined,_sustainUsed:undefined}):null)
+      const reset=p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined,_sustainUsed:undefined,_hrUsed:undefined}):null)
       return scanMentorLinks(reset)
     })
     // Redeal hand from current deck+discard
@@ -9052,6 +9094,7 @@ function App(){
     let joinMsg=''
     setStage(prev=>{
       const ns=[...prev]
+      if(member.keyword==='FALLEN'&&ns.filter(m=>m).length>2)return prev // safety: contract flow handles sacrifice first
       const idx=ns.findIndex(m=>!m)
       if(idx!==-1){
         const withUid={...member,uid:uid(),roleBondWith:[],roleBondBonus:0}

@@ -150,3 +150,13 @@ sim 40% winrate vs live 56% fight-2 death rate. DECIDE: which is intended?
 drew into an 82-score Amp), aura-aware stage ordering (sim improveOrdering via
 shop arrows), pact handler, play-verification via ember/discard deltas (hand
 refills after plays — old hand-count check logged successes as play_fails).
+
+
+## BALANCE PATCH + FIX BATCH (July 31 — post-first-Lucifer-kill)
+
+JV decisions implemented: Heavy Riff once/member/fight - Lucifer 666,666 flat -
+full-band replace modal + Devil's Contract popup - forge restored for the BOT
+(game was fine; bot could not parse forge tiles - name extraction fixed, verified
+forge_pick live). Sim after patch: 12.70% Lucifer wins (was 39.95%) = on target.
+Bot: braver drug use (boss-fight openers), credits/WTH handlers, declines Lucifer,
+replaces weakest member when upgrading a full band.
