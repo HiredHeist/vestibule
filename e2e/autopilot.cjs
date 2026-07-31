@@ -19,6 +19,7 @@ async function screenType(s) {
   if (btn('got it')) return 'popup'
   if (btn('discard & continue') || btn('✓ confirm')) return 'modal'
   if (t.includes('THE PACT')) return 'pact'
+  if (t.includes('DOOM FORGE')) return 'forge'
   if (t.includes('— OR —') || t.includes('OR —')) return 'event'
   if (t.includes('THE DESCENT') && t.includes('SELECT THIS PATH')) return 'descent'
   if (t.includes('OPENING NIGHT')) return 'draft'
@@ -211,6 +212,33 @@ async function pactTick(s) {
   const pick = opts.sort((a, b) => score(b) - score(a))[0]
   if (pick) { ev('pact_choice', { pick: pick.t.slice(0, 60), score: score(pick) }); await P.click(pick.x, pick.y) }
   else { ev('pact_skip', {}); await P.clickText('skip').catch(() => {}) }
+}
+
+async function forgeTick(s) {
+  // Doom Forge (after pact, each circle boss): upgrade one card permanently.
+  // Doctrine (GDD + FIRST_TIPS): pick your best card — score the visible deck
+  // cards with the brain's static values, click the top one, then confirm.
+  const cards = await P.evaljs(`(() => {
+    const seen = {}
+    return [...document.querySelectorAll('div')].filter(d => {
+      const t = d.textContent || ''; const r = d.getBoundingClientRect()
+      return /RIFF|UTILITY|EMBER|CORRUPT/.test(t) && t.length < 220 && r.height > innerHeight * 0.08 && r.width < innerWidth * 0.25
+    }).map(d => { const r = d.getBoundingClientRect(); return { t: d.textContent.replace(/\s+/g, ' ').slice(0, 40), x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } })
+      .filter(c => { const k = c.t.slice(0, 20); return seen[k] ? false : (seen[k] = 1) })
+  })()`).catch(() => [])
+  const scored = cards.map(c => ({ ...c, card: BRAIN.matchCard(c.t.replace(/^\d+/, '')) }))
+    .filter(c => c.card)
+    .map(c => ({ ...c, v: ({ possessedperf: 95, infencore: 88, amp: 82, encore: 76, heavyriff: 74, stagedive: 72, soundwall: 70, staticcharge: 66, crowdsurf: 64, battlecry: 62, powertap: 60 })[c.card.id] || 30 }))
+    .sort((a, b) => b.v - a.v)
+  if (scored.length) {
+    ev('forge_pick', { card: scored[0].card.id, v: scored[0].v })
+    await P.click(scored[0].x, scored[0].y)
+    await P.connect().then(p => p.waitForTimeout(600))
+    for (const b of ['forge', 'upgrade', 'confirm', 'continue', 'skip']) { try { await P.clickText(b); break } catch (e) {} }
+  } else {
+    ev('forge_skip', { why: 'no cards parsed' })
+    for (const b of ['skip', 'continue', ...OVERLAY_BTNS]) { try { await P.clickText(b); break } catch (e) {} }
+  }
 }
 
 async function eventTick(s) {
@@ -421,6 +449,7 @@ async function main() {
       else if (type === 'modal') await modalTick(s)
       else if (type === 'event') await eventTick(s)
       else if (type === 'pact') await pactTick(s)
+      else if (type === 'forge') await forgeTick(s)
       else if (type === 'descent') await descentTick(s)
       else if (type === 'combat') await combatTick(s)
       else if (type === 'shop') await shopTick(s)

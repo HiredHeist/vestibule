@@ -68,3 +68,20 @@ Bronze + Standard, tutorial skipped, legit full run to a Lucifer kill. No Shift+
 
 ## SACRED CONSTANTS (unchanged)
 420 stash cap / 69 deck size / BogartsMetalFont NO digits / MBScribblesFont default / ScratchFont 20pt+ flavor / React Strict Mode: no side effects in updaters.
+
+## 🧠 BOT RULES-COVERAGE MATRIX (July 31 audit — vs GDD.md)
+
+HANDLED: draft, descent, combat (sim scoreCard, chains, NEED gates), shop economy
+(packs→recruits→relic→pedal→drugs), recruit picks, pacts, Doom Forge (upgrade best
+card), random events, trips (buy + panic use), discard-digging, aura stage ordering,
+death/restart, zombie-save guard.
+
+KNOWN GAPS (deliberate or deferred — do not re-discover):
+- Mentor links: ordering ignores the upgraded-LEFT-of-same-role-basic ×1.5-3.0 rule
+  (needs tier parsing from member frames — deferred)
+- Synergy spread: buffs concentrate on the carry; 3+/4+/5+ buffed-member bonuses
+  (×1.1/1.2/1.35) not chased deliberately (matches sim targeting)
+- Boosters (Cassette/CD-R) never bought — parity with sim (sim doesn't buy them)
+- Pawn-sell + member upgrades when band is full (sim replaces weakest at C2+) — deferred
+- WTH contract cards unmatched by brain (not in ALL_CARDS) — contracts never played
+- Sixth Slot pact: shop doctrine caps at 5 members regardless
