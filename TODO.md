@@ -43,6 +43,11 @@ across strikes. Sim economy ~4x richer → winrate estimates inflated. Pick one.
 - Abandon Run button in pause menu - booster doctrine (sim+bot buy CD-R when rich)
 - Setlist text honesty - _hrUsed survives save/reload
 
+**OVERTIME ERA (July 31, JV design call):** strike limit is now a soft cap — boss
+enrage doubles damage per overtime strike, fights end only in death. Live-verified
+(x2->x4->x8->x16 escalation). HP curve rescaled x1.65 for the new math: 11.06%
+Lucifer winrate @5K (target ~10%). Save schema clamps sl>=1 (resume = fight restart).
+
 **Open items:** sim winrate discrepancy (2K fresh run says 39.95% Lucifer on Bronze/
 Standard vs July 29 doc's 8.3–11.8% claim — reconcile before balance work) · aura-ATK
 display chip on member cards · Setlist "Draw 3" vs hand-cap text · relic-SOLD-on-load

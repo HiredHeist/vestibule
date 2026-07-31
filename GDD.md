@@ -24,6 +24,10 @@
 
 ## COMBAT FUNDAMENTALS
 
+**OVERTIME (Jul 31 2026):** running out of strikes no longer ends the fight. The boss
+ENRAGES — damage ×2 per overtime strike (×2, ×4, ×8...). Fights end only in death.
+4 strikes is the plan; overtime is the price of failing to plan.
+
 - **4 Strikes per fight** (3 on Demonic stake)
 - **4 Discards per fight** — discard hand cards to draw replacements
 - **HAND_SIZE = 6**, max 10 (over-cap pulses gold)

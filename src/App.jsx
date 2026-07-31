@@ -7022,7 +7022,7 @@ function App(){
       stage:stage.map(m=>m?{id:m.id,name:m.name,hp:m.hp,maxHp:m.maxHp,atk:m.atk,role:m.role,keyword:m.keyword,tooStoned:m.tooStoned,uid:m.uid,foil:m.foil,mythic:m.mythic,demonic:m.demonic,permAtkBonus:m.permAtkBonus||0,encoreReady:m.encoreReady,stoneShield:m.stoneShield,isMentor:m.isMentor,mentorMult:m.mentorMult,mentorLinkedToUid:m.mentorLinkedToUid,mentorAlive:m.mentorAlive,buffCount:m.buffCount||0,_hrUsed:m._hrUsed||false}:null),
       dk:deck.map(c=>c.id),hand:hand.map(c=>c.id),disc:discardPile.map(c=>c.id),
       em:embers,mx:maxEmbers,st:stash,co:corruption,
-      sl:strikesLeft,ms:fightMaxStrikes,dl:discardsLeft,
+      sl:Math.max(1,strikesLeft),ms:fightMaxStrikes,dl:discardsLeft, // resume restarts the fight — never store overtime/zombie strike counts
       pa:chosenPacts,art:activeArtifacts.map(a=>a.id),pas:activePassives.map(p=>p.id),
       loot:collectedLoot,upg:upgradedCards,stats:stats,
       shrooms:heldShrooms,acid:heldAcid,dmt:heldDMT
@@ -7631,7 +7631,7 @@ function App(){
   const handleStrike=useCallback(()=>{
     setUndoSnapshot(null) // can't undo after striking
     // Guard: don't allow re-triggering during animation
-    if(animPhase!=='idle'||strikesLeft<=0||enemyHp<=0)return
+    if(animPhase!=='idle'||enemyHp<=0)return // OVERTIME (Jul 31): striking allowed past 0 — boss enrages instead
     // ── FIRE ECHOPLEX/LOOPER/SABBATH REPLAYS first ──
     // Replays apply card effects again (stacking permanent buffs, re-dealing
     // direct damage). Marked with '_echo:' prefix in cardsPlayedRef so artifact
@@ -7666,7 +7666,7 @@ function App(){
     // animPhase guard removed here — wrapper handleStrike checks it before calling.
     // After replay delay, animPhase=='replaying' in this closure (stale), so checking
     // here would always early-return and strike would never resolve.
-    if(strikesLeft<=0||enemyHp<=0)return
+    if(enemyHp<=0)return // OVERTIME: no strike floor
     const actives=stage.filter(m=>m&&!m.tooStoned)
     if(actives.length===0){addLog('⚠ No active members!');return}
     // ── KEYWORD STACK CONTEXT — centralized helper for tier-scaled bonuses ──
@@ -8354,6 +8354,9 @@ function App(){
           }
         }
         else{scaledBaseDmg=stakeBaseDmg}
+        // ── OVERTIME ENRAGE (Jul 31 2026, JV) ── past the strike limit the boss's
+        // damage doubles per overtime strike: x2, x4, x8... Fight ends only in death.
+        {const _ot=Math.max(0,-strikesLeft);if(_ot>0){scaledBaseDmg=scaledBaseDmg*Math.pow(2,_ot);addLog('🔥 OVERTIME x'+Math.pow(2,_ot)+' — the crowd turns on you!')}}
         // v0.7.1: Possession bonus removed — boss damage no longer scales with player corruption.
         // The cost lives in Hangover (next fight, next shop), not in this fight.
         // v0.7.2: bossSkipStrikes — DMT BREAKTHROUGH / K-HOLE trips can fully skip
@@ -8549,7 +8552,7 @@ function App(){
             setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);
             // Check out-of-strikes death AFTER this strike resolves
             setStrikesLeft(function(cur){
-              if(cur<=0){
+              if(false){ // OVERTIME (Jul 31 2026 JV): out-of-strikes no longer ends the fight.
                 if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins. But you already conquered Hell.')}else{setDeathCause('beaten');setLastKillingBlow((enemy?.name||'The boss')+' hit for '+((enemy?.baseDmg||0)+(activeStake?.dmgAdd||0))+' damage');playSfx('defeat')};
                 {const _rs=calcRunScore(stats,false);saveRunHistory(stats,false,enemy,runSeed);
                 // Achievement checks at game end
@@ -9294,7 +9297,7 @@ function App(){
     else if(animPhase==='idle')setPhaseBanner('play')
   },[animPhase])
 
-  const canStrike=animPhase==='idle'&&strikesLeft>0&&enemyHp>0&&stage.some(m=>m&&!m.tooStoned)
+  const canStrike=animPhase==='idle'&&enemyHp>0&&stage.some(m=>m&&!m.tooStoned) // OVERTIME (Jul 31): no strike floor — enrage is the cost
   const canDiscard=animPhase==='idle'&&discardsLeft>0&&selected.length>0
 
   // ── KEYBOARD SHORTCUT REFS — keep in sync each render so handler reads current values
@@ -11048,7 +11051,7 @@ function App(){
           {/* Strike pips — directly under STRIKE button */}
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'center'}}>
             <PhaseDots left={strikesLeft} total={fightMaxStrikes} color='#c41e3a' wide={true}/>
-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:strikesLeft<=1?22:strikesLeft<=2?18:15,fontWeight:900,color:strikesLeft<=1?'#ff2200':strikesLeft<=2?'#ff4400':'var(--blood)',letterSpacing:1,textShadow:strikesLeft<=1?'0 0 12px rgba(255,0,0,0.8)':'none'}}><span key={'sl-'+strikesLeft} style={{animation:strikesLeft<=1?'memberHitShake 0.4s ease-out, inkStamp 0.4s ease-out':strikesLeft<=2?'inkStamp 0.4s ease-out, pulse 0.8s ease infinite alternate':'inkStamp 0.4s ease-out',display:'inline-block'}}>{strikesLeft}/{fightMaxStrikes}</span></span>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:strikesLeft<=1?22:strikesLeft<=2?18:15,fontWeight:900,color:strikesLeft<=1?'#ff2200':strikesLeft<=2?'#ff4400':'var(--blood)',letterSpacing:1,textShadow:strikesLeft<=1?'0 0 12px rgba(255,0,0,0.8)':'none'}}><span key={'sl-'+strikesLeft} style={{animation:strikesLeft<=1?'memberHitShake 0.4s ease-out, inkStamp 0.4s ease-out':strikesLeft<=2?'inkStamp 0.4s ease-out, pulse 0.8s ease infinite alternate':'inkStamp 0.4s ease-out',display:'inline-block'}}>{strikesLeft>0?strikesLeft+'/'+fightMaxStrikes:'☠ OVERTIME ×'+Math.pow(2,1-strikesLeft)}</span></span>
           </div>
           {/* DAMAGE PREVIEW — below pips, big stamp animation */}
           {/* ACTIVE BUFF BADGES — CHAIN chip removed (redundant with multiplier box). TEMP ATK kept since it shows team total. */}

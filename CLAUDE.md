@@ -238,7 +238,7 @@ vst_achievement_*         Per-achievement unlock flags
 - Run: `node vestibule-sim-kwstacks.js [numGames] [stake] [deck]`
 - Models: cards, passives, artifacts, pacts, loot, combos, mentor links, drugs, hellquakes, corruption thresholds, random events, blood oath, full keyword stack tier scaling
 - **Live HP sync:** sim reads `boss_hp_override.json` at repo root for current ENEMIES maxHp values, then applies `deck.hpScale` (1.85 default Standard). Matches live `getScaledMaxHp` exactly. **When live boss HPs change, update `boss_hp_override.json` in the same commit.**
-- Latest 5K Bronze sim (Jul 31 2026, TRUE ember economy + retune): avg fight 15.05/26, Wanderer 0% deaths, Lost Soul 17.5%, Lucifer wins 8.56% (~10% target). NOTE: sim no longer refills embers per strike (matches live; old numbers were inflated).
+- Latest 5K Bronze sim (Jul 31 2026, OVERTIME era): avg fight 12.08/26, Lucifer wins 11.06% (~10% target). Sim models: true ember economy (no per-strike refill) + overtime enrage (dmg x2 per OT strike, fights end only in death).
 - Sim is fast: 5K games in ~17 seconds, 10K in ~35 seconds
 
 When changing game balance, run sim before committing.

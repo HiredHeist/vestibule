@@ -169,3 +169,13 @@ JV ruling: limited embers ARE the game — sim's phantom per-strike refill remov
 5K-validated 8.56% Lucifer winrate, Lost Soul deaths 63%->17.5%, avg fight 15/26.
 Plus: Lucifer scales with Heat/Encore; Abandon Run button; booster doctrine
 (sim+bot); Devil's Contract + replace-modal shipped earlier same day.
+
+
+## OVERTIME (July 31)
+
+JV: "should we not have the 4 strikes limit?" -> design ruling: overtime enrage.
+Strikes stay the puzzle (Balatro bones); running out triggers boss enrage x2/OT
+strike; losses are now always real deaths (fixes the healthy-band-loses feel-bad).
+Sim: overtime alone pushed winrate 8.56%->17.9%; HP rescale x1.65 brings it to
+11.06% @5K. Live-verified: OVERTIME counter escalates x2->x16, no technicality
+deaths, strike button live past 0.

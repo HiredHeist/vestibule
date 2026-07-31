@@ -750,7 +750,11 @@ function simFight(gs,phaseHp,luciferPhase){
   if(gs._tripBuff==='TIME_DILATION')maxStrikes=Math.max(maxStrikes,5)
 
   let wthStrikeCount=0
-  for(let strike=0;strike<maxStrikes;strike++){
+  // OVERTIME (Jul 31 2026 JV): running out of strikes no longer ends the fight —
+  // the boss ENRAGES: damage x2 per overtime strike. Fight ends only in death
+  // (either side). Safety cap +8 OT strikes.
+  for(let strike=0;strike<maxStrikes+8;strike++){
+    const _otLevel=Math.max(0,strike-maxStrikes+1)
     gs.stage.forEach(m=>{m.tempAtkBonus=0;m.ampedThisStrike=false;m.encoreThisStrike=false});
     gs._directDmg=0;gs._overdriveActive=false;gs._infencoreActive=false;gs._possessedActive=false;gs._nextCardFree=false;
     // ── DECK IDENTITY: hand size override (Engineer 7, Shredder 6) ──
@@ -1000,7 +1004,7 @@ function simFight(gs,phaseHp,luciferPhase){
     enemy._hp-=(strikeDmg+_echoDmg);if(enemy._hp<=0)break;
 
     // BOSS ATTACKS
-    let bossDmg=enemy.baseDmg+enemy._atkBuff+STAKE.dmgAdd+(gs.corruption>=100?3:0);
+    let bossDmg=(enemy.baseDmg+enemy._atkBuff+STAKE.dmgAdd+(gs.corruption>=100?3:0))*Math.pow(2,_otLevel);
     if(stoneWallActive)bossDmg=Math.max(1,bossDmg-1);
     if(enemy.passiveId==='stashSteal'&&gs.stash>0){const s=Math.min(gs.stash,1);gs.stash-=s;gs.stashStolen+=s}
     if(enemy.passiveId==='stashSteal2'&&gs.stash>0){const s=Math.min(gs.stash,1);gs.stash-=s;gs.stashStolen+=s}
