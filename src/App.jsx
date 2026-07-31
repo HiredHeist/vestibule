@@ -158,7 +158,11 @@ function isUnlocked(id,lt){
   return score>=milestone.score
 }
 function getUnlockedCards(){const lt=parseInt(localStorage.getItem('vst_lifetime')||'0');return ALL_CARDS.filter(c=>!c.locked||isUnlocked(c.id,lt))}
-function getUnlockedMusicians(){const lt=parseInt(localStorage.getItem('vst_lifetime')||'0');return ALL_MUSICIANS.filter(m=>!m.locked||isUnlocked(m.id,lt))}
+function getUnlockedMusicians(){const lt=parseInt(localStorage.getItem('vst_lifetime')||'0')
+  let pool=ALL_MUSICIANS.filter(m=>!m.locked||isUnlocked(m.id,lt))
+  // vst_no_lucifer=1 (fair-test mode): the Devil sits out EVERYWHERE — draft, packs, all pools
+  if(localStorage.getItem('vst_no_lucifer')==='1')pool=pool.filter(m=>m.id!=='lucifer_member')
+  return pool}
 
 // ── RUN HISTORY ──────────────────────────────────────────────
 function saveRunHistory(stats,won,enemy,seed){
@@ -8978,6 +8982,11 @@ function App(){
       if(item.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
       addLog('💿 Passive equipped: '+item.name+'!')
     } else if(type==='recruit'){
+      // Lucifer band cap: refund the pack instead of selling dead candidates
+      if(stage.some(m=>m&&m.keyword==='FALLEN')&&stage.filter(m=>m).length>=3){
+        setStash(p=>p+(item.cost||0));addLog('😈 Lucifer limits your band to 3 — Sly refunds the pack.')
+        return
+      }
       let candidates
       if(item._memberOverride){
         // Center shop member card — specific named member, already tiered

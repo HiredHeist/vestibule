@@ -404,6 +404,7 @@ async function draftTick(s) {
   // Ground truth: the confirm button reads "SELECT 2 MUSICIANS" until exactly 2 are
   // selected, then becomes "TAKE THE STAGE". Click one candidate at a time, re-read.
   const stageBtn = st => st.clickables.find(c => /take the stage/i.test(c.t))
+  const noDevil = list => list.filter(c => !/FALLEN|The Devil/i.test(c.t)) // fair tests never draft Lucifer
   let st = s
   for (let attempt = 0; attempt < 8; attempt++) {
     const ready = stageBtn(st)
@@ -412,7 +413,7 @@ async function draftTick(s) {
       ev('draft_confirm', { attempt, seed })
       await P.click(ready.x, ready.y); return
     }
-    const cand = st.clickables.filter(c => /ATK\d/.test(c.t.replace(/\s/g, ''))).map(c => {
+    const cand = noDevil(st.clickables.filter(c => /ATK\d/.test(c.t.replace(/\s/g, '')))).map(c => {
       const { p, kw } = memberScoreFromText(c.t)
       return { ...c, kw, score: p }
     }).sort((a, b) => b.score - a.score)
