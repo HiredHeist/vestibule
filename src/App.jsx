@@ -8984,7 +8984,12 @@ function App(){
         candidates=[{...base,foil:m.foil||false,mythic:m.mythic||false,demonic:m.demonic||false,uid:uid()}]
       } else {
         const count=item.members||2
-        const real=getUnlockedMusicians()
+        let real=getUnlockedMusicians()
+        // Jul 31 2026: Lucifer never rolls when he can't legally join (band > 2) —
+        // an unpickable candidate is a wasted pack slot. Test rigs can exclude him
+        // entirely via localStorage vst_no_lucifer=1 for fair balance runs.
+        const _bandN=stage.filter(m=>m).length
+        if(_bandN>2||localStorage.getItem('vst_no_lucifer')==='1')real=real.filter(m=>m.id!=='lucifer_member')
         const shuffled=[...real].sort(()=>Math.random()-.5).slice(0,count)
         const fc=item.foilChance||0,mc=item.mythicChance||0,dc=item.demonicChance||0
         candidates=shuffled.map(m=>{
