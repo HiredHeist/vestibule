@@ -48,6 +48,10 @@ enrage doubles damage per overtime strike, fights end only in death. Live-verifi
 (x2->x4->x8->x16 escalation). HP curve rescaled x1.65 for the new math: 11.06%
 Lucifer winrate @5K (target ~10%). Save schema clamps sl>=1 (resume = fight restart).
 
+**QoL (from JV's own confusion Jul 31):** when Heat > 1, the boss frame should show
+the multiplier ("HEAT ×1.6") next to the HP bar — silent NG+ inflation reads as an
+HP bug even to the developer. Bot now pins vst_heat=1 for fair baseline tests.
+
 **Open items:** sim winrate discrepancy (2K fresh run says 39.95% Lucifer on Bronze/
 Standard vs July 29 doc's 8.3–11.8% claim — reconcile before balance work) · aura-ATK
 display chip on member cards · Setlist "Draw 3" vs hand-cap text · relic-SOLD-on-load

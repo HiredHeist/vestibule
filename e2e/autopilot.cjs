@@ -443,7 +443,7 @@ async function main() {
   ev('session', { msg: 'autopilot v2 start', build })
   // player-settings for a steadier hand: hover-zoom off (cards stop re-fanning under
   // the cursor), damage numbers on. Same toggles a human sets in OPTIONS.
-  try { await P.evaljs("localStorage.setItem('vst_hoverzoom','off'); localStorage.setItem('vst_shake','off'); localStorage.setItem('vst_no_lucifer','1'); 'ok'") } catch (e) {}
+  try { await P.evaljs("localStorage.setItem('vst_hoverzoom','off'); localStorage.setItem('vst_shake','off'); localStorage.setItem('vst_no_lucifer','1'); localStorage.setItem('vst_heat','1'); 'ok'") } catch (e) {}
   // FRESH START (Jul 31, JV): every bot launch is a new test — wipe any mid-run save
   // so data never begins mid-story. (Mid-session rig-heals do NOT re-run this.)
   try { await P.evaljs("localStorage.removeItem('vst_save_v4'); location.reload(); 'fresh'"); await new Promise(r => setTimeout(r, 4000)) } catch (e) {}
