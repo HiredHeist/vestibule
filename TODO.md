@@ -24,6 +24,12 @@ Bot run beat the entire game in 13 minutes. Ledger forensics found and fixed:
    synced). Sim @5K: 9.2% wins, fights avg ~3 strikes, one-shots ~30%.
 5. JV RULING: duplicate members are a legit strategy (twin Tanuki OK). Bot now
    declines band-full replacements unless incoming beats weakest by 20%.
+⬜ OPEN: PHANTOM VICTORY struck TWICE more in the Aug 1 overnight run (Lucifer
+   phase 2 "died" at 76k, Executive at 85k) — forensic tap now live: autopilot
+   pipes game console (incl. [VICTORY] caller stacks) into the ledger as
+   game_console events. Next uploaded ledger names the culprit.
+⬜ Full report: PLAYTEST_REPORT_AUG1.md (6h session analysis, tuning proposals
+   C1 trim + overtime flat-damage + pity ember, 20 feature ideas — awaiting JV).
 ⬜ OPEN: unexplained victory-at-178k-HP from the Aug 1 run — Shift+W or a bad
    triggerVictory caller; the [VICTORY] forensic log will attribute the next one.
 ⬜ OPEN: verify overtime enrage applies inside Lucifer P1/P2 boss-attack paths
