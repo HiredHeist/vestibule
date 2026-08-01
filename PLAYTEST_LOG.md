@@ -193,3 +193,26 @@ JV ruling locked in the same day: hand refills ONLY at strike resolve (StS/Balat
 rhythm) — the game's cardsToDrawRef machinery already did exactly this; the dup bug
 had been masking it. Live-verified: play 2 → hand 6→4/disc +2/deck flat/embers
 drained; STRIKE → refill to 6/6 drawing exactly 2 from deck.
+
+
+## THE 13-MINUTE FULL CLEAR (Aug 1) — forensics
+
+JV: "the tester just flew through everything and beat the game super easy...
+thats not the games design." Ledger showed the run credits-rolling 13 minutes
+after fresh start, with Lucifer dying at 178,478/185,000 HP. Three separate
+game-breakers: (1) Lucifer's 666,666 setup was dead code — stale fightIndex
+check in handleShopLeave meant he spawned generic-scaled at 185k, no phases;
+(2) Shift+W debug key fired full victory + credits with no HP check, live for
+all players — now gated behind vst_debug=1 with a [VICTORY] caller-stack log
+as a permanent forensic trap; (3) two RENDER ERROR crashes mid-run (ShopScreen
+lastRiffPlayed scope, setDiscard typo) that the bot recovered from via reload.
+
+## THE BALATRO CURVE (Aug 1)
+
+Sim per-fight telemetry proved the mash meta: one-shot rates 67% (mid) / 92%
+(late) because player damage compounds exponentially while HP grew politely.
+Swept linear multipliers x2-x6 — barely moved it. Answer is Balatro's answer:
+exponential blind scaling. HP x15^(i/26), Wanderer + Lucifer protected.
+5K-game validation: 9.2% winrate (target ~10%), fights average ~3 strikes,
+one-shots ~30% (a payoff, not the norm), 19.5% reach Lucifer and he kills half
+of them. Deaths: C1 remains the noob filter, C9 reclaims 10% of runs.

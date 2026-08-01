@@ -1,7 +1,33 @@
 # VESTIBULE — TODO
 
-*Last updated: July 30, 2026 — bot-playtest rig operational, code audit clean ✅*
+*Last updated: Aug 1, 2026 — Lucifer HP bug + debug-key hole killed; Balatro HP curve shipped*
 *Branch state: main = audited stable · playtest/session2 = bot rig WIP (see HANDOFF.md)*
+
+## 🔥 AUG 1 — THE "BEAT THE GAME IN 13 MIN" FORENSICS (d48699b + c0d4260)
+
+Bot run beat the entire game in 13 minutes. Ledger forensics found and fixed:
+1. **Lucifer never had his real HP** — handleShopLeave's setup block checked the
+   STALE fightIndex (25 at entry), so 666,666/phases NEVER applied. He spawned
+   at 185,000 (100k × 1.85 generic), phase 0, no cinematic. Fixed to nextIdx +
+   scaledMaxHp; resume path (loadGame fi=26) got the same fix. Live-verified
+   333,333/333,333 phase 1 via both paths.
+2. **Shift+W = instant win, live for every player** — full victory cinematic +
+   credits, zero HP check. All dev keys (S/C/W/D/H/~) now gated behind
+   localStorage vst_debug=1. triggerVictory now logs [VICTORY] + caller stack
+   (forensic trap — a bogus victory can never hide again).
+3. Two mid-run RENDER ERROR crashes: ShopScreen referenced out-of-scope
+   lastRiffPlayed on Demo Tape detail; Trickster shuffle called setDiscard
+   (undefined) not setDiscardPile. Both fixed.
+4. **THE BALATRO CURVE** — sim telemetry showed 67% mid / 92% late one-shot
+   fights (nova meta, JV: "not the games design"). HP now scales exponentially
+   ×15^(i/26) (Wanderer + Lucifer protected; enemies.js + boss_hp_override.json
+   synced). Sim @5K: 9.2% wins, fights avg ~3 strikes, one-shots ~30%.
+5. JV RULING: duplicate members are a legit strategy (twin Tanuki OK). Bot now
+   declines band-full replacements unless incoming beats weakest by 20%.
+⬜ OPEN: unexplained victory-at-178k-HP from the Aug 1 run — Shift+W or a bad
+   triggerVictory caller; the [VICTORY] forensic log will attribute the next one.
+⬜ OPEN: verify overtime enrage applies inside Lucifer P1/P2 boss-attack paths
+   (repro showed band surviving 14 strikes suspiciously comfortably).
 
 ## 🤖 CURRENT PHASE — AUTONOMOUS PLAYTEST (July 30)
 
