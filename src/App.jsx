@@ -5537,6 +5537,9 @@ function App(){
     if(card.id==='stagedive'&&stageDiveUsed){addLog('⚠ Stage Dive once per round only.');return false}
     const m=stage[slotIdx]
     let ns=[...stage],spent=effectiveEmbers,msg=''
+    // Aug 1 2026: snapshot pre-card ATK so temp buffs can be un-applied. See the
+    // normalisation right before setStage(ns) below.
+    const _preCardAtk=stage.map(m=>m?m.atk:null)
 
     // CONTRACT CARD (Welcome to Hell)
     if(card.id==='contract'){
@@ -5941,7 +5944,7 @@ function App(){
         // 10: TOTAL WIPEOUT — random member Too Stoned AND boss heals 15 (negative)
         const alive2=ns.filter(m=>m&&!m.tooStoned)
         if(alive2.length>0){const v2=alive2[Math.floor(Math.random()*alive2.length)];const vi2=ns.indexOf(v2);ns[vi2]=Object.assign({},v2,{hp:0,tooStoned:true,bloodOath:false})}
-        setEnemyHp(function(prev){return Math.min(enemy.maxHp,prev+15)})
+        setEnemyHp(function(prev){return Math.min(scaledMaxHp||enemy.maxHp,prev+15)})
         hqMsg='⛧ HELLQUAKE: TOTAL WIPEOUT! A member falls and the boss recovers!';hqFloat='WIPEOUT!';hqColor='#440000';hqDesc='A member fell and the boss recovered 15 HP.'
       }
       // Dramatic flash then reveal
@@ -6157,6 +6160,17 @@ function App(){
       addLog('⚠ '+(ns[slotIdx].name)+' has 3+ buffs — Corruption +20%!')
     }
 
+    // ── TEMP-BUFF EXPIRY NORMALISATION (Aug 1 2026) ────────────────────
+    // handleStrikeBody expires a "this Strike" buff only when BOTH tempBuff and
+    // _origAtk are set. 32 card sites set tempBuff:true but only 24 captured
+    // _origAtk — so 8+ cards (Doom Chord, Devil's Dice, Blood Harmony, Cursed
+    // Strings, Dial to Eleven, Possession Riff, Sonic Boom's adjacency...) granted
+    // buffs that NEVER expired and compounded for the entire run. That silently
+    // made the live game far stronger than any sim number, in the opposite
+    // direction from the sim's perm-ATK double-dip. Capture the restore value
+    // here, once, for every site — no call-site archaeology required.
+    ns=ns.map((m,i)=>(m&&m.tempBuff&&m._origAtk===undefined&&_preCardAtk[i]!==null&&_preCardAtk[i]!==m.atk)
+      ?Object.assign({},m,{_origAtk:_preCardAtk[i]}):m)
     setStage(ns)
     if(spent>0){setEmbers(function(p){return p-spent});embersSpentThisFightRef.current+=spent}
     if(msg)addLog(msg)
@@ -6264,14 +6278,20 @@ function App(){
         break
       }
     }
-    // cardHeal enemy passive
-    if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
-    else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
-    else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+4))
-    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+6))
-    else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+15))
-    else if(enemy.passiveId==='cardHeal3b')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+8))
-    else if(enemy.passiveId==='cardHeal8')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+25))
+    // cardHeal enemy passive.
+    // Aug 1 2026 CRITICAL: these clamped to enemy.maxHp — the UNSCALED data value —
+    // while live HP is maxHp x deckScale x heat x encore. Every clamp therefore
+    // SLAMMED the boss down to its base HP the first time it "healed":
+    //   Glutton 2,030 -> 1,097 (-933) · Feaster 3,325 -> 1,797 (-1,528)
+    //   Devourer 11,918 -> 6,442 (-5,476, i.e. 46% of the fight deleted by one card)
+    // Circle 3 was not a real fight. Now clamps to scaledMaxHp (the live value).
+    if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+2))
+    else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+3))
+    else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+4))
+    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+6))
+    else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+15))
+    else if(enemy.passiveId==='cardHeal3b')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+8))
+    else if(enemy.passiveId==='cardHeal8')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+25))
     return true
   },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected,fightTripBuff,enemy,enemyHp,maxEmbers,activePassives,activeArtifacts,chosenPacts,fightIndex,collectedLoot])
 
@@ -6435,13 +6455,13 @@ function App(){
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
       // cardHeal enemy passive
-      if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
-      else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
-      else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+4))
-    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+6))
-    else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+15))
-    else if(enemy.passiveId==='cardHeal3b')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+8))
-    else if(enemy.passiveId==='cardHeal8')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+25))
+      if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+2))
+      else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+3))
+      else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+4))
+    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+6))
+    else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+15))
+    else if(enemy.passiveId==='cardHeal3b')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+8))
+    else if(enemy.passiveId==='cardHeal8')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+25))
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
     }
@@ -6475,13 +6495,13 @@ function App(){
     // #3: ASCENDING PITCH on each card played
     try{const _ctx=new(window.AudioContext||window.webkitAudioContext)();const _o=_ctx.createOscillator();const _g=_ctx.createGain();_o.type='sine';const _cp=(cardsPlayedRef.current||[]).length;_o.frequency.value=300+_cp*120;_g.gain.value=Math.min(0.12,sfxVol*0.3);_o.connect(_g);_g.connect(_ctx.destination);_o.start();_o.stop(_ctx.currentTime+0.06)}catch(e){}
       cardsPlayedRef.current=[...cardsPlayedRef.current,card.id]
-      if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+2))
-      else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+3))
-      else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+4))
-    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+6))
-    else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+15))
-    else if(enemy.passiveId==='cardHeal3b')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+8))
-    else if(enemy.passiveId==='cardHeal8')setEnemyHp(p=>p<=0?p:Math.min(enemy.maxHp,p+25))
+      if(enemy.passiveId==='cardHeal')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+2))
+      else if(enemy.passiveId==='cardHeal3')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+3))
+      else if(enemy.passiveId==='cardHeal4')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+4))
+    else if(enemy.passiveId==='cardHeal6')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+6))
+    else if(enemy.passiveId==='cardHeal5')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+15))
+    else if(enemy.passiveId==='cardHeal3b')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+8))
+    else if(enemy.passiveId==='cardHeal8')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+25))
       setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null)
       return
     }
@@ -8208,6 +8228,16 @@ function App(){
       if(_breakdownLines.length>1&&!_lethalStrike){
         // Cascade drives HP drop — boss HP stays put until SLAM
         setDmgBreakdown({lines:_breakdownLines,total:_totalStrikeDmg,_pendingHpDrop:_applyHpDrop,cascadeMults:_cascadeMults,totalMult:_totalMult})
+        // ── Aug 1 2026: SLAM-RACE SAFETY NET ────────────────────────────
+        // _bossDelay budgets 140ms per breakdown line, but DamageBreakdown's
+        // lineDelay() returns up to 700ms for a big multiplier. On a build with
+        // several fat mults the boss-attack timer fires first, unmounts the
+        // breakdown, and onSlam never runs — so _pendingHpDrop never fires and
+        // the ENTIRE STRIKE DEALS ZERO DAMAGE. Reads as "my huge hit did
+        // nothing". _applyHpDrop is idempotent (setEnemyHp uses Math.min on the
+        // previous value), so calling it again is always safe: whichever path
+        // gets there first wins, and the damage can never be lost.
+        setTimeout(_applyHpDrop,_breakdownLines.length*720+900)
       } else {
         // Lethal OR no cascade: apply immediately
         _applyHpDrop()
@@ -9310,6 +9340,23 @@ function App(){
   const handleReset=(retrySeed)=>{
     setRunSeed(retrySeed||Math.floor(Math.random()*0xFFFFFF))
     runStartTimeRef.current=Date.now()
+    // ── CROSS-RUN CONTAMINATION FIX (Aug 1 2026) ────────────────────────
+    // An audit of all 181 useState vars against handleReset found 90 unreset.
+    // Most are cosmetic, but these carry real run state into the NEXT run —
+    // which is exactly what silently poisons an overnight multi-run dataset.
+    // tutorialFight is the worst: any nonzero value makes triggerVictory take
+    // the tutorial branch and skip ALL victory processing, so a run can never
+    // be recorded as won.
+    setTutorialFight(0);setTutorialTipIdx(0);setShowTutorialMsg(false)
+    setPendingEmbers(0);setExtraEmberNextFight(0);setAmpFeedbackDiscount(0);setPyromaniacActive(false)
+    setLastRiffPlayed(null);lastRiffPlayedRef.current=null
+    setUndoSnapshot(null);setVictorySummary(null);setDmgBreakdown(null)
+    setDemonicConflict(null);setSlotSwapPrompt(null);setSetlistOpen(false);setRemasterOpen(false)
+    setQuickPlayCardUid(null);setDragCardUid(null);setDragStageIdx(null)
+    setRecruitBought(false);setRecruitCandidates([]);setRerollCost(2)
+    setShopCards([]);setBoosterPacks([]);setCircleArtifact(null);setCirclePassive(null)
+    setShroomsInStock(false);setAcidInStock(false);setDMTInStock(false)
+    setIsDailyRun(false);setFirstTip(null);setPreFightSplash(null);setCircleSplash(null)
     // Apply starter deck bonuses
     const deckDef=STARTER_DECKS.find(d=>d.id===selectedDeck)
     if(deckDef?.startCorruption)setCorruption(deckDef.startCorruption)

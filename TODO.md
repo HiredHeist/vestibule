@@ -28,6 +28,28 @@ Bot run beat the entire game in 13 minutes. Ledger forensics found and fixed:
    phase 2 "died" at 76k, Executive at 85k) — forensic tap now live: autopilot
    pipes game console (incl. [VICTORY] caller stacks) into the ledger as
    game_console events. Next uploaded ledger names the culprit.
+## ✅ PRE-FLIGHT CORRECTNESS PASS (Aug 1) — data is now trustworthy
+Fixed before any further data collection, because each of these silently corrupted
+results rather than crashing:
+- **Boss "heal" passives DAMAGED the boss.** Clamped to unscaled `enemy.maxHp` while
+  live HP is scaled, so one card slammed Devourer 11,918 -> 6,442 (46% of the fight
+  deleted). All 22 sites now clamp to `scaledMaxHp`. Circle 3 was never a real fight.
+- **Cascade slam race voided entire strikes.** `_bossDelay` budgets 140ms/line but
+  `lineDelay()` returns up to 700ms, so big-multiplier builds unmounted the breakdown
+  before `onSlam` fired and the strike dealt ZERO damage. Idempotent fallback timer added.
+- **"This Strike" buffs never expired** on 8+ cards (tempBuff set without `_origAtk`,
+  and expiry requires both) — they compounded for the whole run. Normalised at one
+  choke point in applyCard instead of 32 call sites.
+- **Cross-run contamination:** 90 of 181 useState vars were unreset by handleReset.
+  18 carried real run state into the next run — worst was `tutorialFight`, which makes
+  triggerVictory take the tutorial branch and skip ALL victory processing.
+- **Sim rebuilt to match live** (~30 divergences, see AUDIT_AUG1.md). Winrate with
+  correct math was 1.6%, not 9.2%.
+- **FINAL RETUNE x0.40** on top of the Balatro curve. 5K-validated: 10.30% Lucifer,
+  C1 deaths 24.3%, C9 39.5%, fights avg 2.3-2.5 strikes. enemies.js + override synced.
+- Bot smoke run after all fixes: play-fail rate **53% -> 6%**, 0 parse misses,
+  0 unknown screens, 0 stalls, reached Circle 2, bought 5 relics (previously impossible).
+
 ## 🔬 ONE-SHOT AUDIT (Aug 1) — see AUDIT_AUG1.md for the complete backlog
 Four parallel auditors swept game logic, card parity, bot policy and economy in a
 single pass (JV: "it should all be found in one clean audit"). Fixed this session:

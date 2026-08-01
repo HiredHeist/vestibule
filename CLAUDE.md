@@ -238,7 +238,14 @@ vst_achievement_*         Per-achievement unlock flags
 - Run: `node vestibule-sim-kwstacks.js [numGames] [stake] [deck]`
 - Models: cards, passives, artifacts, pacts, loot, combos, mentor links, drugs, hellquakes, corruption thresholds, random events, blood oath, full keyword stack tier scaling
 - **Live HP sync:** sim reads `boss_hp_override.json` at repo root for current ENEMIES maxHp values, then applies `deck.hpScale` (1.85 default Standard). Matches live `getScaledMaxHp` exactly. **When live boss HPs change, update `boss_hp_override.json` in the same commit.**
-- Latest 5K Bronze sim (Jul 31 2026, OVERTIME era): avg fight 12.08/26, Lucifer wins 11.06% (~10% target). Sim models: true ember economy (no per-strike refill) + overtime enrage (dmg x2 per OT strike, fights end only in death).
+- Latest 5K Bronze sim (**Aug 1 2026, post-parity-fix**): **Lucifer wins 10.30%**, Circle-1 deaths 24.3%, Circle-9 deaths 39.5%, fights average **2.3-2.5 strikes** (23-46% one-shot). Sim models true ember economy + overtime enrage.
+- ⚠️ **Every sim number produced before Aug 1 2026 was WRONG.** The sim double-counted
+  permanent ATK (buffs wrote both `atk` and `permAtkBonus` while damage summed both, so
+  every +X ATK card was worth 2X), invented an entire Hellquake table that silently
+  evaluated to NaN, dealt phantom damage on feedbackloop/deathriff (live deals none),
+  had 8 wrong ember costs, 3 cards that don't exist live, 4 wildly wrong corruption
+  values, and no Heavy Riff once-per-member gate. The old "11.06%" was fantasy; the
+  same code measured 1.8% once the ATK bug alone was fixed. Full list: AUDIT_AUG1.md.
 - Sim is fast: 5K games in ~17 seconds, 10K in ~35 seconds
 
 When changing game balance, run sim before committing.

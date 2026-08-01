@@ -114,8 +114,11 @@ async function perceive() {
     const bm = document.body.innerText.match(/([\\d,]+)\\s*\\/\\s*([\\d,]+)\\s*HP/)
     out.bossHp = bm ? num(bm[1]) : null
     out.bossMaxHp = bm ? num(bm[2]) : null
-    if (!bm) out.miss.push('bossHp')
-    else if (out._corrMissing) out.miss.push('corruption') // in combat and unreadable = real
+    // NOTE: the corruption tube renders only when corruption > 0 (App.jsx
+    // ~10349), so its ABSENCE is meaningful — it means corruption is exactly 0,
+    // not that the read failed. Flagging it produced 39 false parse_miss events
+    // in a 4-minute run. Absence == 0 is correct; never flag it.
+    out.inCombat = !!bm
 
     // ── labelled HUD pills. Verified against the LIVE DOM: the label element
     // holds only the label, and the value sits beside it in the shared parent
@@ -134,7 +137,7 @@ async function perceive() {
       }
       return null
     }
-    const emb = readPill('EMBERS'); if (!emb) out.miss.push('embers')
+    const emb = readPill('EMBERS'); if (!emb && out.inCombat) out.miss.push('embers')
     out.embers = emb ? emb.cur : 0; out.maxEmbers = emb ? emb.max : null
     // discards-LEFT lives on the "↓ DISCARD" button; readPill('DISCARD') returns
     // the discard PILE count instead — two different numbers behind one word.
@@ -157,7 +160,7 @@ async function perceive() {
     out.overtime = /OVERTIME/i.test(bodyTxt)
     const sm = bodyTxt.match(/STRIKE[^\\d]{0,12}(\\d+)\\s*\\/\\s*(\\d+)/)
     out.strikesLeft = out.overtime ? 0 : (sm ? +sm[1] : null)
-    if (out.strikesLeft === null) out.miss.push('strikes')
+    if (out.strikesLeft === null && out.inCombat) out.miss.push('strikes')
     const mm = bodyTxt.match(/MULTIPLIER\\s*\\n?×([\\d.]+)/)
     out.strikeMult = mm ? parseFloat(mm[1]) : 1
     out.discardLen = (() => { const d = bodyTxt.match(/(\\d+)\\s*\\n?DISCARD/); return d ? +d[1] : 0 })()
