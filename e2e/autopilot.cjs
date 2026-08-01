@@ -33,7 +33,12 @@ async function screenType(s) {
   if (t.includes('START TUTORIAL') || t.includes('ENTER THE VESTIBULE')) return 'menu'
   if (t.includes('DEFEATED BY') || t.includes('PLAY AGAIN') || t.includes('TRY AGAIN') || t.includes('CAUSE OF DEATH')) return 'death'
   if (t.includes('LUCIFER IS DEAD') || /LUCIFER (IS )?(SLAIN|DEAD|DESTROYED|FALLS|DEFEATED)/.test(t)) return 'victory'
+  if (t.includes('THE DEVIL IS DEAD')) return 'victory' // full-game victory cinematic
   if (t.includes('VICTORY') || t.includes('ONWARD')) return 'popup' // fight-victory summary → click through
+  // Aug 1: post-credits Collection/gallery screens — bot sat on "Collection 38/74
+  // discovered" for 5.4 HOURS (9,560 unknown_screen ticks). Escape out of any
+  // meta screen that isn't a run.
+  if (/COLLECTION|DISCOVERED|TROPHY|TROPHIES|ACHIEVEMENTS|HALL OF/.test(t) && !btn('strike')) return 'meta'
   return 'unknown'
 }
 
@@ -459,6 +464,19 @@ async function main() {
   // so data never begins mid-story. (Mid-session rig-heals do NOT re-run this.)
   try { await P.evaljs("localStorage.removeItem('vst_save_v4'); location.reload(); 'fresh'"); await new Promise(r => setTimeout(r, 4000)) } catch (e) {}
   ev('fresh_start', { note: 'save wiped at launch' })
+  // Aug 1 FORENSIC TAP: pipe the game's own console into the ledger. triggerVictory
+  // logs [VICTORY] + caller stack — this catches the phantom-victory bug (Lucifer
+  // died at 76k, Executive at 85k) red-handed with a stack trace next time it fires.
+  try {
+    const pg = await P0.connect()
+    pg.on('console', m => {
+      const txt = m.text()
+      if (/\[VICTORY\]|\[DEBUG-WIN\]|RENDER ERROR|is not defined|Uncaught|TypeError|ReferenceError/.test(txt)) {
+        ev('game_console', { line: txt.slice(0, 600) })
+      }
+    })
+    pg.on('pageerror', e2 => ev('game_pageerror', { msg: String(e2 && e2.message || e2).slice(0, 400) }))
+  } catch (e) {}
   let tick = 0, opTimeouts = 0
   const origEv = ev
   // rig self-heal: 3 consecutive op timeouts = degraded CDP session → restart Electron,
@@ -507,6 +525,13 @@ async function main() {
       else if (type === 'forge') await forgeTick(s)
       else if (type === 'boosterpick') await forgeTick(s) // same shape: card tiles, pick best, confirm
       else if (type === 'credits') { ev('credits_seen', {}); const vp = await P.evaljs('({w:innerWidth,h:innerHeight})'); await P.click(Math.round(vp.w / 2), Math.round(vp.h / 2)) }
+      else if (type === 'meta') {
+        // Collection / trophies / achievements — leave via back/escape, then menu handler restarts
+        ev('meta_screen', { text: s.text.slice(0, 60) })
+        let out = false
+        for (const b of ['back', 'close', 'menu', 'main menu', '✕', 'x']) { try { await P.clickText(b); out = true; break } catch (e) {} }
+        if (!out) await P.key('Escape').catch(() => {})
+      }
       else if (type === 'wth') {
         const f = await P.shot('wth-' + Date.now())
         ev('wth_screen', { shot: f, text: s.text.slice(0, 600) })

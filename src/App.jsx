@@ -7060,7 +7060,7 @@ function App(){
   // localStorage vst_debug=1 (rig/test sessions set it; players never see them).
   useEffect(function(){
     function onKey(e){
-      if(e.shiftKey&&localStorage.getItem('vst_debug')!=='1'&&['S','C','c','W','w','D','d','H','h','`','~'].includes(e.key))return
+      if(e.shiftKey&&localStorage.getItem('vst_debug')!=='1'&&['S','C','c','W','w','D','d','H','h','K','k','`','~'].includes(e.key))return
       if(e.shiftKey&&e.key==='S'){
         setShopCards(genShopCards(1))
         setBoosterPacks(genBoosterPacks(1))
@@ -7095,6 +7095,13 @@ function App(){
         clearSave();setGameState('end')
       }
       if(e.shiftKey&&(e.key==='H'||e.key==='h')){setCreditsRoll(true)}
+      // Shift+K (rig only, vst_debug=1): burn 97% of boss's CURRENT HP through the
+      // normal damage path. Exists to test Lucifer phase transitions + victory flow
+      // live without 300 manual strikes. Uses the same guarded setter as cards.
+      if(e.shiftKey&&(e.key==='K'||e.key==='k')){
+        console.log('[DEBUG-DMG] Shift+K: boss HP -97%')
+        setEnemyHp(p=>{const nh=Math.max(1,Math.floor(p*0.03));return nh})
+      }
       // Shift+` (tilde) = toggle debug HUD overlay (state inspection)
       if(e.shiftKey&&(e.key==='`'||e.key==='~')){setShowDebugHud(p=>!p)}
       // Ctrl+Z = Undo last card play
