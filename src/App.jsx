@@ -1720,7 +1720,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
           </div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,
             color:'#c8a878',textAlign:'center',padding:'8px 14px',
-            lineHeight:1.45,flex:1}}>{card.id==='demotape'?(lastRiffPlayed?'📼 Will replay: '+lastRiffPlayed.name+' (free)':'📼 No riff recorded yet — play a RIFF card first'):(<>{card.effect||card.desc||''}{card.upgraded&&CARD_UPGRADES[card.id]&&<div style={{marginTop:4,padding:'3px 8px',background:'rgba(255,200,0,0.12)',border:'1px solid rgba(255,200,0,0.3)',borderRadius:4,color:'var(--text-gold)',fontSize:13,fontWeight:700}}>⛧ {CARD_UPGRADES[card.id].desc}</div>}</>)}</div>
+            lineHeight:1.45,flex:1}}>{/* Aug 1: demotape branch referenced lastRiffPlayed which is NOT in ShopScreen scope → ReferenceError crashed the whole app whenever the shop rendered a Demo Tape detail (bot run hit it twice). Static text here; live replay preview only exists in combat HandCard. */}{card.id==='demotape'?('📼 '+(card.effect||'Replays the last RIFF you played this fight, free.')):(<>{card.effect||card.desc||''}{card.upgraded&&CARD_UPGRADES[card.id]&&<div style={{marginTop:4,padding:'3px 8px',background:'rgba(255,200,0,0.12)',border:'1px solid rgba(255,200,0,0.3)',borderRadius:4,color:'var(--text-gold)',fontSize:13,fontWeight:700}}>⛧ {CARD_UPGRADES[card.id].desc}</div>}</>)}</div>
           {card.isMember&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',
             padding:'8px 14px',borderTop:'1px solid rgba(255,255,255,0.07)',flexShrink:0}}>
             <div style={{textAlign:'center'}}>
@@ -6579,6 +6579,10 @@ function App(){
   const triggerVictoryRef=useRef(null)
   const triggerVictory=useCallback(function(){
     if(victoryFiredRef.current)return // prevent double-fire
+    // Aug 1 2026 forensic log: a bot run got full victory with Lucifer at 178k HP.
+    // Every caller is supposed to have verified the kill; this logs who called and
+    // with what state so a bad caller can't hide. Cheap, stays in prod builds.
+    try{console.log('[VICTORY]','fi='+fightIndex,'hp='+enemyHp,'phase='+luciferPhase,'stack:',new Error().stack.split('\n').slice(2,6).join(' <- '))}catch(e){}
     victoryFiredRef.current=true
     // ═══ TUTORIAL INTERCEPT ═══
     if(tutorialFight>0){
@@ -7049,9 +7053,14 @@ function App(){
     }
   },[corruption,gameState])
 
-  // ── DEV SHORTCUT: Shift+S = jump to shop ─────────────────────────
+  // ── DEV SHORTCUTS (Shift+S/C/W/D/H/~) ────────────────────────────
+  // Aug 1 2026 CRITICAL: these were LIVE for every player — Shift+W fired the
+  // full victory cinematic + credits with ZERO HP check (one keystroke beats the
+  // game), Shift+S opened a free shop with 69 stash. Now gated behind
+  // localStorage vst_debug=1 (rig/test sessions set it; players never see them).
   useEffect(function(){
     function onKey(e){
+      if(e.shiftKey&&localStorage.getItem('vst_debug')!=='1'&&['S','C','c','W','w','D','d','H','h','`','~'].includes(e.key))return
       if(e.shiftKey&&e.key==='S'){
         setShopCards(genShopCards(1))
         setBoosterPacks(genBoosterPacks(1))
@@ -7068,6 +7077,7 @@ function App(){
         setGameState('campfire')
       }
       if(e.shiftKey&&(e.key==='W'||e.key==='w')){
+        console.log('[DEBUG-WIN] Shift+W pressed — debug victory cinematic fired (vst_debug=1)')
         setDeathCause('victory')
         setStats({fightsSurvived:27,strikesThrown:108,totalDamage:666666,highestStrike:42069,tooStonedCount:3,maxCorruption:100,stashEarned:420,cardsPlayed:420})
         // Trigger cinematic sequence
@@ -8326,7 +8336,7 @@ function App(){
             addLog('💢 Warlord commands: lose 1 ember!')
             addFloat('-1 EMBER',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff8800',true)
           } else {
-            setHand(h=>{if(h.length===0)return h;const di=Math.floor(Math.random()*h.length);const dropped=h[di];setDiscard(d=>[...d,dropped]);const nh=[...h];nh.splice(di,1);return nh})
+            setHand(h=>{if(h.length===0)return h;const di=Math.floor(Math.random()*h.length);const dropped=h[di];setDiscardPile(d=>[...d,dropped]);const nh=[...h];nh.splice(di,1);return nh})
             addLog('💢 Warlord commands: 1 hand card discarded!')
             addFloat('CARD LOST',getCenter(bossRef).x,getCenter(bossRef).y-80,'#cc1144',true)
           }
@@ -8715,11 +8725,16 @@ function App(){
     // BOSS LOOT effects at fight start
     if(collectedLoot.includes('love_letter'))setNextCardFree(true)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
-    if(fightIndex===26){
-      // 8 circle bosses killed = 8 × 51,750 = 414,000 reduction → 6,666 HP
+    // Aug 1 2026 CRITICAL FIX: was `fightIndex===26` — but fightIndex here is the
+    // STALE pre-transition value (25 when entering Lucifer), so this block NEVER
+    // ran. Lucifer spawned with generic HP (100000×deckScale=185,000) and
+    // luciferPhase=0 (no phases, no cinematic). Bot run 00:37 Aug 1 beat the whole
+    // game because of this. Must check nextIdx (the fight being entered).
+    if(nextIdx===26){
       const _lheat=parseInt(localStorage.getItem('vst_heat')||'1')
       const luciferActualHp=Math.ceil(333333*(1+Math.max(0,_lheat-1)*0.15)*(encoreMode?2.0:1.0)) // phase 1 of 2 — 666,666 total at Heat 1, scales with NG+/Encore
       setEnemyHp(luciferActualHp)
+      setScaledMaxHp(luciferActualHp) // display max must match — generic set above used 185,000
       setLuciferPhase(1)
       addLog('⛧ THE DEVIL HIMSELF — 666,666 HP ACROSS TWO FORMS ⛧')
       addLog('🧊 Phase 1: Lucifer, Frozen in Cocytus — 333,333 HP')
@@ -9224,9 +9239,19 @@ function App(){
       anchorSavesUsedRef.current=0
     }
     const ne=ENEMIES[sv.fi]||ENEMIES[0];setEnemy(ne)
-    const _ds=(STARTER_DECKS.find(d=>d.id===sv.deck)||{}).hpScale||1
-    const _hm=1+(Math.max(0,parseInt(localStorage.getItem('vst_heat')||'1')-1)*0.15)
-    const _hp=Math.ceil(ne.maxHp*_ds*_hm*_stakeHpF());setEnemyHp(_hp);setScaledMaxHp(_hp)
+    // Aug 1 2026: resume at fight 26 must use the flat Lucifer formula + phase 1,
+    // not the generic deck-scale math (was resuming Lucifer at 185,000 / phase 0).
+    // Resume = fight restart, so phase 1 fresh is correct even for a mid-P2 save.
+    if(sv.fi===26){
+      const _lh=parseInt(localStorage.getItem('vst_heat')||'1')
+      const _lhp=Math.ceil(333333*(1+Math.max(0,_lh-1)*0.15)*(encoreMode?2.0:1.0))
+      setEnemyHp(_lhp);setScaledMaxHp(_lhp);setLuciferPhase(1)
+    } else {
+      setLuciferPhase(0)
+      const _ds=(STARTER_DECKS.find(d=>d.id===sv.deck)||{}).hpScale||1
+      const _hm=1+(Math.max(0,parseInt(localStorage.getItem('vst_heat')||'1')-1)*0.15)
+      const _hp=Math.ceil(ne.maxHp*_ds*_hm*_stakeHpF());setEnemyHp(_hp);setScaledMaxHp(_hp)
+    }
     setGameState('playing');addLog('⛧ Run resumed from save...')
   }
   const handleReset=(retrySeed)=>{
