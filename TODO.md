@@ -28,6 +28,17 @@ Bot run beat the entire game in 13 minutes. Ledger forensics found and fixed:
    phase 2 "died" at 76k, Executive at 85k) — forensic tap now live: autopilot
    pipes game console (incl. [VICTORY] caller stacks) into the ledger as
    game_console events. Next uploaded ledger names the culprit.
+✅ RELIC MYSTERY SOLVED (Aug 1) — NOT an economy problem. The shop's buy button
+   is labelled with the ITEM'S NAME ("🤘Crowd Noise ×1.10 per alive member"),
+   never the word "artifact", so the bot's buy('artifact') could never match a
+   clickable: it was structurally incapable of buying relics for its entire life.
+   Fixed by parsing name+cost from the tile block and clicking by name (handles
+   both "<emoji>\n<Name>" and "<emoji><Name>" layouts). Verified live: bought
+   Triple Sixes for exactly 35 stash; Gaffer Tape + Stone Tablet both resolve.
+✅ WASTED-PACK BUG (JV: "a real player wouldn't open redundant packs") — bandSize
+   was name-regex'd off the stage strip and fell back to 2 on any parse miss, so
+   the bot bought 6 member packs for a FULL band then declined the replacement.
+   Now counts ⟩ delimiters in the stage-order strip (glyph-agnostic). Verified: 5.
 ⬜ Full report: PLAYTEST_REPORT_AUG1.md (6h session analysis, tuning proposals
    C1 trim + overtime flat-damage + pity ember, 20 feature ideas — awaiting JV).
 ⬜ OPEN: unexplained victory-at-178k-HP from the Aug 1 run — Shift+W or a bad

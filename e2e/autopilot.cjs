@@ -289,8 +289,14 @@ async function shopTick(s) {
   const sig = (t.match(/STASH\s*\n?💵\s*\n?(\d+)/) || ['', '?'])[1] + '|' + t.length
   if (BOT.lastShopSig !== sig.split('|')[1]) { BOT.boughtThisShop = new Set(); BOT.lastShopSig = sig.split('|')[1] }
   const stash = +((t.match(/STASH\s*\n?💵\s*\n?(\d+)/) || [0, 0])[1])
-  const bandNames = [...t.matchAll(/⟨\s*\n?[^\n⟩]*\n?([A-Z][a-z]{2,})\s*\n?⟩/g)].map(m => m[1])
-  const bandSize = new Set(bandNames).size || 2
+  // Aug 1 FIX: band size was parsed by name-regex over the stage-order strip and
+  // silently fell back to 2 whenever a name didn't match [A-Z][a-z]{2,} (stoned
+  // members, odd glyphs). Result: bot thought the band had room, bought 6 member
+  // packs it could not use, then hit BAND IS FULL and declined — pure wasted stash,
+  // and the early `return` after each buy meant it NEVER reached the relic branch.
+  // Counting ⟩ delimiters in the strip is glyph-agnostic and exact.
+  const stripM = t.match(/STAGE ORDER[^]*?(?=⛧ THIS CIRCLE|⛧ ARTIFACT|⛧ EFFECT PEDAL|🎸 CARDS)/i)
+  const bandSize = stripM ? (stripM[0].match(/⟩/g) || []).length : ((t.match(/⟩/g) || []).length || 2)
   const buy = async (label, why) => {
     const c = s.clickables.find(c => c.t.toLowerCase().includes(label))
     if (!c) return false
@@ -315,17 +321,45 @@ async function shopTick(s) {
       ev('shop_skip', { tile: pk, why: 'tile not in clickables' })
     }
   }
-  // 2. RELIC (one per circle; sim buys if <3 owned and value clears bar — simplified: keep 4 reserve)
-  if (BOT.artifacts < 3 && /THIS CIRCLE ONLY/.test(t) && tryable('artifact')) {
-    const m = t.match(/⛧ ARTIFACT\s*\n?(\d+)\s*\n?(\d+)?/)
-    const cost = m ? +(m[2] || m[1]) : 99
-    if (stash >= cost + 4 && await buy('artifact', 'relic value, cost=' + cost)) { BOT.artifacts++; return }
+  // 2/3. RELIC + PEDAL — Aug 1 ROOT-CAUSE FIX (zero relics bought in a 6-hour run).
+  // The buy button is labelled with the ITEM'S NAME ("🤘Crowd Noise ×1.10 per alive
+  // member"), never the word "artifact" — so buy('artifact') could never match any
+  // clickable. The bot was structurally incapable of buying relics; this was a rig
+  // blindness bug, NOT relics losing on price. Parse name+cost out of the tile block
+  // and click by name. Shop text shape:
+  //   ⛧ ARTIFACT \n <cost> \n <emoji> \n <Name> \n <effect>
+  // Tile layout varies: sometimes "<emoji>\n<Name>\n<effect>", sometimes
+  // "<emoji><Name>\n<effect>". Collect both lines after the cost as name
+  // candidates and match on a short prefix — clickable text is truncated at 60
+  // chars by pilot.state(), so matching a full effect sentence would miss.
+  const buyNamed = async (cands, why, label) => {
+    let c = null, used = ''
+    for (const raw of cands) {
+      const n = String(raw || '').replace(/^[^A-Za-z0-9]+/, '').slice(0, 22).toLowerCase()
+      if (n.length < 3) continue
+      c = s.clickables.find(x => x.t.toLowerCase().includes(n))
+      if (c) { used = n; break }
+    }
+    if (!c) { ev('shop_skip', { tile: label, why: 'tile not clickable, tried: ' + cands.join(' | ').slice(0, 60) }); return false }
+    BOT.boughtThisShop.add(label)
+    ev('shop_buy', { label: (label + ': ' + c.t).slice(0, 60), why, stash, bandSize, matched: used })
+    await P.click(c.x, c.y); return true
   }
-  // 3. EFFECT PEDAL (sim: one passive per circle)
-  if (/EFFECT PEDAL/.test(t) && tryable('effect pedal')) {
-    const m = t.match(/⛧ EFFECT PEDAL\s*\n?(\d+)\s*\n?(\d+)?/)
-    const cost = m ? +(m[2] || m[1]) : 99
-    if (stash >= cost + 6 && await buy('effect pedal', 'pedal-per-circle, cost=' + cost)) { BOT.pedals++; return }
+  const tileInfo = marker => {
+    const m = t.match(new RegExp(marker + '\\s*\\n(\\d+)\\s*\\n([^\\n]+)\\n?([^\\n]*)'))
+    return m ? { cost: +m[1], cands: [m[2], m[3]] } : null
+  }
+  if (BOT.artifacts < 3 && tryable('artifact')) {
+    const a = tileInfo('⛧ ARTIFACT')
+    if (a && stash >= a.cost + 4) {
+      if (await buyNamed(a.cands, `relic cost=${a.cost}`, 'artifact')) { BOT.artifacts++; return }
+    } else if (a) ev('shop_skip', { tile: 'artifact', why: `stash ${stash} < ${a.cost}+4` })
+  }
+  if (BOT.pedals < 2 && tryable('effect pedal')) {
+    const p = tileInfo('⛧ EFFECT PEDAL')
+    if (p && stash >= p.cost + 6) {
+      if (await buyNamed(p.cands, `pedal cost=${p.cost}`, 'effect pedal')) { BOT.pedals++; return }
+    } else if (p) ev('shop_skip', { tile: 'pedal', why: `stash ${stash} < ${p.cost}+6` })
   }
   // 4. DRUGS (sim: shrooms if stash>=16, acid if stash>=22 — reserve logic)
   if (stash >= 16 && /Shrooms/i.test(t) && !/Shrooms\s*\n?DRY/i.test(t) && tryable('shrooms') && await buy('shrooms', 'panic button reserve')) return
