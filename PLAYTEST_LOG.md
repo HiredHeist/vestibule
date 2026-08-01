@@ -179,3 +179,17 @@ strike; losses are now always real deaths (fixes the healthy-band-loses feel-bad
 Sim: overtime alone pushed winrate 8.56%->17.9%; HP rescale x1.65 brings it to
 11.06% @5K. Live-verified: OVERTIME counter escalates x2->x16, no technicality
 deaths, strike button live past 0.
+
+
+## CARD DUPLICATION KILL (Aug 1)
+
+JV: "played the same card like 10 times in a row, something is messed up with the
+ember system." Root cause was NOT embers and NOT the reshuffle cycle (earlier
+diagnosis retracted): handleDropOnStage's completion filtered the hand by stale
+dragCardUid — null on quick-play — so the filter removed nothing; the played card
+stayed in hand while a copy went to discard. Every quick-play duplicated a card,
+which read as "always refilling" + same-card spam. One-line fix (filter by _playUid).
+JV ruling locked in the same day: hand refills ONLY at strike resolve (StS/Balatro
+rhythm) — the game's cardsToDrawRef machinery already did exactly this; the dup bug
+had been masking it. Live-verified: play 2 → hand 6→4/disc +2/deck flat/embers
+drained; STRIKE → refill to 6/6 drawing exactly 2 from deck.

@@ -1,6 +1,21 @@
-# HANDOFF — July 30, 2026 (bot-playtest era begins)
+# HANDOFF — Aug 1, 2026 (bot-playtest era; hand-rhythm locked)
 
 *Fresh-chat bootstrap. Read this + CLAUDE.md and you're fully armed. No other context needed.*
+
+## ⚡ LATEST (Aug 1) — read this first
+
+- **Card duplication KILLED** (bd8a364): quick-play completion filtered hand by stale
+  `dragCardUid` → played card stayed in hand + copy in discard. Was JV's "same card
+  10x / embers messed up" report and the fake always-refill feel. Filter by `_playUid` now.
+- **JV DESIGN RULING (locked):** hand refills ONLY at strike resolve, drawing exactly
+  the number of cards played (StS/Balatro rhythm). Draw cards are the only mid-strike
+  draws. The game's `cardsToDrawRef` machinery (App.jsx ~7710 set, ~8491 refill) already
+  does this — never "fix" it into always-refill. Live-verified Aug 1: play 2 → hand 6→4,
+  deck flat, embers drained; STRIKE → refill to 6/6, deck -2, ~3-8s after click (post-anim).
+- Ledger note: refill lands seconds AFTER strike — any hand-count check right after a
+  strike click reads 1 cycle stale (this produced a false "refill broken" alarm once).
+- JV runs the bot on HIS Windows PC: `cd /d C:\Users\John\Desktop\vestibule && git pull origin main && e2e\run-bot.bat` (single line, NO annotations — he pastes literally).
+- gh-pages deploy still HELD until JV's explicit go.
 
 ---
 

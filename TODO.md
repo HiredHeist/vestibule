@@ -48,6 +48,16 @@ enrage doubles damage per overtime strike, fights end only in death. Live-verifi
 (x2->x4->x8->x16 escalation). HP curve rescaled x1.65 for the new math: 11.06%
 Lucifer winrate @5K (target ~10%). Save schema clamps sl>=1 (resume = fight restart).
 
+**GAME BUG #4 ✅ FIXED (Aug 1) — CARD DUPLICATION ON QUICK-PLAY:** the generic play
+completion filtered hand by stale `dragCardUid` (always null on quick-play), so the
+played card STAYED in hand while a copy hit the discard. This was JV's "played the
+same card 10 times / embers messed up" report AND the fake always-refill feel. Fixed
+to filter by `_playUid`. Live-verified full Balatro rhythm (JV ruling): play 2 cards
+→ hand 6→4, disc +2, deck untouched, embers drained; STRIKE → hand refills to 6/6
+drawing exactly 2 from deck at strike resolve (~3-8s after click, post-animation).
+NOTE: refill-at-strike machinery (cardsToDrawRef) was already correct — the dup bug
+masked it. Earlier "infinite reshuffle cycle" diagnosis was wrong; this was the cause.
+
 **QoL (from JV's own confusion Jul 31):** when Heat > 1, the boss frame should show
 the multiplier ("HEAT ×1.6") next to the HP bar — silent NG+ inflation reads as an
 HP bug even to the developer. Bot now pins vst_heat=1 for fair baseline tests.
