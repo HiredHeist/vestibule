@@ -6496,7 +6496,10 @@ function App(){
       },400)
       setTimeout(()=>setCardAbsorb(null),900)
       const curHand=[...hand]
-      const remaining=curHand.filter(c=>c.uid!==dragCardUid)
+      // Jul 31: filter by _playUid — filtering by stale dragCardUid removed NOTHING on
+      // quick-play, so the played card stayed in hand while a copy hit the discard
+      // (card duplication + fake always-refill + infinite replays of the same card).
+      const remaining=curHand.filter(c=>c.uid!==_playUid)
       // ── RESONANCE COIL (a9) STALE-LOGIC REMOVED (v0.7.9, May 4 2026) ──
       // Was: if you have a9 and a duplicate of the played card in hand, both
       // discard for +2 embers. JV reported as "played 1 card, both got played."
