@@ -383,13 +383,24 @@ async function recruitTick(s) {
     const at = after.text.toUpperCase()
     if (at.includes("DEVIL'S CONTRACT")) { ev('lucifer_declined', {}); await P.clickText('walk away').catch(() => {}) }
     else if (at.includes('BAND IS FULL')) {
-      // replace the weakest current member (upgrade doctrine)
+      // Replace the weakest current member ONLY if the incoming candidate is
+      // actually stronger. Aug 1: bot cut its grown ATK-13 Ragnar for a fresh
+      // ATK-4 Ragnar — buffed members accumulate perm ATK all run; a base-stat
+      // recruit almost never beats a developed member. Value = ATK*3 + HP,
+      // incoming needs a real margin (+20%) to justify losing the growth.
       const cuts = after.clickables.filter(c => /✂/.test(c.t))
       if (cuts.length) {
-        const scoredCuts = cuts.map(c => ({ ...c, v: (+(c.t.match(/ATK (\d+)/) || [0, 0])[1]) * 3 + (+(c.t.match(/HP (\d+)/) || [0, 0])[1]) }))
+        const val = t => (+(t.match(/ATK\s*(\d+)/i) || [0, 0])[1]) * 3 + (+(t.match(/HP\s*(\d+)/i) || [0, 0])[1])
+        const scoredCuts = cuts.map(c => ({ ...c, v: val(c.t) }))
         const weakest = scoredCuts.sort((a, b) => a.v - b.v)[0]
-        ev('member_replaced', { cut: weakest.t.slice(0, 40) })
-        await P.click(weakest.x, weakest.y)
+        const incomingV = val(bestSafe.t)
+        if (incomingV > weakest.v * 1.2) {
+          ev('member_replaced', { cut: weakest.t.slice(0, 40), cutV: weakest.v, inV: incomingV })
+          await P.click(weakest.x, weakest.y)
+        } else {
+          ev('replace_declined', { weakest: weakest.t.slice(0, 30), cutV: weakest.v, inV: incomingV })
+          await P.clickText('keep current band').catch(() => {})
+        }
       } else await P.clickText('keep current band').catch(() => {})
     }
     for (const b of ['add to band', 'recruit', 'confirm', 'take', 'join', 'welcome']) { try { await P.clickText(b); break } catch (e) {} }
