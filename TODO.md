@@ -28,6 +28,39 @@ Bot run beat the entire game in 13 minutes. Ledger forensics found and fixed:
    phase 2 "died" at 76k, Executive at 85k) — forensic tap now live: autopilot
    pipes game console (incl. [VICTORY] caller stacks) into the ledger as
    game_console events. Next uploaded ledger names the culprit.
+## 🛡 OVERNIGHT RELIABILITY HARDENING (Aug 1) — three real killers found by testing
+JV asked for 100% confidence that an overnight run can't hang. Testing the actual
+failure modes (rather than reading the code) found three things that would each have
+ended a night, and the previous 6-hour ECONNREFUSED session is explained by #2:
+1. **`P.connect` was the only pilot op NOT timeout-wrapped.** A hung CDP connect blocks
+   the loop in an await, and the in-loop watchdog — checked at the top of each
+   iteration — can never run. Now wrapped like every other op.
+2. **The error path `continue`d, skipping the stall check entirely.** That is exactly
+   how a session spun on ECONNREFUSED for hours instead of restarting.
+3. **The bot silently EXITED when the rig died.** Two causes: the watchdog timer was
+   `unref()`'d (so Node felt free to exit while the loop was stuck), and an unhandled
+   promise rejection from a dead CDP target kills Node outright. Both fixed —
+   `unhandledRejection`/`uncaughtException` now log to the ledger and keep grinding.
+
+Added, because screen text is NOT proof of life (after a rig death the menu kept
+animating, which reset the text watchdog forever while zero cards were played):
+- **HARD watchdog** — an out-of-loop `setInterval` on the same 60s budget that no hung
+  await or `continue` can suppress. Escalates: soft run-restart, then `process.exit(3)`.
+- **ACTION watchdog** — fed only by real gameplay events (play/strike/descent/shop/...).
+  3 minutes with no gameplay = restart; twice = hard exit.
+- **`run-bot.bat` is now a supervisor loop** — on exit code 3 it kills orphaned
+  Electron, launches a fresh browser and resumes with the remaining time budget, so a
+  crashed renderer costs ~2 minutes instead of the night.
+- Rig self-heal works on **Windows** now (`taskkill`), not just Linux.
+
+VERIFIED BY TEST, not assertion:
+- Normal 3-min run: 49 plays, 9% fail rate, **0 false watchdog fires**, 0 crashes,
+  0 unknown screens, 0 parse misses.
+- Frozen DOM mid-run: detected at 11s, logged screen type + text + screenshot,
+  wiped the save, restarted a clean run from Circle 1.
+- Electron killed mid-run: process **survived** (previously died in ~3s), self-healed
+  the rig, watchdog fired correctly.
+
 ## 🔍 GAME-vs-SIM AUDIT #2 (Aug 1, pre-overnight) — non-card layers
 The card layer was already gated by e2e/test-card-parity.cjs (51/51). This pass audited
 the STRIKE / DAMAGE / KEYWORD layer, which no test covers, and found the real reason

@@ -5,11 +5,29 @@ const P0 = require('./pilot.cjs')
 const fs = require('fs')
 const path = require('path')
 const LOG = path.join(__dirname, 'session3-events.jsonl')
-const ev = (type, data) => { fs.appendFileSync(LOG, JSON.stringify({ ts: new Date().toISOString(), ev: type, ...data }) + '\n') }
+// Second, independent signal: the last time the bot did something that ADVANCES A
+// RUN. Screen text alone is not proof of life — after a rig death the menu kept
+// animating, which reset the text watchdog forever while zero cards were played.
+const ACTION = { at: Date.now(), fires: 0 }
+const ACTION_STALL_MS = 180000 // 3 min with no play/strike/descent = not playing
+const ACTION_EVENTS = new Set(['play', 'strike', 'descent', 'draft_confirm', 'shop_buy', 'shop_leave', 'recruit_pick', 'run_start', 'event_choice', 'pact_choice', 'forge_pick', 'modal_pick'])
+const ev = (type, data) => { if (ACTION_EVENTS.has(type)) ACTION.at = Date.now(); fs.appendFileSync(LOG, JSON.stringify({ ts: new Date().toISOString(), ev: type, ...data }) + '\n') }
 // every pilot op gets a hard timeout — a hung CDP call must never freeze the loop
 const TMO = 20000
 const wrap = fn => (...a) => Promise.race([fn(...a), new Promise((_, rej) => setTimeout(() => rej(new Error('op timeout: ' + fn.name)), TMO))])
-const P = { connect: P0.connect, state: wrap(P0.state), shot: wrap(P0.shot), click: wrap(P0.click), clickText: wrap(P0.clickText), drag: wrap(P0.drag), key: wrap(P0.key), evaljs: wrap(P0.evaljs), playCard: wrap(P0.playCard) }
+const P = { connect: wrap(P0.connect), state: wrap(P0.state), shot: wrap(P0.shot), click: wrap(P0.click), clickText: wrap(P0.clickText), drag: wrap(P0.drag), key: wrap(P0.key), evaljs: wrap(P0.evaljs), playCard: wrap(P0.playCard) }
+
+// ── CRASH GUARDS (Aug 1 2026) ─────────────────────────────────────────
+// Node exits on an unhandled promise rejection, and the rig produces them
+// whenever CDP dies mid-await (page.waitForTimeout on a closed target,
+// connectOverCDP ECONNREFUSED). Observed: the bot vanished ~3s after Electron
+// was killed, before any watchdog could fire. Log and keep grinding instead.
+process.on('unhandledRejection', (r) => {
+  try { ev('unhandled_rejection', { msg: String((r && r.message) || r).slice(0, 200) }) } catch (e) {}
+})
+process.on('uncaughtException', (e) => {
+  try { ev('uncaught_exception', { msg: String((e && e.message) || e).slice(0, 200) }) } catch (x) {}
+})
 
 const OVERLAY_BTNS = ['got it', 'onward', 'continue', 'collect', 'claim', 'next fight', 'descend', 'take the stage', 'ok']
 
@@ -712,6 +730,56 @@ async function draftTick(s) {
   ev('draft_confused', { msg: '8 attempts, no TAKE THE STAGE', shot: f })
 }
 
+// ══════════════════════════════════════════════════════════════════════
+// HARD WATCHDOG (Aug 1 2026, JV requirement: "if the demo stalls for more than
+// 60 seconds make it restart from circle 1 and log what caused the error").
+//
+// The in-loop watchdog can only run when the loop is running. Two real overnight
+// failure modes bypass it entirely:
+//   1. the loop blocks forever inside an unresolved await (a hung CDP call), and
+//   2. state() throws and the loop `continue`s, skipping the check — which is
+//      exactly how a previous 6-hour session spun on ECONNREFUSED all night.
+// This timer lives outside the loop, so neither can suppress it. It escalates:
+// soft restart of the run first, then hard process exit so the launcher relaunches.
+// ══════════════════════════════════════════════════════════════════════
+const PROGRESS = { at: Date.now(), hash: '', softFires: 0 }
+function markProgress(hash) { if (hash !== PROGRESS.hash) { PROGRESS.hash = hash; PROGRESS.at = Date.now() } }
+function startHardWatchdog(stallMs, onSoftRestart) {
+  const timer = setInterval(() => {
+    // ── ACTION stall: alive but not actually playing ──
+    const actionIdle = Date.now() - ACTION.at
+    if (actionIdle > ACTION_STALL_MS) {
+      ACTION.fires++
+      ev('ACTION_STALL', { minutesWithoutGameplay: (actionIdle / 60000).toFixed(1), attempt: ACTION.fires })
+      ACTION.at = Date.now()
+      if (ACTION.fires >= 2) {
+        ev('HARD_EXIT', { msg: 'no gameplay for two ACTION_STALL windows — exiting for launcher relaunch' })
+        process.exit(3)
+      }
+      try { onSoftRestart() } catch (e) {}
+      return
+    }
+    const idle = Date.now() - PROGRESS.at
+    if (idle < stallMs) return
+    PROGRESS.softFires++
+    ev('HARD_WATCHDOG', { idleSeconds: Math.round(idle / 1000), attempt: PROGRESS.softFires })
+    PROGRESS.at = Date.now()
+    if (PROGRESS.softFires >= 3) {
+      // Three stalls without progress = the rig itself is wedged (dead Electron,
+      // dead CDP). Exit non-zero; run-bot.bat relaunches us with a fresh browser.
+      ev('HARD_EXIT', { msg: 'rig wedged after 3 hard-watchdog fires — exiting for launcher relaunch' })
+      try { fs.appendFileSync(LOG, JSON.stringify({ ts: new Date().toISOString(), ev: 'session', msg: 'hard exit' }) + '\n') } catch (e) {}
+      process.exit(3)
+    }
+    try { onSoftRestart() } catch (e) {}
+  }, 5000)
+  // Deliberately NOT unref()'d: if the main loop is stuck awaiting a promise that
+  // never resolves, an unref'd timer lets Node decide it has nothing to do and
+  // exit silently — which is exactly what killed a test run. This timer is the
+  // last thing keeping the process alive, and that is the point.
+  return timer
+}
+
 async function main() {
   const maxMs = (+(process.argv[2] || 14)) * 60000
   const t0 = Date.now()
@@ -744,6 +812,13 @@ async function main() {
     pg.on('pageerror', e2 => ev('game_pageerror', { msg: String(e2 && e2.message || e2).slice(0, 400) }))
   } catch (e) {}
   let tick = 0, opTimeouts = 0
+  // Fires on the SAME 60s budget as the in-loop check, but from outside the loop
+  // so a hung await or an error-path `continue` cannot suppress it.
+  startHardWatchdog(STALL_MS, () => {
+    preferNewRun = true
+    P0.reset().catch(() => {})
+    P.evaljs("localStorage.removeItem('vst_save_v4'); setTimeout(()=>location.reload(),50); 'x'").catch(() => {})
+  })
   const origEv = ev
   // rig self-heal: 3 consecutive op timeouts = degraded CDP session → restart Electron,
   // reconnect. Game state survives in localStorage (vst_save mid-fight snapshot).
@@ -751,11 +826,15 @@ async function main() {
     opTimeouts++
     if (opTimeouts >= 3) {
       origEv('rig_heal', { msg: 'restarting electron after ' + opTimeouts + ' op timeouts' })
-      if (process.platform === 'linux') {
-        try {
+      try {
+        if (process.platform === 'win32') {
+          // Aug 1: self-heal was Linux-only, so on JV's Windows box a dead Electron
+          // could never be revived and the run was lost for the night.
+          require('child_process').execSync('taskkill /F /IM electron.exe /T', { timeout: 30000, stdio: 'ignore' })
+        } else {
           require('child_process').execSync('pkill -f "electron ./e2e/driver" 2>/dev/null; pkill Xvfb 2>/dev/null; sleep 2; bash ' + path.join(__dirname, 'up.sh'), { timeout: 60000 })
-        } catch (e) { origEv('rig_heal_err', { msg: e.message.slice(0, 100) }) }
-      }
+        }
+      } catch (e) { origEv('rig_heal_err', { msg: String(e.message).slice(0, 100) }) }
       await P0.reset(); opTimeouts = 0
       await new Promise(r => setTimeout(r, 4000))
     }
@@ -763,7 +842,18 @@ async function main() {
   while (Date.now() - t0 < maxMs) {
     tick++
     if (tick % 10 === 0) ev('heartbeat', { tick })
-    let s; try { s = await P.state(); opTimeouts = 0 } catch (e) { ev('error', { msg: e.message }); if (/op timeout/.test(e.message)) await global.__opTimeout(); await new Promise(r => setTimeout(r, 3000)); continue }
+    let s
+    try { s = await P.state(); opTimeouts = 0 }
+    catch (e) {
+      // Aug 1: this used to `continue`, skipping the stall check entirely — the
+      // exact path that let a session spin on ECONNREFUSED for hours. Now the
+      // error itself is progress-less by definition, so we fall through to the
+      // watchdog by leaving PROGRESS.at untouched, and try to revive the rig.
+      ev('error', { msg: e.message })
+      if (/op timeout|ECONNREFUSED|Target closed|browser has been closed/i.test(e.message)) await global.__opTimeout()
+      await new Promise(r => setTimeout(r, 3000))
+      continue
+    }
     const hash = s.text.slice(0, 500)
     stuck = (hash === lastHash) ? stuck + 1 : 0; lastHash = hash
     const type = await screenType(s)
@@ -774,6 +864,7 @@ async function main() {
     // If the SCREEN TEXT has not changed in 60s: log exactly what we were
     // looking at, wipe the save, and start a clean run from Circle 1.
     if (hash !== lastProgressHash) { lastProgressHash = hash; lastProgressAt = Date.now() }
+    markProgress(hash) // feeds the out-of-loop HARD watchdog
     if (Date.now() - lastProgressAt > STALL_MS) {
       const shot = await P.shot('stall-' + Date.now()).catch(() => null)
       ev('STALL_RESTART', {
