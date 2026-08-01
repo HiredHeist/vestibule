@@ -28,6 +28,60 @@ Bot run beat the entire game in 13 minutes. Ledger forensics found and fixed:
    phase 2 "died" at 76k, Executive at 85k) — forensic tap now live: autopilot
    pipes game console (incl. [VICTORY] caller stacks) into the ledger as
    game_console events. Next uploaded ledger names the culprit.
+## 🔍 GAME-vs-SIM AUDIT #2 (Aug 1, pre-overnight) — non-card layers
+The card layer was already gated by e2e/test-card-parity.cjs (51/51). This pass audited
+the STRIKE / DAMAGE / KEYWORD layer, which no test covers, and found the real reason
+the sim read ~92% while the live bot died in Circle 1: **one bug inflating the sim and
+one deflating live, ~10x apart.**
+
+FIXED — LIVE (these corrupted the real game, i.e. the data the bot collects):
+1. **Every card/chain-count relic multiplier was DEAD.** `cardsPlayedRef` and
+   `combosFiredRef` are emptied at App.jsx:7826, but the artifact-multiplier block
+   reads them at :8038 from inside a setTimeout — so both were ALWAYS 0. Silently
+   dead: Vintage Guitar, Haunted Radio, Cracked Pickup, Tape Hiss, Set List Art,
+   Resonance Coil, Pentagram Shrine, Black Mass Bell x2.5, **Burning Stage x3.0,
+   Solo Sermon x6.0, Doom Crown x8.0**. Relics were a dead system. Now read from the
+   pre-reset snapshot. (Same bug killed Volume Knob + Compressor Pedal — also fixed.)
+2. **Overtime enrage off-by-one.** `_ot=Math.max(0,-strikesLeft)` used the PRE-decrement
+   closure value, so the first overtime strike dealt x1 instead of x2 — while the strike
+   counter already displayed the x2. UI and damage disagreed by a full strike.
+
+FIXED — SIM (so its numbers mean something):
+3. **The 10x bug: "this Strike" buffs never expired.** The sim zeroed its own
+   tempAtkBonus but never restored `m.atk` from `_origAtk`, so Amp (x2), Overdrive (x2),
+   Possessed Performance (x3) and Dial to Eleven were **permanent and compounded for the
+   whole run**. Alone, this moved the reported winrate 90.8% -> 8.0%.
+4. tempAtkBonus was double-counted on top of the engine's `.atk` delta.
+5. Mentor links were multiplicative on the whole band; live is additive on the two
+   linked members only (4x10 band, 1 demonic link: sim 356 vs live 252).
+6. Band synergy (x1.10/1.20/1.35 for 3/4/5 buffed members) was missing entirely.
+7. Drummer rule: live rolls once and multiplies the WHOLE band by 1.0/1.5/2.0 while
+   drummers deal no damage; the sim applied the roll to the drummer's own 0-1 ATK.
+
+CURRENT SIM READING (2K, Bronze/Standard): **8.10% Lucifer winrate, Circle-1 deaths
+11.0%, Circle-9 deaths 50.5%** — deaths pushed late, Lucifer is the wall. Boss HP data
+files unchanged; this is the game as it actually is.
+
+⬜ STILL OPEN (documented, not blocking an overnight run):
+- Boss loot multiplier VALUES differ (sim 1.15/1.3/1.5/1.3/2.0 vs relics.js
+  1.3/2.0/2.5/1.5/3.0); `love_letter` and `golden_tooth` missing from the sim; the
+  sim's `_strikesLeft` never decrements so `limbos_echo` sees a constant 4.
+- bossDebuff off-by-one (sim one strike stronger) and no debuff vs Lucifer P2.
+- Sim-only boss damage terms: `corruption>=100 -> +3`, `targetHighestHp2/3 -> x1.2/x1.5`,
+  bloodlust as two full hits instead of one doubled hit.
+- Sim auto-optimises stage adjacency every fight (`improveOrdering`); live never does.
+- Not modelled in the sim: Echoplex/Looper/Witch's Sabbath retriggers, Octave Pedal,
+  trip start-multipliers (REALITY GLITCH x2.0 / OVERMIND x3.0).
+- LIVE: stale `strikesLeft` closure also makes CA4 Wailing Guitar and `sigilOpener` fire
+  on strike 2 instead of strike 1.
+- LIVE: `strikeMultRef` is synced by a useEffect, so a play-then-strike inside one React
+  batch can lose the card+chain multiplier.
+- A FOURTH card implementation still exists: the Echoplex/Looper retrigger ladder
+  (App.jsx ~7460-7700). Routing it through cardEngine is the remaining drift surface.
+- Shop-only cards (overdrive, remaster, sabbathsigil, doubledown, goingbroke,
+  hellfirerift, soulsacrifice, voidpact) are untested by the parity gate but CAN be
+  acquired mid-run.
+
 ## 🎯 SINGLE SOURCE OF TRUTH — card logic unified (Aug 1)
 JV: "the sim should be exactly the same as my demo plays, right?" — it now is, and
 it's *proven*, not asserted.

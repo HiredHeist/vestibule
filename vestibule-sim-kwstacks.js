@@ -660,7 +660,7 @@ function applyCardSim(card,gs,enemy){
     dst.tooStoned=src.tooStoned;dst.stoneShield=src.stoneShield
     dst.tempBuff=src.tempBuff;dst._origAtk=src._origAtk
     dst.permAtkBonus=0 // engine keeps ALL damage in .atk (verified: battlecry 5->6, perm stays 0)
-    dst.tempAtkBonus=src.tempAtkBonus||0
+    dst.tempAtkBonus=0 // engine folds temp deltas into .atk; keeping this double-counts
     dst._buffCount=src.buffCount;dst._hrUsed=src._hrUsed
     dst.ampedThisStrike=false // engine already doubled .atk
     dst.encoreThisStrike=src.encoreReady
@@ -761,7 +761,14 @@ function simFight(gs,phaseHp,luciferPhase){
 
   const links=scanMentorLinks(gs.stage);gs.mentorLinks=links;
   improveOrdering(gs)
-  const dtMult={};gs.stage.filter(m=>m.keyword==='DOUBLE TIME'&&!m.tooStoned).forEach(m=>{const roll=rand(6)+1;dtMult[m.uid]=roll<=2?1.0:roll<=4?1.5:2.0});
+  // Aug 1 2026: live (App.jsx ~7854) rolls ONCE if ANY alive member has role
+  // 'Drummer' and multiplies the WHOLE band's damage by 1.0/1.5/2.0 — and drummers
+  // themselves deal no damage. The sim keyed off the DOUBLE TIME keyword and applied
+  // the roll to that member's own 0-1 ATK, i.e. almost nothing.
+  const _hasDrummer=gs.stage.some(m=>m&&!m.tooStoned&&m.role==='Drummer')
+  const _dblRoll=_hasDrummer?rand(6)+1:0
+  const _bandDbl=!_hasDrummer?1:(_dblRoll<=2?1.0:_dblRoll<=4?1.5:2.0)
+  const dtMult={}
   gs.deck=shuffle([...gs.deck,...gs.discard]);gs.discard=[];gs.hand=[];
 
   // TRIP logic (same as v12)
@@ -789,7 +796,15 @@ function simFight(gs,phaseHp,luciferPhase){
   // (either side). Safety cap +8 OT strikes.
   for(let strike=0;strike<maxStrikes+8;strike++){
     const _otLevel=Math.max(0,strike-maxStrikes+1)
-    gs.stage.forEach(m=>{m.tempAtkBonus=0;m.ampedThisStrike=0;m.encoreThisStrike=false});
+    gs.stage.forEach(m=>{
+      // Aug 1 2026 — THE 10x BUG. Expire "this Strike" ATK buffs exactly like live's
+      // handleStrikeBody does: restore atk from _origAtk. The sim only ever zeroed
+      // its own tempAtkBonus and NEVER restored m.atk, so Amp (x2), Overdrive (x2),
+      // Possessed Performance (x3) and Dial to Eleven were permanent and compounded
+      // geometrically for the whole run. This single line is the difference between
+      // a reported ~91% winrate and the truth.
+      if(m.tempBuff&&m._origAtk!==undefined){m.atk=m._origAtk;m._origAtk=undefined;m.tempBuff=false}
+      m.tempAtkBonus=0;m.ampedThisStrike=0;m.encoreThisStrike=false});
     gs._directDmg=0;gs._overdriveActive=false;gs._infencoreActive=false;gs._possessedActive=false;gs._nextCardFree=false;
     gs._stageDiveUsed=false;gs._lastRiffPlayed=null;gs._ampFbDiscount=0;gs.stage.forEach(m=>{m._skipAttack=false});
     // ── DECK IDENTITY: hand size override (Engineer 7, Shredder 6) ──
@@ -930,14 +945,28 @@ function simFight(gs,phaseHp,luciferPhase){
       atk+=_auraAtk[m.uid]||0
       if(m.ampedThisStrike)atk*=Math.pow(2,m.ampedThisStrike);if(gs._possessedActive)atk*=3;if(gs._overdriveActive)atk*=2;
       if(dtMult[m.uid]!==undefined)atk=Math.floor(atk*dtMult[m.uid]);
+      if(m.role==='Drummer')continue // live: drummers buff, they don't swing
       strikeDmg+=Math.max(0,atk);
       if(m.encoreThisStrike||m._kwDoubleStrike)strikeDmg+=Math.max(0,atk);
     }
     if(gs._infencoreActive)strikeDmg*=2;
     folkAuraHeal(gs.stage)
+    let _mentorAdd=0
     let mentorMult=1.0;for(const link of links){const mn=gs.stage[link.mentorIdx],pr=gs.stage[link.protegeIdx];
-      if(mn&&!mn.tooStoned&&pr&&!pr.tooStoned){mentorMult*=link.mult;TRACK.linkStrikesFired++}}
-    const preLinkDmg=strikeDmg;strikeDmg=Math.floor(strikeDmg*mentorMult);TRACK.linkBonusDmg+=(strikeDmg-preLinkDmg);
+      if(mn&&!mn.tooStoned&&pr&&!pr.tooStoned){
+        // Aug 1 2026: live (App.jsx ~7907) is ADDITIVE and applies only to the two
+        // linked members: _mlb += round((mentorAtk+protegeAtk)*(mult-1)). The sim
+        // multiplied the ENTIRE band's damage per link — a 4x10 band with one demonic
+        // link measured 356 vs live's 252, and 712 vs 326 with two links.
+        _mentorAdd+=Math.round((mn.atk+pr.atk)*(link.mult-1));TRACK.linkStrikesFired++}}
+    if(_bandDbl>1)strikeDmg=Math.round(strikeDmg*_bandDbl)
+    strikeDmg+=_mentorAdd;TRACK.linkBonusDmg+=_mentorAdd;
+    // Aug 1 2026: BAND SYNERGY was missing from the sim entirely. Live (App.jsx
+    // ~7843) multiplies the whole strike by 1.35/1.20/1.10 when 5/4/3 members have
+    // buffCount>0 this fight. The sim already tracked _buffCount and never used it.
+    {const _bf=gs.stage.filter(m=>!m.tooStoned&&(m._buffCount||0)>0).length
+     const _bb=_bf>=5?1.35:_bf>=4?1.20:_bf>=3?1.10:1.0
+     if(_bb>1)strikeDmg=Math.round(strikeDmg*_bb)}
     strikeDmg+=gs._directDmg||0;
     if(strike===0&&hasWailing)strikeDmg*=2;
     if(strike===0&&p10)strikeDmg+=10;

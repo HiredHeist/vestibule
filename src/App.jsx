@@ -7783,6 +7783,9 @@ function App(){
     // adds 1 hit; e.g. RIFF→RIFF→CORRUPT yields 1 hit).
     const _kwStacks=getKeywordStacks(stage)
     const _cardIdsThisStrike=cardsPlayedRef.current.slice() // snapshot before reset
+    // Aug 1 2026: snapshot the fired chains too — the artifact-multiplier block far
+    // below runs inside a setTimeout and reads these refs AFTER they were emptied.
+    const _combosThisStrike=(combosFiredRef.current||[]).slice()
     const _riffsThisStrike=_cardIdsThisStrike.filter(id=>CARD_TYPE_BY_ID[id]==='RIFF').length
     let _shredderHits=0
     for(let _si=1;_si<_cardIdsThisStrike.length;_si++){
@@ -8035,14 +8038,24 @@ function App(){
       if(corruptionMult>1)_cascadeMults.push({mult:corruptionMult,label:'Corruption '+Math.floor(corruption)+'%',emoji:'🌀',color:'#cc44ff'})
       // ARTIFACT MULTIPLIER TRIGGERS — Balatro-style Jokers
       let artifactMult=1.0
-      const cardsPlayedCount=cardsPlayedRef.current.length||0
-      const chainsFired=(combosFiredRef.current||[]).length
+      // ── Aug 1 2026 CRITICAL: EVERY CARD/CHAIN-COUNT RELIC WAS DEAD ────────
+      // These used to read cardsPlayedRef / combosFiredRef, but both are emptied
+      // synchronously earlier in handleStrikeBody while this block runs inside a
+      // setTimeout — so both were ALWAYS 0 and every count-based multiplier
+      // silently never fired: Vintage Guitar (cards3), Burning Stage x3.0
+      // (cards5), Solo Sermon x6.0 (cards2exact), Doom Crown x8.0 (allSameType),
+      // Black Mass Bell x2.5 (chains3), Haunted Radio (perChain), Pentagram
+      // Shrine (perCorruptCard), Cracked Pickup (playedRiff), Tape Hiss (noRiff),
+      // Set List Art (firstCardEmber), Resonance Coil (perDupePlayed).
+      // Relics were a dead system in the live game. Use the pre-reset snapshots.
+      const cardsPlayedCount=_cardIdsThisStrike.length||0
+      const chainsFired=_combosThisStrike.length
       const stonedCount=stage.filter(m=>m&&m.tooStoned).length
       const handDupes=hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
       // ── EXTENDED CONTEXT for new multTrigger types ──
       // _cardsThisStrike list filtered to count types/CORRUPTs/RIFFs played this strike.
       // Echoplex retriggers prefix with '_echo:' on the card ID — excluded from purity checks.
-      const cardIdsThisStrike=cardsPlayedRef.current||[]
+      const cardIdsThisStrike=_cardIdsThisStrike||[]
       const cardsThisStrike=cardIdsThisStrike.map(id=>{
         const isEcho=typeof id==='string'&&id.startsWith('_echo:')
         const realId=isEcho?id.slice(6):id
@@ -8252,7 +8265,9 @@ function App(){
       updStat('totalDamage',finalDmg);updStat('highestStrike',finalDmg,true);if(finalDmg>=500){playSfx('big_hit');triggerShake(8,250)}
 
       // ── VOLUME KNOB / COMPRESSOR: 4+ cards this strike → next-strike bonuses ──
-      const _cardsThisCount=(cardsPlayedRef.current||[]).filter(id=>!String(id).startsWith('_echo:')).length
+      // Same emptied-ref bug as the artifact block above: Volume Knob and
+      // Compressor Pedal ("4+ cards this strike") could never trigger.
+      const _cardsThisCount=(_cardIdsThisStrike||[]).filter(id=>!String(id).startsWith('_echo:')).length
       if(_cardsThisCount>=4){
         if(activePassives.some(p=>p.id==='volumeknob')){
           setPendingDraw(p=>p+1)
@@ -8456,7 +8471,11 @@ function App(){
         else{scaledBaseDmg=stakeBaseDmg}
         // ── OVERTIME ENRAGE (Jul 31 2026, JV) ── past the strike limit the boss's
         // damage doubles per overtime strike: x2, x4, x8... Fight ends only in death.
-        {const _ot=Math.max(0,-strikesLeft);if(_ot>0){scaledBaseDmg=scaledBaseDmg*Math.pow(2,_ot);addLog('🔥 OVERTIME x'+Math.pow(2,_ot)+' — the crowd turns on you!')}}
+        {/* Aug 1 2026 OFF-BY-ONE: strikesLeft here is the PRE-decrement closure value (the
+           functional setStrikesLeft(p=>p-1) above does not update it), so the first
+           overtime strike computed _ot=0 and dealt NO enrage at all. The strike-counter
+           display already used 1-strikesLeft, so UI and damage disagreed by one strike. */}
+        {const _ot=Math.max(0,1-strikesLeft);if(_ot>0){scaledBaseDmg=scaledBaseDmg*Math.pow(2,_ot);addLog('🔥 OVERTIME x'+Math.pow(2,_ot)+' — the crowd turns on you!')}}
         // v0.7.1: Possession bonus removed — boss damage no longer scales with player corruption.
         // The cost lives in Hangover (next fight, next shop), not in this fight.
         // v0.7.2: bossSkipStrikes — DMT BREAKTHROUGH / K-HOLE trips can fully skip
