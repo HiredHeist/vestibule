@@ -39,6 +39,18 @@ async function screenType(s) {
   // discovered" for 5.4 HOURS (9,560 unknown_screen ticks). Escape out of any
   // meta screen that isn't a run.
   if (/COLLECTION|DISCOVERED|TROPHY|TROPHIES|ACHIEVEMENTS|HALL OF/.test(t) && !btn('strike')) return 'meta'
+  // ── Aug 1 2026: every screen the Aug-1 audit found landing on 'unknown'.
+  // An unclassified screen means the bot stares at it until the watchdog fires;
+  // one of them (post-credits Collection) ate 5.4 hours of a 6-hour session.
+  if (t.includes('PAUSED') || btn('abandon run')) return 'pause'           // overlay ABOVE combat: STRIKE is visible behind it, used to classify as combat
+  if (/KEEP THIS ONE|DEMONIC CONFLICT/.test(t)) return 'demonicconflict'   // hard block: no OVERLAY_BTN matches, infinite stall
+  if (/ARTIFACT SLOTS FULL|PEDAL SLOTS FULL|SLOTS FULL/.test(t)) return 'slotswap'
+  if (/THE REMASTER/.test(t)) return 'modal'
+  if (/NOW DISCARD \d+ TO CONTINUE|SETLIST/.test(t) && btn('confirm')) return 'modal'
+  if (/PAWN SHOP/.test(t)) return 'pawn'
+  if (/PRESS ANY KEY|TONIGHT ONLY/.test(t)) return 'boot'
+  if (/⛧ ENTERING ⛧|ENTERING/.test(t) && !btn('strike')) return 'splash'   // circleSplash: no clickables, auto-clears in 3s
+  if (/THE EXECUTIVE FALLS|THE SECOND ALBUM/.test(t)) return 'splash'
   return 'unknown'
 }
 
@@ -69,121 +81,299 @@ async function members() {
   })()`)
 }
 
+
+// ══════════════════════════════════════════════════════════════════════
+// PERCEPTION LAYER (Aug 1 2026 rebuild) — DOM reads, not innerText regex.
+// The Aug-1 audit found the bot was playing blind: corruption parsed as 0
+// forever (anchored ^ regex that could never match), maxHp faked as hp (so
+// "is anyone hurt?" was structurally false), Too Stoned members counted as
+// alive, hand deduped by name (duplicate copies invisible), and the whole
+// game state frozen at the moment the strike began so every ember read was
+// stale after the first card. Every one of those is a silent wrong VALUE,
+// which is worse than a crash. This reads the real numbers off the DOM and
+// LOGS a parse_miss instead of falling back to a plausible lie.
+// ══════════════════════════════════════════════════════════════════════
+async function perceive() {
+  const raw = await P.evaljs(`(() => {
+    const num = t => { const m = String(t).replace(/,/g,'').match(/-?\\d+/); return m ? +m[0] : null }
+    const vis = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 }
+    const out = { miss: [] }
+
+    // ── corruption: the stamp span carries key 'c-<n>' and reads "<n>%" ──
+    let corr = null
+    for (const el of document.querySelectorAll('span,div')) {
+      const t = (el.textContent || '').trim()
+      if (/^\\d{1,3}%$/.test(t) && el.children.length === 0 && vis(el)) { corr = num(t); break }
+    }
+    // Only a real defect if we're IN COMBAT (the stamp doesn't exist elsewhere).
+    // Combat is identified by the boss HP readout below, so defer the miss flag.
+    out._corrMissing = corr === null
+    out.corruption = corr === null ? 0 : corr
+
+    // ── boss HP ──
+    const bm = document.body.innerText.match(/([\\d,]+)\\s*\\/\\s*([\\d,]+)\\s*HP/)
+    out.bossHp = bm ? num(bm[1]) : null
+    out.bossMaxHp = bm ? num(bm[2]) : null
+    if (!bm) out.miss.push('bossHp')
+    else if (out._corrMissing) out.miss.push('corruption') // in combat and unreadable = real
+
+    // ── labelled HUD pills. Verified against the LIVE DOM: the label element
+    // holds only the label, and the value sits beside it in the shared parent
+    // ("Embers🔥🔥🔥🔥🔥🔥6/6", "Fight2/3", "Stash40"). My first pass walked
+    // previousElementSibling and read 0 for everything — caught by
+    // e2e/test-perception.cjs before it could poison a single real run.
+    const readPill = label => {
+      for (const el of document.querySelectorAll('div,span')) {
+        if ((el.textContent || '').trim().toUpperCase() !== label) continue
+        const par = el.parentElement; if (!par) continue
+        const pt = (par.textContent || '').replace(/\\s+/g, '')
+        const frac = pt.match(/(\\d+)\\s*\\/\\s*(\\d+)/)
+        if (frac) return { cur: +frac[1], max: +frac[2] }
+        const bare = pt.replace(new RegExp(label, 'i'), '').match(/(\\d+)/)
+        if (bare) return { cur: +bare[1], max: null }
+      }
+      return null
+    }
+    const emb = readPill('EMBERS'); if (!emb) out.miss.push('embers')
+    out.embers = emb ? emb.cur : 0; out.maxEmbers = emb ? emb.max : null
+    // discards-LEFT lives on the "↓ DISCARD" button; readPill('DISCARD') returns
+    // the discard PILE count instead — two different numbers behind one word.
+    out.discardsLeft = (() => {
+      for (const el of document.querySelectorAll('div,span,button')) {
+        const t = (el.textContent || '').replace(/\\s+/g, ' ').trim()
+        if (!/^↓?\\s*DISCARD/i.test(t) || t.length > 24) continue
+        const par = el.parentElement
+        const pt = ((par ? par.textContent : t) || '').replace(/\\s+/g, '')
+        const m = pt.match(/(\\d+)\\s*\\/\\s*(\\d+)/)
+        if (m) return +m[1]
+      }
+      return 0
+    })()
+    const stash = readPill('STASH'); out.stash = stash ? stash.cur : 0
+    const fight = readPill('FIGHT'); out.fightInCircle = fight ? fight.cur : null
+
+    // ── strikes: "⛧ STRIKE ⛧" button shows "n/m"; OVERTIME has no digits ──
+    const bodyTxt = document.body.innerText
+    out.overtime = /OVERTIME/i.test(bodyTxt)
+    const sm = bodyTxt.match(/STRIKE[^\\d]{0,12}(\\d+)\\s*\\/\\s*(\\d+)/)
+    out.strikesLeft = out.overtime ? 0 : (sm ? +sm[1] : null)
+    if (out.strikesLeft === null) out.miss.push('strikes')
+    const mm = bodyTxt.match(/MULTIPLIER\\s*\\n?×([\\d.]+)/)
+    out.strikeMult = mm ? parseFloat(mm[1]) : 1
+    out.discardLen = (() => { const d = bodyTxt.match(/(\\d+)\\s*\\n?DISCARD/); return d ? +d[1] : 0 })()
+
+    // ── circle number → true fightIndex (sabbathsigil/hexdecay gate on it) ──
+    const cm = bodyTxt.match(/CIRCLE\\s+([IVX]+)/)
+    const ROM = { I:1, II:2, III:3, IV:4, V:5, VI:6, VII:7, VIII:8, IX:9 }
+    const circle = cm ? (ROM[cm[1]] || 1) : 1
+    out.circle = circle
+    out.fightIndex = (circle - 1) * 3 + ((out.fightInCircle || 1) - 1)
+
+    // ── members: real cards only. maxHp recovered from the HP-bar width. ──
+    out.members = []
+    const seenBox = new Set()
+    for (const d of document.querySelectorAll('div')) {
+      const t = (d.textContent || '')
+      if (!/ATK/.test(t) || !/HP/.test(t)) continue
+      if (t.length > 420) continue
+      const r = d.getBoundingClientRect()
+      if (!(r.height > innerHeight * 0.11 && r.width < innerWidth * 0.24 && r.y > innerHeight * 0.18 && r.y < innerHeight * 0.70)) continue
+      if (/^\\s*EMPTY\\s*$/i.test(t)) continue
+      const flat = t.replace(/\\s+/g, ' ')
+      const nm = flat.match(/([A-Z][a-z]+)\\s*(?:Rhythm|Lead|Bass|Synth|Drummer|Vocalist|Dark|Keyboard)/)
+              || flat.match(/^\\W*([A-Z][a-z]+)/)
+      const atk = flat.match(/ATK\\s*(\\d+)(?:\\s*\\+\\s*(\\d+))?/)
+      const hp  = flat.match(/HP\\s*(\\d+)/)
+      if (!nm || !atk) continue
+      // HP bar: inline width percentage === hp/maxHp
+      let maxHp = hp ? +hp[1] : 0
+      for (const bar of d.querySelectorAll('div')) {
+        const w = bar.style && bar.style.width
+        if (w && /%$/.test(w) && bar.getBoundingClientRect().height <= 6) {
+          const pct = parseFloat(w)
+          if (pct > 0 && hp) maxHp = Math.max(+hp[1], Math.round(+hp[1] / (pct / 100)))
+          break
+        }
+      }
+      const role = (flat.match(/(Rhythm Guitarist|Lead Guitarist|Bass Player|Synth Player|Drummer|Vocalist|Dark Minstrel|Keyboardist)/) || [])[1] || ''
+      const kw = (flat.match(/(FRENZIED|DOUBLE TIME|ANCHOR|CORRUPT|DEBUFF|FOLK MAGIC|SHREDDER|HEXED|FALLEN)/) || [])[1] || ''
+      // nested divs re-match the same member; keep the LARGEST box per name
+      const prevIdx = out.members.findIndex(x => x.name === nm[1])
+      if (prevIdx !== -1) { if (out.members[prevIdx]._area >= r.width * r.height) continue; out.members.splice(prevIdx, 1) }
+      out.members.push({
+        _area: r.width * r.height,
+        name: nm[1], atk: (+atk[1]) + (+(atk[2] || 0)), hp: hp ? +hp[1] : 0, maxHp,
+        role, keyword: kw,
+        tooStoned: /TOO STONED/i.test(flat),
+        tier: /DEMONIC/i.test(flat) ? 'demonic' : /MYTHIC/i.test(flat) ? 'mythic' : /FOIL/i.test(flat) ? 'foil' : '',
+        x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2)
+      })
+    }
+
+    // ── hand: NO name dedupe (duplicate copies are real, separately playable
+    // cards — the old dedupe-by-name hid every second copy from the brain).
+    // Nested divs re-match the same card, and because the fan is rotated their
+    // centres differ, so positional bucketing does NOT collapse them. Filter by
+    // ANCESTRY instead: keep only nodes with no matched ancestor.
+    out.hand = []
+    const handEls = []
+    for (const d of document.querySelectorAll('div')) {
+      const t = (d.textContent || '')
+      if (!/RIFF|UTILITY|EMBER|CORRUPT/.test(t) || t.length >= 200) continue
+      const r = d.getBoundingClientRect()
+      if (!(r.y > innerHeight * 0.62 && r.height > innerHeight * 0.13)) continue
+      handEls.push(d)
+    }
+    const outermost = handEls.filter(d => !handEls.some(o => o !== d && o.contains(d)))
+    for (const d of outermost) {
+      const t = (d.textContent || '')
+      const r = d.getBoundingClientRect()
+      const flat = t.replace(/\\s+/g, ' ')
+      const m = flat.match(/^(\\d+)(.*?)(RIFF|UTILITY|EMBER|CORRUPT)/)
+      if (!m) continue
+      const corrGate = flat.match(/Need\\s*(\\d+)%\\s*Corr/i)
+      out.hand.push({
+        _area: r.width * r.height,
+        cost: +m[1],
+        name: m[2].replace(/[^A-Za-z' ]/g, ' ').replace(/Need \\d+% Corr/, '').trim(),
+        type: m[3], corrReq: corrGate ? +corrGate[1] : 0,
+        x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2),
+        desc: flat.slice(0, 130)
+      })
+    }
+    out.hand.sort((a, b) => a.x - b.x).forEach(c => { delete c._area })
+    out.members.forEach(m => { delete m._area })
+    return out
+  })()`)
+  if (raw && raw.miss && raw.miss.length) ev('parse_miss', { fields: raw.miss })
+  return raw
+}
+
 const BRAIN = require('./brain.cjs')
 let strikeNumThisFight = 0, lastBossHp = null
 let zeroStrikeTicks = 0, preferNewRun = false
 
 async function combatTick(s) {
-  const strikes = (s.text.match(/STRIKE ⛧\s*(\d+)\s*\/\s*(\d+)/) || [])[1]
-  const bossHp = (s.text.match(/(\d+)\s*\/\s*(\d+)\s*HP/) || [])
-  if (lastBossHp !== null && bossHp[2] && +bossHp[1] === +bossHp[2]) { strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set() } // full-HP boss = new fight
-  lastBossHp = bossHp[1] ? +bossHp[1] : null
-  const h = await hand(); let mem = await members()
-  const real = mem.filter(m => BRAIN.MUSICIANS.some(x => x.name.toLowerCase() === m.name.toLowerCase()))
-  if (real.length) mem = real // drop phantom parses (boss/artifact text like 'Devil')
-  if (!mem.length) {
+  // ── EXPERT COMBAT (Aug 1 2026 rebuild) ──────────────────────────────
+  // Sequence a 1000-hour player uses: read the board -> dig for a live hand
+  // BEFORE spending embers -> play greedily by the sim's validated policy,
+  // re-reading state after EVERY card -> hold a clutch trip -> strike.
+  let g = await perceive()
+  if (g.bossHp !== null && g.bossMaxHp && g.bossHp === g.bossMaxHp) {
+    strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set(); hrUsedThisFight.clear()
+  }
+  lastBossHp = g.bossHp
+
+  const aliveOf = gg => gg.members.filter(m => !m.tooStoned)
+  if (!aliveOf(g).length) {
     ev('warn', { msg: 'no members parsed — using fixed slot fallback' })
     const vp = await P.evaljs('({w:innerWidth,h:innerHeight})')
-    mem = [{ name: 'slot1', atk: 1, hp: 5, x: Math.round(vp.w * 0.38), y: Math.round(vp.h * 0.44) }, { name: 'slot2', atk: 0, hp: 5, x: Math.round(vp.w * 0.53), y: Math.round(vp.h * 0.44) }]
+    g.members = [{ name: 'slot1', atk: 1, hp: 5, maxHp: 5, tooStoned: false, keyword: '', role: '', tier: '', x: Math.round(vp.w * 0.38), y: Math.round(vp.h * 0.44) },
+                 { name: 'slot2', atk: 0, hp: 5, maxHp: 5, tooStoned: false, keyword: '', role: '', tier: '', x: Math.round(vp.w * 0.53), y: Math.round(vp.h * 0.44) }]
   }
-  // ── EXPERT BRAIN (ported sim scoreCard policy) ──
-  // gs-lite from the live screen; sim stop-rule: play best card while score > 3
-  const gsLite = () => ({
-    alive: mem.map(m => ({ ...m, maxHp: m.hp })), // maxHp approximation (parse limit)
-    corruption: +((s.text.match(/^(\d+)%/) || [0, 0])[1]),
-    stash: +((s.text.match(/STASH\s*\n?(\d+)/) || [0, 0])[1]),
-    embers: +((s.text.match(/(\d+)\s*\/\s*\d+\s*\n?FIGHT/) || [0, 5])[1]),
-    discardsLeft: +((s.text.match(/(\d+)\s*\/\s*\d+\s*\n?EMBERS/) || [0, 4])[1]),
-    strikeMult: +((s.text.match(/MULTIPLIER\s*\n?×([\d.]+)/) || [0, 1])[1]),
-    bossHp: +(bossHp[1] || 0), fightIndex: 0,
-    anyStoned: /TOO STONED/i.test(s.text),
-    handIds: [], handLen: 0, cardsPlayedIds: playedIdsThisFight, firedChains: firedChainsThisFight, discardLen: +((s.text.match(/(\d+)\s*\n?DISCARD/) || [0, 0])[1]),
+
+  const gsFrom = gg => ({
+    alive: aliveOf(gg),                       // real maxHp + tooStoned filtering
+    corruption: gg.corruption,                // real value (was pinned at 0)
+    stash: gg.stash, embers: gg.embers, discardsLeft: gg.discardsLeft,
+    strikeMult: gg.strikeMult, bossHp: gg.bossHp || 0,
+    fightIndex: gg.fightIndex,                // real index (was hardcoded 0)
+    anyStoned: gg.members.some(m => m.tooStoned),
+    handIds: [], handLen: gg.hand.length,
+    cardsPlayedIds: playedIdsThisFight, firedChains: firedChainsThisFight,
+    discardLen: gg.discardLen, hrUsed: hrUsedThisFight
   })
-  const embers = gsLite().embers
-  let played = 0, failStreak = 0
-  const failed = new Set()
-  for (let iter = 0; iter < 10 && played < 8 && failStreak < 3; iter++) {
-    const cur = await hand()
-    const known = cur.map(c => ({ ...c, card: BRAIN.matchCard(c.name) })).filter(c => c.card && !failed.has(c.name))
-      .filter(c => !/Need \d+% Corr/i.test(c.desc) || gsLite().corruption >= 40)
-      .filter(c => { const n = c.desc.match(/NEED\s*(\d)(?!\d|%)/); if (!n) return true; if (+n[1] === c.cost) return true; return mem.length >= +n[1] }) // NEED==cost is the ember badge, not a member gate
-    const gs = gsLite()
-    gs.handIds = known.map(k => k.card.id); gs.handLen = cur.length
-    const affordable = known.filter(k => k.cost <= gs.embers)
-    if (!affordable.length) { if (iter === 0) ev('no_play', { handSeen: cur.length, matched: known.length, embers: gs.embers, names: cur.map(x => x.name.slice(0, 18)) }); break }
-    affordable.forEach(k => { k.score = BRAIN.scoreCard(k.card, gs, strikeNumThisFight, played) })
-    affordable.sort((a, b) => b.score - a.score)
-    const c = affordable[0]
-    if (c.score <= 3) break // sim stop-rule: nothing worth playing, save the hand
-    const tgt = BRAIN.pickTarget(c.card, mem)
-    // success = embers or discard-pile changed (hand REFILLS after plays — count never shrinks)
-    const sigOf = t => ((t.match(/(\d+)\s*\n?DISCARD/) || [0, 0])[1]) + '|' + ((t.match(/(\d+)\s*\/\s*\d+\s*\n?FIGHT/) || [0, 0])[1])
-    const sigBefore = sigOf((await P.state()).text)
-    await P.playCard(c.x, c.y, tgt.x, tgt.y)
-    const sigAfter = sigOf((await P.state()).text)
-    if (sigAfter !== sigBefore) {
-      played++; failStreak = 0; playedIdsThisFight.push(c.card.id)
-      for (const ch of BRAIN.RIFF_CHAINS) { const ck = ch[0] + '+' + ch[1]; if (!firedChainsThisFight.has(ck) && playedIdsThisFight.includes(ch[0]) && playedIdsThisFight.includes(ch[1])) firedChainsThisFight.add(ck) }
-      ev('play', { card: c.card.id, score: c.score, cost: c.cost, target: tgt.name })
-    }
-    else { failStreak++; failed.add(c.name); ev('play_fail', { card: c.name, cost: c.cost }); await P.click(c.x, c.y).catch(() => {}) }
-    if ((await P.state()).text.toUpperCase().includes('DISCARD & CONTINUE')) { await modalTick(await P.state()) }
-  }
-  // DISCARD-DIGGING (sim weapon #1): burn a discard to replace junk when the hand
-  // is weak — chain-partner draws and playable cards beat dead corr-gated filler.
-  const gsD = gsLite()
-  if (gsD.discardsLeft > 0 && played < 3) {
-    const cur2 = await hand()
-    const scored = cur2.map(c => ({ ...c, card: BRAIN.matchCard(c.name) }))
-      .map(c => ({ ...c, score: c.card ? BRAIN.scoreCard(c.card, { ...gsD, handIds: [], handLen: cur2.length }, strikeNumThisFight, played) : 0 }))
-    const junk = scored.filter(c => c.score < 25 || /Need \d+% Corr/i.test(c.desc)).sort((a, b) => a.score - b.score).slice(0, 2)
-    if (junk.length && cur2.length >= 4) {
-      for (const j of junk) await P.click(j.x, j.y)
-      const before = (await hand()).length
-      await P.clickText('↓ discard').catch(() => P.clickText('discard').catch(() => {}))
-      await P.connect().then(p => p.waitForTimeout(700))
-      ev('discard_dig', { dumped: junk.map(j => j.name.slice(0, 14)), handBefore: before })
-      // one bonus play pass on the fresh cards
-      const cur3 = await hand()
-      const known3 = cur3.map(c => ({ ...c, card: BRAIN.matchCard(c.name) })).filter(c => c.card)
-        .filter(c => !/Need \d+% Corr/i.test(c.desc) || gsD.corruption >= 40)
-        .filter(c => { const n = c.desc.match(/NEED\s*(\d)(?!\d|%)/); if (!n) return true; if (+n[1] === c.cost) return true; return mem.length >= +n[1] })
-        .filter(k => k.cost <= gsD.embers)
-      known3.forEach(k => { k.score = BRAIN.scoreCard(k.card, { ...gsD, handIds: known3.map(x => x.card.id), handLen: cur3.length }, strikeNumThisFight, played) })
-      const b3 = known3.sort((a, b) => b.score - a.score)[0]
-      if (b3 && b3.score > 3) {
-        const t3 = BRAIN.pickTarget(b3.card, mem)
-        await P.playCard(b3.x, b3.y, t3.x, t3.y)
-        if ((await hand()).length < cur3.length) { played++; playedIdsThisFight.push(b3.card.id); ev('play', { card: b3.card.id, score: b3.score, cost: b3.cost, target: t3.name, afterDig: true }) }
+
+  // playable = matched + affordable + corruption gate satisfied at its REAL threshold
+  const playableIn = (gg, skipIds) => gg.hand
+    .map(c => ({ ...c, card: BRAIN.matchCard(c.name) }))
+    .filter(c => c.card && !skipIds.has(c.card.id))
+    .filter(c => !c.corrReq || gg.corruption >= c.corrReq)
+    .filter(c => c.cost <= gg.embers)
+
+  // ── PHASE 1: DIG FIRST. A human discards on a dead opening hand, before
+  // committing embers — not after (the old code dug last, with embers gone).
+  {
+    const gs0 = gsFrom(g)
+    const cand0 = playableIn(g, new Set())
+    cand0.forEach(k => { k.score = BRAIN.scoreCard(k.card, { ...gs0, handIds: cand0.map(x => x.card.id) }, strikeNumThisFight, 0) })
+    const best0 = cand0.sort((a, b) => b.score - a.score)[0]
+    const chainLive = g.hand.some(c => { const m = BRAIN.matchCard(c.name); return m && BRAIN.RIFF_CHAINS.some(ch => (ch[0] === m.id || ch[1] === m.id) && g.hand.some(o => { const m2 = BRAIN.matchCard(o.name); return m2 && m2.id !== m.id && (ch[0] === m2.id || ch[1] === m2.id) }) ) })
+    if (g.discardsLeft > 0 && g.hand.length >= 4 && (!best0 || best0.score < 40) && !chainLive) {
+      // junk = unplayable corruption-gated + genuinely low value. NEVER dump a
+      // free card: whispercard/hungercard/madnesscard/blood_price are 0-cost
+      // power the old filter was throwing away.
+      const scoredAll = g.hand.map(c => { const card = BRAIN.matchCard(c.name); return { ...c, card, score: card ? BRAIN.scoreCard(card, { ...gs0, handIds: [] }, strikeNumThisFight, 0) : 0 } })
+      const junk = scoredAll
+        .filter(c => c.cost > 0 && (c.score < 25 || (c.corrReq && g.corruption < c.corrReq)))
+        .sort((a, b) => a.score - b.score).slice(0, 2)
+      if (junk.length) {
+        for (const j of junk) {
+          const fresh = await perceive()
+          const hit = fresh.hand.find(h => h.name === j.name && h.cost === j.cost)
+          if (hit) await P.click(hit.x, hit.y)   // re-read coords: the fan re-lays-out on select
+        }
+        await P.clickText('↓ discard').catch(() => P.clickText('discard').catch(() => {}))
+        await P.connect().then(p => p.waitForTimeout(700))
+        ev('discard_dig', { dumped: junk.map(j => j.name.slice(0, 16)), reason: best0 ? 'bestScore ' + best0.score : 'no playable' })
+        g = await perceive()
       }
     }
   }
-  // PANIC BUTTON (sim doctrine: clutch trips when the fight goes south) —
-  // <=2 strikes left and boss above ~45%: drop a held trip before striking
-  const sNow = await P.state()
-  const strikesLeft = +((sNow.text.match(/STRIKE ⛧\s*(\d+)\s*\//) || [])[1] || 4)
-  const hpm = sNow.text.match(/(\d+)\s*\/\s*(\d+)\s*HP/)
-  const bigFight = hpm && +hpm[2] >= 1500 // circle bosses and beyond
-  if ((strikesLeft <= 2 && hpm && (+hpm[1] / +hpm[2]) > 0.45) || (bigFight && strikeNumThisFight === 0)) {
-    const trip = sNow.clickables.find(c => /🍄|🧪|💠/.test(c.t) && c.t.length < 30)
-    if (trip) { ev('trip_used', { btn: trip.t, bossPct: (100 * hpm[1] / hpm[2]).toFixed(0) }); await P.click(trip.x, trip.y); await P.connect().then(p => p.waitForTimeout(1500)) }
+
+  // ── PHASE 2: PLAY LOOP. Re-perceive after every card so embers/corruption/
+  // ATK/hand are never stale (the audit's #1 finding: 53% of plays failed
+  // because the bot was reasoning about a pre-strike snapshot).
+  let played = 0, failStreak = 0
+  const failedIds = new Set()   // keyed by CARD ID, not badged screen name
+  for (let iter = 0; iter < 14 && played < 10 && failStreak < 3; iter++) {
+    const gs = gsFrom(g)
+    const cand = playableIn(g, failedIds)
+    gs.handIds = cand.map(k => k.card.id)
+    if (!cand.length) { if (iter === 0) ev('no_play', { handSeen: g.hand.length, embers: g.embers, corr: g.corruption, names: g.hand.map(x => x.name.slice(0, 16)) }); break }
+    cand.forEach(k => { k.score = BRAIN.scoreCard(k.card, gs, strikeNumThisFight, played) })
+    cand.sort((a, b) => b.score - a.score)
+    const c = cand[0]
+    if (c.score <= 3) break                       // sim stop-rule
+    const tgt = BRAIN.pickTarget(c.card, aliveOf(g), { hrUsed: hrUsedThisFight })
+    if (!tgt) break
+    const before = { e: g.embers, d: g.discardLen }
+    await P.playCard(c.x, c.y, tgt.x, tgt.y)
+    g = await perceive()
+    if (g.embers !== before.e || g.discardLen !== before.d) {
+      played++; failStreak = 0; playedIdsThisFight.push(c.card.id)
+      if (c.card.id === 'heavyriff') hrUsedThisFight.add(tgt.name)   // once per member per fight
+      for (const ch of BRAIN.RIFF_CHAINS) { const ck = ch[0] + '+' + ch[1]; if (!firedChainsThisFight.has(ck) && playedIdsThisFight.includes(ch[0]) && playedIdsThisFight.includes(ch[1])) { firedChainsThisFight.add(ck); ev('chain_fired', { chain: ck }) } }
+      ev('play', { card: c.card.id, score: c.score, cost: c.cost, target: tgt.name, embers: g.embers, corr: g.corruption })
+    } else {
+      failStreak++; failedIds.add(c.card.id)
+      ev('play_fail', { card: c.card.id, cost: c.cost, embers: g.embers, corr: g.corruption })
+      await P.click(c.x, c.y).catch(() => {})    // deselect
+    }
+    if ((await P.state()).text.toUpperCase().includes('DISCARD & CONTINUE')) { await modalTick(await P.state()); g = await perceive() }
   }
-  // ZOMBIE-FIGHT GUARD (game bug logged Jul 30): save made at 0 strikes reloads into a
-  // locked fight — 0 strikes, boss alive, no death trigger, and no abandon option in pause.
-  if (strikes === '0' && played === 0) { zeroStrikeTicks++ } else zeroStrikeTicks = 0
-  if (zeroStrikeTicks >= 3) {
-    ev('zombie_fight', { msg: 'save-at-0-strikes soft-lock — clearing save, forcing new run' })
-    await P.evaljs("localStorage.removeItem('vst_save'); setTimeout(()=>location.reload(),50); 'x'").catch(() => {})
-    preferNewRun = true; zeroStrikeTicks = 0
-    await P.connect().then(p => p.waitForTimeout(4000))
-    return
+
+  // ── PHASE 3: CLUTCH TRIP. Sim doctrine — trips are emergency buttons and
+  // late-fight finishers, NOT openers. The old rule dumped shrooms on strike 1
+  // of every boss at 100% HP (9/9 trips in the last run were wasted that way).
+  const bossPct = (g.bossHp && g.bossMaxHp) ? g.bossHp / g.bossMaxHp : 1
+  const bandHurt = aliveOf(g).length > 0 && aliveOf(g).reduce((a, m) => a + m.hp, 0) / Math.max(1, aliveOf(g).reduce((a, m) => a + m.maxHp, 0)) < 0.4
+  const desperate = (g.strikesLeft !== null && g.strikesLeft <= 2 && bossPct > 0.45) || g.overtime || bandHurt
+  if (desperate) {
+    // prefer the strongest held drug for the situation: DMT > acid > shrooms late
+    const pick = ['💠', '🧪', '🍄'].map(e => g0Clickable(s, e)).find(Boolean)
+      || (await P.state()).clickables.find(c => /🍄|🧪|💠/.test(c.t) && c.t.length < 30)
+    if (pick) { ev('trip_used', { btn: pick.t, bossPct: (bossPct * 100).toFixed(0), why: g.overtime ? 'overtime' : bandHurt ? 'band<40%hp' : 'low strikes' }); await P.click(pick.x, pick.y); await P.connect().then(p => p.waitForTimeout(1500)); g = await perceive() }
   }
-  const preview = (sNow.text.match(/DEALS\s*(\d+)/) || [])[1]
-  ev('strike', { strikes, bossHp: bossHp[1], played, embers, preview, chains: firedChainsThisFight.size })
+
+  ev('strike', { strikes: g.strikesLeft, overtime: g.overtime, bossHp: g.bossHp, played, embers: g.embers, corr: g.corruption, chains: firedChainsThisFight.size, fightIndex: g.fightIndex })
   strikeNumThisFight++
   await P.clickText('strike').catch(e => ev('warn', { msg: 'strike btn: ' + e.message }))
   await P.connect().then(p => p.waitForTimeout(1800))
 }
+function g0Clickable(s, emoji) { return (s.clickables || []).find(c => c.t.includes(emoji) && c.t.length < 30) }
+const hrUsedThisFight = new Set()   // Heavy Riff: once per member per fight (live game hard-rejects a repeat)
+
 // per-fight brain state (sim: _cardsPlayedIds persists across strikes within a fight)
 const playedIdsThisFight = []
 let firedChainsThisFight = new Set()
@@ -274,6 +464,9 @@ async function descentTick(s) {
 // drug reserves (shrooms if stash>=16, acid if stash>=22), then leave.
 const KW_W = { FRENZIED: 6, 'FOLK MAGIC': 5, CORRUPT: 4, HEXED: 3, SHREDDER: 3, 'DOUBLE TIME': 2, DEBUFF: 2, ANCHOR: 1 }
 const BOT = { boughtThisShop: new Set(), lastShopSig: '', artifacts: 0, pedals: 0 }
+// Aug 1: these are module-global and were never reset, so after the first run
+// filled 3 artifacts the relic branch was dead for every later run in the session.
+function resetRunEconomy() { BOT.artifacts = 0; BOT.pedals = 0; BOT.boughtThisShop = new Set(); BOT.lastShopSig = '' }
 
 function memberScoreFromText(t) {
   const atk = +((t.match(/ATK\s*(\d+)/i) || [0, 0])[1])
@@ -295,8 +488,20 @@ async function shopTick(s) {
   // packs it could not use, then hit BAND IS FULL and declined — pure wasted stash,
   // and the early `return` after each buy meant it NEVER reached the relic branch.
   // Counting ⟩ delimiters in the strip is glyph-agnostic and exact.
+  // Aug 1 (2nd pass): the `|| 2` fallback was still live on the else-branch —
+  // exactly the guess that bought 6 unusable member packs. Now: no guess. If the
+  // strip is unreadable, bandSize is null and the member-pack branch is SKIPPED.
   const stripM = t.match(/STAGE ORDER[^]*?(?=⛧ THIS CIRCLE|⛧ ARTIFACT|⛧ EFFECT PEDAL|🎸 CARDS)/i)
-  const bandSize = stripM ? (stripM[0].match(/⟩/g) || []).length : ((t.match(/⟩/g) || []).length || 2)
+  let bandSize = stripM ? (stripM[0].match(/⟩/g) || []).length : null
+  if (bandSize === null) {
+    const domCount = await P.evaljs(`(() => {
+      const strip = [...document.querySelectorAll('div')].find(d => /STAGE ORDER/i.test(d.textContent || ''))
+      if (!strip) return null
+      return (strip.textContent.match(/⟩/g) || []).length
+    })()`).catch(() => null)
+    bandSize = domCount
+    if (bandSize === null) ev('parse_miss', { field: 'bandSize', note: 'member packs skipped this shop' })
+  }
   const buy = async (label, why) => {
     const c = s.clickables.find(c => c.t.toLowerCase().includes(label))
     if (!c) return false
@@ -308,7 +513,7 @@ async function shopTick(s) {
   // sold-check: look for SOLD within 200 chars AFTER the label (case-insensitive find)
   const tryable = l => { if (BOT.boughtThisShop.has(l)) return false; const i = tl.indexOf(l.toLowerCase()); return i < 0 ? true : !/sold/i.test(t.slice(i, i + 60)) } // 60 = tile-local; wider windows bleed into neighboring tiles' SOLD stamps
   // 1. MEMBERS FIRST (sim: needsMembers = band < 5)
-  if (bandSize < 5) {
+  if (bandSize !== null && bandSize < 5) {
     if (/welcome pack/i.test(t)) {
       if (tryable('welcome pack')) { if (await buy('welcome pack', 'free member')) return; ev('shop_skip', { tile: 'welcome', why: 'not in clickables' }) }
       else ev('shop_skip', { tile: 'welcome', why: 'sold/bought' })
@@ -442,7 +647,14 @@ async function recruitTick(s) {
         }
       } else await P.clickText('keep current band').catch(() => {})
     }
-    for (const b of ['add to band', 'recruit', 'confirm', 'take', 'join', 'welcome']) { try { await P.clickText(b); break } catch (e) {} }
+    // Aug 1: this sweep used to run unconditionally — RecruitScreen has NO confirm
+    // button (onPick fires on the card click), so by now we're back in the shop and
+    // 'recruit'/'welcome' match the shop's OWN pack tiles → it bought a second pack
+    // it never intended. Only sweep if we're genuinely still on a recruit screen.
+    const stillRecruit = await P.state().then(st => screenType(st)).catch(() => 'unknown')
+    if (stillRecruit === 'recruit') {
+      for (const b of ['add to band', 'confirm', 'take', 'join']) { try { await P.clickText(b); break } catch (e) {} }
+    }
   } else {
     ev('recruit_pass', { why: 'no candidates parsed' })
     try { await P.clickText('pass') } catch (e) { for (const b of OVERLAY_BTNS) { try { await P.clickText(b); break } catch (e2) {} } }
@@ -488,6 +700,9 @@ async function main() {
   const maxMs = (+(process.argv[2] || 14)) * 60000
   const t0 = Date.now()
   let lastHash = '', stuck = 0, recoveries = 0
+  // 60s wall-clock stall limit (JV, Aug 1). Override with VST_STALL_MS for tests.
+  const STALL_MS = +(process.env.VST_STALL_MS || 60000)
+  let lastProgressHash = '', lastProgressAt = Date.now(), stallRestarts = 0
   let build = 'unknown'
   try { build = require('child_process').execSync('git -C ' + JSON.stringify(path.join(__dirname, '..')) + ' log --oneline -1').toString().trim().slice(0, 50) } catch (e) {}
   ev('session', { msg: 'autopilot v2 start', build })
@@ -497,6 +712,7 @@ async function main() {
   // FRESH START (Jul 31, JV): every bot launch is a new test — wipe any mid-run save
   // so data never begins mid-story. (Mid-session rig-heals do NOT re-run this.)
   try { await P.evaljs("localStorage.removeItem('vst_save_v4'); location.reload(); 'fresh'"); await new Promise(r => setTimeout(r, 4000)) } catch (e) {}
+  resetRunEconomy()
   ev('fresh_start', { note: 'save wiped at launch' })
   // Aug 1 FORENSIC TAP: pipe the game's own console into the ledger. triggerVictory
   // logs [VICTORY] + caller stack — this catches the phantom-victory bug (Lucifer
@@ -535,9 +751,44 @@ async function main() {
     const hash = s.text.slice(0, 500)
     stuck = (hash === lastHash) ? stuck + 1 : 0; lastHash = hash
     const type = await screenType(s)
+    // ── 60-SECOND STALL WATCHDOG (JV, Aug 1) ────────────────────────────
+    // Absolute wall-clock guard, independent of the click-based `stuck`
+    // counter (which the audit showed could be reset forever by a button that
+    // matches but doesn't advance — that's how a 6-hour session was lost).
+    // If the SCREEN TEXT has not changed in 60s: log exactly what we were
+    // looking at, wipe the save, and start a clean run from Circle 1.
+    if (hash !== lastProgressHash) { lastProgressHash = hash; lastProgressAt = Date.now() }
+    if (Date.now() - lastProgressAt > STALL_MS) {
+      const shot = await P.shot('stall-' + Date.now()).catch(() => null)
+      ev('STALL_RESTART', {
+        stalledSeconds: Math.round((Date.now() - lastProgressAt) / 1000),
+        screenType: type, shot,
+        clickables: s.clickables.slice(0, 12).map(c => c.t.slice(0, 40)),
+        text: s.text.slice(0, 700)
+      })
+      stallRestarts++
+      await P.evaljs("localStorage.removeItem('vst_save_v4'); setTimeout(()=>location.reload(),50); 'x'").catch(() => {})
+      await new Promise(r => setTimeout(r, 5000))
+      preferNewRun = true
+      lastProgressAt = Date.now(); lastProgressHash = ''; lastHash = ''; stuck = 0
+      strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set(); hrUsedThisFight.clear()
+      resetRunEconomy()
+      ev('run_restart', { reason: 'stall watchdog', totalStallRestarts: stallRestarts })
+      continue
+    }
     if (stuck >= 6) {
       const f = await P.shot('stuck-' + Date.now()); ev('stuck', { type, shot: f, text: s.text.slice(0, 800) })
-      for (const b of OVERLAY_BTNS) { try { await P.clickText(b); stuck = 0; break } catch (e) {} }
+      // Aug 1: only reset `stuck` when the click actually MOVED the game. The
+      // old code zeroed it on a successful click attempt, so any screen with a
+      // matching-but-inert button looped forever without ever escalating.
+      for (const b of OVERLAY_BTNS) {
+        try {
+          await P.clickText(b)
+          const after = (await P.state().catch(() => ({ text: '' }))).text.slice(0, 500)
+          if (after !== hash) { stuck = 0 }
+          break
+        } catch (e) {}
+      }
       if (stuck >= 10) {
         recoveries++
         if (recoveries > 3) { ev('abort', { msg: 'hard stuck after 3 recoveries' }); break }
@@ -559,6 +810,25 @@ async function main() {
       else if (type === 'forge') await forgeTick(s)
       else if (type === 'boosterpick') await forgeTick(s) // same shape: card tiles, pick best, confirm
       else if (type === 'credits') { ev('credits_seen', {}); const vp = await P.evaljs('({w:innerWidth,h:innerHeight})'); await P.click(Math.round(vp.w / 2), Math.round(vp.h / 2)) }
+      else if (type === 'pause') { await P.key('Escape').catch(() => {}) }
+      else if (type === 'splash' || type === 'boot') { const vp = await P.evaljs('({w:innerWidth,h:innerHeight})').catch(() => null); if (vp) await P.click(Math.round(vp.w / 2), Math.round(vp.h * 0.9)).catch(() => {}) }
+      else if (type === 'demonicconflict') {
+        // Two DEMONIC members can't coexist. Keep the higher ATK+HP one.
+        const opts = s.clickables.filter(c => /ATK\s*\d/.test(c.t))
+        const val = t => (+((t.match(/ATK\s*(\d+)/) || [0, 0])[1])) * 3 + (+((t.match(/HP\s*(\d+)/) || [0, 0])[1]))
+        const best = opts.sort((a, b) => val(b.t) - val(a.t))[0]
+        ev('demonic_conflict', { picked: best ? best.t.slice(0, 40) : 'none', of: opts.length })
+        if (best) await P.click(best.x, best.y)
+        else for (const b of ['keep', 'confirm', 'continue']) { try { await P.clickText(b); break } catch (e) {} }
+      }
+      else if (type === 'slotswap') {
+        // Artifact/pedal slots full — swap out the cheapest owned item.
+        const owned = s.clickables.filter(c => /\d/.test(c.t) && c.t.length < 60 && !/CANCEL|KEEP/i.test(c.t))
+        ev('slot_swap', { options: owned.length })
+        if (owned.length) await P.click(owned[0].x, owned[0].y)
+        else for (const b of ['cancel', 'keep current']) { try { await P.clickText(b); break } catch (e) {} }
+      }
+      else if (type === 'pawn') { for (const b of ['close', 'back', 'done']) { try { await P.clickText(b); break } catch (e) {} } await P.key('Escape').catch(() => {}) }
       else if (type === 'meta') {
         // Collection / trophies / achievements — leave via back/escape, then menu handler restarts
         ev('meta_screen', { text: s.text.slice(0, 60) })
@@ -593,4 +863,7 @@ async function main() {
   ev('session', { msg: 'autopilot loop end', minutes: ((Date.now() - t0) / 60000).toFixed(1) })
   process.exit(0)
 }
-main()
+// Aug 1: export the perception + policy internals so they can be unit-tested
+// against a live game instead of only being exercised inside a 6-hour run.
+module.exports = { perceive, screenType, combatTick, shopTick }
+if (require.main === module) main()

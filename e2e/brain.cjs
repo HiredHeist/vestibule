@@ -54,7 +54,16 @@ function scoreBase(card, gs, strikeNum, cardsPlayed) {
     case 'groupie': return embers <= 3 ? 62 : 28
     case 'soundboard': return embers <= 3 ? 60 : 28; case 'setbreak': return embers <= 2 ? 52 : 14
     case 'soundwall': return 70
-    case 'heavyriff': return highestAtk >= 6 ? 78 : 55
+    // Heavy Riff is ONCE PER MEMBER PER FIGHT — the live game hard-rejects a
+    // repeat on the same member (App.jsx `if(m._hrUsed) return false`). The bot
+    // used to re-offer it and burn its failStreak. Match the sim: if every alive
+    // member has already ridden it, score below the stop rule.
+    case 'heavyriff': {
+      const used = gs.hrUsed || new Set()
+      const fresh = alive.filter(m => !used.has(m.name))
+      if (!fresh.length) return 3
+      return Math.max(...fresh.map(m => m.atk)) >= 6 ? 78 : 55
+    }
     case 'crowdsurf': return handLen >= 5 ? 74 : handLen >= 3 ? 55 : 30
     case 'deathriff': return corruption < 50 ? 52 : 18; case 'feedbackloop': return corruption >= 40 ? 57 : 18
     case 'herbmoney': return stash >= 10 ? 65 : 0; case 'goingbroke': return stash >= 50 ? 62 : 5
@@ -91,16 +100,57 @@ function scoreBase(card, gs, strikeNum, cardsPlayed) {
     case 'bootlegcopy': return 55; case 'secondwind': return embers === 0 ? 90 : embers <= 2 ? 50 : 10; case 'pyromaniac': return embers <= 2 ? 68 : 25
     case 'slowburn': return strikeNum === 0 ? 65 : 30; case 'ampfeedback': return embers <= 2 ? 70 : 30
     case 'drainthecrowd': return embers <= 2 ? 65 : 20; case 'corrsiphon': return embers <= 2 && corruption < 60 ? 72 : 15
+    // ── Aug 1 2026: FREE power cards. These were falling through to default:5,
+    // which put them below the discard-junk threshold — the ledger caught the bot
+    // literally DISCARDING Dark Whisper and Blood Price to dig for something
+    // "better". They cost ZERO embers; a 1000-hour player plays them on sight.
+    case 'madnesscard': return 96   // 15% of boss MAX HP, direct, free — best tempo card in the game
+    case 'hungercard': return 80    // all +1 ATK and draw 2, free
+    case 'whispercard': return 74   // +2 ATK permanent, free
+    case 'blood_price': return 78   // corruption gift: +4 ATK permanent, free
+    case 'dark_whisper': return 70  // corruption gift: +2 ATK permanent, free
+    case 'void_pact': return 72     // corruption gift: all +2 ATK this strike, free
+    case 'contract': return alive.length > 2 ? 30 : 0 // Record Deal: only with members to spare
     default: return 5
   }
 }
 
 // targeting doctrine from applyCardSim: most single-target effects want the carry
 // (highest ATK); protection/heal singles want the weakest.
-const WEAKEST_TARGET = new Set(['roadie'])
-function pickTarget(card, alive) {
-  if (WEAKEST_TARGET.has(card.id)) return alive.reduce((a, b) => a.hp < b.hp ? a : b)
-  return alive.reduce((a, b) => a.atk > b.atk ? a : b) // carry
+// Aug 1 2026 REWRITE. The old rule was "everything at the highest-ATK member
+// except Roadie", which produced provable misplays:
+//   resonancecard sets target ATK = highest ATK on stage -> aiming it at the
+//     member who ALREADY has the highest ATK is a guaranteed no-op.
+//   stagedive deals damage EQUAL TO TARGET HP -> wants the tankiest, not the carry.
+//   controlfeedback fully heals -> wants the most injured, not a healthy carry.
+//   bloodritual trades 25% of target HP for 6x damage -> wants the highest HP.
+//   offeringpit makes the target SKIP ITS NEXT ATTACK -> never the carry.
+//   carrioncall needs a Too Stoned member to work at all.
+const HIGHEST_HP = new Set(['stagedive', 'bloodritual'])
+const LOWEST_ATK = new Set(['resonancecard', 'offeringpit'])
+const MOST_INJURED = new Set(['roadie', 'controlfeedback', 'soundcheck'])
+const STONED_TARGET = new Set(['carrioncall', 'wakeup'])
+const LOWEST_VALUE = new Set(['russianroulette'])
+function pickTarget(card, alive, opts) {
+  if (!alive || !alive.length) return null
+  const by = (f, best) => alive.reduce((a, b) => (best(f(b), f(a)) ? b : a))
+  const lower = (x, y) => x < y, higher = (x, y) => x > y
+  const id = card.id
+  if (STONED_TARGET.has(id)) {
+    const stoned = (opts && opts.allMembers ? opts.allMembers : alive).filter(m => m.tooStoned)
+    if (stoned.length) return stoned[0]
+  }
+  // Heavy Riff: strongest member who has NOT already used it this fight
+  if (id === 'heavyriff') {
+    const used = (opts && opts.hrUsed) || new Set()
+    const fresh = alive.filter(m => !used.has(m.name))
+    return (fresh.length ? fresh : alive).reduce((a, b) => b.atk > a.atk ? b : a)
+  }
+  if (HIGHEST_HP.has(id)) return by(m => m.hp, higher)
+  if (LOWEST_ATK.has(id)) return by(m => m.atk, lower)
+  if (MOST_INJURED.has(id)) return by(m => m.hp / Math.max(1, m.maxHp || m.hp), lower)
+  if (LOWEST_VALUE.has(id)) return by(m => m.atk * 3 + m.hp, lower)
+  return by(m => m.atk, higher) // default: the carry
 }
 
 // ---- aura-aware stage ordering (ported from sim improveOrdering/auraStaticScore)

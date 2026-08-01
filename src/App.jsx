@@ -4803,6 +4803,10 @@ function App(){
   const [fightIndex,setFightIndex]=useState(0)
   const [enemy,setEnemy]=useState(ENEMIES[0])
   const [enemyHp,setEnemyHp]=useState(ENEMIES[0].maxHp)
+  // Aug 1 2026: live mirror of enemyHp. The victory safety net fires on a delayed
+  // timer and MUST re-read HP at fire time — see the PHANTOM VICTORY fix below.
+  const enemyHpRef=useRef(ENEMIES[0].maxHp)
+  useEffect(()=>{enemyHpRef.current=enemyHp},[enemyHp])
   const [scaledMaxHp,setScaledMaxHp]=useState(ENEMIES[0].maxHp)
   const [stage,setStage]=useState([null,null,null,null,null])
   const [deck,setDeck]=useState([]);const deckRef=useRef([]);
@@ -6577,12 +6581,57 @@ function App(){
 
   const victoryFiredRef=useRef(false)
   const triggerVictoryRef=useRef(null)
+  // ── LUCIFER PHASE 2 ENTRY (Aug 1 2026, extracted) ─────────────────────
+  // Single implementation of the phase 1 → 2 handoff. Called from
+  // handleStrikeBody AND from triggerVictory's phase-1 intercept, so every kill
+  // path (strike damage, direct-damage cards, DOT, hellquake, safety net) opens
+  // phase 2 instead of ending the run.
+  const luciferPhase2Ref=useRef(null)
+  const enterLuciferPhase2=useCallback(()=>{
+    setLuciferPhase(2)
+    const _lh2=parseInt(localStorage.getItem('vst_heat')||'1')
+    const _lucP2Hp=Math.ceil(333333*(1+Math.max(0,_lh2-1)*0.15)*(encoreMode?2.0:1.0))
+    setEnemyHp(_lucP2Hp);enemyHpRef.current=_lucP2Hp;setScaledMaxHp(_lucP2Hp)
+    setBossRageAtk(0)
+    setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,stoneShield:false,tempBuff:false,encoreReady:false,ampedThisStrike:false}):null))
+    setEmbers(maxEmbers)
+    const _lucDeckStrMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
+    setStrikesLeft(activeStake.maxStrikes+_lucDeckStrMod)
+    setFightMaxStrikes(activeStake.maxStrikes+_lucDeckStrMod)
+    setDiscardsLeft(MAX_DISCARDS)
+    setFightMaxDiscards(MAX_DISCARDS)
+    setTripUsedThisFight(false)
+    setFightTripBuff(null)
+    setActiveTripEffect(null)
+    setLuciferCinematic({text:'THE ICE SHATTERS',hp:333333,phase:2})
+    setTimeout(()=>setLuciferCinematic(null),4000)
+    addLog('⛧ THE ICE SHATTERS ⛧')
+    addLog('😈 Phase 2: Satan, Lord of the Flies — 333,333 HP')
+    addLog('⛧ Band revived! Full HP, Embers, Strikes, Discards reset!')
+    setAnimPhase('idle')
+  },[encoreMode,maxEmbers,selectedDeck,activeStake,addLog])
+  luciferPhase2Ref.current=enterLuciferPhase2
+
   const triggerVictory=useCallback(function(){
     if(victoryFiredRef.current)return // prevent double-fire
     // Aug 1 2026 forensic log: a bot run got full victory with Lucifer at 178k HP.
     // Every caller is supposed to have verified the kill; this logs who called and
     // with what state so a bad caller can't hide. Cheap, stays in prod builds.
     try{console.log('[VICTORY]','fi='+fightIndex,'hp='+enemyHp,'phase='+luciferPhase,'stack:',new Error().stack.split('\n').slice(2,6).join(' <- '))}catch(e){}
+    // ── LUCIFER PHASE-1 INTERCEPT (Aug 1 2026) ────────────────────────────
+    // Killing phase 1 must open phase 2, never end the run. handleStrikeBody had
+    // its own transition, but ~15 OTHER kill paths call triggerVictory directly
+    // (Sound Wall, Feedback Loop, Crowd Surf, Stage Dive, Sonic Boom, Skull
+    // Splitter, Feedback Scream, Necrotic Amp, Going Broke, Blood Ritual, Venom
+    // DOT, Black Candle, Madness, and 3 Hellquake outcomes) plus the delayed
+    // safety net — all of which skipped straight to THE DEVIL IS DEAD, ending the
+    // game at the halfway point. Guarding at this single choke point covers every
+    // caller present and future. Bot repro: "[VICTORY] fi=26 hp=0 phase=1".
+    if(enemy&&(enemy.passiveId==='luciferBoss'||enemy.id==='lucifer')&&luciferPhase===1){
+      try{console.log('[VICTORY-INTERCEPT] phase 1 down → opening phase 2 instead of ending the run')}catch(e){}
+      if(luciferPhase2Ref.current)luciferPhase2Ref.current()
+      return // victoryFiredRef intentionally NOT set — phase 2 still has to be won
+    }
     victoryFiredRef.current=true
     // ═══ TUTORIAL INTERCEPT ═══
     if(tutorialFight>0){
@@ -6880,7 +6929,21 @@ function App(){
     // final number gets to resonate before the screen changes.
     if(enemyHp<=0&&gameState==='playing'&&!victoryFiredRef.current&&enemy&&enemy.maxHp>0){
       if(dmgBreakdown)return // cascade still running — wait for it to clear
-      setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},600)
+      setTimeout(()=>{
+        // ── PHANTOM VICTORY FIX (Aug 1 2026) ──────────────────────────────
+        // This timer used to call triggerVictory unconditionally. Any flow that
+        // takes HP to 0 and then REFILLS it within the 600ms window won the game
+        // for free: Lucifer's phase 1→2 transition (0 → 333,333) and the Welcome
+        // to Hell handoff both do exactly that. Bot ledger caught it twice in one
+        // run — "THE DEVIL IS DEAD" with Lucifer sitting at 76,093 HP, and the
+        // Executive falling at 85,298/89,700. Re-read HP at FIRE time (ref, not
+        // the stale closure value) and abort if the boss got back up.
+        if(enemyHpRef.current>0){
+          try{console.log('[VICTORY-ABORT] safety net cancelled — boss back to '+enemyHpRef.current+' HP (phase transition)')}catch(e){}
+          return
+        }
+        if(triggerVictoryRef.current)triggerVictoryRef.current()
+      },600)
     }
   },[enemyHp,gameState,dmgBreakdown])
 
@@ -8225,29 +8288,12 @@ function App(){
       }
 
       if(newEHp<=0){
-        // LUCIFER PHASE TRANSITION: Phase 1 → Phase 2
+        // LUCIFER PHASE TRANSITION: Phase 1 → Phase 2.
+        // Aug 1 2026: body extracted to enterLuciferPhase2 so the ~15 direct-damage
+        // kill paths and the delayed victory safety net share ONE implementation
+        // (they used to skip this entirely and end the run at the halfway point).
         if(enemy.passiveId==='luciferBoss'&&luciferPhase===1){
-          setLuciferPhase(2)
-          const _lh2=parseInt(localStorage.getItem('vst_heat')||'1');const _lucP2Hp=Math.ceil(333333*(1+Math.max(0,_lh2-1)*0.15)*(encoreMode?2.0:1.0));setEnemyHp(_lucP2Hp);setScaledMaxHp(_lucP2Hp) // phase 2 of 666,666 total (Heat/Encore-scaled)
-          setBossRageAtk(0)
-          // Full band reset
-          setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,stoneShield:false,tempBuff:false,encoreReady:false,ampedThisStrike:false}):null))
-          setEmbers(maxEmbers)
-          const _lucDeckStrMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
-          setStrikesLeft(activeStake.maxStrikes+_lucDeckStrMod)
-          setFightMaxStrikes(activeStake.maxStrikes+_lucDeckStrMod)
-          setDiscardsLeft(MAX_DISCARDS)
-          setFightMaxDiscards(MAX_DISCARDS)
-          setTripUsedThisFight(false)
-          setFightTripBuff(null)
-          setActiveTripEffect(null)
-          // Dramatic transition
-          setLuciferCinematic({text:'THE ICE SHATTERS',hp:3333,phase:2})
-          setTimeout(()=>setLuciferCinematic(null),4000)
-          addLog('⛧ THE ICE SHATTERS ⛧')
-          addLog('😈 Phase 2: Satan, Lord of the Flies — 3,333 HP')
-          addLog('⛧ Band revived! Full HP, Embers, Strikes, Discards reset!')
-          setAnimPhase('idle')
+          if(luciferPhase2Ref.current)luciferPhase2Ref.current()
           return
         }
         if(triggerVictoryRef.current)triggerVictoryRef.current();return

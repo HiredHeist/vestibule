@@ -21,7 +21,11 @@ async function state() {
     const vis = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.right > 0 && r.top < innerHeight && r.left < innerWidth }
     const clickables = [...document.querySelectorAll('button,[role=button],[onclick],[style*="cursor: pointer"],[style*="cursor:pointer"]')]
       .filter(vis).slice(0, 80).map(el => { const r = el.getBoundingClientRect(); return { t: (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 60), x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2), w: Math.round(r.width), h: Math.round(r.height) } })
-    return { url: location.href, title: document.title, text: document.body.innerText.slice(0, 4000), clickables }
+    const _full = document.body.innerText
+    // Aug 1: was sliced at 4000 chars. The shop screen is near that budget, and an
+    // overflow silently nulled EVERY regex at once — all the `|| 2` / `|| 4` / `|| 5`
+    // fallbacks engaging together, invisibly. Raised, and overflow is now reported.
+    return { url: location.href, title: document.title, text: _full.slice(0, 20000), textTruncated: _full.length > 20000, clickables }
   })
 }
 async function shot(name) {

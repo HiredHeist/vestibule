@@ -28,6 +28,26 @@ Bot run beat the entire game in 13 minutes. Ledger forensics found and fixed:
    phase 2 "died" at 76k, Executive at 85k) — forensic tap now live: autopilot
    pipes game console (incl. [VICTORY] caller stacks) into the ledger as
    game_console events. Next uploaded ledger names the culprit.
+## 🔬 ONE-SHOT AUDIT (Aug 1) — see AUDIT_AUG1.md for the complete backlog
+Four parallel auditors swept game logic, card parity, bot policy and economy in a
+single pass (JV: "it should all be found in one clean audit"). Fixed this session:
+Lucifer phase-1 victory bypass (~15 kill paths), victory safety-net HP re-check,
+debug-key lockdown, and a full bot perception rebuild. ~35 findings remain open and
+are enumerated in AUDIT_AUG1.md — the two worst are the cascade-slam race that voids
+an entire strike's damage, and boss heal passives that clamp to unscaled maxHp and
+therefore DAMAGE the boss.
+
+## 🤖 BOT REBUILD (Aug 1) — now covered by `node e2e/test-perception.cjs` (33 assertions)
+Audit verdict on the old bot: "a confused beginner with a good textbook" — the expert
+policy port was faithful, but it was fed a broken world model. Corruption read 0
+forever, state was frozen at strike start (53% of plays failed), maxHp was faked as hp,
+stoned members counted as alive, duplicate hand cards were invisible, six cards were
+targeted wrongly, and three FREE power cards were scored as junk and discarded.
+All fixed and asserted. Plus JV's two requirements: every known screen is now
+classified (9 were 'unknown', one of which ate 5.4 hours), and a 60-second wall-clock
+stall watchdog wipes the save, logs the cause + screenshot, and restarts from Circle 1
+(verified live: froze the DOM mid-run, detected in 12s, clean restart).
+
 ✅ RELIC MYSTERY SOLVED (Aug 1) — NOT an economy problem. The shop's buy button
    is labelled with the ITEM'S NAME ("🤘Crowd Noise ×1.10 per alive member"),
    never the word "artifact", so the bot's buy('artifact') could never match a
