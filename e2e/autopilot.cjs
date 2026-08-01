@@ -624,8 +624,21 @@ async function recruitTick(s) {
     const pickFrom = safe.length ? safe : scored
     const bestSafe = pickFrom.sort((a, b) => (b.p + (counts[b.kw] > 1 ? 15 : 0)) - (a.p + (counts[a.kw] > 1 ? 15 : 0)))[0]
     ev('recruit_pick', { pick: bestSafe.t.slice(0, 50), score: bestSafe.p })
+    // Aug 1: a recruit click that silently misses used to hang here until the 60s
+    // watchdog restarted the run (observed once in a 3-minute smoke run). Verify
+    // the screen actually moved; retry at the card's upper third, which is inside
+    // the portrait rather than the description text, before giving up and passing.
+    const beforeSig = s.text.slice(0, 300)
     await P.click(bestSafe.x, bestSafe.y)
     await P.connect().then(p => p.waitForTimeout(600))
+    let moved = (await P.state().catch(() => ({ text: '' }))).text.slice(0, 300) !== beforeSig
+    if (!moved) {
+      await P.click(bestSafe.x, Math.round(bestSafe.y - (bestSafe.h || 120) * 0.3)).catch(() => {})
+      await P.connect().then(p => p.waitForTimeout(700))
+      moved = (await P.state().catch(() => ({ text: '' }))).text.slice(0, 300) !== beforeSig
+      ev('recruit_retry', { worked: moved })
+      if (!moved) { try { await P.clickText('pass') } catch (e) {} }
+    }
     const after = await P.state()
     const at = after.text.toUpperCase()
     if (at.includes("DEVIL'S CONTRACT")) { ev('lucifer_declined', {}); await P.clickText('walk away').catch(() => {}) }

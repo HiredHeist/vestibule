@@ -7,6 +7,7 @@
 // number produced before this date was measured on a band with roughly double the
 // real ATK growth. Buffs now write permAtkBonus only.
 import{readFileSync}from'fs'
+import * as ENGINE from './src/data/cardEngine.js'
 // vestibule-sim.js v19.1 — Expert AI Simulator for Vestibule
 // Session 16 — +Immediate draws, 15-card loop — +Events, Corruption Thresholds, Blood Oath: ALL mechanics (artifacts, passives, loot, combos, multiplier, hellquake)
 // KEYWORD STACK BONUSES VARIANT — same as v19.1 + per-keyword stack tier bonuses applied at strike time.
@@ -603,160 +604,101 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
 //    fires live's "+20% Corruption" 3-buff penalty (applyCard, App.jsx ~6157).
 function _lpbAdd(m,n){m._lpb=(m._lpb||0)+n}
 function _liveAtk(m){return m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0)}
+// ══════════════════════════════════════════════════════════════════════
+// Aug 1 2026 — SINGLE SOURCE OF TRUTH. applyCardSim no longer reimplements
+// cards; it adapts the sim's state to `src/data/cardEngine.js` and calls the
+// SAME function the live game's semantics were transcribed from. Every card
+// used to exist three times (live applyCard, live Demo Tape replay, this
+// switch) and drift was constant and silent — ~30 divergences were found in a
+// single audit, including phantom damage, doubled ATK, and an entirely
+// invented Hellquake table. cardEngine is verified against the RUNNING GAME by
+// e2e/test-card-parity.cjs (51/51). Do not add card logic below this line.
+// ══════════════════════════════════════════════════════════════════════
+function _engTargetIdx(card,gs){
+  const stage=gs.stage, alive=stage.map((m,i)=>({m,i})).filter(x=>x.m&&!x.m.tooStoned)
+  if(!alive.length)return -1
+  const id=card.id
+  const by=(f,cmp)=>alive.reduce((a,b)=>cmp(f(b.m),f(a.m))?b:a).i
+  const lo=(x,y)=>x<y, hi=(x,y)=>x>y
+  if(id==='heavyriff'){const fresh=alive.filter(x=>!x.m._hrUsed);const p=fresh.length?fresh:alive;return p.reduce((a,b)=>b.m.atk>a.m.atk?b:a).i}
+  if(id==='stagedive'||id==='bloodritual')return by(m=>m.hp,hi)
+  if(id==='resonancecard'||id==='offeringpit')return by(m=>m.atk,lo)
+  if(id==='roadie'||id==='controlfeedback'||id==='soundcheck')return by(m=>m.hp/Math.max(1,m.maxHp),lo)
+  if(id==='russianroulette')return by(m=>m.atk*3+m.hp,lo)
+  return by(m=>m.atk,hi) // carry
+}
 function applyCardSim(card,gs,enemy){
-  const{stage}=gs,alive=stage.filter(m=>!m.tooStoned);if(alive.length===0)return;
-  const target=alive.reduce((a,b)=>(a.atk+(a.permAtkBonus||0)>b.atk+(b.permAtkBonus||0)?a:b));
-  const weakest=alive.reduce((a,b)=>a.hp/a.maxHp<b.hp/b.maxHp?a:b);
-  const lowest=alive.reduce((a,b)=>(_liveAtk(a)<=_liveAtk(b)?a:b));
-  const highestAtk=Math.max(...alive.map(m=>m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0)));
-  // live's applyCard fires the 3-buff corruption penalty on the DROPPED-ON member.
-  // `target` is the sim's stand-in for the drop target on single-target cards.
-  const _preBuff=target._buffCount||0
-  switch(card.id){
-    case 'contract':{const strongest=alive.sort((a,b)=>(b.atk+(b.permAtkBonus||0))-(a.atk+(a.permAtkBonus||0)))[0];strongest.tooStoned=true;strongest.hp=0;gs._contractsPlayed++;TRACK.contractsSigned++;break}
-    case 'amp':target.ampedThisStrike=(target.ampedThisStrike||0)+1;break;
-    case 'battlecry':{const b=(gs.passives.some(p=>p.id==='p7')?2:1)+(card.upgraded?1:0);target.permAtkBonus=(target.permAtkBonus||0)+b;break}
-    case 'newstrings':target.permAtkBonus=(target.permAtkBonus||0)+2;break;
-    case 'encore':target.encoreThisStrike=true;break;
-    case 'soundcheck':alive.forEach(m=>{const h=m.hp<m.maxHp;m.hp=Math.min(m.maxHp,m.hp+4);if(h)m.tempAtkBonus=(m.tempAtkBonus||0)+1});break;
-    case 'roadie':weakest.stoneShield=2;weakest.hp=Math.min(weakest.maxHp,weakest.hp+2);weakest._buffCount=(weakest._buffCount||0)+1;break;
-    case 'distortion':gs.corruption=Math.min(100,gs.corruption+15);alive.forEach(m=>{m.tempAtkBonus=(m.tempAtkBonus||0)+1;m._buffCount=(m._buffCount||0)+1});break;
-    case 'dialtoeleven':{const b=card.upgraded?4:3;gs.corruption=Math.min(100,gs.corruption+10);alive.forEach(m=>{m.tempAtkBonus=(m.tempAtkBonus||0)+b;m._buffCount=(m._buffCount||0)+1});break}
-    case 'controlfeedback':{gs.corruption=50;const ht=alive.reduce((a,b)=>a.hp/a.maxHp<b.hp/b.maxHp?a:b);ht.hp=ht.maxHp;break}
-    case 'sigdecay':{if(gs.hand.length>0){const vi=rand(gs.hand.length);gs.discard.push(gs.hand.splice(vi,1)[0])};drawCards(gs,2);break}
-    case 'feedbackloop':{const b=gs.corruption>=50?4:2;target.permAtkBonus=(target.permAtkBonus||0)+b;_lpbAdd(target,b);break}
-    case 'soundwall':{const b=1+(gs.passives.some(p=>p.id==='p5')?1:0)+(card.upgraded?1:0);alive.forEach(m=>{m.permAtkBonus=(m.permAtkBonus||0)+b;_lpbAdd(m,b);m._buffCount=(m._buffCount||0)+1});break}
-    case 'heavyriff':{// LIVE hard-rejects a 2nd Heavy Riff on the same member per fight (App.jsx 5837).
-      const hrPool=alive.filter(m=>!m._hrUsed);if(hrPool.length===0)break;
-      const hrT=hrPool.reduce((a,b)=>(_liveAtk(a)>=_liveAtk(b)?a:b));
-      const hrB=Math.min(20,Math.ceil((_liveAtk(hrT)+(hrT._lpb||0))/2))+(card.upgraded?2:0);
-      hrT.permAtkBonus=(hrT.permAtkBonus||0)+hrB;_lpbAdd(hrT,hrB);hrT._hrUsed=true;hrT._buffCount=(hrT._buffCount||0)+1;break}
-    case 'crowdsurf':{const b=Math.max(1,gs.hand.length)+(card.upgraded?1:0);target.permAtkBonus=(target.permAtkBonus||0)+b;_lpbAdd(target,b);target._buffCount=(target._buffCount||0)+1;break}
-    case 'deathriff':alive.forEach(m=>{m.permAtkBonus=(m.permAtkBonus||0)+2;_lpbAdd(m,2)});gs.corruption=Math.min(100,gs.corruption+10);break;
-    case 'stagedive':{if(gs._stageDiveUsed)break;gs._directDmg=(gs._directDmg||0)+target.hp;gs._stageDiveUsed=true;break}
-    case 'overdrive':if(gs.corruption>=(card.upgraded?50:60))gs._overdriveActive=true;break;
-    case 'infencore':gs._infencoreActive=true;break;
-    case 'possessedperf':gs._possessedActive=true;break;
-    case 'powertap':{const b=(gs.artifacts.some(a=>a.id==='a5')?3:2)+(gs.passives.some(p=>p.id==='p4')?1:0);gs.embers=Math.min(gs.maxEmbers,gs.embers+b);break}
-    case 'staticcharge':gs.embers=Math.min(gs.maxEmbers,gs.embers+(gs.corruption===0?4:2));break;
-    case 'tappedout':gs._tappedOutNext=true;break;
-    case 'ampoverload':{gs.embers=Math.min(gs.maxEmbers,gs.embers+3);gs._discardsLeft=Math.max(0,gs._discardsLeft-1);break}
-    case 'groupie':{gs.embers=Math.min(gs.maxEmbers,gs.embers+2+(gs.passives.some(p=>p.id==='p4')?1:0));drawCards(gs,1);break}
-    case 'soundboard':{gs.embers=Math.min(gs.maxEmbers,gs.embers+2);gs._drawNextStrike=(gs._drawNextStrike||0)+1;break}
-    case 'setbreak':{if(gs.hand.length>0)gs.discard.push(gs.hand.splice(rand(gs.hand.length),1)[0]);gs.embers=Math.min(gs.maxEmbers,gs.embers+3);gs.corruption=Math.max(0,gs.corruption-15);const d=gs.deck.length>0?gs.deck.pop():null;if(d)gs.hand.push(d);break}
-    case 'setlist':{drawCards(gs,card.upgraded?4:3);if(gs.hand.length>0)gs.discard.push(gs.hand.splice(rand(gs.hand.length),1)[0]);break}
-    case 'doubledown':gs._nextCardFree=true;break;
-    case 'wakeup':{alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+2));const st=stage.find(m=>m.tooStoned);if(st){st.tooStoned=false;st.hp=st.maxHp;st.tempAtkBonus=0}break}
-    case 'demotape':{
-      // LIVE (applyCard 'demotape'): replays lastRiffPlayed via a hand-written
-      // per-card table. Most branches grant ATK, a handful deal fixed damage;
-      // anything unlisted falls through to a generic +2 ATK to the target.
-      const lr=gs._lastRiffPlayed;if(!lr)break;
-      const circle=Math.floor(gs.fightIndex/3)+1
-      switch(lr){
-        case 'amp':target.ampedThisStrike=(target.ampedThisStrike||0)+1;break;
-        case 'battlecry':target.permAtkBonus=(target.permAtkBonus||0)+(gs.passives.some(p=>p.id==='p7')?2:1);break;
-        case 'newstrings':target.permAtkBonus=(target.permAtkBonus||0)+2;break;
-        case 'encore':target.encoreThisStrike=true;break;
-        case 'soundwall':gs._directDmg=(gs._directDmg||0)+((circle<=3?5:circle<=6?8:12)+(gs.passives.some(p=>p.id==='p5')?4:0));break;
-        case 'feedbackloop':gs._directDmg=(gs._directDmg||0)+Math.floor(gs.corruption/2);break;
-        case 'crowdsurf':gs._directDmg=(gs._directDmg||0)+gs.hand.length*3;break;
-        case 'overdrive':if(gs.corruption>=60)gs._overdriveActive=true;break;
-        case 'infencore':gs._infencoreActive=true;break;
-        case 'resonancecard':lowest.tempAtkBonus=(lowest.tempAtkBonus||0)+Math.max(0,highestAtk-_liveAtk(lowest));break;
-        case 'distortion':gs.corruption=Math.min(100,gs.corruption+15);alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+1);break;
-        case 'doubledown':gs._nextCardFree=true;break;
-        case 'heavyriff':{const hp2=alive.filter(m=>!m._hrUsed);if(hp2.length){const t=hp2.reduce((a,b)=>(_liveAtk(a)>=_liveAtk(b)?a:b));t.permAtkBonus=(t.permAtkBonus||0)+3;_lpbAdd(t,3);t._hrUsed=true}break}
-        case 'moshpit':alive.forEach(m=>{m.permAtkBonus=(m.permAtkBonus||0)+1;_lpbAdd(m,1)});break;
-        case 'shredsolo':target.permAtkBonus=(target.permAtkBonus||0)+4;break;
-        case 'sonicboom':gs._directDmg=(gs._directDmg||0)+alive.reduce((s,m)=>s+_liveAtk(m),0);break;
-        case 'stagedive':gs._directDmg=(gs._directDmg||0)+12;break;
-        case 'possessedperf':target.permAtkBonus=(target.permAtkBonus||0)+Math.floor(gs.corruption/20);break;
-        case 'doomchord':alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+2);break;
-        case 'skullsplitter':gs._directDmg=(gs._directDmg||0)+15;break;
-        case 'tremolopick':target.permAtkBonus=(target.permAtkBonus||0)+2;break;
-        case 'feedbackscream':gs._directDmg=(gs._directDmg||0)+Math.floor(gs.corruption/5)+3;break;
-        case 'bloodharmony':{const dupes=gs.hand.filter((c,i)=>gs.hand.findIndex(h=>h.id===c.id)!==i).length;target.permAtkBonus=(target.permAtkBonus||0)+dupes+1;break}
-        case 'necroticamp':gs._directDmg=(gs._directDmg||0)+8;gs.corruption=Math.min(100,gs.corruption+5);break;
-        case 'herbmoney':gs.stash=Math.min(MAX_STASH,gs.stash+5);break;
-        case 'overdriveped':target.permAtkBonus=(target.permAtkBonus||0)+3;break;
-        case 'riffthief':target.permAtkBonus=(target.permAtkBonus||0)+2;break;
-        case 'devilsdice':{const r=rand(6)+1;if(r>=5)alive.forEach(m=>{m.permAtkBonus=(m.permAtkBonus||0)+5});else if(r>=3)alive.forEach(m=>{m.permAtkBonus=(m.permAtkBonus||0)+3});break}
-        default:target.permAtkBonus=(target.permAtkBonus||0)+2;break;
-      }
-      target._buffCount=(target._buffCount||0)+1;break}
-    case 'resonancecard':{const gap=Math.max(0,highestAtk-_liveAtk(lowest));if(gap>0){lowest.tempAtkBonus=(lowest.tempAtkBonus||0)+gap;lowest._buffCount=(lowest._buffCount||0)+1}break}
-    case 'ampstatic':{const b=gs.corruption>=50?4:2;target.tempAtkBonus=(target.tempAtkBonus||0)+b;target._buffCount=(target._buffCount||0)+1;break}
-    case 'darktuning':{if(gs.corruption<40)break;const n=gs.corruption>=70?3:2;const pool=[...alive];for(let i=0;i<Math.min(n,pool.length);i++){const t=pool.splice(rand(pool.length),1)[0];t.permAtkBonus=(t.permAtkBonus||0)+1;_lpbAdd(t,1)}break}
-    case 'herbmoney':{if(gs.stash>=10){gs.stash-=10;const b=card.upgraded?4:3;target.permAtkBonus=(target.permAtkBonus||0)+b;_lpbAdd(target,b);target._buffCount=(target._buffCount||0)+1};break}
-    case 'goingbroke':gs._directDmg=(gs._directDmg||0)+gs.stash;gs.stash=0;break;
-    case 'burnset':drawCards(gs,1);break;
-    case 'remaster':{if(gs.hand.length>0)gs.hand.splice(rand(gs.hand.length),1);drawCards(gs,3);break}
-    case 'seance':{const h=gs.corruption>=50?6:3;alive.forEach(m=>m.hp=Math.min(m.maxHp,m.hp+h));break}
-    case 'moshpit':{const b=alive.length>=4?2:1;alive.forEach(m=>{m.permAtkBonus=(m.permAtkBonus||0)+b;_lpbAdd(m,b);m._buffCount=(m._buffCount||0)+1});break}
-    case 'bloodritual':{const t=alive.reduce((a,b)=>a.hp>b.hp?a:b);const sac=Math.floor(t.hp*0.25);if(sac<=0)break;t.hp-=sac;const mult=gs._pacts.includes('blood_price')?9:(card.upgraded?8:6);gs._directDmg=(gs._directDmg||0)+sac*mult;gs.corruption=Math.min(100,gs.corruption+15);break}
-    case 'sabbathsigil':gs.corruption=100;rollHellquake(gs,enemy);TRACK.hellquakesFired=(TRACK.hellquakesFired||0)+1;gs._consumeCard=true;break;
-
-    // NEW CARDS apply
-    case 'echopedal':case 'riffthief':{const last=(gs._cardsPlayedIds||[])[gs._cardsPlayedIds.length-1];if(last&&!['echopedal','riffthief'].includes(last)){const c=ALL_CARDS.find(x=>x.id===last);if(c){gs.hand.push({...c,uid:Math.random().toString(36).slice(2)});gs._nextCardFree=true}};break}
-    case 'feedbackscream':target.permAtkBonus=(target.permAtkBonus||0)+4;_lpbAdd(target,4);target.hp=Math.max(1,target.hp-2);break;
-    case 'skullsplitter':{const b=(_liveAtk(target)+(target._lpb||0))>=10?5:3;target.permAtkBonus=(target.permAtkBonus||0)+b;_lpbAdd(target,b);break}
-    case 'doomchord':target.tempAtkBonus=(target.tempAtkBonus||0)+4;if(gs.corruption>=50){const idx=gs.stage.indexOf(target);[-1,1].forEach(d=>{const n=gs.stage[idx+d];if(n&&!n.tooStoned)n.tempAtkBonus=(n.tempAtkBonus||0)+4})};break;
-    case 'bloodharmony':{const idx=gs.stage.indexOf(target);target.tempAtkBonus=(target.tempAtkBonus||0)+2;[-1,1].forEach(d=>{const n=gs.stage[idx+d];if(n&&!n.tooStoned)n.tempAtkBonus=(n.tempAtkBonus||0)+2});break}
-    case 'sonicboom':alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+2);drawCards(gs,1);break;
-    case 'tremolopick':target.tempAtkBonus=(target.tempAtkBonus||0)+((gs._cardsPlayedIds||[]).length>=3?4:1);break;
-    case 'shredsolo':target.encoreThisStrike=true;break;
-    case 'harmonicfb':{const r=(gs._cardsPlayedIds||[]).filter(x=>ALL_CARDS.find(c=>c.id===x&&c.type==='RIFF')).length;const b=Math.max(1,r);target.permAtkBonus=(target.permAtkBonus||0)+b;_lpbAdd(target,b);break}
-    case 'overdriveped':gs._strikeMult=Math.min(10000,gs._strikeMult*1.5);break;
-    case 'devilsdice':{const r=rand(6)+1;if(r>=3&&r<=4)alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+3);else if(r>=5){alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+5);drawCards(gs,2)};break}
-    case 'necroticamp':{const b=Math.floor(gs.corruption/20);alive.forEach(m=>m.tempAtkBonus=(m.tempAtkBonus||0)+b);break}
-    case 'soulbargain':target.tempAtkBonus=(target.tempAtkBonus||0)+5;target.hp=Math.max(1,target.hp-3);gs.corruption=Math.min(100,gs.corruption+5);break;
-    case 'venomriff':target.permAtkBonus=(target.permAtkBonus||0)+3;_lpbAdd(target,3);gs.corruption=Math.min(100,gs.corruption+5);break;
-    case 'offeringpit':{const other=alive.filter(m=>m.uid!==target.uid);if(other.length===0)break;const r=pick(other);r.tempAtkBonus=(r.tempAtkBonus||0)+8;r._buffCount=(r._buffCount||0)+1;target._skipAttack=true;gs.corruption=Math.min(100,gs.corruption+10);break}
-    case 'cursedstrings':target.tempAtkBonus=(target.tempAtkBonus||0)+3;target._buffCount=(target._buffCount||0)+1;target._cursed=true;break;
-    case 'hexdecay':gs._directDmg=(gs._directDmg||0)+Math.floor(enemy._hp*0.15);gs.corruption=Math.min(100,gs.corruption+15);break;
-    case 'infernalpact':gs.corruption=66;alive.forEach(m=>{m.permAtkBonus=(m.permAtkBonus||0)+2;_lpbAdd(m,2)});break;
-    case 'carrioncall':{const st=gs.stage.find(m=>m.tooStoned);if(!st)break;st.tooStoned=false;st.hp=1;st.permAtkBonus=(st.permAtkBonus||0)+5;_lpbAdd(st,5);gs.corruption=Math.min(100,gs.corruption+20);break}
-    case 'possessionriff':target.tempAtkBonus=(target.tempAtkBonus||0)+20;target._buffCount=(target._buffCount||0)+1;gs.corruption=Math.min(100,gs.corruption+10);break;
-    case 'darkcrescendo':if(gs.corruption>=80)gs._strikeMult*=3;break;
-    case 'russianroulette':{const r=rand(6)+1;if(r===1){target.tooStoned=true;target.hp=0}else if(r<=5)target.tempAtkBonus=(target.tempAtkBonus||0)+4;else{target.tempAtkBonus=(target.tempAtkBonus||0)+8;target.stoneShield=2};break}
-    case 'gearcheck':drawCards(gs,2);break;
-    case 'setlistrewrite':break;
-    case 'backstagepass':gs._nextCardFree=true;drawCards(gs,1);break;
-    case 'venueswap':gs.discard.push(...gs.hand);gs.hand=[];drawCards(gs,6);break;
-    case 'doublebooking':gs._extraStrikes=(gs._extraStrikes||0)+1;break;
-    case 'bootlegcopy':{if(gs.hand.length>0){const best=gs.hand.filter(c=>!['bootlegcopy','echopedal'].includes(c.id))[0];if(best)gs.hand.push({...best,uid:Math.random().toString(36).slice(2)})};break}
-    case 'secondwind':gs.embers=gs.maxEmbers;break;
-    case 'pyromaniac':gs.embers=Math.min(gs.maxEmbers,gs.embers+2);gs._pyromaniacActive=true;break;
-    case 'slowburn':gs.embers=Math.min(gs.maxEmbers,gs.embers+1);gs._slowBurnStrikes=(gs._slowBurnStrikes||0)+2;break;
-    case 'ampfeedback':gs.embers=Math.min(gs.maxEmbers,gs.embers+2);gs._ampFbDiscount=1;break;
-    case 'drainthecrowd':gs.embers=Math.min(gs.maxEmbers,gs.embers+2);{const v=pick(alive);v.hp=Math.max(1,v.hp-2)};break;
-    case 'corrsiphon':gs.embers=Math.min(gs.maxEmbers,gs.embers+3);gs.corruption=Math.min(100,gs.corruption+8);break;
-
-    // ── CORRUPTION GAMBIT CARDS — were silent no-ops in the sim ──
-    case 'hellfirerift':alive.forEach(m=>m.ampedThisStrike=(m.ampedThisStrike||0)+1);gs.corruption=Math.min(100,gs.corruption+20);break;
-    case 'soulsacrifice':alive.forEach(m=>{m.permAtkBonus=(m.permAtkBonus||0)+5;_lpbAdd(m,5);m._buffCount=(m._buffCount||0)+1});gs.corruption=Math.min(100,gs.corruption+15);break;
-    case 'voidpact':gs._strikeMult=Math.min(10000,Math.round(gs._strikeMult*2.5*100)/100);gs.corruption=Math.min(100,gs.corruption+25);break;
-
-    // ── LEGACY / CORRUPTION-THRESHOLD GIFT CARDS (live applyCard has all six) ──
-    case 'whispercard':target.permAtkBonus=(target.permAtkBonus||0)+2;_lpbAdd(target,2);target._buffCount=(target._buffCount||0)+1;break;
-    case 'hungercard':alive.forEach(m=>{m.tempAtkBonus=(m.tempAtkBonus||0)+1;m._buffCount=(m._buffCount||0)+1});drawCards(gs,2);break;
-    case 'madnesscard':gs._directDmg=(gs._directDmg||0)+Math.floor(enemy.maxHp*0.15);break;
-    case 'dark_whisper':target.tempAtkBonus=(target.tempAtkBonus||0)+2;target._buffCount=(target._buffCount||0)+1;gs.corruption=Math.min(100,gs.corruption+5);break;
-    case 'blood_price':target.permAtkBonus=(target.permAtkBonus||0)+4;_lpbAdd(target,4);target.hp=Math.max(1,target.hp-3);target._buffCount=(target._buffCount||0)+1;break;
-    case 'void_pact':alive.forEach(m=>{m.tempAtkBonus=(m.tempAtkBonus||0)+2;m._buffCount=(m._buffCount||0)+1});gs.corruption=Math.min(100,gs.corruption+10);break;
+  const idx=_engTargetIdx(card,gs)
+  if(idx<0)return
+  // Adapt: the sim keeps a dense stage array; the engine expects 5 slots.
+  const S={
+    stage:(()=>{const a=gs.stage.map(m=>m?{uid:m.uid,name:m.name||m.id,atk:m.atk,hp:m.hp,maxHp:m.maxHp,role:m.role,keyword:m.keyword,tooStoned:!!m.tooStoned,stoneShield:m.stoneShield,tempBuff:!!m.tempBuff,_origAtk:m._origAtk,permAtkBonus:m.permAtkBonus||0,tempAtkBonus:m.tempAtkBonus||0,buffCount:m._buffCount||0,foil:!!m.foil,mythic:!!m.mythic,demonic:!!m.demonic,_hrUsed:!!m._hrUsed,ampedCount:m.ampedThisStrike?1:0,encoreReady:!!m.encoreThisStrike}:null);while(a.length<5)a.push(null);return a})(),
+    corruption:gs.corruption,embers:gs.embers,maxEmbers:gs.maxEmbers,stash:gs.stash,
+    strikeMult:gs._strikeMult||1,
+    bossHp:enemy._hp,bossMaxHp:enemy.maxHp,bossDebuff:0,
+    hand:gs.hand.map(c=>({id:c.id,uid:c.uid,name:c.id})),
+    deck:gs.deck.map(c=>({id:c.id,uid:c.uid,name:c.id})),
+    discard:gs.discard.map(c=>({id:c.id,uid:c.uid,name:c.id})),
+    strikesLeft:gs._strikesLeft,discardsLeft:gs._discardsLeft,
+    cardsPlayedIds:gs._cardsPlayedIds||[],directDmg:0,pendingDraw:0,pendingEmbers:0,
+    flags:{nextCardFree:!!gs._nextCardFree,allCardsFree:!!gs._allCardsFree,freeCardsLeft:gs._freeCardsLeft||0,
+      stageDiveUsed:!!gs._stageDiveUsed,possessedActive:!!gs._possessedActive,overdriveActive:!!gs._overdriveActive,
+      infencoreActive:!!gs._infencoreActive,bossSkipStrikes:gs._bossSkipStrikes||0,slowBurnStrikes:gs._slowBurn||0,
+      pyromaniacActive:!!gs._pyro,venomDotStacks:gs._venomDot||0,tripBuff:gs._tripBuff,cursedNoHeal:!!gs._cursed}
   }
-  // LIVE (applyCard tail, App.jsx ~6157): a member reaching EXACTLY 3 buffs
-  // costs +20% Corruption. Was entirely unmodelled in the sim.
-  if((target._buffCount||0)===3&&(target._buffCount||0)>_preBuff)gs.corruption=Math.min(100,gs.corruption+20)
-  // cardHeal boss passives — values taken from live applyCard, not invented.
-  if(enemy.passiveId==='cardHeal')enemy._hp=Math.min(enemy.maxHp,enemy._hp+2);
-  if(enemy.passiveId==='cardHeal3b')enemy._hp=Math.min(enemy.maxHp,enemy._hp+8);
-  if(enemy.passiveId==='cardHeal3')enemy._hp=Math.min(enemy.maxHp,enemy._hp+3);
-  if(enemy.passiveId==='cardHeal4')enemy._hp=Math.min(enemy.maxHp,enemy._hp+4);
-  if(enemy.passiveId==='cardHeal5')enemy._hp=Math.min(enemy.maxHp,enemy._hp+15)
-  if(enemy.passiveId==='cardHeal6')enemy._hp=Math.min(enemy.maxHp,enemy._hp+6);
-  if(enemy.passiveId==='cardHeal8')enemy._hp=Math.min(enemy.maxHp,enemy._hp+25);
+  const ctx={targetIdx:idx,artifacts:(gs.artifacts||[]).map(a=>a.id),passives:(gs.passives||[]).map(p=>p.id),
+    pacts:gs._pacts||[],loot:gs.loot||[],upgraded:!!card.upgraded,fightIndex:gs.fightIndex,
+    circleNum:Math.floor(gs.fightIndex/3)+1,selfUid:card.uid,lastRiffId:gs._lastRiffPlayed,rng:Math.random}
+  const res=ENGINE.applyCardEffect(card.id,S,ctx)
+  if(!res||!res.ok)return
+  // Write back. The sim's damage formula sums atk+permAtkBonus, so mirror the
+  // engine's permAtkBonus (live bookkeeping) rather than folding it into atk.
+  for(let i=0;i<gs.stage.length;i++){
+    const src=S.stage[i],dst=gs.stage[i]
+    if(!src||!dst)continue
+    dst.atk=src.atk;dst.hp=src.hp;dst.maxHp=src.maxHp
+    dst.tooStoned=src.tooStoned;dst.stoneShield=src.stoneShield
+    dst.tempBuff=src.tempBuff;dst._origAtk=src._origAtk
+    dst.permAtkBonus=0 // engine keeps ALL damage in .atk (verified: battlecry 5->6, perm stays 0)
+    dst.tempAtkBonus=src.tempAtkBonus||0
+    dst._buffCount=src.buffCount;dst._hrUsed=src._hrUsed
+    dst.ampedThisStrike=false // engine already doubled .atk
+    dst.encoreThisStrike=src.encoreReady
+  }
+  gs.corruption=Math.max(0,Math.min(100,S.corruption))
+  gs.embers=S.embers;gs.stash=S.stash;gs._strikeMult=S.strikeMult
+  gs._discardsLeft=S.discardsLeft
+  // CRITICAL: the sim's piles hold FULL card objects (embers/type/rarity/copies).
+  // Mapping them back as {id,uid} stubs strips .embers, so every card's cost read
+  // as undefined and nothing was playable — the sim collapsed to 97% Circle-1
+  // deaths. Re-hydrate from the originals by uid; only cards the engine newly
+  // created (copies, injected contracts) are rebuilt from the card table.
+  const _byUid=new Map()
+  for(const c of [...gs.hand,...gs.deck,...gs.discard]) if(c&&c.uid!==undefined)_byUid.set(c.uid,c)
+  const _hydrate=c=>{
+    if(!c)return null
+    const orig=_byUid.get(c.uid); if(orig)return orig
+    const def=ALL_CARDS.find(x=>x.id===c.id)
+    return def?{...def,uid:c.uid}:{id:c.id,uid:c.uid,embers:0,type:'UTILITY',rarity:'Common'}
+  }
+  gs.hand=S.hand.map(_hydrate).filter(Boolean)
+  gs.deck=S.deck.map(_hydrate).filter(Boolean)
+  gs.discard=S.discard.map(_hydrate).filter(Boolean)
+  // NOTE: the engine ALREADY subtracted direct damage from S.bossHp and only
+  // *records* it in S.directDmg for telemetry. Feeding it into gs._directDmg as
+  // well made every direct-damage card hit the boss TWICE.
+  enemy._hp=S.bossHp
+  gs._drawNextStrike=(gs._drawNextStrike||0)+(S.pendingDraw||0)
+  gs._tappedOutNext=(S.pendingEmbers||0)>0?S.pendingEmbers:gs._tappedOutNext
+  gs._stageDiveUsed=S.flags.stageDiveUsed
+  // DO NOT propagate possessed/overdrive/infencore/amped: the engine already
+  // applied those multipliers directly to member .atk (live semantics). The sim's
+  // strike formula ALSO multiplies by these flags, which made Possessed
+  // Performance x9 instead of x3 and pushed the measured winrate to 95%.
+  gs._possessedActive=false;gs._overdriveActive=false;gs._infencoreActive=false
+  gs._nextCardFree=S.flags.nextCardFree;gs._allCardsFree=S.flags.allCardsFree;gs._freeCardsLeft=S.flags.freeCardsLeft
+  gs._bossSkipStrikes=S.flags.bossSkipStrikes;gs._venomDot=S.flags.venomDotStacks
+  gs._cursed=S.flags.cursedNoHeal
 }
 
 // Genre system removed — reserved for potential future genre-specific deck
@@ -1280,7 +1222,12 @@ function simShop(gs){
       if(chosen){gs.stash-=pack.cost;TRACK.packsOpened++;let placed=false;
         if(isUpgraded(chosen)){for(let i=0;i<gs.stage.length;i++){if(gs.stage[i].role===chosen.role&&!isUpgraded(gs.stage[i])){gs.stage.splice(i,0,chosen);placed=true;break}}}
         else{for(let i=0;i<gs.stage.length;i++){if(gs.stage[i].role===chosen.role&&isUpgraded(gs.stage[i])){gs.stage.splice(i+1,0,chosen);placed=true;break}}}
-        if(!placed)gs.stage.push(chosen)}}
+        if(!placed)gs.stage.push(chosen)
+        // Aug 1 2026: the splice-insert paths above could push the band past the
+        // 5-slot cap the live game enforces (observed: 6 members). Trim the
+        // weakest so sim band size can never exceed live's.
+        while(gs.stage.length>5){const w=gs.stage.reduce((a,b,i)=>memberScore(b)<memberScore(gs.stage[a])?i:a,0);gs.stage.splice(w,1)}
+      }}
   }else{
     if(circleNum>=2&&gs.stash>=Math.ceil(22*discount)){
       const pack=circleNum>=4&&gs.stash>=Math.ceil(40*discount)?{name:'Demonic',cost:Math.ceil(40*discount),numCandidates:4,foilChance:0.25,mythicChance:0.15,demonicChance:0.05}:{name:'Touring',cost:Math.ceil(22*discount),numCandidates:3,foilChance:0.25,mythicChance:0.05,demonicChance:0};

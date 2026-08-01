@@ -28,6 +28,35 @@ Bot run beat the entire game in 13 minutes. Ledger forensics found and fixed:
    phase 2 "died" at 76k, Executive at 85k) — forensic tap now live: autopilot
    pipes game console (incl. [VICTORY] caller stacks) into the ledger as
    game_console events. Next uploaded ledger names the culprit.
+## 🎯 SINGLE SOURCE OF TRUTH — card logic unified (Aug 1)
+JV: "the sim should be exactly the same as my demo plays, right?" — it now is, and
+it's *proven*, not asserted.
+- **`src/data/cardEngine.js`** (NEW): one pure, deterministic implementation of all
+  86 cards. Transcribed from live's `applyCard`, which is the spec. Self-test
+  `node src/data/cardEngine.js` => PASS 86/86.
+- **`vestibule-sim-kwstacks.js`** no longer reimplements cards — its 156-line
+  `applyCardSim` switch is gone, replaced by an adapter that calls the SAME engine.
+- **`e2e/test-card-parity.cjs`** (NEW): drives the REAL running game, plays each card
+  on a known board, and diffs the measured deltas against the engine's prediction.
+  **51 tested, 51 passed, 0 mismatched.** Every live number is cross-checked between
+  the debug HUD (raw React state) and the DOM — zero disagreements. Re-run with
+  `bash e2e/up.sh && node e2e/test-card-parity.cjs`; exits non-zero on any drift.
+  This is the regression gate: card drift can never silently return.
+- Bugs the parity test caught: engine's Smoke Break drew a card (live draws none —
+  live's `drawUpTo` uses a refill target of 1 AND discards its return value).
+- Adapter bugs caught by re-running the sim: card objects were being replaced with
+  `{id,uid}` stubs (stripping `.embers`, so nothing was playable => 97% C1 deaths);
+  amp/possessed/overdrive multipliers were applied by BOTH engine and sim (x9 instead
+  of x3); temp buffs were never expired in the sim; band size could exceed the 5 cap.
+
+⬜ **BALANCE IS NOW THE OPEN QUESTION, AND IT IS A DESIGN CALL — NOT A TUNING ONE.**
+With a faithful engine the sim says the late game is close to unloseable: at Circle-1
+deaths ~26% the overall winrate is ~67%, and pushing late-game HP to **x81** only
+brings it to 56% while Circle 9 still kills ~0%. Player damage compounds
+(multiplicative artifacts x chains x strikeMult growth) faster than any HP curve can
+chase. HP tuning cannot fix this; capping multiplier STACKING can. Deliberately NOT
+guessed at — needs JV's ruling. Boss HP left where the live bot was last verified.
+
 ## ✅ PRE-FLIGHT CORRECTNESS PASS (Aug 1) — data is now trustworthy
 Fixed before any further data collection, because each of these silently corrupted
 results rather than crashing:
