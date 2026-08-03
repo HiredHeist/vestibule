@@ -4,6 +4,20 @@
 
 ## ⚡ LATEST (Aug 1) — read this first
 
+**RUN THE TESTS BEFORE TRUSTING ANY DATA.** One command, ~5 minutes, five gates:
+- Windows: `e2e\run-tests.bat`   ·   Linux/cloud: `bash e2e/run-tests.sh`
+- Gates: vite build · design-rule lint · card-engine self-test (86 cards) ·
+  simulator 2000 games · **bot perception (33 assertions)** ·
+  **card parity — every card played in the REAL game and diffed against the engine (51)**
+- Prints ALL GREEN or the failures. Card parity failing means the sim and the game have
+  drifted apart again; do not trust overnight numbers until it is green.
+
+**Overnight run:** `e2e\run-bot.bat` — supervisor loop, relaunches on a wedged rig.
+Two independent watchdogs (60s screen-stall, 3min no-gameplay) restart from Circle 1
+and log the cause with a screenshot.
+
+
+
 - **Card duplication KILLED** (bd8a364): quick-play completion filtered hand by stale
   `dragCardUid` → played card stayed in hand + copy in discard. Was JV's "same card
   10x / embers messed up" report and the fake always-refill feel. Filter by `_playUid` now.
