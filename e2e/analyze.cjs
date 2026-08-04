@@ -16,12 +16,38 @@ const FILE = args.find(a => !a.startsWith('--') && a !== SINCE) || path.join(__d
 
 if (!fs.existsSync(FILE)) { console.error('no ledger at ' + FILE); process.exit(1) }
 
-const rows = []
+const ALL = args.includes('--all')
+let rows = []
 for (const line of fs.readFileSync(FILE, 'utf8').split('\n')) {
   if (!line.trim()) continue
   try { const d = JSON.parse(line); if (!SINCE || d.ts >= SINCE) rows.push(d) } catch (e) {}
 }
 if (!rows.length) { console.error('no events' + (SINCE ? ' since ' + SINCE : '')); process.exit(1) }
+
+// ── Aug 4 2026: DEFAULT TO THE CURRENT BUILD ONLY ─────────────────────
+// The ledger is append-only across every session ever run, so a plain report
+// mixed 5 days of KNOWN-BROKEN builds into the totals: a 55% play-fail rate and
+// 9,701 unknown screens (the Aug-1 session that sat on the Collection screen for
+// 5.4 hours) were being presented as if they described the current bot. Old runs
+// also predate bandAtk/fightIndex logging, so they showed "—" depth and 0 ATK and
+// dragged every average down. Default to the newest build hash; --all overrides.
+let BUILD = null
+if (!ALL && !SINCE) {
+  for (let i = rows.length - 1; i >= 0; i--) {
+    const d = rows[i]
+    if (d.ev === 'session' && d.build) { BUILD = d.build; break }
+  }
+  if (BUILD) {
+    let keep = false
+    const filtered = []
+    for (const d of rows) {
+      if (d.ev === 'session' && d.build) keep = (d.build === BUILD)
+      if (keep) filtered.push(d)
+    }
+    if (filtered.length > 20) rows = filtered
+    else BUILD = null
+  }
+}
 
 const pct = (n, d) => d ? (100 * n / d).toFixed(0) + '%' : '—'
 const bar = (v, max, w = 18) => '█'.repeat(Math.max(0, Math.round(w * v / (max || 1)))).padEnd(w)
@@ -50,6 +76,8 @@ if (cur && (cur.plays.length || cur.strikes.length)) runs.push(cur)
 
 console.log('\n' + '='.repeat(96))
 console.log(' VESTIBULE PLAYTEST REPORT   ' + path.basename(FILE) + '   ' + rows.length.toLocaleString() + ' events   ' + runs.length + ' runs')
+if (BUILD) console.log(' SCOPE: current build only — ' + BUILD.slice(0, 46) + '   (use --all for every session ever logged)')
+else if (ALL) console.log(' SCOPE: ALL sessions, including known-broken older builds — totals are NOT comparable')
 console.log(' ' + rows[0].ts.replace('T', ' ').slice(0, 19) + '  ->  ' + rows[rows.length - 1].ts.replace('T', ' ').slice(0, 19))
 console.log('='.repeat(96))
 
