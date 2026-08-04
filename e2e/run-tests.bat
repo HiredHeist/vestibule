@@ -13,13 +13,25 @@ echo ================================================================
 
 echo.
 echo [1/5] Building game...
-call npx vite build >nul 2>&1
-if errorlevel 1 (echo    FAIL - build error & set FAILED=1) else (echo    PASS - build clean)
+call npx vite build > "%TEMP%\vst_build.txt" 2>&1
+if errorlevel 1 (
+  echo    FAIL - build error, output below:
+  echo    ----------------------------------------------------------
+  type "%TEMP%\vst_build.txt"
+  echo    ----------------------------------------------------------
+  set FAILED=1
+) else (echo    PASS - build clean)
 
 echo.
 echo [2/5] Design rules lint...
-call npm run check >nul 2>&1
-if errorlevel 1 (echo    FAIL - lint violations, run: npm run check & set FAILED=1) else (echo    PASS - all rules clean)
+call npm run check > "%TEMP%\vst_check.txt" 2>&1
+if errorlevel 1 (
+  echo    FAIL - lint violations, output below:
+  echo    ----------------------------------------------------------
+  type "%TEMP%\vst_check.txt"
+  echo    ----------------------------------------------------------
+  set FAILED=1
+) else (echo    PASS - all rules clean)
 
 echo.
 echo [3/5] Card engine self-test ^(86 cards, determinism, invariants^)...
