@@ -175,7 +175,7 @@
   },
   {
    "id": "whispercard",
-   "name": "Dark Whisper",
+   "name": "Whispered Curse",
    "type": "CORRUPT",
    "embers": 0,
    "rarity": "Rare",
@@ -379,7 +379,7 @@
    "id": "riffthief",
    "name": "Riff Thief",
    "type": "RIFF",
-   "embers": 2,
+   "embers": 0,
    "rarity": "Rare",
    "copies": 0
   },
@@ -443,7 +443,7 @@
    "id": "shredsolo",
    "name": "Shred Solo",
    "type": "RIFF",
-   "embers": 2,
+   "embers": 1,
    "rarity": "Rare",
    "copies": 0
   },
@@ -555,7 +555,7 @@
   },
   {
    "id": "voidpact",
-   "name": "Void Pact",
+   "name": "Pact of the Void",
    "type": "CORRUPT",
    "embers": 0,
    "rarity": "Rare",
@@ -916,112 +916,144 @@
    "name": "Bjorn",
    "keyword": "FRENZIED",
    "atk": 5,
-   "hp": 6
+   "hp": 6,
+   "role": "Lead Guitarist",
+   "maxHp": 8
   },
   {
    "id": "ragnar",
    "name": "Ragnar",
    "keyword": "FRENZIED",
    "atk": 4,
-   "hp": 7
+   "hp": 7,
+   "role": "Lead Guitarist",
+   "maxHp": 9
   },
   {
    "id": "thor",
    "name": "Thor",
-   "keyword": "DOUBLE TIME",
+   "keyword": "ANCHOR",
    "atk": 0,
-   "hp": 8
+   "hp": 10,
+   "role": "Drummer",
+   "maxHp": 14
   },
   {
    "id": "ingrid",
    "name": "Ingrid",
    "keyword": "ANCHOR",
    "atk": 3,
-   "hp": 10
+   "hp": 10,
+   "role": "Bass Player",
+   "maxHp": 14
   },
   {
    "id": "loki",
    "name": "Loki",
    "keyword": "CORRUPT",
    "atk": 3,
-   "hp": 6
+   "hp": 6,
+   "role": "Synth Player",
+   "maxHp": 8
   },
   {
    "id": "grimnir",
    "name": "Grimnir",
    "keyword": "DEBUFF",
-   "atk": 2,
-   "hp": 7
+   "atk": 5,
+   "hp": 5,
+   "role": "Vocalist",
+   "maxHp": 7
   },
   {
    "id": "dag",
    "name": "Dag",
    "keyword": "ANCHOR",
    "atk": 2,
-   "hp": 12
+   "hp": 12,
+   "role": "Bass Player",
+   "maxHp": 16
   },
   {
    "id": "vitalik",
    "name": "Vitalik",
    "keyword": "FOLK MAGIC",
    "atk": 6,
-   "hp": 9
+   "hp": 9,
+   "role": "Dark Minstrel",
+   "maxHp": 12
   },
   {
    "id": "sigrid",
    "name": "Sigrid",
    "keyword": "SHREDDER",
    "atk": 3,
-   "hp": 8
+   "hp": 8,
+   "role": "Rhythm Guitarist",
+   "maxHp": 11
   },
   {
    "id": "gunnar",
    "name": "Gunnar",
    "keyword": "SHREDDER",
    "atk": 4,
-   "hp": 7
+   "hp": 7,
+   "role": "Rhythm Guitarist",
+   "maxHp": 9
   },
   {
    "id": "astrid",
    "name": "Astrid",
    "keyword": "DEBUFF",
    "atk": 3,
-   "hp": 8
+   "hp": 8,
+   "role": "Vocalist",
+   "maxHp": 11
   },
   {
    "id": "freya",
    "name": "Freya",
    "keyword": "CORRUPT",
    "atk": 4,
-   "hp": 5
+   "hp": 5,
+   "role": "Synth Player",
+   "maxHp": 7
   },
   {
    "id": "ulf",
    "name": "Ulf",
    "keyword": "ANCHOR",
    "atk": 4,
-   "hp": 9
+   "hp": 9,
+   "role": "Bass Player",
+   "maxHp": 12
   },
   {
    "id": "brynja",
    "name": "Brynja",
    "keyword": "ANCHOR",
    "atk": 1,
-   "hp": 14
+   "hp": 14,
+   "role": "Bass Player",
+   "maxHp": 19
   },
   {
    "id": "rolf",
    "name": "Rolf",
    "keyword": "DOUBLE TIME",
    "atk": 1,
-   "hp": 9
+   "hp": 9,
+   "role": "Drummer",
+   "maxHp": 12
   },
   {
    "id": "orm",
    "name": "Orm",
    "keyword": "HEXED",
    "atk": 2,
-   "hp": 11
+   "hp": 11,
+   "role": "Dark Minstrel",
+   "maxHp": 15
   },
   {
    "id": "tanuki",
@@ -1030,7 +1062,9 @@
    "atk": 8,
    "hp": 8,
    "locked": true,
-   "unlockAt": 3000
+   "unlockAt": 3000,
+   "role": "Bass Player",
+   "maxHp": 11
   },
   {
    "id": "lucifer_member",
@@ -1039,7 +1073,9 @@
    "atk": 20,
    "hp": 69,
    "locked": true,
-   "unlockAt": 100000
+   "unlockAt": 100000,
+   "role": "The Devil",
+   "maxHp": 96
   }
  ],
  "decks": {

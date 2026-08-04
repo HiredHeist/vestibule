@@ -428,7 +428,14 @@ try { for (const c of (require('./carddata.json').chainMeta || [])) CHAIN_BY_NAM
 // emit only the growth; reset it whenever a new fight starts.
 const chainLogSeen = new Map()
 async function scanChainLog() {
-  const lines = await P.evaljs(`(() => (document.body.innerText.match(/⛧ RIFF CHAIN:[^\\n]*/g) || []))()`).catch(() => null)
+  // Read window.__devLog, NOT document.body.innerText. addLog() pushes every
+  // game log entry to __devLog unconditionally (App.jsx ~5370), but the combat
+  // log itself is an OVERLAY that is closed almost all the time — so scanning
+  // visible text could never see a chain line. That is why chain_confirmed was
+  // 0 across every session while chain_fired (the bot's own inference) was 31.
+  const lines = await P.evaljs(
+    `(() => ((window.__devLog||[]).map(e=>e&&e.msg||'').filter(m=>m.indexOf('RIFF CHAIN:')>=0)))()`
+  ).catch(() => null)
   if (!Array.isArray(lines)) return
   const now = new Map()
   for (const l of lines) now.set(l, (now.get(l) || 0) + 1)
