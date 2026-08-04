@@ -28,6 +28,46 @@ Bot run beat the entire game in 13 minutes. Ledger forensics found and fixed:
    phase 2 "died" at 76k, Executive at 85k) — forensic tap now live: autopilot
    pipes game console (incl. [VICTORY] caller stacks) into the ledger as
    game_console events. Next uploaded ledger names the culprit.
+## 📊 AUG 3 — DATA COLLECTION MADE ACTUALLY USEFUL
+JV: "fix EVERYTHING... be sure the game restarts even after a win so we can collect a
+large real data pool" + "give us data on all of the cards... no band members that are
+always skipped or cards never played or combos useless or too powerful."
+
+RIG FIXES:
+- **Restarts after a WIN** (was `break`, ending the session — the other reason a day
+  produced 22 minutes). Verified live by injecting a victory screen mid-run:
+  run_end VICTORY -> run_summary -> run_start afterWin=true.
+- **Trip spam killed.** 38 trips in 22 min, all at bossPct=100 "low strikes" — they
+  fired during fight transitions where bossHp reads the NEXT fight's full HP while
+  strikesLeft is the previous fight's exhausted value. Now requires real combat,
+  a non-opening strike, boss below 95%, and one trip per fight. (1 in 10 min.)
+- **35 phantom strikes** on non-combat screens removed — but the FIRST guard was too
+  aggressive (skipped 48 real strikes when the damage overlay hid the HP readout);
+  the authoritative signal is the STRIKE BUTTON, not the HP text.
+- Relic +4 stash reserve dropped (blocked 10 near-affordable buys); **relics/pedals now
+  bought BEFORE member packs once band >= 3**, per the economy audit (band caps at 5,
+  only 2 packs are ever usable, relics stack multiplicatively and were dead until Aug 1).
+- Pedal tile-name parse no longer mistakes the price line for the item name.
+
+NEW TELEMETRY (this is what makes a run analysable):
+- `run_summary` per run: outcome, minutes, deepest fight/circle, strikes, fails, chains,
+  trips, digs, relics, pedals, recruits, pacts, forge upgrades, peak corruption, peak
+  band ATK, per-card play counts.
+- `strike` now carries bossHp, bossMaxHp, **bandAtk**, aliveMembers and the exact cards
+  played into it. `strike_result` carries hpBefore/hpAfter/**dmg**/ratio.
+  **This is the proof-of-real-run data**: a genuine kill shows damage explainable by
+  band ATK; the Aug-3 phantom showed a 330,548 HP boss "dying" to a band dealing ~2k.
+- `draft_options` / `recruit_options` log what was OFFERED, not just picked — without
+  the rejected slate you cannot tell an unpopular member from one that never appeared.
+
+NEW: **`node e2e\analyze.cjs`** — turns a ledger into a report:
+  one line per run · difficulty wall (where runs end) · card pool coverage + never-played
+  list · damage amplification percentiles (flags multiplier stacking) · INTEGRITY checks
+  that flag impossible kills · **CARD BALANCE verdicts** (DEAD / RARE / WEAK? /
+  OVERPOWERED? by damage amplification vs baseline) · **BAND MEMBER** offered-vs-picked
+  pick rates (flags ALWAYS SKIPPED / ALWAYS TAKEN) · **COMBO/CHAIN** fire rates + never-fired.
+⚠ Verdicts need volume — under ~50 runs, DEAD means "not yet seen", not "bad".
+
 ## 🚨 AUG 3 OVERNIGHT POST-MORTEM — why a day produced 22 minutes
 **The 60s guardrail WORKED.** Ledger proof: HARD_WATCHDOG fired at 05:50, 05:51 and
 05:52, escalated to HARD_EXIT ("rig wedged after 3 fires"), run-bot.bat relaunched a

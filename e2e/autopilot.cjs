@@ -11,7 +11,33 @@ const LOG = path.join(__dirname, 'session3-events.jsonl')
 const ACTION = { at: Date.now(), fires: 0 }
 const ACTION_STALL_MS = 180000 // 3 min with no play/strike/descent = not playing
 const ACTION_EVENTS = new Set(['play', 'strike', 'descent', 'draft_confirm', 'shop_buy', 'shop_leave', 'recruit_pick', 'run_start', 'event_choice', 'pact_choice', 'forge_pick', 'modal_pick'])
-const ev = (type, data) => { if (ACTION_EVENTS.has(type)) ACTION.at = Date.now(); fs.appendFileSync(LOG, JSON.stringify({ ts: new Date().toISOString(), ev: type, ...data }) + '\n') }
+const ev = (type, data) => { if (ACTION_EVENTS.has(type)) ACTION.at = Date.now();
+  try { if (typeof RUN === 'object' && RUN) {
+    const d = data || {}
+    if (type === 'play') RUN.cardsPlayed[d.card] = (RUN.cardsPlayed[d.card] || 0) + 1
+    else if (type === 'play_fail') RUN.fails++
+    else if (type === 'chain_fired') RUN.chains++
+    else if (type === 'trip_used') RUN.trips++
+    else if (type === 'discard_dig') RUN.digs++
+    else if (type === 'recruit_pick') RUN.recruits.push(String(d.pick || '').slice(0, 26))
+    else if (type === 'pact_choice') RUN.pacts.push(String(d.pick || '').slice(0, 26))
+    else if (type === 'forge_pick') RUN.forges.push(d.card)
+    else if (type === 'shop_buy') {
+      const lbl = String(d.label || '')
+      if (/^artifact:/.test(lbl)) RUN.relics.push(lbl.slice(9, 34))
+      else if (/^effect pedal:/.test(lbl)) RUN.pedals.push(lbl.slice(13, 38))
+      else if (/Pack/i.test(lbl)) RUN.packs++
+    } else if (type === 'strike') {
+      RUN.strikes++
+      if (d.overtime) RUN.overtimeStrikes++
+      if (typeof d.corr === 'number' && d.corr > RUN.peakCorruption) RUN.peakCorruption = d.corr
+      if (typeof d.bossHp === 'number' && d.bossHp > RUN.maxBossHpSeen) RUN.maxBossHpSeen = d.bossHp
+      if (typeof d.fightIndex === 'number' && d.fightIndex > RUN.deepestFight) {
+        RUN.deepestFight = d.fightIndex; RUN.deepestCircle = Math.floor(d.fightIndex / 3) + 1
+      }
+      if (typeof d.bandAtk === 'number' && d.bandAtk > RUN.peakBandAtk) RUN.peakBandAtk = d.bandAtk
+    } else if (type === 'descent') RUN.deepestBoss = String(d.pick || '').slice(0, 40)
+  } } catch (e) {} fs.appendFileSync(LOG, JSON.stringify({ ts: new Date().toISOString(), ev: type, ...data }) + '\n') }
 // every pilot op gets a hard timeout — a hung CDP call must never freeze the loop
 const TMO = 20000
 const wrap = fn => (...a) => Promise.race([fn(...a), new Promise((_, rej) => setTimeout(() => rej(new Error('op timeout: ' + fn.name)), TMO))])
@@ -281,7 +307,7 @@ async function combatTick(s) {
   // re-reading state after EVERY card -> hold a clutch trip -> strike.
   let g = await perceive()
   if (g.bossHp !== null && g.bossMaxHp && g.bossHp === g.bossMaxHp) {
-    strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set(); hrUsedThisFight.clear()
+    strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set(); hrUsedThisFight.clear(); tripUsedThisFight = false
   }
   lastBossHp = g.bossHp
 
@@ -379,21 +405,94 @@ async function combatTick(s) {
   // of every boss at 100% HP (9/9 trips in the last run were wasted that way).
   const bossPct = (g.bossHp && g.bossMaxHp) ? g.bossHp / g.bossMaxHp : 1
   const bandHurt = aliveOf(g).length > 0 && aliveOf(g).reduce((a, m) => a + m.hp, 0) / Math.max(1, aliveOf(g).reduce((a, m) => a + m.maxHp, 0)) < 0.4
-  const desperate = (g.strikesLeft !== null && g.strikesLeft <= 2 && bossPct > 0.45) || g.overtime || bandHurt
+  // Aug 3 2026: the Aug-3 ledger shows 38 trips in 22 minutes, EVERY one at
+  // bossPct=100 with reason 'low strikes'. They were firing during the
+  // fight-to-fight transition, where bossHp reads as the NEXT fight's full HP
+  // while strikesLeft is still the previous fight's exhausted value. Three
+  // guards: (a) must genuinely be in combat, (b) never on the opening strike of
+  // a fight, (c) never against a boss that has taken essentially no damage.
+  // Also the game allows only ONE trip per fight, so cap it bot-side and stop
+  // wasting ticks re-clicking.
+  const inRealCombat = g.inCombat && g.bossHp > 0 && g.strikesLeft !== null
+  const emergency = g.overtime || bandHurt || (g.strikesLeft <= 1 && bossPct > 0.35)
+  const desperate = inRealCombat && strikeNumThisFight > 0 && bossPct < 0.95 && emergency && !tripUsedThisFight
   if (desperate) {
     // prefer the strongest held drug for the situation: DMT > acid > shrooms late
     const pick = ['💠', '🧪', '🍄'].map(e => g0Clickable(s, e)).find(Boolean)
       || (await P.state()).clickables.find(c => /🍄|🧪|💠/.test(c.t) && c.t.length < 30)
-    if (pick) { ev('trip_used', { btn: pick.t, bossPct: (bossPct * 100).toFixed(0), why: g.overtime ? 'overtime' : bandHurt ? 'band<40%hp' : 'low strikes' }); await P.click(pick.x, pick.y); await P.connect().then(p => p.waitForTimeout(1500)); g = await perceive() }
+    if (pick) { tripUsedThisFight = true; ev('trip_used', { btn: pick.t, bossPct: (bossPct * 100).toFixed(0), strikesLeft: g.strikesLeft, why: g.overtime ? 'overtime' : bandHurt ? 'band<40%hp' : 'low strikes' }); await P.click(pick.x, pick.y); await P.connect().then(p => p.waitForTimeout(1500)); g = await perceive() }
   }
 
-  ev('strike', { strikes: g.strikesLeft, overtime: g.overtime, bossHp: g.bossHp, played, embers: g.embers, corr: g.corruption, chains: firedChainsThisFight.size, fightIndex: g.fightIndex })
+  // Aug 3: skip strikes fired during fight-to-fight transitions (bossHp=None).
+  // FIRST ATTEMPT was too aggressive — it also skipped REAL strikes whenever the
+  // damage-cascade overlay covered the HP readout (48 skipped in one 8-min test,
+  // so fights never resolved). The authoritative signal is the STRIKE BUTTON: if
+  // the game is offering one, we are in a fight, whatever the HP text looks like.
+  if (g.bossHp === null) {
+    const sNow = await P.state().catch(() => null)
+    const hasStrikeBtn = sNow && sNow.clickables.some(c => /STRIKE/i.test(c.t) && !/DISCARD/i.test(c.t))
+    if (!hasStrikeBtn) { ev('strike_skipped', { why: 'no boss HP and no strike button (transition)' }); return }
+  }
+  const _bandAtk = aliveOf(g).reduce((a, m) => a + (m.atk || 0), 0)
+  // Aug 3 2026 — PROOF-OF-REAL-RUN TELEMETRY. Log boss HP before AND after the
+  // strike resolves, plus the damage actually dealt and the band's ATK. A genuine
+  // kill shows dmg >= hpBefore with a band big enough to explain it; the phantom
+  // victory that ate the Aug 3 night showed a boss at 330,548 HP "dying" to a band
+  // dealing ~2k. With these fields, any faked kill is arithmetic anyone can catch.
+  const _hpBefore = g.bossHp
+  ev('strike', { strikes: g.strikesLeft, overtime: g.overtime, bossHp: _hpBefore, bossMaxHp: g.bossMaxHp, bandAtk: _bandAtk, aliveMembers: aliveOf(g).length, played, embers: g.embers, corr: g.corruption, chains: firedChainsThisFight.size, fightIndex: g.fightIndex, cards: playedIdsThisFight.slice(-played) })
   strikeNumThisFight++
   await P.clickText('strike').catch(e => ev('warn', { msg: 'strike btn: ' + e.message }))
   await P.connect().then(p => p.waitForTimeout(1800))
+  // measure what the strike ACTUALLY did — the audit trail that distinguishes a
+  // real kill from a race condition
+  try {
+    const after = await perceive()
+    const hpAfter = after.bossHp
+    if (_hpBefore !== null && hpAfter !== null) {
+      ev('strike_result', { fightIndex: g.fightIndex, hpBefore: _hpBefore, hpAfter, dmg: _hpBefore - hpAfter, bandAtk: _bandAtk, ratio: +((_hpBefore - hpAfter) / Math.max(1, _bandAtk)).toFixed(1) })
+    } else if (_hpBefore !== null && hpAfter === null) {
+      ev('strike_result', { fightIndex: g.fightIndex, hpBefore: _hpBefore, hpAfter: 'gone', dmg: _hpBefore, bandAtk: _bandAtk, note: 'boss died or fight ended' })
+    }
+  } catch (e) {}
 }
 function g0Clickable(s, emoji) { return (s.clickables || []).find(c => c.t.includes(emoji) && c.t.length < 30) }
 const hrUsedThisFight = new Set()   // Heavy Riff: once per member per fight (live game hard-rejects a repeat)
+let tripUsedThisFight = false       // the game allows one trip per fight; don't waste ticks re-clicking
+
+// ══════════════════════════════════════════════════════════════════════
+// RUN ACCOUNTING (Aug 3 2026) — the ledger previously had no per-run record,
+// so answering "how deep do runs get / what kills them / which cards matter"
+// meant hand-reconstructing from thousands of raw rows. Every run now ends with
+// ONE `run_summary` row carrying everything an analysis needs.
+// ══════════════════════════════════════════════════════════════════════
+const RUN = {
+  n: 0, startedAt: Date.now(), deepestFight: -1, deepestCircle: 0, deepestBoss: '',
+  cardsPlayed: {}, strikes: 0, fails: 0, chains: 0, trips: 0, digs: 0,
+  relics: [], pedals: [], packs: 0, recruits: [], pacts: [], forges: [],
+  peakCorruption: 0, peakBandAtk: 0, maxBossHpSeen: 0, overtimeStrikes: 0
+}
+function runReset() {
+  RUN.n++; RUN.startedAt = Date.now(); RUN.deepestFight = -1; RUN.deepestCircle = 0; RUN.deepestBoss = ''
+  RUN.cardsPlayed = {}; RUN.strikes = 0; RUN.fails = 0; RUN.chains = 0; RUN.trips = 0; RUN.digs = 0
+  RUN.relics = []; RUN.pedals = []; RUN.packs = 0; RUN.recruits = []; RUN.pacts = []; RUN.forges = []
+  RUN.peakCorruption = 0; RUN.peakBandAtk = 0; RUN.maxBossHpSeen = 0; RUN.overtimeStrikes = 0
+}
+function emitRunSummary(outcome, extra) {
+  ev('run_summary', Object.assign({
+    run: RUN.n, outcome,
+    minutes: +((Date.now() - RUN.startedAt) / 60000).toFixed(1),
+    deepestFight: RUN.deepestFight, deepestCircle: RUN.deepestCircle, deepestBoss: RUN.deepestBoss,
+    strikes: RUN.strikes, playFails: RUN.fails, chains: RUN.chains, trips: RUN.trips, digs: RUN.digs,
+    overtimeStrikes: RUN.overtimeStrikes, peakCorruption: RUN.peakCorruption,
+    peakBandAtk: RUN.peakBandAtk, maxBossHp: RUN.maxBossHpSeen,
+    relics: RUN.relics, pedals: RUN.pedals, packsBought: RUN.packs,
+    recruits: RUN.recruits, pacts: RUN.pacts, forgeUpgrades: RUN.forges,
+    distinctCards: Object.keys(RUN.cardsPlayed).length,
+    cardsPlayed: RUN.cardsPlayed
+  }, extra || {}))
+  runReset()
+}
 
 // per-fight brain state (sim: _cardsPlayedIds persists across strikes within a fight)
 const playedIdsThisFight = []
@@ -533,7 +632,25 @@ async function shopTick(s) {
   const tl = t.toLowerCase()
   // sold-check: look for SOLD within 200 chars AFTER the label (case-insensitive find)
   const tryable = l => { if (BOT.boughtThisShop.has(l)) return false; const i = tl.indexOf(l.toLowerCase()); return i < 0 ? true : !/sold/i.test(t.slice(i, i + 60)) } // 60 = tile-local; wider windows bleed into neighboring tiles' SOLD stamps
-  // 1. MEMBERS FIRST (sim: needsMembers = band < 5)
+  // ── Aug 3 2026 DOCTRINE CHANGE: RELICS BEFORE PACKS AT BAND >= 3 ──────
+  // The economy audit did the math: band slots cap at 5 and the draft + free
+  // Welcome Pack already fill 3, so at most two member packs per run are usable
+  // (best case 32 stash -> x1.57 damage, then it is over forever). Three cheap
+  // relics stack multiplicatively to x2.5+, and the ceiling is x18+. Relics were
+  // ALSO silently dead in the live game until Aug 1, which is why members-first
+  // ever looked correct. Now that they work, an expert buys relics.
+  const relicsFirst = bandSize !== null && bandSize >= 3
+  if (relicsFirst) {
+    const a0 = tileInfo('⛧ ARTIFACT')
+    if (BOT.artifacts < 3 && tryable('artifact') && a0 && stash >= a0.cost) {
+      if (await buyNamed(a0.cands, `relic-first cost=${a0.cost} band=${bandSize}`, 'artifact')) { BOT.artifacts++; return }
+    }
+    const p0 = tileInfo('⛧ EFFECT PEDAL')
+    if (BOT.pedals < 2 && tryable('effect pedal') && p0 && stash >= p0.cost) {
+      if (await buyNamed(p0.cands, `pedal-first cost=${p0.cost} band=${bandSize}`, 'effect pedal')) { BOT.pedals++; return }
+    }
+  }
+  // 1. MEMBERS (sim: needsMembers = band < 5)
   if (bandSize !== null && bandSize < 5) {
     if (/welcome pack/i.test(t)) {
       if (tryable('welcome pack')) { if (await buy('welcome pack', 'free member')) return; ev('shop_skip', { tile: 'welcome', why: 'not in clickables' }) }
@@ -572,20 +689,27 @@ async function shopTick(s) {
     await P.click(c.x, c.y); return true
   }
   const tileInfo = marker => {
-    const m = t.match(new RegExp(marker + '\\s*\\n(\\d+)\\s*\\n([^\\n]+)\\n?([^\\n]*)'))
-    return m ? { cost: +m[1], cands: [m[2], m[3]] } : null
+    // Aug 3: grab the next FOUR lines after the cost and drop any that are pure
+    // numbers or bare emoji — the ledger showed 3x "tile not clickable, tried: 10"
+    // where the captured "name" was the price line.
+    const m = t.match(new RegExp(marker + '\\s*\\n(\\d+)((?:\\s*\\n[^\\n]*){1,4})'))
+    if (!m) return null
+    const cands = String(m[2] || '').split('\n')
+      .map(x => x.trim())
+      .filter(x => x && !/^\d+$/.test(x) && /[A-Za-z]{3}/.test(x))
+    return { cost: +m[1], cands }
   }
   if (BOT.artifacts < 3 && tryable('artifact')) {
     const a = tileInfo('⛧ ARTIFACT')
-    if (a && stash >= a.cost + 4) {
+    if (a && stash >= a.cost) { // Aug 3: dropped the +4 reserve — it blocked 10 near-affordable relic buys in one session
       if (await buyNamed(a.cands, `relic cost=${a.cost}`, 'artifact')) { BOT.artifacts++; return }
-    } else if (a) ev('shop_skip', { tile: 'artifact', why: `stash ${stash} < ${a.cost}+4` })
+    } else if (a) ev('shop_skip', { tile: 'artifact', why: `stash ${stash} < ${a.cost}` })
   }
   if (BOT.pedals < 2 && tryable('effect pedal')) {
     const p = tileInfo('⛧ EFFECT PEDAL')
-    if (p && stash >= p.cost + 6) {
+    if (p && stash >= p.cost) {
       if (await buyNamed(p.cands, `pedal cost=${p.cost}`, 'effect pedal')) { BOT.pedals++; return }
-    } else if (p) ev('shop_skip', { tile: 'pedal', why: `stash ${stash} < ${p.cost}+6` })
+    } else if (p) ev('shop_skip', { tile: 'pedal', why: `stash ${stash} < ${p.cost}` })
   }
   // 4. DRUGS (sim: shrooms if stash>=16, acid if stash>=22 — reserve logic)
   if (stash >= 16 && /Shrooms/i.test(t) && !/Shrooms\s*\n?DRY/i.test(t) && tryable('shrooms') && await buy('shrooms', 'panic button reserve')) return
@@ -641,6 +765,14 @@ async function recruitTick(s) {
     const safe = scored.filter(c => !/FALLEN|The Devil/i.test(c.t))
     const pickFrom = safe.length ? safe : scored
     const bestSafe = pickFrom.sort((a, b) => (b.p + (counts[b.kw] > 1 ? 15 : 0)) - (a.p + (counts[a.kw] > 1 ? 15 : 0)))[0]
+    // Aug 3 2026 BALANCE TELEMETRY: log what was OFFERED, not just what was taken.
+    // Without the rejected options you cannot tell an unpopular member from one that
+    // never appeared — which is exactly the "band members that are always skipped"
+    // question this playtest exists to answer.
+    ev('recruit_options', {
+      offered: scored.map(c => ({ name: (c.t.match(/([A-Z][a-z]+)/) || [])[1] || c.t.slice(0, 14), kw: c.kw, score: c.p })),
+      picked: (bestSafe.t.match(/([A-Z][a-z]+)/) || [])[1] || bestSafe.t.slice(0, 14)
+    })
     ev('recruit_pick', { pick: bestSafe.t.slice(0, 50), score: bestSafe.p })
     // Aug 1: a recruit click that silently misses used to hang here until the 60s
     // watchdog restarted the run (observed once in a 3-minute smoke run). Verify
@@ -721,7 +853,11 @@ async function draftTick(s) {
     const order = partner ? [top, partner, ...cand.filter(c => c !== top && c !== partner)] : cand
     // click ONE candidate, then re-read and let the loop decide the next move
     const pick = order[attempt % order.length]
-    ev('draft_click', { attempt, pick: pick.t.slice(0, 30) })
+    if (attempt === 0) {
+      // full opening slate — lets the report compute per-member draft pick rates
+      ev('draft_options', { offered: cand.map(c => ({ name: (c.t.match(/([A-Z][a-z]+)/) || [])[1] || c.t.slice(0, 14), kw: c.kw, score: c.score })) })
+    }
+    ev('draft_click', { attempt, pick: pick.t.slice(0, 30), name: (pick.t.match(/([A-Z][a-z]+)/) || [])[1] || '' })
     await P.click(pick.x, pick.y)
     await P.connect().then(p => p.waitForTimeout(500))
     st = await P.state()
@@ -880,6 +1016,7 @@ async function main() {
       lastProgressAt = Date.now(); lastProgressHash = ''; lastHash = ''; stuck = 0
       strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set(); hrUsedThisFight.clear()
       resetRunEconomy()
+      emitRunSummary('abandoned_stall')
       ev('run_restart', { reason: 'stall watchdog', totalStallRestarts: stallRestarts })
       continue
     }
@@ -961,7 +1098,14 @@ async function main() {
         if (preferNewRun) { preferNewRun = false; await P.clickText('enter the vestibule').catch(() => P.clickText('skip tutorial').catch(() => {})) }
         else await P.clickText('continue').catch(() => P.clickText('skip tutorial').catch(() => P.clickText('enter the vestibule')))
       }
-      else if (type === 'death') { const f = await P.shot('death-' + Date.now()); ev('run_end', { result: 'death', shot: f, text: s.text.slice(0, 1200) }); await P.clickText('play again').catch(() => P.clickText('try again').catch(() => {})) }
+      else if (type === 'death') {
+        const f = await P.shot('death-' + Date.now())
+        ev('run_end', { result: 'death', shot: f, text: s.text.slice(0, 1200) })
+        emitRunSummary('death', { deathText: s.text.slice(0, 220).replace(/\n/g, ' | ') })
+        resetRunEconomy()
+        strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set(); hrUsedThisFight.clear(); tripUsedThisFight = false
+        await P.clickText('play again').catch(() => P.clickText('try again').catch(() => {}))
+      }
       else if (type === 'victory') {
         // Aug 3 2026: this used to `break`, ENDING THE WHOLE SESSION on a win. JV left
         // the bot for a day and got 22 minutes of data because it "won" at 06:03 and
@@ -970,6 +1114,7 @@ async function main() {
         const f = await P.shot('VICTORY-' + Date.now())
         winCount++
         ev('run_end', { result: 'VICTORY', wins: winCount, shot: f, text: s.text.slice(0, 2000) })
+        emitRunSummary('VICTORY')
         const vp = await P.evaljs('({w:innerWidth,h:innerHeight})').catch(() => null)
         if (vp) await P.click(Math.round(vp.w / 2), Math.round(vp.h * 0.9)).catch(() => {})
         await P.evaljs("localStorage.removeItem('vst_save_v4'); setTimeout(()=>location.reload(),50); 'x'").catch(() => {})
