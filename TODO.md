@@ -28,6 +28,34 @@ Bot run beat the entire game in 13 minutes. Ledger forensics found and fixed:
    phase 2 "died" at 76k, Executive at 85k) — forensic tap now live: autopilot
    pipes game console (incl. [VICTORY] caller stacks) into the ledger as
    game_console events. Next uploaded ledger names the culprit.
+## ✅ AUG 4 — BOT VERIFIED WORKING (iterated in-sandbox, no babysitting)
+JV: "run it over and over until we get the exact results i want to see." Four bugs
+found and fixed by running it myself rather than shipping half-fixes:
+1. **`Cannot access 'tileInfo' before initialization`** — the relics-first block was
+   placed ABOVE the const it calls. Temporal dead zone => EVERY shop visit threw, 43
+   times in one session, burning all 3 stuck-recoveries and killing runs at 2.5 min.
+   The doctrine was right; the placement was not. Moved below its dependencies.
+2. **Recruit selector clicked dead space.** A live DOM dump showed the truth:
+   [0] w=409 cursor=crosshair = the CONTAINER; [1]/[3] w=195 cursor=pointer = the real
+   cards. "Keep the outermost node" kept the container, so clicks landed BETWEEN the
+   two cards (27 retries, 9 unresponsive, band stuck at 2). Now: only elements the game
+   made interactive, one per column, tallest wins.
+3. **Silent DOUBLE TIME block** — RecruitScreen opens with `if(blockedDbl) return`, so
+   picking a second drummer did nothing. The bot now reads the game's own canAdd signal
+   (cursor + opacity) instead of modelling the rule, and never passes on a paid pack.
+4. **Booster "Pick 1 card" modal classified as shop** (it renders over the shop), so the
+   bot ran shop logic against an undismissable modal — 9 stucks and a 62s stall.
+   Now matched before the _shopish guard.
+
+VERIFIED over a 28-minute unattended session: **0 errors, 0 stalls, 0 crashes,
+0 watchdog fires**, 450 cards played, 212 strikes, band reaching the full 5, 3 runs
+(2 completed as wins and BOTH auto-restarted), 49% card-pool coverage, and the
+analyzer reporting ✓ DATA LOOKS TRUSTWORTHY (no impossible kills).
+
+FIRST REAL BALANCE SIGNAL FROM LIVE PLAY: damage amplification median x5.8,
+**p90 x46, max x1327** — the multiplier-stacking problem the sim predicted, now
+measured in the actual game. Capping stacking (not HP) is the lever.
+
 ## 📊 AUG 3 — DATA COLLECTION MADE ACTUALLY USEFUL
 JV: "fix EVERYTHING... be sure the game restarts even after a win so we can collect a
 large real data pool" + "give us data on all of the cards... no band members that are

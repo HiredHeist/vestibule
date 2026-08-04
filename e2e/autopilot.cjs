@@ -63,6 +63,12 @@ async function screenType(s) {
   if (btn('got it')) return 'popup'
   if (btn('discard & continue') || btn('✓ confirm')) return 'modal'
   const _shopish = t.includes('BACK TO THE PIT') || t.includes("SLY'S MERCH")
+  // Aug 4 2026: the opened booster modal ("Pick 1 card") renders OVER the shop, so
+  // the _shopish guard below classified it as 'shop' and the bot ran shop logic
+  // against a modal it could not dismiss — 9 stucks and a 62s stall in one run.
+  // The modal's instruction line is "Pick N card(s)"; the shop's own booster TILE
+  // reads "Pick 1." with no 'card', so this is unambiguous and must be tested FIRST.
+  if (/PICK \d+ CARDS?\b/.test(t)) return 'boosterpick'
   if (!_shopish && (t.includes('⛧ CONTAINS ⛧') || (t.includes('PICK 1') && t.includes('BOOSTER')))) return 'boosterpick'
   if (t.includes('CLICK ANYWHERE') || (t.includes('CREDITS') && !t.includes('STRIKE'))) return 'credits'
   if (t.includes('WELCOME TO HELL') && !btn('strike')) return 'wth'
@@ -639,24 +645,6 @@ async function shopTick(s) {
   const tl = t.toLowerCase()
   // sold-check: look for SOLD within 200 chars AFTER the label (case-insensitive find)
   const tryable = l => { if (BOT.boughtThisShop.has(l)) return false; const i = tl.indexOf(l.toLowerCase()); return i < 0 ? true : !/sold/i.test(t.slice(i, i + 60)) } // 60 = tile-local; wider windows bleed into neighboring tiles' SOLD stamps
-  // ── Aug 3 2026 DOCTRINE CHANGE: RELICS BEFORE PACKS AT BAND >= 3 ──────
-  // The economy audit did the math: band slots cap at 5 and the draft + free
-  // Welcome Pack already fill 3, so at most two member packs per run are usable
-  // (best case 32 stash -> x1.57 damage, then it is over forever). Three cheap
-  // relics stack multiplicatively to x2.5+, and the ceiling is x18+. Relics were
-  // ALSO silently dead in the live game until Aug 1, which is why members-first
-  // ever looked correct. Now that they work, an expert buys relics.
-  const relicsFirst = bandSize !== null && bandSize >= 3
-  if (relicsFirst) {
-    const a0 = tileInfo('⛧ ARTIFACT')
-    if (BOT.artifacts < 3 && tryable('artifact') && a0 && stash >= a0.cost) {
-      if (await buyNamed(a0.cands, `relic-first cost=${a0.cost} band=${bandSize}`, 'artifact')) { BOT.artifacts++; return }
-    }
-    const p0 = tileInfo('⛧ EFFECT PEDAL')
-    if (BOT.pedals < 2 && tryable('effect pedal') && p0 && stash >= p0.cost) {
-      if (await buyNamed(p0.cands, `pedal-first cost=${p0.cost} band=${bandSize}`, 'effect pedal')) { BOT.pedals++; return }
-    }
-  }
   // 1. MEMBERS (sim: needsMembers = band < 5)
   if (bandSize !== null && bandSize < 5) {
     if (/welcome pack/i.test(t)) {
@@ -705,6 +693,31 @@ async function shopTick(s) {
       .map(x => x.trim())
       .filter(x => x && !/^\d+$/.test(x) && /[A-Za-z]{3}/.test(x))
     return { cost: +m[1], cands }
+  }
+
+  // ── Aug 4 2026: THIS BLOCK MUST STAY BELOW buyNamed/tileInfo ─────────
+  // It previously sat above them. `const` is in the temporal dead zone, so every
+  // single shop visit threw "Cannot access 'tileInfo' before initialization" —
+  // 43 times in one session, which stuck the bot in the shop, burned all three
+  // stuck-recovery attempts and aborted the run after 2.5 minutes. The relics-first
+  // doctrine itself is correct (see the economy audit); the placement was not.
+  // ── Aug 3 2026 DOCTRINE CHANGE: RELICS BEFORE PACKS AT BAND >= 3 ──────
+  // The economy audit did the math: band slots cap at 5 and the draft + free
+  // Welcome Pack already fill 3, so at most two member packs per run are usable
+  // (best case 32 stash -> x1.57 damage, then it is over forever). Three cheap
+  // relics stack multiplicatively to x2.5+, and the ceiling is x18+. Relics were
+  // ALSO silently dead in the live game until Aug 1, which is why members-first
+  // ever looked correct. Now that they work, an expert buys relics.
+  const relicsFirst = bandSize !== null && bandSize >= 3
+  if (relicsFirst) {
+    const a0 = tileInfo('⛧ ARTIFACT')
+    if (BOT.artifacts < 3 && tryable('artifact') && a0 && stash >= a0.cost) {
+      if (await buyNamed(a0.cands, `relic-first cost=${a0.cost} band=${bandSize}`, 'artifact')) { BOT.artifacts++; return }
+    }
+    const p0 = tileInfo('⛧ EFFECT PEDAL')
+    if (BOT.pedals < 2 && tryable('effect pedal') && p0 && stash >= p0.cost) {
+      if (await buyNamed(p0.cands, `pedal-first cost=${p0.cost} band=${bandSize}`, 'effect pedal')) { BOT.pedals++; return }
+    }
   }
   if (BOT.artifacts < 3 && tryable('artifact')) {
     const a = tileInfo('⛧ ARTIFACT')
