@@ -16,8 +16,12 @@
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, extname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const ROOT = new URL('../src', import.meta.url).pathname
+// fileURLToPath, NOT .pathname — on Windows .pathname yields "/C:/Users/..."
+// which readdirSync resolves against the drive root as "C:\C:\Users\...".
+// This gate silently never ran on Windows until Aug 4 2026.
+const ROOT = fileURLToPath(new URL('../src', import.meta.url))
 const FONT_FLOOR = 13
 const SCRATCH_FONT_FLOOR = 20  // ScratchFont is decorative — illegible below 20pt
 
