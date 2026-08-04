@@ -64,6 +64,38 @@ const OVERLAY_BTNS = ['got it', 'onward', 'continue', 'collect', 'claim', 'next 
 async function screenType(s) {
   const t = s.text.toUpperCase()
   const btn = txt => s.clickables.some(c => c.t.toLowerCase().includes(txt))
+  // ── Aug 4 2026: THE STRIKE BUTTON, NOT THE WORD "STRIKE" ────────────
+  // `btn('strike')` was a SUBSTRING test over every clickable's text, and half the
+  // relic pool describes itself with the word: "Solo Sermon x6.0 if EXACTLY 2
+  // cards played this strike", "Resonance Coil x1.2 for each duplicate card
+  // PLAYED this Strike", "Spit Cup x1.5 if you discarded >=1 card this STRIKE".
+  // Those tiles are clickables ON THE SHOP SCREEN, so any shop that happened to
+  // roll one of them was classified as COMBAT — combatTick then hunted for a hand
+  // that does not exist, never pressed "Back to the Pit", and the run wedged.
+  // This is not hypothetical: the 18.7-minute pre-change baseline died exactly
+  // that way at 10:19 (15 stuck rows on "SLY'S MERCH" typed as combat, then two
+  // ACTION_STALL windows and a HARD_EXIT).
+  // The real button is <button>⛧ STRIKE ⛧</button> (App.jsx ~12244) and nothing
+  // else in the game renders that as its whole label.
+  const strikeBtn = s.clickables.some(c => /^[⛧\s]*strike[⛧\s]*$/i.test((c.t || '').trim()))
+  // ── Aug 4 2026: GLOBAL OVERLAYS ARE TESTED FIRST ────────────────────
+  // These four render at z-index 9998/9999 OVER whatever screen is underneath,
+  // and the screen underneath keeps all of its own text and clickables in the
+  // DOM. Every one of them used to be tested BELOW `btn('strike')` -> 'combat'
+  // and BELOW 'BACK TO THE PIT' -> 'shop', so:
+  //   * ESC pause over combat classified as COMBAT. The bot then played cards
+  //     into a blocked overlay, nothing landed, and it sat there until the 60s
+  //     stall watchdog wiped the run. As of today the pause overlay renders on
+  //     EVERY screen and the bot's own recovery paths press Escape, so this was
+  //     a guaranteed hang, not a theoretical one.
+  //   * The slot-swap modal (also new today) classified as SHOP. Every click the
+  //     shop logic then made landed on the modal's full-screen backdrop, whose
+  //     onClick is cancelSlotSwap — so buying gear with full slots was an
+  //     infinite buy/cancel loop and the modal was unreachable by construction.
+  if (t.includes('PAUSED') || btn('abandon run')) return 'pause'
+  if (/ARTIFACT SLOTS FULL|PEDAL SLOTS FULL|SLOTS FULL/.test(t)) return 'slotswap'
+  if (/DEMONIC CONFLICT|KEEP THIS ONE/.test(t)) return 'demonicconflict'
+  if (/THE REMASTER/.test(t) && btn('confirm')) return 'modal'
   if (btn('got it')) return 'popup'
   if (btn('discard & continue') || btn('✓ confirm')) return 'modal'
   const _shopish = t.includes('BACK TO THE PIT') || t.includes("SLY'S MERCH")
@@ -75,13 +107,16 @@ async function screenType(s) {
   if (/PICK \d+ CARDS?\b/.test(t)) return 'boosterpick'
   if (!_shopish && (t.includes('⛧ CONTAINS ⛧') || (t.includes('PICK 1') && t.includes('BOOSTER')))) return 'boosterpick'
   if (t.includes('CLICK ANYWHERE') || (t.includes('CREDITS') && !t.includes('STRIKE'))) return 'credits'
-  if (t.includes('WELCOME TO HELL') && !btn('strike')) return 'wth'
+  if (t.includes('WELCOME TO HELL') && !strikeBtn) return 'wth'
   if (t.includes('THE PACT')) return 'pact'
   if (!_shopish && t.includes('DOOM FORGE')) return 'forge'
   if (t.includes('— OR —') || t.includes('OR —')) return 'event'
   if (t.includes('THE DESCENT') && t.includes('SELECT THIS PATH')) return 'descent'
   if (t.includes('OPENING NIGHT')) return 'draft'
-  if (btn('strike')) return 'combat'
+  // Shop before combat: the shop legitimately renders no strike button, but this
+  // ordering is the belt to the strikeBtn braces above.
+  if (_shopish && !strikeBtn) return 'shop'
+  if (strikeBtn) return 'combat'
   if (!t.includes('BACK TO THE PIT') && !t.includes('OPENING NIGHT') && /RECRUIT|PICK 1|CHOOSE YOUR/.test(t) && /ATK\s*\d/.test(s.text)) return 'recruit'
   if (t.includes('BACK TO THE PIT') || t.includes('SLY')) return 'shop'
   if (t.includes('START TUTORIAL') || t.includes('ENTER THE VESTIBULE')) return 'menu'
@@ -92,18 +127,15 @@ async function screenType(s) {
   // Aug 1: post-credits Collection/gallery screens — bot sat on "Collection 38/74
   // discovered" for 5.4 HOURS (9,560 unknown_screen ticks). Escape out of any
   // meta screen that isn't a run.
-  if (/COLLECTION|DISCOVERED|TROPHY|TROPHIES|ACHIEVEMENTS|HALL OF/.test(t) && !btn('strike')) return 'meta'
+  if (/COLLECTION|DISCOVERED|TROPHY|TROPHIES|ACHIEVEMENTS|HALL OF/.test(t) && !strikeBtn) return 'meta'
   // ── Aug 1 2026: every screen the Aug-1 audit found landing on 'unknown'.
   // An unclassified screen means the bot stares at it until the watchdog fires;
   // one of them (post-credits Collection) ate 5.4 hours of a 6-hour session.
-  if (t.includes('PAUSED') || btn('abandon run')) return 'pause'           // overlay ABOVE combat: STRIKE is visible behind it, used to classify as combat
-  if (/KEEP THIS ONE|DEMONIC CONFLICT/.test(t)) return 'demonicconflict'   // hard block: no OVERLAY_BTN matches, infinite stall
-  if (/ARTIFACT SLOTS FULL|PEDAL SLOTS FULL|SLOTS FULL/.test(t)) return 'slotswap'
-  if (/THE REMASTER/.test(t)) return 'modal'
+  // (pause / slotswap / demonicconflict / remaster are tested at the TOP now)
   if (/NOW DISCARD \d+ TO CONTINUE|SETLIST/.test(t) && btn('confirm')) return 'modal'
   if (/PAWN SHOP/.test(t)) return 'pawn'
   if (/PRESS ANY KEY|TONIGHT ONLY/.test(t)) return 'boot'
-  if (/⛧ ENTERING ⛧|ENTERING/.test(t) && !btn('strike')) return 'splash'   // circleSplash: no clickables, auto-clears in 3s
+  if (/⛧ ENTERING ⛧|ENTERING/.test(t) && !strikeBtn) return 'splash'   // circleSplash: no clickables, auto-clears in 3s
   if (/THE EXECUTIVE FALLS|THE SECOND ALBUM/.test(t)) return 'splash'
   return 'unknown'
 }
@@ -327,16 +359,82 @@ async function perceive(opts) {
         desc: flat.slice(0, 130)
       })
     }
+    // ── OWNED ARTIFACTS + PEDALS (Aug 4 2026) ─────────────────────────────
+    // THE relic-blindness fix. App.jsx ~11868 renders a fixed rail down the left
+    // of the stage: three 100x108 artifact tiles then two 100x108 pedal tiles,
+    // ALWAYS all five, empty ones printing the placeholder word "Artifact" /
+    // "Effect Pedal". A filled tile prints the item's NAME (and "xN" for a
+    // multiplier artifact) — exactly the text a human reads off the screen. Slot
+    // identity comes from vertical order, which is fixed by the layout, so the
+    // 3-artifact / 2-pedal split needs no colour or id inspection.
+    out.gearRail = (() => {
+      const els = []
+      for (const d of document.querySelectorAll('div')) {
+        const r = d.getBoundingClientRect()
+        if (r.width < 96 || r.width > 104 || r.height < 104 || r.height > 112) continue
+        if (!vis(d)) continue
+        els.push(d)
+      }
+      // Each slot matches TWICE: the position:relative wrapper (which also holds
+      // the absolutely-positioned hover tooltip, so its textContent is the name
+      // AND the full effect text) and the tile itself. Keep the innermost, which
+      // is the tile — its text is just the name (+ "xN").
+      const inner = els.filter(d => !els.some(o => o !== d && d.contains(o)))
+      if (inner.length < 5) return null
+      const boxes = inner.map(d => { const r = d.getBoundingClientRect(); return { x: r.x, y: r.y, t: (d.textContent || '').replace(/\\s+/g, ' ').trim() } })
+      // The rail is one column down the left of the stage: leftmost x, top-to-bottom.
+      const minX = Math.min(...boxes.map(b => b.x))
+      const col = boxes.filter(b => b.x <= minX + 8).sort((a, b) => a.y - b.y)
+      if (col.length < 5) return null
+      return col.slice(0, 5).map(b => b.t)
+    })()
     out.hand.sort((a, b) => a.x - b.x).forEach(c => { delete c._area })
     out.members.forEach(m => { delete m._area })
     return out
   })()`)
   if (raw && raw.inCombat && raw._corrMissing) (raw.miss = raw.miss || []).push('corruption')
+  // Translate the rail's screen text into ids. Kept OUT of the page eval so the
+  // relic table (parsed from src/data/relics.js by brain.cjs) stays in one place.
+  if (raw) {
+    raw.artifacts = []; raw.pedals = []
+    if (raw.gearRail) {
+      raw.gearRail.forEach((txt, i) => {
+        if (!txt || /^(⛧\s*)?artifact$/i.test(txt) || /^(⚡\s*)?effect\s*pedal$/i.test(txt)) return
+        const d = BRAIN.matchRelic(txt.replace(/×[\d.]+\s*$/, ''))
+        if (!d) { noteUnknownGear(txt, i); return }
+        if (i < 3) raw.artifacts.push(d.id); else raw.pedals.push(d.id)
+      })
+      OWNED.artifacts = raw.artifacts; OWNED.pedals = raw.pedals
+    } else { raw.artifacts = OWNED.artifacts.slice(); raw.pedals = OWNED.pedals.slice() }
+    raw.loot = OWNED.loot.slice()
+    // Cache the band with its live ATK/HP/keyword/role/tier. The shop and the
+    // recruit screen only show names (or a card with no history), so the last
+    // combat read is the best picture of the band those screens can score against.
+    if (raw.members && raw.members.length) {
+      OWNED.band = raw.members.map(m => ({ name: m.name, role: m.role, keyword: m.keyword, tier: m.tier, atk: m.atk, hp: m.hp, maxHp: m.maxHp, tooStoned: m.tooStoned }))
+    }
+  }
   if (!(opts && opts.quiet) && raw && raw.miss && raw.miss.length) ev('parse_miss', { fields: raw.miss, corrSource: raw.corrSource })
   return raw
 }
 
 const BRAIN = require('./brain.cjs')
+// ── OWNED GEAR (Aug 4 2026) ───────────────────────────────────────────
+// Artifacts and pedals are re-read off the HUD rail on every perceive(); this
+// cache only covers the screens where the rail is not on screen (shop, forge,
+// pact) so the shop can still evaluate an offer against what the run owns.
+// `loot` cannot be re-read at all — boss loot is applied to damage (App.jsx
+// ~8903) but never rendered in combat. The only place the player is ever told
+// they got it is the combat log ("🏆 Boss Loot: ..."), so that is where the bot
+// reads it too, and it is remembered for the rest of the run.
+const OWNED = { artifacts: [], pedals: [], loot: [], band: [] }
+const _unknownGear = new Set()
+function noteUnknownGear(txt, slot) {
+  const k = String(txt).slice(0, 40)
+  if (_unknownGear.has(k)) return
+  _unknownGear.add(k)
+  ev('gear_unmatched', { text: k, slot })
+}
 let strikeNumThisFight = 0, lastBossHp = null
 let zeroStrikeTicks = 0, preferNewRun = false
 
@@ -427,6 +525,24 @@ try { for (const c of (require('./carddata.json').chainMeta || [])) CHAIN_BY_NAM
 // index cursor would double-count. Track a per-line occurrence count instead and
 // emit only the growth; reset it whenever a new fight starts.
 const chainLogSeen = new Map()
+// Boss loot is announced ONLY in the combat log (App.jsx ~7414 addLog('🏆 Boss
+// Loot: ...')) — there is no loot rail in combat — so this is the one place a
+// player, or the bot, can learn that The Blade (x3.0 at EXACTLY 1 card) is live.
+async function scanLootLog() {
+  const lines = await P.evaljs(
+    `(() => ((window.__devLog||[]).map(e=>e&&e.msg||'').filter(m=>m.indexOf('Boss Loot:')>=0)))()`
+  ).catch(() => null)
+  if (!Array.isArray(lines)) return
+  for (const l of lines) {
+    const nm = (l.match(/Boss Loot:\s*\S*\s*([^—-]+)/) || [])[1]
+    const d = nm ? BRAIN.matchRelic(nm.trim()) : null
+    if (d && d.kind === 'loot' && !OWNED.loot.includes(d.id)) {
+      OWNED.loot.push(d.id)
+      ev('loot_seen', { id: d.id, name: d.name, trigger: d.multTrigger, mult: d.mult, source: 'combat log' })
+    }
+  }
+}
+
 async function scanChainLog() {
   // Read window.__devLog, NOT document.body.innerText. addLog() pushes every
   // game log entry to __devLog unconditionally (App.jsx ~5370), but the combat
@@ -448,6 +564,51 @@ async function scanChainLog() {
     for (let i = had; i < n; i++) ev('chain_confirmed', { chain: meta ? meta.cards.join('+') : null, name: nm ? nm.trim() : null, mult: mult ? +mult : null, source: 'game_log', line: raw.slice(0, 120) })
     chainLogSeen.set(raw, n)
   }
+}
+
+// ── TRIP DOCTRINE (Aug 4 2026 rebuild) ────────────────────────────────
+// The old rule was "panic button only": never on the opening strike, never
+// against a boss above 95% HP. That structurally forbade the single best use of
+// a trip in the game. App.jsx ~8433 reads the trip buff as the STARTING strike
+// multiplier of EVERY strike in the fight — REALITY GLITCH (acid) x2.0, OVERMIND
+// (DMT) x3.0 — so a trip spent on the FIRST strike of a circle boss is worth up
+// to four strikes of that multiplier, while the same trip spent to survive a
+// trash fight buys one strike of it. Shrooms have no multiplier outcome in the
+// pool at all, so they stay the panic button; acid and DMT become boss openers.
+// The game allows one trip per fight, so it is capped bot-side either way.
+async function tripDoctrine(s, g, FI) {
+  if (tripUsedThisFight) return g
+  const inRealCombat = g.inCombat && g.bossHp > 0 && g.strikesLeft !== null
+  if (!inRealCombat) return g
+  const bossPct = (g.bossHp && g.bossMaxHp) ? g.bossHp / g.bossMaxHp : 1
+  const alive = g.members.filter(m => !m.tooStoned)
+  const bandHurt = alive.length > 0 && alive.reduce((a, m) => a + m.hp, 0) / Math.max(1, alive.reduce((a, m) => a + m.maxHp, 0)) < 0.4
+  // ── Aug 4 2026: "HELD" IS THE WORD *USE*, NOT THE EMOJI ─────────────
+  // The three drug pins ALWAYS render (App.jsx ~11991); an empty one is greyed
+  // out, cursor:not-allowed, and its label is the emoji + "⛧", while a held one
+  // reads emoji + "USE". The old code matched on the emoji alone, so it clicked
+  // empty slots — a dead click that logged trip_failed and, because the pin was
+  // still there afterwards, never counted. The 18.7-minute pre-change baseline
+  // used ZERO trips; the smoke test caught two of these against "🧪⛧".
+  const btn = e => (s.clickables || []).find(c => c.t.includes(e) && /USE/i.test(c.t) && c.t.length < 30)
+  const B = { dmt: btn('💠'), acid: btn('🧪'), shrooms: btn('🍄') }
+  const held = { dmt: !!B.dmt, acid: !!B.acid, shrooms: !!B.shrooms }
+  // "Fight 3/3" is printed on the HUD — the boss of the circle.
+  const isBoss = typeof FI.fightIndex === 'number' && FI.fightIndex % 3 === 2
+  const plan = BRAIN.tripPlan(held, {
+    isBoss, strikeNum: strikeNumThisFight, bossPct, overtime: g.overtime,
+    bandHurt, tripUsed: tripUsedThisFight, inCombat: inRealCombat, strikesLeft: g.strikesLeft,
+  })
+  if (!plan.use) return g
+  const pick = B[plan.which]
+  if (!pick) return g
+  await P.click(pick.x, pick.y)
+  await P.connect().then(p => p.waitForTimeout(1500)).catch(() => {})
+  const st2 = await P.state().catch(() => null)
+  const gone = !st2 || !st2.clickables.some(c => c.t === pick.t)
+  if (gone) { tripUsedThisFight = true; ev('trip_used', { btn: pick.t, drug: plan.which, planned: /opener/.test(plan.why), bossPct: (bossPct * 100).toFixed(0), strikesLeft: g.strikesLeft, why: plan.why, fightIndex: FI.fightIndex, verified: true }) }
+  else ev('trip_failed', { btn: pick.t, why: plan.why, note: 'button still present after click — not counted as a trip' })
+  return await perceive()
 }
 
 async function combatTick(s) {
@@ -491,8 +652,21 @@ async function combatTick(s) {
     anyStoned: gg.members.some(m => m.tooStoned),
     handIds: [], handLen: gg.hand.length,
     cardsPlayedIds: playedIdsThisFight, firedChains: firedChainsThisFight,
-    discardLen: gg.discardLen, hrUsed: hrUsedThisFight
+    discardLen: gg.discardLen, hrUsed: hrUsedThisFight,
+    // Aug 4 2026 — the relic-blindness fix, driver side. Everything the shape
+    // planner and the per-card relic bonus need, read off the HUD rail.
+    relics: [].concat(gg.artifacts || [], gg.loot || []), pedals: gg.pedals || [],
+    thisStrikeIds: cardsThisStrike.slice(), chainsThisStrike: 0,
+    maxEmbers: gg.maxEmbers || 6,
   })
+
+  // ── PHASE 0: PLANNED TRIP. A x2.0/x3.0 strike multiplier that lasts the whole
+  // fight has to be live BEFORE the first strike and before the cards are chosen
+  // (HYPERSPACE makes every card free, THIRD EYE draws 8) — not after.
+  if (!tripUsedThisFight && strikeNumThisFight === 0) {
+    const g2 = await tripDoctrine(s, g, FI)
+    if (g2) g = g2
+  }
 
   // playable = matched + affordable + corruption gate satisfied at its REAL threshold.
   // Aug 4: brain.matchCard no longer fuzzy-guesses (it used to relabel Dark Whisper
@@ -503,22 +677,42 @@ async function combatTick(s) {
     .filter(c => !c.corrReq || gg.corruption >= c.corrReq)
     .filter(c => c.cost <= gg.embers)
 
+  // score = the audited combat policy + a small additive relic term. scoreCard
+  // itself is untouched; relicCardBonus only re-ranks near-ties (play the CORRUPT
+  // card while the Pentagram Shrine is on the rail) and can never resurrect a
+  // card the policy has already declared impossible.
+  const scoreWithRelics = (card, gs, sn, cp) => {
+    const base = BRAIN.scoreCard(card, gs, sn, cp)
+    if (base <= 3) return base
+    return Math.max(0, base + BRAIN.relicCardBonus(card.id, gs))
+  }
+
   // ── PHASE 1: DIG FIRST. A human discards on a dead opening hand, before
   // committing embers — not after (the old code dug last, with embers gone).
   {
     const gs0 = gsFrom(g)
     const cand0 = playableIn(g, new Set())
-    cand0.forEach(k => { k.score = BRAIN.scoreCard(k.card, { ...gs0, handIds: cand0.map(x => x.card.id) }, strikeNumThisFight, 0) })
+    cand0.forEach(k => { k.score = scoreWithRelics(k.card, { ...gs0, handIds: cand0.map(x => x.card.id) }, strikeNumThisFight, 0) })
     const best0 = cand0.sort((a, b) => b.score - a.score)[0]
     const chainLive = g.hand.some(c => { const m = BRAIN.matchCard(c.name); return m && BRAIN.RIFF_CHAINS.some(ch => (ch[0] === m.id || ch[1] === m.id) && g.hand.some(o => { const m2 = BRAIN.matchCard(o.name); return m2 && m2.id !== m.id && (ch[0] === m2.id || ch[1] === m2.id) }) ) })
-    if (g.discardsLeft > 0 && g.hand.length >= 4 && (!best0 || best0.score < 40) && !chainLive) {
+    // Aug 4 2026: with Ouroboros Pin (x1.3 PER discard this strike) or Spit Cup
+    // (x1.5 if you discarded at all) on the rail, a discard is not a last resort
+    // — it is a damage multiplier, and the dig should fire on a hand the old
+    // threshold called perfectly good.
+    const digPlan = BRAIN.planStrike(gs0, cand0)
+    const digRelic = digPlan && digPlan.discards > 0 && g.discardsLeft > 0
+    if (digRelic) ev('discard_relic', { want: digPlan.discards, why: digPlan.why })
+    if (g.discardsLeft > 0 && g.hand.length >= 4 && (digRelic || ((!best0 || best0.score < 40) && !chainLive))) {
       // junk = unplayable corruption-gated + genuinely low value. NEVER dump a
       // free card: whispercard/hungercard/madnesscard/blood_price are 0-cost
       // power the old filter was throwing away.
-      const scoredAll = g.hand.map(c => { const card = BRAIN.matchCard(c.name); return { ...c, card, score: card ? BRAIN.scoreCard(card, { ...gs0, handIds: [] }, strikeNumThisFight, 0) : 0 } })
-      const junk = scoredAll
-        .filter(c => c.cost > 0 && (c.score < 25 || (c.corrReq && g.corruption < c.corrReq)))
-        .sort((a, b) => a.score - b.score).slice(0, 2)
+      const scoredAll = g.hand.map(c => { const card = BRAIN.matchCard(c.name); return { ...c, card, score: card ? scoreWithRelics(card, { ...gs0, handIds: [] }, strikeNumThisFight, 0) : 0 } })
+      const junk = (digRelic
+        // A discard relic makes the discard itself the payoff, so dump the worst
+        // cards on the board — but never the best one, and never a free card that
+        // is about to be played this strike.
+        ? scoredAll.filter(c => c.score < (best0 ? best0.score : 100)).sort((a, b) => a.score - b.score).slice(0, digPlan.discards)
+        : scoredAll.filter(c => c.cost > 0 && (c.score < 25 || (c.corrReq && g.corruption < c.corrReq))).sort((a, b) => a.score - b.score).slice(0, 2))
       if (junk.length) {
         for (const j of junk) {
           const fresh = await perceive()
@@ -537,16 +731,46 @@ async function combatTick(s) {
   // ATK/hand are never stale (the audit's #1 finding: 53% of plays failed
   // because the bot was reasoning about a pre-strike snapshot).
   let played = 0, failStreak = 0
+  let planLogged = ''
   const failedIds = new Set()   // keyed by CARD ID, not badged screen name
-  for (let iter = 0; iter < 14 && played < 10 && failStreak < 3; iter++) {
+  // Aug 4 2026: was `failStreak < 3`. Each failure already adds the card to
+  // failedIds so it is never retried, and brain.cjs now returns <=3 for cards the
+  // engine would reject — so a "failure" is almost always the VERIFICATION poll
+  // missing a landed play, not an illegal one. Aborting the whole strike after
+  // three of those threw away playable cards; 4 with the same per-card lockout is
+  // still a hard stop against a genuinely unresponsive board.
+  for (let iter = 0; iter < 14 && played < 10 && failStreak < 4; iter++) {
     const gs = gsFrom(g)
     const cand = playableIn(g, failedIds)
     gs.handIds = cand.map(k => k.card.id)
     if (!cand.length) { if (iter === 0) ev('no_play', { handSeen: g.hand.length, embers: g.embers, corr: g.corruption, names: g.hand.map(x => x.name.slice(0, 16)) }); break }
-    cand.forEach(k => { k.score = BRAIN.scoreCard(k.card, gs, strikeNumThisFight, played) })
+    cand.forEach(k => { k.score = scoreWithRelics(k.card, gs, strikeNumThisFight, played) })
     cand.sort((a, b) => b.score - a.score)
-    const c = cand[0]
-    if (c.score <= 3) break                       // sim stop-rule
+    // The stop-rule runs BEFORE the planner, and the planner only ever sees cards
+    // that pass it. Scoring <=3 means "the engine will reject this or its effect is
+    // already spent" — such a card must never be counted towards a shape (a dead
+    // RIFF would let The Doom Crown believe it can reach three of one type), and a
+    // hand of nothing but dead cards must stop the strike for the audited reason,
+    // not as a phantom "the plan says play zero cards".
+    if (cand[0].score <= 3) break                 // sim stop-rule
+    const live = cand.filter(k => k.score > 3)
+    // ── RELIC SEQUENCING (Aug 4 2026) ─────────────────────────────────
+    // Ask the planner for the best SHAPE of this strike given what is on the
+    // rail. It enumerates every affordable subset and picks the one whose relic
+    // multipliers x card value is highest, so Solo Sermon (x6.0 at EXACTLY 2),
+    // The Doom Crown (x8.0 all-one-type), Vintage Guitar (x1.3 at 4+) and Set
+    // List (x1.4 ember-first) resolve against each other by arithmetic instead
+    // of a hardcoded priority. It only overrides the default line when an owned
+    // relic actually pays for a different one.
+    const plan = BRAIN.planStrike({ ...gs, thisStrikeIds: cardsThisStrike.slice() }, live)
+    if (plan && plan.active) {
+      const sig = plan.cap + '|' + plan.typeLock + '|' + plan.ids.join(',')
+      if (sig !== planLogged) { planLogged = sig; ev('relic_plan', { cap: plan.cap, typeLock: plan.typeLock, first: plan.nextId, mult: +plan.mult.toFixed(2), why: plan.why, ids: plan.ids, relics: gs.relics, pedals: gs.pedals }) }
+      if (cardsThisStrike.length >= plan.cap) { ev('plan_stop', { at: cardsThisStrike.length, mult: +plan.mult.toFixed(2), why: plan.why }); break }
+      if (plan.typeLock) { const keep = live.filter(k => (k.card.type || k.type) === plan.typeLock); if (keep.length) live.length = 0, live.push(...keep) }
+      if (plan.nextId) { const i = live.findIndex(k => k.card.id === plan.nextId); if (i > 0) live.unshift(live.splice(i, 1)[0]) }
+    }
+    const c = live[0]
     const tgt = BRAIN.pickTarget(c.card, aliveOf(g), { hrUsed: hrUsedThisFight })
     if (!tgt) break
     // ── Aug 4 2026: PLAY VERIFICATION ─────────────────────────────────
@@ -583,40 +807,9 @@ async function combatTick(s) {
     if ((await P.state()).text.toUpperCase().includes('DISCARD & CONTINUE')) { await modalTick(await P.state()); g = await perceive() }
   }
 
-  // ── PHASE 3: CLUTCH TRIP. Sim doctrine — trips are emergency buttons and
-  // late-fight finishers, NOT openers. The old rule dumped shrooms on strike 1
-  // of every boss at 100% HP (9/9 trips in the last run were wasted that way).
-  const bossPct = (g.bossHp && g.bossMaxHp) ? g.bossHp / g.bossMaxHp : 1
-  const bandHurt = aliveOf(g).length > 0 && aliveOf(g).reduce((a, m) => a + m.hp, 0) / Math.max(1, aliveOf(g).reduce((a, m) => a + m.maxHp, 0)) < 0.4
-  // Aug 3 2026: the Aug-3 ledger shows 38 trips in 22 minutes, EVERY one at
-  // bossPct=100 with reason 'low strikes'. They were firing during the
-  // fight-to-fight transition, where bossHp reads as the NEXT fight's full HP
-  // while strikesLeft is still the previous fight's exhausted value. Three
-  // guards: (a) must genuinely be in combat, (b) never on the opening strike of
-  // a fight, (c) never against a boss that has taken essentially no damage.
-  // Also the game allows only ONE trip per fight, so cap it bot-side and stop
-  // wasting ticks re-clicking.
-  const inRealCombat = g.inCombat && g.bossHp > 0 && g.strikesLeft !== null
-  const emergency = g.overtime || bandHurt || (g.strikesLeft <= 1 && bossPct > 0.35)
-  const desperate = inRealCombat && strikeNumThisFight > 0 && bossPct < 0.95 && emergency && !tripUsedThisFight
-  if (desperate) {
-    // prefer the strongest held drug for the situation: DMT > acid > shrooms late
-    const pick = ['💠', '🧪', '🍄'].map(e => g0Clickable(s, e)).find(Boolean)
-      || (await P.state()).clickables.find(c => /🍄|🧪|💠/.test(c.t) && c.t.length < 30)
-    if (pick) {
-      // Aug 4: trip_used was logged BEFORE the click and never verified, so the
-      // ledger counted INTENTS (252 of them) as consumed trips. Click first,
-      // confirm the button is gone, and only then write the row.
-      const why = g.overtime ? 'overtime' : bandHurt ? 'band<40%hp' : 'low strikes'
-      await P.click(pick.x, pick.y)
-      await P.connect().then(p => p.waitForTimeout(1500)).catch(() => {})
-      const st2 = await P.state().catch(() => null)
-      const gone = !st2 || !st2.clickables.some(c => c.t === pick.t)
-      if (gone) { tripUsedThisFight = true; ev('trip_used', { btn: pick.t, bossPct: (bossPct * 100).toFixed(0), strikesLeft: g.strikesLeft, why, verified: true }) }
-      else ev('trip_failed', { btn: pick.t, why, note: 'button still present after click — not counted as a trip' })
-      g = await perceive()
-    }
-  }
+  // ── PHASE 3: TRIP. See tripDoctrine() — the boss-opener case already ran
+  // BEFORE the play loop; this is the emergency half.
+  g = (await tripDoctrine(s, g, FI)) || g
 
   // Aug 3: skip strikes fired during fight-to-fight transitions (bossHp=None).
   // FIRST ATTEMPT was too aggressive — it also skipped REAL strikes whenever the
@@ -625,7 +818,7 @@ async function combatTick(s) {
   // the game is offering one, we are in a fight, whatever the HP text looks like.
   if (g.bossHp === null) {
     const sNow = await P.state().catch(() => null)
-    const hasStrikeBtn = sNow && sNow.clickables.some(c => /STRIKE/i.test(c.t) && !/DISCARD/i.test(c.t))
+    const hasStrikeBtn = sNow && sNow.clickables.some(c => /^[⛧\s]*strike[⛧\s]*$/i.test((c.t || '').trim()))
     if (!hasStrikeBtn) { ev('strike_skipped', { why: 'no boss HP and no strike button (transition)', fightIndex: FI.fightIndex, transition: FI.transition }); return }
   }
   const alive = aliveOf(g)
@@ -654,7 +847,14 @@ async function combatTick(s) {
   else ev('strike', base)
   cardsThisStrike.length = 0
   strikeNumThisFight++
-  await P.clickText('strike').catch(e => ev('warn', { msg: 'strike btn: ' + e.message }))
+  // Click the BUTTON by exact label. clickText('strike') picks the shortest
+  // clickable containing the word, which on a screen offering Solo Sermon is a
+  // relic tile, not the strike button.
+  {
+    const sBtn = (await P.state().catch(() => ({ clickables: [] }))).clickables.find(c => /^[⛧\s]*strike[⛧\s]*$/i.test((c.t || '').trim()))
+    if (sBtn) await P.click(sBtn.x, sBtn.y).catch(e => ev('warn', { msg: 'strike btn: ' + e.message }))
+    else await P.clickText('⛧ strike').catch(() => P.clickText('strike').catch(e => ev('warn', { msg: 'strike btn: ' + e.message })))
+  }
   // ── measure what the strike ACTUALLY did ──────────────────────────────
   // Aug 4: this used to be a flat waitForTimeout(1800) + one read, which samples
   // the boss HP MID-CASCADE and understated every non-lethal strike by ×1.77-×2.01.
@@ -664,6 +864,7 @@ async function combatTick(s) {
     const settled = await settleBossHp()
     const hpAfter = settled.hp
     await scanChainLog().catch(() => {})
+    await scanLootLog().catch(() => {})
     if (!measurable) { pendingStrike = null; return }
     const lethal = hpAfter === 0 || hpAfter === null
     ev('strike_result', {
@@ -739,6 +940,7 @@ async function startRun(why, extra) {
   strikeNumThisFight = 0; playedIdsThisFight.length = 0; cardsThisStrike.length = 0
   firedChainsThisFight = new Set(); hrUsedThisFight.clear(); tripUsedThisFight = false
   chainLogSeen.clear(); pendingStrike = null; FIGHT.idx = -1
+  resetRunEconomy()
   ev('run_start', Object.assign({ why }, extra || {}))
   let deck = null, stake = null
   try {
@@ -775,61 +977,135 @@ async function modalTick(s) {
 }
 
 async function pactTick(s) {
-  // boss-kill pact choice: prefer permanent band-wide power (sim scorePact doctrine).
+  // ── Aug 4 2026: SCORE THE REAL LIST ─────────────────────────────────
+  // Pacts are a closed set of 13 (PACT_REWARDS in src/data/relics.js). The old
+  // scorer was a regex over the tile text that paid "max hp" 80+10 and "strike"
+  // 45+10, so THICK SKIN (+3 max HP) beat WAR DRUMS (+1 Strike per fight, for the
+  // rest of the run — a permanent +25-33% on total damage) every time they were
+  // offered together, and SIXTH SLOT (a whole extra band member) lost to it too.
+  // brain.pactScore matches the tile against the actual reward ids.
   const opts = s.clickables.filter(c => c.w > 150 && c.h > 100 && !/skip/i.test(c.t))
-  const score = c => {
-    const t = c.t.toLowerCase(); let p = 10
-    if (/all .*(\+\d+ )?max hp|max hp perm/i.test(t)) p += 80
-    if (/all .*\+\d+ atk|atk permanently/i.test(t)) p += 75
-    if (/ember/i.test(t)) p += 60
-    if (/permanent/i.test(t)) p += 40
-    if (/strike/i.test(t)) p += 45
-    if (/draw|hand/i.test(t)) p += 35
-    if (/instead of|deals \d+x/i.test(t)) p += 25 // single-card upgrades: meh
-    if (/lose|sacrifice|dies|-\d+/i.test(t)) p -= 40
-    return p
-  }
-  const pick = opts.sort((a, b) => score(b) - score(a))[0]
-  if (pick) { ev('pact_choice', { pick: pick.t.slice(0, 60), score: score(pick) }); await P.click(pick.x, pick.y) }
-  else { ev('pact_skip', {}); await P.clickText('skip').catch(() => {}) }
+  const scored = opts.map(c => { const r = BRAIN.pactScore(c.t); return { ...c, v: r.v, id: r.id } }).sort((a, b) => b.v - a.v)
+  const pick = scored[0]
+  if (pick) {
+    ev('pact_choice', { pick: pick.t.slice(0, 60), id: pick.id, score: pick.v, offered: scored.map(o => ({ id: o.id, v: o.v, t: o.t.slice(0, 28) })) })
+    await P.click(pick.x, pick.y)
+  } else { ev('pact_skip', {}); await P.clickText('skip').catch(() => {}) }
 }
 
-async function forgeTick(s) {
-  // Doom Forge (after pact, each circle boss): upgrade one card permanently.
-  // Doctrine (GDD + FIRST_TIPS): pick your best card — score the visible deck
-  // cards with the brain's static values, click the top one, then confirm.
-  const cards = await P.evaljs(`(() => {
+// Card tiles on the Forge / booster-pick screens, with their FULL text (the
+// upgrade description matters — see forgeTick).
+async function cardTiles(maxLen) {
+  return P.evaljs(`(() => {
     const seen = {}
     return [...document.querySelectorAll('div')].filter(d => {
       const t = d.textContent || ''; const r = d.getBoundingClientRect()
-      return /RIFF|UTILITY|EMBER|CORRUPT/.test(t) && t.length < 220 && r.height > innerHeight * 0.08 && r.width < innerWidth * 0.25
-    }).map(d => { const r = d.getBoundingClientRect(); return { t: d.textContent.replace(/\s+/g, ' ').slice(0, 40), x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } })
+      return /RIFF|UTILITY|EMBER|CORRUPT/.test(t) && t.length < ${maxLen || 260} && r.height > innerHeight * 0.08 && r.width < innerWidth * 0.25
+    }).map(d => { const r = d.getBoundingClientRect(); return { t: d.textContent.replace(/\\s+/g, ' ').slice(0, 200), x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } })
       .filter(c => { const k = c.t.slice(0, 20); return seen[k] ? false : (seen[k] = 1) })
   })()`).catch(() => [])
+}
+const tileCard = t => BRAIN.matchCard((String(t).match(/^(.*?)\+?\s*(?:RIFF|UTILITY|EMBER|CORRUPT)/) || [, t])[1])
+
+async function forgeTick(s) {
+  // ── Aug 4 2026: FORGE PICKS WERE ARBITRARY ──────────────────────────
+  // The old scorer was an 11-name hardcoded table with everything else defaulting
+  // to 30 — and FOUR of its top five (possessedperf 95, infencore 88, amp 82,
+  // encore 76) are COSMETIC upgrades: App.jsx applyCard branches on `upgraded` for
+  // exactly nine card ids, and none of those four is one of them. So most forges
+  // this bot has ever performed changed nothing at all, and the balance data has
+  // "upgraded Possessed Performance" rows that mean gold foil and nothing else.
+  // The tile itself says which is which ("Gold foil. No rules change.") — read it.
+  const cards = await cardTiles(260)
   const scored = cards.map(c => {
-    const nm = (c.t.match(/^(.*?)\+?\s*(?:RIFF|UTILITY|EMBER|CORRUPT)/) || [, c.t])[1] // name precedes type on forge tiles
-    return { ...c, card: BRAIN.matchCard(nm) }
-  })
-    .filter(c => c.card)
-    .map(c => ({ ...c, v: ({ possessedperf: 95, infencore: 88, amp: 82, encore: 76, heavyriff: 74, stagedive: 72, soundwall: 70, staticcharge: 66, crowdsurf: 64, battlecry: 62, powertap: 60 })[c.card.id] || 30 }))
-    .sort((a, b) => b.v - a.v)
+    const card = tileCard(c.t)
+    if (!card) return null
+    const f = BRAIN.forgeScore(card.id, c.t, RUN.cardsPlayed)
+    return { ...c, card, v: f.v, real: f.real }
+  }).filter(Boolean).sort((a, b) => b.v - a.v)
   if (scored.length) {
-    ev('forge_pick', { card: scored[0].card.id, v: scored[0].v })
-    await P.click(scored[0].x, scored[0].y)
+    const top = scored[0]
+    ev('forge_pick', {
+      card: top.card.id, v: top.v, realUpgrade: !!top.real,
+      offered: scored.slice(0, 8).map(c => c.card.id + (c.real ? '*' : '')),
+      note: top.real ? undefined : 'no REAL upgrade on offer — every tile is cosmetic',
+    })
+    await P.click(top.x, top.y)
     await P.connect().then(p => p.waitForTimeout(600))
-    for (const b of ['forge', 'upgrade', 'confirm', 'continue', 'skip']) { try { await P.clickText(b); break } catch (e) {} }
+    // Clicking a Forge tile applies immediately and routes to the shop (App.jsx
+    // ~11405) — there is no confirm button, so only press one if we are somehow
+    // still on the Forge.
+    const after = await P.state().catch(() => null)
+    if (after && /DOOM FORGE/i.test(after.text)) { for (const b of ['forge', 'upgrade', 'confirm', 'skip upgrade']) { try { await P.clickText(b); break } catch (e) {} } }
   } else {
     ev('forge_skip', { why: 'no cards parsed' })
-    for (const b of ['skip', 'continue', ...OVERLAY_BTNS]) { try { await P.clickText(b); break } catch (e) {} }
+    for (const b of ['skip upgrade', 'skip', 'continue', ...OVERLAY_BTNS]) { try { await P.clickText(b); break } catch (e) {} }
   }
 }
 
+// ── BOOSTER / CARD PICK (Aug 4 2026) ──────────────────────────────────
+// This screen used to be routed straight into forgeTick, so a booster pick was
+// graded by the FORGE's hardcoded upgrade table — a list about which cards are
+// worth UPGRADING, which is a different question from which card is worth ADDING
+// to the deck, and which defaulted 70+ of the 82 cards to a flat 30. Score the
+// card as a deck addition: real combat value, chain partners already in the deck,
+// and curve.
+async function cardPickTick(s) {
+  const cards = await cardTiles(260)
+  const deckIds = Object.keys(RUN.cardsPlayed || {})
+  const scored = cards.map(c => {
+    const card = tileCard(c.t)
+    if (!card) return null
+    const r = BRAIN.cardPickScore(card.id, { deckIds })
+    return { ...c, card, v: r.v, reasons: r.reasons }
+  }).filter(Boolean).sort((a, b) => b.v - a.v)
+  if (!scored.length) {
+    ev('boosterpick_confused', { why: 'no card tiles parsed' })
+    for (const b of ['confirm', 'take', 'continue', ...OVERLAY_BTNS]) { try { await P.clickText(b); break } catch (e) {} }
+    return
+  }
+  const top = scored[0]
+  ev('booster_pick', { card: top.card.id, v: top.v, why: top.reasons, offered: scored.map(c => c.card.id + ':' + c.v) })
+  await P.click(top.x, top.y)
+  await P.connect().then(p => p.waitForTimeout(500))
+  for (const b of ['confirm', 'take', 'add to deck', 'continue', 'done', 'close']) { try { await P.clickText(b); break } catch (e) {} }
+}
+
 async function eventTick(s) {
-  // random-event choices: prefer permanent gains, avoid stash losses. else first option.
+  // ── Aug 4 2026: PRICE THE TRADE, DON'T KEYWORD-MATCH IT ─────────────
+  // The old scorer was `+2 if the text says permanent, -1 if it says lose stash`,
+  // which cannot tell "+1 ATK to survivors, everyone takes 4 damage and may be
+  // KO'd" (mosh_pit A) from "+5 ATK, but one boss hit kills him" (blood_oath A).
+  // Events are free-text, so this stays a text model — but it now prices the
+  // magnitudes and the risks against each other instead of counting keywords.
   const opts = s.clickables.filter(c => c.w > 150 && c.h > 40 && !/hide|undo/i.test(c.t))
-  const score = c => (/permanent|perm |\+\d+ ATK/i.test(c.t) ? 2 : 0) - (/lose \d+ stash/i.test(c.t) ? 1 : 0)
-  const pick = opts.sort((a, b) => score(b) - score(a))[0]
-  if (pick) { ev('event_choice', { pick: pick.t.slice(0, 60), all: opts.map(o => o.t.slice(0, 40)) }); await P.click(pick.x, pick.y) }
+  const score = c => {
+    const t = c.t
+    let v = 0
+    const allAtk = (t.match(/ALL[^.]{0,24}\+(\d+)\s*ATK/i) || [])[1]
+    const oneAtk = (t.match(/\+(\d+)\s*ATK/i) || [])[1]
+    if (allAtk) v += (+allAtk) * 26
+    else if (oneAtk) v += (+oneAtk) * 9
+    if (/permanent/i.test(t)) v *= 1.5
+    const stashG = (t.match(/\+(\d+)\s*(?:stash|🌿)/i) || [])[1]; if (stashG) v += (+stashG) * 0.7
+    const stashL = (t.match(/-\s*(\d+)\s*(?:stash|🌿)/i) || [])[1] || (t.match(/lose\s*(\d+)/i) || [])[1]
+    if (stashL) v -= (+stashL) * 0.7
+    const emb = (t.match(/\+(\d+)\s*(?:max\s*)?ember/i) || [])[1]; if (emb) v += (+emb) * 22
+    const hp = (t.match(/\+(\d+)\s*(?:max\s*)?HP/i) || [])[1]; if (hp) v += (+hp) * 3
+    const corrDown = (t.match(/-\s*(\d+)%?\s*corrupt/i) || [])[1]; if (corrDown) v += (+corrDown) * 0.3
+    const corrUp = (t.match(/\+\s*(\d+)%?\s*corrupt/i) || [])[1]; if (corrUp) v += (+corrUp) * 0.2
+    // Risk. A KO'd member is gone for the fight and takes their ATK with them;
+    // a member who dies to one boss hit is a run-ending liability in Circle 6+.
+    const dmg = (t.match(/take[s]?\s*(\d+)\s*damage/i) || [])[1]; if (dmg) v -= (+dmg) * 6
+    if (/tooStoned|knocked out|KO|crushed|dies|death/i.test(t)) v -= 40
+    if (/one hit .* die|blood oath/i.test(t)) v -= 35
+    if (/nothing happens|walk away|refuse|leave/i.test(t)) v += 2   // the safe out is worth a little
+    if (/lock/i.test(t) && /corrupt/i.test(t)) v -= 18              // locked corruption kills the damage tiers
+    return Math.round(v)
+  }
+  const scored = opts.map(c => ({ ...c, v: score(c) })).sort((a, b) => b.v - a.v)
+  const pick = scored[0]
+  if (pick) { ev('event_choice', { pick: pick.t.slice(0, 60), score: pick.v, all: scored.map(o => o.t.slice(0, 34) + '=' + o.v) }); await P.click(pick.x, pick.y) }
 }
 
 async function descentTick(s) {
@@ -846,15 +1122,124 @@ const KW_W = { FRENZIED: 6, 'FOLK MAGIC': 5, CORRUPT: 4, HEXED: 3, SHREDDER: 3, 
 const BOT = { boughtThisShop: new Set(), lastShopSig: '', artifacts: 0, pedals: 0 }
 // Aug 1: these are module-global and were never reset, so after the first run
 // filled 3 artifacts the relic branch was dead for every later run in the session.
-function resetRunEconomy() { BOT.artifacts = 0; BOT.pedals = 0; BOT.boughtThisShop = new Set(); BOT.lastShopSig = '' }
+function resetRunEconomy() {
+  BOT.artifacts = 0; BOT.pedals = 0; BOT.boughtThisShop = new Set(); BOT.lastShopSig = ''
+  BOT.bandNames = []; BOT._bandCache = undefined; BOT._bandCacheSig = ''
+  // Aug 4 2026: owned gear is PER-RUN. Carrying last run's artifacts/pedals/loot
+  // into the next one would make the shape planner chase a Solo Sermon the band
+  // does not have — the exact class of bug the module-global BOT counters had.
+  OWNED.artifacts = []; OWNED.pedals = []; OWNED.loot = []; OWNED.band = []
+}
 
+// ── BAND + DECK CONTEXT (Aug 4 2026) ──────────────────────────────────
+// Every out-of-combat decision — which relic to buy, which member to sign, which
+// pact to take — depends on the band that actually exists, and none of them used
+// to look at it. The shop's STAGE ORDER strip prints the names; the roster gives
+// role and keyword for a name, exactly as the player's own knowledge does.
+const ROSTER_BY_NAME = {}
+for (const m of (BRAIN.MUSICIANS || [])) ROSTER_BY_NAME[String(m.name).toLowerCase()] = m
+function bandFromNames(names) {
+  return (names || []).map(n => {
+    const m = ROSTER_BY_NAME[String(n).toLowerCase()]
+    return m ? { name: m.name, role: m.role, keyword: m.keyword, atk: m.atk, hp: m.hp, tier: '' } : { name: n, role: '', keyword: '', atk: 0, hp: 0, tier: '' }
+  })
+}
+// Type mix of the cards this run has actually drawn — the only deck read the bot
+// is entitled to (it cannot open a deck list it never clicked). Used to price
+// Set List (ember-first) and Pentagram Shrine (per CORRUPT card).
+// The richest band picture available: the live combat read if we have had one
+// this run, otherwise the roster's base stats for the names on the shop strip.
+function bandNow() {
+  if (OWNED.band && OWNED.band.length) return OWNED.band
+  return bandFromNames(BOT.bandNames || [])
+}
+function deckTypesSeen() {
+  const out = {}
+  for (const id of Object.keys(RUN.cardsPlayed || {})) {
+    const c = BRAIN.ALL_CARDS.find(x => x.id === id)
+    if (c) out[c.type] = (out[c.type] || 0) + RUN.cardsPlayed[id]
+  }
+  if (!Object.keys(out).length) return { RIFF: 30, CORRUPT: 15, UTILITY: 14, EMBER: 10 }
+  return out
+}
+
+// ── SLOT SWAP MODAL (Aug 4 2026 — first version that ever reached it) ──
+// Slots are hard-capped at 3 artifacts + 2 pedals, so past that point every
+// purchase is a REPLACEMENT and the only question is whether the incoming item
+// beats the worst one already equipped, net of the 50% refund (confirmSlotSwap).
+// The old handler clicked `owned[0]` — the first tile, unscored — which threw
+// away a x1.5 always-on relic for a x1.02 situational one about a third of the
+// time. Cancelling costs nothing (cancelSlotSwap consumes no stash and leaves
+// the tile buyable), so a bad swap has a strictly better alternative.
+async function slotSwapTick(s) {
+  const info = await P.evaljs(`(() => {
+    const txt = document.body.innerText
+    const inc = (txt.match(/Incoming[\\s\\S]{0,40}?\\n([^\\n]+)\\n/) || [])[1] || ''
+    const tiles = [...document.querySelectorAll('div')].filter(d => {
+      const r = d.getBoundingClientRect()
+      return r.width > 140 && r.width < 190 && r.height > 100 && /Sell/i.test(d.textContent || '')
+    }).map(d => { const r = d.getBoundingClientRect(); return { t: (d.textContent || '').replace(/\\s+/g, ' ').slice(0, 120), x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } })
+      .sort((a, b) => a.x - b.x)
+    return { inc, tiles }
+  })()`).catch(() => ({ inc: '', tiles: [] }))
+  const ctx = { band: bandNow(), owned: [].concat(OWNED.artifacts, OWNED.pedals, OWNED.loot), corruption: 0, deckTypes: deckTypesSeen(), circle: (RUN.deepestCircle || 1) }
+  const incoming = BRAIN.relicBuyScore(info.inc, ctx)
+  const scored = (info.tiles || []).map(t => {
+    const nm = t.t.replace(/Sell.*$/i, '').trim()
+    const r = BRAIN.relicBuyScore(nm, { ...ctx, owned: [] })
+    return { ...t, name: nm.slice(0, 24), score: r.score, why: r.why }
+  }).sort((a, b) => a.score - b.score)
+  const weakest = scored[0]
+  // Half the removed item's paid cost comes back, so the true bar is "better than
+  // the worst tile" with a margin for the growth/effects being reverted.
+  if (weakest && incoming.score > weakest.score * 1.25 + 8) {
+    ev('slot_swap', { action: 'swap', out: weakest.name, outScore: weakest.score, in: info.inc.slice(0, 24), inScore: incoming.score, why: incoming.why })
+    await P.click(weakest.x, weakest.y)
+  } else {
+    ev('slot_swap', { action: 'cancel', in: info.inc.slice(0, 24), inScore: incoming.score, bestOwnedFloor: weakest ? weakest.score : null, why: incoming.why || 'nothing worth replacing' })
+    let done = false
+    for (const b of ['cancel', 'keep current']) { try { await P.clickText(b); done = true; break } catch (e) {} }
+    if (!done) await P.key('Escape').catch(() => {})
+  }
+}
+
+// ── MEMBER SCORING (Aug 4 2026 rebuild) ───────────────────────────────
+// Was: ATK*3 + HP + a flat keyword weight. Two things that wrong made every
+// recruit and every draft pick suspect as balance data:
+//   1. DRUMMERS DO NOT SWING. App.jsx handleStrike filters role==='Drummer' out
+//      of the damage sum entirely, so scoring Rolf (ATK 1) or Thor (ATK 0) on ATK
+//      graded them on a column that contributes zero. What a drummer actually
+//      does is roll the band-wide DOUBLE TIME d6 — x1.0/x1.5/x2.0, E[x1.5] on the
+//      WHOLE band's damage. Under the old scorer a drummer was the worst card on
+//      the screen every single time, which is exactly the shape of the
+//      "this member is always skipped" verdict this playtest exists to test.
+//   2. KEYWORD VALUE IS A STEP FUNCTION. _stackTier maps 1/2/3+ stacks to
+//      tiers 1/2/4, so the SECOND SHREDDER is worth far more than the first, and
+//      the third more again. A flat per-keyword weight cannot express that, and
+//      the "counts" bonus the old code applied counted keywords among the OFFERED
+//      candidates rather than among the band that already exists.
+// brain.recruitScore models both, plus mentor links (a foil/mythic/demonic
+// member left-adjacent to a basic member of the SAME ROLE) and the ANCHOR-3
+// band-wide save.
+function parseMemberTile(t) {
+  const atkm = t.match(/ATK\s*(\d+)/i)
+  const hpm = t.match(/HP\s*(\d+)/i)
+  const kw = ((t.match(/(FRENZIED|DOUBLE TIME|ANCHOR|CORRUPT|DEBUFF|FOLK MAGIC|SHREDDER|HEXED|FALLEN)/i) || [])[1] || '').toUpperCase()
+  const role = (t.match(/(Rhythm Guitarist|Lead Guitarist|Bass Player|Synth Player|Drummer|Vocalist|Dark Minstrel|The Devil)/i) || [])[1] || ''
+  const name = memberName(t)
+  const roster = ROSTER_BY_NAME[String(name).toLowerCase()]
+  return {
+    name, keyword: kw || (roster ? roster.keyword : ''),
+    role: role || (roster ? roster.role : ''),
+    atk: atkm ? +atkm[1] : (roster ? roster.atk : 0),
+    hp: hpm ? +hpm[1] : (roster ? roster.hp : 0),
+    tier: /DEMONIC/i.test(t) ? 'demonic' : /MYTHIC/i.test(t) ? 'mythic' : /FOIL/i.test(t) ? 'foil' : '',
+  }
+}
 function memberScoreFromText(t) {
-  const atk = +((t.match(/ATK\s*(\d+)/i) || [0, 0])[1])
-  const hp = +((t.match(/HP\s*(\d+)/i) || [0, 0])[1])
-  const kw = (t.match(/(FRENZIED|DOUBLE TIME|ANCHOR|CORRUPT|DEBUFF|FOLK MAGIC|SHREDDER|HEXED)/i) || [])[1] || ''
-  let p = atk * 3 + hp + (KW_W[kw.toUpperCase()] || 0)
-  if (/FOIL/i.test(t)) p += 20; if (/MYTHIC/i.test(t)) p += 40; if (/DEMONIC/i.test(t)) p += 80
-  return { p, kw: kw.toUpperCase() }
+  const m = parseMemberTile(t)
+  const r = BRAIN.recruitScore(m, bandNow())
+  return { p: r.score, kw: m.keyword, why: r.reasons, role: m.role, name: m.name }
 }
 
 async function shopTick(s) {
@@ -888,6 +1273,14 @@ async function shopTick(s) {
       BOT._bandCache = domCount; BOT._bandCacheSig = BOT.lastShopSig
     }
     if (bandSize === null) ev('parse_miss', { field: 'bandSize', note: 'member packs skipped this shop' })
+  }
+  // Who is actually in the band, by name, off the STAGE ORDER strip. Needed
+  // BEFORE the gear branch so a relic can be scored against the band it will be
+  // used with; the old code only parsed this at the very end, for stage ordering.
+  if (stripM) {
+    const found = []
+    for (const m of (BRAIN.MUSICIANS || [])) if (new RegExp('(^|[^A-Za-z])' + m.name + '([^A-Za-z]|$)', 'i').test(stripM[0])) found.push(m.name)
+    if (found.length) BOT.bandNames = found
   }
   // ── Aug 4 2026: VERIFY THE PURCHASE ─────────────────────────────────
   // shop_buy was written BEFORE the click and never checked, so 187 rows counted
@@ -962,15 +1355,33 @@ async function shopTick(s) {
     return true
   }
   const tileInfo = marker => {
-    // Aug 3: grab the next FOUR lines after the cost and drop any that are pure
+    // Aug 3: grab the next lines after the cost and drop any that are pure
     // numbers or bare emoji — the ledger showed 3x "tile not clickable, tried: 10"
     // where the captured "name" was the price line.
-    const m = t.match(new RegExp(marker + '\\s*\\n(\\d+)((?:\\s*\\n[^\\n]*){1,4})'))
+    // ── Aug 4 2026: READ THE PRICE THE SHOP WILL ACTUALLY CHARGE ────────
+    // Today's shop rebuild made every tile render the BASE price struck through
+    // next to the real one whenever any modifier moved it (App.jsx ~2021:
+    // priceMoved() -> <s>{price}</s> {realPrice(price)}). Hangover alone is up to
+    // +60%. The old regex took the FIRST number, i.e. the struck-through base, so
+    // with a hangover the bot thought a 22-stash pedal cost 14, "afforded" it, and
+    // clicked a tile whose cursor is `default` because canBuy is false — which is
+    // exactly the "tile not clickable" rows in the ledger. Take the LAST number in
+    // the leading price block: that is what `can()` and handleShopSpend use.
+    const m = t.match(new RegExp(marker + '((?:\\s*\\n[^\\n]*){1,7})'))
     if (!m) return null
-    const cands = String(m[2] || '').split('\n')
-      .map(x => x.trim())
-      .filter(x => x && !/^\d+$/.test(x) && /[A-Za-z]{3}/.test(x))
-    return { cost: +m[1], cands }
+    const lines = String(m[1] || '').split('\n').map(x => x.trim()).filter(Boolean)
+    const prices = []
+    let i = 0
+    for (; i < lines.length; i++) {
+      const only = lines[i].replace(/[^\d\s]/g, '').trim()
+      const nums = lines[i].match(/\d+/g)
+      if (nums && only.length && !/[A-Za-z]{3}/.test(lines[i])) { prices.push(...nums.map(Number)); continue }
+      break
+    }
+    if (!prices.length) return null
+    const cands = lines.slice(i).filter(x => !/^\d+$/.test(x) && /[A-Za-z]{3}/.test(x))
+    // struck-through base first, effective second — the charge is the LAST one.
+    return { cost: prices[prices.length - 1], baseCost: prices[0], cands }
   }
 
   // ── Aug 4 2026: THIS BLOCK MUST STAY BELOW buyNamed/tileInfo ─────────
@@ -986,32 +1397,66 @@ async function shopTick(s) {
   // relics stack multiplicatively to x2.5+, and the ceiling is x18+. Relics were
   // ALSO silently dead in the live game until Aug 1, which is why members-first
   // ever looked correct. Now that they work, an expert buys relics.
+  // ── Aug 4 2026: EVALUATE THE RELIC, DO NOT JUST AFFORD IT ────────────
+  // Until now the bot bought whatever artifact the shop happened to roll, as long
+  // as the stash covered it. Three of the offered artifacts are DEAD against the
+  // band this bot actually builds — Lucifer's Pact (x4 only with Lucifer on stage,
+  // and the bot never signs him), Chrome Skull (x3 only when exactly ONE member is
+  // alive), Doom Choir (x1.5 per SAME-ROLE member, worthless on a 5-role band) —
+  // and Drummer's Stick is worth nothing without a drummer. Every one of those
+  // purchases showed up in the balance report as "relic bought, run still lost",
+  // which is a statement about the bot, not the relic. Score the offer against the
+  // real band and the real deck; skip it and keep the stash otherwise.
+  const gearCtx = () => ({
+    band: bandNow(),
+    owned: [].concat(OWNED.artifacts, OWNED.pedals, OWNED.loot),
+    corruption: 0, deckTypes: deckTypesSeen(), circle: (RUN.deepestCircle || 1),
+  })
+  // A relic is worth buying when it moves the needle at all AND the stash it costs
+  // buys more multiplier here than it would as a member pack (~x1.25 for 22).
+  const gearVerdict = (tile, kind) => {
+    if (!tile) return { ok: false, why: 'no tile' }
+    let best = { score: 0, why: 'unreadable' }
+    for (const cand of tile.cands) {
+      const r = BRAIN.relicBuyScore(cand, gearCtx())
+      if (r.score > best.score || best.why === 'unreadable') best = r
+    }
+    const perStash = best.score / Math.max(1, tile.cost)
+    // Stash is worthless in the bank (cap 420, and the run can end at any fight),
+    // so the bar drops once the wallet is fat: a mediocre always-on multiplier
+    // beats 200 unspent stash. Without this the new scoring would hoard.
+    const rich = stash >= 60
+    const minScore = rich ? 8 : 18, minPer = rich ? 0.35 : 0.9
+    if (best.score < minScore || perStash < minPer) return { ok: false, why: `${best.name || tile.cands[0]}: score ${best.score} (${best.why}) @${tile.cost} = ${perStash.toFixed(2)}/stash${rich ? ' [rich bar]' : ''}`, score: best.score }
+    return { ok: true, why: `${best.name || ''}: score ${best.score} (${best.why}) @${tile.cost}`, score: best.score }
+  }
+  const tryGear = async (marker, kind, label, cap, ownedCount) => {
+    if (ownedCount >= cap || !tryable(label)) return false
+    const tile = tileInfo(marker)
+    if (!tile) return false
+    if (stash < tile.cost) { ev('shop_skip', { tile: label, why: `stash ${stash} < ${tile.cost}` }); return false }
+    const v = gearVerdict(tile, kind)
+    if (!v.ok) { BOT.boughtThisShop.add(label); ev('shop_skip', { tile: label, why: 'NOT WORTH IT — ' + v.why }); return false }
+    if (await buyNamed(tile.cands, `${label} cost=${tile.cost} ${v.why}`, label)) {
+      if (label === 'artifact') BOT.artifacts++; else BOT.pedals++
+      return true
+    }
+    return false
+  }
   const relicsFirst = bandSize !== null && bandSize >= 3
   if (relicsFirst) {
-    const a0 = tileInfo('⛧ ARTIFACT')
-    if (BOT.artifacts < 3 && tryable('artifact') && a0 && stash >= a0.cost) {
-      if (await buyNamed(a0.cands, `relic-first cost=${a0.cost} band=${bandSize}`, 'artifact')) { BOT.artifacts++; return }
-    }
-    const p0 = tileInfo('⛧ EFFECT PEDAL')
-    if (BOT.pedals < 2 && tryable('effect pedal') && p0 && stash >= p0.cost) {
-      if (await buyNamed(p0.cands, `pedal-first cost=${p0.cost} band=${bandSize}`, 'effect pedal')) { BOT.pedals++; return }
-    }
+    if (await tryGear('⛧ ARTIFACT', 'artifact', 'artifact', 3, Math.max(BOT.artifacts, OWNED.artifacts.length))) return
+    if (await tryGear('⛧ EFFECT PEDAL', 'pedal', 'effect pedal', 2, Math.max(BOT.pedals, OWNED.pedals.length))) return
   }
-  if (BOT.artifacts < 3 && tryable('artifact')) {
-    const a = tileInfo('⛧ ARTIFACT')
-    if (a && stash >= a.cost) { // Aug 3: dropped the +4 reserve — it blocked 10 near-affordable relic buys in one session
-      if (await buyNamed(a.cands, `relic cost=${a.cost}`, 'artifact')) { BOT.artifacts++; return }
-    } else if (a) ev('shop_skip', { tile: 'artifact', why: `stash ${stash} < ${a.cost}` })
-  }
-  if (BOT.pedals < 2 && tryable('effect pedal')) {
-    const p = tileInfo('⛧ EFFECT PEDAL')
-    if (p && stash >= p.cost) {
-      if (await buyNamed(p.cands, `pedal cost=${p.cost}`, 'effect pedal')) { BOT.pedals++; return }
-    } else if (p) ev('shop_skip', { tile: 'pedal', why: `stash ${stash} < ${p.cost}` })
-  }
-  // 4. DRUGS (sim: shrooms if stash>=16, acid if stash>=22 — reserve logic)
+  if (await tryGear('⛧ ARTIFACT', 'artifact', 'artifact', 3, Math.max(BOT.artifacts, OWNED.artifacts.length))) return
+  if (await tryGear('⛧ EFFECT PEDAL', 'pedal', 'effect pedal', 2, Math.max(BOT.pedals, OWNED.pedals.length))) return
+  // 4. DRUGS. Doctrine change (Aug 4 2026): a trip is not a panic button, it is a
+  // planned boss opener — REALITY GLITCH (acid) and OVERMIND (DMT) set the STARTING
+  // strike multiplier to x2.0 / x3.0 for EVERY strike of the fight. DMT was never
+  // bought at all before today, so its whole outcome pool has zero live data.
+  if (stash >= 25 && /💠/.test(t) && !/💠\s*\n?DRY/i.test(t) && tryable('💠') && await buy('💠', 'DMT: boss opener, x3.0 strike mult all fight')) return
+  if (stash >= 22 && /🧪/.test(t) && !/🧪\s*\n?DRY/i.test(t) && tryable('🧪') && await buy('🧪', 'acid: boss opener, x2.0 strike mult all fight')) return
   if (stash >= 16 && /Shrooms/i.test(t) && !/Shrooms\s*\n?DRY/i.test(t) && tryable('shrooms') && await buy('shrooms', 'panic button reserve')) return
-  if (stash >= 22 && /🧪/.test(t) && !/🧪\s*\n?DRY/i.test(t) && tryable('🧪') && await buy('🧪', 'acid reserve')) return
   // 4b. BOOSTER DOCTRINE (Jul 31 JV): CD-R when stash-rich — data on booster value
   if (stash >= 30 && /CD-R/i.test(t) && tryable('cd-r') && await buy('cd-r', 'booster doctrine, stash=' + stash)) return
   // 5. AURA-AWARE STAGE ORDERING (sim weapon #2): arrange members so aura emitters
@@ -1095,14 +1540,15 @@ async function recruitTick(s) {
   const takeable = cands.filter(c => c.takeable)
   if (takeable.length) cands = takeable
   if (cands.length) {
-    // stack-tier bonus: favor keywords the band already runs (parsed from stage strip earlier runs — approximate with pair bonus)
-    const scored = cands.map(c => { const { p, kw } = memberScoreFromText(c.t); return { ...c, p, kw } })
-    const counts = {}; scored.forEach(c => { counts[c.kw] = (counts[c.kw] || 0) + 1 })
-    const best = scored.sort((a, b) => (b.p + (counts[b.kw] > 1 ? 15 : 0)) - (a.p + (counts[a.kw] > 1 ? 15 : 0)))[0]
+    // Scored against the BAND THAT EXISTS (keyword stack tiers, mentor links, and
+    // the drummer's band-wide d6) — see memberScoreFromText. The old "+15 if two
+    // candidates share a keyword" bonus is gone: it counted keywords among the
+    // OFFERED cards, which says nothing about the stack the band is building.
+    const scored = cands.map(c => { const r = memberScoreFromText(c.t); return { ...c, p: r.p, kw: r.kw, why: r.why, role: r.role } })
     // never sign Lucifer: 3-member cap + dies-ends-run risk isn't in the sim's model
     const safe = scored.filter(c => !/FALLEN|The Devil/i.test(c.t))
     const pickFrom = safe.length ? safe : scored
-    const bestSafe = pickFrom.sort((a, b) => (b.p + (counts[b.kw] > 1 ? 15 : 0)) - (a.p + (counts[a.kw] > 1 ? 15 : 0)))[0]
+    const bestSafe = pickFrom.sort((a, b) => b.p - a.p)[0]
     // Aug 3 2026 BALANCE TELEMETRY: log what was OFFERED, not just what was taken.
     // Without the rejected options you cannot tell an unpopular member from one that
     // never appeared — which is exactly the "band members that are always skipped"
@@ -1114,10 +1560,11 @@ async function recruitTick(s) {
     const bestName = memberName(bestSafe.t)
     ev('recruit_options', {
       pickCount: 1, offeredCount: scored.length,
-      offered: scored.map(c => ({ name: memberName(c.t), kw: c.kw, score: c.p })),
+      offered: scored.map(c => ({ name: memberName(c.t), kw: c.kw, role: c.role, score: c.p })),
+      band: bandNow().map(m => m.name + '/' + (m.keyword || '?')),
       intent: bestName
     })
-    ev('recruit_pick', { pick: bestSafe.t.slice(0, 50), name: bestName, score: bestSafe.p })
+    ev('recruit_pick', { pick: bestSafe.t.slice(0, 50), name: bestName, score: bestSafe.p, why: bestSafe.why })
     // ── Aug 4 2026: DO NOT THROW AWAY A PURCHASED PACK ────────────────────
     // The Aug-3 version diffed the first 300 chars of screen text 600ms after the
     // click and, if it hadn't changed yet, clicked "pass" — which SKIPS the recruit
@@ -1169,10 +1616,14 @@ async function recruitTick(s) {
       // incoming needs a real margin (+20%) to justify losing the growth.
       const cuts = after.clickables.filter(c => /✂/.test(c.t))
       if (cuts.length) {
-        const val = t => (+(t.match(/ATK\s*(\d+)/i) || [0, 0])[1]) * 3 + (+(t.match(/HP\s*(\d+)/i) || [0, 0])[1])
+        // Aug 4 2026: the same ATK*3+HP that made drummers invisible was deciding
+        // who gets FIRED. A drummer scored 3-11 here, so the band's only d6 roller
+        // was always the first one cut. Score both sides with the real model, and
+        // grade the incoming member against the band MINUS whoever is being cut.
+        const val = t => BRAIN.recruitScore(parseMemberTile(t), bandNow()).score
         const scoredCuts = cuts.map(c => ({ ...c, v: val(c.t) }))
         const weakest = scoredCuts.sort((a, b) => a.v - b.v)[0]
-        const incomingV = val(bestSafe.t)
+        const incomingV = bestSafe.p
         if (incomingV > weakest.v * 1.2) {
           ev('member_replaced', { cut: weakest.t.slice(0, 40), cutV: weakest.v, inV: incomingV })
           await P.click(weakest.x, weakest.y)
@@ -1223,10 +1674,20 @@ async function draftTick(s) {
   // Click one candidate at a time, re-read.
   const stageBtn = st => st.clickables.find(c => /take the stage/i.test(c.t))
   const noDevil = list => list.filter(c => !/FALLEN|The Devil/i.test(c.t)) // fair tests never draft Lucifer
-  const parse = st => noDevil(st.clickables.filter(c => /ATK\d/.test(c.t.replace(/\s/g, '')))).map(c => {
-    const { p, kw } = memberScoreFromText(c.t)
-    return { ...c, kw, score: p, name: memberName(c.t) }
-  }).sort((a, b) => b.score - a.score)
+  // Aug 4 2026: score each candidate against the band being drafted SO FAR, not
+  // in isolation. Opening Night picks 2 of 4, and the second pick is a completely
+  // different question once the first is locked in — a second SHREDDER crosses a
+  // stack tier, a second Drummer is worth nothing (the game blocks it), and a
+  // foil member next to a same-role basic opens a mentor link.
+  const parse = (st, taken) => {
+    const virtual = (taken || []).map(n => ROSTER_BY_NAME[String(n).toLowerCase()]).filter(Boolean)
+      .map(m => ({ name: m.name, role: m.role, keyword: m.keyword, atk: m.atk, hp: m.hp, tier: '' }))
+    return noDevil(st.clickables.filter(c => /ATK\d/.test(c.t.replace(/\s/g, '')))).map(c => {
+      const m = parseMemberTile(c.t)
+      const r = BRAIN.recruitScore(m, virtual)
+      return { ...c, kw: m.kw || m.keyword, role: m.role, score: r.score, why: r.reasons, name: m.name }
+    }).sort((a, b) => b.score - a.score)
+  }
 
   // ── Aug 4 2026: LOG THE SLATE ON EVERY DRAFT ────────────────────────
   // draft_options used to be emitted only inside the loop at attempt===0, so it
@@ -1234,7 +1695,7 @@ async function draftTick(s) {
   // already selected on entry logged nothing at all, and the report's pick rates
   // were computed from an n of 2. Emit before anything else, deduped by the slate
   // itself so repeated ticks on the SAME screen don't inflate the offer counts.
-  const opening = parse(s)
+  const opening = parse(s, [])
   const pickCount = draftPickCount(s.text)
   const sig = opening.map(c => c.name).sort().join('|')
   const fresh = sig && sig !== lastDraftSig
@@ -1259,14 +1720,14 @@ async function draftTick(s) {
       lastDraftSig = ''
       return
     }
-    const cand = parse(st)
+    // Re-score against what is already clicked: recruitScore's stack-tier and
+    // mentor-link terms do the "keyword pair" job properly, so the old hardcoded
+    // "boost anyone sharing the top pick's keyword" heuristic is gone.
+    const cand = parse(st, clicked)
     if (!cand.length) { ev('draft_confused', { msg: 'no candidates parsed' }); lastDraftSig = ''; return }
-    // prefer keyword-pair: if top pick's keyword has a partner, boost the partner
-    const top = cand[0]
-    const partner = cand.find(c => c !== top && c.kw && c.kw === top.kw)
-    const order = partner ? [top, partner, ...cand.filter(c => c !== top && c !== partner)] : cand
+    const order = cand.filter(c => !clicked.includes(c.name)).concat(cand)
     const pick = order[attempt % order.length]
-    ev('draft_click', { attempt, pick: pick.t.slice(0, 30), name: pick.name })
+    ev('draft_click', { attempt, pick: pick.t.slice(0, 30), name: pick.name, score: pick.score, why: pick.why })
     clicked.push(pick.name)
     await P.click(pick.x, pick.y)
     await P.connect().then(p => p.waitForTimeout(500))
@@ -1373,7 +1834,14 @@ async function main() {
   // Fires on the SAME 60s budget as the in-loop check, but from outside the loop
   // so a hung await or an error-path `continue` cannot suppress it.
   startHardWatchdog(STALL_MS, () => {
+    // Aug 4 2026: this used to reload the game WITHOUT closing the run out, so
+    // `runActive` stayed true; the menu handler's `if (!runActive)` guard then
+    // suppressed run_start for the run that came back, and the analyzer fused it
+    // onto the abandoned one — the same run-fusion bug that made the win rate read
+    // 18% instead of 5%, arriving down a different path.
     preferNewRun = true
+    try { emitRunSummary('abandoned_watchdog', { reason: 'hard/action watchdog soft restart' }) } catch (e) {}
+    runActive = false
     P0.reset().catch(() => {})
     P.evaljs("localStorage.removeItem('vst_save_v4'); setTimeout(()=>location.reload(),50); 'x'").catch(() => {})
   })
@@ -1477,26 +1945,34 @@ async function main() {
       else if (type === 'event') await eventTick(s)
       else if (type === 'pact') await pactTick(s)
       else if (type === 'forge') await forgeTick(s)
-      else if (type === 'boosterpick') await forgeTick(s) // same shape: card tiles, pick best, confirm
+      else if (type === 'boosterpick') await cardPickTick(s)
       else if (type === 'credits') { ev('credits_seen', {}); const vp = await P.evaljs('({w:innerWidth,h:innerHeight})'); await P.click(Math.round(vp.w / 2), Math.round(vp.h / 2)) }
-      else if (type === 'pause') { await P.key('Escape').catch(() => {}) }
+      else if (type === 'pause') {
+        // ESC toggles the overlay (App.jsx ~7795). If the keypress does not land
+        // — the window can lose focus, and the overlay is the one screen with no
+        // "continue" button — the backdrop's own onClick closes it, so click a
+        // corner well outside the centred panel. Never click ABANDON RUN.
+        ev('pause_overlay', { note: 'ESC pause overlay — dismissing' })
+        await P.key('Escape').catch(() => {})
+        const after = await P.state().catch(() => null)
+        if (after && /PAUSED/i.test(after.text)) {
+          const vp = await P.evaljs('({w:innerWidth,h:innerHeight})').catch(() => null)
+          if (vp) await P.click(Math.round(vp.w * 0.06), Math.round(vp.h * 0.06)).catch(() => {})
+          const after2 = await P.state().catch(() => null)
+          if (after2 && /PAUSED/i.test(after2.text)) ev('pause_stuck', { note: 'ESC and backdrop click both failed' })
+        }
+      }
       else if (type === 'splash' || type === 'boot') { const vp = await P.evaljs('({w:innerWidth,h:innerHeight})').catch(() => null); if (vp) await P.click(Math.round(vp.w / 2), Math.round(vp.h * 0.9)).catch(() => {}) }
       else if (type === 'demonicconflict') {
         // Two DEMONIC members can't coexist. Keep the higher ATK+HP one.
         const opts = s.clickables.filter(c => /ATK\s*\d/.test(c.t))
-        const val = t => (+((t.match(/ATK\s*(\d+)/) || [0, 0])[1])) * 3 + (+((t.match(/HP\s*(\d+)/) || [0, 0])[1]))
+        const val = t => BRAIN.recruitScore(parseMemberTile(t), bandNow()).score
         const best = opts.sort((a, b) => val(b.t) - val(a.t))[0]
         ev('demonic_conflict', { picked: best ? best.t.slice(0, 40) : 'none', of: opts.length })
         if (best) await P.click(best.x, best.y)
         else for (const b of ['keep', 'confirm', 'continue']) { try { await P.clickText(b); break } catch (e) {} }
       }
-      else if (type === 'slotswap') {
-        // Artifact/pedal slots full — swap out the cheapest owned item.
-        const owned = s.clickables.filter(c => /\d/.test(c.t) && c.t.length < 60 && !/CANCEL|KEEP/i.test(c.t))
-        ev('slot_swap', { options: owned.length })
-        if (owned.length) await P.click(owned[0].x, owned[0].y)
-        else for (const b of ['cancel', 'keep current']) { try { await P.clickText(b); break } catch (e) {} }
-      }
+      else if (type === 'slotswap') await slotSwapTick(s)
       else if (type === 'pawn') { for (const b of ['close', 'back', 'done']) { try { await P.clickText(b); break } catch (e) {} } await P.key('Escape').catch(() => {}) }
       else if (type === 'meta') {
         // Collection / trophies / achievements — leave via back/escape, then menu handler restarts

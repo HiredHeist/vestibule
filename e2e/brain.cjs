@@ -623,21 +623,523 @@ function bestOrder(names) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  NOT FIXABLE FROM THIS FILE (documented, not silently ignored)
+//  RELIC AWARENESS (Aug 4 2026 — ADDITIVE. Nothing above this line changed.)
+//
+//  The block below is the answer to the "NOT FIXABLE FROM THIS FILE" note that
+//  used to live here: the driver now PERCEIVES owned artifacts and pedals off the
+//  combat HUD rail (App.jsx ~11868: three 100x108 artifact tiles then two pedal
+//  tiles, each printing the item's NAME — exactly what a human reads) and passes
+//  the ids in. Everything here is a pure function of that list; the combat card
+//  scoring above is untouched and still runs first.
 // ═══════════════════════════════════════════════════════════════════════════
-//  * RELIC / PEDAL AWARENESS. The driver never tells the policy which artifacts or
-//    pedals the run owns, and the perception layer does not read them off the HUD.
-//    Optimal play order changes completely with Echoplex / The Looper / The Witch's
-//    Sabbath (the FIRST card of a strike retriggers, so it must be the highest-value
-//    one), Set List (x1.4 if the first card played was an EMBER type — which fights
-//    the "ember cards first" rule this file just installed), Vintage Guitar (x1.3 at
-//    4+ cards), Solo Sermon (x6.0 at EXACTLY 2 cards — a hard stop rule), The Doom
-//    Crown (x8.0 if every card this strike shares a type), Ouroboros Pin (x1.3 per
-//    discard). Wiring these needs autopilot.cjs to perceive and pass owned item ids.
-//  * WHEN TO STRIKE. The driver strikes unconditionally after the play loop; the
-//    policy has no veto. With embers not refilling between strikes, "spend down,
-//    then strike" is close to right, but Solo Sermon / The Blade / Burning Stage all
-//    make the card COUNT itself a decision, and overtime enrage makes late strikes
-//    dangerous. A real answer needs a search over the remaining hand, not a heuristic.
-//  * TRIP TIMING, SHOP, RECRUIT, PACT and FORGE choices all live in autopilot.cjs.
-module.exports = { matchCard, isAmbiguous, scoreCard, pickTarget, ALL_CARDS, RIFF_CHAINS, MUSICIANS, bestOrder }
+
+// Relic definitions are PARSED from src/data/relics.js at load, not copied, so a
+// balance change to a mult or a trigger cannot silently desync the bot.
+const RELIC_DEF = {}, RELIC_BY_NORM = {}
+try {
+  const _rtxt = require('fs').readFileSync(require('path').join(__dirname, '..', 'src', 'data', 'relics.js'), 'utf8')
+  let pool = ''
+  for (const line of _rtxt.split('\n')) {
+    const p = line.match(/export const ([A-Z_]+)\s*=/); if (p) { pool = p[1]; continue }
+    const id = line.match(/[{,]id:'([^']+)'/); if (!id) continue
+    const nm = (line.match(/[,{]name:'([^']*)'/) || line.match(/[,{]name:"([^"]*)"/) || [])[1]
+    if (!nm) continue
+    const d = {
+      id: id[1], name: nm, pool,
+      kind: /PASSIVE|PEDAL/.test(pool) ? 'pedal' : pool === 'BOSS_LOOT' ? 'loot' : 'artifact',
+      multTrigger: (line.match(/multTrigger:'([^']+)'/) || [])[1] || null,
+      mult: +((line.match(/[,{]mult:([\d.]+)/) || [])[1] || 0),
+      cost: +((line.match(/[,{]cost:(\d+)/) || [])[1] || 0),
+      rarity: (line.match(/rarity:'([^']+)'/) || [])[1] || '',
+      unimplemented: /unimplemented:true/.test(line),
+      effect: (line.match(/effect:'([^']*)'/) || line.match(/effect:"([^"]*)"/) || [])[1] || '',
+    }
+    RELIC_DEF[d.id] = d
+    RELIC_BY_NORM[norm(d.name)] = d
+  }
+} catch (e) { /* relics.js unreadable — every function below degrades to "no relics" */ }
+// Longest-first so "Set List" cannot be eaten by a shorter key inside a HUD blob.
+const RELIC_NORM_KEYS = Object.keys(RELIC_BY_NORM).sort((a, b) => b.length - a.length)
+function matchRelic(screenName) {
+  const n = norm(screenName)
+  if (!n) return null
+  if (RELIC_BY_NORM[n]) return RELIC_BY_NORM[n]
+  for (const k of RELIC_NORM_KEYS) if (k.length >= 5 && n.includes(k)) return RELIC_BY_NORM[k]
+  return null
+}
+const relicDef = id => RELIC_DEF[id] || null
+
+// Triggers whose value depends on the SHAPE of the strike the bot is about to
+// throw (how many cards, of what types, in what order). Everything else — always
+// on, per-stoned-member, per-other-artifact — is a constant factor that cannot
+// change the decision, so it is deliberately excluded from the planner.
+const SHAPE_TRIGGERS = new Set([
+  'cards3', 'cards5', 'cards2exact', 'cards1', 'allSameType', 'firstCardEmber',
+  'playedRiff', 'noRiff', 'embers5', 'perCorruptCard', 'perDupePlayed',
+  'perDiscardStrike', 'discardedStrike', 'perChain', 'chains3',
+])
+// First-card replay pedals. Echoplex is NOT here on purpose: App.jsx ~6758 rolls
+// its 69% on EVERY card played, not on the first one, so it is a reason to play
+// MORE cards, never a reason to reorder them. (The audit brief listed it as a
+// first-card effect; the code disagrees and the code wins.)
+const FIRST_REPLAYS = { looperpedal: 1, witchssabbath: 2 }
+
+function ownedShapeRelics(owned) {
+  const out = []
+  for (const id of (owned || [])) {
+    const d = RELIC_DEF[id]
+    if (d && d.multTrigger && d.mult > 0 && SHAPE_TRIGGERS.has(d.multTrigger)) out.push(d)
+  }
+  return out
+}
+
+// Multiplier the owned shape-relics pay for one concrete strike shape.
+function shapeMult(shape, relics) {
+  let m = 1
+  for (const r of relics) {
+    let fires = 0
+    switch (r.multTrigger) {
+      case 'cards3': fires = shape.n >= 4 ? 1 : 0; break
+      case 'cards5': fires = shape.n >= 6 ? 1 : 0; break
+      case 'cards2exact': fires = shape.n === 2 ? 1 : 0; break
+      case 'cards1': fires = shape.n === 1 ? 1 : 0; break
+      case 'allSameType': fires = (shape.n >= 3 && shape.sameType) ? 1 : 0; break
+      case 'firstCardEmber': fires = shape.firstType === 'EMBER' ? 1 : 0; break
+      case 'playedRiff': fires = shape.riffs > 0 ? 1 : 0; break
+      case 'noRiff': fires = (shape.riffs === 0 && shape.n > 0) ? 1 : 0; break
+      case 'embers5': fires = shape.embersAfter >= 5 ? 1 : 0; break
+      case 'perCorruptCard': fires = shape.corrupts; break
+      case 'perDupePlayed': fires = shape.dupes; break
+      case 'perDiscardStrike': fires = shape.discards; break
+      case 'discardedStrike': fires = shape.discards >= 1 ? 1 : 0; break
+      case 'perChain': fires = shape.chains; break
+      case 'chains3': fires = shape.chains >= 3 ? 1 : 0; break
+    }
+    if (fires > 0) m *= Math.pow(r.mult, fires)
+  }
+  return m
+}
+
+// A strike is worth more than any one card, so the planner prices the strike
+// itself at BASE and the cards as their own ordinal scores. Relic multipliers
+// scale the WHOLE thing, which is exactly why a x6.0 Solo Sermon can be worth
+// throwing away two good cards for.
+const PLAN_BASE = 120
+
+// ── planStrike ─────────────────────────────────────────────────────────────
+// Enumerate every reachable strike shape and return the best one. Returns null
+// when nothing owned cares about shape, so the driver keeps its old behaviour.
+//   gs.relics / gs.pedals : owned ids (artifacts+loot, pedals)
+//   cands                 : [{id,type,cost,score}] already filtered to playable
+function planStrike(gs, cands) {
+  const owned = [].concat(gs.relics || [], gs.pedals || [])
+  const shaped = ownedShapeRelics(owned)
+  const replays = (gs.pedals || []).reduce((s, id) => s + (FIRST_REPLAYS[id] || 0), 0)
+  if (!shaped.length && !replays) return null
+  // The driver's candidate records carry the resolved card under `.card`; accept
+  // either shape so a caller passing raw hand records cannot silently produce a
+  // plan full of undefined ids (which is exactly what shipped for ten minutes).
+  const list = (cands || []).map(c => {
+    const id = c && (c.id || (c.card && c.card.id))
+    if (!id) return null
+    return { id, type: c.type || (c.card && c.card.type) || (DEF[id] && DEF[id].type) || '', cost: c.cost || 0, score: c.score || 0 }
+  }).filter(Boolean)
+  if (!list.length) return null
+  const embers = (gs && gs.embers) || 0
+  const alreadyPlayed = ((gs && gs.thisStrikeIds) || [])
+  const already = alreadyPlayed.length
+  const alreadyTypes = alreadyPlayed.map(id => (DEF[id] && DEF[id].type) || '')
+  const discardsLeft = (gs && gs.discardsLeft) || 0
+  const chains = (gs && gs.chainsThisStrike) || 0
+  // EXHAUSTIVE over subsets, not greedy. A greedy "best score first" walk cannot
+  // find the shape Vintage Guitar wants (four CHEAP cards beats two expensive
+  // ones) or the one Doom Crown wants (three cards of one type), which is exactly
+  // the kind of sequencing this planner exists to do.
+  const pool = list.slice().sort((a, b) => b.score - a.score).slice(0, 10)
+  const wantsDiscard = shaped.some(r => r.multTrigger === 'perDiscardStrike' || r.multTrigger === 'discardedStrike')
+  const discards = wantsDiscard ? Math.min(discardsLeft, 2) : 0
+  const evaluate = (chosen, firstIdx) => {
+    let spend = 0
+    for (const c of chosen) spend += c.cost
+    const ordered = firstIdx > 0 ? [chosen[firstIdx], ...chosen.filter((_, i) => i !== firstIdx)] : chosen
+    const types = alreadyTypes.concat(ordered.map(c => c.type))
+    const seen = {}; let dupes = 0
+    for (const id of alreadyPlayed.concat(ordered.map(c => c.id))) { seen[id] = (seen[id] || 0) + 1; if (seen[id] > 1) dupes++ }
+    const shape = {
+      n: already + ordered.length,
+      sameType: types.length > 0 && types.every(t => t === types[0]),
+      firstType: types[0] || null,
+      riffs: types.filter(t => t === 'RIFF').length,
+      corrupts: types.filter(t => t === 'CORRUPT').length,
+      dupes, discards, chains, embersAfter: embers - spend,
+    }
+    const m = shapeMult(shape, shaped)
+    let value = ordered.reduce((s, c) => s + c.score, 0)
+    if (replays && already === 0 && ordered.length) value += ordered[0].score * replays
+    return { total: m * (PLAN_BASE + value), mult: m, shape, ordered }
+  }
+  let best = null, naive = null
+  const N = pool.length
+  for (let mask = 0; mask < (1 << N); mask++) {
+    const chosen = []
+    let spend = 0, ok = true
+    for (let i = 0; i < N; i++) {
+      if (!(mask & (1 << i))) continue
+      chosen.push(pool[i]); spend += pool[i].cost
+      if (chosen.length > 6 || spend > embers) { ok = false; break }
+    }
+    if (!ok) continue
+    // chosen is already in descending-score order; try "best card first" and, if a
+    // different type sits in the set, that card first (Set List's EMBER rule).
+    const firsts = new Set([0])
+    for (let i = 1; i < chosen.length; i++) if (chosen[i].type !== chosen[0].type) firsts.add(i)
+    for (const fi of firsts) {
+      const r = evaluate(chosen, fi)
+      if (!best || r.total > best.r.total) best = { r, chosen, fi }
+    }
+  }
+  if (!best) return null
+  // The naive line the driver would take without a plan: highest score first,
+  // spend down. Used only to decide whether the plan actually changes anything.
+  {
+    const chosen = []; let spend = 0
+    for (const c of pool) { if (chosen.length >= 6) break; if (spend + c.cost > embers) continue; chosen.push(c); spend += c.cost }
+    naive = chosen.map(c => c.id).join(',')
+  }
+  const ord = best.r.ordered
+  // The type lock is only real when an owned relic PAYS for purity (Doom Crown).
+  // Without that gate, any single-type subset would have locked the driver out of
+  // better off-type cards for nothing.
+  const purityPaid = shaped.some(r => r.multTrigger === 'allSameType') && best.r.shape.sameType && best.r.shape.n >= 3
+  const plan = {
+    total: best.r.total, mult: best.r.mult,
+    cap: already + ord.length,
+    typeLock: purityPaid ? ord[0].type : null,
+    firstPrefer: already === 0 && ord.length ? ord[0].type : null,
+    nextId: ord.length ? ord[0].id : null,
+    ids: ord.map(c => c.id), discards,
+    naive,
+    why: shaped.filter(r => shapeMult(best.r.shape, [r]) > 1).map(r => r.name),
+  }
+  // Only OVERRIDE the (audited, incrementally re-scored) default line when an
+  // owned relic genuinely pays for a different shape. A plan whose multiplier is
+  // 1.0 is just a static knapsack re-ranking of the same cards, and the driver's
+  // per-card re-scoring is strictly better information than that.
+  // ACTIVE means "the driver must do something different". A relic whose
+  // multiplier is the same for every shape (Spit Cup fires on the DISCARD, not on
+  // the cards) cannot change the argmax, so the plan is only worth following when
+  // the chosen cards or their order actually differ from the default line.
+  plan.active = plan.ids.join(',') !== naive
+  return plan
+}
+
+// ── relicCardBonus ─────────────────────────────────────────────────────────
+// Per-card score delta from owned relics, used ON TOP of scoreCard(). Small and
+// additive by design: it re-ranks near-ties (play the CORRUPT card when the
+// Pentagram Shrine is on the rail) without ever resurrecting an unplayable card.
+function relicCardBonus(cardId, gs) {
+  const owned = [].concat(gs.relics || [], gs.pedals || [])
+  if (!owned.length) return 0
+  const def = DEF[cardId]; if (!def) return 0
+  const played = (gs.thisStrikeIds || []).map(id => (DEF[id] && DEF[id].type) || '')
+  let b = 0
+  for (const id of owned) {
+    const r = RELIC_DEF[id]; if (!r || !r.multTrigger) continue
+    switch (r.multTrigger) {
+      case 'perCorruptCard': if (def.type === 'CORRUPT') b += 24; break
+      case 'playedRiff': if (def.type === 'RIFF' && !played.includes('RIFF')) b += 14; break
+      case 'noRiff': if (def.type === 'RIFF') b -= 22; break
+      case 'perDupePlayed': if ((gs.thisStrikeIds || []).includes(cardId)) b += 14; break
+      case 'perChain': case 'chains3': break // chainBonus already dominates these
+      case 'corrupt50': case 'corrupt80': case 'corrupt100exact': case 'corruptedClean': {
+        // A corruption card is worth more when a corruption relic is one tier away.
+        const need = r.multTrigger === 'corrupt50' ? 60 : r.multTrigger === 'corrupt80' ? 80 : 100
+        const d = CORR_SET[cardId] !== undefined ? CORR_SET[cardId] - (gs.corruption || 0) : (CORR_DELTA[cardId] || 0)
+        if (d > 0 && (gs.corruption || 0) < need && (gs.corruption || 0) + d >= need) b += Math.min(40, Math.round(20 * r.mult))
+        break
+      }
+    }
+  }
+  return b
+}
+
+// ── relicBuyScore ──────────────────────────────────────────────────────────
+// What an offered artifact/pedal is worth TO THIS RUN. The old shop bought
+// whatever the tile happened to be, so Lucifer's Pact (x4 if Lucifer is on stage
+// — the bot never signs Lucifer) and Chrome Skull (x3 if exactly ONE member is
+// alive) were bought at full price as dead weight, and then the balance report
+// blamed the relic. ctx: {band:[{role,keyword,tier}], owned:[ids], corruption,
+// deckTypes:{RIFF:n,...}, circle}
+function relicBuyScore(idOrName, ctx) {
+  const r = RELIC_DEF[idOrName] || matchRelic(idOrName)
+  if (!r) return { score: 0, why: 'unknown item' }
+  const c = ctx || {}
+  const band = c.band || []
+  const owned = c.owned || []
+  const alive = band.filter(m => m && !m.tooStoned)
+  const n = alive.length
+  const roles = {}; alive.forEach(m => { roles[m.role] = (roles[m.role] || 0) + 1 })
+  const maxSameRole = Math.max(0, ...Object.values(roles))
+  const hasDrummer = alive.some(m => m.role === 'Drummer')
+  const deckTypes = c.deckTypes || {}
+  const totalCards = Math.max(1, Object.values(deckTypes).reduce((a, b) => a + b, 0))
+  const corr = c.corruption || 0
+  // Expected multiplier this run, given the band that actually exists.
+  let em = 1, why = r.multTrigger || 'utility'
+  switch (r.multTrigger) {
+    case 'alwaysOn': em = r.mult; break
+    case 'cards3': em = 1 + (r.mult - 1) * 0.55; break            // 4+ cards happens often, not always
+    case 'cards5': em = 1 + (r.mult - 1) * 0.15; break            // all 6 cards is rare
+    case 'cards2exact': em = 1 + (r.mult - 1) * 0.75; break       // the bot can CHOOSE to stop at 2
+    case 'cards1': em = 1 + (r.mult - 1) * 0.5; break
+    case 'allSameType': em = 1 + (r.mult - 1) * 0.35; break       // reachable but costs card quality
+    case 'firstCardEmber': em = 1 + (r.mult - 1) * ((deckTypes.EMBER || 0) / totalCards > 0.08 ? 0.8 : 0.25); break
+    case 'playedRiff': em = 1 + (r.mult - 1) * 0.85; break
+    case 'noRiff': em = 1 + (r.mult - 1) * 0.2; break             // fights the whole deck
+    case 'embers5': em = 1 + (r.mult - 1) * 0.3; break            // conflicts with spending embers
+    case 'discardedStrike': em = 1 + (r.mult - 1) * 0.6; break
+    case 'perDiscardStrike': em = Math.pow(r.mult, 1.2); break
+    case 'perCorruptCard': em = Math.pow(r.mult, Math.min(3, 1 + 2 * ((deckTypes.CORRUPT || 0) / totalCards))); break
+    case 'perDupePlayed': em = Math.pow(r.mult, 0.8); break
+    case 'perChain': em = Math.pow(r.mult, 1.0); break
+    case 'chains3': em = 1 + (r.mult - 1) * 0.2; break
+    case 'perAliveMember': em = Math.pow(r.mult, n); break
+    case 'perSameRole': em = maxSameRole >= 2 ? Math.pow(r.mult, maxSameRole) : 1; break
+    case 'perStoned': em = 1 + (r.mult - 1) * 0.3; break          // stoned members are a LOSS; never plan for them
+    case 'anyStoned': em = 1 + (r.mult - 1) * 0.35; break
+    case 'allHealthy': em = 1 + (r.mult - 1) * 0.5; break
+    case 'lastMemberStanding': em = n <= 1 ? r.mult : 1.02; break // dead relic with a real band
+    case 'doubleTimeRolled': em = hasDrummer ? 1 + (r.mult - 1) * 0.33 : 1; break // d6 5-6 = 1/3
+    case 'luciferOnStage': em = alive.some(m => m.keyword === 'FALLEN') ? r.mult : 1; break
+    case 'corrupt50': em = 1 + (r.mult - 1) * (corr >= 40 ? 0.8 : 0.5); break
+    case 'corrupt80': em = 1 + (r.mult - 1) * (corr >= 60 ? 0.7 : 0.4); break
+    case 'corrupt100exact': em = 1 + (r.mult - 1) * 0.2; break    // EXACTLY 100 is hard to hold
+    case 'corruptedClean': em = 1 + (r.mult - 1) * 0.1; break
+    case 'perOtherArtifact': em = Math.pow(r.mult, Math.max(0, owned.filter(o => (RELIC_DEF[o] || {}).kind === 'artifact').length)); break
+    case 'goatStackOther': em = r.mult * Math.pow(1.3, Math.max(0, owned.filter(o => (RELIC_DEF[o] || {}).kind === 'artifact').length)); break
+    case 'earlyCircle': em = (c.circle || 1) <= 2 ? 1 + (r.mult - 1) * 0.7 : 1.0; break
+    case 'firstStrikeOfFight': em = 1 + (r.mult - 1) * 0.28; break
+    case 'tongueDamage': em = 1.8; break
+    case 'sigilOpener': em = 2.2; break
+    default: em = 0                                              // no multiplier: priced below
+  }
+  let score
+  if (em) score = Math.round((em - 1) * 100)
+  else {
+    // Utility pedals: hand-priced against what they actually do for a strike.
+    const UTIL = {
+      p1: 30, p2: 8, p3: 14, p4: 26, p5: 30, p6: 8, p7: 16, p8: 20, p10: 18,
+      a3: 42, a4: 8, a7: 30, a8: 22, ca2: 34, ca3: 16, wardrums: 90,
+      reverbtank: 20, fuzzbox: 26, wahpedal: 14, volumeknob: 18, powerconditioner: 22,
+      cabletester: 14, drumthrone: hasDrummer ? 34 : 0, phaserpedal: 24, compressorpedal: 30,
+      octavepedal: 30, sustainpedal: 18, looperpedal: 70, bitcrusher: 22, echoplex: 110,
+      witchssabbath: 150, theconduit: 140, tabletofazothoth: 90,
+    }
+    score = UTIL[r.id] !== undefined ? UTIL[r.id] : 12
+  }
+  if (r.unimplemented) return { score: 0, why: 'UNIMPLEMENTED in App.jsx — does nothing', em: 1 }
+  if (owned.includes(r.id)) return { score: 0, why: 'already owned', em: 1 }
+  return { score, why, em: +(em || 0).toFixed(2), cost: r.cost, kind: r.kind, name: r.name }
+}
+
+// ── recruitScore ───────────────────────────────────────────────────────────
+// The old scorer was ATK*3+HP+keyword, which is wrong twice over: drummers do not
+// swing at all (App.jsx handleStrike filters role==='Drummer' out of the damage
+// sum) so their ATK column is noise, and keyword value is a STEP function of how
+// many the band already has (_stackTier: 1 -> 1, 2 -> 2, 3+ -> 4), so the second
+// SHREDDER is worth far more than the first.
+// cand: {name, atk, hp, role, keyword, tier}   band: same shape, already on stage
+const KW_UNIT = { FRENZIED: 7, CORRUPT: 6, SHREDDER: 6, HEXED: 5, DEBUFF: 5, 'FOLK MAGIC': 4, ANCHOR: 3, 'DOUBLE TIME': 3 }
+const TIER_BONUS = { demonic: 46, mythic: 26, foil: 12 }
+function recruitScore(cand, band) {
+  if (!cand) return { score: 0 }
+  const alive = (band || []).filter(Boolean)
+  const kwCount = {}; alive.forEach(m => { kwCount[m.keyword] = (kwCount[m.keyword] || 0) + (m.tier === 'foil' ? 2 : 1) })
+  const roleCount = {}; alive.forEach(m => { roleCount[m.role] = (roleCount[m.role] || 0) + 1 })
+  const bandAtk = alive.filter(m => m.role !== 'Drummer').reduce((s, m) => s + (m.atk || 0), 0)
+  const reasons = []
+  let s = 0
+
+  if (cand.role === 'Drummer') {
+    // A drummer contributes ZERO to the damage sum and instead rolls the band-wide
+    // DOUBLE TIME d6 (1-2 x1.0, 3-4 x1.5, 5-6 x2.0 → E = x1.5). On a band already
+    // swinging for B, that expected +50% is worth ~B/2 of ATK — an order of
+    // magnitude more than the 0-1 ATK the old scorer graded him on. A SECOND
+    // drummer adds nothing (the game blocks a second DOUBLE TIME anyway).
+    if (roleCount.Drummer) { reasons.push('2nd drummer: d6 already covered'); s += 4 }
+    else { s += 55 + Math.round(bandAtk * 0.5); reasons.push('first drummer: band-wide d6 E[x1.5]') }
+    s += (cand.hp || 0) * 0.6   // he still soaks boss hits
+  } else {
+    s += (cand.atk || 0) * 3 + (cand.hp || 0) * 0.8
+  }
+
+  // Keyword MARGINAL value across the stack-tier step, not a flat weight.
+  const kw = cand.keyword
+  if (kw) {
+    const add = cand.tier === 'foil' ? 2 : 1
+    const before = kwCount[kw] || 0
+    const t = n => (n >= 3 ? 4 : n === 2 ? 2 : n >= 1 ? 1 : 0)
+    const step = t(before + add) - t(before)
+    const unit = KW_UNIT[kw] || 3
+    s += unit * (1 + step * 3)
+    if (step > 0) reasons.push(kw + ' stack ' + before + '->' + (before + add) + ' (tier +' + step + ')')
+  }
+  // 3+ ANCHOR protects the WHOLE band from one lethal hit each.
+  if (kw === 'ANCHOR' && (kwCount.ANCHOR || 0) + 1 >= 3) { s += 22; reasons.push('ANCHOR 3-stack: band-wide save') }
+  // MENTOR LINK: a foil/mythic/demonic member placed left of a BASIC member of the
+  // SAME ROLE grants stats and a x1.25/x1.5/x2.0 strike multiplier (scanMentorLinks).
+  if (cand.tier && cand.tier !== '' && alive.some(m => m.role === cand.role && !m.tier)) {
+    const mm = cand.tier === 'demonic' ? 60 : cand.tier === 'mythic' ? 40 : 22
+    s += mm; reasons.push('mentor link available with existing ' + cand.role)
+  }
+  s += TIER_BONUS[cand.tier] || 0
+  // Never sign the Devil: 3-member band cap and his death ends the run.
+  if (kw === 'FALLEN') return { score: -999, reasons: ['FALLEN: caps the band at 3 and ends the run if he dies'] }
+  return { score: Math.round(s), reasons }
+}
+
+// ── forgeScore ─────────────────────────────────────────────────────────────
+// The Doom Forge only ever offers cards in CARD_UPGRADES, but only NINE of those
+// keys change any rule (App.jsx applyCard branches on `upgraded`); the rest are
+// gold foil and nothing else, and the tile SAYS SO ("Gold foil. No rules change.").
+// The old scorer's hand-written table put four cosmetics in its top five, so most
+// forge picks were literally worth zero. Read the tile's own text.
+const REAL_UPGRADE_VALUE = {
+  soundwall: 96,      // +1 -> +2 ATK permanently to ALL, every copy, forever
+  dialtoeleven: 92,   // +3 -> +4 ATK to ALL, 0 embers, 2 copies in Standard
+  battlecry: 88,      // +1 -> +2 permanent, 1 ember, FOUR copies in Standard
+  heavyriff: 74,      // +2 on top of half-ATK, once per member per fight
+  bloodritual: 70,    // 6x -> 8x sacrificed HP
+  herbmoney: 52,      // +3 -> +4 permanent, costs 10 stash
+  crowdsurf: 50,      // +1 on top of per-card-in-hand
+  overdrive: 44,      // corruption gate 60 -> 50
+  setlist: 34,        // draw 3 -> 4
+}
+function forgeScore(cardId, tileText, deckCounts) {
+  const cosmetic = /no rules change|gold foil/i.test(String(tileText || ''))
+  const real = REAL_UPGRADE_VALUE[cardId]
+  if (cosmetic && !real) return { v: 6, real: false }
+  if (!real) return { v: cosmetic ? 6 : 20, real: false }
+  const copies = (deckCounts && deckCounts[cardId]) || 1
+  // Upgrades apply to EVERY copy in the deck, so copies multiply the payoff.
+  return { v: Math.round(real * (1 + 0.22 * Math.max(0, copies - 1))), real: true }
+}
+
+// ── cardPickScore ──────────────────────────────────────────────────────────
+// Booster packs and shop card offers used to be scored by the FORGE table (the
+// driver routed 'boosterpick' straight into forgeTick), so a booster pick was
+// graded on whether the card happened to be one of eleven hardcoded names. Score
+// the card as a deck addition instead: standalone power, chain partners already
+// in the deck, and curve.
+function cardPickScore(cardId, ctx) {
+  const def = DEF[cardId]; if (!def) return { v: 0 }
+  const c = ctx || {}
+  const deckIds = c.deckIds || []
+  const reasons = []
+  // Standalone power, on the same ordinal scale the combat policy uses. Reuse the
+  // real scorer against a neutral mid-run board so the two agree.
+  const board = c.gs || { alive: [{ name: 'x', atk: 8, hp: 9, maxHp: 12, role: 'Lead Guitarist', keyword: 'FRENZIED' }], corruption: 50, embers: 6, handIds: [], cardsPlayedIds: [], handLen: 5, stash: 30, fightIndex: 4, discardsLeft: 2, strikeMult: 1, bossHp: 500, discardLen: 0, hrUsed: new Set() }
+  let v = 0
+  try { v = scoreCard({ id: cardId }, board, 1, 1) } catch (e) { v = 20 }
+  // Chain partners already owned: a live chain is x1.78+ on a whole strike.
+  for (const ch of RIFF_CHAINS) {
+    const partner = cardId === ch[0] ? ch[1] : cardId === ch[1] ? ch[0] : null
+    if (!partner) continue
+    if (deckIds.includes(partner)) { v += 28; reasons.push('chain partner ' + partner + ' in deck') }
+    else { v += 6 }
+  }
+  // Curve: a 3-ember card is only castable alongside one other card.
+  if ((def.embers || 0) >= 3) v -= 10
+  if ((def.embers || 0) === 0) v += 8
+  // Dead weight the data files themselves flag.
+  if (cardId === 'setlistrewrite') { v = 1; reasons.push('LIVE NO-OP (App.jsx applyCard logs only)') }
+  return { v: Math.round(v), reasons }
+}
+
+// ── pactScore ──────────────────────────────────────────────────────────────
+// Boss pacts are a fixed list of 13 (PACT_REWARDS). The old scorer was a regex
+// over the tile text that paid "ember" 60 and "strike" 45, so War Drums (+1 STRIKE
+// PER FIGHT — a permanent +25-33% damage for the rest of the run) lost to "+3 max
+// HP". Score the actual list.
+const PACT_VALUE = {
+  war_drums: 100,        // +1 strike/fight forever = +25-33% total damage
+  sixth_slot: 88,        // a whole extra member for the rest of the run
+  speed_demon: 72,       // +1 card per strike compounds every strike
+  ember_surge: 60,       // +1 max ember = one more card per strike
+  iron_strings: 55,      // all +1 ATK permanently
+  blood_price: 40,       // only if Blood Ritual is in the deck
+  dark_bargain: 38,      // all CORRUPT -1 ember
+  corruption_engine: 34, // +5% corruption/fight: damage tiers, costs hangover
+  clean_living: 32,      // +2 ATK/+2 HP at fight start
+  thick_skin: 28,        // all +3 max HP
+  merchants_eye: 26,     // 20% off everything
+  stone_wall: 24,        // -1 damage per strike
+  atonement: 20,         // -15% corruption after a boss
+}
+const PACT_BY_NORM = {}
+for (const k of Object.keys(PACT_VALUE)) PACT_BY_NORM[k.replace(/_/g, '')] = k
+function pactScore(text) {
+  const n = norm(text)
+  for (const key of Object.keys(PACT_BY_NORM)) if (n.includes(key)) {
+    const id = PACT_BY_NORM[key]
+    return { v: PACT_VALUE[id], id }
+  }
+  // Unknown tile: fall back to a conservative reading of the text.
+  let v = 10
+  if (/strikeperfight|strikeperfightpermanently/.test(n)) v = 90
+  else if (/bandmemberslot/.test(n)) v = 85
+  else if (/extracardperstrike|draw1extra/.test(n)) v = 70
+  else if (/maxember/.test(n)) v = 58
+  else if (/allatkpermanently|all1atk/.test(n)) v = 52
+  else if (/maxhp/.test(n)) v = 26
+  return { v, id: null }
+}
+
+// ── tripPlan ───────────────────────────────────────────────────────────────
+// Trips were a panic button. Two of them are among the biggest multipliers in the
+// game and apply to EVERY strike of the fight (App.jsx ~8433: OVERMIND x3.0,
+// REALITY GLITCH x2.0 as the STARTING strike multiplier, every strike), so the
+// correct line is to open a circle boss with the strongest one held, not to burn
+// it surviving a trash fight. Returns {use, which, why}.
+//   held: {dmt,acid,shrooms} booleans, ctx: {isBoss, strikeNum, bossPct, overtime,
+//   bandHurt, tripUsed, inCombat, strikesLeft}
+function tripPlan(held, ctx) {
+  const c = ctx || {}
+  if (c.tripUsed || !c.inCombat) return { use: false }
+  const have = ['dmt', 'acid', 'shrooms'].filter(k => held && held[k])
+  if (!have.length) return { use: false }
+  // PLANNED: open a circle boss with the best multiplier trip in hand.
+  if (c.isBoss && c.strikeNum === 0) {
+    const which = held.dmt ? 'dmt' : held.acid ? 'acid' : null
+    // Shrooms have no strike-multiplier outcome, so they are NOT worth an opener;
+    // they stay in the bag as the panic button they are good at.
+    if (which) return { use: true, which, why: 'boss opener (x2.0/x3.0 strike mult applies to EVERY strike)' }
+  }
+  // EMERGENCY: unchanged doctrine, but shrooms are now preferred so a planned
+  // boss opener is not spent saving a trash fight.
+  const emergency = c.overtime || c.bandHurt || (c.strikesLeft <= 1 && c.bossPct > 0.35)
+  if (emergency && c.strikeNum > 0 && c.bossPct < 0.95) {
+    const which = held.shrooms ? 'shrooms' : held.acid ? 'acid' : 'dmt'
+    return { use: true, which, why: c.overtime ? 'overtime' : c.bandHurt ? 'band<40%hp' : 'low strikes' }
+  }
+  return { use: false }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  STILL NOT FIXABLE FROM THIS FILE
+// ═══════════════════════════════════════════════════════════════════════════
+//  * WHEN TO STRIKE is now partly answerable (planStrike returns a card CAP, which
+//    is what Solo Sermon / The Blade / Burning Stage actually need), but the driver
+//    still strikes unconditionally afterwards. A true answer needs a search over the
+//    remaining hand and the boss's telegraphed damage, not a shape enumeration.
+//  * BOSS LOOT is applied to damage (App.jsx ~8903) but is NEVER RENDERED during
+//    combat, so the bot can only know it owns The Blade from the award popup it read
+//    when the boss died. Loot ids captured that way are passed in with the relics.
+//  * SHOP / RECRUIT / PACT / FORGE selection all live in autopilot.cjs; this file
+//    only supplies the numbers.
+module.exports = {
+  matchCard, isAmbiguous, scoreCard, pickTarget, ALL_CARDS, RIFF_CHAINS, MUSICIANS, bestOrder,
+  // Aug 4 2026 additions (purely additive — combat scoring above is untouched):
+  RELIC_DEF, matchRelic, relicDef, planStrike, relicCardBonus, relicBuyScore,
+  recruitScore, forgeScore, cardPickScore, pactScore, tripPlan, shapeMult, ownedShapeRelics,
+}
