@@ -1,5 +1,5 @@
 {
- "_comment": "Synced from src/data/enemies.js. Aug 1 2026 FINAL RETUNE: x0.40 on top of the Balatro curve, after the sim was corrected (perm-ATK double-dip + ~30 other sim/live divergences). Validated 5K Bronze/Standard: 10.30% Lucifer winrate, C1 deaths 24.3%, C9 39.5%, fights avg 2.3-2.5 strikes (23-46% one-shot). Wanderer(0) and Lucifer(26) protected.",
+ "_comment": "MIRROR of src/data/enemies.js maxHp, indexed by ENEMIES position. CARDINAL RULE: this file and src/data/enemies.js MUST be updated in the SAME commit — the sim reads this file, the live game reads enemies.js via getScaledMaxHp, and any drift means the sim measures a game that does not exist. Enforced automatically: vestibule-sim-kwstacks.js throws on load if any entry disagrees, and e2e/test-card-parity.cjs asserts the same before it connects. Aug 4 2026: entry 26 (Lucifer) said 666666 while enemies.js says 100000 — the sim had been fighting a 1,233,332 HP Lucifer (666666 x 1.85 deck scale) against live's 185,000, which voided every Lucifer winrate ever reported. Synced to enemies.js.",
  "0": 45,
  "1": 44,
  "2": 115,
@@ -26,5 +26,5 @@
  "23": 29201,
  "24": 10289,
  "25": 12176,
- "26": 666666
+ "26": 100000
 }

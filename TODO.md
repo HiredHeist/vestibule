@@ -3,6 +3,489 @@
 *Last updated: Aug 1, 2026 — Lucifer HP bug + debug-key hole killed; Balatro HP curve shipped*
 *Branch state: main = audited stable · playtest/session2 = bot rig WIP (see HANDOFF.md)*
 
+## 🩸 AUG 4 — PHASE 1: CRASHES, FREEZES AND UNREACHABLE UI (App.jsx)
+
+Audit-driven sweep of every hard-stop in `src/App.jsx`. `no-undef` is now ZERO in
+that file (was 26 errors across 5 sites); `no-dupe-keys` is zero (was 4).
+
+1. **Render crash — `dmg` is not defined** (~11172, full-stack multiplier preview).
+   The `tongueDamage` branch divided by `dmg`, which only exists in the SIBLING
+   damage-preview IIFE. Equipping mythic `tongueofdevourer` + playing any card threw
+   on every render. Added in-scope `_vmBaseDmg` (mirrors step 1 of the damage preview
+   and handleStrikeBody's `dmg`) and divide by that.
+2. **HARD FREEZE, reload-only — Second Album win cinematic** (~10199). `welcomeToHell
+   ==='won'` returned ABOVE `gameState==='end'`, and nothing ever clears
+   `welcomeToHell` (by design — EndScreen reads `secondAlbumWin`). No button, no
+   timer, no key handler. Now gated on `gameState!=='end'` so triggerVictory's
+   5.5s `setGameState('end')` actually lands; click-anywhere skips the wait.
+3. **ErrorBoundary now fails open** (CLAUDE.md rule 12). The red "RENDER ERROR" wall
+   dead-ended the bot (Try Again only cleared `state.error`, so a deterministic bug
+   re-threw instantly). `render()` returns `this.props.children` unconditionally;
+   `componentDidCatch` still console.errors message + stack + component stack.
+4. **"⛧ The Encore ⛧" button threw ReferenceError on click.** Its ~21 identifiers
+   live in App's closure, not EndScreen's props. Lifted into `App` as
+   `handleEncore` useCallback, passed as `onEncore`. This is the ONLY reset of
+   `corruptCardsGivenRef` outside handleReset.
+5. **Slot-swap modal was unreachable** — it sat below the `gameState==='shop'` early
+   return, so buying an artifact/pedal with full slots was a silent no-op AND left
+   `slotSwapPrompt` stuck, ambushing the player mid-combat later. Purchase
+   accounting untouched (phase 2 owns that).
+6. **ESC pause menu was unreachable on every non-combat screen** — same cause. It's
+   the only in-run escape hatch (ABANDON RUN), which the dead `gameState!=='menu'`
+   guard proved was meant to be global.
+   5+6 fix: all screen paths moved into `renderScreen()`; App now returns
+   `<>{renderScreen()}{combatLogOverlay}{slotSwapModal}{pauseOverlay}</>`. Fragment,
+   not a wrapper div, so `absolute/inset:0` still resolves against #vst-scale-root —
+   geometry unchanged. The ESC menu's Combat Log viewer was hoisted for the same
+   reason.
+7. **`whispercard` crashed on an empty slot** — added the null-target guard and
+   `return false`, matching `src/data/cardEngine.js` IMPL.whispercard.
+8. **`isGoodDeal()` deleted** — it called `getShopCost()`, which is declared nowhere
+   in the repo. Uncalled, so a latent ReferenceError. `cardPrice()` is the real
+   price source.
+9. **`ARTIFACTS` → `STARTER_ARTIFACTS`** in the `_deckDef.freeArtifact` branch of run
+   setup (latent: no STARTER_DECKS entry sets freeArtifact yet).
+10. **SetlistModal had no cancel path** — `onClose` was passed but never
+    destructured, and Confirm is `disabled={!picked}`, so an empty `setlistCards`
+    was a permanent softlock. Cancel button added. Also: combat keyboard shortcuts
+    fired straight THROUGH open modals (S = strike with the Setlist modal up) —
+    now gated on a `modalOpenRef` covering setlist / slot-swap / deck / discard /
+    pause. And `setlistOpen`/`setlistCards`/deck+discard viewers are cleared in the
+    between-fight reset, not just handleReset.
+11. **Demonic conflict deleted BOTH members** when you kept the new one.
+    `handleRecruitPick` bails into the conflict before inserting, and
+    `handleDemonicChoice` only nulled the loser's slot — band shrank by one and the
+    pack was wasted. The incoming member is now equipped into the freed slot.
+
+Also: **RemasterModal deleted** (unreachable dead code — no `setRemasterOpen(true)`
+or `setRemasterCards()` existed anywhere; the `remaster` CARD has its own working
+path in handleDropOnStage and is unaffected), plus its two state vars. Duplicate
+style keys fixed at ~3304 (`flexShrink`), ~10990 (`overflow`) and the STRIKE button
+(`boxShadow` + `animation` were each declared twice — the multiplier-intensity glow
+and animation were being silently dropped; both layers now compose).
+
+Verified: `npx vite build` clean · eslint no-undef/no-dupe-keys/no-redeclare = 0
+problems on src/App.jsx · `npm run check` ALL RULES CLEAN.
+
+## 💰 AUG 4 — PHASE 2: THE SHOP AND ECONOMY (App.jsx)
+
+The bot finished a session sitting on 62🌿 having bought nothing, because several
+purchase paths took no money and gave no item. Whole subsystem swept.
+
+**THE CORE FIX — ONE pricing function.** There were TWO that disagreed:
+`ShopScreen.realPrice()` (hangover hunger curve × merchants_eye) drove every
+DISPLAYED price and the `can()` gate; `handleShopSpend.effectiveCost`
+(corruption≥50 → ×1.25 × merchants_eye) was what got CHARGED. Shrooms displayed
+10 and charged 8; Acid displayed 20 and charged 15. Neither applied the stake's
+`priceMult` or `drugPriceMult`, so every stake's shop-difficulty knob was inert.
+Now: module-scope `shopPrice(baseCost,{kind,hangover,chosenPacts,stake})` with
+`kind` ∈ `'item'|'drug'|'reroll'`, one `Math.ceil` at the end, used for display,
+for `can()` and for the charge. Both old formulas deleted. **Canonical hunger
+curve is the `hangover` one** (0/50/75/100 → ×1.0/1.2/1.4/1.6) — it's what the
+shop UI advertises and what the STAKES table documents. Buyback got the same
+treatment: `cardSellValue` / `memberSellValue` at module scope, shared by the
+pawn modal, the recruit screen and the handlers.
+
+1. **`onSpend` returns `'bought' | 'pending' | 'refused'`** and every caller gates
+   its "mark sold / grant item / set bought flag" on it. It used to return
+   nothing while `handleShopSpend` early-returned on insufficient stash and on
+   full slots.
+2. **Slot-full purchases consume nothing until confirmed.** `handleShopSpend`
+   takes an `onCommit` callback and stashes it in `slotSwapPrompt`; it fires only
+   from `confirmSlotSwap`. Cancelling restores the tile to buyable — it used to
+   leave it stamped SOLD and set the per-circle `circleCartBought`/`circleCpasBought`
+   flags with zero stash spent.
+3. **Drug tiles no longer hand out free drugs.** They fired `onBuyShrooms()` etc.
+   unconditionally after `onSpend`; with the two price formulas disagreeing the
+   purchase could be refused and the drug granted anyway.
+4. **Lucifer band-cap refund deleted, replaced with a refusal.** It deducted then
+   "refunded" `item.cost`, but `buyCard`'s recruit payload had no `cost` field —
+   so a member card at the cap charged full and refunded 0. It was also the only
+   `setStash` in the shop with no `MAX_STASH` clamp. The check now runs before any
+   deduction. (`cost` added to the payload anyway.)
+5. **`handleShopSpend` deps were `[stash]`** — `chosenPacts`, `stage`,
+   `activeArtifacts`, `activePassives` all stale. Taking Merchants Eye rendered
+   every tag 20% off while the first purchase charged full price; stale `stage`
+   defeated the Lucifer guard.
+6. **Booster packs are charged ON OPEN.** They were charged only on the final pick,
+   and "Pass — Take Nothing" neither charged nor marked the pack consumed — so you
+   could open Rare Vinyl, read all 5 cards, Pass, and re-roll the pack for free
+   until a Mythic showed. Picking now routes contents via a zero-cost `'pack'`
+   call, which also restores the `✓ Confirm Picks` branch that had gone unreachable.
+7. **A 2🌿 reroll no longer launders the one-pack-per-visit limit.** The
+   `[shopCards]` effect cleared `boughtPackIds`/`packsBoughtThisVisit`, and reroll
+   replaces `shopCards`. Both lifted to parent state (they also died on the
+   shop→recruit→shop remount).
+8. **Reroll is priced and gated.** It charged raw `rerollCost` while displaying
+   `realPrice(rerollCost)`, with no affordability check and no disabled styling.
+9. **`rerollCost` resets per shop visit** (was run-permanent, reset only in
+   `handleReset` and the Shift+S debug shop — whose presence proved the intent).
+10. **Reroll no longer nukes boss-shop DMT stock.** It did `setDMTInStock(false)`
+    unconditionally; DMT is boss-shop-only and always stocked there for discovery.
+11. **`handlePawnSellCard` searched only `deck` but the modal lists deck+discard** —
+    on `idx===-1` it returned the deck unchanged and paid out anyway. Selling a
+    card you played last fight gave money and kept the card, twice per visit.
+12. **Pawn card price ignored foil/mythic.** Modal said `base+foil+mythic`, handler
+    paid `base`. A Mythic Rare's button read 12🌿 and paid 4.
+13. **Slot swaps now REVERSE the outgoing item's permanent on-equip effects**
+    (`a7` +1 max ember, `a8` +3 max HP). You could equip Stone Tablet, sell it back
+    through the swap modal for 6🌿, and keep the +3 forever. Apply/revert factored
+    into `applyGearEquip`/`revertGearEquip`; pack-equip paths deduped by id.
+14. **Lucifer's sale price displayed 5🌿 and paid 69🌿** — display branched on
+    `m.demonic`, the handler on `keyword==='FALLEN'` first, and `lucifer_member` has
+    FALLEN with no demonic flag.
+15. **The Recruit screen's fire panel honours the 2-sales-per-visit cap.** The cap
+    lived in `ShopScreen` local state and was decremented only by the pawn modal's
+    wrappers. Now parent state, decremented by the handlers. The band-full replace
+    modal and Lucifer's contract sacrifice pass `{ignoreSalesCap:true}` — those
+    fires complete a purchase, they aren't walk-up sales.
+16. **Pawn "need 2 members" gate counted NON-stoned members** while the handler
+    counted all of them: a band of 4 with 2 stoned showed every Sell button dead.
+17. **Dive Bar Sign's circle-IV refund pays what was CHARGED** (`paidCost`), not the
+    base cost — during a hangover you paid 15 and got 9; with Merchants Eye the
+    refund exceeded the purchase. Same basis for the swap modal's 50% buyback.
+18. **Cursed Demo is purchasable at all.** `genBoosterPacks` did `.slice(-3)` while
+    the shop rendered `.slice(0,2)` — the two LEAST advanced of the three most
+    advanced. From circle 6 the only Mythic-chance pack was unreachable in every
+    run. Now returns exactly the two rendered slots.
+19. **Pack-reward router discriminated artifacts with `!c.cost`** — but every entry
+    in STARTER/CIRCLE/MYTHIC_ARTIFACTS has a truthy cost, so the artifacts bucket
+    was always empty and pack-granted artifacts were pushed into `setActivePassives`
+    (an artifact in a pedal slot, invisible to all artifact multiplier logic).
+    Routed on an explicit `_packKind` tag stamped at generation.
+20. **Pack gear that doesn't fit opens the swap modal instead of evaporating.**
+    It was silently destroyed with no refund and no prompt. Overflow queues.
+21. **The cursed pack's passive roll is deduped against equipped pedals** (the
+    `ritual` pack always was). A second Merch Table equipped fine but
+    `activePassives.some(p=>p.id==='p3')` still paid once — 60🌿 for nothing.
+22. **`handleReset` no longer overwrites the starter-deck stash/corruption bonus**
+    four lines after applying it. Dead today (no deck sets `startStash`) but it
+    guaranteed any future deck's identity would silently evaporate.
+
+Verified: `npx vite build` clean · `npm run check` ALL RULES CLEAN · eslint
+no-undef / no-dupe-keys / no-redeclare = 0 on src/App.jsx · 4,032 assertions over
+{6 stakes × 8 hangover values × ±merchants_eye × item/drug/reroll × 14 base costs}
+confirming display === affordability gate === amount charged in every cell, that
+`priceMult`/`drugPriceMult` actually move the number on every stake that sets
+them, and that `drugPriceMult` doesn't leak into non-drug purchases.
+
+**Deliberately NOT changed:** `genPackCards` implements `ritual`, `hellforged`,
+`garage`, `touring` and `demonic` pack types that `genBoosterPacks` never emits.
+They overlap the recruit pack and the gear tiles; emitting them is a balance
+decision, not a bug fix. The routing/dedup/overflow code paths that serve them are
+fixed and ready if they're ever turned on.
+
+## ⚔ AUG 4 — PHASE 3: THE COMBAT DAMAGE PIPELINE (App.jsx)
+
+29 verified defects in the strike → damage → cascade → counter-attack chain. The
+headline is structural: `handleStrikeBody` schedules ~4 seconds of `setTimeout`s that
+capture the CURRENT fight's numbers, and NOTHING checked whether that fight still
+existed when they fired.
+
+### A. Cross-fight stale timers (the structural one)
+
+1. **`fightTokenRef` — monotonic fight identity.** Bumped by `beginFightToken()` at
+   every fight-start boundary (between-fight block, Welcome-to-Hell branch, tutorial
+   fight setup, run reset, Encore, save-resume, Lucifer phase 2 entry); it also
+   `clearTimeout`s everything registered in `strikeTimersRef`. `handleStrike` and
+   `handleStrikeBody` capture the token and every deferred body bails when it no
+   longer matches, logging `[STALE-TIMER-BLOCKED] …` (the playtest bot scrapes it).
+   Guarded: the per-member impact damage, the cascade/damage-resolution block, the
+   cascade slam-race safety net (`_applyHpDrop`), the `_bossDelay` chain, the boss
+   counter-attack damage timer, the post-strike draw/refill timer, and
+   `handleStrike`'s replay-delay body. Previously, ending a fight inside that window
+   let the OLD fight slam the new boss down to the old boss's leftover HP, land the
+   old boss's counter-attack (with the old rage/debuff/immolate values) on the new
+   band, run Sabbath Crown / the FALLEN -1 tick / `fraudShuffle` on the new hand, and
+   overwrite the new hand from the previous fight's `cardsToDrawRef`. The
+   replay-delay body additionally re-ran a WHOLE strike (burning a strike, wiping
+   `strikeMult`, scheduling another boss chain) if a retrigger killed the boss inside
+   its window.
+
+### B. HP and victory
+
+2. **Between-fight HP omitted `_stakeHpF()`.** Fight 1 was stake-scaled and fights
+   2–27 were not — the entire stake HP ladder did nothing after the opener, and the
+   descent map / boss preview / victory summary (all of which call `getScaledMaxHp`)
+   printed a number the fight never used. Now routed through `getScaledMaxHp`
+   (CLAUDE.md rule 13).
+3. **All 8 direct-damage branches in `fireQueuedReplays`** did
+   `const newHp=Math.max(0,enemyHp-dmg); setEnemyHp(newHp)` — an absolute write from
+   a stale closure, with no victory trigger. Two queued replays computed from the
+   same base, so the second overwrote the first and could HEAL the boss. One
+   `_replayDamage()` helper: functional updater off `enemyHpRef.current`, routed
+   through `triggerVictoryRef.current()` (rules 2 + 3).
+4. **Per-member impact damage raced the 600ms victory safety net.** Impacts could
+   take the boss to 0 seconds before the cascade block ran, while `dmgBreakdown` was
+   still null. On Lucifer: net → phase-1 intercept → phase 2 spawns at 333,333 →
+   the cascade's `_applyHpDrop` slammed it back to 0 → a stale `luciferPhase===1`
+   read entered phase 2 a SECOND time (double cinematic, double resets, double band
+   revive). In normal fights the killing blow simply never showed its breakdown.
+   Fixed with `strikeInFlightRef` (the safety net stands down while a strike's damage
+   pipeline is resolving; the cascade block owns the kill and releases the hold) and
+   `luciferPhaseRef` everywhere the phase is read from inside a timer.
+5. **`_applyHpDrop` now applies a DELTA**, not `setEnemyHp(p=>Math.min(p,newEHp))`.
+   The absolute clamp derived from a `startHp` captured before the animation, so any
+   damage landing in the same window was silently deleted — venom DOT lost its tick
+   every single strike. Delta = total strike damage − what the per-member impacts
+   already took. A delta isn't idempotent, so the slam and the safety net share an
+   explicit once-only guard.
+6. **Overkill was always 0** — `newEHp` was clamped by `Math.max(0,…)` before
+   `Math.abs()` read it. Unclamped value kept.
+7. **Cascade timing reconciled.** See the timeline below.
+8. **`DamageBreakdown` reused its instance.** The cascade effect was keyed on
+   `[lines.length]` and captured `total`/`onSlam`/`isDevilDeal` from its first run,
+   and the element had no `key` — a new breakdown with an equal line count never
+   re-scheduled, and `onSlam` fired the PREVIOUS strike's `_pendingHpDrop`. Now
+   `key={dmgBreakdown.key}` (monotonic `breakdownSeqRef`) + effect on `[data]`.
+
+### C. Multipliers and relics
+
+9. **Tongue of the Devourer was shown and never dealt.** Its flat damage went into
+   the cascade display and `_totalMult` but never into `artifactMult`, expressed as
+   `1+(tongueDmg/dmg)` — an additive bonus faked as a multiplier against the
+   pre-multiplier base. Now a real additive term (`_flatArtifactDmg`) added after the
+   multiplier chain, with its own `type:'add'` breakdown line.
+10. **Wailing Guitar ×2 and Sigil of Set's opener fired on strike 2.** Both checked
+    `strikesLeft===fightMaxStrikes-1`, but `setStrikesLeft(p=>p-1)` is functional and
+    does not update the local const — strike 1 IS `fightMaxStrikes`. The preview
+    mirrors already used `fightMaxStrikes`, which proved the intent.
+11. **`p10Bonus` gated on `activeStake.maxStrikes`** instead of `fightMaxStrikes`, so
+    with War Drums or a deck `maxStrikesMod` it never fired on strike 1.
+12. **`perStrikesLeft` loot counted the strike being spent** — one extra
+    `Math.pow(mult,1)` on every strike of every fight, and it fired on the last
+    strike. Now `strikesLeft-1` (live and preview).
+13. **`discardsThisStrikeRef` is reset per STRIKE**, not just per fight. Ouroboros
+    Pin's ×1.3 `perDiscardStrike` reached ×1.3^8 (×8.16) by strike 4 and fired on
+    strikes with no discards; Spit Cup's `discardedStrike` stayed permanently on.
+    (The artifact block reads a pre-reset snapshot.)
+14. **`_shredderHits` counted `_echo:` retriggers as type matches** —
+    `CARD_TYPE_BY_ID['_echo:x']` is `undefined` and `undefined===undefined`. Two
+    back-to-back retriggers handed a 3-stack SHREDDER band +4/+8 free ATK per member.
+    Synthetics filtered (matching `_riffsThisStrike`).
+15. **Lucky Draw's ×1.5 applied after `currentMult` was captured** — it never
+    affected the strike it fired on. Block moved above the capture.
+16. **`totalDamage`/`highestStrike` excluded `_shredderEchoDmg`**, which IS dealt.
+    Both now record `_totalStrikeDmg` (what the float shows).
+
+### D. Boss passives and counter-attack
+
+17. **A trailing `else{scaledBaseDmg=stakeBaseDmg}` discarded the Stone Wall pact
+    reduction and the ANCHOR aura reduction** for the 15 of 27 bosses that hit that
+    branch — while the attack telegraph DID subtract stone_wall and showed the lower
+    number. Removed; the mitigated value now survives.
+18. **`targetHighestHp2` / `targetHighestHp3` were matched for TARGETING only.** The
+    Hunter's "+50% damage to them" and The Executioner's "deals double damage" were
+    completely inert. Multipliers applied.
+19. **Bloodlust read the stale `enemyHp` closure**, so the Berserker's <50% check
+    lagged a full strike. Uses `enemyHpRef.current`.
+20. **`bossRageAtk` and `bossDebuff` were render-closure reads inside the
+    counter-attack timer**, so both lagged exactly one strike: a DEBUFF vocalist
+    logged "-2 damage" and the boss hit for the full undebuffed amount, and Lucifer's
+    rage never included the strike that had just landed. Refs (rule 3).
+21. **Control returned 300ms BEFORE the counter-attack at normal speed.** See below.
+
+### E. Buffs, chains, draw
+
+22. **Pyromaniac's +3 ATK and the Warlord's -1 ATK never expired.** Both set
+    `tempBuff:true` without `_origAtk`, and the expiry block requires both — so
+    Pyromaniac was +12 permanent ATK per member per fight and the Warlord's -1 was a
+    permanent stat loss up to 4× a fight. `_origAtk` stamped.
+23. **`cardsToDrawRef` counted `_echo:` retriggers**, inflating the post-strike refill
+    and burning the deck faster than intended. Real plays only.
+24. **The riff-chain loop `break`ed after the first match**, so a card completing two
+    chains awarded one ×1.78 and deferred (or lost) the second.
+25. **The Encore bonus didn't exclude the paranoia victim**, unlike the base sum, the
+    DOUBLE TIME tier-3 bonus and `memberDmgs` — so against The Traitor the per-member
+    breakdown lines summed to LESS than the BASE ATK subtotal printed beneath them.
+26. **Both early returns fired AFTER `setStrikeMult(_newStrikeStart)`** — a whole band
+    going Too Stoned wiped an accumulated ×12 with no strike thrown and no strike
+    consumed. Early returns moved to the top (and read `enemyHpRef.current`).
+27. **The victory summary reported 0 riff chains on every fight of every run** —
+    `combosFiredRef` is emptied by the strike body ~2.8s earlier. Falls back to the
+    pre-reset snapshot (`lastStrikeCombosRef`).
+
+### F. Dead gates
+
+28. **`vst_lifetime_score` is never written** — the game writes `vst_lifetime`. Read
+    in `rollWeightedFromPool` and in the card-lock display; War Drums (and any future
+    `unlockAt` relic) was permanently filtered out of every roll. Both renamed.
+29. **Lucky Draw gated on `vst_achievement_beat_lucifer==='1'`**, but
+    `unlockAchievement` writes a JSON array to `vst_achievements` and no
+    `vst_achievement_*` key is ever written — the feature was unreachable even after
+    beating Lucifer. Reads `getAchievements().includes('beat_lucifer')`.
+
+### Timelines (items 7 and 21)
+
+`cascadeLineDelay()` / `cascadeSlamAt()` are now module-level and are the SINGLE
+source of truth: `DamageBreakdown` schedules its own cascade with them, and
+`handleStrikeBody` derives the safety net and `_bossDelay` from them. The breakdown
+also receives `_fast` in its payload instead of re-reading `vst_speed` (which desyncs
+when speed is toggled by HOLDING SPACE — that sets `speedMode` without writing the
+key). Times below are relative to the start of the damage-resolution block:
+
+```
+                       slam    net    self-unmount  boss    bossDmg   idle
+typical (6 lines)  N   1780    2030      2980       3180     4380     4680
+                   F    740     990      1940       1440     2040     2340
+big     (14 lines) N   7080    7330      8280       8480     9680     9980
+                   F   1460    1710      2660       2160     2760     3060
+minimal (3 lines)  N    940    1190      2140       2340     3540     3840
+                   F    470     720      1670       1170     1770     2070
+```
+
+Old numbers for comparison: safety net `lines*720+900`, breakdown unmount
+`lines*140+2300`. At 14 lines that was net 10,980 vs unmount 4,260 — the component
+was torn down 2.8s before the cascade would even have slammed, `onSlam` never ran,
+and HP dropped 6.7s after the boss had already counter-attacked.
+
+Item 21: the post-strike block that hands control back (`setAnimPhase('idle')`) was a
+flat 900ms while the boss's damage lands at `speedFast?600:1200`. Fast mode (600 dmg
+/ 900 idle) was correctly ordered; normal (1200 dmg / 900 idle) returned control
+300ms EARLY, so clicking STRIKE began strike N+1 while strike N's damage was pending
+and the counter-attack's `setStage` landed mid-strike on a pre-buff closure. Now
+`speedFast?900:1500` — damage+300 at both speeds.
+
+Verified: `npx vite build` clean · `npm run check` ALL RULES CLEAN · eslint
+no-undef / no-dupe-keys / no-redeclare = 0 on src/App.jsx · `node
+src/data/cardEngine.js` still PASS 86/86.
+
+## 🔁 AUG 4 — PHASE 4: STATE LIFECYCLE AND RESETS (App.jsx)
+
+The file has 267 `useState`/`useRef` declarations in `App` and the reset blocks had
+drifted into three hand-rolled subsets that disagreed with each other. Fixed by
+extracting ONE registry instead of patching three copies.
+
+### The extraction — RESET REGISTRY (`grep -n "RESET REGISTRY" src/App.jsx`)
+Four keyed maps declared side by side, keyed by the variable's own name:
+`PER_STRIKE_RESETS` (6) · `PER_FIGHT_RESETS` (111) · `PER_RUN_RESETS` (88) ·
+`RESET_EXEMPT` (68, value = the written reason). `resetPerStrikeState(opts)` and
+`resetPerFightState(opts)` just iterate their map. `handleReset` runs
+`PER_FIGHT_RESETS` **then** `PER_RUN_RESETS`, so a run boundary is a strict superset
+of a fight boundary by construction — the 35-item and 55-item diffs cannot regrow.
+Opts bag (uniform across every thunk):
+`{corruption, handTarget, stage, drumThrone, strikes, discards, seed, startEmbers,
+startStash, evilEye, onLog}`.
+Call sites, all of them: the normal between-fight block, the Welcome-to-Hell
+Executive branch, `startTutorialFight`, `handleReset`, and `handleStrikeBody`.
+
+**Dev invariant.** A `useEffect` right under the maps (DEV only) reads `App`'s own
+source, extracts every `useState`/`useRef` name, and `console.warn`s anything
+registered nowhere — plus anything registered that no longer exists. Currently
+`[RESET-REGISTRY] OK — 267 declarations, all registered.` CLAUDE.md rule 5 points
+at it.
+
+1. **THE WORST ONE — the menu bypassed `handleReset` entirely.**
+   "⛧ Enter the Vestibule ⛧" was `onClick={()=>setGameState('booster')}`, and
+   `startGame` never applies `activeStake.startEmbers`/`startCorruption` — those
+   lived only in `handleReset`. A fresh load → menu → Blood stake (`4/10`) played the
+   whole run at Bronze economy (5 embers, 0% corruption) while scoring ×3.0; Demonic
+   (`4/15`) worse. **This is what forked the bot's ledger:** post-VICTORY the bot
+   reloads and clicks "enter the vestibule"; post-DEATH it clicks "play again" →
+   `handleReset`. Two populations in every overnight run. Both menu buttons (and
+   "Skip Tutorial") now call `handleReset()`. Verified live on Blood: embers 4,
+   maxEmbers 4, corruption 10.
+2. **Tutorial no longer bleeds into the first real run.** Same bypass:
+   `stash` (tutorial sets 20), `corruption` (10), `log`/`fullRunLogRef`,
+   `runStartTimeRef` (`runElapsed` counted the whole tutorial) are all covered by
+   `handleReset` now that the menu goes through it. `stats` got the real fix —
+   `updStat` has a `tutorialFight>0` guard, so three tutorial fights of
+   `strikesThrown`/`totalDamage`/`cardsPlayed` (and the per-fight refs that feed off
+   it) no longer land in run 1's end-screen score.
+3. **Three refs that were reset NOWHERE in the file**, now in `PER_RUN_RESETS`:
+   - `corruptCardsGivenRef` — run 1 got the free CORRUPT cards at 25/50/75%; every
+     later run in the same page session got zero, because the `includes(t)` guard
+     stayed satisfied and the bot never reloads between death-restarts.
+     (`handleEncore`'s reset survived phase 1 — verified.)
+   - `discoveredRef` — `handleReset` cleared the `discovered` STATE but not the ref
+     that gates `discover()`, so from run 2 on every mechanic early-returned:
+     EndScreen's discovery list empty, "⛧ DISCOVERED" float/log never fired again.
+   - `stashMilestonesRef` — 100/200/300/420 log lines + the 420 arpeggio fired at
+     most once per page session.
+4. **Welcome-to-Hell was missing ~35 per-fight resets** — every one carried Lucifer's
+   state into the Executive fight: `bossDebuff` (a Vocalist band clamped the
+   Executive to 1 dmg/hit for the whole fight), `bossSkipStrikes`+ref (a DMT trip on
+   Lucifer's last strike skipped the Executive's first two attacks),
+   `anchorSavesUsedRef`/`survivorSavesUsedRef` (ANCHOR / Second Wind gave no lethal
+   save), `discardsThisFightRef`/`discardsThisStrikeRef` (discard relics at full
+   accumulated stack from strike 1), `shredderEchoesPendingRef` (free echo damage on
+   the opener), `wahPedalUsedRef`/`octavePedalFiredRef`/`tabletFiredRef` (three
+   "first of fight" bonuses silently never fired),
+   `fightTripBuff`/`activeTripEffect`/`tripUsedThisFight` (OVERMIND kept its ×3.0
+   floor AND no new trip could be taken), the free-card trio,
+   `bonusDiscards`/`bonusEmbers`/`pendingBurningStage`, `dblRoll` (DOUBLE TIME locked
+   to Lucifer's roll all fight), `immolateStacks`, `multMilestonesRef`,
+   `peakCorruptionRef`, `luciferPhase`, `recruitPickFiredRef`,
+   `luciferStrikesUsedRef`, `fightLossMembersRef`, and the six per-fight stat refs
+   that made the victory summary report LUCIFER's numbers. One
+   `resetPerFightState()` call now.
+5. **The tutorial fight setup was missing ~55 of the same.** Concrete leaks between
+   tutorial fights: `stageDiveUsed` (dead card in fights 2–3), `milestonesFiredRef`
+   (HALFWAY/ALMOST/DESTROY HIM only ever flashed in fight 1), `discardsThisFightRef`
+   (while `discardsThisStrikeRef` WAS reset — the tell), plus `handTargetRef`,
+   `pendingDraw`, `slowBurnStrikes`, `ampFeedbackDiscount`, `pyromaniacActive`,
+   `lastRiffPlayed`+ref, `memberBuffs`, the free-card trio, the three pedal flags,
+   `anchorTierRef`/`anchorSavesUsedRef`, `survivorSavesUsedRef`,
+   `shredderEchoesPendingRef`, `queuedReplaysRef`. Conversely the five things the
+   tutorial reset and `handleReset` did NOT (`isWiggling`, `damageFlash`,
+   `cardAbsorb`, `discardsThisStrikeRef`, `phaseBanner`) are now in the shared map.
+6. **Per-strike.** `discardsThisStrikeRef` verified reset per strike (phase 3), and
+   the block is now the *single* place it happens — the Ritualist ember-refund cap,
+   which had its own reset ~90 lines higher in `handleStrikeBody`, folded in.
+   **Evil Eye (A3)** reads *"The first card you play each **Strike** costs 0 Embers"*
+   but `nextCardFree` was armed only at fight start and consumed by the first card
+   played — one free card per FIGHT, a **4× shortfall at Bronze**. Re-armed per
+   strike via `PER_STRIKE_RESETS.nextCardFree` (`{evilEye}` opt).
+7. **Save/load asymmetry.** The snapshot now stores `dbl` and `hang`.
+   `handleContinueSave` never set `dblRoll`; on a fresh page load it stayed `null`
+   and the strike body's `if(dblRoll<=2)` coerced `null`→`0`→true→`dblMult=1.0`
+   STANDARD for the entire resumed fight, silently disabling DOUBLE TIME.
+   `hangover` was omitted too, so the HP debuff + shop hunger tax vanished on resume.
+   Restore treats `null` as a legitimate value ("no drummer") and only re-rolls when
+   the field is absent (pre-phase-4 saves). Verified live: forged save with
+   `dbl:6, hang:77` → resume shows `dblRoll=6, hangover=77`.
+8. **`handleReset` ordering** — phase 2's single authoritative set confirmed landed
+   (deck `startCorruption`/`startStash` are honoured, not clobbered). The body is now
+   pure orchestration: build `_opts`, `beginFightToken()`, run the two maps,
+   `clearSave()`.
+   Also aligned five run-reset values with what a *fresh page load* produces —
+   `shopCards`, `boosterPacks`, `recruitPack`, `circleArtifact`, `circlePassive`,
+   `shroomsInStock`/`acidInStock`. `handleReset` used to null/empty them while the
+   `useState` initialisers rolled real content, so a post-death restart and a
+   post-win reload disagreed about whether circle 1's shops offered a relic at all.
+
+### Coverage (267 declarations in `App`)
+`PER_FIGHT_RESETS` 111 · `PER_RUN_RESETS` 88 · `RESET_EXEMPT` 68 ·
+`PER_STRIKE_RESETS` 6 (all 6 also per-fight). **Orphans: 0. Stale entries: 0.**
+199 are reset at the run boundary. The 68 that are not are all `RESET_EXEMPT`, in
+five groups: player settings + lifetime profile (surviving a run is the point, and
+they're localStorage-backed so a reload agrees), shell/modal chrome, self-expiring
+visual effects, render-time mirror refs (reassigned every render — a reset is a
+no-op), monotonic key counters (resetting them collides React keys), and the three
+refs `beginFightToken()` owns.
+
+### Two-entry-point verification (live, e2e rig)
+Drove the built app under Electron/CDP, walked the React fiber to `App` (353 hooks —
+exactly matching a source-order extraction of every `useState`/`useRef`/`useEffect`/
+`useMemo`/`useCallback`) and snapshotted all 267 declarations by name.
+- **A** = post-win reload → menu → "⛧ Enter the Vestibule ⛧".
+- **B** = fresh run, then **138 declarations deliberately dirtied** through their own
+  hook dispatchers/refs (numbers +7, booleans flipped, strings suffixed, Sets/arrays
+  given a sentinel), then the death screen, then "↺ Play Again".
+**A vs B: 10 differences, all expected** — `runSeed` and the four deliberately
+re-randomised shop rolls, `fightStartTimeRef`/`runStartTimeRef` (`Date.now()`),
+`fightTokenRef` (monotonic), `audioRef` (lazily-populated element cache), and
+`screenFade` (mid-transition). Zero leaks. Spot-checked 77 high-value run/fight vars
+(corruption, stash, hangover, the three never-reset refs, every pedal one-shot, the
+per-fight stat refs, …): **all identical**, 71 of them dirtied first.
+
+Smoke test: 3-minute autopilot session — 5 fights, 24 strikes, 26 distinct cards,
+shops/recruits/events/pacts/forge, zero console errors.
+
+Verified: `npx vite build` clean · `npm run check` ALL RULES CLEAN · eslint
+no-undef / no-dupe-keys / no-redeclare = 0 on src/App.jsx · `node
+src/data/cardEngine.js` still PASS 86/86.
+
 ## 🔥 AUG 1 — THE "BEAT THE GAME IN 13 MIN" FORENSICS (d48699b + c0d4260)
 
 Bot run beat the entire game in 13 minutes. Ledger forensics found and fixed:

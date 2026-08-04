@@ -33,8 +33,14 @@ export const STARTER_ARTIFACTS=[
   {id:'luciferspact',name:"Lucifer's Pact",emoji:'😈',effect:'×4 if Lucifer is on stage. Run score ×1.3.',cost:40,multTrigger:'luciferOnStage',mult:4.0,scoreMult:1.3,rarity:'rare'},
   {id:'invertedpentacle',name:'Inverted Pentacle',emoji:'🜺',effect:'×5 if Corruption is exactly 100% (no over, no under).',cost:36,multTrigger:'corrupt100exact',mult:5.0,rarity:'rare'},
   {id:'blackgoat',name:'The Black Goat',emoji:'🐐',effect:'×2.0 always × ×1.3 per OTHER artifact owned. Stacks with Goat of Mendes.',cost:42,multTrigger:'goatStackOther',mult:2.0,rarity:'rare'},
-  // ── UNLOCKABLE (kept) ─────────────────────────────────────────
-  {id:'wardrums',name:'War Drums',emoji:'🪘',effect:'+1 Strike per fight permanently (5 Strikes instead of 4).',cost:30,locked:true,unlockAt:5000,reclassifiedToPedal:true},
+  // ── UNLOCKABLE ────────────────────────────────────────────────
+  // Aug 4 2026: the `wardrums` entry that used to live here is GONE. It was the
+  // only id defined in two relic pools at once (here and STARTER_PASSIVES below),
+  // and it was already tagged `reclassifiedToPedal:true` — i.e. the artifact copy
+  // was meant to have been deleted when it moved to the pedal pool and never was.
+  // Two copies meant the roller could offer it twice, the "already owned" checks
+  // (which are per-pool) could not see each other, and App.jsx ~8969 had to test
+  // BOTH activeArtifacts and activePassives to find it. War Drums is a pedal.
 ]
 export const MYTHIC_ARTIFACTS=[
   {id:'invertedcross',name:'The Inverted Cross',emoji:'✟',effect:'×69 damage if Corruption is exactly 100% AND no member is Too Stoned. Run score ×1.5.',cost:50,multTrigger:'corruptedClean',mult:69.0,scoreMult:1.5,rarity:'mythic',unlockId:'invertedCross',hint:'When the King of Hell falls before you for the first time...'},
@@ -59,7 +65,12 @@ export const STARTER_PASSIVES=[
   {id:'p6',name:'Cult Following',emoji:'🕯',effect:'Each time any member goes Too Stoned, gain 3 Stash.',cost:10,rarity:'common'},
   {id:'p7',name:'Guitar Tech',emoji:'🎛',effect:'Battle Cry gives +2 ATK permanently instead of +1.',cost:8,rarity:'common'},
   {id:'p8',name:'Green Room',emoji:'🛋',effect:'At the start of each fight, all members gain Stonewall (immune to first Too Stoned event).',cost:16,rarity:'uncommon'},
-  {id:'p9',name:'Heavy Rotation',emoji:'🎚',effect:'When you draw a duplicate card into your hand, draw 1 extra card next Strike.',cost:10,rarity:'uncommon'},
+  // ⚠ UNIMPLEMENTED (audited Aug 4 2026): `p9` has ZERO references in src/App.jsx
+  // outside this table — nothing detects a duplicate draw and nothing grants the
+  // extra card. It is buyable and does nothing. Not fixable in cardEngine.js: the
+  // trigger is a DRAW event, and the engine only sees card plays. Needs a hook in
+  // App.jsx `drawUpTo`. Flagged in data so the shop/audit tooling can see it.
+  {id:'p9',name:'Heavy Rotation',emoji:'🎚',effect:'When you draw a duplicate card into your hand, draw 1 extra card next Strike.',cost:10,rarity:'uncommon',unimplemented:true},
   {id:'p10',name:'Stage Fright Reversal',emoji:'🎙',effect:'The first Strike of every fight deals +10 bonus damage.',cost:14,rarity:'common'},
   // ── RECLASSIFIED FROM ARTIFACTS (7) ───────────────────────────
   // Former a3, a4, a7, a8, ca2, ca3, wardrums — all utility/structural.
@@ -73,7 +84,11 @@ export const STARTER_PASSIVES=[
   // ── NEW COMMON PEDALS (8) ─────────────────────────────────────
   {id:'reverbtank',name:'Reverb Tank',emoji:'〰️',effect:'First card you play each Strike costs 1 less Ember (min 0).',cost:12,rarity:'common'},
   {id:'fuzzbox',name:'Fuzz Box',emoji:'🌫',effect:'All RIFF cards cost 1 less Ember.',cost:14,rarity:'common'},
-  {id:'tunerpedal',name:'Tuner Pedal',emoji:'🎯',effect:'Discarding a card draws 1 immediately.',cost:12,rarity:'common'},
+  // ⚠ UNIMPLEMENTED (audited Aug 4 2026): `tunerpedal` has ZERO references in
+  // src/App.jsx outside this table — handleDiscard never checks for it. Buyable,
+  // does nothing. Not fixable in cardEngine.js: the trigger is a DISCARD event
+  // (App.jsx handleDiscard ~6182), which the engine never sees.
+  {id:'tunerpedal',name:'Tuner Pedal',emoji:'🎯',effect:'Discarding a card draws 1 immediately.',cost:12,rarity:'common',unimplemented:true},
   {id:'wahpedal',name:'Wah Pedal',emoji:'🦶',effect:'First CORRUPT card each fight costs 0 Embers.',cost:12,rarity:'common'},
   {id:'volumeknob',name:'Volume Knob',emoji:'🔆',effect:'If you played 4+ cards last Strike, draw 1 extra next Strike.',cost:11,rarity:'common'},
   {id:'powerconditioner',name:'Power Conditioner',emoji:'🔌',effect:'Start each fight with +1 Ember.',cost:10,rarity:'common'},

@@ -32,11 +32,15 @@ const ev = (type, data) => { if (ACTION_EVENTS.has(type)) ACTION.at = Date.now()
       if (d.overtime) RUN.overtimeStrikes++
       if (typeof d.corr === 'number' && d.corr > RUN.peakCorruption) RUN.peakCorruption = d.corr
       if (typeof d.bossHp === 'number' && d.bossHp > RUN.maxBossHpSeen) RUN.maxBossHpSeen = d.bossHp
-      if (typeof d.fightIndex === 'number' && d.fightIndex > RUN.deepestFight) {
+      // transition-tagged strikes read the circle numeral mid fight-to-fight swap
+      // and are a full circle too deep — never let them set the run's depth.
+      if (!d.transition && typeof d.fightIndex === 'number' && d.fightIndex > RUN.deepestFight) {
         RUN.deepestFight = d.fightIndex; RUN.deepestCircle = Math.floor(d.fightIndex / 3) + 1
       }
-      if (typeof d.bandAtk === 'number' && d.bandAtk > RUN.peakBandAtk) RUN.peakBandAtk = d.bandAtk
-    } else if (type === 'descent') RUN.deepestBoss = String(d.pick || '').slice(0, 40)
+      const _atk = typeof d.bandAtkBase === 'number' ? d.bandAtkBase : d.bandAtk
+      if (typeof _atk === 'number' && _atk > RUN.peakBandAtk) RUN.peakBandAtk = _atk
+    } else if (type === 'strike_skipped') RUN.skippedStrikes++
+    else if (type === 'descent') RUN.deepestBoss = String(d.pick || '').slice(0, 40)
   } } catch (e) {} fs.appendFileSync(LOG, JSON.stringify({ ts: new Date().toISOString(), ev: type, ...data }) + '\n') }
 // every pilot op gets a hard timeout — a hung CDP call must never freeze the loop
 const TMO = 20000
@@ -143,22 +147,47 @@ async function members() {
 // which is worse than a crash. This reads the real numbers off the DOM and
 // LOGS a parse_miss instead of falling back to a plausible lie.
 // ══════════════════════════════════════════════════════════════════════
-async function perceive() {
+async function perceive(opts) {
+  // `quiet` suppresses parse_miss. settleBossHp() re-perceives up to 15 times per
+  // strike; without this, one settling strike would write a dozen parse_miss rows
+  // for fields that are simply mid-animation, and drown the real ones.
   const raw = await P.evaljs(`(() => {
     const num = t => { const m = String(t).replace(/,/g,'').match(/-?\\d+/); return m ? +m[0] : null }
     const vis = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 }
     const out = { miss: [] }
 
-    // ── corruption: the stamp span carries key 'c-<n>' and reads "<n>%" ──
-    let corr = null
-    for (const el of document.querySelectorAll('span,div')) {
-      const t = (el.textContent || '').trim()
-      if (/^\\d{1,3}%$/.test(t) && el.children.length === 0 && vis(el)) { corr = num(t); break }
+    // ── corruption ────────────────────────────────────────────────────
+    // Aug 4 2026: the comment here claimed it read the 'c-<n>' stamp. It did not
+    // — it took the FIRST leaf element ANYWHERE in the document matching ^\\d{1,3}%$,
+    // so a shop discount badge or an HP percentage label won the race and fed a
+    // wrong corruption straight into brain.cjs's corruption gating (overdrive,
+    // darktuning, deathriff, necroticamp, darkcrescendo all key off it).
+    // The real stamp (App.jsx ~10390) is a <span> inside the corruption tube with
+    // animation 'inkStamp'; the tube itself is the right-edge column at
+    // right:14px/width:56px. Anchor to those, in that order, and nothing else.
+    let corr = null, corrSrc = ''
+    const tube = [...document.querySelectorAll('div')].find(d => {
+      const st = d.getAttribute('style') || ''
+      return /right:\\s*14px/.test(st) && /width:\\s*56px/.test(st) && vis(d)
+    }) || null
+    for (const sp of (tube || document).querySelectorAll('span')) {
+      const st = sp.getAttribute('style') || ''
+      const t = (sp.textContent || '').trim()
+      if (!/inkStamp/.test(st)) continue
+      if (/^\\d{1,3}%$/.test(t) && vis(sp)) { corr = num(t); corrSrc = 'stamp'; break }
     }
-    // Only a real defect if we're IN COMBAT (the stamp doesn't exist elsewhere).
-    // Combat is identified by the boss HP readout below, so defer the miss flag.
-    out._corrMissing = corr === null
+    if (corr === null && tube) {
+      for (const el of tube.querySelectorAll('span,div')) {
+        const t = (el.textContent || '').trim()
+        if (/^\\d{1,3}%$/.test(t) && el.children.length === 0 && vis(el)) { corr = num(t); corrSrc = 'tube'; break }
+      }
+    }
+    // The tube renders only when corruption > 0 (App.jsx ~10384), so its ABSENCE
+    // means corruption is exactly 0 — not a failed read. Only flag a miss when the
+    // tube IS on screen and the stamp inside it could not be parsed.
+    out._corrMissing = corr === null && !!tube
     out.corruption = corr === null ? 0 : corr
+    out.corrSource = corr === null ? (tube ? 'MISS' : 'no-tube(=0)') : corrSrc
 
     // ── boss HP ──
     const bm = document.body.innerText.match(/([\\d,]+)\\s*\\/\\s*([\\d,]+)\\s*HP/)
@@ -255,7 +284,11 @@ async function perceive() {
       if (prevIdx !== -1) { if (out.members[prevIdx]._area >= r.width * r.height) continue; out.members.splice(prevIdx, 1) }
       out.members.push({
         _area: r.width * r.height,
-        name: nm[1], atk: (+atk[1]) + (+(atk[2] || 0)), hp: hp ? +hp[1] : 0, maxHp,
+        // atk = base + this-strike temp buff ("ATK 5 +3"); atkBase = the base group
+        // ONLY. The buff swings wildly within a fight (455 -> 822 -> 295 -> 161
+        // across consecutive fights in the Aug-4 ledger), so it is useless as an
+        // amplification denominator. Keep both; log both.
+        name: nm[1], atk: (+atk[1]) + (+(atk[2] || 0)), atkBase: +atk[1], hp: hp ? +hp[1] : 0, maxHp,
         role, keyword: kw,
         tooStoned: /TOO STONED/i.test(flat),
         tier: /DEMONIC/i.test(flat) ? 'demonic' : /MYTHIC/i.test(flat) ? 'mythic' : /FOIL/i.test(flat) ? 'foil' : '',
@@ -298,13 +331,117 @@ async function perceive() {
     out.members.forEach(m => { delete m._area })
     return out
   })()`)
-  if (raw && raw.miss && raw.miss.length) ev('parse_miss', { fields: raw.miss })
+  if (raw && raw.inCombat && raw._corrMissing) (raw.miss = raw.miss || []).push('corruption')
+  if (!(opts && opts.quiet) && raw && raw.miss && raw.miss.length) ev('parse_miss', { fields: raw.miss, corrSource: raw.corrSource })
   return raw
 }
 
 const BRAIN = require('./brain.cjs')
 let strikeNumThisFight = 0, lastBossHp = null
 let zeroStrikeTicks = 0, preferNewRun = false
+
+// ── STRIKE IDENTITY (Aug 4 2026) ──────────────────────────────────────
+// analyze.cjs used to join `strike` to `strike_result` on `fightIndex|bossHp`.
+// That key collides: 43 of 111 keys in the Aug-4 ledger were duplicates, and
+// `0|84` appeared three times with three DIFFERENT card lists, so cards got
+// credited with other strikes' damage. Every strike now carries a monotonic id
+// that is unique across the whole ledger (process id + counter).
+const RUN_ID = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7)
+let strikeSeq = 0
+const nextStrikeId = () => RUN_ID + '#' + (++strikeSeq)
+
+// ── FIGHT INDEX (Aug 4 2026) ──────────────────────────────────────────
+// perceive() derives fightIndex from CIRCLE numeral + FIGHT pill. During a
+// fight-to-fight transition the circle numeral advances BEFORE the pill resets,
+// so the pair briefly reads a full circle too deep — the ledger shows f11 right
+// after f8, f14 after f11, f17 after f14. Only accept a new index when we are in
+// a real fight with a live boss AND it moves by at most one; otherwise carry the
+// last good value and tag the event transition:true.
+const _unmatchedSeen = new Set(), _ambigSeen = new Set()
+function noteUnmatched(c) {
+  const k = String(c.name || '').toLowerCase()
+  if (!k || _unmatchedSeen.has(k)) return
+  _unmatchedSeen.add(k)
+  ev('card_unmatched', { name: String(c.name).slice(0, 30), cost: c.cost, type: c.type, desc: String(c.desc || '').slice(0, 90) })
+}
+function noteAmbiguous(c, card) {
+  const amb = BRAIN.isAmbiguous(c.name)
+  if (!amb) return
+  const k = String(c.name || '').toLowerCase()
+  if (_ambigSeen.has(k)) return
+  _ambigSeen.add(k)
+  ev('card_ambiguous', { name: String(c.name).slice(0, 30), resolvedTo: card.id, candidates: amb })
+}
+
+const FIGHT = { idx: -1 }
+function resolveFightIndex(g) {
+  const liveBoss = !!(g.inCombat && typeof g.bossHp === 'number' && g.bossHp > 0 && g.bossMaxHp && g.strikesLeft !== null)
+  const seen = typeof g.fightIndex === 'number' ? g.fightIndex : null
+  if (seen !== null && liveBoss && (FIGHT.idx < 0 || seen <= FIGHT.idx + 1)) { FIGHT.idx = seen; return { fightIndex: seen, transition: false } }
+  if (FIGHT.idx >= 0) return { fightIndex: FIGHT.idx, transition: true, sawFightIndex: seen }
+  return { fightIndex: seen, transition: true, sawFightIndex: seen }
+}
+
+// ── HP SETTLING (Aug 4 2026) ──────────────────────────────────────────
+// The old code slept a flat 1800ms and read bossHp once. The damage-number
+// cascade is still animating at that point, so every non-lethal strike was
+// UNDERSTATED by a factor clustering at ×1.77-×2.01 — half the reported damage
+// simply had not landed on the HP bar yet. Poll instead, and stop only when two
+// consecutive reads agree.
+async function settleBossHp(maxMs = 6000, stepMs = 400) {
+  const t0 = Date.now()
+  let prev, hp = null, reads = 0
+  while (Date.now() - t0 < maxMs) {
+    await P.connect().then(p => p.waitForTimeout(stepMs)).catch(() => {})
+    const a = await perceive({ quiet: true }).catch(() => null)
+    hp = a ? a.bossHp : null
+    reads++
+    if (reads > 1 && hp === prev) return { hp, settleMs: Date.now() - t0, reads, settled: true }
+    prev = hp
+  }
+  return { hp, settleMs: Date.now() - t0, reads, settled: false }
+}
+
+// The most trustworthy damage figure is not "HP after" at all — it is
+// hpBefore(N) - hpBefore(N+1), because the NEXT strike reads the bar long after
+// every animation has finished. Hold the last strike open and emit a
+// reconstruction when the following strike in the same fight begins.
+let pendingStrike = null
+function emitRecon(g, fightIndex) {
+  if (!pendingStrike) return
+  const p = pendingStrike
+  if (p.fightIndex === fightIndex && typeof g.bossHp === 'number' && g.bossHp > 0 && g.bossHp <= p.hpBefore) {
+    ev('strike_recon', { strikeId: p.strikeId, fightIndex, hpBefore: p.hpBefore, hpAtNextStrike: g.bossHp, dmg: p.hpBefore - g.bossHp, bandAtkBase: p.bandAtkBase })
+  }
+  pendingStrike = null
+}
+
+// ── CHAIN CONFIRMATION (Aug 4 2026) ───────────────────────────────────
+// `chain_fired` is the BOT's own inference (both ids appear in playedIds), which
+// is not the same thing as the game firing a chain. The game writes its own line
+// to the combat log: "⛧ RIFF CHAIN: <emoji> <NAME>! (...) ×N MULTIPLIER!"
+// (App.jsx ~6239). Read THAT and emit chain_confirmed.
+const CHAIN_BY_NAME = {}
+try { for (const c of (require('./carddata.json').chainMeta || [])) CHAIN_BY_NAME[c.name.toUpperCase()] = c } catch (e) {}
+// The log panel keeps a rolling window and is cleared between fights, so an
+// index cursor would double-count. Track a per-line occurrence count instead and
+// emit only the growth; reset it whenever a new fight starts.
+const chainLogSeen = new Map()
+async function scanChainLog() {
+  const lines = await P.evaljs(`(() => (document.body.innerText.match(/⛧ RIFF CHAIN:[^\\n]*/g) || []))()`).catch(() => null)
+  if (!Array.isArray(lines)) return
+  const now = new Map()
+  for (const l of lines) now.set(l, (now.get(l) || 0) + 1)
+  for (const [raw, n] of now) {
+    const had = chainLogSeen.get(raw) || 0
+    if (n <= had) continue
+    const nm = (raw.match(/⛧ RIFF CHAIN:\s*\S*\s*([A-Z][A-Z' ]+?)!/) || [])[1]
+    const meta = nm ? CHAIN_BY_NAME[nm.trim().toUpperCase()] : null
+    const mult = (raw.match(/×([\d.]+)\s*MULTIPLIER/) || [])[1]
+    for (let i = had; i < n; i++) ev('chain_confirmed', { chain: meta ? meta.cards.join('+') : null, name: nm ? nm.trim() : null, mult: mult ? +mult : null, source: 'game_log', line: raw.slice(0, 120) })
+    chainLogSeen.set(raw, n)
+  }
+}
 
 async function combatTick(s) {
   // ── EXPERT COMBAT (Aug 1 2026 rebuild) ──────────────────────────────
@@ -313,16 +450,29 @@ async function combatTick(s) {
   // re-reading state after EVERY card -> hold a clutch trip -> strike.
   let g = await perceive()
   if (g.bossHp !== null && g.bossMaxHp && g.bossHp === g.bossMaxHp) {
-    strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set(); hrUsedThisFight.clear(); tripUsedThisFight = false
+    strikeNumThisFight = 0; playedIdsThisFight.length = 0; cardsThisStrike.length = 0
+    firedChainsThisFight = new Set(); hrUsedThisFight.clear(); tripUsedThisFight = false
+    chainLogSeen.clear(); pendingStrike = null
   }
   lastBossHp = g.bossHp
+  // resolve the fight index ONCE per tick, then reconstruct the previous strike's
+  // damage from the HP the boss is showing now (long after every animation).
+  const FI = resolveFightIndex(g)
+  emitRecon(g, FI.fightIndex)
 
   const aliveOf = gg => gg.members.filter(m => !m.tooStoned)
+  let membersParsed = true
   if (!aliveOf(g).length) {
-    ev('warn', { msg: 'no members parsed — using fixed slot fallback' })
+    // Aug 4: this fallback invents {atk:1},{atk:0} members. 10 of 69 strikes in
+    // the Aug-4 ledger logged bandAtk<=1 (one logged 0) purely because of it, and
+    // those rows became division-by-~1 amplification outliers. Still needed to
+    // keep the bot clicking, but the strike is now STAMPED as unparsed so the
+    // analyzer can drop it instead of believing it.
+    membersParsed = false
+    ev('warn', { msg: 'no members parsed — using fixed slot fallback', membersParsed: false })
     const vp = await P.evaljs('({w:innerWidth,h:innerHeight})')
-    g.members = [{ name: 'slot1', atk: 1, hp: 5, maxHp: 5, tooStoned: false, keyword: '', role: '', tier: '', x: Math.round(vp.w * 0.38), y: Math.round(vp.h * 0.44) },
-                 { name: 'slot2', atk: 0, hp: 5, maxHp: 5, tooStoned: false, keyword: '', role: '', tier: '', x: Math.round(vp.w * 0.53), y: Math.round(vp.h * 0.44) }]
+    g.members = [{ name: 'slot1', atk: 1, atkBase: 1, hp: 5, maxHp: 5, tooStoned: false, keyword: '', role: '', tier: '', x: Math.round(vp.w * 0.38), y: Math.round(vp.h * 0.44) },
+                 { name: 'slot2', atk: 0, atkBase: 0, hp: 5, maxHp: 5, tooStoned: false, keyword: '', role: '', tier: '', x: Math.round(vp.w * 0.53), y: Math.round(vp.h * 0.44) }]
   }
 
   const gsFrom = gg => ({
@@ -337,9 +487,11 @@ async function combatTick(s) {
     discardLen: gg.discardLen, hrUsed: hrUsedThisFight
   })
 
-  // playable = matched + affordable + corruption gate satisfied at its REAL threshold
+  // playable = matched + affordable + corruption gate satisfied at its REAL threshold.
+  // Aug 4: brain.matchCard no longer fuzzy-guesses (it used to relabel Dark Whisper
+  // as `whispercard`). An unmatched card is now LOGGED, once per distinct name.
   const playableIn = (gg, skipIds) => gg.hand
-    .map(c => ({ ...c, card: BRAIN.matchCard(c.name) }))
+    .map(c => { const card = BRAIN.matchCard(c.name); if (!card) noteUnmatched(c); else noteAmbiguous(c, card); return { ...c, card } })
     .filter(c => c.card && !skipIds.has(c.card.id))
     .filter(c => !c.corrReq || gg.corruption >= c.corrReq)
     .filter(c => c.cost <= gg.embers)
@@ -390,18 +542,36 @@ async function combatTick(s) {
     if (c.score <= 3) break                       // sim stop-rule
     const tgt = BRAIN.pickTarget(c.card, aliveOf(g), { hrUsed: hrUsedThisFight })
     if (!tgt) break
-    const before = { e: g.embers, d: g.discardLen }
+    // ── Aug 4 2026: PLAY VERIFICATION ─────────────────────────────────
+    // Success used to be inferred from an ember/discard delta sampled ONCE, ~400ms
+    // after the click. Two consequences: every 0-cost card (whispercard,
+    // hungercard, madnesscard, blood_price, harmonicfb, secondwind, the whole
+    // corruption-gift set) changes no ember count and was read as a FAILURE, and
+    // the animation had often not finished either way — 2,252 play_fail against
+    // 1,951 play, a 54% "failure" rate that was mostly fiction.
+    // Now: poll up to ~1.5s and accept ANY of embers / discard pile / hand size
+    // moving. Hand size is the signal that catches free cards.
+    const before = { e: g.embers, d: g.discardLen, h: g.hand.length }
     await P.playCard(c.x, c.y, tgt.x, tgt.y)
-    g = await perceive()
-    if (g.embers !== before.e || g.discardLen !== before.d) {
-      played++; failStreak = 0; playedIdsThisFight.push(c.card.id)
+    let landed = false, waitedMs = 0
+    for (let poll = 0; poll < 5; poll++) {
+      g = await perceive()
+      if (g.embers !== before.e || g.discardLen !== before.d || g.hand.length !== before.h) { landed = true; break }
+      if (poll === 4) break
+      await P.connect().then(p => p.waitForTimeout(300)).catch(() => {}); waitedMs += 300
+    }
+    if (landed) {
+      played++; failStreak = 0; playedIdsThisFight.push(c.card.id); cardsThisStrike.push(c.card.id)
       if (c.card.id === 'heavyriff') hrUsedThisFight.add(tgt.name)   // once per member per fight
-      for (const ch of BRAIN.RIFF_CHAINS) { const ck = ch[0] + '+' + ch[1]; if (!firedChainsThisFight.has(ck) && playedIdsThisFight.includes(ch[0]) && playedIdsThisFight.includes(ch[1])) { firedChainsThisFight.add(ck); ev('chain_fired', { chain: ck }) } }
-      ev('play', { card: c.card.id, score: c.score, cost: c.cost, target: tgt.name, embers: g.embers, corr: g.corruption })
+      for (const ch of BRAIN.RIFF_CHAINS) { const ck = ch[0] + '+' + ch[1]; if (!firedChainsThisFight.has(ck) && playedIdsThisFight.includes(ch[0]) && playedIdsThisFight.includes(ch[1])) { firedChainsThisFight.add(ck); ev('chain_fired', { chain: ck, inferred: true }) } }
+      ev('play', { card: c.card.id, score: c.score, cost: c.cost, target: tgt.name, embers: g.embers, corr: g.corruption, waitedMs })
     } else {
       failStreak++; failedIds.add(c.card.id)
-      ev('play_fail', { card: c.card.id, cost: c.cost, embers: g.embers, corr: g.corruption })
-      await P.click(c.x, c.y).catch(() => {})    // deselect
+      ev('play_fail', { card: c.card.id, cost: c.cost, embers: g.embers, corr: g.corruption, waitedMs })
+      // NO re-tap. The old "click it again to deselect" could RE-PLAY the card the
+      // poll had simply not seen land yet — a double-play logged as a failure. The
+      // card id is in failedIds now, so the next iteration picks a different card
+      // and that click re-targets the selection anyway.
     }
     if ((await P.state()).text.toUpperCase().includes('DISCARD & CONTINUE')) { await modalTick(await P.state()); g = await perceive() }
   }
@@ -426,7 +596,19 @@ async function combatTick(s) {
     // prefer the strongest held drug for the situation: DMT > acid > shrooms late
     const pick = ['💠', '🧪', '🍄'].map(e => g0Clickable(s, e)).find(Boolean)
       || (await P.state()).clickables.find(c => /🍄|🧪|💠/.test(c.t) && c.t.length < 30)
-    if (pick) { tripUsedThisFight = true; ev('trip_used', { btn: pick.t, bossPct: (bossPct * 100).toFixed(0), strikesLeft: g.strikesLeft, why: g.overtime ? 'overtime' : bandHurt ? 'band<40%hp' : 'low strikes' }); await P.click(pick.x, pick.y); await P.connect().then(p => p.waitForTimeout(1500)); g = await perceive() }
+    if (pick) {
+      // Aug 4: trip_used was logged BEFORE the click and never verified, so the
+      // ledger counted INTENTS (252 of them) as consumed trips. Click first,
+      // confirm the button is gone, and only then write the row.
+      const why = g.overtime ? 'overtime' : bandHurt ? 'band<40%hp' : 'low strikes'
+      await P.click(pick.x, pick.y)
+      await P.connect().then(p => p.waitForTimeout(1500)).catch(() => {})
+      const st2 = await P.state().catch(() => null)
+      const gone = !st2 || !st2.clickables.some(c => c.t === pick.t)
+      if (gone) { tripUsedThisFight = true; ev('trip_used', { btn: pick.t, bossPct: (bossPct * 100).toFixed(0), strikesLeft: g.strikesLeft, why, verified: true }) }
+      else ev('trip_failed', { btn: pick.t, why, note: 'button still present after click — not counted as a trip' })
+      g = await perceive()
+    }
   }
 
   // Aug 3: skip strikes fired during fight-to-fight transitions (bossHp=None).
@@ -437,30 +619,61 @@ async function combatTick(s) {
   if (g.bossHp === null) {
     const sNow = await P.state().catch(() => null)
     const hasStrikeBtn = sNow && sNow.clickables.some(c => /STRIKE/i.test(c.t) && !/DISCARD/i.test(c.t))
-    if (!hasStrikeBtn) { ev('strike_skipped', { why: 'no boss HP and no strike button (transition)' }); return }
+    if (!hasStrikeBtn) { ev('strike_skipped', { why: 'no boss HP and no strike button (transition)', fightIndex: FI.fightIndex, transition: FI.transition }); return }
   }
-  const _bandAtk = aliveOf(g).reduce((a, m) => a + (m.atk || 0), 0)
-  // Aug 3 2026 — PROOF-OF-REAL-RUN TELEMETRY. Log boss HP before AND after the
-  // strike resolves, plus the damage actually dealt and the band's ATK. A genuine
-  // kill shows dmg >= hpBefore with a band big enough to explain it; the phantom
-  // victory that ate the Aug 3 night showed a boss at 330,548 HP "dying" to a band
-  // dealing ~2k. With these fields, any faked kill is arithmetic anyone can catch.
+  const alive = aliveOf(g)
+  const _bandAtk = alive.reduce((a, m) => a + (m.atk || 0), 0)
+  const _bandAtkBase = alive.reduce((a, m) => a + (typeof m.atkBase === 'number' ? m.atkBase : m.atk || 0), 0)
   const _hpBefore = g.bossHp
-  ev('strike', { strikes: g.strikesLeft, overtime: g.overtime, bossHp: _hpBefore, bossMaxHp: g.bossMaxHp, bandAtk: _bandAtk, aliveMembers: aliveOf(g).length, played, embers: g.embers, corr: g.corruption, chains: firedChainsThisFight.size, fightIndex: g.fightIndex, cards: playedIdsThisFight.slice(-played) })
+  const strikeId = nextStrikeId()
+  // Aug 4: `cards` used to be playedIdsThisFight.slice(-played). When played===0,
+  // slice(-0) === slice(0) — the WHOLE fight's card list. 42 of 69 strikes logged
+  // played:0 and every one of them carried a bogus non-empty card array, which is
+  // exactly how moshpit / setlist / soundboard got labelled OVERPOWERED. There is
+  // now a dedicated per-strike array, cleared after each strike event.
+  const cardsForThisStrike = cardsThisStrike.slice()
+  const base = {
+    strikeId, strikes: g.strikesLeft, overtime: g.overtime, bossHp: _hpBefore, bossMaxHp: g.bossMaxHp,
+    bandAtk: _bandAtk, bandAtkBase: _bandAtkBase, membersParsed,
+    aliveMembers: alive.length, played, embers: g.embers, corr: g.corruption,
+    chains: firedChainsThisFight.size, fightIndex: FI.fightIndex, transition: FI.transition,
+    cards: cardsForThisStrike
+  }
+  // Aug 4: a strike with bossHp null/0 is unmeasurable — 27 of 69 strike rows had
+  // one and they were silently inflating strikes-per-run. Still CLICK the button
+  // (the game has to advance), but log it as strike_skipped, not as a strike.
+  const measurable = typeof _hpBefore === 'number' && _hpBefore > 0
+  if (!measurable) ev('strike_skipped', Object.assign({ why: 'bossHp ' + JSON.stringify(_hpBefore) + ' — unmeasurable, still striking to advance the game' }, base))
+  else ev('strike', base)
+  cardsThisStrike.length = 0
   strikeNumThisFight++
   await P.clickText('strike').catch(e => ev('warn', { msg: 'strike btn: ' + e.message }))
-  await P.connect().then(p => p.waitForTimeout(1800))
-  // measure what the strike ACTUALLY did — the audit trail that distinguishes a
-  // real kill from a race condition
+  // ── measure what the strike ACTUALLY did ──────────────────────────────
+  // Aug 4: this used to be a flat waitForTimeout(1800) + one read, which samples
+  // the boss HP MID-CASCADE and understated every non-lethal strike by ×1.77-×2.01.
+  // Poll instead. Also record the reconstruction handle so the NEXT strike in this
+  // fight can supply hpAtNextStrike, which is animation-proof.
   try {
-    const after = await perceive()
-    const hpAfter = after.bossHp
-    if (_hpBefore !== null && hpAfter !== null) {
-      ev('strike_result', { fightIndex: g.fightIndex, hpBefore: _hpBefore, hpAfter, dmg: _hpBefore - hpAfter, bandAtk: _bandAtk, ratio: +((_hpBefore - hpAfter) / Math.max(1, _bandAtk)).toFixed(1) })
-    } else if (_hpBefore !== null && hpAfter === null) {
-      ev('strike_result', { fightIndex: g.fightIndex, hpBefore: _hpBefore, hpAfter: 'gone', dmg: _hpBefore, bandAtk: _bandAtk, note: 'boss died or fight ended' })
-    }
-  } catch (e) {}
+    const settled = await settleBossHp()
+    const hpAfter = settled.hp
+    await scanChainLog().catch(() => {})
+    if (!measurable) { pendingStrike = null; return }
+    const lethal = hpAfter === 0 || hpAfter === null
+    ev('strike_result', {
+      strikeId, fightIndex: FI.fightIndex, transition: FI.transition,
+      hpBefore: _hpBefore, hpAfter: hpAfter === null ? 'gone' : hpAfter, hpAfterSettled: hpAfter,
+      settleMs: settled.settleMs, settleReads: settled.reads, settled: settled.settled,
+      dmg: _hpBefore - (hpAfter === null ? 0 : hpAfter),
+      bandAtk: _bandAtk, bandAtkBase: _bandAtkBase, membersParsed,
+      // A killing blow can only ever report the boss's REMAINING HP as damage —
+      // overkill is unobservable. Mark it so the analyzer keeps it out of the
+      // percentiles instead of letting it dominate them.
+      lowerBound: lethal,
+      ratio: +((_hpBefore - (hpAfter === null ? 0 : hpAfter)) / Math.max(1, _bandAtkBase)).toFixed(1),
+      note: lethal ? 'boss died or fight ended — damage is a LOWER BOUND' : undefined
+    })
+    pendingStrike = lethal ? null : { strikeId, fightIndex: FI.fightIndex, hpBefore: _hpBefore, bandAtkBase: _bandAtkBase }
+  } catch (e) { pendingStrike = null }
 }
 function g0Clickable(s, emoji) { return (s.clickables || []).find(c => c.t.includes(emoji) && c.t.length < 30) }
 const hrUsedThisFight = new Set()   // Heavy Riff: once per member per fight (live game hard-rejects a repeat)
@@ -474,22 +687,30 @@ let tripUsedThisFight = false       // the game allows one trip per fight; don't
 // ══════════════════════════════════════════════════════════════════════
 const RUN = {
   n: 0, startedAt: Date.now(), deepestFight: -1, deepestCircle: 0, deepestBoss: '',
-  cardsPlayed: {}, strikes: 0, fails: 0, chains: 0, trips: 0, digs: 0,
+  cardsPlayed: {}, strikes: 0, skippedStrikes: 0, fails: 0, chains: 0, trips: 0, digs: 0,
   relics: [], pedals: [], packs: 0, recruits: [], pacts: [], forges: [],
-  peakCorruption: 0, peakBandAtk: 0, maxBossHpSeen: 0, overtimeStrikes: 0
+  peakCorruption: 0, peakBandAtk: 0, maxBossHpSeen: 0, overtimeStrikes: 0, deck: null
 }
 function runReset() {
   RUN.n++; RUN.startedAt = Date.now(); RUN.deepestFight = -1; RUN.deepestCircle = 0; RUN.deepestBoss = ''
-  RUN.cardsPlayed = {}; RUN.strikes = 0; RUN.fails = 0; RUN.chains = 0; RUN.trips = 0; RUN.digs = 0
+  RUN.cardsPlayed = {}; RUN.strikes = 0; RUN.skippedStrikes = 0; RUN.fails = 0; RUN.chains = 0; RUN.trips = 0; RUN.digs = 0
   RUN.relics = []; RUN.pedals = []; RUN.packs = 0; RUN.recruits = []; RUN.pacts = []; RUN.forges = []
   RUN.peakCorruption = 0; RUN.peakBandAtk = 0; RUN.maxBossHpSeen = 0; RUN.overtimeStrikes = 0
 }
+// Aug 4: `run_summary` had NEVER ONCE been emitted in the whole ledger, because
+// every terminal path either broke out of the loop or fell through. It is now
+// emitted from a single guarded helper that every terminal path calls, and the
+// guard makes a double-call (run_end -> summary, then a stall watchdog on the same
+// run) a no-op instead of a second phantom run.
+let summaryPending = true, runActive = false
 function emitRunSummary(outcome, extra) {
+  if (!summaryPending) return
+  summaryPending = false; runActive = false
   ev('run_summary', Object.assign({
-    run: RUN.n, outcome,
+    run: RUN.n, outcome, deck: RUN.deck,
     minutes: +((Date.now() - RUN.startedAt) / 60000).toFixed(1),
     deepestFight: RUN.deepestFight, deepestCircle: RUN.deepestCircle, deepestBoss: RUN.deepestBoss,
-    strikes: RUN.strikes, playFails: RUN.fails, chains: RUN.chains, trips: RUN.trips, digs: RUN.digs,
+    strikes: RUN.strikes, skippedStrikes: RUN.skippedStrikes, playFails: RUN.fails, chains: RUN.chains, trips: RUN.trips, digs: RUN.digs,
     overtimeStrikes: RUN.overtimeStrikes, peakCorruption: RUN.peakCorruption,
     peakBandAtk: RUN.peakBandAtk, maxBossHp: RUN.maxBossHpSeen,
     relics: RUN.relics, pedals: RUN.pedals, packsBought: RUN.packs,
@@ -499,9 +720,35 @@ function emitRunSummary(outcome, extra) {
   }, extra || {}))
   runReset()
 }
+// ── RUN START (Aug 4 2026) ────────────────────────────────────────────
+// death -> "play again" emitted NO run_start, so the analyzer fused consecutive
+// runs: 58 run_end events collapsed into 17 reported runs and the win rate read
+// 18% instead of the true 3/58 (~5%). Every path that begins a run now calls
+// this, and it also stamps which of the 5 starter decks is in play — without that
+// the analyzer had to score DEAD content against all 86 card ids instead of the
+// ~36 the run could actually draw.
+async function startRun(why, extra) {
+  summaryPending = true; runActive = true
+  strikeNumThisFight = 0; playedIdsThisFight.length = 0; cardsThisStrike.length = 0
+  firedChainsThisFight = new Set(); hrUsedThisFight.clear(); tripUsedThisFight = false
+  chainLogSeen.clear(); pendingStrike = null; FIGHT.idx = -1
+  ev('run_start', Object.assign({ why }, extra || {}))
+  let deck = null, stake = null
+  try {
+    const meta = await P.evaljs("({deck: localStorage.getItem('vst_active_deck') || 'standard', stake: localStorage.getItem('vst_active_stake') || null, heat: localStorage.getItem('vst_heat') || null, lifetime: localStorage.getItem('vst_lifetime_score') || '0'})")
+    deck = meta && meta.deck; stake = meta && meta.stake
+    RUN.deck = deck
+    ev('run_deck', { deck, stake, heat: meta && meta.heat, lifetimeScore: meta && meta.lifetime })
+  } catch (e) { ev('parse_miss', { fields: ['run_deck'], note: String(e.message).slice(0, 80) }) }
+  return deck
+}
 
 // per-fight brain state (sim: _cardsPlayedIds persists across strikes within a fight)
 const playedIdsThisFight = []
+// Aug 4: cards played into THE CURRENT STRIKE only, cleared the moment the strike
+// event is written. Replaces `playedIdsThisFight.slice(-played)`, whose `slice(-0)`
+// returned the whole fight whenever nothing had been played.
+const cardsThisStrike = []
 let firedChainsThisFight = new Set()
 
 async function modalTick(s) {
@@ -635,12 +882,33 @@ async function shopTick(s) {
     }
     if (bandSize === null) ev('parse_miss', { field: 'bandSize', note: 'member packs skipped this shop' })
   }
+  // ── Aug 4 2026: VERIFY THE PURCHASE ─────────────────────────────────
+  // shop_buy was written BEFORE the click and never checked, so 187 rows counted
+  // INTENTS, not acquisitions — and the report's "relics/pedals acquired in N
+  // runs" was built entirely out of them. Click, then confirm the stash actually
+  // moved (or the tile went SOLD) before writing the row.
+  const confirmSpend = async (before, tileLabel) => {
+    for (let i = 0; i < 5; i++) {
+      await P.connect().then(p => p.waitForTimeout(300)).catch(() => {})
+      const st2 = await P.state().catch(() => null)
+      if (!st2) continue
+      const now = +((st2.text.match(/STASH\s*\n?💵\s*\n?(\d+)/) || [0, NaN])[1])
+      if (isFinite(now) && now < before) return { ok: true, spent: before - now, stashAfter: now }
+      const i2 = st2.text.toLowerCase().indexOf(String(tileLabel || '').toLowerCase())
+      if (tileLabel && i2 >= 0 && /sold/i.test(st2.text.slice(i2, i2 + 60))) return { ok: true, spent: null, stashAfter: isFinite(now) ? now : null }
+      if (!/SHOP|BACK TO THE PIT/i.test(st2.text)) return { ok: true, spent: null, stashAfter: null, note: 'left the shop' }
+    }
+    return { ok: false }
+  }
   const buy = async (label, why) => {
     const c = s.clickables.find(c => c.t.toLowerCase().includes(label))
     if (!c) return false
     BOT.boughtThisShop.add(label)
-    ev('shop_buy', { label: c.t.slice(0, 50), why, stash, bandSize })
-    await P.click(c.x, c.y); return true
+    await P.click(c.x, c.y)
+    const v = await confirmSpend(stash, label)
+    if (v.ok) ev('shop_buy', { label: c.t.slice(0, 50), why, stash, stashAfter: v.stashAfter, spent: v.spent, bandSize, verified: true })
+    else ev('shop_buy_failed', { label: c.t.slice(0, 50), why, stash, bandSize, note: 'no stash change and no SOLD stamp — intent only, NOT counted' })
+    return true
   }
   const tl = t.toLowerCase()
   // sold-check: look for SOLD within 200 chars AFTER the label (case-insensitive find)
@@ -680,8 +948,11 @@ async function shopTick(s) {
     }
     if (!c) { ev('shop_skip', { tile: label, why: 'tile not clickable, tried: ' + cands.join(' | ').slice(0, 60) }); return false }
     BOT.boughtThisShop.add(label)
-    ev('shop_buy', { label: (label + ': ' + c.t).slice(0, 60), why, stash, bandSize, matched: used })
-    await P.click(c.x, c.y); return true
+    await P.click(c.x, c.y)
+    const v = await confirmSpend(stash, used)
+    if (v.ok) ev('shop_buy', { label: (label + ': ' + c.t).slice(0, 60), why, stash, stashAfter: v.stashAfter, spent: v.spent, bandSize, matched: used, verified: true })
+    else ev('shop_buy_failed', { label: (label + ': ' + c.t).slice(0, 60), why, stash, bandSize, matched: used, note: 'no stash change and no SOLD stamp — intent only, NOT counted' })
+    return true
   }
   const tileInfo = marker => {
     // Aug 3: grab the next FOUR lines after the cost and drop any that are pure
@@ -829,11 +1100,17 @@ async function recruitTick(s) {
     // Without the rejected options you cannot tell an unpopular member from one that
     // never appeared — which is exactly the "band members that are always skipped"
     // question this playtest exists to answer.
+    // Aug 4: `picked` here is an INTENT — it was logged BEFORE the click, so every
+    // failed pick (blocked DOUBLE TIME dup, no empty slot, unresponsive screen)
+    // still counted as a pick and inflated that member's rate. The intent stays,
+    // clearly named; the CONFIRMED outcome is emitted below, after the click lands.
+    const bestName = memberName(bestSafe.t)
     ev('recruit_options', {
-      offered: scored.map(c => ({ name: (c.t.match(/([A-Z][a-z]+)/) || [])[1] || c.t.slice(0, 14), kw: c.kw, score: c.p })),
-      picked: (bestSafe.t.match(/([A-Z][a-z]+)/) || [])[1] || bestSafe.t.slice(0, 14)
+      pickCount: 1, offeredCount: scored.length,
+      offered: scored.map(c => ({ name: memberName(c.t), kw: c.kw, score: c.p })),
+      intent: bestName
     })
-    ev('recruit_pick', { pick: bestSafe.t.slice(0, 50), score: bestSafe.p })
+    ev('recruit_pick', { pick: bestSafe.t.slice(0, 50), name: bestName, score: bestSafe.p })
     // ── Aug 4 2026: DO NOT THROW AWAY A PURCHASED PACK ────────────────────
     // The Aug-3 version diffed the first 300 chars of screen text 600ms after the
     // click and, if it hadn't changed yet, clicked "pass" — which SKIPS the recruit
@@ -874,6 +1151,8 @@ async function recruitTick(s) {
     }
     if (!after) after = await P.state()
     const at = after.text.toUpperCase()
+    // the CONFIRMED acquisition — the only row the report's pick rates count.
+    if (took && !at.includes("DEVIL'S CONTRACT")) ev('recruit_confirmed', { name: bestName, score: bestSafe.p })
     if (at.includes("DEVIL'S CONTRACT")) { ev('lucifer_declined', {}); await P.clickText('walk away').catch(() => {}) }
     else if (at.includes('BAND IS FULL')) {
       // Replace the weakest current member ONLY if the incoming candidate is
@@ -913,43 +1192,82 @@ async function recruitTick(s) {
   }
 }
 
+// ── ROSTER NAME RESOLUTION (Aug 4 2026) ───────────────────────────────
+// `draft_click.name` was populated on 4 of 129 rows because it was a bare
+// /([A-Z][a-z]+)/ against a tile whose text starts with keyword badges and stat
+// blocks. Match against the KNOWN ROSTER first — the game only ever offers those
+// 18 musicians — and only then fall back to the regex. `name` is never empty now.
+let ROSTER_NAMES = []
+try { ROSTER_NAMES = (require('./carddata.json').musicians || []).map(m => m.name) } catch (e) {}
+function memberName(text) {
+  const t = String(text || '')
+  for (const n of ROSTER_NAMES) if (new RegExp('(^|[^A-Za-z])' + n + '([^A-Za-z]|$)', 'i').test(t)) return n
+  const m = t.match(/([A-Z][a-z]{2,})/)
+  return (m && m[1]) || t.replace(/\s+/g, ' ').trim().slice(0, 14) || 'UNPARSED'
+}
+
+// Draft is pick-N-of-M (N=2 by default): the confirm button reads
+// "SELECT 2 MUSICIANS" until exactly N are selected, then "TAKE THE STAGE".
+const draftPickCount = txt => { const m = String(txt).match(/SELECT\s+(\d+)\s+MUSICIAN/i); return m ? +m[1] : 2 }
+let lastDraftSig = ''
 async function draftTick(s) {
   // v2 (Jul 30): VERIFY-AFTER-EACH-CLICK. Candidate clicks TOGGLE selection and the
   // layout shifts on select — blind double-clicks can toggle forever (the "spaz").
-  // Ground truth: the confirm button reads "SELECT 2 MUSICIANS" until exactly 2 are
-  // selected, then becomes "TAKE THE STAGE". Click one candidate at a time, re-read.
+  // Click one candidate at a time, re-read.
   const stageBtn = st => st.clickables.find(c => /take the stage/i.test(c.t))
   const noDevil = list => list.filter(c => !/FALLEN|The Devil/i.test(c.t)) // fair tests never draft Lucifer
+  const parse = st => noDevil(st.clickables.filter(c => /ATK\d/.test(c.t.replace(/\s/g, '')))).map(c => {
+    const { p, kw } = memberScoreFromText(c.t)
+    return { ...c, kw, score: p, name: memberName(c.t) }
+  }).sort((a, b) => b.score - a.score)
+
+  // ── Aug 4 2026: LOG THE SLATE ON EVERY DRAFT ────────────────────────
+  // draft_options used to be emitted only inside the loop at attempt===0, so it
+  // fired 2 times against 63 draft_confirms — a draft whose candidates were
+  // already selected on entry logged nothing at all, and the report's pick rates
+  // were computed from an n of 2. Emit before anything else, deduped by the slate
+  // itself so repeated ticks on the SAME screen don't inflate the offer counts.
+  const opening = parse(s)
+  const pickCount = draftPickCount(s.text)
+  const sig = opening.map(c => c.name).sort().join('|')
+  const fresh = sig && sig !== lastDraftSig
+  if (fresh) {
+    lastDraftSig = sig
+    ev('draft_options', {
+      pickCount, offeredCount: opening.length,
+      offered: opening.map(c => ({ name: c.name, kw: c.kw, score: c.score }))
+    })
+  }
+  const clicked = []
   let st = s
   for (let attempt = 0; attempt < 8; attempt++) {
     const ready = stageBtn(st)
     if (ready) {
       const seed = (st.text.match(/RUN SEED:\s*([A-Z0-9]+)/i) || [])[1]
+      await P.click(ready.x, ready.y)
       ev('draft_confirm', { attempt, seed })
-      await P.click(ready.x, ready.y); return
+      // ONE outcome row per draft with the names actually confirmed. draft_click
+      // is an INTENT (logged before the click); this is the result.
+      ev('draft_result', { seed, pickCount, offeredCount: opening.length, offered: opening.map(c => c.name), confirmed: [...new Set(clicked)] })
+      lastDraftSig = ''
+      return
     }
-    const cand = noDevil(st.clickables.filter(c => /ATK\d/.test(c.t.replace(/\s/g, '')))).map(c => {
-      const { p, kw } = memberScoreFromText(c.t)
-      return { ...c, kw, score: p }
-    }).sort((a, b) => b.score - a.score)
-    if (!cand.length) { ev('draft_confused', { msg: 'no candidates parsed' }); return }
+    const cand = parse(st)
+    if (!cand.length) { ev('draft_confused', { msg: 'no candidates parsed' }); lastDraftSig = ''; return }
     // prefer keyword-pair: if top pick's keyword has a partner, boost the partner
     const top = cand[0]
     const partner = cand.find(c => c !== top && c.kw && c.kw === top.kw)
     const order = partner ? [top, partner, ...cand.filter(c => c !== top && c !== partner)] : cand
-    // click ONE candidate, then re-read and let the loop decide the next move
     const pick = order[attempt % order.length]
-    if (attempt === 0) {
-      // full opening slate — lets the report compute per-member draft pick rates
-      ev('draft_options', { offered: cand.map(c => ({ name: (c.t.match(/([A-Z][a-z]+)/) || [])[1] || c.t.slice(0, 14), kw: c.kw, score: c.score })) })
-    }
-    ev('draft_click', { attempt, pick: pick.t.slice(0, 30), name: (pick.t.match(/([A-Z][a-z]+)/) || [])[1] || '' })
+    ev('draft_click', { attempt, pick: pick.t.slice(0, 30), name: pick.name })
+    clicked.push(pick.name)
     await P.click(pick.x, pick.y)
     await P.connect().then(p => p.waitForTimeout(500))
     st = await P.state()
   }
   const f = await P.shot('draft-confused-' + Date.now())
-  ev('draft_confused', { msg: '8 attempts, no TAKE THE STAGE', shot: f })
+  ev('draft_confused', { msg: '8 attempts, no TAKE THE STAGE', shot: f, offered: opening.map(c => c.name), clicked })
+  lastDraftSig = ''
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -976,6 +1294,7 @@ function startHardWatchdog(stallMs, onSoftRestart) {
       ACTION.at = Date.now()
       if (ACTION.fires >= 2) {
         ev('HARD_EXIT', { msg: 'no gameplay for two ACTION_STALL windows — exiting for launcher relaunch' })
+        try { emitRunSummary('abandoned_hard_exit', { reason: 'ACTION_STALL x2' }) } catch (e) {}
         process.exit(3)
       }
       try { onSoftRestart() } catch (e) {}
@@ -990,6 +1309,7 @@ function startHardWatchdog(stallMs, onSoftRestart) {
       // Three stalls without progress = the rig itself is wedged (dead Electron,
       // dead CDP). Exit non-zero; run-bot.bat relaunches us with a fresh browser.
       ev('HARD_EXIT', { msg: 'rig wedged after 3 hard-watchdog fires — exiting for launcher relaunch' })
+      try { emitRunSummary('abandoned_hard_exit', { reason: 'watchdog x3' }) } catch (e) {}
       try { fs.appendFileSync(LOG, JSON.stringify({ ts: new Date().toISOString(), ev: 'session', msg: 'hard exit' }) + '\n') } catch (e) {}
       process.exit(3)
     }
@@ -1010,8 +1330,17 @@ async function main() {
   const STALL_MS = +(process.env.VST_STALL_MS || 60000)
   let lastProgressHash = '', lastProgressAt = Date.now(), stallRestarts = 0
   let build = 'unknown'
-  try { build = require('child_process').execSync('git -C ' + JSON.stringify(path.join(__dirname, '..')) + ' log --oneline -1').toString().trim().slice(0, 50) } catch (e) {}
-  ev('session', { msg: 'autopilot v2 start', build })
+  // Aug 4: an uncommitted working tree used to log the SAME build hash as the
+  // clean commit, so analyze.cjs happily merged runs of different code under one
+  // "current build only" scope. Mark it.
+  let dirty = false
+  try {
+    const R = JSON.stringify(path.join(__dirname, '..'))
+    build = require('child_process').execSync('git -C ' + R + ' log --oneline -1').toString().trim().slice(0, 50)
+    dirty = require('child_process').execSync('git -C ' + R + ' status --porcelain').toString().trim().length > 0
+    if (dirty) build += '-dirty'
+  } catch (e) {}
+  ev('session', { msg: 'autopilot v2 start', build, dirty })
   // player-settings for a steadier hand: hover-zoom off (cards stop re-fanning under
   // the cursor), damage numbers on. Same toggles a human sets in OPTIONS.
   try { await P.evaljs("localStorage.setItem('vst_hoverzoom','off'); localStorage.setItem('vst_shake','off'); localStorage.setItem('vst_no_lucifer','1'); localStorage.setItem('vst_heat','1'); 'ok'") } catch (e) {}
@@ -1100,10 +1429,13 @@ async function main() {
       await new Promise(r => setTimeout(r, 5000))
       preferNewRun = true
       lastProgressAt = Date.now(); lastProgressHash = ''; lastHash = ''; stuck = 0
-      strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set(); hrUsedThisFight.clear()
       resetRunEconomy()
       emitRunSummary('abandoned_stall')
       ev('run_restart', { reason: 'stall watchdog', totalStallRestarts: stallRestarts })
+      // Aug 4: tripUsedThisFight (and the chain/strike-id per-fight state) was NOT
+      // reset here, so the first fight after every stall restart could never spend
+      // a trip. startRun() clears the whole per-fight block in one place.
+      await startRun('stall_restart', { totalStallRestarts: stallRestarts })
       continue
     }
     if (stuck >= 6) {
@@ -1121,7 +1453,7 @@ async function main() {
       }
       if (stuck >= 10) {
         recoveries++
-        if (recoveries > 3) { ev('abort', { msg: 'hard stuck after 3 recoveries' }); break }
+        if (recoveries > 3) { ev('abort', { msg: 'hard stuck after 3 recoveries' }); emitRunSummary('abandoned_abort', { reason: 'hard stuck after 3 recoveries' }); break }
         ev('recover', { attempt: recoveries, type })
         await P.key('Escape').catch(() => {}); await P.key('Escape').catch(() => {})
         for (const b of ['back to the pit', 'skip', 'continue', 'got it']) { try { await P.clickText(b); break } catch (e) {} }
@@ -1180,17 +1512,27 @@ async function main() {
       else if (type === 'recruit') await recruitTick(s)
       else if (type === 'draft') await draftTick(s)
       else if (type === 'menu') {
-        ev('run_start', { preferNewRun })
-        if (preferNewRun) { preferNewRun = false; await P.clickText('enter the vestibule').catch(() => P.clickText('skip tutorial').catch(() => {})) }
-        else await P.clickText('continue').catch(() => P.clickText('skip tutorial').catch(() => P.clickText('enter the vestibule')))
+        // Aug 4: run_start used to fire on EVERY menu tick (18 rows for 58 runs,
+        // and never on the path that actually mattered). One row per run now.
+        const first = preferNewRun ? ['enter the vestibule', 'skip tutorial'] : ['continue', 'skip tutorial', 'enter the vestibule']
+        let entered = false
+        for (const b of first) { try { await P.clickText(b); entered = true; break } catch (e) {} }
+        if (entered) { const wasNew = preferNewRun; preferNewRun = false; if (!runActive) await startRun('menu', { preferNewRun: wasNew }) }
       }
       else if (type === 'death') {
         const f = await P.shot('death-' + Date.now())
         ev('run_end', { result: 'death', shot: f, text: s.text.slice(0, 1200) })
         emitRunSummary('death', { deathText: s.text.slice(0, 220).replace(/\n/g, ' | ') })
         resetRunEconomy()
-        strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set(); hrUsedThisFight.clear(); tripUsedThisFight = false
-        await P.clickText('play again').catch(() => P.clickText('try again').catch(() => {}))
+        // ── Aug 4 2026: THE RUN-FUSION BUG ────────────────────────────
+        // "play again" restarts the game WITHOUT passing through the menu, so no
+        // run_start was ever written and the analyzer glued the next run onto this
+        // one. 58 run_end events came back as 17 runs and the win rate read 18%
+        // instead of the true 3/58 (~5%). Emit run_start immediately after the click.
+        let again = false
+        for (const b of ['play again', 'try again']) { try { await P.clickText(b); again = true; break } catch (e) {} }
+        if (again) await startRun('play_again_after_death')
+        else { runActive = false; preferNewRun = true }
       }
       else if (type === 'victory') {
         // Aug 3 2026: this used to `break`, ENDING THE WHOLE SESSION on a win. JV left
@@ -1207,14 +1549,20 @@ async function main() {
         await new Promise(r => setTimeout(r, 5000))
         preferNewRun = true
         resetRunEconomy()
-        strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set(); hrUsedThisFight.clear()
         lastHash = ''; stuck = 0
-        ev('run_start', { preferNewRun: true, afterWin: true })
+        // Aug 4: tripUsedThisFight was NOT reset on this path, so the first fight
+        // of the run after every victory could never spend a trip. startRun()
+        // clears the whole per-fight block (and stamps the deck) in one place.
+        await startRun('after_victory', { afterWin: true })
       }
       else { for (const b of OVERLAY_BTNS) { try { await P.clickText(b); break } catch (e) {} } ev('unknown_screen', { text: s.text.slice(0, 300) }) }
     } catch (e) { ev('error', { msg: e.message, type }); if (/op timeout/.test(e.message)) await global.__opTimeout() }
     await new Promise(r => setTimeout(r, 800))
   }
+  // Aug 4: EVERY terminal path emits a run_summary. Before today `run_summary`
+  // had never once appeared in the ledger, so the analyzer had to reconstruct
+  // outcomes from raw rows and silently fused runs together.
+  emitRunSummary('abandoned_session_end', { reason: 'max minutes reached' })
   ev('session', { msg: 'autopilot loop end', minutes: ((Date.now() - t0) / 60000).toFixed(1) })
   process.exit(0)
 }

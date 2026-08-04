@@ -18,7 +18,15 @@ This is the canonical dev reference. If something here conflicts with another do
 2. **All `setEnemyHp` damage paths** that could kill the boss MUST trigger via `triggerVictoryRef.current()`, not direct state checks.
 3. **Use REFS** for values consumed inside `useCallback` closures. State variables go stale.
 4. **`drawUpTo` MUST use refs** — `deckRef.current`, `discRef.current`, `handRef.current`. Same for `cardsPlayedRef`.
-5. **`handleReset` must reset ALL state + ALL refs** — every new piece of state needs a corresponding reset entry.
+5. **`handleReset` must reset ALL state + ALL refs** — every new piece of state needs a corresponding reset entry. **This is now enforced by the RESET REGISTRY** (`App.jsx`, `grep -n "RESET REGISTRY"`). Adding a `useState`/`useRef` inside `App` means adding its name to **exactly one** of four keyed maps declared side by side there:
+   | Map | Meaning |
+   |---|---|
+   | `PER_STRIKE_RESETS` | wiped at every strike (`resetPerStrikeState()`, called once, in `handleStrikeBody`) |
+   | `PER_FIGHT_RESETS` | wiped at every fight boundary (`resetPerFightState()`, called from the between-fight block, the Welcome-to-Hell branch, `startTutorialFight`, **and** `handleReset`) |
+   | `PER_RUN_RESETS` | wiped only on a new run (`handleReset`) |
+   | `RESET_EXEMPT` | deliberately never reset — value is the written reason |
+   Because `handleReset` runs `PER_FIGHT_RESETS` *then* `PER_RUN_RESETS`, a run boundary is a strict superset of a fight boundary by construction. A dev-only `useEffect` right below the maps re-reads `App`'s own source, extracts every `useState`/`useRef` name, and `console.warn`s any that is registered nowhere (and any registered name that no longer exists). Check the browser console for `[RESET-REGISTRY]` after adding state.
+   **There is exactly ONE run-init path: `handleReset`.** The menu's "⛧ Enter the Vestibule ⛧" button, "Skip Tutorial", EndScreen's "Play Again"/retry-seed and the daily-challenge button all call it. Never start a run with a bare `setGameState('booster')` — that path skips the stake's `startEmbers`/`startCorruption` and drags tutorial state into the run.
 6. **Card leak rule:** any card handler in `handleDropOnStage` MUST include the played card in `drawUpTo`'s discard arg. Otherwise the card is silently lost.
 7. **Fight-start reshuffle MUST include `handRef`** alongside `deckRef` and `discRef` — `[...handRef.current, ...deckRef.current, ...discRef.current]`.
 8. **BogartsMetalFont** is for display text ONLY — **NO NUMBERS** (it has weird numeric glyphs). Use `MBScribblesFont` for anything containing digits. Lint enforces this.

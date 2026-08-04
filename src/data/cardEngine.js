@@ -400,7 +400,7 @@ IMPL.whispercard = (S, C, out) => {
 
 IMPL.hungercard = (S, C, out) => {
   for (const m of alive(S)) {
-    // TEXT-MISMATCH: card text says "+1 ATK this Strike", but live sets only
+    // TEXT-MISMATCH: card text said "+1 ATK this Strike", but live sets only
     // `tempAtkBonus` — NOT `tempBuff`/`_origAtk` — so the buff NEVER expires and
     // is effectively permanent. Faithful to live: raw atk bump + tempAtkBonus
     // bookkeeping, no tempBuff.
@@ -408,8 +408,14 @@ IMPL.hungercard = (S, C, out) => {
     m.tempAtkBonus = num(m.tempAtkBonus) + 1
     bumpBuff(m)
   }
-  draw(S, 2, C.rng)
-  log(out, '🔥 Hungering Flame! All +1 ATK, drew 2 cards.')
+  // NO DRAW. The engine drew 2. Live (App.jsx ~5596) calls
+  //   drawUpTo(hand.filter(...), deckRef.current, [...discRef.current,card], 2)
+  // where the last argument is a hand-size TARGET of 2, not a count — the hand is
+  // already ≥2 cards so nothing is drawn — AND the return value is discarded
+  // without ever reaching setHand/setDeck. Two independent reasons the cards can
+  // never arrive, exactly like setbreak. Matching live, not the card text.
+  // (Reported as a live bug: the intended draw needs the setbreak-style fix.)
+  log(out, '🔥 Hungering Flame! All +1 ATK.')
 }
 
 IMPL.madnesscard = (S, C, out) => {
@@ -1100,6 +1106,10 @@ IMPL.sonicboom = (S, C, out) => {
 
 IMPL.tremolopick = (S, C, out) => {
   if (!C.m) return false
+  // Counts the ledger's LENGTH, exactly like live (App.jsx ~6006 reads
+  // cardsPlayedRef.current.length). That deliberately includes the synthetic
+  // '_smokebreak_discard' / '_echo:' entries live pushes — see the CARDS-PLAYED
+  // LEDGER note in applyCardEffect. Do not "fix" this into a real-card filter.
   const bonus = (S.cardsPlayedIds || []).length >= 3 ? 4 : 1
   tempAtk(C.m, bonus); bumpBuff(C.m)
   log(out, '⚡ Tremolo Pick! ' + C.m.name + ' +' + bonus + ' ATK!' + (bonus >= 4 ? ' (3+ cards = bonus!)' : ''))
@@ -1298,10 +1308,19 @@ IMPL.backstagepass = (S, C, out) => {
 }
 
 IMPL.venueswap = (S, C, out) => {
-  // Live discards the whole hand then draws 6 (the played card itself is
-  // removed by the caller afterwards).
-  S.discard.push(...S.hand)
+  // Live discards the REST of the hand and draws 6. The played card is not part
+  // of that dump: the caller (live's handleDropOnStage, the sim's play loop)
+  // moves it to the discard itself. Dumping it here too is exactly how live used
+  // to duplicate Venue Swap into the deck on every play — 18 cards in, 19 out
+  // (fixed Aug 4 2026, App.jsx ~6644, proved by e2e/test-card-parity.cjs).
+  // Filtering on selfUid is correct for BOTH callers: the sim removes the played
+  // card from S.hand before calling (the filter is then a no-op), the parity
+  // harness leaves it in (the filter keeps it in hand for the caller to move).
+  const self = S.hand.filter(c => c && c.uid === C.selfUid)
+  const rest = S.hand.filter(c => !(c && c.uid === C.selfUid))
+  S.discard.push(...rest)
   S.hand.length = 0
+  S.hand.push(...self)
   draw(S, 6, C.rng)
   log(out, '🏟️ Venue Swap! Hand shuffled away — drew 6 fresh cards!')
 }
@@ -1313,9 +1332,15 @@ IMPL.doublebooking = (S, C, out) => {
 }
 
 IMPL.bootlegcopy = (S, C, out) => {
-  // TEXT-MISMATCH: text says "Copy the SELECTED card"; live ignores the
-  // selection and copies the first non-bootlegcopy card in hand order.
-  if (S.hand.length <= 1) { log(out, '📀 Bootleg Copy! Nothing to copy.'); return }
+  // Copies the first card in hand that is not itself a Bootleg Copy. Live filters
+  // by ID, so a SECOND Bootleg Copy in hand is not a legal source either.
+  // There is deliberately no hand-length guard: `best` coming back undefined
+  // already covers "nothing to copy", and a length test would be off by one for
+  // one of the two callers (the sim removes the played card from S.hand before
+  // calling, the parity harness leaves it in).
+  // LIVE BUG FIXED Aug 4 2026: live queued its copy with setHand() and
+  // handleDropOnStage then replaced the whole hand with a plain value, so the
+  // copy was destroyed and the card did nothing at all. App.jsx ~6660.
   const best = S.hand.filter(c => c && c.id !== 'bootlegcopy')[0]
   if (!best) { log(out, '📀 Bootleg Copy! Nothing to copy.'); return }
   S.hand.push(Object.assign({}, best, { uid: engineUid(C.rng) }))
@@ -1369,9 +1394,25 @@ IMPL.corrsiphon = (S, C, out) => {
 //  slammed the boss down to its data HP the first time it "healed" (Devourer
 //  11,918 → 6,442: 46% of the fight deleted by one card).
 // ═══════════════════════════════════════════════════════════════════════════
+//
+//  Aug 4 2026 CLEANUP: this table used to carry four DEAD ids — cardHeal(2),
+//  cardHeal3(3), cardHeal4(4), cardHeal6(6) — that no entry in src/data/enemies.js
+//  has ever used. (App.jsx still has its own inline branches for them; they are
+//  equally unreachable there and are listed under LIVE-SIDE FIXES.) Only the three
+//  below are real. Their ids are historical and LIE about their values — the number
+//  in the id is the heal amount they had before the Gluttony retune, not the amount
+//  they heal now. Renaming them would mean editing enemies.js AND every
+//  `enemy.passiveId==='cardHealX'` branch in App.jsx in the same commit; until then
+//  the mapping is documented here rather than silently misleading:
+//
+//      passiveId     enemy                     heal/card    id implies
+//      ───────────────────────────────────────────────────────────────
+//      cardHeal3b    Glutton      (fight 7)         8            3
+//      cardHeal5     Feaster      (fight 8)        15            5
+//      cardHeal8     Devourer     (fight 9, boss)  25            8
+//
 const CARD_HEAL = {
-  cardHeal: 2, cardHeal3: 3, cardHeal4: 4, cardHeal6: 6,
-  cardHeal5: 15, cardHeal3b: 8, cardHeal8: 25,
+  cardHeal3b: 8, cardHeal5: 15, cardHeal8: 25,
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1537,12 +1578,28 @@ export function applyCardEffect(cardId, S, ctx = {}) {
   mulStrikeMult(S, PER_CARD_MULT)
 
   // ── LAST RIFF TRACKING (feeds Demo Tape) ─────────────────────────────────
-  if (C.card.type === 'RIFF') S.flags.lastRiffId = cardId
+  // burnset is EXCLUDED. It is a RIFF, and live's burnset branch does call
+  // setLastRiffPlayed(card) (App.jsx ~6429) — but it never touches
+  // lastRiffPlayedRef.current, and Demo Tape reads the REF. So in the live game
+  // Burn the Set can never become Demo Tape's replay source. (Reported as a live
+  // bug: the branch is missing its `lastRiffPlayedRef.current=card` line.)
+  if (C.card.type === 'RIFF' && cardId !== 'burnset') S.flags.lastRiffId = cardId
 
   // ── CARDS-PLAYED LEDGER ──────────────────────────────────────────────────
   // Pushed AFTER resolution: live's tremolopick/harmonicfb read cardsPlayedRef
   // before the tail appends this card.
+  //
+  // SYNTHETIC ENTRIES: live's ledger is not a list of cards, it is a list of
+  // EVENTS. Smoke Break pushes TWO entries — the card id plus
+  // '_smokebreak_discard' (App.jsx ~6352) — and each Echoplex retrigger pushes
+  // '_echo:'+id (~7474). Anything that reads the ledger's LENGTH therefore counts
+  // them: Tremolo Pick's ">=3 cards played" threshold hits a strike earlier when a
+  // Smoke Break was played. Anything that reads the ledger's TYPES ignores them,
+  // because cardTypeOf/ALL_CARDS.find returns nothing for a synthetic id (that is
+  // what keeps harmonicfb's RIFF count honest). Both behaviours are reproduced:
+  // the synthetic entry is appended here, and cardTypeOf returns null for it.
   S.cardsPlayedIds.push(cardId)
+  if (cardId === 'setbreak') S.cardsPlayedIds.push('_smokebreak_discard')
 
   // ── BOSS "heals on card play" PASSIVES ───────────────────────────────────
   const healAmt = CARD_HEAL[ctx.bossPassiveId]
@@ -1602,7 +1659,7 @@ if (typeof process !== 'undefined' && import.meta.url === `file://${process.argv
         artifacts: ['a5'], passives: ['p4', 'p5', 'p7'], pacts: [], loot: [],
         upgraded: false, fightIndex: 4, circleNum: 2, rng,
         selectedUids, selfUid: 'not-in-hand',
-        bossPassiveId: 'cardHeal3',
+        bossPassiveId: 'cardHeal3b',
         emberCost: num(CARD_DEFS[id] && CARD_DEFS[id].embers, 0),
       })
     } catch (e) {

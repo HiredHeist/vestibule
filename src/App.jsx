@@ -824,14 +824,65 @@ function cardPrice(card){
   return base
 }
 
-// Generate shop cards scaled by circle depth (circleNum 1-9)
-function isGoodDeal(card){
-  const cost=card.shopCost||getShopCost(card)
-  if(card.rarity==='Rare'&&cost<=10)return true
-  if(card.rarity==='Uncommon'&&cost<=6)return true
-  if(card.upgraded)return true
-  return false
+// ═══════════════════════════════════════════════════════════════════
+// UNIFIED SHOP PRICING (Aug 4 2026, phase 2 economy sweep)
+// ═══════════════════════════════════════════════════════════════════
+// THE ONLY price formula in the game. Before this there were two that
+// disagreed: ShopScreen.realPrice() (hangover-based hunger curve, drove every
+// DISPLAYED price and the affordability gate) and handleShopSpend's
+// effectiveCost (corruption>=50 → ×1.25, what was actually CHARGED). Shrooms
+// displayed 10 and charged 8; Acid displayed 20 and charged 15. Neither applied
+// the stake's priceMult/drugPriceMult, so every stake's shop-difficulty knob
+// was inert.
+//
+// CANONICAL HUNGER CURVE: the `hangover`-based one. It is what the shop UI
+// advertises ("HUNGOVER +20%" etc.) and what the STAKES table documents. The
+// corruption>=50 → ×1.25 curve is deleted.
+//
+// Order of operations (single Math.ceil at the end — one rounding rule):
+//   base × merchantsEye(0.8) × hunger(1.0/1.2/1.4/1.6) × stake.priceMult
+//        × (drugs only) stake.drugPriceMult
+//
+// kind: 'item' (cards, artifacts, pedals, packs, recruits) | 'drug' | 'reroll'
+function shopHungerMult(hangoverPct){
+  const h=hangoverPct||0
+  return h>=100?1.60:h>=75?1.40:h>=50?1.20:1.00
 }
+function shopPrice(baseCost,opts){
+  const o=opts||{}
+  const c=Number(baseCost)||0
+  if(c<=0)return 0 // free items (Welcome Pack, pack-grant re-entry) stay free
+  const merchDiscount=(o.chosenPacts&&o.chosenPacts.includes&&o.chosenPacts.includes('merchants_eye'))?0.8:1.0
+  const hunger=shopHungerMult(o.hangover)
+  const stake=o.stake||null
+  const stakeMult=(stake&&stake.priceMult)||1.0
+  const drugMult=(o.kind==='drug')?((stake&&stake.drugPriceMult)||1.0):1.0
+  return Math.max(1,Math.ceil(c*merchDiscount*hunger*stakeMult*drugMult))
+}
+
+// ═══ UNIFIED BUYBACK PRICING ═══
+// Single source of truth for what Sly pays. The pawn modal used to show
+// base+foil+mythic while handlePawnSellCard paid base only (sell a Mythic Rare:
+// button said 12🌿, you got 4). Lucifer displayed 5 and paid 69 because the
+// display branched on `demonic` while the handler branched on keyword==='FALLEN'
+// first — and lucifer_member has FALLEN with no demonic flag.
+function cardSellValue(c){
+  if(!c)return 0
+  const base=c.rarity==='Rare'?4:c.rarity==='Uncommon'?2:1
+  return base+(c.foil?3:0)+(c.mythic?8:0)
+}
+function memberSellValue(m){
+  if(!m)return 0
+  if(m.keyword==='FALLEN')return 69 // Lucifer — checked FIRST, matches the handler
+  if(m.demonic)return 69
+  return 5+(m.foil?3:0)+(m.mythic?8:0)
+}
+
+// Generate shop cards scaled by circle depth (circleNum 1-9)
+// NOTE (Aug 4 2026, phase 1 crash sweep): `isGoodDeal()` lived here and called
+// `getShopCost()`, which is declared nowhere in the repo. Nothing called it, so it
+// was a latent ReferenceError waiting for its first caller. Deleted outright —
+// `cardPrice()` above is the real price source if a "good deal" badge ever returns.
 // ═══════════════════════════════════════════════════════════
 // RARITY-WEIGHTED ROLL — used for shop artifact + pedal generation
 // ═══════════════════════════════════════════════════════════
@@ -843,7 +894,10 @@ const RARITY_WEIGHTS={common:50,uncommon:30,rare:17,mythic:3}
 function rollWeightedFromPool(pool,unlockedMythics){
   if(!pool||pool.length===0)return null
   // Filter out locked entries (e.g. War Drums until 5000 score)
-  const lifetimeScore=parseInt(localStorage.getItem('vst_lifetime_score')||'0')
+  // Aug 4 2026 (phase 3): read 'vst_lifetime_score', which NOTHING ever writes — the
+  // game writes 'vst_lifetime'. War Drums (and any future unlockAt relic) was therefore
+  // permanently filtered out of every roll.
+  const lifetimeScore=parseInt(localStorage.getItem('vst_lifetime')||'0')
   const filtered=pool.filter(item=>{
     if(item.locked&&item.unlockAt&&lifetimeScore<item.unlockAt)return false
     // Mythic items use unlockId (camelCase) — check against unlocked list, NOT item.id
@@ -952,7 +1006,13 @@ function genBoosterPacks(circleNum){
     {id:'rarevinyl',name:'Rare Vinyl',emoji:'🖤',cost:38,desc:'1 Rare + 30% Foil chance. Pick 1.',minCircle:4},
     {id:'cursed',name:'Cursed Demo',emoji:'⛧',cost:60,desc:'1 Rare guaranteed. 50% Foil, 20% Mythic, 5% Double-Mythic.',minCircle:6},
   ]
-  return allPacks.filter(p=>cn>=p.minCircle).slice(-3) // show up to 3 most advanced
+  // Aug 4 2026: was `.slice(-3)` while the shop rendered `.slice(0,2)` of the
+  // result — i.e. the two LEAST advanced of the three most advanced. From
+  // circle 6 the list is [vinyl, rarevinyl, cursed] and Cursed Demo — 60🌿, the
+  // only Mythic-chance pack in the game — was never purchasable in any run.
+  // Return exactly the two slots the shop renders.
+  // C1: cassette+cdr · C2-3: cdr+vinyl · C4-5: vinyl+rarevinyl · C6+: rarevinyl+cursed
+  return allPacks.filter(p=>cn>=p.minCircle).slice(-2)
 }
 
 // Recruitment packs
@@ -1268,23 +1328,19 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
   // Show ALL copies individually so player can sell as many as they want
   // Sort deck+discard by sell price descending, then by name
   const allCards = [...deck,...discard].sort((a,b)=>{
-    const pa = (a.rarity==='Rare'?4:a.rarity==='Uncommon'?2:1)+(a.foil?3:0)+(a.mythic?8:0)
-    const pb = (b.rarity==='Rare'?4:b.rarity==='Uncommon'?2:1)+(b.foil?3:0)+(b.mythic?8:0)
+    const pa = cardSellValue(a)
+    const pb = cardSellValue(b)
     if(pb!==pa) return pb-pa
     return (a.name||'').localeCompare(b.name||'')
   })
   const members = stage.map((m,i)=>m?{m,i}:null).filter(Boolean)
   const canSell = salesLeft > 0
-  const activeMembers = members.filter(x=>!x.m.tooStoned)
 
-  function memberSellPrice(m){
-    if(m.demonic) return 69
-    return 5 + (m.foil?3:0) + (m.mythic?8:0)
-  }
-  function cardSellPrice(c){
-    const base = c.rarity==='Rare'?4:c.rarity==='Uncommon'?2:1
-    return base + (c.foil?3:0) + (c.mythic?8:0)
-  }
+  // Aug 4 2026: display and handler now share ONE price source (see
+  // memberSellValue / cardSellValue at module scope). The old local copies
+  // disagreed with handlePawnSellMember/Card on Lucifer and on foil/mythic.
+  const memberSellPrice = memberSellValue
+  const cardSellPrice = cardSellValue
   const tabStyle = (active) => ({
     fontFamily:"'MBScribblesFont',serif", fontSize:16, fontWeight:900, letterSpacing:3,
     padding:'10px 28px', cursor:'pointer', border:'none', textTransform:'uppercase',
@@ -1323,7 +1379,12 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
         {members.length===0&&<div style={{fontFamily:"'MBScribblesFont',serif",color:'var(--text-muted)',fontStyle:'italic',fontSize:16}}>No members on stage.</div>}
         {members.map(({m,i})=>{
           const price = memberSellPrice(m)
-          const cantSell = activeMembers.length<=2
+          // Aug 4 2026: counts ALL members, matching handlePawnSellMember's
+          // `stage.filter(m=>m).length<=2`. It used to count only non-stoned
+          // members, so a band of 4 with 2 stoned showed every Sell button
+          // greyed out reading "Need 2+ members" while the handler would have
+          // allowed the sale.
+          const cantSell = members.length<=2
           const bc = {'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}[m.keyword]||'#e8a820'
           const tierColor = m.demonic?'#ffd700':m.mythic?'#dd88ff':m.foil?'#88ccff':null
           return(
@@ -1422,16 +1483,21 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
 
 const pickSlyLine=(tag)=>{const p=SLY_LINES[tag]||SLY_LINES.ambient;return p[Math.floor(Math.random()*p.length)]}
 
-function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePassive,recruitPack,recruitBought,onMarkRecruitBought,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,heldDMT,shroomsInStock,acidInStock,dmtInStock,onBuyShrooms,onBuyAcid,onBuyDMT,corruption,hangover,chosenPacts,addLog,encoreMode}){
+function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,onMarkPackBought,boughtPackIds=[],circleArtifact,circlePassive,recruitPack,recruitBought,onMarkRecruitBought,shopCards,boosterPacks,rerollCost,onReroll,fightIndex,activeArtifacts,activePassives,starterArtifacts,starterPassives,stage,deck,discardPile,onPawnSellMember,onPawnSellCard,onPawnBurnCard,soldIds,onMarkSold,circleCartBought,circleCpasBought,onBuyCart,onBuyCpas,heldShrooms,heldAcid,heldDMT,shroomsInStock,acidInStock,dmtInStock,onBuyShrooms,onBuyAcid,onBuyDMT,corruption,hangover,chosenPacts,addLog,encoreMode}){
   const drugMax=isUnlocked('double_dealer')?2:1
   const [hovId,setHovId]=useState(null)
   const [hoveringArtifact,setHoveringArtifact]=useState(false)
-  const [pawnSalesLeft,setPawnSalesLeft]=useState(2)
   const [pawnOpen,setPawnOpen]=useState(false)
   const [boughtIds,setBoughtIds]=useState([])
   const [leftBought,setLeftBought]=useState({cart:false,cpas:false,rec:false})
-  const [boughtPackIds,setBoughtPackIds]=useState([])
-  const [packsBoughtThisVisit,setPacksBoughtThisVisit]=useState(0)
+  // Aug 4 2026: pack-purchase bookkeeping and the pawn sales cap are PARENT
+  // state now. As ShopScreen locals they were wiped by (a) the [shopCards]
+  // effect, which a 2🌿 reroll triggers — re-unlocking the pack you just bought
+  // and erasing the one-pack-per-visit limit — and (b) the shop→recruit→shop
+  // remount, which unmounts this component entirely. The pawn cap additionally
+  // has to be visible to the Recruit screen's fire panel, which sells members
+  // through the same handler (see item 15).
+  const packsBoughtThisVisit=((boughtPackIds||[]).length+(recruitBought?1:0))>=1?1:0
   const [shopTab,setShopTab]=useState('all') // all, cards, packs, gear
   const [tearingPack,setTearingPack]=useState(null) // pack object while tear animation plays
   const [tearPhase,setTearPhase]=useState(0) // 0=anticipate, 1=rip, 2=fan, 3=sparks
@@ -1480,56 +1546,81 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
     const t=setTimeout(()=>setSlyFlash(false),650)
     return()=>clearTimeout(t)
   },[slyContext])
-  // On reroll / new circle, freshen the line within the current pool too
+  // On reroll / new circle, freshen the line within the current pool too.
+  // Aug 4 2026: this used to also clear boughtPackIds/packsBoughtThisVisit,
+  // which made a 2🌿 reroll a laundromat for the one-pack-per-visit limit.
+  // `boughtIds` is safe to clear here — a reroll mints brand-new card uids.
   useEffect(()=>{
-    setBoughtIds([]);setBoughtPackIds([]);setPacksBoughtThisVisit(0)
+    setBoughtIds([])
     setSlyLine(pickSlyLine(slyContextRef.current))
   },[shopCards])
   const [openPackModal,setOpenPackModal]=useState(null) // {pack, cards, picksLeft, picked}
   const circleNum=Math.floor(fightIndex/3)+1
   // ── HANGOVER SHOP TAX (v0.7.1) ─────────────────────────────────
-  // Replaces the old single-tier "Hunger" (corruption≥50 → ×1.25). Now reads
-  // from `hangover` (carried-over peak from last fight) with a 3-step curve.
-  // Variable names kept as `hungerActive`/`hungerMult` to minimize prop-rename
-  // diff churn in shop UI components — semantics shifted, name stayed.
+  // Reads from `hangover` (carried-over peak from last fight), 3-step curve.
+  // Aug 4 2026: the arithmetic moved to module-scope shopPrice() so display,
+  // the affordability gate and the actual charge cannot drift apart again.
+  // These locals now exist ONLY for the "⚠ HUNGOVER +20%" warning label.
   const hangoverPct=hangover||0
-  const hungerMult=hangoverPct>=100?1.60:hangoverPct>=75?1.40:hangoverPct>=50?1.20:1.00
-  const hungerActive=hungerMult>1.00
+  const hungerActive=shopHungerMult(hangoverPct)>1.00
   const hungerLabel=hangoverPct>=100?'WASTED +60%':hangoverPct>=75?'HUNGOVER +40%':hangoverPct>=50?'HUNGOVER +20%':null
-  const merchDiscount=chosenPacts&&chosenPacts.includes('merchants_eye')?0.8:1.0
-  const realPrice=p=>Math.ceil(p*merchDiscount*hungerMult)
-  const can=p=>stash>=realPrice(p)
+  // THE price function. `kind` is 'item' | 'drug' | 'reroll'.
+  const realPrice=(p,kind)=>shopPrice(p,{kind:kind||'item',hangover,chosenPacts,stake})
+  const can=(p,kind)=>stash>=realPrice(p,kind)
+  // Show the struck-through base price whenever ANY modifier moved the number —
+  // hangover, Merchants Eye, or the stake's priceMult/drugPriceMult.
+  const priceMoved=(p,kind)=>realPrice(p,kind)!==p
+  const rerollReal=realPrice(rerollCost,'reroll')
+  const canReroll=stash>=rerollReal
   const stashColor=stash>=420?'#ff3300':stash>=380?'#ff9900':'#55ee66'
   const typeClr=t=>t==='CORRUPT'?'#aa1111':t==='UTILITY'?'#22aa44':t==='EMBER'?'#c87820':'#9933cc'
   const typeGlow=t=>t==='CORRUPT'?'rgba(170,0,0,0.5)':t==='UTILITY'?'rgba(30,160,50,0.5)':t==='EMBER'?'rgba(200,120,20,0.5)':'rgba(140,40,200,0.5)'
   const rarityAnim=r=>r==='Rare'?'holoShimmer 3s ease-in-out infinite':r==='Uncommon'?'uncommonGlow 2s ease-in-out infinite':''
 
+  // ── PURCHASE COMMIT DISCIPLINE (Aug 4 2026) ────────────────────────
+  // onSpend (handleShopSpend) now returns 'bought' | 'pending' | 'refused'.
+  // NOTHING is marked sold until it says 'bought'. On 'pending' the slot-swap
+  // modal is open and the parent will invoke the onCommit callback we hand it
+  // if — and only if — the player confirms the swap. Before this, every caller
+  // stamped the tile SOLD unconditionally: a refused purchase (or one that
+  // opened the swap modal and got cancelled) burned the item for the whole
+  // circle and took no stash.
   function buyCard(card){
-    if(!can(cardPrice(card)))return
+    const price=cardPrice(card)
+    if(!can(price))return
     if(card.isMember){
-      // Member cards in center shop → recruit flow, NOT card flow
-      onSpend(cardPrice(card),'recruit',{
+      // Member cards in center shop → recruit flow, NOT card flow.
+      // `cost` is carried on the payload so any downstream refund path can see
+      // what the pack was worth (the old payload had no cost field at all).
+      const res=onSpend(price,'recruit',{
         members:1,
+        cost:price,
         foilChance: card.foil?1:0,
         mythicChance: card.mythic?1:0,
         demonicChance: card.demonic?1:0,
         _memberOverride: card, // pass the specific member
       })
+      if(res!=='bought')return
       setBoughtIds(p=>[...p,card.uid])
       onMarkSold&&onMarkSold(card.uid) // uid only — never card.id for members
       return
     }
-    onSpend(cardPrice(card),'card',card)
+    const res=onSpend(price,'card',card)
+    if(res!=='bought')return
     setBoughtIds(p=>[...p,card.uid||card.id])
     onMarkSold&&onMarkSold(card.uid||card.id)
   }
   function buyLeft(key,cost,type,item){
     if(!can(cost))return
-    onSpend(cost,type,item)
-    setLeftBought(p=>({...p,[key]:true}))
-    onMarkSold&&onMarkSold(item.id||item.uid)
-    if(key==='cart')onBuyCart&&onBuyCart()
-    if(key==='cpas')onBuyCpas&&onBuyCpas()
+    // Runs on 'bought' immediately, or later from confirmSlotSwap on 'pending'.
+    const commit=()=>{
+      setLeftBought(p=>({...p,[key]:true}))
+      onMarkSold&&onMarkSold(item.id||item.uid)
+      if(key==='cart')onBuyCart&&onBuyCart()
+      if(key==='cpas')onBuyCpas&&onBuyCpas()
+    }
+    const res=onSpend(cost,type,item,commit)
+    if(res==='bought')commit()
   }
 
   // ── PACK CARD GENERATOR ──
@@ -1557,10 +1648,15 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
     if(pack.id==='rarevinyl')return{cards:applyFoilMythic([...pickRandom(commons,2),...pickRandom(uncommons,2),...pickRandom(rares,1)],0.30,0.05),picks:2}
     if(pack.id==='cursed'){
       const base=[...pickRandom(uncommons,2),...pickRandom(rares,2)]
-      // 10% chance one is a passive
-      if(rng()<0.1&&(starterPassives||[]).length){
-        const pas=starterPassives[Math.floor(rng()*starterPassives.length)]
-        base.push({...pas,_isPack:true,uid:uid()})
+      // 10% chance one is a passive. Aug 4 2026: deduped against already-equipped
+      // pedals the way the `ritual` pack always was. Without this you could pull a
+      // second Merch Table, equip it, and still only get paid once
+      // (`activePassives.some(p=>p.id==='p3')`) — 60🌿 to burn a pedal slot on
+      // nothing.
+      const _freePedals=(starterPassives||[]).filter(p=>!(activePassives||[]).some(e=>e.id===p.id))
+      if(rng()<0.1&&_freePedals.length){
+        const pas=_freePedals[Math.floor(rng()*_freePedals.length)]
+        base.push({...pas,_isPack:true,_packKind:'passive',uid:uid()})
       } else {
         base.push(...pickRandom(rares,1))
       }
@@ -1568,11 +1664,11 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
     }
     if(pack.id==='ritual'){
       const packs=(starterPassives||[]).filter(p=>!(activePassives||[]).some(e=>e.id===p.id))
-      return{cards:pickRandom(packs,Math.min(2,packs.length)).map(p=>({...p,_isPack:true,uid:uid()})),picks:1}
+      return{cards:pickRandom(packs,Math.min(2,packs.length)).map(p=>({...p,_isPack:true,_packKind:'passive',uid:uid()})),picks:1}
     }
     if(pack.id==='hellforged'){
       const arts=(starterArtifacts||[]).filter(a=>!(activeArtifacts||[]).some(e=>e.id===a.id))
-      return{cards:pickRandom(arts,Math.min(2,arts.length)).map(a=>({...a,_isPack:true,uid:uid()})),picks:1}
+      return{cards:pickRandom(arts,Math.min(2,arts.length)).map(a=>({...a,_isPack:true,_packKind:'artifact',uid:uid()})),picks:1}
     }
     if(pack.id==='garage'){
       const members=getUnlockedMusicians().map(m=>({...m,isMember:true,uid:uid()}))
@@ -1589,10 +1685,23 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
     return{cards:[],picks:1}
   }
 
+  // ── PACKS ARE CHARGED ON OPEN (Aug 4 2026) ─────────────────────────
+  // They used to be charged only on the FINAL pick, and "Pass — Take Nothing"
+  // just nulled the modal without charging or marking the pack consumed. So you
+  // could open Rare Vinyl, read all 5 cards, Pass, and re-open for a fresh
+  // genPackCards roll — free, forever, until a Mythic showed up.
+  // Now: tearing the pack open is the transaction. Picking routes the contents
+  // via a zero-cost 'pack' call (shopPrice returns 0 for cost<=0), which
+  // restores the ✓ Confirm Picks branch that had become unreachable.
   function handleOpenPack(pack){
     if(!can(pack.cost))return
+    if((boughtPackIds||[]).includes(pack.id))return
     if(packsBoughtThisVisit>=1){addLog&&addLog('🛑 Already bought a pack this visit. Come back next time.');return}
     if(tearingPack)return // guard: already tearing one
+    if(openPackModal)return
+    const res=onSpend(pack.cost,'pack',{...pack,pickedCards:[]})
+    if(res!=='bought')return
+    onMarkPackBought&&onMarkPackBought(pack.id)
     setTearingPack(pack)
     setTearPhase(0)
     setTimeout(()=>setTearPhase(1),200)  // start rip
@@ -1607,16 +1716,18 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
 
   function handlePickCard(card){
     if(!openPackModal)return
-    const newPicked=[...openPackModal.picked,card]
-    if(newPicked.length>=openPackModal.picksLeft){
-      // Finalize — add picked cards and pay
-      onSpend(openPackModal.pack.cost,'pack',{...openPackModal.pack,pickedCards:newPicked})
-      setBoughtPackIds(p=>[...p,openPackModal.pack.id])
-      setPacksBoughtThisVisit(1)
-      setOpenPackModal(null)
-    } else {
-      setOpenPackModal(p=>({...p,picked:newPicked}))
-    }
+    if(openPackModal.picked.some(p=>p.uid===card.uid))return
+    if(openPackModal.picked.length>=openPackModal.picksLeft)return
+    setOpenPackModal(p=>p?{...p,picked:[...p.picked,card]}:p)
+  }
+
+  // Hand the picks to the parent router. cost 0 — the pack was already paid for
+  // at open time; this call only moves the goods.
+  function closePackModal(){
+    if(!openPackModal){return}
+    const picked=openPackModal.picked||[]
+    if(picked.length)onSpend(0,'pack',{...openPackModal.pack,pickedCards:picked})
+    setOpenPackModal(null)
   }
 
   // ── SOLD OVERLAY ──
@@ -1658,8 +1769,12 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
     const id='pk_'+card.uid
     const hov=hovId===id
     const isPicked=picked.some(p=>p.uid===card.uid)
-    const isPassive=card._isPack&&card.cost
-    const isArtifact=card._isPack&&!card.cost&&!card.isMember
+    // Aug 4 2026: discriminate on the explicit `_packKind` tag stamped at
+    // generation. The old `!card.cost` test was structurally dead — EVERY entry
+    // in STARTER_ARTIFACTS / CIRCLE_ARTIFACTS / MYTHIC_ARTIFACTS has a truthy
+    // cost, so no pack item ever read as an artifact.
+    const isPassive=card._packKind==='passive'
+    const isArtifact=card._packKind==='artifact'
     const bc=card.isMember?'#e8a820':isPassive?'#9933cc':isArtifact?'#c87820':typeClr(card.type||'RIFF')
     const gl=card.isMember?'rgba(232,168,32,0.5)':typeGlow(card.type||'RIFF')
     const foilBg=card.foil?'linear-gradient(160deg,#201a06,#1a1408,#201a06)':'linear-gradient(180deg,#201408,#100804)'
@@ -1776,14 +1891,14 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
         </div>
         {/* Pass / Done button */}
         <div style={{display:'flex',gap:16}}>
-          {remaining>0&&<button onClick={()=>setOpenPackModal(null)}
+          {remaining>0&&<button onClick={closePackModal}
             style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,letterSpacing:2,
               padding:'12px 32px',background:'rgba(40,25,8,0.6)',
               border:'1px solid rgba(120,80,20,0.4)',borderRadius:6,
               color:'#aa8a40',cursor:'pointer',textTransform:'uppercase'}}>
-            Pass — Take Nothing
+            {picked.length>0?'Done — Take '+picked.length:'Pass — Take Nothing'}
           </button>}
-          {remaining===0&&<button onClick={()=>setOpenPackModal(null)}
+          {remaining===0&&<button onClick={closePackModal}
             style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:2,
               padding:'14px 40px',background:'rgba(20,80,20,0.4)',
               border:'2px solid #44aa44',borderRadius:6,
@@ -1819,7 +1934,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
             position:'relative'}}>
             {/* hole + string knot */}
             <div style={{position:'absolute',top:3,left:4,width:6,height:6,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'var(--text-inverse)',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{price}</span> <WeedLeaf size={13}/>{realPrice(price)}</>:<><WeedLeaf size={13}/> {price}</>}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:'var(--text-inverse)',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{priceMoved(price)?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{price}</span> <WeedLeaf size={13}/>{realPrice(price)}</>:<><WeedLeaf size={13}/> {price}</>}</div>
             {hungerActive&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-blood)',fontWeight:900,letterSpacing:0.5,marginTop:-1}}>⚠ {hungerLabel}</div>}
           </div>
         </div>
@@ -1903,7 +2018,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
             padding:'2px 8px 3px',borderRadius:2,whiteSpace:'nowrap',minWidth:48,textAlign:'center',
             position:'relative'}}>
             <div style={{position:'absolute',top:3,left:3,width:4,height:4,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-inverse)',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{price}</span> <WeedLeaf size={11}/>{realPrice(price)}</>:<><WeedLeaf size={11}/> {price}</>}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-inverse)',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{priceMoved(price)?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{price}</span> <WeedLeaf size={11}/>{realPrice(price)}</>:<><WeedLeaf size={11}/> {price}</>}</div>
           </div>
         </div>
         <div onClick={()=>canBuy&&onBuy()}
@@ -1956,7 +2071,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
             padding:'3px 10px 4px',borderRadius:2,whiteSpace:'nowrap',minWidth:58,textAlign:'center',
             position:'relative'}}>
             <div style={{position:'absolute',top:3,left:4,width:6,height:6,borderRadius:'50%',background:'#1a1408',border:'1px solid #000'}}/>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--text-inverse)',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{pack.cost}</span> <WeedLeaf size={14}/>{realPrice(pack.cost)}</>:<><WeedLeaf size={14}/> {pack.cost}</>}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--text-inverse)',lineHeight:1,letterSpacing:0.5,display:'flex',alignItems:'center',justifyContent:'center',gap:3}}>{priceMoved(pack.cost)?<><span style={{textDecoration:'line-through',opacity:0.6,fontSize:13}}>{pack.cost}</span> <WeedLeaf size={14}/>{realPrice(pack.cost)}</>:<><WeedLeaf size={14}/> {pack.cost}</>}</div>
           </div>
         </div>
         <div onClick={()=>canBuy&&handleOpenPack(pack)}
@@ -2127,15 +2242,20 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:slyFlash?'#ffe69a':'var(--ink-rust)',letterSpacing:0.3,marginTop:2,fontWeight:700,fontStyle:'italic',textShadow:slyFlash?'0 0 14px rgba(255,210,90,0.85), 0 0 4px rgba(255,210,90,0.5)':'none',transition:'color 320ms ease-out, text-shadow 320ms ease-out'}}>"{slyLine}" —Sly</div>
         </div>
 
-        {/* REROLL — pill badge, single-line wider, wiggle preserved */}
-        <div onClick={onReroll} title="Sly shuffles the merch."
-          onMouseEnter={e=>{e.currentTarget.style.animation='none';e.currentTarget.style.background='rgba(55,40,8,0.95)'}}
-          onMouseLeave={e=>{e.currentTarget.style.animation='rerollWiggle 3s ease-in-out infinite';e.currentTarget.style.background='rgba(25,18,4,0.92)'}}
+        {/* REROLL — pill badge, single-line wider, wiggle preserved.
+            Aug 4 2026: it charged the RAW rerollCost while displaying
+            realPrice(rerollCost), had no affordability gate and no disabled
+            styling — a broke player got silence. Now priced through shopPrice
+            like everything else and visibly dead when you can't afford it. */}
+        <div onClick={()=>{if(canReroll)onReroll()}} title={canReroll?'Sly shuffles the merch.':'Not enough stash to reroll.'}
+          onMouseEnter={e=>{if(!canReroll)return;e.currentTarget.style.animation='none';e.currentTarget.style.background='rgba(55,40,8,0.95)'}}
+          onMouseLeave={e=>{if(!canReroll)return;e.currentTarget.style.animation='rerollWiggle 3s ease-in-out infinite';e.currentTarget.style.background='rgba(25,18,4,0.92)'}}
           style={{minWidth:160,flexShrink:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2,padding:'8px 14px',whiteSpace:'nowrap',
-            background:'rgba(25,18,4,0.92)',border:'2px solid rgba(200,150,30,0.85)',borderRadius:8,cursor:'pointer',
-            boxShadow:'0 0 16px rgba(180,130,20,0.3)',animation:'rerollWiggle 3s ease-in-out infinite'}}>
+            background:'rgba(25,18,4,0.92)',border:'2px solid '+(canReroll?'rgba(200,150,30,0.85)':'rgba(110,85,20,0.4)'),borderRadius:8,cursor:canReroll?'pointer':'not-allowed',
+            opacity:canReroll?1:0.4,
+            boxShadow:canReroll?'0 0 16px rgba(180,130,20,0.3)':'none',animation:canReroll?'rerollWiggle 3s ease-in-out infinite':'none'}}>
           <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-gold)',letterSpacing:3,textTransform:'uppercase'}}>🎲 Reroll</span>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--text-gold)',lineHeight:1}}>{hungerActive?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:13}}>{rerollCost}</span> <WeedLeaf size={14}/> {realPrice(rerollCost)}</>:<><WeedLeaf size={14}/> {rerollCost}</>}</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--text-gold)',lineHeight:1}}>{priceMoved(rerollCost,'reroll')?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:13}}>{rerollCost}</span> <WeedLeaf size={14}/> {rerollReal}</>:<><WeedLeaf size={14}/> {rerollCost}</>}</span>
         </div>
 
         {/* BACK TO THE PIT — wide, single line, throbbing red pulse. Chill cadence (2.4s) but impossible to miss. */}
@@ -2165,7 +2285,12 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
           {/* RECRUITMENT PACK — the star. Flex:1 so it dominates the column. Most important purchase in the game. */}
           <div onClick={()=>{
               if(leftBought.rec||recruitBought||packsBoughtThisVisit>=1)return
-              if(can(recruitPack.cost)){onSpend(recruitPack.cost,'recruit',recruitPack);setLeftBought(p=>({...p,rec:true}));setPacksBoughtThisVisit(1);if(onMarkRecruitBought)onMarkRecruitBought()}
+              if(!can(recruitPack.cost))return
+              // Only mark the pack consumed if the parent actually took the money
+              // (it refuses when Lucifer caps the band at 3).
+              if(onSpend(recruitPack.cost,'recruit',recruitPack)!=='bought')return
+              setLeftBought(p=>({...p,rec:true}))
+              if(onMarkRecruitBought)onMarkRecruitBought()
             }}
             style={{position:'relative',cursor:can(recruitPack.cost)&&!leftBought.rec&&!recruitBought&&packsBoughtThisVisit<1?'pointer':'default',
               flex:1,minHeight:0,
@@ -2240,40 +2365,40 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-positive)',letterSpacing:2,display:'flex',alignItems:'center',gap:6}}>
               <WeedLeaf size={16}/> SLY'S STASH:
             </div>
-            <div onClick={()=>{if(shroomsInStock&&heldShrooms<drugMax&&can(6)){onSpend(6,'dealer',null);onBuyShrooms()}}}
+            <div onClick={()=>{if(shroomsInStock&&heldShrooms<drugMax&&can(6,'drug')){if(onSpend(6,'dealer',null)==='bought')onBuyShrooms()}}}
               style={{display:'flex',alignItems:'center',gap:6,padding:'4px 16px',
-                background:shroomsInStock&&heldShrooms<drugMax&&can(6)?'rgba(80,40,10,0.5)':'rgba(20,15,10,0.3)',
+                background:shroomsInStock&&heldShrooms<drugMax&&can(6,'drug')?'rgba(80,40,10,0.5)':'rgba(20,15,10,0.3)',
                 border:'1px solid '+(shroomsInStock&&heldShrooms<drugMax?'rgba(200,150,50,0.5)':'rgba(60,40,20,0.3)'),
-                borderRadius:6,cursor:shroomsInStock&&heldShrooms<drugMax&&can(6)?'pointer':'default',
+                borderRadius:6,cursor:shroomsInStock&&heldShrooms<drugMax&&can(6,'drug')?'pointer':'default',
                 opacity:shroomsInStock?1:0.4,transition:'all 0.15s'}}>
               <span style={{fontSize:48,filter:'drop-shadow(0 0 6px rgba(232,168,32,0.4))'}}>🍄</span>
               <div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:shroomsInStock?'#e8a820':'#554428'}}>
                   {heldShrooms>=drugMax?'HOLDING':shroomsInStock?'Shrooms':'DRY'}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',display:'flex',alignItems:'center',gap:2}}>
-                  <WeedLeaf size={10}/> {realPrice(6)}</div>
+                  <WeedLeaf size={10}/> {realPrice(6,'drug')}</div>
               </div>
             </div>
-            <div onClick={()=>{if(acidInStock&&heldAcid<drugMax&&can(12)){onSpend(12,'dealer',null);onBuyAcid()}}}
+            <div onClick={()=>{if(acidInStock&&heldAcid<drugMax&&can(12,'drug')){if(onSpend(12,'dealer',null)==='bought')onBuyAcid()}}}
               style={{display:'flex',alignItems:'center',gap:6,padding:'4px 16px',
-                background:acidInStock&&heldAcid<drugMax&&can(12)?'rgba(40,10,80,0.5)':'rgba(15,10,20,0.3)',
+                background:acidInStock&&heldAcid<drugMax&&can(12,'drug')?'rgba(40,10,80,0.5)':'rgba(15,10,20,0.3)',
                 border:'1px solid '+(acidInStock&&heldAcid<drugMax?'rgba(150,50,220,0.5)':'rgba(40,20,60,0.3)'),
-                borderRadius:6,cursor:acidInStock&&heldAcid<drugMax&&can(12)?'pointer':'default',
+                borderRadius:6,cursor:acidInStock&&heldAcid<drugMax&&can(12,'drug')?'pointer':'default',
                 opacity:acidInStock?1:0.4,transition:'all 0.15s'}}>
               <span style={{fontSize:48,filter:'drop-shadow(0 0 6px rgba(204,68,255,0.4))'}}>🧪</span>
               <div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:acidInStock?'#cc44ff':'#4a2a6a'}}>
                   {heldAcid>=drugMax?'HOLDING':acidInStock?'Acid':'DRY'}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',display:'flex',alignItems:'center',gap:2}}>
-                  <WeedLeaf size={10}/> {realPrice(12)}</div>
+                  <WeedLeaf size={10}/> {realPrice(12,'drug')}</div>
               </div>
             </div>
             {/* DMT tile — boss shops only (rendered conditionally on dmtInStock from parent) */}
-            {dmtInStock&&<div onClick={()=>{if(heldDMT<drugMax&&can(25)){onSpend(25,'dealer',null);onBuyDMT()}}}
+            {dmtInStock&&<div onClick={()=>{if(heldDMT<drugMax&&can(25,'drug')){if(onSpend(25,'dealer',null)==='bought')onBuyDMT()}}}
               style={{display:'flex',alignItems:'center',gap:6,padding:'4px 16px',
-                background:heldDMT<drugMax&&can(25)?'linear-gradient(135deg,rgba(80,180,220,0.55),rgba(180,80,220,0.55))':'rgba(20,15,30,0.3)',
+                background:heldDMT<drugMax&&can(25,'drug')?'linear-gradient(135deg,rgba(80,180,220,0.55),rgba(180,80,220,0.55))':'rgba(20,15,30,0.3)',
                 border:'1px solid '+(heldDMT<drugMax?'rgba(220,200,255,0.7)':'rgba(80,60,120,0.3)'),
-                borderRadius:6,cursor:heldDMT<drugMax&&can(25)?'pointer':'default',
+                borderRadius:6,cursor:heldDMT<drugMax&&can(25,'drug')?'pointer':'default',
                 opacity:1,transition:'all 0.15s',
                 boxShadow:heldDMT<drugMax?'0 0 14px rgba(180,200,255,0.4)':'none'}}>
               <span style={{fontSize:48,filter:'drop-shadow(0 0 8px rgba(220,200,255,0.6))'}}>💠</span>
@@ -2281,7 +2406,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#e8ddff',letterSpacing:1}}>
                   {heldDMT>=drugMax?'HOLDING':'DMT'}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',display:'flex',alignItems:'center',gap:2}}>
-                  <WeedLeaf size={10}/> {realPrice(25)}</div>
+                  <WeedLeaf size={10}/> {realPrice(25,'drug')}</div>
               </div>
             </div>}
           </div>
@@ -2327,17 +2452,16 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,circleArtifact,circlePa
                 {pawnSalesLeft>0?'→ Tap Sly to make a deal':'Sold out for this visit'}
               </div>
             </div>
+              {/* Aug 4 2026: the 2-sales-per-visit cap is decremented by the
+                  HANDLERS now, not by these wrappers. It used to be ShopScreen
+                  local state touched only here, so the Recruit screen's fire
+                  panel — which calls the same handler — sold members outside the
+                  limit entirely. */}
               {pawnOpen&&<PawnShopModal
                 stage={stage||[]} deck={deck||[]} discard={discardPile||[]}
                 stash={stash} salesLeft={pawnSalesLeft}
-                onSellMember={(m,i)=>{
-                  onPawnSellMember&&onPawnSellMember(m,i)
-                  setPawnSalesLeft(p=>Math.max(0,p-1))
-                }}
-                onSellCard={(c)=>{
-                  onPawnSellCard&&onPawnSellCard(c)
-                  setPawnSalesLeft(p=>Math.max(0,p-1))
-                }}
+                onSellMember={(m,i)=>{onPawnSellMember&&onPawnSellMember(m,i)}}
+                onSellCard={(c)=>{onPawnSellCard&&onPawnSellCard(c)}}
                 onBurnCard={(c)=>{onPawnBurnCard&&onPawnBurnCard(c)}}
                 onClose={()=>setPawnOpen(false)}
               />}
@@ -2671,6 +2795,31 @@ function HandCard({card,index,total,isHovered,isSelected,anyHovered,canAfford,on
 // ═══════════════════════════════════════════════════════════
 // DAMAGE BREAKDOWN — Balatro-style number-go-up animation
 // ═══════════════════════════════════════════════════════════
+// ── CASCADE TIMING — SINGLE SOURCE OF TRUTH (Aug 4 2026, phase 3) ────────────
+// DamageBreakdown reveals one line at a time with a magnitude-scaled delay, then slams.
+// handleStrikeBody has to schedule its slam-race safety net and the boss counter-attack
+// AROUND that slam. Those two used to be independent guesses (lines*720+900 vs
+// lines*140+2300) that grew at wildly different rates, so on multi-multiplier strikes
+// the component was unmounted mid-cascade and onSlam never ran. Both sides now call
+// these helpers, so the ordering holds at every line count and both speeds.
+function cascadeLineDelay(line,isFast){
+  if(isFast)return 90
+  const base=180
+  if(line&&line.type==='multiply'&&line.mult){
+    if(line.mult>=5)return 700
+    if(line.mult>=3)return 500
+    if(line.mult>=2)return 380
+    if(line.mult>=1.5)return 280
+    return base
+  }
+  return base
+}
+function cascadeSlamAt(lines,isFast){
+  let cum=0
+  ;(lines||[]).forEach(l=>{cum+=cascadeLineDelay(l,isFast)})
+  return cum+(isFast?200:400)
+}
+
 function DamageBreakdown({data,onDone,onSlam}){
   const [visibleCount,setVisibleCount]=useState(0)
   const [slamming,setSlamming]=useState(false)
@@ -2688,21 +2837,14 @@ function DamageBreakdown({data,onDone,onSlam}){
   const total=data.total||0
   const totalMult=data.totalMult||1.0
   const cascadeMults=data.cascadeMults||[]
-  const isFast=localStorage.getItem('vst_speed')==='fast'
+  // Speed comes from the strike that built this payload. Reading localStorage here
+  // desynced from handleStrikeBody whenever speed was toggled by HOLDING SPACE (which
+  // sets speedMode without writing vst_speed) — the cascade and the timers that wrap it
+  // would then run on different clocks.
+  const isFast=data._fast!==undefined?!!data._fast:localStorage.getItem('vst_speed')==='fast'
 
-  // Magnitude-scaled delay — bigger multipliers pause longer.
-  function lineDelay(line){
-    if(isFast)return 90
-    const base=180
-    if(line.type==='multiply'&&line.mult){
-      if(line.mult>=5)return 700
-      if(line.mult>=3)return 500
-      if(line.mult>=2)return 380
-      if(line.mult>=1.5)return 280
-      return base
-    }
-    return base
-  }
+  // Magnitude-scaled delay — bigger multipliers pause longer. Shared with the strike body.
+  function lineDelay(line){return cascadeLineDelay(line,isFast)}
 
   // 666 special tier (600-699 range)
   const isDevilDeal=total>=600&&total<700
@@ -2951,7 +3093,14 @@ function DamageBreakdown({data,onDone,onSlam}){
     const doneTimer=setTimeout(()=>{if(onDone)onDone()},slamAt+(isDevilDeal?2000:1200))
     timers.push(doneTimer)
     return()=>{timers.forEach(clearTimeout)}
-  },[lines.length])
+    // Aug 4 2026 (phase 3): this was keyed on [lines.length] alone, so it captured
+    // total / onSlam / isDevilDeal from the render it FIRST ran in. Combined with the
+    // element having no `key`, a new breakdown with an equal line count reused the same
+    // instance and never re-scheduled — no cascade, and onSlam calling the PREVIOUS
+    // strike's _pendingHpDrop. The element now carries data.key, and the effect keys on
+    // the payload identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[data])
 
   const slamAnim=`@keyframes screenShake{0%,100%{transform:translate(0,0)}10%{transform:translate(-6px,4px)}20%{transform:translate(8px,-3px)}30%{transform:translate(-4px,6px)}40%{transform:translate(6px,-2px)}50%{transform:translate(-3px,3px)}60%{transform:translate(4px,-4px)}70%{transform:translate(-2px,2px)}80%{transform:translate(3px,-1px)}90%{transform:translate(-1px,1px)}}
       @keyframes screenPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.008)}}
@@ -3304,7 +3453,7 @@ function TrophyWall({onClose}){
       </div>)
     })()}
 
-    <button onClick={onClose} style={{marginTop:4,fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,padding:'8px 40px',flexShrink:0,background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'var(--text-secondary)',cursor:'pointer',textTransform:'uppercase',flexShrink:0}}>
+    <button onClick={onClose} style={{marginTop:4,fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:4,padding:'8px 40px',flexShrink:0,background:'rgba(40,20,5,0.5)',border:'2px solid #4a3010',borderRadius:6,color:'var(--text-secondary)',cursor:'pointer',textTransform:'uppercase'}}>
       Close
     </button>
   </div>)
@@ -3454,7 +3603,8 @@ function MasteryGallery({onClose}){
       {filtered.map(c=>{
         const plays=data[c.id]||0
         const isDiscovered=plays>0
-        const isLocked=c.locked&&c.unlockAt&&(parseInt(localStorage.getItem('vst_lifetime_score')||'0')<c.unlockAt)
+        // 'vst_lifetime_score' is never written — the game writes 'vst_lifetime'. (phase 3)
+        const isLocked=c.locked&&c.unlockAt&&(parseInt(localStorage.getItem('vst_lifetime')||'0')<c.unlockAt)
         let tier=MASTERY_TIERS[0]
         for(const t of MASTERY_TIERS){if(plays>=t.min)tier=t}
         const bc=typeColors[c.type]||'#9933cc'
@@ -3848,7 +3998,7 @@ function CombatLogViewer({log,onClose}){
   )
 }
 
-function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered,newAchievements,enemyHp,stage,chosenPacts,fullRunLog,newTrophies,runElapsed,lastKillingBlow,devDailyScore,secondAlbumWin,contractsPlayed}){
+function EndScreen({won,cause,enemy,stats,seed,onReset,onEncore,streakWins,streakLosses,totalRuns,isDailyRun,onDailyChallenge,personalBest,dailyStreak,lifetimeScore,discovered,newAchievements,enemyHp,stage,chosenPacts,fullRunLog,newTrophies,runElapsed,lastKillingBlow,devDailyScore,secondAlbumWin,contractsPlayed}){
   const [showEndLog,setShowEndLog]=useState(false)
   const isStoned=cause==='stoned'
   const isBeaten=cause==='beaten'
@@ -4316,25 +4466,10 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,streakWins,streakLosses,t
                 border:'2px solid #4a3010',borderRadius:6,color:'#8a7040',cursor:'pointer'}}>
               📜 Run Log
             </button>
-            {isVictory&&<button onClick={()=>{/* Encore: restart with scaled enemies */
-              setEncoreMode(true);setEncoreCircle(p=>p+10)
-              setFightIndex(0);setEnemy(ENEMIES[0]);
-              // Encore mode is now true (set above) so getScaledMaxHp will apply the ×2 boost.
-              // We can't call the helper here directly because encoreMode state hasn't propagated yet,
-              // so inline the same formula with encoreMode forced true:
-              const _ds=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1
-              const _hl=parseInt(localStorage.getItem('vst_heat')||'1')
-              const _hm=1+(Math.max(0,_hl-1)*0.15)
-              const _wHp=Math.ceil(ENEMIES[0].maxHp*_ds*_hm*_stakeHpF()*2.0)
-              setEnemyHp(_wHp);setScaledMaxHp(_wHp)
-              const _encDeckStrMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
-              setStrikesLeft(activeStake.maxStrikes+_encDeckStrMod);setFightMaxStrikes(activeStake.maxStrikes+_encDeckStrMod);setDiscardsLeft(4);setFightMaxDiscards(4)
-              setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
-              setGameState('playing');setAnimPhase('idle');setDeathCause(null)
-              if(victoryFiredRef)victoryFiredRef.current=false
-    corruptCardsGivenRef.current=[]
-              addLog('⛧ THE ENCORE BEGINS — All enemies ×2.0 HP! ⛧')
-            }}
+            {/* Encore: restart with scaled enemies. Body lives in App as handleEncore —
+                it drives ~21 App-scope setters/refs that EndScreen never received, so
+                inlining it here threw ReferenceError on the very first statement. */}
+            {isVictory&&onEncore&&<button onClick={onEncore}
               style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,letterSpacing:4,
                 color:'#ff4400',background:'rgba(120,0,0,0.4)',
                 border:'2px solid #ff4400',borderRadius:8,padding:'10px 36px',cursor:'pointer',
@@ -4499,10 +4634,14 @@ function DemonicConflictScreen({conflict,onChoice}){
   )
 }
 
-function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
+function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash,salesLeft}){
   const isFull=stage.filter(Boolean).length>=5
   const activeMembers=stage.map((m,i)=>m?{m,i}:null).filter(Boolean).filter(x=>!x.m.tooStoned)
-  function fireSellPrice(m){return m.demonic?69:5+(m.foil?3:0)+(m.mythic?8:0)}
+  // Aug 4 2026: shared with the pawn modal and handlePawnSellMember. The local
+  // copy branched on `demonic` only, so Lucifer (keyword FALLEN, no demonic
+  // flag) advertised 5🌿 while the handler paid 69🌿.
+  const fireSellPrice=memberSellValue
+  const salesRemaining=salesLeft==null?99:salesLeft
   // Jul 31 2026 (JV): full-band picks open a REPLACE modal (packs were silently
   // wasted before); Lucifer opens his contract with the sacrifice option.
   const [pendingPick,setPendingPick]=useState(null)
@@ -4510,7 +4649,7 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
   const memberVal=x=>(x.m.atk+(x.m.permAtkBonus||0))*3+x.m.hp
   const signLucifer=()=>{
     const keep=[...activeMembers].sort((a,b)=>memberVal(b)-memberVal(a)).slice(0,2).map(x=>x.m.uid)
-    activeMembers.filter(x=>!keep.includes(x.m.uid)).forEach(x=>onFireMember(x.m,x.i))
+    activeMembers.filter(x=>!keep.includes(x.m.uid)).forEach(x=>onFireMember(x.m,x.i,{ignoreSalesCap:true}))
     onPick(pendingPick);setPendingPick(null)
   }
   return(
@@ -4532,7 +4671,7 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
               <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:30,color:'var(--text-gold)',letterSpacing:3}}>Band Is Full</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-secondary)',textAlign:'center'}}>Recruit {pendingPick.name} — who gets cut? (Sly pays their buyback)</div>
               <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
-                {activeMembers.map(x=><button key={x.m.uid} onClick={()=>{onFireMember(x.m,x.i);onPick(pendingPick);setPendingPick(null)}}
+                {activeMembers.map(x=><button key={x.m.uid} onClick={()=>{onFireMember(x.m,x.i,{ignoreSalesCap:true});onPick(pendingPick);setPendingPick(null)}}
                   style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-primary)',background:'rgba(60,30,10,0.6)',border:'1px solid #886030',borderRadius:7,padding:'10px 14px',cursor:'pointer'}}>
                   ✂ {x.m.name}<br/><span style={{fontSize:13,color:'var(--ink-dim)'}}>ATK {x.m.atk+(x.m.permAtkBonus||0)} · HP {x.m.hp} · +{fireSellPrice(x.m)}🌿</span></button>)}
               </div>
@@ -4599,7 +4738,7 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
       {isFull&&onFireMember&&(
         <div style={{position:'absolute',bottom:24,right:24,width:520,background:'linear-gradient(160deg,#0e0a16,#080510)',border:'2px solid rgba(220,60,20,0.7)',borderRadius:12,padding:'20px 24px',boxShadow:'0 0 40px rgba(200,40,0,0.35)',zIndex:9700}}>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:38,color:'var(--text-blood)',textAlign:'center',marginBottom:6,textShadow:'0 0 20px rgba(255,60,20,0.8)'}}>🔥 Fire a Member</div>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--text-blood)',textAlign:'center',fontStyle:'italic',marginBottom:16}}>Fire one to open a slot</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--text-blood)',textAlign:'center',fontStyle:'italic',marginBottom:16}}>{salesRemaining>0?'Fire one to open a slot':"Sly's out of cash — no sales left this visit"}</div>
           {activeMembers.map(({m,i})=>(
             <div key={m.uid||i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 14px',marginBottom:10,background:'rgba(0,0,0,0.35)',borderRadius:8,border:'1px solid rgba(180,60,20,0.35)'}}>
               <div style={{display:'flex',alignItems:'center',gap:14,flex:1,minWidth:0}}>
@@ -4609,92 +4748,34 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash}){
                   <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'var(--text-secondary)',letterSpacing:1}}>{m.keyword} · ATK {m.atk} · HP {m.hp}</div>
                 </div>
               </div>
+              {/* Aug 4 2026: this panel sells through the same handler as Sly's
+                  pawn shop, so it now honours the same 2-sales-per-visit cap.
+                  Fire three from here then Pass used to net three extra sales. */}
               <button
-                onClick={()=>onFireMember(m,i)}
-                style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:1,padding:'10px 16px',background:'rgba(160,30,10,0.4)',border:'2px solid rgba(220,60,20,0.6)',borderRadius:6,color:'var(--text-blood)',cursor:'pointer',whiteSpace:'nowrap',flexShrink:0,marginLeft:14}}
-                onMouseEnter={e=>{e.currentTarget.style.background='rgba(200,40,10,0.65)'}}
+                disabled={salesRemaining<=0}
+                onClick={()=>{if(salesRemaining>0)onFireMember(m,i)}}
+                style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:1,padding:'10px 16px',background:'rgba(160,30,10,0.4)',border:'2px solid rgba(220,60,20,0.6)',borderRadius:6,color:'var(--text-blood)',cursor:salesRemaining>0?'pointer':'not-allowed',opacity:salesRemaining>0?1:0.4,whiteSpace:'nowrap',flexShrink:0,marginLeft:14}}
+                onMouseEnter={e=>{if(salesRemaining>0)e.currentTarget.style.background='rgba(200,40,10,0.65)'}}
                 onMouseLeave={e=>{e.currentTarget.style.background='rgba(160,30,10,0.4)'}}>
                 <span style={{display:'inline-flex',alignItems:'center',gap:4}}>🔥 {fireSellPrice(m)}<WeedLeaf size={14}/></span>
               </button>
             </div>
           ))}
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'var(--text-secondary)',textAlign:'center',marginTop:10,letterSpacing:1,display:'flex',alignItems:'center',justifyContent:'center',gap:4}}>Stash: {stash}<WeedLeaf size={14}/> · Refund shown per member</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'var(--text-secondary)',textAlign:'center',marginTop:10,letterSpacing:1,display:'flex',alignItems:'center',justifyContent:'center',gap:4}}>Stash: {stash}<WeedLeaf size={14}/> · Refund shown per member · {salesRemaining} sale{salesRemaining===1?'':'s'} left</div>
         </div>
       )}
     </div>
   )
 }
 
+// (RemasterModal deleted Aug 4 2026 — the modal was unreachable dead code: no
+//  setRemasterOpen(true) / setRemasterCards() call existed anywhere in the repo.)
 
-function RemasterModal({cards,onConfirm,onClose}){
-  const [toDelete,setToDelete]=useState([])
-  const [toCopy,setToCopy]=useState(null)
-  const [hovUid,setHovUid]=useState(null)
-  const toggleDelete=(uid)=>{
-    if(toDelete.includes(uid)){setToDelete(p=>p.filter(x=>x!==uid))}
-    else if(toDelete.length<2){setToDelete(p=>[...p,uid])}
-  }
-  const ready=toDelete.length===2&&toCopy!==null
-  return(
-    <div style={{position:'absolute',inset:0,zIndex:9700,background:'rgba(4,2,1,0.97)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:20,padding:'20px'}}>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:44,color:'var(--text-secondary)'}}>The Remaster</div>
-      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'var(--text-secondary)',fontStyle:'italic',textAlign:'center'}}>
-        Click <span style={{color:'var(--text-blood)',fontWeight:900}}>2 cards to delete</span> · Click <span style={{color:'var(--type-utility)',fontWeight:900}}>1 card to copy</span>
-      </div>
-      <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center',maxWidth:1100,overflowY:'auto',maxHeight:'55vh'}}>
-        {cards.map((card)=>{
-          const bc=card.type==='CORRUPT'?'#aa1111':card.type==='UTILITY'?'#22aa44':card.type==='EMBER'?'#c87820':'#9933cc'
-          const isDel=toDelete.includes(card.uid)
-          const isCopy=toCopy===card.uid
-          const canDel=!isCopy&&(isDel||toDelete.length<2)
-          const canCopy=!isDel
-          const hov=hovUid===card.uid
-          return(
-            <div key={card.uid}
-              onMouseEnter={()=>setHovUid(card.uid)} onMouseLeave={()=>setHovUid(null)}
-              style={{width:140,background:'linear-gradient(180deg,#201408,#100804)',border:isDel?'2px solid #ee2222':isCopy?'2px solid #22aa44':'1px solid '+bc+'55',borderRadius:7,overflow:'visible',opacity:(isDel||isCopy||(!isDel&&!isCopy))?1:0.5,transition:'all 0.2s',flexShrink:0,position:'relative'}}>
-              <div style={{height:4,background:bc,borderRadius:'5px 5px 0 0'}}/>
-              <div style={{height:70,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.35)'}}><CardArtImg id={card.id} emoji={card.emoji} size={50}/></div>
-              <div style={{padding:'6px 8px 4px'}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,color:'var(--text-primary)',textAlign:'center',marginBottom:2}}>{card.name}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:bc,textAlign:'center',letterSpacing:2,textTransform:'uppercase'}}>{card.type}</div>
-              </div>
-              <div style={{display:'flex',gap:4,padding:'4px 6px 8px'}}>
-                <button onClick={()=>canDel&&toggleDelete(card.uid)}
-                  style={{flex:1,padding:'4px 0',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,background:isDel?'rgba(180,0,0,0.4)':'rgba(60,20,10,0.4)',border:isDel?'1px solid #ee2222':'1px solid rgba(100,40,20,0.4)',borderRadius:2,color:isDel?'#ff4444':'var(--text-secondary)',cursor:canDel?'pointer':'not-allowed'}}>
-                  {isDel?'✓ DEL':'✗ DEL'}
-                </button>
-                <button onClick={()=>canCopy&&setToCopy(isCopy?null:card.uid)}
-                  style={{flex:1,padding:'4px 0',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,background:isCopy?'rgba(0,120,40,0.4)':'rgba(10,40,20,0.4)',border:isCopy?'1px solid #22aa44':'1px solid rgba(20,60,30,0.4)',borderRadius:2,color:isCopy?'#44dd44':'#2a5a30',cursor:canCopy?'pointer':'not-allowed'}}>
-                  {isCopy?'✓ CPY':'+CPY'}
-                </button>
-              </div>
-              {hov&&card.effect&&<div style={{position:'absolute',bottom:'calc(100% + 8px)',left:'50%',transform:'translateX(-50%)',width:240,background:'rgba(8,4,2,0.98)',border:'1px solid '+bc+'aa',borderRadius:5,padding:'10px 12px',zIndex:99999,pointerEvents:'none',boxShadow:'0 8px 32px rgba(0,0,0,0.9), 0 0 16px '+bc+'33'}}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6,gap:8}}>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:bc,letterSpacing:2,textTransform:'uppercase'}}>{card.type}{card.rarity?' · '+card.rarity:''}</div>
-                  {card.embers>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-gold)'}}>{card.embers}🔥</div>}
-                </div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-primary)',lineHeight:1.45}}>{card.effect}</div>
-              </div>}
-            </div>
-          )
-        })}
-      </div>
-      <div style={{display:'flex',gap:16}}>
-        <button onClick={()=>ready&&onConfirm(toDelete,toCopy)} disabled={!ready}
-          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:ready?'rgba(30,130,30,0.3)':'rgba(20,20,20,0.3)',border:ready?'2px solid #22aa44':'1px solid var(--text-muted)',borderRadius:3,color:ready?'#44dd44':'var(--text-muted)',cursor:ready?'pointer':'not-allowed'}}>
-          ✓ Apply
-        </button>
-        <button onClick={onClose}
-          style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,textTransform:'uppercase',padding:'12px 40px',background:'rgba(80,40,10,0.3)',border:'1px solid rgba(100,60,20,0.5)',borderRadius:3,color:'var(--text-secondary)',cursor:'pointer'}}>
-          Cancel
-        </button>
-      </div>
-    </div>
-  )
-}
 
-function SetlistModal({hand,onConfirm}){
+// onClose was passed by the call site but never destructured, so Confirm (disabled
+// until a card is picked) was the ONLY exit — an empty setlistCards array made this
+// a permanent softlock. Cancel button added Aug 4 2026.
+function SetlistModal({hand,onConfirm,onClose}){
   // Draw 2 already happened — player must pick 1 card to discard before continuing
   const [picked,setPicked]=useState(null)
   const [hovUid,setHovUid]=useState(null)
@@ -4738,6 +4819,13 @@ function SetlistModal({hand,onConfirm}){
           border:picked?'2px solid #44dd44':'2px solid var(--text-muted)',borderRadius:3,
           color:picked?'#44dd44':'var(--text-muted)',cursor:picked?'pointer':'not-allowed',transition:'all 0.15s'}}>
         ✓ Discard &amp; Continue
+      </button>
+      <button onClick={()=>onClose&&onClose()}
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:4,textTransform:'uppercase',
+          padding:'10px 40px',background:'rgba(20,12,4,0.6)',
+          border:'1px solid var(--text-muted)',borderRadius:3,
+          color:'var(--text-muted)',cursor:'pointer',transition:'all 0.15s'}}>
+        ✕ Cancel
       </button>
     </div>
   )
@@ -4926,6 +5014,37 @@ function App(){
   // Discard tracking refs for new modifier system (Spit Cup, Ouroboros Pin)
   const discardsThisFightRef=useRef(0)
   const discardsThisStrikeRef=useRef(0)
+  // Aug 4 2026 (phase 3) — CROSS-FIGHT STALE TIMERS.
+  // handleStrike/handleStrikeBody schedule a long chain of setTimeouts (cascade
+  // safety net, boss counter-attack, draw refill…) that each capture THIS fight's
+  // numbers. If the fight ends inside that window — kill, Lucifer phase handoff,
+  // wipe, tutorial restart — the timers still fired and corrupted the NEXT fight:
+  // the new boss got slammed to the old boss's leftover HP, the old boss's
+  // counter-attack landed on the new band, the previous fight's refill count
+  // overwrote the new hand. fightTokenRef is bumped at every fight-start boundary;
+  // every deferred body captures it and bails when it no longer matches.
+  const fightTokenRef=useRef(0)
+  const strikeTimersRef=useRef([])
+  const beginFightToken=()=>{
+    fightTokenRef.current++
+    try{(strikeTimersRef.current||[]).forEach(t=>clearTimeout(t))}catch(e){}
+    strikeTimersRef.current=[]
+    strikeInFlightRef.current=0
+  }
+  // Live mirrors of values that deferred strike bodies read. State closures inside
+  // a setTimeout are one full strike stale (CLAUDE.md rule 3).
+  const bossDebuffRef=useRef(0)
+  const bossRageAtkRef=useRef(0)
+  const luciferPhaseRef=useRef(0)
+  // Set while a strike's damage pipeline is mid-flight (per-member impacts have
+  // started, cascade block has not yet resolved victory). The 600ms victory
+  // safety net must not fire inside this window or it beats the cascade.
+  const strikeInFlightRef=useRef(0)
+  // Snapshot of the chains fired on the most recent strike — the strike body
+  // empties combosFiredRef ~2.8s before the victory summary is built.
+  const lastStrikeCombosRef=useRef([])
+  // Monotonic key for DamageBreakdown so React never reuses a previous strike's instance.
+  const breakdownSeqRef=useRef(0)
   // Wah Pedal: tracks whether first-CORRUPT-free has been used this fight
   const wahPedalUsedRef=useRef(false)
   // Octave Pedal: tracks whether first chain double has fired this fight
@@ -4940,6 +5059,8 @@ function App(){
   const discoveredRef=useRef(new Set())
   const [bossDebuff,setBossDebuff]=useState(0)
   const [bossRageAtk,setBossRageAtk]=useState(0)
+  useEffect(()=>{bossDebuffRef.current=bossDebuff},[bossDebuff])
+  useEffect(()=>{bossRageAtkRef.current=bossRageAtk},[bossRageAtk])
   // Wrathful self-immolation: stacks each strike, +50% dmg per stack, also loses 8% maxHp/strike
   const [immolateStacks,setImmolateStacks]=useState(0)
   const [dblRoll,setDblRoll]=useState(null) // null=not rolled, 1-2=half, 3-4=offbeat, 5-6=double
@@ -4998,8 +5119,6 @@ function App(){
   useEffect(()=>{bossSkipStrikesRef.current=bossSkipStrikes},[bossSkipStrikes])
   const [setlistOpen,setSetlistOpen]=useState(false)
   const [setlistCards,setSetlistCards]=useState([])
-  const [remasterOpen,setRemasterOpen]=useState(false)
-  const [remasterCards,setRemasterCards]=useState([])
   const [deathCause,setDeathCause]=useState('fallen')
   const [lastKillingBlow,setLastKillingBlow]=useState('')
   const [hellquakeAnim,setHellquakeAnim]=useState(null)
@@ -5203,6 +5322,12 @@ function App(){
   const [recruitCandidates,setRecruitCandidates]=useState([])
   const [demonicConflict,setDemonicConflict]=useState(null)
   const [rerollCost,setRerollCost]=useState(2)
+  // Aug 4 2026 — PER-SHOP-VISIT state that used to live inside ShopScreen and
+  // therefore evaporated on every reroll (the [shopCards] effect) and on every
+  // shop→recruit→shop round trip (component unmount). Both are reset alongside
+  // `recruitBought` at every shop entry.
+  const [boughtPackIds,setBoughtPackIds]=useState([])   // booster packs opened this visit
+  const [pawnSalesLeft,setPawnSalesLeft]=useState(2)    // Sly's "Max 2 sales per visit"
   const [shopBoughtIds,setShopBoughtIds]=useState([])
   const [shopSoldIds,setShopSoldIds]=useState([])
   const [circleCartBought,setCircleCartBought]=useState(false)
@@ -5222,6 +5347,7 @@ function App(){
   const [activeTripEffect,setActiveTripEffect]=useState(null) // {type,name,desc,color} — shown as dramatic reveal
   const [fightTripBuff,setFightTripBuff]=useState(null) // persists for entire fight — combat checks read this
   const [luciferPhase,setLuciferPhase]=useState(0) // 0=not lucifer, 1=phase1 ice, 2=phase2 satan
+  useEffect(()=>{luciferPhaseRef.current=luciferPhase},[luciferPhase])
   const [luciferCinematic,setLuciferCinematic]=useState(null) // {text,hpSteps} for HP melt animation
   const [victoryCinematic,setVictoryCinematic]=useState(null) // {phase,stage} for kill cinematic
   const [creditsRoll,setCreditsRoll]=useState(false) // full credits after beating Lucifer
@@ -5293,6 +5419,12 @@ function App(){
   const embersSpentThisFightRef=useRef(0)
   const [victorySummary,setVictorySummary]=useState(null)
   const updStat=(key,val,isMax)=>{
+    // ── TUTORIAL GUARD (Aug 4 2026, phase 4) ───────────────────────────────
+    // updStat had no tutorialFight guard, and cardsPlayedThisFightRef /
+    // highestStrikeThisFightRef / damageThisFightRef feed off it — so the first
+    // real run's end-screen score included three tutorial fights' worth of
+    // strikesThrown / totalDamage / cardsPlayed. Tutorial fights are not a run.
+    if(tutorialFight>0)return
     isMax=isMax||false
     setStats(p=>Object.assign({},p,{[key]:isMax?Math.max(p[key],val):p[key]+val}))
     if(key==='cardsPlayed')cardsPlayedThisFightRef.current+=val
@@ -5336,6 +5468,402 @@ function App(){
     addLog('⛧ DISCOVERED: '+label+' — first time!')
   }
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // ── RESET REGISTRY (Aug 4 2026, phase 4) ───────────────────────────────
+  // CLAUDE.md rule 5 lives HERE. Every piece of App state/ref that has to be
+  // wiped at a boundary is registered in exactly one of these three maps,
+  // keyed by its own variable name. Adding a `useState`/`useRef` therefore has
+  // one obvious place to be declared — and the dev-only invariant at the
+  // bottom of App re-reads App's own source, extracts every declaration name,
+  // and console.warns for anything that isn't registered anywhere.
+  //
+  //   PER_FIGHT_RESETS — wiped at EVERY fight boundary. Four call sites, all
+  //     via resetPerFightState(): the normal between-fight block, the
+  //     Welcome-to-Hell Executive branch, startTutorialFight, and handleReset.
+  //     Anything here is therefore automatically covered at the run boundary
+  //     too — that is the whole point of the extraction. Before this existed
+  //     the Welcome-to-Hell branch was missing ~35 of these and the tutorial
+  //     ~55, and the two diffs regrew every time state was added.
+  //   PER_RUN_RESETS   — wiped only when a new run starts (handleReset).
+  //   RESET_EXEMPT     — deliberately never reset, with the reason.
+  //
+  // Every thunk takes the same opts bag so the maps stay uniform:
+  //   {corruption, handTarget, stage, drumThrone, strikes, discards,
+  //    seed, startEmbers, startStash, startCorruption, maxStrikes}
+  const PER_FIGHT_RESETS=useMemo(()=>({
+    // ── animation / presentation transients ──
+    animPhase:()=>setAnimPhase('idle'),
+    phaseBanner:()=>setPhaseBanner('play'),
+    isWiggling:()=>setIsWiggling(false),
+    damageFlash:()=>setDamageFlash(false),
+    cardAbsorb:()=>setCardAbsorb(null),
+    projectiles:()=>setProjectiles([]),
+    strikingMemberIdx:()=>setStrikingMemberIdx(-1),
+    strikeAnim:()=>setStrikeAnim(null),
+    bossStrikeAnim:()=>setBossStrikeAnim(null),
+    hitMemberIdx:()=>setHitMemberIdx(-1),
+    flyingCard:()=>setFlyingCard(null),
+    echoplexReplays:()=>setEchoplexReplays([]),
+    comboFlash:()=>setComboFlash(null),
+    chainCallout:()=>setChainCallout(null),
+    chainFlashActive:()=>setChainFlashActive(false),
+    hellquakeAnim:()=>setHellquakeAnim(null),
+    milestoneFlash:()=>setMilestoneFlash(null),
+    clutchFlash:()=>setClutchFlash(null),
+    postStrikeFlash:()=>setPostStrikeFlash(null),
+    mvpFlash:()=>setMvpFlash(null),
+    beastFlash:()=>setBeastFlash(false),
+    beastTierFlash:()=>setBeastTierFlash(false),
+    triggeredArtifactId:()=>setTriggeredArtifactId(null),
+    preFightSplash:()=>setPreFightSplash(null),
+    dmgBreakdown:()=>setDmgBreakdown(null),
+    luciferCinematic:()=>setLuciferCinematic(null),
+    // ── input / selection ──
+    selected:()=>setSelected([]),
+    quickPlayCardUid:()=>setQuickPlayCardUid(null),
+    dragCardUid:()=>setDragCardUid(null),
+    dragStageIdx:()=>setDragStageIdx(null),
+    dragOverSlotIdx:()=>setDragOverSlotIdx(null),
+    dragHandIdx:()=>setDragHandIdx(null),
+    dragOverHandIdx:()=>setDragOverHandIdx(null),
+    undoSnapshot:()=>setUndoSnapshot(null),
+    setlistOpen:()=>setSetlistOpen(false),
+    setlistCards:()=>setSetlistCards([]),
+    deckViewOpen:()=>setDeckViewOpen(false),
+    discardViewOpen:()=>setDiscardViewOpen(false),
+    // ── resource / combat counters ──
+    strikesLeft:o=>{const s=o.strikes!=null?o.strikes:MAX_STRIKES;setStrikesLeft(s)},
+    fightMaxStrikes:o=>{const s=o.strikes!=null?o.strikes:MAX_STRIKES;setFightMaxStrikes(s)},
+    discardsLeft:o=>{const d=o.discards!=null?o.discards:MAX_DISCARDS;setDiscardsLeft(d)},
+    fightMaxDiscards:o=>{const d=o.discards!=null?o.discards:MAX_DISCARDS;setFightMaxDiscards(d)},
+    pendingDraw:()=>setPendingDraw(0),
+    pendingEmbers:()=>setPendingEmbers(0),
+    bonusDiscards:()=>setBonusDiscards(0),
+    bonusEmbers:()=>setBonusEmbers(0),
+    pendingBurningStage:()=>setPendingBurningStage(false),
+    stageDiveUsed:()=>setStageDiveUsed(false),
+    slowBurnStrikes:()=>setSlowBurnStrikes(0),
+    venomDotStacks:()=>setVenomDotStacks(0),
+    ampFeedbackDiscount:()=>setAmpFeedbackDiscount(0),
+    pyromaniacActive:()=>setPyromaniacActive(false),
+    immolateStacks:()=>setImmolateStacks(0),
+    memberBuffs:()=>setMemberBuffs({}),
+    stashStolenThisFight:()=>setStashStolenThisFight(0),
+    stolenAtkPool:()=>setStolenAtkPool(0),
+    contractsPlayed:()=>setContractsPlayed(0),
+    // ── boss-side per-fight debuffs (state + live mirror ref) ──
+    bossDebuff:()=>setBossDebuff(0),
+    bossDebuffRef:()=>{bossDebuffRef.current=0},
+    bossRageAtk:()=>setBossRageAtk(0),
+    bossRageAtkRef:()=>{bossRageAtkRef.current=0},
+    bossSkipStrikes:()=>setBossSkipStrikes(0),
+    bossSkipStrikesRef:()=>{bossSkipStrikesRef.current=0},
+    // ── free-card economy (state + ref pairs) ──
+    nextCardFree:()=>setNextCardFree(false),
+    nextCardFreeRef:()=>{nextCardFreeRef.current=false},
+    allCardsFree:()=>setAllCardsFree(false),
+    allCardsFreeRef:()=>{allCardsFreeRef.current=false},
+    freeCardsLeft:()=>setFreeCardsLeft(0),
+    freeCardsLeftRef:()=>{freeCardsLeftRef.current=0},
+    lastRiffPlayed:()=>setLastRiffPlayed(null),
+    lastRiffPlayedRef:()=>{lastRiffPlayedRef.current=null},
+    strikeMult:()=>setStrikeMult(1.0),
+    strikeMultRef:()=>{strikeMultRef.current=1.0},
+    multMilestonesRef:()=>{multMilestonesRef.current={2:false,4:false,8:false,16:false}},
+    // ── drugs / trips: a trip is explicitly ONE fight long ──
+    tripUsedThisFight:()=>setTripUsedThisFight(false),
+    activeTripEffect:()=>setActiveTripEffect(null),
+    fightTripBuff:()=>setFightTripBuff(null),
+    // ── card-flow refs ──
+    cardsPlayedThisStrike:()=>setCardsPlayedThisStrike([]),
+    cardsPlayedRef:()=>{cardsPlayedRef.current=[]},
+    cardsToDrawRef:()=>{cardsToDrawRef.current=0},
+    combosFiredRef:()=>{combosFiredRef.current=[]},
+    lastStrikeCombosRef:()=>{lastStrikeCombosRef.current=[]},
+    discardsThisFightRef:()=>{discardsThisFightRef.current=0},
+    discardsThisStrikeRef:()=>{discardsThisStrikeRef.current=0},
+    handTargetRef:o=>{handTargetRef.current=o.handTarget!=null?o.handTarget:HAND_SIZE},
+    queuedReplaysRef:()=>{queuedReplaysRef.current=[]},
+    // ── "first of fight" relic/pedal one-shots ──
+    wahPedalUsedRef:()=>{wahPedalUsedRef.current=false},
+    octavePedalFiredRef:()=>{octavePedalFiredRef.current=false},
+    tabletFiredRef:()=>{tabletFiredRef.current=false},
+    // ── deck signatures ──
+    shredderEchoesPendingRef:()=>{shredderEchoesPendingRef.current=0},
+    ritualistPrevCorruptionRef:o=>{ritualistPrevCorruptionRef.current=o.corruption||0},
+    ritualistEmberRefundsThisStrikeRef:()=>{ritualistEmberRefundsThisStrikeRef.current=0},
+    survivorSavesUsedRef:()=>{survivorSavesUsedRef.current=new Set()},
+    anchorSavesUsedRef:()=>{anchorSavesUsedRef.current=0},
+    anchorTierRef:o=>{
+      const st=o.stage||[]
+      const n=st.filter(m=>m&&!m.tooStoned&&m.keyword==='ANCHOR').reduce((s,m)=>s+(m.foil?2:1),0)
+      anchorTierRef.current=_stackTier(n)
+    },
+    // ── per-fight bookkeeping ──
+    milestonesFiredRef:()=>{milestonesFiredRef.current={half:false,quarter:false,tenth:false}},
+    victoryFiredRef:()=>{victoryFiredRef.current=false},
+    wthStrikesRef:()=>{wthStrikesRef.current=0},
+    recruitPickFiredRef:()=>{recruitPickFiredRef.current=false},
+    luciferStrikesUsedRef:()=>{luciferStrikesUsedRef.current=0},
+    fightLossMembersRef:()=>{fightLossMembersRef.current=new Set()},
+    luciferPhase:()=>setLuciferPhase(0),
+    luciferPhaseRef:()=>{luciferPhaseRef.current=0},
+    // ── per-fight stat refs (feed the victory summary) ──
+    fightStartTimeRef:()=>{fightStartTimeRef.current=Date.now()},
+    corruptionAtFightStartRef:o=>{corruptionAtFightStartRef.current=o.corruption||0},
+    peakCorruptionRef:o=>{peakCorruptionRef.current=o.corruption||0},
+    cardsPlayedThisFightRef:()=>{cardsPlayedThisFightRef.current=0},
+    highestStrikeThisFightRef:()=>{highestStrikeThisFightRef.current=0},
+    damageThisFightRef:()=>{damageThisFightRef.current=0},
+    embersSpentThisFightRef:()=>{embersSpentThisFightRef.current=0},
+    // ── DOUBLE TIME re-roll. Owned here so no fight-start path can forget it
+    //    (the Welcome-to-Hell branch used to inherit Lucifer's roll for the
+    //    whole Executive fight).
+    dblRoll:o=>{
+      const st=o.stage||[]
+      const drummers=st.filter(m=>m&&m.role==='Drummer').length
+      if(drummers===0){setDblRoll(null);return}
+      let roll=Math.floor(Math.random()*6)+1
+      if(drummers>=2&&roll<=2)roll=Math.floor(Math.random()*6)+1
+      if(o.drumThrone){
+        const rr=Math.floor(Math.random()*6)+1
+        roll=Math.max(roll,rr)
+        if(o.onLog)o.onLog('🪑 Drum Throne re-roll: kept '+roll)
+      }
+      setDblRoll(roll)
+    },
+  }),[])
+
+  // ── PER-STRIKE RESETS ──────────────────────────────────────────────────
+  // Run at the top of every strike resolution (handleStrikeBody) — the single
+  // place these happen. Registered here so "what dies each strike" is data,
+  // not a line buried 3,000 lines into the strike body.
+  // opts: {evilEye:boolean}
+  const PER_STRIKE_RESETS=useMemo(()=>({
+    cardsPlayedThisStrike:()=>setCardsPlayedThisStrike([]),
+    cardsPlayedRef:()=>{cardsPlayedRef.current=[]},
+    combosFiredRef:()=>{combosFiredRef.current=[]},
+    discardsThisStrikeRef:()=>{discardsThisStrikeRef.current=0},
+    ritualistEmberRefundsThisStrikeRef:()=>{ritualistEmberRefundsThisStrikeRef.current=0},
+    // A3 Evil Eye reads "The first card you play each STRIKE costs 0 Embers",
+    // but nextCardFree was armed only at fight start and consumed by the first
+    // card played — one free card per FIGHT, a 4× shortfall at Bronze. Re-arm
+    // it here so the relic does what its text says. (Aug 4 2026, phase 4)
+    nextCardFree:o=>{if(o&&o.evilEye){setNextCardFree(true);nextCardFreeRef.current=true}},
+  }),[])
+
+  const resetPerFightState=useCallback(opts=>{
+    const o=opts||{}
+    for(const k in PER_FIGHT_RESETS)PER_FIGHT_RESETS[k](o)
+  },[PER_FIGHT_RESETS])
+
+  const resetPerStrikeState=useCallback(opts=>{
+    const o=opts||{}
+    for(const k in PER_STRIKE_RESETS)PER_STRIKE_RESETS[k](o)
+  },[PER_STRIKE_RESETS])
+
+  // ── PER_RUN_RESETS ─────────────────────────────────────────────────────
+  // Run by handleReset AFTER resetPerFightState, so a run boundary is a
+  // superset of a fight boundary by construction. handleReset is now the ONE
+  // authoritative run-init path — the menu's "⛧ Enter the Vestibule ⛧" button
+  // and EndScreen's "Play Again" both go through it, so a post-win reload and a
+  // post-death restart produce byte-identical starting state. (Before Aug 4
+  // 2026 phase 4 the menu button was a bare setGameState('booster'), so the
+  // stake's startEmbers/startCorruption were never applied on that path and
+  // the bot's overnight ledger was two different populations.)
+  const PER_RUN_RESETS=useMemo(()=>({
+    // ── run identity ──
+    runSeed:o=>setRunSeed(o.seed),
+    runStartTimeRef:()=>{runStartTimeRef.current=Date.now()},
+    isDailyRun:()=>setIsDailyRun(false),
+    gameState:()=>setGameState('booster'),
+    // ── tutorial must never bleed into a real run ──
+    tutorialFight:()=>setTutorialFight(0),
+    tutorialTipIdx:()=>setTutorialTipIdx(0),
+    showTutorialMsg:()=>setShowTutorialMsg(null),
+    firstTip:()=>setFirstTip(null),
+    // ── board ──
+    fightIndex:()=>setFightIndex(0),
+    enemy:()=>setEnemy(ENEMIES[0]),
+    enemyHp:()=>setEnemyHp(ENEMIES[0].maxHp),
+    scaledMaxHp:()=>setScaledMaxHp(ENEMIES[0].maxHp),
+    stage:()=>setStage([null,null,null,null,null]),
+    deck:()=>setDeck([]),
+    hand:()=>setHand([]),
+    discardPile:()=>setDiscardPile([]),
+    // ── run economy (the two values the menu path used to skip entirely) ──
+    embers:o=>setEmbers(o.startEmbers),
+    maxEmbers:o=>setMaxEmbers(o.startEmbers),
+    stash:o=>setStash(o.startStash),
+    corruption:o=>setCorruption(o.corruption||0),
+    hangover:()=>setHangover(0),
+    // ── run-long progression ──
+    chosenPacts:()=>setChosenPacts([]),
+    pactChoices:()=>setPactChoices([]),
+    upgradedCards:()=>setUpgradedCards([]),
+    collectedLoot:()=>setCollectedLoot([]),
+    newTrophies:()=>setNewTrophies([]),
+    activeArtifacts:()=>setActiveArtifacts([]),
+    activePassives:()=>setActivePassives([]),
+    relicsSeenRef:()=>{relicsSeenRef.current=new Set()},
+    descentData:()=>setDescentData(null),
+    circleClearedData:()=>setCircleClearedData(null),
+    circleSplash:()=>setCircleSplash(null),
+    overrideFightIdxRef:()=>{overrideFightIdxRef.current=null},
+    skipDescentRef:()=>{skipDescentRef.current=false},
+    encoreMode:()=>setEncoreMode(false),
+    encoreCircle:()=>setEncoreCircle(0),
+    // ── shop / recruit ──
+    // ── these five must land on the SAME value a fresh page load produces ──
+    // handleReset used to null/empty them while the useState initialisers rolled
+    // real content, so a post-death restart and a post-win reload disagreed about
+    // whether circle 1's shops offered a relic/pedal at all. Mirror the
+    // initialisers exactly. (Aug 4 2026, phase 4)
+    shopCards:()=>setShopCards(genShopCards(1)),
+    boosterPacks:()=>setBoosterPacks(genBoosterPacks(1)),
+    recruitPack:()=>setRecruitPack(genRecruitPack(0)),
+    circleArtifact:()=>setCircleArtifact(rollShopArtifact()),
+    circlePassive:()=>setCirclePassive(rollShopPedal()),
+    recruitBought:()=>setRecruitBought(false),
+    recruitCandidates:()=>setRecruitCandidates([]),
+    rerollCost:()=>setRerollCost(2),
+    boughtPackIds:()=>setBoughtPackIds([]),
+    pawnSalesLeft:()=>setPawnSalesLeft(2),
+    shopBoughtIds:()=>setShopBoughtIds([]),
+    shopSoldIds:()=>setShopSoldIds([]),
+    circleCartBought:()=>setCircleCartBought(false),
+    circleCpasBought:()=>setCirCleCpasBought(false),
+    slotSwapPrompt:()=>setSlotSwapPrompt(null),
+    gearSwapQueueRef:()=>{gearSwapQueueRef.current=[]},
+    demonicConflict:()=>setDemonicConflict(null),
+    // ── drugs ──
+    shroomsInStock:()=>setShroomsInStock(Math.random()<0.50),
+    acidInStock:()=>setAcidInStock(Math.random()<0.50),
+    dmtInStock:()=>setDMTInStock(false),
+    heldShrooms:()=>setHeldShrooms(0),
+    heldAcid:()=>setHeldAcid(0),
+    heldDMT:()=>setHeldDMT(0),
+    drugsUsedThisRun:()=>setDrugsUsedThisRun({shrooms:0,acid:0,dmt:0}),
+    // ── endgame / cinematics ──
+    welcomeToHell:()=>setWelcomeToHell(null),
+    victoryCinematic:()=>setVictoryCinematic(null),
+    creditsRoll:()=>setCreditsRoll(false),
+    victorySummary:()=>setVictorySummary(null),
+    showConfetti:()=>setShowConfetti(false),
+    bossQuoteTypewriter:()=>setBossQuoteTypewriter(null),
+    deathCause:()=>setDeathCause('fallen'),
+    lastKillingBlow:()=>setLastKillingBlow(''),
+    currentTip:()=>setCurrentTip(''),
+    mythicUnlockOverlay:()=>setMythicUnlockOverlay(null),
+    newAchievements:()=>setNewAchievements([]),
+    // ── events / corruption ──
+    pendingEvent:()=>setPendingEvent(null),
+    eventsSeenThisRun:()=>setEventsSeenThisRun([]),
+    corruptionFlash:()=>setCorruptionFlash(null),
+    lastCorruptThreshold:()=>{lastCorruptThreshold.current=0},
+    corrPowerShownRef:()=>{corrPowerShownRef.current=false},
+    // ── Aug 4 2026 phase 4: these three had NO reset anywhere in the file.
+    //    corruptCardsGivenRef: run 1 got the free CORRUPT cards at 25/50/75%
+    //      and every later run in the same page session got zero.
+    //    discoveredRef: handleReset cleared the `discovered` STATE but not the
+    //      ref that gates discover(), so from run 2 on the EndScreen discovery
+    //      list was empty and the "⛧ DISCOVERED" float never fired again.
+    //    stashMilestonesRef: the 100/200/300/420 log lines + the 420 arpeggio
+    //      fired at most once per page session.
+    corruptCardsGivenRef:()=>{corruptCardsGivenRef.current=[]},
+    discoveredRef:()=>{discoveredRef.current=new Set()},
+    discovered:()=>setDiscovered(new Set()),
+    stashMilestonesRef:()=>{stashMilestonesRef.current={100:false,200:false,300:false,420:false}},
+    combosDiscoveredThisRun:()=>setCombosDiscoveredThisRun([]),
+    // ── mythic-unlock per-run trackers ──
+    chainsFiredThisRunRef:()=>{chainsFiredThisRunRef.current=new Set()},
+    soloMembersUsedRef:()=>{soloMembersUsedRef.current=new Set()},
+    runStonedMembersRef:()=>{runStonedMembersRef.current=new Set()},
+    // ── log + stats ──
+    log:()=>setLog(['⛧ Starting fresh...']),
+    fullRunLogRef:()=>{fullRunLogRef.current=['⛧ Starting fresh...']},
+    stats:()=>setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0,overkillDmg:0,bestMultiplier:1.0}),
+    extraEmberNextFight:()=>setExtraEmberNextFight(0),
+  }),[])
+
+  // ── RESET_EXEMPT ───────────────────────────────────────────────────────
+  // Declared state/refs that are deliberately reset at NO boundary, with the
+  // reason. The dev invariant below treats anything listed here as covered.
+  const RESET_EXEMPT=useMemo(()=>({
+    // player settings / persisted profile — surviving a run is the point
+    handSort:'user setting (vst_handsort)',speedMode:'user setting (vst_speed)',
+    musicVol:'user setting',sfxVol:'user setting',shakeEnabled:'user setting',
+    selectedDeck:'run configuration, chosen on the booster screen',
+    activeStakeId:'run configuration, chosen on the menu',
+    streakWins:'lifetime profile',streakLosses:'lifetime profile',
+    totalRunsPlayed:'lifetime profile',personalBest:'lifetime profile',
+    lifetimeScore:'lifetime profile',dailyStreak:'lifetime profile',
+    lastPlayedDate:'lifetime profile',
+    // shell / navigation chrome — not run state
+    screenFade:'render transition',showDebugHud:'dev HUD toggle',
+    bootScreen:'once per page load',coldOpenPhase:'once per page load',
+    menuView:'menu navigation',unlockTab:'menu navigation',unlockPage:'menu navigation',
+    unlockHover:'menu hover',showPauseOptions:'modal',showCollection:'modal',
+    showTrophies:'modal',showStats:'modal',showCombatLog:'modal',
+    footerCollapsed:'UI preference',hovered:'pointer hover',
+    polaroidNotif:'self-dismissing toast',
+    circlePreview:'dead state — setCirclePreview is never called anywhere',
+    // self-expiring visual effects (own timers)
+    floats:'self-expiring',vfxParticles:'self-expiring',shakeOffset:'self-expiring',
+    // render-time mirrors: reassigned on EVERY render, so a reset is a no-op
+    handRef:'render mirror of hand',deckRef:'render mirror of deck',
+    discRef:'render mirror of discardPile',enemyHpRef:'effect mirror of enemyHp',
+    canStrikeRef:'render mirror',canDiscardRef:'render mirror',
+    selectedRef:'render mirror',stageDiveUsedRef:'render mirror',
+    gameStateRef:'render mirror',modalOpenRef:'render mirror',
+    prevGameStateRef:'render mirror',prevStashRef:'render mirror',
+    prevEmbersRef:'render mirror',prevMultRef:'render mirror',
+    handleStrikeRef:'render mirror',handleDiscardRef:'render mirror',
+    handleUndoRef:'render mirror',playSfxRef:'render mirror',
+    handleStrikeBodyRef:'render mirror',triggerVictoryRef:'render mirror',
+    luciferPhase2Ref:'render mirror',
+    // monotonic id/key counters — resetting would collide React keys
+    pidRef:'monotonic key counter',fid:'monotonic key counter',
+    prid:'monotonic key counter',breakdownSeqRef:'monotonic key counter',
+    // owned by beginFightToken() (called at every fight/run boundary)
+    fightTokenRef:'beginFightToken()',strikeTimersRef:'beginFightToken()',
+    strikeInFlightRef:'beginFightToken()',
+    // DOM / audio handles
+    bossRef:'DOM handle',stageRefs:'DOM handles',audioRef:'audio elements',
+    currentTrackRef:'audio playback state',shakeTimerRef:'timer handle',
+    spaceHeldRef:'live keyboard state',
+  }),[])
+
+  // ── DEV INVARIANT: every declaration must be registered ────────────────
+  // The reason CLAUDE.md rule 5 kept rotting is that nothing ever checked it.
+  // This reads App's OWN source (unminified in dev only), extracts every
+  // useState/useRef name declared inside it, and warns about any that is in
+  // none of the four maps above. Adding a `useState` without deciding its
+  // boundary is now a console warning on the very next dev load instead of a
+  // silent cross-run leak discovered three overnight datasets later.
+  useEffect(()=>{
+    if(!import.meta.env.DEV)return
+    try{
+      const src=App.toString()
+      const names=new Set()
+      let m
+      const reState=/const\s*\[\s*(\w+)\s*,\s*\w+\s*\]\s*=\s*useState\s*\(/g
+      while((m=reState.exec(src))!==null)names.add(m[1])
+      const reRef=/(?:const\s+|,\s*)(\w+)\s*=\s*useRef\s*\(/g
+      while((m=reRef.exec(src))!==null)names.add(m[1])
+      // If the source came back minified/native, the extraction is meaningless.
+      if(names.size<50)return
+      const covered=new Set([].concat(
+        Object.keys(PER_STRIKE_RESETS),Object.keys(PER_FIGHT_RESETS),
+        Object.keys(PER_RUN_RESETS),Object.keys(RESET_EXEMPT)))
+      const orphans=[...names].filter(n=>!covered.has(n))
+      const stale=[...covered].filter(n=>!names.has(n))
+      if(orphans.length)console.warn('[RESET-REGISTRY] '+orphans.length+' App state/ref declaration(s) are not registered in PER_STRIKE_RESETS / PER_FIGHT_RESETS / PER_RUN_RESETS / RESET_EXEMPT. Pick one (CLAUDE.md rule 5):',orphans)
+      if(stale.length)console.warn('[RESET-REGISTRY] registered but no longer declared in App — delete these entries:',stale)
+      if(!orphans.length&&!stale.length)console.log('[RESET-REGISTRY] OK — '+names.size+' declarations, all registered.')
+    }catch{/* source introspection unavailable — invariant is dev-only, fail open */}
+  },[PER_STRIKE_RESETS,PER_FIGHT_RESETS,PER_RUN_RESETS,RESET_EXEMPT])
+
   const drawUpTo=useCallback((h,d,disc,target)=>{
     const cappedTarget=Math.min(target,10)
     let nh=[...h],nd=[...d],ndisc=[...disc]
@@ -5354,7 +5882,22 @@ function App(){
   }
   // ═══ TUTORIAL START ═══
   const startTutorialFight=useCallback((fightNum)=>{
+    beginFightToken() // fight boundary — invalidate any in-flight strike timers
     const tutEnemy=TUTORIAL_ENEMIES[fightNum-1]
+    const _tutCorr=fightNum>=2?10:0 // Fight 2+ starts with some corruption
+    // Set tutorial members
+    const members=TUTORIAL_MEMBERS.map(id=>ALL_MUSICIANS.find(m=>m.id===id))
+    const initStage=[null,...members.map(m=>({...m,maxHp:m.hp,uid:uid()})),...Array(3).fill(null)]
+    // ── SHARED PER-FIGHT RESET (Aug 4 2026, phase 4) ──────────────────────
+    // This block used to be a hand-rolled subset missing ~55 of the normal
+    // between-fight resets — stageDiveUsed stayed used from fight 1 (dead card
+    // in fights 2 and 3), milestonesFiredRef meant HALFWAY/ALMOST/DESTROY HIM
+    // only ever flashed in fight 1, discardsThisFightRef compounded across all
+    // three fights (while discardsThisStrikeRef WAS reset — the tell), and the
+    // pedal/anchor/survivor/free-card state never reset at all. It also reset
+    // five things handleReset didn't (isWiggling, damageFlash, cardAbsorb,
+    // discardsThisStrikeRef, phaseBanner) — all folded into the registry.
+    resetPerFightState({corruption:_tutCorr,handTarget:HAND_SIZE,stage:initStage,strikes:4,discards:4})
     setEnemy(tutEnemy)
     setEnemyHp(tutEnemy.maxHp)
     setScaledMaxHp(tutEnemy.maxHp)
@@ -5362,9 +5905,6 @@ function App(){
     setTutorialFight(fightNum)
     setTutorialTipIdx(0)
     setShowTutorialMsg(null)
-    // Set tutorial members
-    const members=TUTORIAL_MEMBERS.map(id=>ALL_MUSICIANS.find(m=>m.id===id))
-    const initStage=[null,...members.map(m=>({...m,maxHp:m.hp,uid:uid()})),...Array(3).fill(null)]
     setStage(initStage)
     // Set tutorial hand
     const handIds=TUTORIAL_HANDS[fightNum]
@@ -5374,37 +5914,14 @@ function App(){
     const deckCards=['battlecry','amp','moshpit','groupie','distortion','newstrings','heavyriff','encore','roadie','tappedout'].map(id=>{const c=ALL_CARDS.find(x=>x.id===id);return{...c,uid:uid()}})
     setDeck(deckCards)
     setDiscardPile([])
-    setStrikesLeft(4)
-    setFightMaxStrikes(4)
-    setDiscardsLeft(4)
-    setFightMaxDiscards(4)
     setEmbers(5)
     setMaxEmbers(5)
-    setCorruption(fightNum>=2?10:0) // Fight 2+ starts with some corruption
-    setAnimPhase('idle')
+    setCorruption(_tutCorr)
     setGameState('playing')
-    setDblRoll(null)
-    setStrikeMult(1.0)
-    setPhaseBanner('play')
-    setIsWiggling(false)
-    setDamageFlash(false)
-    setProjectiles([])
-    setStrikingMemberIdx(-1)
-    setStrikeAnim(null)
-    setBossStrikeAnim(null)
-    setFlyingCard(null)
-    setCardAbsorb(null)
-    setSelected([])
-    setCardsPlayedThisStrike([])
-    cardsPlayedRef.current=[]
-    combosFiredRef.current=[]
-    discardsThisStrikeRef.current=0
-    victoryFiredRef.current=false
     setStash(20) // enough to buy stuff if shop appears
-        setBossDebuff(0)
     setChosenPacts([])
-    fullRunLogRef.current=['\u26E7 Tutorial Fight '+fightNum+' begins.']
-  },[])
+    fullRunLogRef.current=['⛧ Tutorial Fight '+fightNum+' begins.']
+  },[resetPerFightState])
 
   const handleTutorialVictory=useCallback(()=>{
     const fightNum=tutorialFight
@@ -5451,7 +5968,10 @@ function App(){
     setStage(initStage)
     // ── DECK IDENTITY: free starter artifact (Engineer) ──
     if(_deckDef.freeArtifact){
-      const _t1Pool=ARTIFACTS.filter(a=>a.cost<=8)
+      // `ARTIFACTS` never existed — the real Tier-1 pool is STARTER_ARTIFACTS
+      // (imported from src/data/relics.js). Latent ReferenceError until a
+      // STARTER_DECKS entry set freeArtifact. Fixed Aug 4 2026.
+      const _t1Pool=STARTER_ARTIFACTS.filter(a=>a.cost<=8)
       if(_t1Pool.length>0){
         const _gift=_t1Pool[Math.floor(Math.random()*_t1Pool.length)]
         setActiveArtifacts(p=>[...p,_gift])
@@ -5592,7 +6112,13 @@ function App(){
       msg='🔊 Sound Check! All +4 HP'+(injuredCount>0?' + '+injuredCount+' injured member(s) +1 ATK!':'!');stage.filter(x=>x&&!x.tooStoned).forEach(x=>addBuff(x.uid,'+HP','#33dd33'))
       addFloat('+4 HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')
     }
-    else if(card.id==='whispercard'){ns=ns.map((m,mi)=>mi===slotIdx?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2,buffCount:(m.buffCount||0)+1}):m);msg='\u{1F300} Dark Whisper! +2 ATK permanently.'}
+    else if(card.id==='whispercard'){
+      // Targeted card — dropping it on an EMPTY stage slot used to throw
+      // (`m.atk` on null). Reject the play cleanly, matching cardEngine.js
+      // IMPL.whispercard which returns false on a null target.
+      if(!m){addLog('⚠ Dark Whisper needs a band member.');return false}
+      ns=ns.map((mm,mi)=>mi===slotIdx&&mm?Object.assign({},mm,{atk:mm.atk+2,permAtkBonus:(mm.permAtkBonus||0)+2,buffCount:(mm.buffCount||0)+1}):mm);msg='\u{1F300} Dark Whisper! +2 ATK permanently.'
+    }
     else if(card.id==='hungercard'){ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,tempAtkBonus:(m.tempAtkBonus||0)+1,buffCount:(m.buffCount||0)+1}):m);drawUpTo(hand.filter(c=>c.uid!==card.uid),deckRef.current,[...discRef.current,card],2);msg='\u{1F525} Hungering Flame! All +1 ATK, drew 2 cards.'}
     else if(card.id==='madnesscard'){const maxHp=scaledMaxHp||(enemy?enemy.maxHp:100);const dmg=Math.floor(maxHp*0.15);const bc2=getCenter(bossRef);const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp);if(newHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);addFloat(dmg,bc2.x,bc2.y-60,'#cc1144',dmg>=20);playHit();updStat('totalDamage',dmg);msg='\u{1F480} Madness Unleashed! '+dmg+' damage (15% of max HP)!'}
     else if(card.id==='dark_whisper'){
@@ -6116,8 +6642,26 @@ function App(){
       msg='🎫 Backstage Pass! Next card is FREE! Draw 1!'
     }
     else if(card.id==='venueswap'){
-      setHand(h=>{setDiscardPile(dp=>[...dp,...h]);return[]})
-      setDeck(d=>{const drawn=d.slice(-6);setHand(drawn);return d.slice(0,-6)})
+      // ── Aug 4 2026 PARITY FIX (measured by e2e/test-card-parity.cjs) ──────
+      // Was: setHand(h=>{setDiscardPile(dp=>[...dp,...h]);return[]}) followed by a
+      // setHand() buried inside a setDeck updater (CRITICAL RULE 1). Two real bugs:
+      //   1. the hand dumped into the discard INCLUDED this card, and
+      //      handleDropOnStage pushes the played card to the discard again once
+      //      applyCard returns — so Venue Swap DUPLICATED ITSELF into the deck on
+      //      every play. Measured live: 18 cards in (6 hand + 12 deck), 19 out
+      //      (6 hand + 6 deck + 7 discard, with two Venue Swaps in the discard).
+      //   2. it drew with a raw d.slice(-6), so a deck holding fewer than 6 cards
+      //      drew short and silently skipped the discard reshuffle.
+      // drawUpTo off the REFS (RULE 4) fixes both. `card` is deliberately NOT in the
+      // discard arg here: this handler does not return early, so the caller still
+      // adds it (that is RULE 6's "must be included" — once, not twice).
+      const _hw=hand.filter(c=>c.uid!==card.uid)
+      const _res=drawUpTo([],deckRef.current,[...discRef.current,..._hw],6)
+      setDeck(_res.d);setDiscardPile(_res.disc)
+      // handleDropOnStage calls setHand(remaining) with a PLAIN VALUE immediately
+      // after applyCard returns, which REPLACES any hand update queued here. Land
+      // the fresh hand after it, the same way the Copier signature does (~6845).
+      setTimeout(()=>setHand(_res.h),0)
       msg='🏟️ Venue Swap! Hand shuffled away — drew 6 fresh cards!'
     }
     else if(card.id==='doublebooking'){
@@ -6125,8 +6669,15 @@ function App(){
       msg='📅 DOUBLE BOOKING! +1 extra Strike this fight! 🔥'
     }
     else if(card.id==='bootlegcopy'){
-      setHand(h=>{if(h.length<=1)return h;const best=h.filter(c=>c.id!=='bootlegcopy')[0];if(best)return[...h,Object.assign({},best,{uid:uid()})];return h})
-      msg='📀 Bootleg Copy! Copied best card in hand!'
+      // ── Aug 4 2026 PARITY FIX (measured by e2e/test-card-parity.cjs) ──────
+      // Was: setHand(h=>{...return[...h,copy]}). handleDropOnStage queues
+      // setHand(remaining) with a PLAIN VALUE immediately after applyCard returns,
+      // which REPLACES this updater — the copy never reached the hand and the card
+      // was a 1-ember no-op. Measured live: hand 6 -> 5, no copy anywhere.
+      // Land the copy after the caller's setHand, like the Copier signature (~6845).
+      const _src=hand.length>1?hand.filter(c=>c.id!=='bootlegcopy')[0]:null
+      if(_src){const _copy=Object.assign({},_src,{uid:uid()});setTimeout(()=>setHand(h=>[...h,_copy]),0)}
+      msg=_src?'📀 Bootleg Copy! Copied best card in hand!':'📀 Bootleg Copy! Nothing to copy.'
     }
     else if(card.id==='secondwind'){
       const gain=maxEmbers-embers;setEmbers(maxEmbers)
@@ -6275,7 +6826,12 @@ function App(){
         // damage on the second card. Removing keeps the chain log honest:
         // chains contribute through the multiplier at strike time, not before.
         setTimeout(()=>setComboFlash(null),3000)
-        break
+        // Aug 4 2026 (phase 3): this used to `break` after the first match. A card that
+        // completed TWO chains at once awarded only one ×1.78 — the second was deferred
+        // to the next card play, or lost outright if that was the strike's last card.
+        // combosFiredRef guards against re-firing the same chain, so continuing the scan
+        // is safe; octavePedalFiredRef is set inside the body so the doubler still only
+        // applies to the first chain of the fight.
       }
     }
     // cardHeal enemy passive.
@@ -6608,11 +7164,17 @@ function App(){
   // phase 2 instead of ending the run.
   const luciferPhase2Ref=useRef(null)
   const enterLuciferPhase2=useCallback(()=>{
-    setLuciferPhase(2)
+    // Phase 2 is a fresh fight in every way that matters (new HP pool, revived band,
+    // reset strikes). Bump the fight token so phase 1's in-flight strike timers can't
+    // slam the freshly-spawned phase 2 boss back down to 0.
+    if(luciferPhaseRef.current===2)return // already transitioned — never run twice
+    beginFightToken()
+    setLuciferPhase(2);luciferPhaseRef.current=2
     const _lh2=parseInt(localStorage.getItem('vst_heat')||'1')
     const _lucP2Hp=Math.ceil(333333*(1+Math.max(0,_lh2-1)*0.15)*(encoreMode?2.0:1.0))
     setEnemyHp(_lucP2Hp);enemyHpRef.current=_lucP2Hp;setScaledMaxHp(_lucP2Hp)
-    setBossRageAtk(0)
+    setBossRageAtk(0);bossRageAtkRef.current=0
+    strikeInFlightRef.current=0
     setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,stoneShield:false,tempBuff:false,encoreReady:false,ampedThisStrike:false}):null))
     setEmbers(maxEmbers)
     const _lucDeckStrMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
@@ -6788,6 +7350,13 @@ function App(){
         setBoosterPacks(genBoosterPacks(nextCn))
         setRecruitPack(genRecruitPack(fightIndex))
         setRecruitBought(false) // v0.7.3: parent-level lock — reset on shop rotate
+        // Aug 4 2026: rerollCost used to escalate PERMANENTLY across the whole
+        // run — it was reset only in handleReset and in the Shift+S debug shop,
+        // whose presence proves a per-visit reset was intended. Pack purchases
+        // and the pawn sales cap reset here too, for the same reason.
+        setRerollCost(2)
+        setBoughtPackIds([])
+        setPawnSalesLeft(2)
         setShroomsInStock(Math.random()<0.50)
         setAcidInStock(Math.random()<0.50)
         // DMT (v0.7.2): boss-shop only. Always in stock at those shops to ensure
@@ -6804,8 +7373,15 @@ function App(){
           const _next=rollShopArtifact(_ex);relicsSeenRef.current.add(_next.id)
           setCircleArtifact(_next)}
           setCirclePassive(rollShopPedal(activePassives.map(p=>p.id)))
+          // Dive Bar Sign — "refunds its cost when you reach Circle IV".
+          // Aug 4 2026: pays back what was ACTUALLY charged (paidCost), not the
+          // base sticker. It used to pay `cost` flat, so during a hangover you
+          // paid 15 and got 9 back — and with Merchants Eye the refund exceeded
+          // the purchase. Falls back to `cost` for pack-granted copies that
+          // never went through a priced purchase.
           if(fightIndex===8){const _db=activeArtifacts.find(a=>a.refundAtC4)
-            if(_db){setActiveArtifacts(p=>p.filter(a=>!a.refundAtC4));setStash(p=>Math.min(420,p+(_db.cost||9)));addLog('🍻 '+_db.name+' — the residency ends. '+(_db.cost||9)+' stash refunded.')}}
+            if(_db){const _dbRefund=(_db.paidCost!=null?_db.paidCost:(_db.cost||9))
+              setActiveArtifacts(p=>p.filter(a=>!a.refundAtC4));setStash(p=>Math.min(MAX_STASH,p+_dbRefund));addLog('🍻 '+_db.name+' — the residency ends. '+_dbRefund+' stash refunded.')}}
           setCircleCartBought(false)
           setCirCleCpasBought(false)
         }
@@ -6872,7 +7448,10 @@ function App(){
               embersSpent:embersSpentThisFightRef.current,
               corruptionGained:Math.max(0,corruption-corruptionAtFightStartRef.current),
               timeMs:dur,
-              riffChains:(combosFiredRef.current||[]).length,
+              // Aug 4 2026 (phase 3): combosFiredRef was emptied by the strike body ~2.8s
+              // before this runs, so this reported 0 chains on every fight of every run.
+              // Fall back to the pre-reset snapshot the strike body already takes.
+              riffChains:((combosFiredRef.current||[]).length)||((lastStrikeCombosRef.current||[]).length),
               mvp,
               next:nextScreen
             })
@@ -6949,7 +7528,21 @@ function App(){
     // final number gets to resonate before the screen changes.
     if(enemyHp<=0&&gameState==='playing'&&!victoryFiredRef.current&&enemy&&enemy.maxHp>0){
       if(dmgBreakdown)return // cascade still running — wait for it to clear
+      // ── Aug 4 2026 (phase 3) STRIKE-PIPELINE HOLD ────────────────────────
+      // Per-member impact damage can take the boss to 0 several seconds BEFORE the
+      // cascade block runs, and at that moment dmgBreakdown is still null — so this
+      // net used to win the fight out from under the strike. On Lucifer that was
+      // catastrophic: net -> phase-1 intercept -> enterLuciferPhase2() spawns 333,333,
+      // then the cascade's _applyHpDrop slammed the fresh phase 2 back to 0 and the
+      // next line (reading a stale luciferPhase===1) entered phase 2 a SECOND time —
+      // double cinematic, double resets, double band revive. In normal fights the same
+      // ordering meant the killing blow never showed its damage breakdown.
+      // The cascade block owns the kill; it releases this hold when it resolves.
       setTimeout(()=>{
+        if(strikeInFlightRef.current>0){
+          try{console.warn('[STALE-TIMER-BLOCKED] victory safety net — strike pipeline still resolving, cascade owns the kill')}catch(e){}
+          return
+        }
         // ── PHANTOM VICTORY FIX (Aug 1 2026) ──────────────────────────────
         // This timer used to call triggerVictory unconditionally. Any flow that
         // takes HP to 0 and then REFILLS it within the 600ms window won the game
@@ -7119,7 +7712,15 @@ function App(){
       sl:Math.max(1,strikesLeft),ms:fightMaxStrikes,dl:discardsLeft, // resume restarts the fight — never store overtime/zombie strike counts
       pa:chosenPacts,art:activeArtifacts.map(a=>a.id),pas:activePassives.map(p=>p.id),
       loot:collectedLoot,upg:upgradedCards,stats:stats,
-      shrooms:heldShrooms,acid:heldAcid,dmt:heldDMT
+      shrooms:heldShrooms,acid:heldAcid,dmt:heldDMT,
+      // Aug 4 2026 phase 4 — both of these were MISSING from the snapshot:
+      //   dbl: handleContinueSave never set dblRoll, so on a fresh page load it
+      //        stayed null and the strike body's `if(dblRoll<=2)` coerced null to
+      //        0 → true → dblMult 1.0 STANDARD for the whole resumed fight,
+      //        silently disabling DOUBLE TIME until the next fight re-rolled.
+      //   hang: hangover drives the per-member max-HP debuff AND the shop hunger
+      //        tax; both evaporated on resume.
+      dbl:dblRoll,hang:hangover
     })}catch(e){}},150)
     return ()=>clearTimeout(t)
   },[fightIndex,gameState])
@@ -7150,6 +7751,8 @@ function App(){
         setRecruitPack(genRecruitPack(fightIndex))
         setRecruitBought(false) // v0.7.3: parent-level lock — reset on debug shop entry
         setRerollCost(2)
+        setBoughtPackIds([])
+        setPawnSalesLeft(2)
         setStash(69)
         setShroomsInStock(Math.random()<0.50)
         setAcidInStock(Math.random()<0.50)
@@ -7193,6 +7796,8 @@ function App(){
 
       // ── PLAYER KEYBOARD SHORTCUTS — only during combat, no modifiers, not while typing
       if(gameStateRef.current!=='playing')return
+      // ...and never through an open modal (setlist / slot swap / deck / discard / pause)
+      if(modalOpenRef.current)return
       if(e.shiftKey||e.ctrlKey||e.metaKey||e.altKey)return
       if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return
       const k=e.key.toLowerCase()
@@ -7433,6 +8038,24 @@ function App(){
     const queue=queuedReplaysRef.current
     if(!queue||queue.length===0)return
     queuedReplaysRef.current=[]
+    // ── Aug 4 2026 (phase 3): RETRIGGER DIRECT DAMAGE ────────────────────────
+    // All 8 direct-damage branches below used to do
+    //   const newHp=Math.max(0,enemyHp-dmg); setEnemyHp(newHp)
+    // — an ABSOLUTE write computed from the stale `enemyHp` render closure, with no
+    // victory trigger. Two queued replays both computed from the SAME stale base, so
+    // the second overwrote the first and could HEAL the boss; and a retrigger that
+    // killed the boss just left it sitting at 0 with the fight still running.
+    // One functional-updater helper for all of them (CLAUDE.md rules 2 + 3).
+    const _replayDamage=(amount)=>{
+      const amt=Math.max(0,Math.round(amount||0))
+      if(amt<=0)return
+      enemyHpRef.current=Math.max(0,enemyHpRef.current-amt)
+      setEnemyHp(prev=>{
+        const nh=Math.max(0,prev-amt)
+        if(nh<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
+        return nh
+      })
+    }
     // Position references
     const bc=getCenter(bossRef)
     queue.forEach(function(replay,replayIdx){
@@ -7630,7 +8253,7 @@ function App(){
           const target=stage[slotIdx]
           if(target){
             const dmg=(target.atk||0)*2
-            const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp)
+            _replayDamage(dmg)
             addFloat(dmg.toLocaleString(),bc.x,bc.y-60,'#9933cc',true)
             updStat('totalDamage',dmg)
           }
@@ -7639,7 +8262,7 @@ function App(){
         else if(card.id==='darkcrescendo'){
           const cnt=cardsPlayedRef.current.length
           const dmg=cnt*10
-          const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp)
+          _replayDamage(dmg)
           addFloat(dmg.toLocaleString(),bc.x,bc.y-60,'#aa44cc',true)
           updStat('totalDamage',dmg)
         }
@@ -7666,7 +8289,7 @@ function App(){
         // Devil's Dice: random 1-12 dmg
         else if(card.id==='devilsdice'){
           const dmg=Math.floor(Math.random()*12)+1
-          const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp)
+          _replayDamage(dmg)
           addFloat(dmg.toLocaleString(),bc.x,bc.y-60,'#cc1144',true)
           updStat('totalDamage',dmg)
         }
@@ -7676,7 +8299,7 @@ function App(){
           if(target){
             const sacrifice=Math.floor(target.hp*0.25)
             if(sacrifice>0){
-              const newHp=Math.max(0,enemyHp-sacrifice*3);setEnemyHp(newHp)
+              _replayDamage(sacrifice*3)
               addFloat((sacrifice*3).toLocaleString(),bc.x,bc.y-60,'#aa1111',true)
               updStat('totalDamage',sacrifice*3)
             }
@@ -7687,8 +8310,7 @@ function App(){
           const target=stage[slotIdx]
           if(target){
             const dmg=target.hp
-            const newHp=Math.max(0,enemyHp-dmg)
-            setEnemyHp(newHp)
+            _replayDamage(dmg)
             addFloat(dmg.toLocaleString(),bc.x,bc.y-60,'#ff2200',true)
             updStat('totalDamage',dmg)
           }
@@ -7697,24 +8319,21 @@ function App(){
         else if(card.id==='madnesscard'){
           const maxHp=scaledMaxHp||(enemy?enemy.maxHp:100)
           const dmg=Math.floor(maxHp*0.15)
-          const newHp=Math.max(0,enemyHp-dmg)
-          setEnemyHp(newHp)
+          _replayDamage(dmg)
           addFloat(dmg.toLocaleString(),bc.x,bc.y-60,'#cc1144',true)
           updStat('totalDamage',dmg)
         }
         // Death Riff: low corruption = more damage
         else if(card.id==='deathriff'){
           const drDmg=Math.max(3,15-Math.floor(corruption/10))
-          const newHp=Math.max(0,enemyHp-drDmg)
-          setEnemyHp(newHp)
+          _replayDamage(drDmg)
           addFloat(drDmg.toLocaleString(),bc.x,bc.y-60,'#ff2200',true)
           updStat('totalDamage',drDmg)
         }
         // Hex of Decay: 15% current HP direct damage
         else if(card.id==='hexdecay'){
-          const dmg=Math.floor(enemyHp*0.15)
-          const newHp=Math.max(0,enemyHp-dmg)
-          setEnemyHp(newHp)
+          const dmg=Math.floor(enemyHpRef.current*0.15)
+          _replayDamage(dmg)
           addFloat(dmg.toLocaleString(),bc.x,bc.y-60,'#88cc44',true)
           updStat('totalDamage',dmg)
         }
@@ -7739,6 +8358,7 @@ function App(){
     setUndoSnapshot(null) // can't undo after striking
     // Guard: don't allow re-triggering during animation
     if(animPhase!=='idle'||enemyHp<=0)return // OVERTIME (Jul 31): striking allowed past 0 — boss enrages instead
+    const _fightToken=fightTokenRef.current
     // ── FIRE ECHOPLEX/LOOPER/SABBATH REPLAYS first ──
     // Replays apply card effects again (stacking permanent buffs, re-dealing
     // direct damage). Marked with '_echo:' prefix in cardsPlayedRef so artifact
@@ -7752,7 +8372,16 @@ function App(){
       // Set animPhase to a non-idle marker so player can't re-click Strike
       setAnimPhase('replaying')
       const _replayDelay=_replayQueueLen*200+800
-      setTimeout(()=>{setAnimPhase('idle');if(handleStrikeBodyRef.current)handleStrikeBodyRef.current()},_replayDelay)
+      strikeTimersRef.current.push(setTimeout(()=>{
+        // Aug 4 2026 (phase 3): a replay that KILLED the boss inside this delay window
+        // used to run a whole strike body against whatever fight was current — burning
+        // a strike, wiping strikeMult and scheduling a full boss-attack chain on the
+        // NEXT boss. Guard on fight identity + live HP + phase.
+        if(fightTokenRef.current!==_fightToken){try{console.warn('[STALE-TIMER-BLOCKED] handleStrike replay-delay body (fight changed)')}catch(e){}return}
+        if(gameStateRef.current!=='playing'){try{console.warn('[STALE-TIMER-BLOCKED] handleStrike replay-delay body (left the fight screen)')}catch(e){}return}
+        if(enemyHpRef.current<=0){try{console.warn('[STALE-TIMER-BLOCKED] handleStrike replay-delay body (boss already dead)')}catch(e){}setAnimPhase('idle');return}
+        setAnimPhase('idle');if(handleStrikeBodyRef.current)handleStrikeBodyRef.current()
+      },_replayDelay))
       return
     }
     if(handleStrikeBodyRef.current)handleStrikeBodyRef.current()
@@ -7760,9 +8389,43 @@ function App(){
 
   // The actual strike resolution body — extracted so we can delay it for replay animations.
   const handleStrikeBody=useCallback(()=>{
-    // Reset Ritualist's per-strike ember refund cap
-    ritualistEmberRefundsThisStrikeRef.current=0
+    // Aug 4 2026 (phase 3): fight identity. Every deferred body below re-checks this
+    // and bails if the fight moved on while it was pending.
+    const _fightToken=fightTokenRef.current
+    const _stale=(where)=>{
+      if(fightTokenRef.current!==_fightToken){
+        try{console.warn('[STALE-TIMER-BLOCKED] '+where+' — fight token '+_fightToken+' != '+fightTokenRef.current)}catch(e){}
+        return true
+      }
+      return false
+    }
+    const _reg=(t)=>{strikeTimersRef.current.push(t);return t}
+    // (Ritualist's per-strike ember refund cap resets in the PER-STRIKE RESET below)
     // (75% Madness random-discard removed in v0.7.1 simplification — punishing RNG with no agency)
+    // ── EARLY RETURNS FIRST (Aug 4 2026, phase 3) ──────────────────────────
+    // These used to sit BELOW setStrikeMult(_newStrikeStart), so bailing out
+    // ("boss already dead", "No active members!") still destroyed the accumulated
+    // strike multiplier. A whole band going Too Stoned wiped a ×12 with no strike
+    // thrown and no strike consumed. Read the live HP ref, not the stale closure.
+    if((enemyHpRef.current!==undefined&&enemyHpRef.current!==null?enemyHpRef.current:enemyHp)<=0)return // OVERTIME: no strike floor
+    const actives=stage.filter(m=>m&&!m.tooStoned)
+    if(actives.length===0){addLog('⚠ No active members!');return}
+    // ── #10 LUCKY DRAW — unlocked after first Lucifer kill, toggleable ──────
+    // Aug 4 2026 (phase 3): moved ABOVE the currentMult capture. The ×1.5 used to be
+    // applied after currentMult was already read, so it never affected the strike it
+    // fired on while the log and the float both claimed it did.
+    // Gate fixed too: nothing ever wrote a `vst_achievement_*` key — unlockAchievement
+    // writes a JSON array to `vst_achievements`, so the whole feature was unreachable.
+    const _luckyUnlocked=getAchievements().includes('beat_lucifer')&&localStorage.getItem('vst_lucky_draw')!=='off'
+    const _luckyRng=((runSeed*7+stats.strikesThrown*13+fightIndex*31)%100)
+    if(_luckyUnlocked&&_luckyRng<10){
+      const _luckyType=_luckyRng%5
+      if(_luckyType===0){strikeMultRef.current=Math.min(10000,strikeMultRef.current*1.5);addLog('🍀 LUCKY DRAW! ×1.5 Strike Mult bonus!');addFloat('🍀 LUCKY ×1.5!',960,300,'#ffdd00',true)}
+      else if(_luckyType===1){setStash(p=>Math.min(420,p+10));addLog('🍀 LUCKY DRAW! +10 Stash from the crowd!');addFloat('🍀 +10 STASH!',960,300,'#44ff44',true)}
+      else if(_luckyType===2){setEmbers(p=>Math.min(maxEmbers,p+2));addLog('🍀 LUCKY DRAW! +2 bonus Embers!');addFloat('🍀 +2 EMBERS!',960,300,'#ff8800',true)}
+      else if(_luckyType===3&&hand.length<6){setPendingDraw(p=>p+1);addLog('🍀 LUCKY DRAW! Draw 1 extra card!');addFloat('🍀 +1 CARD!',960,300,'#44aaff',true)}
+      else{setStage(p=>p.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+1,permAtkBonus:(s.permAtkBonus||0)+1}):s));addLog('🍀 LUCKY DRAW! All members +1 ATK!');addFloat('🍀 +1 ALL ATK!',960,300,'#cc44ff',true)}
+    }
     const currentMult=strikeMultRef.current
     // v0.7.2: Trip-driven strike-mult start values
     //   REALITY GLITCH (acid):  ×2.0 every strike
@@ -7773,9 +8436,6 @@ function App(){
     // animPhase guard removed here — wrapper handleStrike checks it before calling.
     // After replay delay, animPhase=='replaying' in this closure (stale), so checking
     // here would always early-return and strike would never resolve.
-    if(enemyHp<=0)return // OVERTIME: no strike floor
-    const actives=stage.filter(m=>m&&!m.tooStoned)
-    if(actives.length===0){addLog('⚠ No active members!');return}
     // ── KEYWORD STACK CONTEXT — centralized helper for tier-scaled bonuses ──
     // Stage doesn't change during damage calc, so compute tier once per strike.
     // riffsThisStrike captured here before cardsPlayedRef reset further down.
@@ -7786,16 +8446,31 @@ function App(){
     // Aug 1 2026: snapshot the fired chains too — the artifact-multiplier block far
     // below runs inside a setTimeout and reads these refs AFTER they were emptied.
     const _combosThisStrike=(combosFiredRef.current||[]).slice()
+    lastStrikeCombosRef.current=_combosThisStrike // victory summary reads this after the reset below
+    // Aug 4 2026 (phase 3): discard counters must be snapshotted BEFORE the per-strike
+    // reset (the artifact block reads them from inside a setTimeout).
+    const _discardsThisStrike=(discardsThisStrikeRef&&discardsThisStrikeRef.current)||0
     const _riffsThisStrike=_cardIdsThisStrike.filter(id=>CARD_TYPE_BY_ID[id]==='RIFF').length
+    // ── SHREDDER: consecutive same-type pairs. ─────────────────────────────
+    // Aug 4 2026 (phase 3): this walked the RAW id list, so an '_echo:' retrigger id
+    // had CARD_TYPE_BY_ID===undefined and `undefined===undefined` counted as a type
+    // MATCH. Two back-to-back retriggers handed a 3-stack SHREDDER band +4/+8 free ATK
+    // per member that neither the sim nor the preview modelled. _riffsThisStrike
+    // already excluded synthetics; make the shredder walk agree.
+    const _realIdsThisStrike=_cardIdsThisStrike.filter(id=>!String(id).startsWith('_echo:')&&CARD_TYPE_BY_ID[id]!==undefined)
     let _shredderHits=0
-    for(let _si=1;_si<_cardIdsThisStrike.length;_si++){
-      if(CARD_TYPE_BY_ID[_cardIdsThisStrike[_si]]===CARD_TYPE_BY_ID[_cardIdsThisStrike[_si-1]])_shredderHits++
+    for(let _si=1;_si<_realIdsThisStrike.length;_si++){
+      if(CARD_TYPE_BY_ID[_realIdsThisStrike[_si]]===CARD_TYPE_BY_ID[_realIdsThisStrike[_si-1]])_shredderHits++
     }
     const _atkCtx={corruption,tier:_kwStacks.tier,riffsThisStrike:_riffsThisStrike,shredderHits:_shredderHits,auraAtk:_auraAtkMap(stage,{corruption,shredderHits:_shredderHits})}
 
     if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
     if(slowBurnStrikes>0){setEmbers(p=>Math.min(maxEmbers,p+1));addLog('🕯️ Slow Burn: +1 ember');setSlowBurnStrikes(p=>p-1)}
-    if(pyromaniacActive&&embers===0){setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3,tempBuff:true}):m));addLog('🧨 PYROMANIAC TRIGGERED! ALL +3 ATK! (spent all embers)');setPyromaniacActive(false)}
+    // Aug 4 2026 (phase 3): tempBuff without _origAtk NEVER expires — the expiry block
+    // requires `nm.tempBuff && nm._origAtk!==undefined`. Pyromaniac was handing out
+    // +3 PERMANENT ATK to every member on every proc (4 strikes = +12 for the rest of
+    // the run). Stamp _origAtk so the buff actually ends after the strike.
+    if(pyromaniacActive&&embers===0){setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+3,tempBuff:true,_origAtk:m._origAtk!==undefined?m._origAtk:m.atk}):m));addLog('🧨 PYROMANIAC TRIGGERED! ALL +3 ATK! (spent all embers)');setPyromaniacActive(false)}
     if(venomDotStacks>0){const vd=venomDotStacks;setEnemyHp(p=>{const nh=Math.max(0,p-vd);if(nh<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);return nh});addLog('🐍 Venom DOT: boss takes '+vd+' damage')}
     if(pendingDraw>0){
       const _pd=pendingDraw
@@ -7810,23 +8485,23 @@ function App(){
     const debuffTier=debuffStacks>=3?4:debuffStacks===2?2:debuffStacks>=1?1:0
     const debuffCount=debuffTier // backwards-compat name; preserved for downstream reads
     if(debuffTier>0){setBossDebuff(p=>p+debuffTier*2);addLog('🎤 Vocalist debuffs the boss! (-'+(debuffTier*2)+' damage'+(debuffTier>=2?' · STACK ×'+debuffTier:'')+')')}
-    cardsToDrawRef.current=cardsPlayedRef.current.length
+    // Aug 4 2026 (phase 3): counted '_echo:' retrigger entries, so replays inflated the
+    // post-strike refill and burned the deck faster than the design intends. Real plays only.
+    cardsToDrawRef.current=cardsPlayedRef.current.filter(id=>!String(id).startsWith('_echo:')).length
     setAnimPhase('attacking');setStrikesLeft(p=>p-1);updStat('strikesThrown',1)
     // Mythic tracking: count strikes vs Lucifer for The Conduit unlock (≤3 strikes)
     if(enemy&&(enemy.passiveId==='luciferBoss'||enemy.id==='lucifer'||enemy.name==='Lucifer')){
       luciferStrikesUsedRef.current++
     }
-      // #10: LUCKY DRAW — unlocked after first Lucifer kill, toggleable
-      const _luckyUnlocked=localStorage.getItem('vst_achievement_beat_lucifer')==='1'&&localStorage.getItem('vst_lucky_draw')!=='off'
-      const _luckyRng=((runSeed*7+stats.strikesThrown*13+fightIndex*31)%100)
-      if(_luckyUnlocked&&_luckyRng<10){
-        const _luckyType=_luckyRng%5
-        if(_luckyType===0){setStrikeMult(p=>Math.min(10000,p*1.5));strikeMultRef.current=Math.min(10000,strikeMultRef.current*1.5);addLog('🍀 LUCKY DRAW! ×1.5 Strike Mult bonus!');addFloat('🍀 LUCKY ×1.5!',960,300,'#ffdd00',true)}
-        else if(_luckyType===1){setStash(p=>Math.min(420,p+10));addLog('🍀 LUCKY DRAW! +10 Stash from the crowd!');addFloat('🍀 +10 STASH!',960,300,'#44ff44',true)}
-        else if(_luckyType===2){setEmbers(p=>Math.min(maxEmbers,p+2));addLog('🍀 LUCKY DRAW! +2 bonus Embers!');addFloat('🍀 +2 EMBERS!',960,300,'#ff8800',true)}
-        else if(_luckyType===3&&hand.length<6){setPendingDraw(p=>p+1);addLog('🍀 LUCKY DRAW! Draw 1 extra card!');addFloat('🍀 +1 CARD!',960,300,'#44aaff',true)}
-        else{setStage(p=>p.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+1,permAtkBonus:(s.permAtkBonus||0)+1}):s));addLog('🍀 LUCKY DRAW! All members +1 ATK!');addFloat('🍀 +1 ALL ATK!',960,300,'#cc44ff',true)}
-      };setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
+    // ── PER-STRIKE RESET — the SINGLE place per-strike state is cleared ────
+    // Aug 4 2026 (phase 3): discardsThisStrikeRef was only ever reset at FIGHT start,
+    // so "this strike" discard relics compounded across the whole fight — Ouroboros
+    // Pin's ×1.3 perDiscardStrike hit ×1.3^8 (×8.16) by strike 4 and fired on strikes
+    // where you discarded nothing, and Spit Cup's discardedStrike stayed permanently on.
+    // Phase 4: the contents moved into PER_STRIKE_RESETS (see RESET REGISTRY), and
+    // the Ritualist ember-refund cap — which used to be reset separately ~90 lines
+    // above — folded in, so there is exactly one per-strike reset site.
+    resetPerStrikeState({evilEye:activeArtifacts.some(a=>a.id==='a3')||activePassives.some(p=>p.id==='a3')})
 
     const buffed=actives.filter(m=>(m.buffCount||0)>0)
     const bandBonus=buffed.length>=5?1.35:buffed.length>=4?1.20:buffed.length>=3?1.10:1.0
@@ -7842,7 +8517,11 @@ function App(){
         setStage(p=>p.map(m=>m&&m.uid===target.uid?Object.assign({},m,{hp:Math.max(0,m.hp-3)}):m))
         addLog('🗝 '+paranoiaVictim.name+' turns paranoid! Attacks '+target.name+' for 3 damage!')}
     }
-    const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===activeStake.maxStrikes?10:0
+    // Aug 4 2026 (phase 3): gated on activeStake.maxStrikes instead of fightMaxStrikes,
+    // so with the War Drums pact or a deck maxStrikesMod it never fired on strike 1 and
+    // fired on strike 2 instead. The damage preview already uses fightMaxStrikes.
+    // (strikesLeft here is the PRE-decrement value: strike 1 == fightMaxStrikes.)
+    const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===fightMaxStrikes?10:0
     const _breakdownLines=[]
     let dmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
       const effectiveAtk=getEffectiveAtk(m,_atkCtx)
@@ -7859,7 +8538,11 @@ function App(){
       dmg=Math.round(dmg*dblMult);_bkRunning=dmg
       if(dblMult!==1)_breakdownLines.push({type:'multiply',label:dblMode+' ×'+dblMult,label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff8800'})
     }
-    const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer').reduce((s,m)=>{
+    // Aug 4 2026 (phase 3): the Encore bonus did NOT exclude the paranoia victim, unlike
+    // the base sum, the DOUBLE TIME tier-3 bonus and memberDmgs. Against The Traitor a
+    // member who "refuses to attack" still contributed full ATK here, so the per-member
+    // breakdown lines summed to LESS than the BASE ATK subtotal printed under them.
+    const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
       const ea=getEffectiveAtk(m,_atkCtx)
       return s+ea
     },0)
@@ -7899,8 +8582,11 @@ function App(){
     }
     if(_mlb>0){dmg+=_mlb;_bkRunning=dmg;_breakdownLines.push({type:'add',label:'Mentor Link',emoji:'⛓',value:_mlb,runningAfter:dmg,color:'#ffd700'})}
     // CA4: Wailing Guitar — first Strike deals double damage.
-    // strikesLeft is decremented before this fires, so first strike = fightMaxStrikes - 1.
-    if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===fightMaxStrikes-1){dmg*=2;_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Wailing Guitar ×2',label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff4488'});addLog('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')}
+    // Aug 4 2026 (phase 3): the old comment was wrong. setStrikesLeft(p=>p-1) is a
+    // FUNCTIONAL update — it does not touch the `strikesLeft` const in this closure, so
+    // strikesLeft here is still the PRE-decrement value and strike 1 == fightMaxStrikes.
+    // The `-1` made this fire on strike TWO. The preview mirror (fightMaxStrikes) had it right.
+    if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===fightMaxStrikes){dmg*=2;_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Wailing Guitar ×2',label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff4488'});addLog('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')}
     // HEXED: auto-raise corruption +5%, member gains +1 ATK per 10% corruption
     const hexedMembers=actives.filter(m=>m.keyword==='HEXED')
     if(hexedMembers.length>0){
@@ -7969,6 +8655,14 @@ function App(){
     const _baseTripMult=fightTripBuff==='SACRED CHORD'?3:(fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION')?2:1
     const _baseCorrMult=corruption>=100?3.0:corruption>=80?2.0:corruption>=60?1.5:corruption>=40?1.2:1.0
     const _baseImpactMult=currentMult*_baseTripMult*_baseCorrMult
+    // Aug 4 2026 (phase 3): the cascade's HP drop is now a DELTA, so it has to know
+    // exactly how much the per-member impacts already took off. Same membership rule as
+    // the impact loop below (non-Drummer, non-paranoia, atk>0).
+    const _impactApplied=memberDmgs.filter(d=>d.atk>0).reduce((s,d)=>s+Math.max(1,Math.round(d.atk*_baseImpactMult)),0)
+    // Mark the strike pipeline live: the 600ms victory safety net must not fire between
+    // the first impact landing and the cascade block resolving the kill.
+    strikeInFlightRef.current++
+    const _endPipeline=()=>{if(strikeInFlightRef.current>0)strikeInFlightRef.current--}
     const speedFast=speedMode
     const memberDelay=speedFast?900:2000
     delay=100 // small initial delay so React commits attacking phase first
@@ -7999,7 +8693,8 @@ function App(){
         setStrikeAnim({slotIdx:si,phase:'launch',dx,dy})
       },curDelay+(speedFast?350:700))
       // Phase 4: IMPACT (1200ms) — card hits boss, SFX + shake + damage
-      setTimeout(function(){
+      _reg(setTimeout(function(){
+        if(_stale('per-member impact damage'))return
         setStrikeAnim({slotIdx:si,phase:'impact',dx,dy})
         try{(ATK_SND[m.role]||ATK_SND['Lead Guitarist'])()}catch(e){}
         playHit()
@@ -8011,9 +8706,13 @@ function App(){
           // still adds a slam bonus on top via the cascade.
           const _imp=Math.max(1,Math.round(md.atk*_baseImpactMult))
           addFloat(_imp.toLocaleString(),bc.x,bc.y-60,'#cc8800',_imp>=15)
+          // Deliberately does NOT trigger victory: the cascade block a beat later owns
+          // the kill (Lucifer phase handoff, overkill stat, breakdown slam). The 600ms
+          // safety net is held off by strikeInFlightRef until then — see the effect.
+          enemyHpRef.current=Math.max(0,enemyHpRef.current-_imp)
           setEnemyHp(p=>Math.max(0,p-_imp))
         }
-      },curDelay+(speedFast?550:1200))
+      },curDelay+(speedFast?550:1200)))
       // Phase 5: RETURN (1500ms) — card floats back
       setTimeout(function(){
         setStrikeAnim({slotIdx:si,phase:'return',dx,dy})
@@ -8026,7 +8725,8 @@ function App(){
       delay+=memberDelay
     })
 
-    setTimeout(function(){
+    _reg(setTimeout(function(){
+      if(_stale('strike cascade / damage resolution')){_endPipeline();return}
       setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
       setProjectiles([])
       const tripMult=fightTripBuff==='SACRED CHORD'?3:(fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION')?2:1
@@ -8046,6 +8746,13 @@ function App(){
       if(corruptionMult>1)_cascadeMults.push({mult:corruptionMult,label:'Corruption '+Math.floor(corruption)+'%',emoji:'🌀',color:'#cc44ff'})
       // ARTIFACT MULTIPLIER TRIGGERS — Balatro-style Jokers
       let artifactMult=1.0
+      // Aug 4 2026 (phase 3): flat (additive) relic damage. Tongue of the Devourer used
+      // to fake this as a multiplier — 1+(tongueDmg/dmg) against the PRE-multiplier base,
+      // pushed into the cascade display and into _totalMult but NEVER into artifactMult.
+      // It was shown and never dealt: the breakdown's running total ended higher than the
+      // boss's actual HP loss. Real additive term now, applied after the multipliers.
+      let _flatArtifactDmg=0
+      let _flatArtifactLabel='',_flatArtifactEmoji=''
       // ── Aug 1 2026 CRITICAL: EVERY CARD/CHAIN-COUNT RELIC WAS DEAD ────────
       // These used to read cardsPlayedRef / combosFiredRef, but both are emptied
       // synchronously earlier in handleStrikeBody while this block runs inside a
@@ -8085,7 +8792,7 @@ function App(){
       const aliveNonStoned=stage.filter(m=>m&&!m.tooStoned&&m.hp>0).length
       // Discard tracking — discardsThisFightRef counts discards this fight.
       const discardsThisFight=(discardsThisFightRef&&discardsThisFightRef.current)||0
-      const discardsThisStrike=(discardsThisStrikeRef&&discardsThisStrikeRef.current)||0
+      const discardsThisStrike=_discardsThisStrike // snapshot taken before the per-strike reset
       // Lucifer on stage check
       const luciferOnStage=stage.some(m=>m&&(m.id==='lucifer'||m.name==='Lucifer'))
       // Drummer DOUBLE TIME rolled this fight (uses existing dblRoll state)
@@ -8155,19 +8862,22 @@ function App(){
         // ── NEW MYTHIC TRIGGERS ──
         if(art.multTrigger==='corruptedClean'&&corruption===100&&stonedCount===0)fires=1
         if(art.multTrigger==='tongueDamage'){
-          // Each card you play deals damage = highest member ATK. Flat addition.
+          // Each card you play deals damage = highest member ATK. Flat addition —
+          // accumulated here and ADDED to finalDmg after the multiplier chain, with its
+          // own additive breakdown line. Never enters artifactMult or _totalMult.
           const tongueDmg=highestStageAtk*cardsPlayedCount
           if(tongueDmg>0){
-            // Add as a flat additive event in cascade
-            _cascadeMults.push({mult:1.0+(tongueDmg/Math.max(1,dmg)),label:art.name+' (+'+tongueDmg+' flat)',emoji:art.emoji,color:'#ff0000'})
+            _flatArtifactDmg+=tongueDmg
+            _flatArtifactLabel=art.name;_flatArtifactEmoji=art.emoji||'👅'
             addLog('👅 '+art.name+' DEVOURS! +'+tongueDmg+' flat damage!');setTriggeredArtifactId(art.id);setTimeout(()=>setTriggeredArtifactId(null),600)
           }
           continue
         }
         if(art.multTrigger==='sigilOpener'){
           // First Strike of every fight: card+chain mults auto-peaked + auto-trip if no other trip.
-          // strikesLeft is decremented BEFORE this check fires, so first strike = fightMaxStrikes - 1.
-          const isFirstStrikeOfFight=(strikesLeft===(fightMaxStrikes-1))
+          // Aug 4 2026 (phase 3): same off-by-one as Wailing Guitar — strikesLeft is the
+          // PRE-decrement closure value, so strike 1 == fightMaxStrikes (preview agrees).
+          const isFirstStrikeOfFight=(strikesLeft===fightMaxStrikes)
           if(isFirstStrikeOfFight){
             const peakMult=4.31  // 1.05^6 * 1.78^2 simulated peak
             artifactMult*=peakMult
@@ -8194,7 +8904,10 @@ function App(){
         const loot=BOSS_LOOT.find(l=>l&&l.id===lootId)
         if(!loot||!loot.multTrigger||!loot.mult)continue
         let fires=0
-        if(loot.multTrigger==='perStrikesLeft')fires=strikesLeft
+        // Aug 4 2026 (phase 3): strikesLeft is the PRE-decrement closure value, so this
+        // counted the strike currently being SPENT — one extra Math.pow(mult,1) on every
+        // strike of every fight, and it still fired on the last strike (0 remaining).
+        if(loot.multTrigger==='perStrikesLeft')fires=Math.max(0,strikesLeft-1)
         if(loot.multTrigger==='firstCardFree'&&cardsPlayedCount>=1)fires=1
         if(loot.multTrigger==='alive4'&&actives.length>=4)fires=1
         if(loot.multTrigger==='perStash20')fires=Math.floor(stash/20)
@@ -8204,7 +8917,7 @@ function App(){
         if(loot.multTrigger==='perUniqueKeyword')fires=new Set(actives.map(m=>m.keyword)).size
         if(fires>0){const m=Math.pow(loot.mult,fires);artifactMult*=m;_cascadeMults.push({mult:m,label:loot.name+(fires>1?' ×'+fires:''),emoji:loot.emoji,color:'#44ddff'});addLog('💎 '+loot.emoji+' '+loot.name+' ×'+m.toFixed(2)+'!')}
       }
-      const finalDmg=Math.round(dmg*tripMult*currentMult*corruptionMult*artifactMult)
+      const finalDmg=Math.round(dmg*tripMult*currentMult*corruptionMult*artifactMult)+_flatArtifactDmg
       // Compute the TRUE total multiplier = product of every cascade mult.
       // This is what climbs in the visible counter during the cascade.
       const _totalMult=_cascadeMults.reduce((p,e)=>p*e.mult,1.0)
@@ -8214,6 +8927,11 @@ function App(){
       for(const ev of _cascadeMults){
         _runningDmg=Math.round(_runningDmg*ev.mult)
         _breakdownLines.push({type:'multiply',label:ev.emoji+' '+ev.label+' ×'+ev.mult.toFixed(2),label2:'= '+_runningDmg.toLocaleString(),runningAfter:_runningDmg,color:ev.color,mult:ev.mult})
+      }
+      // Flat relic damage lands AFTER the multiplier chain, as a real additive line.
+      if(_flatArtifactDmg>0){
+        _runningDmg=_runningDmg+_flatArtifactDmg
+        _breakdownLines.push({type:'add',label:_flatArtifactLabel||'Flat relic damage',emoji:_flatArtifactEmoji||'👅',value:_flatArtifactDmg,runningAfter:_runningDmg,color:'#ff0000'})
       }
       // ── SHREDDER SIGNATURE: apply echo damage from chains queued PREVIOUS strike ──
       // Echo = 50% of this strike's final damage × pending chain count.
@@ -8230,40 +8948,66 @@ function App(){
       const _totalStrikeDmg=finalDmg+_shredderEchoDmg
       // v0.8 FOLK MAGIC aura — adjacent members heal 1 per folk neighbor after each strike
       setStage(p=>{const hm=_folkAuraHealMap(p);return hm?p.map((m,i)=>m&&hm[i]?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+hm[i])}):m):p})
-      const newEHp=Math.max(0,startHp-_totalStrikeDmg)
-      if(newEHp<=0){const _ok=Math.abs(newEHp);updStat('overkillDmg',_ok)}
+      // Aug 4 2026 (phase 3): overkill was ALWAYS 0 — newEHp is clamped at 0 by
+      // Math.max BEFORE Math.abs() reads it, so _ok was |0|. Keep the unclamped value.
+      const _rawEHp=startHp-_totalStrikeDmg
+      const newEHp=Math.max(0,_rawEHp)
+      if(_rawEHp<0)updStat('overkillDmg',Math.abs(_rawEHp))
       // ── HP DROP DEFERRED TO CASCADE SLAM (Option B / Balatro-style) ──
       // If the strike has multiple multipliers, hand HP-drop to the breakdown's
       // onSlam callback so HP slams down WITH the final number.
       // CRITICAL EXCEPTION: lethal strikes apply immediately, otherwise the
       // Lucifer phase 2 transition + victory triggers race with the cascade.
+      //
+      // Aug 4 2026 (phase 3): this used to be an ABSOLUTE write —
+      // setEnemyHp(prev=>Math.min(prev,newEHp)) — with newEHp derived from a startHp
+      // captured before the strike animation began. Anything else that damaged the boss
+      // inside that window was silently ERASED (venom DOT lost its tick every single
+      // strike), and against Lucifer it slammed a freshly-spawned phase 2 from 333,333
+      // straight back to 0. It now applies a DELTA: the total strike damage minus what
+      // the per-member impacts already took off. A delta is not idempotent, so the slam
+      // and the safety net share an explicit once-only guard.
+      const _dropDelta=Math.max(0,_totalStrikeDmg-_impactApplied)
+      let _dropDone=false
       const _applyHpDrop=()=>{
-        enemyHpRef.current=Math.min(enemyHpRef.current,newEHp) // keep the ref exact; useEffect sync lags a render
-        setEnemyHp(prev=>Math.min(prev,newEHp))
+        if(_dropDone)return
+        if(_stale('cascade HP drop'))return
+        _dropDone=true
+        const _after=Math.max(0,enemyHpRef.current-_dropDelta)
+        enemyHpRef.current=_after // keep the ref exact; useEffect sync lags a render
+        setEnemyHp(prev=>Math.max(0,prev-_dropDelta))
         if(enemy.passiveId==='luciferBoss'){
-          const atkGain=luciferPhase===1?1:2
-          const phaseTotalDmg=Math.max(0,scaledMaxHp-newEHp)
-          setBossRageAtk(Math.floor(Math.max(0,phaseTotalDmg)/20)*atkGain)
+          // luciferPhase from the render closure is a full strike stale here (this can
+          // run seconds later, from the breakdown's onSlam). Read the live ref.
+          const atkGain=luciferPhaseRef.current===1?1:2
+          const phaseTotalDmg=Math.max(0,scaledMaxHp-_after)
+          const _rage=Math.floor(Math.max(0,phaseTotalDmg)/20)*atkGain
+          setBossRageAtk(_rage);bossRageAtkRef.current=_rage
         }
       }
-      const _lethalStrike=newEHp<=0
+      // Lethal if the strike total kills outright, or if the live HP left after the
+      // impacts can't survive the remaining delta.
+      const _lethalStrike=newEHp<=0||(enemyHpRef.current-_dropDelta)<=0
+      // ── CASCADE TIMING (Aug 4 2026, phase 3) ───────────────────────────────
+      // The old numbers were two unrelated guesses: the safety net at lines*720+900 and
+      // the breakdown unmount (_bossDelay) at lines*140+2300. The net grew FIVE TIMES
+      // faster than the unmount, so on any multi-multiplier strike the component was
+      // torn down mid-cascade, onSlam never ran, and HP finally dropped seconds after
+      // the boss had already counter-attacked and the player had regained control.
+      // Both are now derived from cascadeSlamAt(), the same function DamageBreakdown
+      // uses to schedule its own slam, so the ordering is guaranteed at BOTH speeds:
+      //   slam -> (+250ms) safety net -> (+1400ms normal / +700ms fast) boss attack.
+      const _slamAt=cascadeSlamAt(_breakdownLines,speedFast)
       if(_breakdownLines.length>1&&!_lethalStrike){
         // Cascade drives HP drop — boss HP stays put until SLAM
-        setDmgBreakdown({lines:_breakdownLines,total:_totalStrikeDmg,_pendingHpDrop:_applyHpDrop,cascadeMults:_cascadeMults,totalMult:_totalMult})
-        // ── Aug 1 2026: SLAM-RACE SAFETY NET ────────────────────────────
-        // _bossDelay budgets 140ms per breakdown line, but DamageBreakdown's
-        // lineDelay() returns up to 700ms for a big multiplier. On a build with
-        // several fat mults the boss-attack timer fires first, unmounts the
-        // breakdown, and onSlam never runs — so _pendingHpDrop never fires and
-        // the ENTIRE STRIKE DEALS ZERO DAMAGE. Reads as "my huge hit did
-        // nothing". _applyHpDrop is idempotent (setEnemyHp uses Math.min on the
-        // previous value), so calling it again is always safe: whichever path
-        // gets there first wins, and the damage can never be lost.
-        setTimeout(_applyHpDrop,_breakdownLines.length*720+900)
+        setDmgBreakdown({key:++breakdownSeqRef.current,lines:_breakdownLines,total:_totalStrikeDmg,_pendingHpDrop:_applyHpDrop,cascadeMults:_cascadeMults,totalMult:_totalMult,_fast:speedFast})
+        // SLAM-RACE SAFETY NET: if the component never got to call onSlam (unmounted,
+        // remounted, tab throttled), apply the drop ourselves a beat after the slam.
+        _reg(setTimeout(_applyHpDrop,_slamAt+250))
       } else {
         // Lethal OR no cascade: apply immediately
         _applyHpDrop()
-        if(_breakdownLines.length>1)setDmgBreakdown({lines:_breakdownLines,total:_totalStrikeDmg,cascadeMults:_cascadeMults,totalMult:_totalMult})
+        if(_breakdownLines.length>1)setDmgBreakdown({key:++breakdownSeqRef.current,lines:_breakdownLines,total:_totalStrikeDmg,cascadeMults:_cascadeMults,totalMult:_totalMult,_fast:speedFast})
       }
       addFloat(_totalStrikeDmg.toLocaleString(),bc.x,bc.y-60,'#ff2200',true)
       if(folkMagicFired){
@@ -8271,7 +9015,10 @@ function App(){
         addFloat('🪈 FOLK MAGIC! Full Embers!',window.innerWidth/2,window.innerHeight*0.35,'#44ddaa',true)
         addLog('🪈 Folk Magic proc! All Embers refunded.')
       }
-      updStat('totalDamage',finalDmg);updStat('highestStrike',finalDmg,true);if(finalDmg>=500){playSfx('big_hit');triggerShake(8,250)}
+      // Aug 4 2026 (phase 3): these excluded _shredderEchoDmg, which IS dealt — a
+      // Shredder deck's echo damage never reached the run score and the visible float
+      // (_totalStrikeDmg) disagreed with the recorded stat. Record what actually landed.
+      updStat('totalDamage',_totalStrikeDmg);updStat('highestStrike',_totalStrikeDmg,true);if(_totalStrikeDmg>=500){playSfx('big_hit');triggerShake(8,250)}
 
       // ── VOLUME KNOB / COMPRESSOR: 4+ cards this strike → next-strike bonuses ──
       // Same emptied-ref bug as the artifact block above: Volume Knob and
@@ -8318,10 +9065,18 @@ function App(){
         })
       },0)
 
-      if(newEHp<=0){
+      // ── VICTORY ROUTING ────────────────────────────────────────────────────
+      // Aug 4 2026 (phase 3): the damage pipeline is done from here on, so release the
+      // hold on the 600ms victory safety net. `_kill` uses the LIVE HP (impacts + the
+      // delta just applied) rather than the pre-strike projection, and the Lucifer phase
+      // is read from the ref — the render closure's luciferPhase is stale here, which is
+      // what produced the DOUBLE phase-2 entry (double cinematic, double band revive).
+      _endPipeline()
+      const _kill=_lethalStrike||enemyHpRef.current<=0
+      if(_kill){
         // ── MYTHIC UNLOCKS at fight victory ──
         // Inverted Cross: defeating Lucifer (final phase 2 kill)
-        if(enemy&&enemy.id==='lucifer'&&luciferPhase===2){
+        if(enemy&&enemy.id==='lucifer'&&luciferPhaseRef.current===2){
           fireMythicUnlock('invertedCross')
           // The Conduit: defeated Lucifer in ≤3 strikes total (across both phases)
           if(luciferStrikesUsedRef.current<=3){fireMythicUnlock('theConduit')}
@@ -8334,7 +9089,7 @@ function App(){
         // Witch's Sabbath: at Lucifer victory, check if every member that was
         // ever on stage went Too Stoned at some point in the run AND there are
         // ≥3 such members (so it's a real "haze" not just one bad fight).
-        if(enemy&&enemy.id==='lucifer'&&luciferPhase===2){
+        if(enemy&&enemy.id==='lucifer'&&luciferPhaseRef.current===2){
           if(runStonedMembersRef.current.size>=3&&runStonedMembersRef.current.size>=soloMembersUsedRef.current.size*0.75){
             fireMythicUnlock('witchsSabbath')
           }
@@ -8343,26 +9098,29 @@ function App(){
 
       // Aug 3 2026: never award a win off a zero/blank starting HP — that is the
       // signature of a strike landing mid-transition, not of a real kill.
-      if(newEHp<=0&&startHp<=0){
+      if(_kill&&startHp<=0){
         try{console.log('[VICTORY-BLOCKED] strike resolved with startHp='+startHp+' (boss mid-transition) — not a kill')}catch(e){}
         setAnimPhase('idle')
         return
       }
-      if(newEHp<=0){
+      if(_kill){
         // LUCIFER PHASE TRANSITION: Phase 1 → Phase 2.
         // Aug 1 2026: body extracted to enterLuciferPhase2 so the ~15 direct-damage
         // kill paths and the delayed victory safety net share ONE implementation
         // (they used to skip this entirely and end the run at the halfway point).
-        if(enemy.passiveId==='luciferBoss'&&luciferPhase===1){
+        if(enemy.passiveId==='luciferBoss'&&luciferPhaseRef.current===1){
           if(luciferPhase2Ref.current)luciferPhase2Ref.current()
           return
         }
         if(triggerVictoryRef.current)triggerVictoryRef.current();return
       }
 
-      const _bossDelay=(_breakdownLines.length>1)?(_breakdownLines.length*140+200+1100+1000):(800+1000)
-      if(_breakdownLines.length>1){const _slamAt=_breakdownLines.length*140+200;setTimeout(()=>{try{playSfx('big_hit')}catch(e){}},_slamAt)}
-      setTimeout(function(){
+      // Boss counter-attack starts a beat after the cascade slam — see the CASCADE
+      // TIMING note above. Non-cascade strikes keep the old flat 1.8s.
+      const _bossDelay=(_breakdownLines.length>1)?(_slamAt+(speedFast?700:1400)):(800+1000)
+      if(_breakdownLines.length>1){_reg(setTimeout(()=>{try{playSfx('big_hit')}catch(e){}},_slamAt))}
+      _reg(setTimeout(function(){
+        if(_stale('boss counter-attack chain'))return
         setDmgBreakdown(null) // dismiss breakdown before boss attacks
         setAnimPhase('boss')
         const activeM=stage.filter(function(m){return m&&!m.tooStoned})
@@ -8375,7 +9133,7 @@ function App(){
           target=activeM[Math.floor(Math.random()*activeM.length)]
         }
         // Lucifer Phase 2: AoE — hits ALL members (damage split)
-        const luciferAoE=enemy.passiveId==='luciferBoss'&&luciferPhase===2
+        const luciferAoE=enemy.passiveId==='luciferBoss'&&luciferPhaseRef.current===2 // ref: this runs inside a timer (rule 3)
         // BOSS STRIKE ANIMATION — emoji square flies to target member
           const targetSlotIdx=stage.indexOf(target)
           const bossPos=getCenter(bossRef)
@@ -8404,11 +9162,16 @@ function App(){
           // Phase 5: DONE
           setTimeout(()=>setBossStrikeAnim(null),speedFast?900:1800)
           // Delay damage application until after boss animation
-          setTimeout(function(){
+          _reg(setTimeout(function(){
+          if(_stale('boss counter-attack damage'))return
           const variance=0
           // Apply enemy passive scaling effects before damage
         const stakeBaseDmg=enemy.baseDmg+activeStake.dmgAdd
-        let scaledBaseDmg=Math.max(1,stakeBaseDmg-(chosenPacts.includes('stone_wall')?1:0))+(enemy.passiveId&&enemy.passiveId.startsWith('damageScaleAtk')?bossRageAtk:0)
+        // Aug 4 2026 (phase 3): bossRageAtk/bossDebuff were read from the RENDER closure
+        // inside this timer, so both lagged exactly one strike — a DEBUFF vocalist logged
+        // "-2 damage" and the boss immediately hit for the full undebuffed amount, and
+        // Lucifer's rage never included the strike that had just landed. Refs (rule 3).
+        let scaledBaseDmg=Math.max(1,stakeBaseDmg-(chosenPacts.includes('stone_wall')?1:0))+(enemy.passiveId&&enemy.passiveId.startsWith('damageScaleAtk')?bossRageAtkRef.current:0)
         // v0.8 ANCHOR aura — adjacent ANCHOR members shield the target (-1 each, floor 1)
         scaledBaseDmg=Math.max(1,scaledBaseDmg-_anchorAuraRed(stage,target.uid))
         // selfbuff: boss gains +1/+2 dmg per Strike
@@ -8431,7 +9194,9 @@ function App(){
         // Berserker: BLOODLUST — double damage when below 50% HP
         else if(enemy.passiveId==='bloodlust'){
           scaledBaseDmg=stakeBaseDmg
-          if(enemyHp<(scaledMaxHp||enemy.maxHp)*0.5){
+          // Aug 4 2026 (phase 3): read the live HP ref — the stale enemyHp closure made
+          // the Berserker's <50% check lag a full strike.
+          if(enemyHpRef.current<(scaledMaxHp||enemy.maxHp)*0.5){
             scaledBaseDmg=stakeBaseDmg*2
             addLog('⚔️ BLOODLUST! Berserker strikes twice as hard!')
             addFloat('BLOODLUST!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#cc0000',true)
@@ -8442,7 +9207,10 @@ function App(){
           scaledBaseDmg=stakeBaseDmg
           const _cmd=Math.floor(Math.random()*3)
           if(_cmd===0){
-            setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:Math.max(0,m.atk-1),tempBuff:true}):m))
+            // Aug 4 2026 (phase 3): tempBuff without _origAtk never expires (the expiry
+            // block requires both), so the Warlord's -1 was a PERMANENT stat loss applied
+            // up to 4x per fight. Stamp _origAtk so it wears off after the strike.
+            setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:Math.max(0,m.atk-1),tempBuff:true,_origAtk:m._origAtk!==undefined?m._origAtk:m.atk}):m))
             addLog('💢 Warlord commands: ALL members lose 1 ATK!')
             addFloat('-1 ATK ALL',getCenter(bossRef).x,getCenter(bossRef).y-80,'#cc1144',true)
           } else if(_cmd===1){
@@ -8474,17 +9242,28 @@ function App(){
         }
         // luciferBoss: phase-specific passives
         else if(enemy.passiveId==='luciferBoss'){
-          if(luciferPhase===1){
+          if(luciferPhaseRef.current===1){
             // Frozen Wrath: frostbite 3 to all + damageScale +1
-            scaledBaseDmg=stakeBaseDmg+bossRageAtk
+            scaledBaseDmg=stakeBaseDmg+bossRageAtkRef.current
             playSfx('boss_attack');triggerShake(10,350);setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:Math.max(0,m.hp-3)}):m))
             addLog('🧊 Frostbite! All members take 3 cold damage.')
-          } else if(luciferPhase===2){
+          } else if(luciferPhaseRef.current===2){
             // Infernal: AoE + damageScale +2
-            scaledBaseDmg=stakeBaseDmg+bossRageAtk
+            scaledBaseDmg=stakeBaseDmg+bossRageAtkRef.current
           }
         }
-        else{scaledBaseDmg=stakeBaseDmg}
+        // Aug 4 2026 (phase 3): there used to be a trailing `else{scaledBaseDmg=stakeBaseDmg}`
+        // here. It DISCARDED the Stone Wall pact reduction and the ANCHOR aura reduction
+        // computed above — only the corruptPlayer*/stashSteal* branches (which don't touch
+        // scaledBaseDmg) preserved them — so both mitigations did nothing against 15 of the
+        // 27 bosses, while the attack telegraph DID subtract stone_wall and showed the
+        // lower number. Bosses with no damage-modifying passive now simply keep the
+        // mitigated value computed at the top.
+        // targetHighestHp2/3 were matched for TARGETING only and their damage multipliers
+        // were never applied anywhere: The Hunter's "+50% damage to them" and The
+        // Executioner's "deals double damage" were both completely inert.
+        if(enemy.passiveId==='targetHighestHp2')scaledBaseDmg=Math.max(1,Math.round(scaledBaseDmg*1.5))
+        else if(enemy.passiveId==='targetHighestHp3')scaledBaseDmg=Math.max(1,scaledBaseDmg*2)
         // ── OVERTIME ENRAGE (Jul 31 2026, JV) ── past the strike limit the boss's
         // damage doubles per overtime strike: x2, x4, x8... Fight ends only in death.
         {/* Aug 1 2026 OFF-BY-ONE: strikesLeft here is the PRE-decrement closure value (the
@@ -8503,7 +9282,7 @@ function App(){
           bossSkipStrikesRef.current=Math.max(0,bossSkipStrikesRef.current-1)
           setBossSkipStrikes(p=>Math.max(0,p-1))
         }
-        const actualDmg=(_bossSkippedThisStrike||fightTripBuff==='ASTRAL PROJECTION')?0:Math.max(1,Math.round(scaledBaseDmg)-bossDebuff)
+        const actualDmg=(_bossSkippedThisStrike||fightTripBuff==='ASTRAL PROJECTION')?0:Math.max(1,Math.round(scaledBaseDmg)-bossDebuffRef.current)
         if(_bossSkippedThisStrike){
           addFloat('FROZEN',getCenter(bossRef).x,getCenter(bossRef).y-60,'#88ddff',true)
           addLog('❄ Boss frozen — attack skipped.')
@@ -8613,8 +9392,17 @@ function App(){
           setDamageFlash(true);triggerShake(10,350);setTimeout(function(){setDamageFlash(false)},400)
           addLog('👁 '+enemy.name+' hits '+target.name+' for '+actualDmg)
           } // end single-target else
-          },speedFast?600:1200) // boss animation delay
-          setTimeout(function(){
+          },speedFast?600:1200)) // boss animation delay
+          // ── Aug 4 2026 (phase 3) BOSS-ATTACK / CONTROL ORDERING ──────────────
+          // This block ends by handing control back (setAnimPhase('idle')) and it used
+          // to be a flat 900ms while the boss's damage above lands at 1200ms at NORMAL
+          // speed — so the player regained control 300ms BEFORE the counter-attack.
+          // Clicking STRIKE immediately began strike N+1 while strike N's damage was
+          // still pending, and the counter-attack's setStage then landed mid-strike on a
+          // pre-buff stage closure. Fast mode (600 dmg / 900 idle) was already correct;
+          // normal speed now mirrors it at damage+300 = 1500.
+          _reg(setTimeout(function(){
+            if(_stale('post-strike draw / refill'))return
             let nh=[...handRef.current],nd=[...deckRef.current],ndisc=[...discRef.current];
             const cardsToReplace=Math.min(cardsToDrawRef.current,Math.max(0,handTargetRef.current-nh.length));
             for(let _r=0;_r<cardsToReplace;_r++){
@@ -8699,10 +9487,10 @@ function App(){
               }
               return cur;
             });
-          },900)
-      },_bossDelay)
-    },delay+200)
-  },[animPhase,strikesLeft,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,bossRef,stageRefs,drawUpTo,triggerVictory,bossRageAtk,bossDebuff,fightTripBuff,luciferPhase,stolenAtkPool,maxEmbers])
+          },speedFast?900:1500))
+      },_bossDelay))
+    },delay+200))
+  },[animPhase,strikesLeft,fightMaxStrikes,speedMode,enemyHp,stage,hand,deck,discardPile,enemy,embers,pendingEmbers,fightIndex,bossRef,stageRefs,drawUpTo,triggerVictory,bossRageAtk,bossDebuff,fightTripBuff,luciferPhase,stolenAtkPool,maxEmbers])
   // Wire the ref so handleStrike can call the latest body without stale closure
   handleStrikeBodyRef.current=handleStrikeBody
 
@@ -8712,29 +9500,37 @@ function App(){
       setWelcomeToHell('cutscene')
       setGameState('playing') // needed so cutscene screen renders
       setTimeout(()=>{
-        setEnemy(AR_EXECUTIVE)
-        setEnemyHp(AR_EXECUTIVE.maxHp)
+        beginFightToken() // fight boundary — invalidate any in-flight strike timers
         const _fmS=activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0);
-        setEmbers(maxEmbers);setStrikesLeft(_fmS);setFightMaxStrikes(_fmS);setDiscardsLeft(MAX_DISCARDS);setFightMaxDiscards(MAX_DISCARDS)
-        setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setLastRiffPlayed(null);lastRiffPlayedRef.current=null
-        setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[]
-        setContractsPlayed(0);setPendingDraw(0);wthStrikesRef.current=0
-        const allCards=[...handRef.current,...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
         const hs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
+        // ── SHARED PER-FIGHT RESET (Aug 4 2026, phase 4) ──────────────────
+        // This branch used to be a hand-rolled subset of the between-fight
+        // reset missing ~35 entries, every one of which carried Lucifer's
+        // state into the Executive fight: bossDebuff (a Vocalist band clamped
+        // the Executive to 1 dmg/hit for the whole fight), bossSkipStrikes (a
+        // DMT trip on Lucifer's last strike skipped the Executive's first two
+        // attacks), anchorSavesUsedRef/survivorSavesUsedRef (lethal saves stayed
+        // burned), discardsThisFightRef (discard relics fired at full stack from
+        // strike 1), shredderEchoesPendingRef (free echo damage on the opener),
+        // wahPedalUsedRef/octavePedalFiredRef/tabletFiredRef (three "first of
+        // fight" bonuses silently never fired), fightTripBuff/activeTripEffect/
+        // tripUsedThisFight (OVERMIND kept its ×3.0 floor AND no new trip could
+        // be taken), the free-card trio, bonusDiscards/bonusEmbers, dblRoll
+        // (DOUBLE TIME locked to Lucifer's roll), immolateStacks, luciferPhase,
+        // and the six per-fight stat refs that made the victory summary report
+        // LUCIFER's numbers. It is now the same call as every other fight start.
+        // (triggerVictory already clears stolenAtkPool/stashStolenThisFight/
+        //  corruption on the Lucifer kill; re-clearing them here is a no-op.)
+        resetPerFightState({
+          corruption,handTarget:hs,stage,strikes:_fmS,discards:MAX_DISCARDS,
+          drumThrone:activePassives.some(p=>p.id==='drumthrone'),
+        })
+        setEnemy(AR_EXECUTIVE)
+        setEnemyHp(AR_EXECUTIVE.maxHp);enemyHpRef.current=AR_EXECUTIVE.maxHp
+        setEmbers(maxEmbers)
+        const allCards=[...handRef.current,...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
         setHand(allCards.slice(0,hs));setDeck(allCards.slice(hs));setDiscardPile([])
-        handTargetRef.current=hs
         setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined}):null))
-        // ── CRITICAL: reset between-fight refs/state (v0.7.12) ──
-        // Without this, victoryFiredRef remained true from the Lucifer kill,
-        // so when the Executive's HP hit 0, triggerVictory() bailed at its
-        // first line ("if(victoryFiredRef.current)return"). Game stuck on
-        // play screen — no end transition, no cinematic. JV hit this and
-        // couldn't progress. Also resetting the other per-fight transients
-        // that the normal between-fight flow handles at line ~9214.
-        victoryFiredRef.current=false
-        setMemberBuffs({});setSlowBurnStrikes(0);setAmpFeedbackDiscount(0);setPyromaniacActive(false)
-        milestonesFiredRef.current={half:false,quarter:false,tenth:false}
-        setStrikeMult(1.0);strikeMultRef.current=1.0
         setWelcomeToHell('fighting')
       },3000)
       return
@@ -8766,11 +9562,31 @@ function App(){
     }
     setFightIndex(nextIdx)
     const nextEnemy=ENEMIES[nextIdx]
-    setEnemy(nextEnemy);const _deckScale=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1;const _heatLevel=parseInt(localStorage.getItem('vst_heat')||'1');const _heatMult=1+(Math.max(0,_heatLevel-1)*0.15);const _sHp=Math.ceil(nextEnemy.maxHp*_deckScale*_heatMult*(encoreMode?2.0:1.0));setEnemyHp(_sHp);setScaledMaxHp(_sHp)
-    // per-fight tracking resets
-    fightStartTimeRef.current=Date.now()
-    // Reset live peak corruption tracker — Hangover commits this on victory.
-    peakCorruptionRef.current=corruption
+    beginFightToken() // fight boundary — invalidate any in-flight strike timers
+    setEnemy(nextEnemy)
+    // Aug 4 2026 (phase 3) — this inlined the scaling formula and OMITTED _stakeHpF(),
+    // which both getScaledMaxHp and the run-start formula include. Fight 1 was
+    // stake-scaled and fights 2–27 were not, so the whole stake HP ladder did nothing
+    // past the opener AND the descent map / boss preview / victory summary (all of
+    // which call getScaledMaxHp) printed a number the fight never used.
+    // CLAUDE.md rule 13: getScaledMaxHp is the only HP formula.
+    const _sHp=getScaledMaxHp(nextEnemy);setEnemyHp(_sHp);setScaledMaxHp(_sHp);enemyHpRef.current=_sHp
+    // ── SHARED PER-FIGHT RESET (Aug 4 2026, phase 4) ────────────────────
+    // The ~40 lines of per-fight resets that used to be scattered through the
+    // rest of this function now live in PER_FIGHT_RESETS (see RESET REGISTRY),
+    // which the Welcome-to-Hell branch and startTutorialFight call too. Adding a
+    // per-fight `useState` means adding ONE registry entry, not remembering
+    // three call sites. Everything below this line is fight-SPECIFIC setup
+    // (enemy, hangover, pacts, artifacts, loot, hand redeal) — deliberately not
+    // in the registry because it varies per site.
+    const _deckMaxStrikesMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
+    const _fmStrikes=activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0)+_deckMaxStrikesMod
+    const _fmDiscards=MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0)
+    const _lhs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
+    resetPerFightState({
+      corruption,handTarget:_lhs,stage,strikes:_fmStrikes,discards:_fmDiscards,
+      drumThrone:activePassives.some(p=>p.id==='drumthrone'),onLog:addLog,
+    })
     // ── HANGOVER HP DEBUFF (v0.7.1) ──────────────────────────────
     // Members enter the next fight with reduced max HP based on last fight's
     // peak corruption. -⌊hangover/33⌋ per member, capped at 3. Restored on
@@ -8794,32 +9610,8 @@ function App(){
       setPreFightSplash({enemy:nextEnemy,circle:nextEnemy.circle||('Circle '+(Math.floor(nextIdx/3)+1)),quote:TOUR_QUOTES[Math.floor(Math.random()*TOUR_QUOTES.length)]})
       setTimeout(()=>setPreFightSplash(null),2200)
     }
-    corruptionAtFightStartRef.current=corruption
-    cardsPlayedThisFightRef.current=0
-    highestStrikeThisFightRef.current=0
-    damageThisFightRef.current=0
-    embersSpentThisFightRef.current=0
-    // ── ANCHOR (4d) — lock save tier + reset save count for this fight ──
-    {
-      const _anchorCount=stage.filter(m=>m&&!m.tooStoned&&m.keyword==='ANCHOR').reduce((s,m)=>s+(m.foil?2:1),0)
-      anchorTierRef.current=_stackTier(_anchorCount)
-      anchorSavesUsedRef.current=0
-    }
-    // ── DECK SIGNATURES — reset per-fight state ──
-    shredderEchoesPendingRef.current=0
-    ritualistPrevCorruptionRef.current=corruption
-    ritualistEmberRefundsThisStrikeRef.current=0
-    survivorSavesUsedRef.current=new Set()
-    // Reset modifier tracking refs each fight
-    discardsThisFightRef.current=0
-    discardsThisStrikeRef.current=0
-    wahPedalUsedRef.current=false
-    octavePedalFiredRef.current=false
-    tabletFiredRef.current=false
-    queuedReplaysRef.current=[]
-    // Mythic unlock per-fight trackers
-    luciferStrikesUsedRef.current=0
-    fightLossMembersRef.current=new Set()
+    // (per-fight stat refs, ANCHOR tier, deck-signature refs, modifier refs and
+    //  the mythic per-fight trackers all moved into PER_FIGHT_RESETS above)
     addLog('══════ FIGHT '+(nextIdx+1)+': '+nextEnemy.name+' ('+_sHp+' HP) ══════')
     // Pact: Corruption Engine — +5% corruption at fight start
     if(chosenPacts.includes('corruption_engine')&&!chosenPacts.includes('corruption_locked'))setCorruption(p=>Math.min(100,p+5))
@@ -8828,18 +9620,16 @@ function App(){
       setStage(p=>{const alive=p.filter(m=>m&&!m.tooStoned);if(alive.length===0)return p;const weakest=alive.reduce((a,b)=>a.hp<b.hp?a:b);return p.map(m=>m&&m.uid===weakest.uid?Object.assign({},m,{hp:Math.max(1,m.hp-1)}):m)})
       addLog('🔮 The Whispers... '+corruption+'% corruption gnaws at your weakest.')
     }
-    const _deckMaxStrikesMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
-    const _fmStrikes = activeStake.maxStrikes+(chosenPacts.includes('war_drums')?1:0)+_deckMaxStrikesMod;
-    const _fmDiscards = MAX_DISCARDS+(bonusDiscards>0?bonusDiscards:0);
-    // Initial ember placement: let the extraEm calculation below do all the work
-    // Don't pre-set to max, or P1/Power Conditioner gains get silently capped.
-    playSfx('ember_gain');setStrikesLeft(_fmStrikes);setFightMaxStrikes(_fmStrikes);setDiscardsLeft(_fmDiscards);setFightMaxDiscards(_fmDiscards);setPendingDraw(0)
-    if(bonusDiscards>0)setBonusDiscards(0);if(bonusEmbers>0)setBonusEmbers(0)
-    setStageDiveUsed(false);setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setNextCardFree(false);setAllCardsFree(false);allCardsFreeRef.current=false;setFreeCardsLeft(0);freeCardsLeftRef.current=0;setBossSkipStrikes(0);bossSkipStrikesRef.current=0;setLastRiffPlayed(null);lastRiffPlayedRef.current=null;setStashStolenThisFight(0);setTripUsedThisFight(false);setActiveTripEffect(null);setFightTripBuff(null);setStolenAtkPool(0);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0);milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false;setPhaseBanner('play');setStrikeMult(1.0);multMilestonesRef.current={2:false,4:false,8:false,16:false}
+    // Strikes/discards/pendingDraw/bonusDiscards/bonusEmbers are applied by
+    // resetPerFightState above (it received _fmStrikes/_fmDiscards). Initial
+    // ember placement is left to the extraEm calculation below — don't pre-set
+    // to max, or P1/Power Conditioner gains get silently capped.
+    playSfx('ember_gain')
+    // (the ~40-setter per-fight wipe that used to live here — including the
+    //  Setlist/deck-view modals and victoryFiredRef — is now PER_FIGHT_RESETS)
     // AUTO-SAVE moved to effect-based save keyed on fightIndex (v4.1, Jul 30 2026).
     // The setTimeout save that lived here captured STALE closure state (previous
     // fight's sl/hand/stage/fightIndex) → zombie-fight saves. See effect ~line 6962.
-    setMemberBuffs({});victoryFiredRef.current=false;setSlowBurnStrikes(0);setAmpFeedbackDiscount(0);setPyromaniacActive(false)
     // BOSS LOOT effects at fight start
     if(collectedLoot.includes('love_letter'))setNextCardFree(true)
     // ── LUCIFER PHASE SETUP ─────────────────────────────────────
@@ -8853,26 +9643,24 @@ function App(){
       const luciferActualHp=Math.ceil(333333*(1+Math.max(0,_lheat-1)*0.15)*(encoreMode?2.0:1.0)) // phase 1 of 2 — 666,666 total at Heat 1, scales with NG+/Encore
       setEnemyHp(luciferActualHp)
       setScaledMaxHp(luciferActualHp) // display max must match — generic set above used 185,000
-      setLuciferPhase(1)
+      setLuciferPhase(1);luciferPhaseRef.current=1
       addLog('⛧ THE DEVIL HIMSELF — 666,666 HP ACROSS TWO FORMS ⛧')
       addLog('🧊 Phase 1: Lucifer, Frozen in Cocytus — 333,333 HP')
       // Show cinematic overlay
       setLuciferCinematic({text:'666,666 HP. BRING EVERYTHING.',hp:luciferActualHp})
       setTimeout(()=>setLuciferCinematic(null),5000)
     } else {
-      setLuciferPhase(0)
+      setLuciferPhase(0);luciferPhaseRef.current=0
     }
-    // Re-roll DOUBLE TIME for next fight
-    const nd=stage.some(m=>m&&m.role==='Drummer')
-    const ndCount=stage.filter(m=>m&&m.role==='Drummer').length
-    if(nd){let r=Math.floor(Math.random()*6)+1;if(ndCount>=2&&r<=2)r=Math.floor(Math.random()*6)+1;setDblRoll(r)}else setDblRoll(null)
+    // DOUBLE TIME is re-rolled by PER_FIGHT_RESETS.dblRoll (with the Drum Throne
+    // re-roll folded in). This block used to roll it TWICE — once here without
+    // Drum Throne, once again ~90 lines below with it.
     setStage(p=>{
       const reset=p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined,_sustainUsed:undefined,_hrUsed:undefined}):null)
       return scanMentorLinks(reset)
     })
     // Redeal hand from current deck+discard
     const allCards=[...handRef.current,...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
-    const _lhs=HAND_SIZE+(chosenPacts.includes('speed_demon')?1:0)
     setHand(allCards.slice(0,_lhs))
     setDeck(allCards.slice(_lhs))
     setDiscardPile([])
@@ -8882,15 +9670,17 @@ function App(){
     // A1: Vintage Guitar — lead guitarist +1 ATK
     // A2: Devil's Tuning Fork — start at 15% corruption (applied below)
     const hasDevilsFork=activeArtifacts.some(a=>a.id==='a2')
-    // A3: Evil Eye — first card each Strike free (state reset each fight)
-    if(activeArtifacts.some(a=>a.id==='a3')||activePassives.some(p=>p.id==='a3'))setNextCardFree(true)
+    // A3: Evil Eye — "The first card you play each Strike costs 0 Embers".
+    // Arming it here only gets you the FIRST card of the FIGHT; the per-strike
+    // re-arm that makes the card text true lives in the PER-STRIKE RESET inside
+    // handleStrikeBody (Aug 4 2026, phase 4 — it was a 4× shortfall at Bronze).
+    if(activeArtifacts.some(a=>a.id==='a3')||activePassives.some(p=>p.id==='a3')){setNextCardFree(true);nextCardFreeRef.current=true}
     // A4: Roadie's Toolbelt — random member Stonewall
     const hasToolbelt=activeArtifacts.some(a=>a.id==='a4')||activePassives.some(p=>p.id==='a4')
     // A7: Serpent's Kiss — handled via maxEmbers permanently
     // A8: Stone Tablet — handled via maxHp permanently
     // A10: Burning Stage bonus embers
-    const burnBonus=pendingBurningStage?5:0
-    if(pendingBurningStage)setPendingBurningStage(false)
+    const burnBonus=pendingBurningStage?5:0 // cleared by PER_FIGHT_RESETS.pendingBurningStage
     // ── CIRCLE ARTIFACT FIGHT-START EFFECTS ──────────────────
     const hasGoat=activeArtifacts.some(a=>a.id==='ca1')     // Goat of Mendes: all +1 ATK
     // ca2 (Hellfire) and ca3 (Sabbath Crown) reclassified to pedal pool — now check activePassives
@@ -8948,27 +9738,12 @@ function App(){
       setEmbers(maxEmbers+(bonusEmbers>0?bonusEmbers:0)+extraEm)
       if(extraEm>0)addLog('🌿 Ember bonus: +'+(extraEm)+' (passives)')
     }
-    // Roll DOUBLE TIME d6 if drummer is on stage
-    const hasDrummer=stage.some(m=>m&&m.role==='Drummer')
-    const drumCount3=stage.filter(m=>m&&m.role==='Drummer').length
-    const hasDrumThrone=activePassives.some(p=>p.id==='drumthrone')
-    if(hasDrummer){
-      let roll=Math.floor(Math.random()*6)+1
-      if(drumCount3>=2&&roll<=2)roll=Math.floor(Math.random()*6)+1
-      // Drum Throne pedal: roll twice and pick higher
-      if(hasDrumThrone){
-        const reroll=Math.floor(Math.random()*6)+1
-        roll=Math.max(roll,reroll)
-        addLog('🪑 Drum Throne re-roll: kept '+roll)
-      }
-      setDblRoll(roll)
-    } else {
-      setDblRoll(null)
-    }
+    // DOUBLE TIME d6 (incl. the Drum Throne re-roll) is owned by
+    // PER_FIGHT_RESETS.dblRoll — see the resetPerFightState call at the top.
     // War Drums: +1 Strike
     if(activeArtifacts.some(a=>a.id==='wardrums')||activePassives.some(p=>p.id==='wardrums')){setStrikesLeft(p=>p+1);setFightMaxStrikes(p=>p+1);addLog('🪘 War Drums! +1 Strike this fight.')}
     setGameState('playing')
-  },[fightIndex,maxEmbers,stage,selectedDeck,activeStake,chosenPacts,activeArtifacts,activePassives,corruption,collectedLoot,encoreMode,bonusDiscards,bonusEmbers,tutorialFight,upgradedCards,heldShrooms,heldAcid,stash])
+  },[fightIndex,maxEmbers,stage,selectedDeck,activeStake,chosenPacts,activeArtifacts,activePassives,corruption,collectedLoot,encoreMode,bonusDiscards,bonusEmbers,tutorialFight,upgradedCards,heldShrooms,heldAcid,stash,getScaledMaxHp,resetPerFightState])
 
   // ═══════════════════════════════════════════════════════════
   // HANDLE EVENT CHOICE — apply effects, then go to shop
@@ -9077,25 +9852,67 @@ function App(){
   },[pendingEvent,stage,corruption,chosenPacts,stash])
 
 
-  const handleShopSpend=useCallback((cost,type,item)=>{
-    const hungerMult=corruption>=50?1.25:1.0
-    const effectiveCost=Math.ceil((chosenPacts.includes('merchants_eye')?Math.max(1,Math.floor(cost*0.8)):cost)*hungerMult)
-    if(stash<effectiveCost)return
+  // ═══ GEAR ON-EQUIP SIDE EFFECTS — apply AND reverse ═══════════════
+  // a7 (Serpent's Kiss) and a8 (Stone Tablet) mutate permanent stats when
+  // equipped. Four separate code paths used to inline the "apply" half and NONE
+  // of them implemented the "reverse" half, so swapping a8 out in the slot modal
+  // paid a 6🌿 refund and left the +3 max HP on every member forever.
+  const applyGearEquip=useCallback((it)=>{
+    if(!it)return
+    if(it.id==='a7')setMaxEmbers(p=>Math.min(MAX_EMBERS_CAP,p+1))
+    if(it.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
+  },[])
+  const revertGearEquip=useCallback((it)=>{
+    if(!it)return
+    if(it.id==='a7')setMaxEmbers(p=>Math.max(1,p-1))
+    if(it.id==='a8')setStage(prev=>prev.map(m=>{
+      if(!m)return m
+      const nmax=Math.max(1,m.maxHp-3)
+      return Object.assign({},m,{maxHp:nmax,hp:Math.max(1,Math.min(m.hp,nmax))})
+    }))
+  },[])
+  // Pack-granted gear that doesn't fit queues up behind the first swap prompt.
+  const gearSwapQueueRef=useRef([])
+
+  // ═══ THE ONE PURCHASE PATH ═══════════════════════════════════════
+  // Returns 'bought' | 'pending' | 'refused'. Callers MUST gate their
+  // "mark sold / grant item / set bought flag" on 'bought'. Before Aug 4 2026
+  // this returned undefined, so every caller committed unconditionally: a
+  // refused purchase handed over the goods for free (drug tiles) or burned the
+  // tile for the whole circle without taking a coin (slot-full artifacts).
+  //
+  // 'pending' means the slot-swap modal is now open; `onCommit` (supplied by
+  // the caller) fires only if confirmSlotSwap succeeds.
+  const handleShopSpend=useCallback((cost,type,item,onCommit)=>{
+    // Single pricing source — same function the shop UI renders with.
+    const effectiveCost=shopPrice(cost,{kind:type==='dealer'?'drug':'item',hangover,chosenPacts,stake:activeStake})
+    if(stash<effectiveCost){addLog('🚫 Not enough stash — that runs '+effectiveCost+'🌿.');return 'refused'}
+    // ── LUCIFER BAND CAP ──
+    // Checked BEFORE any deduction. It used to deduct first and then "refund"
+    // `item.cost` — but buyCard's recruit payload carried no cost field, so
+    // buying a member card at the cap charged full price and refunded 0 (and
+    // that was the only setStash in the shop with no MAX_STASH clamp). Refusing
+    // outright is exact by construction.
+    if(type==='recruit'&&stage.some(m=>m&&m.keyword==='FALLEN')&&stage.filter(m=>m).length>=3){
+      addLog('😈 Lucifer limits your band to 3 — Sly keeps the pack on the shelf.')
+      playSfx('select',0.5)
+      return 'refused'
+    }
     // ── SLOT-FULL CHECK FOR ARTIFACTS/PEDALS (v0.7.10) ──
     // Run BEFORE deducting stash. Old behavior: deduct → check cap → silently
     // bail with stash gone. Now: if slots full, open the swap modal and don't
     // deduct anything. Modal's confirm handler will deduct and equip.
     if(type==='artifact'&&activeArtifacts.length>=3){
-      setSlotSwapPrompt({type:'artifact',incoming:item,cost:effectiveCost})
+      setSlotSwapPrompt({type:'artifact',incoming:item,cost:effectiveCost,onCommit:onCommit||null})
       playSfx('select',0.7) // gentle select sound, not the buy "clack"
-      return
+      return 'pending'
     }
     if(type==='passive'&&activePassives.length>=2){
-      setSlotSwapPrompt({type:'passive',incoming:item,cost:effectiveCost})
+      setSlotSwapPrompt({type:'passive',incoming:item,cost:effectiveCost,onCommit:onCommit||null})
       playSfx('select',0.7)
-      return
+      return 'pending'
     }
-    setStash(p=>p-effectiveCost)
+    if(effectiveCost>0)setStash(p=>Math.max(0,p-effectiveCost))
     playSfx('buy')
     if(type==='card'){
       const nc=Object.assign({},item,{uid:uid(),shopBought:true})
@@ -9103,26 +9920,18 @@ function App(){
       setShopBoughtIds(p=>[...p,nc.uid])
       addLog('🛒 Bought '+item.name+'!')
     } else if(type==='artifact'){
-      setActiveArtifacts(p=>[...p,item])
-      // A7: Serpent's Kiss — permanent +1 max ember
-      if(item.id==='a7')setMaxEmbers(p=>Math.min(8,p+1))
-      // A8: Stone Tablet — permanent +3 max HP all members
-      if(item.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
+      // `paidCost` records what was ACTUALLY charged so refund paths (Dive Bar
+      // Sign's circle-IV refund, the swap-modal 50% buyback) can never pay back
+      // more than you spent. See item 17.
+      setActiveArtifacts(p=>[...p,Object.assign({},item,{paidCost:effectiveCost})])
+      applyGearEquip(item)
       addLog('⚗ Artifact equipped: '+item.name+'!')
     } else if(type==='passive'){
-      setActivePassives(p=>[...p,item])
+      setActivePassives(p=>[...p,Object.assign({},item,{paidCost:effectiveCost})])
       // RECLASSIFIED ARTIFACTS — apply on-equip effects from passive branch too
-      // A7: Serpent's Kiss — permanent +1 max ember
-      if(item.id==='a7')setMaxEmbers(p=>Math.min(8,p+1))
-      // A8: Stone Tablet — permanent +3 max HP all members
-      if(item.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
+      applyGearEquip(item)
       addLog('💿 Passive equipped: '+item.name+'!')
     } else if(type==='recruit'){
-      // Lucifer band cap: refund the pack instead of selling dead candidates
-      if(stage.some(m=>m&&m.keyword==='FALLEN')&&stage.filter(m=>m).length>=3){
-        setStash(p=>p+(item.cost||0));addLog('😈 Lucifer limits your band to 3 — Sly refunds the pack.')
-        return
-      }
       let candidates
       if(item._memberOverride){
         // Center shop member card — specific named member, already tiered
@@ -9155,85 +9964,126 @@ function App(){
       setRecruitCandidates(candidates)
       setGameState('recruit')
     } else if(type==='pack'){
-      playSfx('pack_open')
-      // Handle booster pack picks — route each picked card to the right place
+      // Two call shapes: (cost, 'pack', {...pack, pickedCards:[]}) at OPEN time,
+      // which only charges, and (0, 'pack', {...pack, pickedCards:[...]}) when
+      // the player closes the picker, which only routes the goods.
       const picked = item.pickedCards || []
-      const members = picked.filter(c => c.isMember)
-      const cards = picked.filter(c => !c.isMember && !c._isPack)
-      const artifacts = picked.filter(c => c._isPack && !c.cost && !c.isMember)
-      const passives = picked.filter(c => c._isPack && c.cost)
+      if(picked.length){
+        playSfx('pack_open')
+        const members = picked.filter(c => c.isMember)
+        // Aug 4 2026: routed on the explicit `_packKind` tag. The old test was
+        // `c._isPack && !c.cost` for artifacts / `c._isPack && c.cost` for
+        // passives — but every artifact in STARTER/CIRCLE/MYTHIC_ARTIFACTS has a
+        // truthy cost, so the artifacts bucket was ALWAYS empty and every
+        // pack-granted artifact was shoved into setActivePassives: an artifact
+        // sitting in a pedal slot, where no artifact multiplier logic reads it.
+        const cards = picked.filter(c => !c.isMember && !c._isPack && !c._packKind)
+        const artifacts = picked.filter(c => c._packKind==='artifact')
+        const passives = picked.filter(c => c._packKind==='passive')
 
-      // Add regular cards to deck
-      cards.forEach(c => {
-        const nc = Object.assign({},c,{uid:uid(),shopBought:true})
-        setDeck(p=>[...p,nc])
-        setShopBoughtIds(p=>[...p,nc.uid])
-        addLog('🛒 Added '+c.name+' to deck!')
-      })
-      // Equip artifacts — 3-slot cap, use local counter to avoid stale activeArtifacts.length
-      let _aCount=activeArtifacts.length
-      artifacts.forEach(a => {
-        if(_aCount>=3){addLog('⚠ Artifact slots full! Sell or replace one in shop.');return}
-        _aCount++
-        setActiveArtifacts(p=>p.length>=3?p:[...p,a])
-        if(a.id==='a7')setMaxEmbers(p=>Math.min(8,p+1))
-        if(a.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
-        addLog('⚗ Artifact equipped: '+a.name+'!')
-      })
-      // Equip passives — 2-slot pedal cap (design: 3 artifacts + 2 pedals).
-      // Use a local counter — activePassives.length is stale across forEach iterations.
-      let _pCount=activePassives.length
-      passives.forEach(p => {
-        if(_pCount>=2){addLog('⚠ Pedal slots full! Sell or replace one in shop.');return}
-        _pCount++
-        setActivePassives(prev=>prev.length>=2?prev:[...prev,p])
-        // Reclassified artifact-as-passive equip effects
-        if(p.id==='a7')setMaxEmbers(em=>Math.min(8,em+1))
-        if(p.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
-        addLog('💿 Pedal equipped: '+p.name+'!')
-      })
-      // Members — trigger recruit flow (same as buying a recruitment pack)
-      if(members.length>0){
-        const enriched = members.map(m=>{
-          return {...m, foil:m.foil||false, mythic:m.mythic||false, demonic:m.demonic||false}
+        // Add regular cards to deck
+        cards.forEach(c => {
+          const nc = Object.assign({},c,{uid:uid(),shopBought:true})
+          setDeck(p=>[...p,nc])
+          setShopBoughtIds(p=>[...p,nc.uid])
+          addLog('🛒 Added '+c.name+' to deck!')
         })
-        recruitPickFiredRef.current=false
-        setRecruitCandidates(enriched)
-        setGameState('recruit')
+        // Gear that doesn't fit used to be DESTROYED with no refund and no
+        // prompt — pay 60🌿 for a Cursed Demo, pick the pedal, watch it
+        // evaporate. Overflow now opens the same swap modal the buy path uses,
+        // at cost 0 (already paid). Extras queue behind the first.
+        const _overflow=[]
+        const _ownedA=new Set(activeArtifacts.map(a=>a.id))
+        const _ownedP=new Set(activePassives.map(p=>p.id))
+        let _aCount=activeArtifacts.length
+        artifacts.forEach(a => {
+          if(_ownedA.has(a.id)){addLog('⚗ '+a.name+' is already equipped — skipped.');return}
+          _ownedA.add(a.id)
+          if(_aCount>=3){_overflow.push({type:'artifact',incoming:a,cost:0,onCommit:null});return}
+          _aCount++
+          setActiveArtifacts(p=>p.length>=3?p:[...p,a])
+          applyGearEquip(a)
+          addLog('⚗ Artifact equipped: '+a.name+'!')
+        })
+        // 2-slot pedal cap (design: 3 artifacts + 2 pedals). Local counter —
+        // activePassives.length is stale across forEach iterations.
+        let _pCount=activePassives.length
+        passives.forEach(p => {
+          if(_ownedP.has(p.id)){addLog('💿 '+p.name+' is already equipped — skipped.');return}
+          _ownedP.add(p.id)
+          if(_pCount>=2){_overflow.push({type:'passive',incoming:p,cost:0,onCommit:null});return}
+          _pCount++
+          setActivePassives(prev=>prev.length>=2?prev:[...prev,p])
+          applyGearEquip(p)
+          addLog('💿 Pedal equipped: '+p.name+'!')
+        })
+        if(_overflow.length){
+          gearSwapQueueRef.current=_overflow.slice(1)
+          setSlotSwapPrompt(_overflow[0])
+          addLog('⚠ Slots full — pick what '+_overflow[0].incoming.name+' replaces, or cancel to discard it.')
+          playSfx('select',0.7)
+        }
+        // Members — trigger recruit flow (same as buying a recruitment pack)
+        if(members.length>0){
+          const enriched = members.map(m=>{
+            return {...m, foil:m.foil||false, mythic:m.mythic||false, demonic:m.demonic||false}
+          })
+          recruitPickFiredRef.current=false
+          setRecruitCandidates(enriched)
+          setGameState('recruit')
+        }
       }
     } else if(type==='dealer'){
       // Dealer purchases handled by onBuyShrooms/onBuyAcid callbacks, just deduct stash
       addLog('🌿 Dealer transaction complete.')
-    } else {addLog('📦 Purchased: '+item.name+'!')}
-  },[stash])
+    } else {addLog('📦 Purchased: '+(item&&item.name)+'!')}
+    return 'bought'
+    // DEPS: `[stash]` alone left chosenPacts/stage/activeArtifacts/activePassives
+    // stale. Taking Merchants Eye changes chosenPacts without changing stash, so
+    // every price tag rendered 20% off while the first purchase charged full
+    // price; the stale `stage` also defeated the Lucifer band-cap guard.
+  },[stash,hangover,chosenPacts,activeStake,stage,activeArtifacts,activePassives,addLog,playSfx,applyGearEquip])
 
-  // ── SLOT SWAP CONFIRM (v0.7.10) ──
-  // Called when player clicks one of their current artifacts/pedals in the
-  // swap modal. Removes the chosen one, equips the incoming, deducts stash.
-  // Refunds 50% of the removed item's `cost` so it feels like selling.
+  // ── SLOT SWAP CONFIRM (v0.7.10, accounting rebuilt Aug 4 2026) ──
+  // Player clicks one of their current artifacts/pedals in the swap modal.
+  // Removes the chosen one, equips the incoming, deducts stash, and — new —
+  // REVERSES the removed item's permanent on-equip effects and fires the
+  // caller's onCommit so the shop tile is only stamped SOLD now, not when the
+  // modal opened. Refunds 50% of what the removed item actually cost you.
   const confirmSlotSwap=useCallback((removedIdx)=>{
     if(!slotSwapPrompt)return
-    const {type,incoming,cost}=slotSwapPrompt
+    const {type,incoming,cost,onCommit}=slotSwapPrompt
     const slots=type==='artifact'?activeArtifacts:activePassives
     const removed=slots[removedIdx]
     if(!removed)return
-    const refund=Math.floor((removed.cost||0)*0.5)
+    // Refund basis is what you PAID (paidCost), not the sticker price — with a
+    // hangover or Merchants Eye those diverge and the sticker price could refund
+    // more than the purchase took.
+    const refund=Math.floor((removed.paidCost!=null?removed.paidCost:(removed.cost||0))*0.5)
+    if(stash<cost){addLog('🚫 Not enough stash to complete the swap.');return}
     setStash(p=>Math.max(0,Math.min(MAX_STASH,p-cost+refund)))
+    // Reverse the OUTGOING item's permanent stats before applying the incoming
+    // one's. Without this you could equip Stone Tablet (+3 max HP to everyone),
+    // sell it back through this modal for a 6🌿 refund, and keep the +3 forever.
+    revertGearEquip(removed)
+    const _incoming=Object.assign({},incoming,{paidCost:cost})
     if(type==='artifact'){
-      setActiveArtifacts(p=>{const np=[...p];np.splice(removedIdx,1);np.push(incoming);return np})
-      // Apply on-equip side-effects of incoming (mirror handleShopSpend artifact branch)
-      if(incoming.id==='a7')setMaxEmbers(p=>Math.min(8,p+1))
-      if(incoming.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
+      setActiveArtifacts(p=>{const np=[...p];np.splice(removedIdx,1);np.push(_incoming);return np})
     } else {
-      setActivePassives(p=>{const np=[...p];np.splice(removedIdx,1);np.push(incoming);return np})
-      if(incoming.id==='a7')setMaxEmbers(p=>Math.min(8,p+1))
-      if(incoming.id==='a8')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):null))
+      setActivePassives(p=>{const np=[...p];np.splice(removedIdx,1);np.push(_incoming);return np})
     }
+    applyGearEquip(incoming)
+    if(onCommit)onCommit()
     addLog('🔄 Sold '+removed.name+' (+'+refund+'🌿) and equipped '+incoming.name+'.')
     playSfx('buy')
-    setSlotSwapPrompt(null)
-  },[slotSwapPrompt,activeArtifacts,activePassives])
-  const cancelSlotSwap=useCallback(()=>{setSlotSwapPrompt(null);playSfx('select',0.5)},[])
+    setSlotSwapPrompt(gearSwapQueueRef.current.shift()||null)
+  },[slotSwapPrompt,activeArtifacts,activePassives,stash,addLog,playSfx,applyGearEquip,revertGearEquip])
+  // Cancelling consumes NOTHING: no stash, no onCommit, so the shop tile stays
+  // buyable. It used to leave the tile permanently stamped SOLD.
+  const cancelSlotSwap=useCallback(()=>{
+    setSlotSwapPrompt(gearSwapQueueRef.current.shift()||null)
+    playSfx('select',0.5)
+  },[playSfx])
 
   const recruitPickFiredRef=useRef(false)
   const handleRecruitPick=useCallback((member)=>{
@@ -9281,34 +10131,67 @@ function App(){
       const ns=breakMentorLink(remove,[...prev])
       const ri=ns.findIndex(m=>m&&m.uid===remove.uid)
       if(ri>=0)ns[ri]=null
-      return ns
+      // handleRecruitPick bails into the conflict BEFORE inserting the incoming
+      // member, so if the player kept the NEW one it was never on stage — this
+      // used to just delete the existing demonic member and lose both (band -1,
+      // pack wasted). Equip the incoming member into the freed slot.
+      const keptIsOnStage=keep&&keep.uid!=null&&ns.some(m=>m&&m.uid===keep.uid)
+      if(keep&&!keptIsOnStage){
+        const slot=ri>=0?ri:ns.findIndex(m=>!m)
+        if(slot>=0){
+          const withUid={...keep,uid:uid(),roleBondWith:[],roleBondBonus:0}
+          ns[slot]=applyMentorLink(withUid,ns)
+          soloMembersUsedRef.current.add(withUid.uid)
+        }
+      }
+      return scanMentorLinks(ns)
     })
     setDemonicConflict(null)
     addLog('⛧ '+keep.name+' reigns! '+remove.name+' is gone forever.')
     setGameState('shop')
   },[])
 
-  const handlePawnSellMember=useCallback((member,slotIdx)=>{
+  // opts.ignoreSalesCap — set by the Recruit screen's "band is full, who gets
+  // cut?" modal and Lucifer's contract sacrifice. Those fires are part of
+  // completing a purchase you already made, not walk-up pawn sales. The Recruit
+  // screen's standalone FIRE PANEL does NOT set it: it used to bypass the
+  // 2-sales-per-visit cap entirely (fire three, then Pass = three free sales).
+  const handlePawnSellMember=useCallback((member,slotIdx,opts)=>{
+    const o=opts||{}
     const bandSize=stage.filter(m=>m).length
     if(bandSize<=2){addLog('⚠ Cannot sell — need at least 2 members!');return}
-    // Lucifer sells for 69 herb
-    const price=member.keyword==='FALLEN'?69:member.demonic?69:5+(member.foil?3:0)+(member.mythic?8:0)
+    if(!o.ignoreSalesCap){
+      if(pawnSalesLeft<=0){addLog("⚠ Sly's out of cash — no sales left this visit.");return}
+      setPawnSalesLeft(p=>Math.max(0,p-1))
+    }
+    const price=memberSellValue(member)
     setStage(prev=>{
       const ns=breakMentorLink(member,[...prev])
       ns[slotIdx]=null
       return ns
     })
-    setStash(p=>Math.min(420,p+price))
-    if(member.keyword==='FALLEN'){addLog('😈 Sold Lucifer for 69🌿! Band cap restored to 5.')}
+    setStash(p=>Math.min(MAX_STASH,p+price))
+    if(member.keyword==='FALLEN'){addLog('😈 Sold Lucifer for '+price+'🌿! Band cap restored to 5.')}
     else{playSfx('sell');addLog('💰 Sold '+member.name+' for '+price+' stash.'+(member.roleBondBonus>0?' 🔗 Bond broken.':''))}
-  },[stage])
+  },[stage,pawnSalesLeft,addLog,playSfx])
 
   const handlePawnSellCard=useCallback((card)=>{
-    const price=card.rarity==='Rare'?4:card.rarity==='Uncommon'?2:1
-    setDeck(p=>{ const idx=p.findIndex(c=>c.uid===card.uid); if(idx===-1)return p; const n=[...p]; n.splice(idx,1); return n })
-    setStash(p=>Math.min(420,p+price))
+    // The modal lists [...deck, ...discard] but this only ever SEARCHED deck —
+    // and on idx===-1 it returned the deck unchanged and paid out anyway. Selling
+    // a card you played last fight gave you money and let you keep the card,
+    // twice per shop visit, every visit. Membership is now checked against both
+    // piles synchronously, before any payout.
+    const inDeck=deck.some(c=>c.uid===card.uid)
+    const inDiscard=discardPile.some(c=>c.uid===card.uid)
+    if(!inDeck&&!inDiscard){addLog('⚠ '+card.name+' is no longer in your collection.');return}
+    if(pawnSalesLeft<=0){addLog("⚠ Sly's out of cash — no sales left this visit.");return}
+    setPawnSalesLeft(p=>Math.max(0,p-1))
+    const price=cardSellValue(card) // shared with the modal's button label (was base-only: Mythic Rare said 12🌿, paid 4)
+    if(inDeck)setDeck(p=>{ const idx=p.findIndex(c=>c.uid===card.uid); if(idx===-1)return p; const n=[...p]; n.splice(idx,1); return n })
+    else setDiscardPile(p=>{ const idx=p.findIndex(c=>c.uid===card.uid); if(idx===-1)return p; const n=[...p]; n.splice(idx,1); return n })
+    setStash(p=>Math.min(MAX_STASH,p+price))
     playSfx('sell');addLog('💰 Sold '+card.name+' for '+price+' stash.')
-  },[])
+  },[deck,discardPile,pawnSalesLeft,addLog,playSfx])
 
   const handlePawnBurnCard=useCallback((card)=>{
     setDeck(p=>{const idx=p.findIndex(c=>c.uid===card.uid);if(idx!==-1){const n=[...p];n.splice(idx,1);return n}return p})
@@ -9317,18 +10200,25 @@ function App(){
   },[])
 
   const handleReroll=useCallback(()=>{
-    if(stash<rerollCost)return
-    setStash(p=>Math.min(MAX_STASH,p-rerollCost));setRerollCost(p=>p+2)
+    // Priced through shopPrice like every other tile — it used to charge the raw
+    // rerollCost while the tile displayed realPrice(rerollCost).
+    const price=shopPrice(rerollCost,{kind:'reroll',hangover,chosenPacts,stake:activeStake})
+    if(stash<price){addLog('🚫 Not enough stash — a reroll runs '+price+'🌿.');return}
+    setStash(p=>Math.min(MAX_STASH,Math.max(0,p-price)));setRerollCost(p=>p+2)
     const cn=Math.floor(fightIndex/3)+1
     setShopCards(genShopCards(cn))
     setShroomsInStock(Math.random()<0.50)
-    setDMTInStock(false)
+    // DMT stock is NOT touched. It's boss-shop-only and "always in stock at
+    // those shops to ensure discovery" — this used to unconditionally
+    // setDMTInStock(false), so one reroll destroyed the boss-shop DMT stock
+    // permanently for that visit.
     setAcidInStock(Math.random()<0.50)
-    playSfx('reroll');addLog('🔄 Shop rerolled for '+rerollCost+' 🌿')
-  },[stash,rerollCost,fightIndex])
+    playSfx('reroll');addLog('🔄 Shop rerolled for '+price+' 🌿')
+  },[stash,rerollCost,fightIndex,hangover,chosenPacts,activeStake,addLog,playSfx])
 
   const handleContinueSave=()=>{
     const sv=loadGame();if(!sv)return
+    beginFightToken() // fight boundary — invalidate any in-flight strike timers
     setRunSeed(sv.seed);setSelectedDeck(sv.deck);setFightIndex(sv.fi)
     relicsSeenRef.current=new Set(sv.relicsSeen||[]) // v0.8.1: relic scarcity survives save/load
     setStage(sv.stage.map(m=>m?Object.assign({},ALL_MUSICIANS.find(mu=>mu.id===m.id)||{},m):null))
@@ -9336,6 +10226,11 @@ function App(){
     setHand(sv.hand.map(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c?Object.assign({},c,{uid:uid()}):null}).filter(Boolean))
     setDiscardPile(sv.disc.map(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c?Object.assign({},c,{uid:uid()}):null}).filter(Boolean))
     setEmbers(sv.em);setMaxEmbers(sv.mx);setStash(sv.st);setCorruption(sv.co)
+    // dblRoll: `null` means "no drummer" and is a legitimate value, so only fall
+    // back to a fresh roll when the field is absent entirely (pre-phase-4 save).
+    if(sv.dbl!==undefined)setDblRoll(sv.dbl)
+    else rollDblForStage(sv.stage||[])
+    setHangover(sv.hang||0)
     setStrikesLeft(sv.sl);setFightMaxStrikes(sv.ms);setDiscardsLeft(sv.dl)
     setChosenPacts(sv.pa||[]);setCollectedLoot(sv.loot||[]);setUpgradedCards(sv.upg||[])
     // Include MYTHIC pools so save loads with unlocked mythics restore correctly.
@@ -9363,54 +10258,71 @@ function App(){
     if(sv.fi===26){
       const _lh=parseInt(localStorage.getItem('vst_heat')||'1')
       const _lhp=Math.ceil(333333*(1+Math.max(0,_lh-1)*0.15)*(encoreMode?2.0:1.0))
-      setEnemyHp(_lhp);setScaledMaxHp(_lhp);setLuciferPhase(1)
+      setEnemyHp(_lhp);enemyHpRef.current=_lhp;setScaledMaxHp(_lhp);setLuciferPhase(1);luciferPhaseRef.current=1
     } else {
-      setLuciferPhase(0)
+      setLuciferPhase(0);luciferPhaseRef.current=0
       const _ds=(STARTER_DECKS.find(d=>d.id===sv.deck)||{}).hpScale||1
       const _hm=1+(Math.max(0,parseInt(localStorage.getItem('vst_heat')||'1')-1)*0.15)
-      const _hp=Math.ceil(ne.maxHp*_ds*_hm*_stakeHpF());setEnemyHp(_hp);setScaledMaxHp(_hp)
+      const _hp=Math.ceil(ne.maxHp*_ds*_hm*_stakeHpF());setEnemyHp(_hp);enemyHpRef.current=_hp;setScaledMaxHp(_hp)
     }
     setGameState('playing');addLog('⛧ Run resumed from save...')
   }
+  // ── THE ENCORE (Aug 4 2026, phase 1) ───────────────────────────────
+  // This body used to be inlined in EndScreen's "⛧ The Encore ⛧" onClick, where
+  // none of these setters/refs are in scope — the button threw ReferenceError on
+  // its first statement, every time. Lifted into App and passed down as onEncore.
+  // NOTE: this is the ONLY place corruptCardsGivenRef is reset outside handleReset.
+  const handleEncore=useCallback(()=>{
+    beginFightToken() // fight boundary — invalidate any in-flight strike timers
+    setEncoreMode(true);setEncoreCircle(p=>p+10)
+    setFightIndex(0);setEnemy(ENEMIES[0])
+    // encoreMode state hasn't propagated yet, so getScaledMaxHp would still read
+    // false here — inline the same formula with the ×2.0 encore multiplier forced.
+    const _ds=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1
+    const _hl=parseInt(localStorage.getItem('vst_heat')||'1')
+    const _hm=1+(Math.max(0,_hl-1)*0.15)
+    const _wHp=Math.ceil(ENEMIES[0].maxHp*_ds*_hm*_stakeHpF()*2.0)
+    setEnemyHp(_wHp);setScaledMaxHp(_wHp);enemyHpRef.current=_wHp
+    const _encDeckStrMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
+    setStrikesLeft(activeStake.maxStrikes+_encDeckStrMod);setFightMaxStrikes(activeStake.maxStrikes+_encDeckStrMod);setDiscardsLeft(4);setFightMaxDiscards(4)
+    setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
+    setGameState('playing');setAnimPhase('idle');setDeathCause(null)
+    victoryFiredRef.current=false
+    corruptCardsGivenRef.current=[]
+    addLog('⛧ THE ENCORE BEGINS — All enemies ×2.0 HP! ⛧')
+  },[selectedDeck,activeStake,addLog])
+
+  // ── handleReset — THE single authoritative run-init path ───────────────
+  // Called from EndScreen's "Play Again"/retry-seed buttons, the daily-challenge
+  // button, AND (since Aug 4 2026 phase 4) the menu's "⛧ Enter the Vestibule ⛧"
+  // and "Skip Tutorial" buttons. That menu path used to be a bare
+  // setGameState('booster'), which meant embers/maxEmbers/corruption never
+  // picked up the active stake's startEmbers/startCorruption and the whole
+  // tutorial's stash/corruption/stats/log/runStartTime bled into the first real
+  // run. Two entry points, one function, identical starting state.
+  //
+  // The body is now pure orchestration: everything it resets lives in
+  // PER_FIGHT_RESETS / PER_RUN_RESETS (see the RESET REGISTRY above), so a run
+  // boundary is a strict superset of a fight boundary by construction.
   const handleReset=(retrySeed)=>{
-    setRunSeed(retrySeed||Math.floor(Math.random()*0xFFFFFF))
-    runStartTimeRef.current=Date.now()
-    // ── CROSS-RUN CONTAMINATION FIX (Aug 1 2026) ────────────────────────
-    // An audit of all 181 useState vars against handleReset found 90 unreset.
-    // Most are cosmetic, but these carry real run state into the NEXT run —
-    // which is exactly what silently poisons an overnight multi-run dataset.
-    // tutorialFight is the worst: any nonzero value makes triggerVictory take
-    // the tutorial branch and skip ALL victory processing, so a run can never
-    // be recorded as won.
-    setTutorialFight(0);setTutorialTipIdx(0);setShowTutorialMsg(false)
-    setPendingEmbers(0);setExtraEmberNextFight(0);setAmpFeedbackDiscount(0);setPyromaniacActive(false)
-    setLastRiffPlayed(null);lastRiffPlayedRef.current=null
-    setUndoSnapshot(null);setVictorySummary(null);setDmgBreakdown(null)
-    setDemonicConflict(null);setSlotSwapPrompt(null);setSetlistOpen(false);setRemasterOpen(false)
-    setQuickPlayCardUid(null);setDragCardUid(null);setDragStageIdx(null)
-    setRecruitBought(false);setRecruitCandidates([]);setRerollCost(2)
-    setShopCards([]);setBoosterPacks([]);setCircleArtifact(null);setCirclePassive(null)
-    setShroomsInStock(false);setAcidInStock(false);setDMTInStock(false)
-    setIsDailyRun(false);setFirstTip(null);setPreFightSplash(null);setCircleSplash(null)
-    // Apply starter deck bonuses
     const deckDef=STARTER_DECKS.find(d=>d.id===selectedDeck)
-    if(deckDef?.startCorruption)setCorruption(deckDef.startCorruption)
-    if(deckDef?.startStash)setStash(p=>p+(deckDef.startStash||0))
-    setGameState('booster');setFightIndex(0);setEnemy(ENEMIES[0]);setEnemyHp(ENEMIES[0].maxHp)
-    setStage([null,null,null,null,null]);setDeck([]);setHand([]);setDiscardPile([])
-    const _restartDeckStrMod=deckDef?.maxStrikesMod||0
-    setEmbers(activeStake.startEmbers);setMaxEmbers(activeStake.startEmbers);setStash(3);setStrikesLeft(activeStake.maxStrikes+_restartDeckStrMod);setFightMaxStrikes(activeStake.maxStrikes+_restartDeckStrMod);setDiscardsLeft(MAX_DISCARDS);setFightMaxDiscards(MAX_DISCARDS);setPendingDraw(0);setBonusDiscards(0);setBonusEmbers(0)
-    setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);setProjectiles([]);setStageDiveUsed(false);setCorruption(activeStake.startCorruption);setDeathCause('fallen');setCircleClearedData(null);setCardsPlayedThisStrike([]);cardsPlayedRef.current=[];combosFiredRef.current=[];handTargetRef.current=HAND_SIZE;setCombosDiscoveredThisRun([]);setComboFlash(null);setChosenPacts([]);setUpgradedCards([]);setCollectedLoot([]);setPactChoices([]);setDescentData(null);overrideFightIdxRef.current=null;skipDescentRef.current=false;relicsSeenRef.current=new Set()
-    clearSave();setLog(['⛧ Starting fresh...']);fullRunLogRef.current=['⛧ Starting fresh...'];setNewTrophies([]);setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setShopSoldIds([]);setHeldShrooms(0);setHeldAcid(0);setHeldDMT(0);setActiveTripEffect(null);setTripUsedThisFight(false);setFightTripBuff(null);setLuciferPhase(0);setLuciferCinematic(null);setVictoryCinematic(null);setCreditsRoll(false);setWelcomeToHell(null);setContractsPlayed(0);setStolenAtkPool(0);setNewAchievements([]);setDrugsUsedThisRun({shrooms:0,acid:0,dmt:0})
-    setActiveArtifacts([]);setActivePassives([]);setPendingBurningStage(false);setStrikeMult(1.0);strikeMultRef.current=1.0;setMemberBuffs({});setNextCardFree(false);nextCardFreeRef.current=false;setAllCardsFree(false);allCardsFreeRef.current=false;setFreeCardsLeft(0);freeCardsLeftRef.current=0;setBossSkipStrikes(0);bossSkipStrikesRef.current=0;victoryFiredRef.current=false;milestonesFiredRef.current={half:false,quarter:false,tenth:false};wthStrikesRef.current=0;recruitPickFiredRef.current=false
-    // Reset mythic unlock per-run trackers
-    chainsFiredThisRunRef.current=new Set()
-    soloMembersUsedRef.current=new Set()
-    runStonedMembersRef.current=new Set()
-    luciferStrikesUsedRef.current=0
-    fightLossMembersRef.current=new Set()
-    setDiscovered(new Set());setPendingEvent(null);setEventsSeenThisRun([]);setHangover(0);peakCorruptionRef.current=0;setCorruptionFlash(null);lastCorruptThreshold.current=0;setEncoreMode(false);setEncoreCircle(0)
-    setStats({strikesThrown:0,totalDamage:0,highestStrike:0,tooStonedCount:0,cardsPlayed:0,maxCorruption:0,stashEarned:0,fightsSurvived:0,overkillDmg:0,bestMultiplier:1.0});setScaledMaxHp(0);setVenomDotStacks(0);setDblRoll(null);setLastKillingBlow('');setCurrentTip('');setBossDebuff(0);setBossRageAtk(0);setImmolateStacks(0);setSlowBurnStrikes(0);setStashStolenThisFight(0);corrPowerShownRef.current=false
+    // Deck identity wins over stake defaults where a deck defines one; this is
+    // the SINGLE authoritative set (phase 2 killed the old apply-then-clobber).
+    const _opts={
+      seed:retrySeed||Math.floor(Math.random()*0xFFFFFF),
+      startEmbers:activeStake.startEmbers,
+      startStash:3+(deckDef?.startStash||0),
+      corruption:(deckDef?.startCorruption>0)?deckDef.startCorruption:activeStake.startCorruption,
+      strikes:activeStake.maxStrikes+(deckDef?.maxStrikesMod||0),
+      discards:MAX_DISCARDS,
+      handTarget:HAND_SIZE,
+      stage:[],          // empty band at run start → dblRoll rolls to null
+      drumThrone:false,
+    }
+    beginFightToken() // run reset — invalidate any in-flight strike timers
+    resetPerFightState(_opts)
+    for(const k in PER_RUN_RESETS)PER_RUN_RESETS[k](_opts)
+    clearSave()
   }
 
   // Boss HP milestone detection
@@ -9482,6 +10394,10 @@ function App(){
   const handleUndoRef=useRef(null);handleUndoRef.current=handleUndo
   const playSfxRef=useRef(null);playSfxRef.current=playSfx
   const gameStateRef=useRef(gameState);gameStateRef.current=gameState
+  // Combat shortcuts fired straight THROUGH open modals — pressing S while the
+  // Setlist modal was up executed a strike. One mirrored flag for every overlay
+  // that owns input; the keydown handler bails on it. (Aug 4 2026, phase 1)
+  const modalOpenRef=useRef(false);modalOpenRef.current=!!(setlistOpen||slotSwapPrompt||deckViewOpen||discardViewOpen||showPauseOptions)
   const won=fightIndex>=26&&enemyHp<=0
   // Corruption visual escalation
   const corruptLow=corruption>=40&&corruption<70
@@ -9491,6 +10407,148 @@ function App(){
   const parchmentFilter=corruptMax?'sepia(0.4) hue-rotate(330deg) saturate(1.8)':corruptHigh?'sepia(0.25) hue-rotate(340deg) saturate(1.4)':corruptLow?'sepia(0.1) saturate(1.1)':'none'
   const bgPulseAnim=corruption>=50?'bgPulse '+(corruption>=75?'1.5s':'3s')+' ease-in-out infinite':'none'
 
+  // Combat log too — the ESC menu's "Combat Log" button is now reachable from
+  // every screen, so its viewer has to be as well.
+  const combatLogOverlay=showCombatLog?<CombatLogViewer log={fullRunLogRef.current} onClose={()=>setShowCombatLog(false)}/>:null
+
+  // ── GLOBAL OVERLAYS (Aug 4 2026, phase 1) ──────────────────────────
+  // These two used to live inside the fall-through combat return, BELOW every
+  // early return, so they were unreachable on the shop/descent/pact/forge/
+  // recruit/event/end screens — and then ambushed the player the next time
+  // combat rendered. Hoisted here and rendered by the shared shell below, so
+  // every screen path gets them. Absolute/inset:0 still resolves against the
+  // 1920x1080 #vst-scale-root, so geometry is unchanged.
+  // ── SLOT SWAP MODAL (v0.7.10) ──
+  //   Pops up when player tries to buy an artifact/pedal with full slots.
+  //   Shows current 3 artifacts (or 2 pedals); click one to sell it for
+  //   50% refund and equip the new one. Cancel button to back out.
+  //   handleShopSpend sets slotSwapPrompt from the SHOP, so this MUST render on
+  //   the shop screen — it never did before (buying with full slots was a silent
+  //   no-op, and the stuck prompt then hijacked the next combat render).
+  const slotSwapModal=slotSwapPrompt?(()=>{
+    const isArt=slotSwapPrompt.type==='artifact'
+    const slots=isArt?activeArtifacts:activePassives
+    const incoming=slotSwapPrompt.incoming
+    const cost=slotSwapPrompt.cost
+    const accent=isArt?'#c87820':'#9933cc'
+    const tintBg=isArt?'rgba(40,24,6,0.96)':'rgba(34,12,48,0.96)'
+    return (<div style={{position:'absolute',inset:0,zIndex:9998,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'center',justifyContent:'center',animation:'fadeIn 0.2s ease'}} onClick={cancelSlotSwap}>
+      <div onClick={e=>e.stopPropagation()} style={{minWidth:680,maxWidth:900,background:tintBg,border:'2px solid '+accent,borderRadius:12,padding:'28px 36px 24px',boxShadow:'0 0 60px '+accent+'66, 0 20px 80px rgba(0,0,0,0.9)',display:'flex',flexDirection:'column',gap:20}}>
+        <div style={{textAlign:'center'}}>
+          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:accent,letterSpacing:5,textShadow:'0 0 16px '+accent+'aa, 3px 3px 0 #000'}}>{isArt?'⛧ ARTIFACT SLOTS FULL ⛧':'⚡ PEDAL SLOTS FULL ⚡'}</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-secondary)',letterSpacing:2,marginTop:6,fontStyle:'italic'}}>Pick one to sell for 50% refund. Cancel costs you nothing.</div>
+        </div>
+
+        {/* INCOMING — what they're buying */}
+        <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:6,padding:'10px 14px',background:'rgba(0,0,0,0.4)',border:'1px dashed '+accent+'88',borderRadius:8}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:3,color:'var(--text-positive)',textTransform:'uppercase'}}>Incoming · {cost>0?cost+'🌿':'ALREADY PAID'}</div>
+          <div style={{display:'flex',alignItems:'center',gap:14}}>
+            {isArt?<ArtifactArtImg id={incoming.id} emoji={incoming.emoji} size={48}/>:<div style={{fontSize:42}}>{incoming.emoji}</div>}
+            <div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--text-primary)',letterSpacing:2}}>{incoming.name}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',fontStyle:'italic',maxWidth:520,lineHeight:1.3}}>{incoming.effect}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:3,color:accent,textTransform:'uppercase',textAlign:'center'}}>↓ Click an existing one to sell it ↓</div>
+
+        {/* CURRENT — clickable */}
+        <div style={{display:'flex',gap:14,justifyContent:'center'}}>
+          {slots.map((s,i)=>(<div key={i} onClick={()=>confirmSlotSwap(i)}
+            style={{flex:'0 0 auto',width:160,padding:'12px 10px',background:'rgba(0,0,0,0.55)',border:'2px solid '+accent+'aa',borderRadius:8,cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:8,transition:'transform 0.12s, box-shadow 0.12s, border-color 0.12s'}}
+            onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px) scale(1.03)';e.currentTarget.style.borderColor='var(--text-blood)';e.currentTarget.style.boxShadow='0 8px 24px rgba(196,30,58,0.55)'}}
+            onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor=accent+'aa';e.currentTarget.style.boxShadow='none'}}>
+            {isArt?<ArtifactArtImg id={s.id} emoji={s.emoji} size={44}/>:<div style={{fontSize:40}}>{s.emoji}</div>}
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-primary)',letterSpacing:1,textAlign:'center',lineHeight:1.15}}>{s.name}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontStyle:'italic',color:'var(--ink-dim)',textAlign:'center',lineHeight:1.3,minHeight:32}}>{s.effect}</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-positive)',letterSpacing:1,marginTop:'auto'}}>Sell · +{Math.floor((s.paidCost!=null?s.paidCost:(s.cost||0))*0.5)}🌿</div>
+          </div>))}
+        </div>
+
+        <button onClick={cancelSlotSwap} style={{alignSelf:'center',marginTop:6,padding:'8px 28px',background:'rgba(0,0,0,0.6)',border:'1px solid var(--ink-rust)',borderRadius:6,color:'var(--ink-bone)',fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:4,textTransform:'uppercase',cursor:'pointer'}}
+          onMouseEnter={e=>{e.currentTarget.style.background='rgba(60,30,30,0.7)'}}
+          onMouseLeave={e=>{e.currentTarget.style.background='rgba(0,0,0,0.6)'}}>Cancel</button>
+      </div>
+    </div>)
+  })():null
+
+  // ── PAUSE OPTIONS OVERLAY (ESC key) ──
+  //   The global keydown handler toggles showPauseOptions on EVERY screen, but this
+  //   overlay only ever rendered in combat — so ESC in the shop/descent/pact/forge/
+  //   recruit/event/end screens silently flipped the flag with no UI, then popped up
+  //   uninvited on the next combat render. It's also the only in-run escape hatch
+  //   ("ABANDON RUN"), which the gameState!=='menu' guard below proves was intended
+  //   to be global. Now rendered by the shared shell on every screen.
+  const pauseOverlay=showPauseOptions?(<div style={{position:'absolute',inset:0,zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.85)'}} onClick={()=>setShowPauseOptions(false)}>
+    <div onClick={e=>e.stopPropagation()} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16,padding:'40px 60px',background:'rgba(10,6,2,0.98)',border:'2px solid rgba(100,65,15,0.5)',borderRadius:12,maxWidth:500,width:'90%'}}>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'var(--text-blood)',textShadow:'0 0 20px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:6}}>Paused</div>
+      {gameState!=='menu'&&<button onClick={()=>{if(window.confirm('Abandon this run? The tour ends here — no refunds from Hell.')){clearSave();setShowPauseOptions(false);handleReset()}}}
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:3,color:'var(--text-blood)',background:'rgba(60,10,10,0.5)',border:'1px solid var(--text-blood)',borderRadius:7,padding:'10px 28px',cursor:'pointer',width:'100%'}}>🏳 ABANDON RUN</button>}
+      <div style={{display:'flex',flexDirection:'column',gap:10,width:'100%'}}>
+        {[
+          ['Scanlines','vst_scanlines',localStorage.getItem('vst_scanlines')!=='off'],
+          ['Screen Shake','vst_shake',localStorage.getItem('vst_shake')!=='off'],
+          ['Card Hover Zoom','vst_hoverzoom',localStorage.getItem('vst_hoverzoom')!=='off'],
+          ['Damage Numbers','vst_dmgnums',localStorage.getItem('vst_dmgnums')!=='off'],
+          ['Chain Hints','vst_chainhints',localStorage.getItem('vst_chainhints')!=='off'],
+          ['VHS Effect','vst_vhs',localStorage.getItem('vst_vhs')!=='off'],
+        ].map(([label,key,on])=>(
+          <div key={key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-gold)'}}>{label}</span>
+            <button onClick={()=>{localStorage.setItem(key,on?'off':'on');setShowPauseOptions(false);setTimeout(()=>setShowPauseOptions(true),10)}}
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:on?'#44cc44':'#cc4444',background:'rgba(0,0,0,0.4)',border:'1px solid '+(on?'#44cc44':'#cc4444'),borderRadius:4,padding:'6px 20px',cursor:'pointer',minWidth:60,textAlign:'center'}}>{on?'ON':'OFF'}</button>
+          </div>
+        ))}
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-gold)'}}>Combat Speed</span>
+          <button onClick={()=>{setSpeedMode(p=>{const nv=!p;localStorage.setItem('vst_speed',nv?'fast':'normal');return nv});setShowPauseOptions(false);setTimeout(()=>setShowPauseOptions(true),10)}}
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-gold)',background:'rgba(0,0,0,0.4)',border:'1px solid #c87820',borderRadius:4,padding:'6px 20px',cursor:'pointer',minWidth:60,textAlign:'center'}}>{speedMode?'FAST':'NORMAL'}</button>
+        </div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-gold)'}}>Music Volume</span>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <input type="range" min="0" max="1" step="0.05" value={musicVol}
+              onChange={e=>{const v=parseFloat(e.target.value);setMusicVol(v);localStorage.setItem('vst_music_vol',v)}}
+              style={{width:100,accentColor:'#e8a820',cursor:'pointer'}}/>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',minWidth:30,textAlign:'right'}}>{Math.round(musicVol*100)}%</span>
+          </div>
+        </div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-gold)'}}>SFX Volume</span>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <input type="range" min="0" max="1" step="0.05" value={sfxVol}
+              onChange={e=>{const v=parseFloat(e.target.value);setSfxVol(v);localStorage.setItem('vst_sfx_vol',v)}}
+              style={{width:100,accentColor:'#e8a820',cursor:'pointer'}}/>
+            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',minWidth:30,textAlign:'right'}}>{Math.round(sfxVol*100)}%</span>
+          </div>
+        </div>
+        <div style={{padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-gold)',marginBottom:6}}>⌨ Keyboard Shortcuts</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',lineHeight:2}}>
+            S = Strike · D = Discard · 1-6 = Select cards · Ctrl+Z = Undo · ESC = Pause · Space = Fast mode
+          </div>
+        </div>
+
+      </div>
+
+
+      <button onClick={()=>{setShowPauseOptions(false);setShowCombatLog(true)}}
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:3,
+          padding:'12px 40px',background:'rgba(30,15,5,0.7)',
+          border:'2px solid rgba(100,65,15,0.5)',borderRadius:6,color:'#c8a060',cursor:'pointer',
+          textTransform:'uppercase',width:'100%'}}>
+        📜 Combat Log
+      </button>
+      <button onClick={()=>setShowPauseOptions(false)}
+        style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,letterSpacing:4,color:'var(--text-blood)',background:'rgba(120,0,0,0.25)',border:'2px solid #aa0000',borderRadius:8,padding:'12px 60px',cursor:'pointer',marginTop:8,animation:'throb 2s ease-in-out infinite'}}>Resume</button>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-muted)',letterSpacing:2,marginTop:4}}>Press ESC to close</div>
+    </div>
+  </div>):null
+
+  // Every screen path is computed inside renderScreen() so the global overlays
+  // below (slot-swap modal, ESC pause menu) render on ALL of them, not just combat.
+  const renderScreen=()=>{
   // ── TROPHY WALL / MASTERY GALLERY (overlay from menu) ──
   if(showTrophies&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><TrophyWall onClose={()=>setShowTrophies(false)}/></div>)
   if(showStats&&gameState==='menu')return(<div style={{width:1920,height:1080,position:'relative',overflow:'auto'}}><StatsScreen onClose={()=>setShowStats(false)}/></div>)
@@ -9723,7 +10781,11 @@ function App(){
                   animation:'throb 2s ease-in-out infinite',transition:'all 0.2s'}}>
                 ⛧ Start Tutorial ⛧
               </button>
-              <button onClick={()=>{markTutorialDone();setGameState('booster')}}
+              {/* handleReset() — NOT a bare setGameState('booster'). See handleReset's
+                  header: the menu is a new-run entry point and must go through the
+                  single authoritative run-init path, or the stake economy and the
+                  tutorial's leftover state come along for the ride. */}
+              <button onClick={()=>{markTutorialDone();handleReset()}}
                 style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,letterSpacing:4,color:'var(--text-secondary)',
                   background:'none',border:'none',cursor:'pointer',textDecoration:'underline',
                   textTransform:'uppercase',opacity:0.7}}>
@@ -9731,7 +10793,10 @@ function App(){
               </button>
             </div>
           ):(<>
-            <button onClick={()=>setGameState('booster')}
+            {/* ⛧ Enter the Vestibule ⛧ — the post-win-reload new-run entry point.
+                Must be handleReset(), same as EndScreen's "Play Again", or the two
+                entry points start from different stake economies. */}
+            <button onClick={()=>handleReset()}
               style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:63,letterSpacing:10,color:'var(--text-blood)',
                 background:'rgba(120,0,0,0.25)',border:'3px solid #aa0000',borderRadius:10,
                 padding:'28px 140px',cursor:'pointer',textTransform:'uppercase',
@@ -10039,7 +11104,7 @@ function App(){
           setShroomsInStock(Math.random()<0.50)
           setDMTInStock(false)
           setAcidInStock(Math.random()<0.50)
-          setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setRecruitBought(false) // v0.7.3
+          setShopBoughtIds([]);setShopSoldIds([]);setCircleCartBought(false);setCirCleCpasBought(false);setRecruitBought(false);setRerollCost(2);setBoughtPackIds([]);setPawnSalesLeft(2) // v0.7.3
           setGameState('shop')
         }}
           style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,letterSpacing:4,padding:'16px 40px',background:'rgba(130,0,0,0.4)',border:'2px solid #cc1111',borderRadius:6,color:'var(--text-blood)',cursor:'pointer',textShadow:'0 0 14px rgba(200,0,0,0.6)',boxShadow:'0 0 25px rgba(180,0,0,0.4)',transition:'all 0.2s'}}
@@ -10074,8 +11139,14 @@ function App(){
   // ── SECOND ALBUM VICTORY CINEMATIC (v0.7.12) ──
   // Plays for ~5s when player defeats The Executive in the Welcome to Hell
   // post-game. Held until setTimeout in triggerVictory transitions to 'end'.
-  if(welcomeToHell==='won')return(
-    <div style={{width:1920,height:1080,position:'relative',background:'radial-gradient(ellipse at center, #1a0a04 0%, #050302 60%, #000 100%)',overflow:'hidden',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:18}}>
+  // Aug 4 2026 (phase 1): `welcomeToHell` is NEVER cleared — it stays 'won' so
+  // EndScreen can read secondAlbumWin. Without the gameState guard this return
+  // sat above the `gameState==='end'` return and rendered forever: no button,
+  // no timer, no key handler. HARD FREEZE, reload-only escape. Gate on
+  // gameState so triggerVictory's setGameState('end') actually lands, and let a
+  // click skip the wait in case the timer is ever lost.
+  if(welcomeToHell==='won'&&gameState!=='end')return(
+    <div onClick={()=>{clearSave();setGameState('end')}} style={{width:1920,height:1080,position:'relative',background:'radial-gradient(ellipse at center, #1a0a04 0%, #050302 60%, #000 100%)',overflow:'hidden',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:18,cursor:'pointer'}}>
       {/* Gold sunburst behind crown */}
       <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center, rgba(232,168,32,0.22) 0%, transparent 50%)',animation:'fadeIn 1.2s ease',pointerEvents:'none'}}/>
       {/* Border frame — gold */}
@@ -10098,7 +11169,7 @@ function App(){
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--gold)',letterSpacing:6,marginTop:12,animation:'fadeIn 1.8s ease 2.2s both',textTransform:'uppercase'}}>⛧ Stake Unlocked: <span style={{color:'var(--ink-bone)'}}>Second Album</span> ⛧</div>
 
       {/* Subtle bottom hint */}
-      <div style={{position:'absolute',bottom:48,fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',letterSpacing:8,opacity:0.6,animation:'fadeIn 2s ease 3.5s both',textTransform:'uppercase'}}>Returning to the void...</div>
+      <div style={{position:'absolute',bottom:48,fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',letterSpacing:8,opacity:0.6,animation:'fadeIn 2s ease 3.5s both',textTransform:'uppercase'}}>Returning to the void... (click to continue)</div>
     </div>
   )
 
@@ -10368,9 +11439,9 @@ function App(){
   )}
   if(victorySummary)return <VictorySummaryScreen summary={victorySummary} onContinue={continueVictorySummary}/>
   if(demonicConflict)return <DemonicConflictScreen conflict={demonicConflict} onChoice={handleDemonicChoice}/>
-  if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash}/>
-  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} onSwapMembers={(i,j)=>setStage(p=>{const n=[...p];const t=n[i];n[i]=n[j];n[j]=t;return n})} corruption={corruption} hangover={hangover} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} recruitBought={recruitBought} onMarkRecruitBought={()=>setRecruitBought(true)} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} heldDMT={heldDMT} shroomsInStock={shroomsInStock} acidInStock={acidInStock} dmtInStock={dmtInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)} onBuyDMT={()=>setHeldDMT(p=>p+1)} encoreMode={encoreMode}/>
-  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} devDailyScore={6666} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage} runElapsed={Math.floor((Date.now()-runStartTimeRef.current)/1000)} lastKillingBlow={lastKillingBlow} secondAlbumWin={welcomeToHell==='won'} contractsPlayed={contractsPlayed}/></div>
+  if(gameState==='recruit')return <RecruitScreen candidates={recruitCandidates} stage={stage} onPick={handleRecruitPick} onPass={handleRecruitPass} onFireMember={handlePawnSellMember} stash={stash} salesLeft={pawnSalesLeft}/>
+  if(gameState==='shop')return <ShopScreen stash={stash} onSpend={handleShopSpend} stake={activeStake} pawnSalesLeft={pawnSalesLeft} boughtPackIds={boughtPackIds} onMarkPackBought={(id)=>setBoughtPackIds(p=>p.includes(id)?p:[...p,id])} onSwapMembers={(i,j)=>setStage(p=>{const n=[...p];const t=n[i];n[i]=n[j];n[j]=t;return n})} corruption={corruption} hangover={hangover} chosenPacts={chosenPacts} addLog={addLog} onLeave={handleShopLeave} circleArtifact={circleArtifact} circlePassive={circlePassive} recruitPack={recruitPack} recruitBought={recruitBought} onMarkRecruitBought={()=>setRecruitBought(true)} shopCards={shopCards} boosterPacks={boosterPacks} rerollCost={rerollCost} onReroll={handleReroll} fightIndex={fightIndex} activeArtifacts={activeArtifacts} activePassives={activePassives} starterArtifacts={STARTER_ARTIFACTS} starterPassives={STARTER_PASSIVES} stage={stage} deck={deck} discardPile={discardPile} onPawnSellMember={handlePawnSellMember} onPawnSellCard={handlePawnSellCard} onPawnBurnCard={handlePawnBurnCard} soldIds={shopSoldIds} onMarkSold={(id)=>setShopSoldIds(p=>[...p,id])} circleCartBought={circleCartBought} circleCpasBought={circleCpasBought} onBuyCart={()=>setCircleCartBought(true)} onBuyCpas={()=>setCirCleCpasBought(true)} heldShrooms={heldShrooms} heldAcid={heldAcid} heldDMT={heldDMT} shroomsInStock={shroomsInStock} acidInStock={acidInStock} dmtInStock={dmtInStock} onBuyShrooms={()=>setHeldShrooms(p=>p+1)} onBuyAcid={()=>setHeldAcid(p=>p+1)} onBuyDMT={()=>setHeldDMT(p=>p+1)} encoreMode={encoreMode}/>
+  if(gameState==='end')return <div style={{width:1920,height:1080,position:'relative',overflow:'hidden'}}><EndScreen won={won} cause={deathCause} fullRunLog={fullRunLogRef.current} newTrophies={newTrophies} enemy={enemy} stats={stats} seed={runSeed} onReset={handleReset} onEncore={handleEncore} streakWins={streakWins} streakLosses={streakLosses} totalRuns={totalRunsPlayed} isDailyRun={isDailyRun} chosenPacts={chosenPacts} onDailyChallenge={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}} devDailyScore={6666} personalBest={personalBest} dailyStreak={dailyStreak} lifetimeScore={lifetimeScore} discovered={discovered} newAchievements={newAchievements} enemyHp={enemyHp} stage={stage} runElapsed={Math.floor((Date.now()-runStartTimeRef.current)/1000)} lastKillingBlow={lastKillingBlow} secondAlbumWin={welcomeToHell==='won'} contractsPlayed={contractsPlayed}/></div>
 
   return(
     <div key={'play-'+fightIndex} className="page-transition-in" style={{width:1920,height:1080,display:'flex',flexDirection:'column',background:`${(()=>{const cn=Math.floor(fightIndex/3)+1;const ct=CIRCLE_BG[cn]||CIRCLE_BG[1];return 'radial-gradient(ellipse at 50% 20%, '+ct.glow+', '+ct.base+')'})()}`,overflow:'hidden',position:'relative',userSelect:'none',transform:shakeOffset.x||shakeOffset.y?`translate(${shakeOffset.x}px,${shakeOffset.y}px)`:'none'}}>
@@ -10586,7 +11657,7 @@ function App(){
         {postStrikeFlash.mult>1.5&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--text-gold)',letterSpacing:3}}>×{postStrikeFlash.mult.toFixed(2)} MULTIPLIER</div>}
         {postStrikeFlash.isNewBest&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:'var(--text-gold)',letterSpacing:6,marginTop:4,textShadow:'0 0 16px rgba(255,220,0,0.8)'}}>⛧ NEW BEST! ⛧</div>}
       </div>}
-      {dmgBreakdown&&<DamageBreakdown data={dmgBreakdown} onSlam={()=>{if(dmgBreakdown._pendingHpDrop)dmgBreakdown._pendingHpDrop()}} onDone={()=>setDmgBreakdown(null)}/>}
+      {dmgBreakdown&&<DamageBreakdown key={dmgBreakdown.key||0} data={dmgBreakdown} onSlam={()=>{if(dmgBreakdown._pendingHpDrop)dmgBreakdown._pendingHpDrop()}} onDone={()=>setDmgBreakdown(null)}/>}
 
       {hellquakeAnim&&<div style={{position:'absolute',inset:0,zIndex:9500,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,background:'rgba(0,0,0,0.85)',animation:'fadeIn 0.1s ease'}}>
         <div style={{position:'absolute',inset:0,backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.04) 3px,rgba(255,255,255,0.04) 4px)',animation:'interlaceFlicker 0.08s steps(1) infinite',pointerEvents:'none'}}/>
@@ -10625,7 +11696,6 @@ function App(){
         </div>
       </>}
       
-      {showCombatLog&&<CombatLogViewer log={fullRunLogRef.current} onClose={()=>setShowCombatLog(false)}/>}
       {corruptionFlash&&<div style={{position:'absolute',top:'35%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9600,textAlign:'center',animation:'fadeIn 0.3s ease',pointerEvents:'none'}}>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:corruptionFlash.color,textShadow:'0 0 30px '+corruptionFlash.color+',0 0 60px rgba(200,0,60,0.5),2px 2px 0 #000',letterSpacing:4}}>⚠ {corruptionFlash.name} ⚠</div>
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--tier-mythic)',marginTop:6,textShadow:'0 0 10px rgba(0,0,0,0.9)'}}>{corruptionFlash.desc}</div>
@@ -10692,57 +11762,6 @@ function App(){
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--ink-rust)',letterSpacing:6,textTransform:'uppercase',zIndex:1,animation:'fadeIn 3.5s ease',marginTop:8}}>Will appear in shops on future runs.</div>
       </div>}
 
-      {/* ── SLOT SWAP MODAL (v0.7.10) ──
-          Pops up when player tries to buy an artifact/pedal with full slots.
-          Shows current 3 artifacts (or 2 pedals); click one to sell it for
-          50% refund and equip the new one. Cancel button to back out. */}
-      {slotSwapPrompt&&(()=>{
-        const isArt=slotSwapPrompt.type==='artifact'
-        const slots=isArt?activeArtifacts:activePassives
-        const incoming=slotSwapPrompt.incoming
-        const cost=slotSwapPrompt.cost
-        const accent=isArt?'#c87820':'#9933cc'
-        const tintBg=isArt?'rgba(40,24,6,0.96)':'rgba(34,12,48,0.96)'
-        return (<div style={{position:'absolute',inset:0,zIndex:9998,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'center',justifyContent:'center',animation:'fadeIn 0.2s ease'}} onClick={cancelSlotSwap}>
-          <div onClick={e=>e.stopPropagation()} style={{minWidth:680,maxWidth:900,background:tintBg,border:'2px solid '+accent,borderRadius:12,padding:'28px 36px 24px',boxShadow:'0 0 60px '+accent+'66, 0 20px 80px rgba(0,0,0,0.9)',display:'flex',flexDirection:'column',gap:20}}>
-            <div style={{textAlign:'center'}}>
-              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:accent,letterSpacing:5,textShadow:'0 0 16px '+accent+'aa, 3px 3px 0 #000'}}>{isArt?'⛧ ARTIFACT SLOTS FULL ⛧':'⚡ PEDAL SLOTS FULL ⚡'}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-secondary)',letterSpacing:2,marginTop:6,fontStyle:'italic'}}>Pick one to sell for 50% refund.</div>
-            </div>
-
-            {/* INCOMING — what they're buying */}
-            <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:6,padding:'10px 14px',background:'rgba(0,0,0,0.4)',border:'1px dashed '+accent+'88',borderRadius:8}}>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:3,color:'var(--text-positive)',textTransform:'uppercase'}}>Incoming · {cost}🌿</div>
-              <div style={{display:'flex',alignItems:'center',gap:14}}>
-                {isArt?<ArtifactArtImg id={incoming.id} emoji={incoming.emoji} size={48}/>:<div style={{fontSize:42}}>{incoming.emoji}</div>}
-                <div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--text-primary)',letterSpacing:2}}>{incoming.name}</div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',fontStyle:'italic',maxWidth:520,lineHeight:1.3}}>{incoming.effect}</div>
-                </div>
-              </div>
-            </div>
-
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:3,color:accent,textTransform:'uppercase',textAlign:'center'}}>↓ Click an existing one to sell it ↓</div>
-
-            {/* CURRENT — clickable */}
-            <div style={{display:'flex',gap:14,justifyContent:'center'}}>
-              {slots.map((s,i)=>(<div key={i} onClick={()=>confirmSlotSwap(i)}
-                style={{flex:'0 0 auto',width:160,padding:'12px 10px',background:'rgba(0,0,0,0.55)',border:'2px solid '+accent+'aa',borderRadius:8,cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:8,transition:'transform 0.12s, box-shadow 0.12s, border-color 0.12s'}}
-                onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px) scale(1.03)';e.currentTarget.style.borderColor='var(--text-blood)';e.currentTarget.style.boxShadow='0 8px 24px rgba(196,30,58,0.55)'}}
-                onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor=accent+'aa';e.currentTarget.style.boxShadow='none'}}>
-                {isArt?<ArtifactArtImg id={s.id} emoji={s.emoji} size={44}/>:<div style={{fontSize:40}}>{s.emoji}</div>}
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-primary)',letterSpacing:1,textAlign:'center',lineHeight:1.15}}>{s.name}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontStyle:'italic',color:'var(--ink-dim)',textAlign:'center',lineHeight:1.3,minHeight:32}}>{s.effect}</div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-positive)',letterSpacing:1,marginTop:'auto'}}>Sell · +{Math.floor((s.cost||0)*0.5)}🌿</div>
-              </div>))}
-            </div>
-
-            <button onClick={cancelSlotSwap} style={{alignSelf:'center',marginTop:6,padding:'8px 28px',background:'rgba(0,0,0,0.6)',border:'1px solid var(--ink-rust)',borderRadius:6,color:'var(--ink-bone)',fontFamily:"'MBScribblesFont',serif",fontSize:14,letterSpacing:4,textTransform:'uppercase',cursor:'pointer'}}
-              onMouseEnter={e=>{e.currentTarget.style.background='rgba(60,30,30,0.7)'}}
-              onMouseLeave={e=>{e.currentTarget.style.background='rgba(0,0,0,0.6)'}}>Cancel</button>
-          </div>
-        </div>)
-      })()}
 
       {/* RIFF CHAIN COMBO FLASH */}
       {comboFlash&&<div style={{position:'absolute',inset:0,zIndex:9600,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:0,animation:'chainGlow 3s ease forwards'}}>
@@ -10801,16 +11820,6 @@ function App(){
           })()}
         </div>
       </div>}
-      {remasterOpen&&<RemasterModal cards={remasterCards} onConfirm={(delUids,copyUid)=>{
-        setDeck(prev=>{
-          const copyCard=prev.find(c=>c.uid===copyUid)||remasterCards.find(c=>c.uid===copyUid)
-          const filtered=prev.filter(c=>!delUids.includes(c.uid))
-          if(copyCard){const newCopy=Object.assign({},copyCard,{uid:uid()});filtered.push(newCopy)}
-          return filtered
-        })
-        setRemasterOpen(false)
-        addLog('🎙 Remastered: deleted 2, copied 1.')
-      }} onClose={()=>setRemasterOpen(false)}/>}
       {setlistOpen&&<SetlistModal hand={setlistCards} onConfirm={(discardUid)=>{
         setHand(prev=>prev.filter(c=>c.uid!==discardUid))
         setDiscardPile(prev=>[...prev,...setlistCards.filter(c=>c.uid===discardUid)])
@@ -10853,7 +11862,7 @@ function App(){
             })()}
           </div>
         </div>
-        <div style={{position:'relative',zIndex:8,overflow:'visible',flex:1,display:'flex',flexDirection:'column',justifyContent:'center',overflow:'visible'}}>
+        <div style={{position:'relative',zIndex:8,overflow:'visible',flex:1,display:'flex',flexDirection:'column',justifyContent:'center'}}>
           <div style={{display:'flex',alignItems:'center',gap:stage.length>5?16:50,padding:stage.length>5?'0px 10px 0px 100px':'0px 10px 0px 130px',justifyContent:'center',flex:1,position:'relative'}}>
             <div style={{display:'flex',flexDirection:'column',gap:6,alignSelf:'flex-start',flexShrink:0,background:'rgba(0,0,0,0.22)',borderRadius:'0 6px 6px 0',padding:'6px 10px 6px 10px',borderRight:'1px solid rgba(140,90,20,0.35)',position:'absolute',left:0,top:8}}>
               {[0,1,2].map(i=>{const a=(activeArtifacts||[])[i];return(
@@ -11118,6 +12127,11 @@ function App(){
             const _vmRiffsThis=_vmCardsThisStrike.filter(c=>c.type==='RIFF').length
             const _vmAtkCtx={corruption,tier:_vmKwStacks.tier,riffsThisStrike:_vmRiffsThis,shredderHits:0,auraAtk:_auraAtkMap(stage,{corruption,shredderHits:0})}
             const _vmHighestAtk = Math.max(0, ...stage.filter(m=>m).map(m=>getEffectiveAtk(m,_vmAtkCtx)))
+            // Base (pre-multiplier) damage — mirrors step 1 of the damage preview
+            // IIFE below and `dmg` at the top of handleStrikeBody's artifact loop.
+            // Needed by the tongueDamage artifact, which converts a FLAT bonus into
+            // an equivalent multiplier and therefore needs a denominator.
+            const _vmBaseDmg = stage.filter(m=>m&&!m.tooStoned&&m.role!=='Drummer').reduce((s,m)=>s+getEffectiveAtk(m,_vmAtkCtx),0)
 
             for(const art of activeArtifacts){
               if(!art.multTrigger)continue
@@ -11163,7 +12177,10 @@ function App(){
               if(art.multTrigger==='tongueDamage'){
                 // Flat damage preview: harder to express as mult, approximate
                 const tongueDmg=_vmHighestAtk*_vmCpc
-                if(tongueDmg>0&&dmg>0)_vmArt*=(1+tongueDmg/dmg)
+                // `dmg` has no binding in this IIFE — it belonged to the sibling
+                // damage-preview IIFE. Every render threw once this artifact was
+                // equipped and a card had been played. Use the in-scope base.
+                if(tongueDmg>0&&_vmBaseDmg>0)_vmArt*=(1+tongueDmg/_vmBaseDmg)
                 continue
               }
               if(art.multTrigger==='sigilOpener'){
@@ -11185,7 +12202,7 @@ function App(){
               const loot=BOSS_LOOT.find(l=>l&&l.id===lootId)
               if(!loot||!loot.multTrigger||!loot.mult)continue
               let fires=0
-              if(loot.multTrigger==='perStrikesLeft')fires=strikesLeft
+              if(loot.multTrigger==='perStrikesLeft')fires=Math.max(0,strikesLeft-1) // strikes left AFTER this one (matches live)
               if(loot.multTrigger==='firstCardFree'&&_vmCpc>=1)fires=1
               if(loot.multTrigger==='alive4'&&_activesNoStone.length>=4)fires=1
               if(loot.multTrigger==='perStash20')fires=Math.floor(stash/20)
@@ -11217,9 +12234,14 @@ function App(){
           {/* STRIKE button — wider so pentagrams don't clip */}
           <button onClick={handleStrike} disabled={!canStrike}
             style={{fontFamily:"'MBScribblesFont',serif",fontSize:19,fontWeight:900,letterSpacing:2,textTransform:'uppercase',whiteSpace:'nowrap',padding:'18px 6px',background:canStrike?'linear-gradient(180deg, rgba(196,30,58,0.55), rgba(122,15,31,0.3))':'rgba(25,12,5,0.4)',border:canStrike?'2px solid var(--blood)':'1px solid var(--rot)',borderRadius:3,color:canStrike?'var(--ink-bone)':'var(--rot)',cursor:canStrike?'pointer':'not-allowed',
-              animation:canStrike?(strikeMult>=8?'strikeInferno 0.4s ease-in-out infinite alternate':strikeMult>=4?'strikeBlaze 0.6s ease-in-out infinite alternate':strikeMult>=2?'strikeGlow 1s ease-in-out infinite alternate':'throb 1.5s ease-in-out infinite'):'none',
               filter:strikeMult>=8?'brightness(1.4) saturate(1.5)':strikeMult>=4?'brightness(1.2)':'none',
-              boxShadow:strikeMult>=8?'0 0 40px rgba(255,0,0,0.8),0 0 80px rgba(255,100,0,0.4),inset 0 0 20px rgba(255,50,0,0.5)':strikeMult>=4?'0 0 30px rgba(255,50,0,0.6),0 0 60px rgba(255,100,0,0.3)':strikeMult>=2?'0 0 20px rgba(255,100,0,0.4)':'none',textShadow:canStrike?'0 0 20px rgba(196,30,58,0.9), 0 2px 4px rgba(0,0,0,0.6)':'none',boxShadow:canStrike?'inset 0 0 32px rgba(196,30,58,0.25), 0 0 24px rgba(196,30,58,0.35)':'none',transition:'all 0.15s',width:'100%',animation:canStrike?'altarBreath 3s ease-in-out infinite':'none'}}>⛧ STRIKE ⛧</button>
+              // boxShadow + animation were each declared TWICE in this object — the
+              // multiplier-intensity glow/animation was silently dropped by the later
+              // altar pair. Merged: both layers now compose (CSS takes comma lists).
+              boxShadow:[canStrike?'inset 0 0 32px rgba(196,30,58,0.25), 0 0 24px rgba(196,30,58,0.35)':null,
+                strikeMult>=8?'0 0 40px rgba(255,0,0,0.8), 0 0 80px rgba(255,100,0,0.4), inset 0 0 20px rgba(255,50,0,0.5)':strikeMult>=4?'0 0 30px rgba(255,50,0,0.6), 0 0 60px rgba(255,100,0,0.3)':strikeMult>=2?'0 0 20px rgba(255,100,0,0.4)':null].filter(Boolean).join(', ')||'none',
+              animation:canStrike?('altarBreath 3s ease-in-out infinite'+(strikeMult>=8?', strikeInferno 0.4s ease-in-out infinite alternate':strikeMult>=4?', strikeBlaze 0.6s ease-in-out infinite alternate':strikeMult>=2?', strikeGlow 1s ease-in-out infinite alternate':'')):'none',
+              textShadow:canStrike?'0 0 20px rgba(196,30,58,0.9), 0 2px 4px rgba(0,0,0,0.6)':'none',transition:'all 0.15s',width:'100%'}}>⛧ STRIKE ⛧</button>
           {/* Strike pips — directly under STRIKE button */}
           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'center'}}>
             <PhaseDots left={strikesLeft} total={fightMaxStrikes} color='#c41e3a' wide={true}/>
@@ -11456,72 +12478,6 @@ function App(){
           boxShadow:'inset 0 0 '+_insetPx+'px rgba(150,0,20,'+_alpha+')',
           animation:_anim,borderRadius:0}}/>
       })()}
-      {/* PAUSE OPTIONS OVERLAY (ESC key) */}
-      {showPauseOptions&&<div style={{position:'absolute',inset:0,zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.85)'}} onClick={()=>setShowPauseOptions(false)}>
-        <div onClick={e=>e.stopPropagation()} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16,padding:'40px 60px',background:'rgba(10,6,2,0.98)',border:'2px solid rgba(100,65,15,0.5)',borderRadius:12,maxWidth:500,width:'90%'}}>
-          <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'var(--text-blood)',textShadow:'0 0 20px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:6}}>Paused</div>
-          {gameState!=='menu'&&<button onClick={()=>{if(window.confirm('Abandon this run? The tour ends here — no refunds from Hell.')){clearSave();setShowPauseOptions(false);handleReset()}}}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:3,color:'var(--text-blood)',background:'rgba(60,10,10,0.5)',border:'1px solid var(--text-blood)',borderRadius:7,padding:'10px 28px',cursor:'pointer',width:'100%'}}>🏳 ABANDON RUN</button>}
-          <div style={{display:'flex',flexDirection:'column',gap:10,width:'100%'}}>
-            {[
-              ['Scanlines','vst_scanlines',localStorage.getItem('vst_scanlines')!=='off'],
-              ['Screen Shake','vst_shake',localStorage.getItem('vst_shake')!=='off'],
-              ['Card Hover Zoom','vst_hoverzoom',localStorage.getItem('vst_hoverzoom')!=='off'],
-              ['Damage Numbers','vst_dmgnums',localStorage.getItem('vst_dmgnums')!=='off'],
-              ['Chain Hints','vst_chainhints',localStorage.getItem('vst_chainhints')!=='off'],
-              ['VHS Effect','vst_vhs',localStorage.getItem('vst_vhs')!=='off'],
-            ].map(([label,key,on])=>(
-              <div key={key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
-                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-gold)'}}>{label}</span>
-                <button onClick={()=>{localStorage.setItem(key,on?'off':'on');setShowPauseOptions(false);setTimeout(()=>setShowPauseOptions(true),10)}}
-                  style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:on?'#44cc44':'#cc4444',background:'rgba(0,0,0,0.4)',border:'1px solid '+(on?'#44cc44':'#cc4444'),borderRadius:4,padding:'6px 20px',cursor:'pointer',minWidth:60,textAlign:'center'}}>{on?'ON':'OFF'}</button>
-              </div>
-            ))}
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-gold)'}}>Combat Speed</span>
-              <button onClick={()=>{setSpeedMode(p=>{const nv=!p;localStorage.setItem('vst_speed',nv?'fast':'normal');return nv});setShowPauseOptions(false);setTimeout(()=>setShowPauseOptions(true),10)}}
-                style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-gold)',background:'rgba(0,0,0,0.4)',border:'1px solid #c87820',borderRadius:4,padding:'6px 20px',cursor:'pointer',minWidth:60,textAlign:'center'}}>{speedMode?'FAST':'NORMAL'}</button>
-            </div>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-gold)'}}>Music Volume</span>
-              <div style={{display:'flex',alignItems:'center',gap:8}}>
-                <input type="range" min="0" max="1" step="0.05" value={musicVol}
-                  onChange={e=>{const v=parseFloat(e.target.value);setMusicVol(v);localStorage.setItem('vst_music_vol',v)}}
-                  style={{width:100,accentColor:'#e8a820',cursor:'pointer'}}/>
-                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',minWidth:30,textAlign:'right'}}>{Math.round(musicVol*100)}%</span>
-              </div>
-            </div>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
-              <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-gold)'}}>SFX Volume</span>
-              <div style={{display:'flex',alignItems:'center',gap:8}}>
-                <input type="range" min="0" max="1" step="0.05" value={sfxVol}
-                  onChange={e=>{const v=parseFloat(e.target.value);setSfxVol(v);localStorage.setItem('vst_sfx_vol',v)}}
-                  style={{width:100,accentColor:'#e8a820',cursor:'pointer'}}/>
-                <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',minWidth:30,textAlign:'right'}}>{Math.round(sfxVol*100)}%</span>
-              </div>
-            </div>
-            <div style={{padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-gold)',marginBottom:6}}>⌨ Keyboard Shortcuts</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',lineHeight:2}}>
-                S = Strike · D = Discard · 1-6 = Select cards · Ctrl+Z = Undo · ESC = Pause · Space = Fast mode
-              </div>
-            </div>
-
-          </div>
-
-
-          <button onClick={()=>{setShowPauseOptions(false);setShowCombatLog(true)}}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,letterSpacing:3,
-              padding:'12px 40px',background:'rgba(30,15,5,0.7)',
-              border:'2px solid rgba(100,65,15,0.5)',borderRadius:6,color:'#c8a060',cursor:'pointer',
-              textTransform:'uppercase',width:'100%'}}>
-            📜 Combat Log
-          </button>
-          <button onClick={()=>setShowPauseOptions(false)}
-            style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,letterSpacing:4,color:'var(--text-blood)',background:'rgba(120,0,0,0.25)',border:'2px solid #aa0000',borderRadius:8,padding:'12px 60px',cursor:'pointer',marginTop:8,animation:'throb 2s ease-in-out infinite'}}>Resume</button>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-muted)',letterSpacing:2,marginTop:4}}>Press ESC to close</div>
-        </div>
-      </div>}
 
       {/* ═══ TUTORIAL OVERLAYS ═══ */}
       {/* PRE-FIGHT SPLASH — tour quote loading screen */}
@@ -11551,16 +12507,28 @@ function App(){
 
     </div>
   )
+  }  // end renderScreen
+
+  // ── SHARED SHELL ────────────────────────────────────────────────────
+  // Fragment, not a wrapper div: App's children stay direct children of the
+  // 1920x1080 #vst-scale-root, so every `position:absolute;inset:0` overlay keeps
+  // the exact geometry it had inside the combat return.
+  return(<>{renderScreen()}{combatLogOverlay}{slotSwapModal}{pauseOverlay}</>)
 }
 
 // ── SCALE ROOT — fits game to any screen size ──────────────────
 const DESIGN_W=1920,DESIGN_H=1080
+// CLAUDE.md rule 12: render() MUST return this.props.children — fail open, never
+// replace the UI with an error wall. The old red "RENDER ERROR" screen only offered
+// a "Try Again" button that cleared state.error, so a deterministic render bug
+// re-threw instantly and dead-ended the overnight playtest bot. We keep logging
+// loudly (the bot scrapes console) but always hand the children back to React.
 class ErrorBoundary extends React.Component {
   constructor(props){super(props);this.state={error:null}}
   static getDerivedStateFromError(error){return{error}}
-  componentDidCatch(e,info){console.error('VESTIBULE RENDER ERROR:',e.message,info.componentStack)}
+  componentDidCatch(e,info){console.error('VESTIBULE RENDER ERROR:',e&&e.message,e&&e.stack,info&&info.componentStack)}
   render(){
-    if(this.state.error)return <div style={{color:'red',padding:40,fontFamily:'monospace',background:'#000',position:'fixed',inset:0,zIndex:999999,overflow:'auto'}}><h1>RENDER ERROR</h1><pre>{this.state.error.message}</pre><pre>{this.state.error.stack}</pre><button onClick={()=>this.setState({error:null})} style={{color:'#0f0',background:'#333',padding:'10px 20px',border:'none',cursor:'pointer',marginTop:20}}>Try Again</button></div>
+    // Deliberately ignores this.state.error — children are handed back every time.
     return this.props.children
   }
 }

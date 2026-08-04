@@ -3,18 +3,38 @@
 // ~40% of Bronze/Standard runs). Card knowledge: e2e/carddata.json (82 cards, 16 chains).
 const { cards: ALL_CARDS, chains: RIFF_CHAINS, musicians: MUSICIANS } = require('./carddata.json')
 
-// ---- name matching: screen shows "ChainRareStage Dive" etc — strip badges, fuzzy match
+// ---- name matching: screen shows "ChainRareStage Dive" etc — strip badges only.
+// Aug 4 2026: the old third pass was a fuzzy endsWith/startsWith scan over every
+// known card name, and it SILENTLY RELABELLED cards. "Dark Whisper" came back as
+// `whispercard` and "Void Pact" as `voidpact` — so the ledger attributed plays of
+// the free corruption-gift cards (dark_whisper / void_pact) to two entirely
+// different shop-only cards, and the balance report scored the wrong ids. A wrong
+// label is worse than no label: delete the fallback, return null, and let the
+// caller log `card_unmatched` so the miss is visible instead of invented.
 const norm = s => (s || '').toLowerCase().replace(/[^a-z]/g, '')
 const BADGES = /^(chain|rare|novice|foil|mythic|adept|master|legendary|need|new)+/
+// Two REAL cards can share a display name (ALL_CARDS `whispercard`/`voidpact` vs
+// the CORRUPTION_CARDS gifts `dark_whisper`/`void_pact`). The gifts are handed out
+// free in every run at 25/50/75% corruption; their namesakes are shopOnly/copies:0
+// and must be bought. Gifts are registered LAST so they win the collision, and the
+// clash is exported so autopilot can log it rather than hide it.
 const BY_NORM = {}
-for (const c of ALL_CARDS) BY_NORM[norm(c.name)] = c
+const AMBIGUOUS = {}
+for (const c of ALL_CARDS) {
+  const k = norm(c.name)
+  if (BY_NORM[k]) (AMBIGUOUS[k] = AMBIGUOUS[k] || [BY_NORM[k].id]).push(c.id)
+  BY_NORM[k] = c
+}
 function matchCard(screenName) {
-  let n = norm(screenName)
+  const n = norm(screenName)
   if (BY_NORM[n]) return BY_NORM[n]
   const stripped = n.replace(BADGES, '')
   if (BY_NORM[stripped]) return BY_NORM[stripped]
-  for (const key in BY_NORM) if (stripped.endsWith(key) || key.endsWith(stripped)) return BY_NORM[key]
   return null
+}
+const isAmbiguous = screenName => {
+  const n = norm(screenName), s = n.replace(BADGES, '')
+  return AMBIGUOUS[n] || AMBIGUOUS[s] || null
 }
 
 // ---- gs-lite: assembled each strike from the live screen by autopilot
@@ -185,4 +205,4 @@ function bestOrder(names) { // names in current stage order -> improved name ord
   return order.map(o => o.name)
 }
 
-module.exports = { matchCard, scoreCard, pickTarget, ALL_CARDS, RIFF_CHAINS, MUSICIANS, bestOrder }
+module.exports = { matchCard, isAmbiguous, scoreCard, pickTarget, ALL_CARDS, RIFF_CHAINS, MUSICIANS, bestOrder }

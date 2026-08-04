@@ -38,25 +38,79 @@
 //    * Live's `applyCard` returns false BEFORE mutating anything on a rejection,
 //      so `ok:false` predicts "nothing changed at all".
 //
-//  CURRENT RESULT (Aug 1 2026): 51 scenarios, 50 pass, 1 mismatch.
-//  The single mismatch is a real ENGINE BUG, left in place deliberately so this
-//  file keeps failing until the engine is fixed:
+//  COVERAGE
+//  --------
+//  Aug 4 2026: extended from 39 of the engine's 86 cards to ALL of them bar one.
+//  The old table was exactly the Standard 69-card deck plus the three corruption
+//  gifts, which left every Ritualist / Engineer / Survivor-exclusive card, every
+//  `copies:0` alt-deck card and all four shop-only corruption gambits completely
+//  unverified — even though the shop and booster pools draw from
+//  getUnlockedCards() WITHOUT filtering on copies (App.jsx ~916), so any of them
+//  can reach a real hand. The runner prints a COVERAGE section at the end listing
+//  any ENGINE_CARD_IDS entry with no scenario; it should only ever name
+//  `contract` (injectable only by the Welcome-to-Hell fight, which is a different
+//  board plant entirely — engine-side it is covered by cardEngine's self-test).
 //
-//    setbreak (Smoke Break) | handLen | live=4 engine=5
-//    setbreak (Smoke Break) | deckLen | live=12 engine=11
+//  LIVE RNG
+//  --------
+//  Some cards branch on a roll live makes with Math.random() and the engine makes
+//  with ctx.rng. Three treatments, strongest first:
+//    * `rngBranches` (devilsdice, russianroulette, drainthecrowd) — the impl
+//      consumes exactly ONE rng value, so every outcome is enumerable. The engine
+//      is run once per possible roll and live must match ONE branch on EVERY
+//      field. Nothing is downgraded and nothing flakes.
+//    * `atkMode:'multiset'` (darktuning, offeringpit) — multiple draws from a
+//      shrinking list, not enumerable with a constant rng. Only the sorted ATK
+//      deltas are asserted: which member was hit is not, that the right number of
+//      members were hit for the right amount is.
+//    * `rngBranchy` (sabbathsigil) — a d10 whose branches move different fields
+//      AND roll a second random inside two of them. Reported informationally,
+//      never counted as an engine bug.
+//  Aug 4 2026: devilsdice / russianroulette / drainthecrowd used to sit in the
+//  multiset bucket, which for them was not an assertion but a coin flip — their
+//  branches move fields the multiset does not look at (tooStoned, hp, hand, deck),
+//  so the row passed or "failed" on whether the two independent rolls happened to
+//  land in the same band. See the LIVE-RNG BRANCH ENUMERATION note below.
 //
-//    IMPL.setbreak ends with `draw(S, 1, C.rng)` and logs "Drew 1 card".
-//    Live draws NOTHING. App.jsx ~6355 calls
-//        drawUpTo(remaining, deckRef.current, [...discRef.current,card,victim], 1)
-//    with a REFILL TARGET of 1 (not remaining.length+1), and then throws the
-//    return value away — it is never fed to setHand/setDeck. Two independent
-//    reasons the card can never arrive. Measured: hand 6→4, deck 12→12.
-//    Engine overstates Smoke Break by one card of draw every time it is played.
+//  The Aug 1 setbreak mismatch documented here is FIXED and gone: IMPL.setbreak
+//  no longer draws (cardEngine ~698-703 carries the measurement that proved live
+//  draws nothing). Do not re-add a "known failure" note without a failing run.
 //
 //  Run:   node e2e/test-card-parity.cjs            (all cards)
 //         node e2e/test-card-parity.cjs amp battlecry   (subset)
 //  Rig:   bash e2e/up.sh   (idempotent; game on :4173, CDP on :9222)
 // ═══════════════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  PRE-FLIGHT: CARDINAL RULE — boss_hp_override.json === src/data/enemies.js
+// ═══════════════════════════════════════════════════════════════════════════
+// The sim reads the JSON, the live game reads enemies.js. Drift means the sim is
+// measuring a game that does not exist — on Aug 4 2026 the JSON said Lucifer had
+// 666,666 HP while enemies.js said 100,000, which voided every Lucifer winrate
+// ever published. This runs before anything touches the browser so a desync
+// fails in under a second instead of after a full CDP session.
+;(function assertBossHpSync() {
+  const fs = require('fs'), path = require('path')
+  const root = path.resolve(__dirname, '..')
+  const json = JSON.parse(fs.readFileSync(path.join(root, 'boss_hp_override.json'), 'utf8'))
+  const src = fs.readFileSync(path.join(root, 'src/data/enemies.js'), 'utf8')
+  // enemies.js is pure data; read it without importing (this file is CJS).
+  const rows = [...src.matchAll(/\{id:'([a-z_0-9]+)',[^}]*?maxHp:(\d+)/g)].map(m => ({ id: m[1], maxHp: +m[2] }))
+  const problems = []
+  if (rows.length === 0) problems.push('could not parse any enemy out of src/data/enemies.js')
+  const keys = Object.keys(json).filter(k => k !== '_comment')
+  if (keys.length !== rows.length) problems.push(`entry count: json ${keys.length}, enemies.js ${rows.length}`)
+  rows.forEach((e, i) => {
+    if (json[i] === undefined) problems.push(`index ${i} (${e.id}): missing from boss_hp_override.json`)
+    else if (json[i] !== e.maxHp) problems.push(`index ${i} (${e.id}): json=${json[i]} enemies.js=${e.maxHp}`)
+  })
+  if (problems.length) {
+    console.log('CARDINAL RULE VIOLATION: boss_hp_override.json disagrees with src/data/enemies.js')
+    console.log('Both files must change in the SAME commit.')
+    for (const p2 of problems) console.log('  ✗ ' + p2)
+    process.exit(1)
+  }
+})()
 
 const P = require('./pilot.cjs')
 const { perceive } = require('./autopilot.cjs')
@@ -67,6 +121,28 @@ function mkRng(seed) {
   let s = seed >>> 0
   return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 0x100000000 }
 }
+
+// ── LIVE-RNG BRANCH ENUMERATION ───────────────────────────────────────────
+// Some cards branch on a Math.random() that LIVE rolls and the engine cannot
+// see. Downgrading such a row to a sorted multiset of ATK deltas (the old
+// devilsdice / russianroulette treatment) does not actually work, because their
+// branches move DIFFERENT FIELDS: Russian Roulette's 1 sets tooStoned+hp and
+// changes no ATK at all, and Devil's Dice's 5-6 also draws 2 cards. The multiset
+// therefore agreed only when both sides happened to roll into the same band — a
+// 33-50% coin flip, reported as PASS or as an "engine bug" at random. (That is
+// what produced the Aug 4 russianroulette report: live rolled 2-5 -> +4 ATK,
+// the engine rolled 1 -> Too Stoned. Two correct implementations, one roll.)
+//
+// So: ENUMERATE. Run the engine once per possible roll and require live to match
+// ONE of those branches on EVERY field. Strictly stronger than the multiset (it
+// asserts hp, tooStoned, hand, deck and discard as well as ATK) and it cannot
+// flake. `rngBranchy` stays for cards this cannot handle — see sabbathsigil.
+//
+// ONLY valid when the impl consumes exactly ONE rng value: a constant rng cannot
+// enumerate an effect that draws twice from a shrinking list (darktuning,
+// offeringpit — those keep the multiset compare).
+const D6 = [0, 0.2, 0.4, 0.6, 0.8, 0.95]   // Math.floor(r*6)+1  ->  1,2,3,4,5,6
+const PICK3 = [0, 0.4, 0.7]                // pick() over the 3 non-stoned members
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  BOARD PLANT
@@ -411,6 +487,111 @@ const SCENARIOS = [
     preplay: { idx: 0, slot: 2 }, playIdx: 0,
     patchEngine: S => { S.flags.stageDiveUsed = true },
   }),
+
+  // ═══════════════════════════════════════════════════════════════════════
+  //  Aug 4 2026 — COVERAGE EXTENSION: the other 47 engine cards
+  // ═══════════════════════════════════════════════════════════════════════
+  // Until now this file covered 39 of the engine's 86 cards: exactly the
+  // Standard 69-card deck plus the three corruption gifts. Everything
+  // exclusive to the Ritualist / Engineer / Survivor manifests, every
+  // `copies:0` alt-deck card and all four shop-only corruption gambits were
+  // completely unverified against the running game — which is the same class of
+  // blind spot that let the sim ship fantasy numbers for months. The shop and
+  // booster pools draw from getUnlockedCards() WITHOUT filtering on copies
+  // (App.jsx ~916), so every one of these can end up in a real hand.
+  //
+  // These do not need a deck change: the save-plant writes hand ids directly,
+  // so any card id can be put in hand at fight 13 regardless of manifest.
+  //
+  // ── alt-deck RIFF ──────────────────────────────────────────────────────
+  SC('echopedal',      { hand: ['battlecry', 'echopedal', 'roadie'], preplay: { idx: 0, slot: 0 }, playIdx: 0, extraHandDelta: 0 }),
+  SC('riffthief',      { hand: ['battlecry', 'riffthief', 'roadie'], preplay: { idx: 0, slot: 0 }, playIdx: 0 }),
+  SC('feedbackscream'),
+  SC('skullsplitter'),                                  // slot 0 Bjorn atk 9 → <10 branch
+  SC('skullsplitter@10', { card: 'skullsplitter', slot: 0, plant: { members: [Object.assign({}, MEMBERS[0], { atk: 12 })].concat(MEMBERS.slice(1)) } }),
+  SC('doomchord',      { slot: 1 }),                    // adjacency: slots 0 and 2 flank Gunnar
+  SC('doomchord@30',   { card: 'doomchord', slot: 1, plant: { co: 30 } }),  // below the ≥50 adjacency gate
+  SC('bloodharmony',   { slot: 1 }),
+  SC('sonicboom'),
+  SC('tremolopick'),                                    // 0 cards played → +1 branch
+  SC('harmonicfb'),                                     // 0 RIFFs played → minimum +1
+  SC('shredsolo'),
+  SC('overdriveped'),                                   // strikeMult only — see NOT OBSERVABLE
+  SC('necroticamp'),                                    // 76% corruption → +3 each
+  SC('necroticamp@0',  { card: 'necroticamp', plant: { co: 0 } }),          // +0 each, still valid
+  // devilsdice / russianroulette / sabbathsigil roll Math.random() in live and
+  // ctx.rng in the engine; the two rolls cannot be made to agree. The first two
+  // roll a d6 ONCE, so every outcome is enumerable: rngBranches runs the engine
+  // on all six rolls and demands live match one of them on every field (see the
+  // LIVE-RNG BRANCH ENUMERATION note up top for why the old atkMode:'multiset'
+  // was a coin flip here rather than an assertion). sabbathsigil's d10 is not
+  // enumerable this way — two of its branches roll a SECOND random on top — so
+  // it stays `rngBranchy`.
+  SC('devilsdice',     { rngBranches: D6 }),
+  SC('russianroulette', { rngBranches: D6 }),
+
+  // ── alt-deck CORRUPT ───────────────────────────────────────────────────
+  SC('soulbargain'),
+  SC('venomriff'),
+  SC('offeringpit',    { slot: 0, atkMode: 'multiset' }),   // the +8 goes to a RANDOM other member
+  SC('cursedstrings'),
+  SC('hexdecay'),
+  SC('infernalpact'),                                   // SETS corruption to 66 (can lower it)
+  SC('possessionriff'),
+  SC('darkcrescendo'),                                  // ≥80 gate CLOSED at 76 — consumed, no effect
+  SC('darkcrescendo@85', { card: 'darkcrescendo', plant: { co: 85 } }),     // gate open
+  SC('carrioncall',    { slot: 0 }),                    // slot 3 (Orm) is the stoned member it revives
+  SC('carrion/noStoned2', { card: 'carrioncall', plant: { members: MEMBERS.slice(0, 3) } }), // REJECT
+
+  // ── corruption gambits (shopOnly, copies:0) ────────────────────────────
+  SC('hellfirerift'),
+  SC('soulsacrifice'),
+  SC('voidpact'),
+  SC('sabbathsigil',   { rngBranchy: true }),
+
+  // ── alt-deck UTILITY ───────────────────────────────────────────────────
+  SC('gearcheck'),
+  SC('setlistrewrite'),                                 // LIVE NO-OP: nothing must move
+  SC('backstagepass'),
+  SC('venueswap'),
+  SC('doublebooking'),                                  // +1 strike: HUD prints strikes: n/m
+  SC('bootlegcopy'),
+  SC('remaster',       { hand: ['remaster', 'newstrings', 'roadie'], selectIdx: [1] }),
+  SC('remaster/nosel', { card: 'remaster' }),           // REJECT: nothing selected
+
+  // ── alt-deck EMBER ─────────────────────────────────────────────────────
+  SC('secondwind'),                                     // fills to max (5/8 → 8/8)
+  SC('pyromaniac'),
+  SC('slowburn'),
+  SC('ampfeedback'),
+  // Drains a RANDOM non-stoned member for 2 HP. atkMode:'multiset' was the wrong
+  // axis entirely — this card moves HP, not ATK, so the per-slot hp compare still
+  // ran and the row failed whenever live's pick differed from the engine's
+  // (measured: live took Ingrid 16→14, engine took Bjorn 20→18; both correct).
+  // One rng call, 3 candidates → enumerate all three and assert the whole board.
+  SC('drainthecrowd', { rngBranches: PICK3 }),
+  SC('corrsiphon'),
+
+  // ── shop-only RIFF ─────────────────────────────────────────────────────
+  SC('overdrive'),                                      // 76% ≥ 60% gate open
+  SC('overdrive<60',   { card: 'overdrive', plant: { co: 40 } }),           // REJECT
+  SC('doubledown'),                                     // nextCardFree — flag only
+  SC('goingbroke'),                                     // spends all 100 stash as damage
+  SC('goingbroke/broke', { card: 'goingbroke', plant: { st: 0 } }),         // REJECT
+
+  // ── legacy corruption cards (in ALL_CARDS, no longer handed out) ───────
+  // whispercard/hungercard/madnesscard are Rare copies:0 entries the 25/50/75%
+  // thresholds NO LONGER grant (CORRUPTION_CARDS does). They are still
+  // draftable from shop/booster pools, so they are still live cards.
+  SC('whispercard'),
+  SC('hungercard'),                                     // draws NOTHING live — see engine note
+  SC('madnesscard'),
+
+  // ── NOT RUNNABLE HERE ──────────────────────────────────────────────────
+  // 'contract' is injected only by the Welcome-to-Hell fight (fightIndex 27+,
+  // every 2 strikes). It cannot be planted into a fight-13 hand, and the WTH
+  // board is a different plant entirely. Engine-side it is covered by
+  // cardEngine's own self-test; live-side it is UNVERIFIED.
 ]
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -523,6 +704,7 @@ function compare(cardId, A, B, S, out, ctx) {
   const rows = []          // {id, status, detail}
   const skipped = []       // {id, reason}
   const engineBugs = []    // mismatch lines
+  const rngNotes = []      // rngBranchy field diffs (informational, never fatal)
   const crossProblems = []
 
   for (const sc of list) {
@@ -567,7 +749,7 @@ function compare(cardId, A, B, S, out, ctx) {
       await playHandCard(A, playIdx, targetName)
       await settle()
 
-      const ctxExtra = { extraHandDelta: 0, extraDiscardDelta: 0, atkMode: sc.atkMode }
+      const ctxExtra = { extraHandDelta: sc.extraHandDelta || 0, extraDiscardDelta: sc.extraDiscardDelta || 0, atkMode: sc.atkMode }
 
       // ── Setlist forces a modal discard before the hand settles ──
       if (sc.setlistModal) {
@@ -592,27 +774,49 @@ function compare(cardId, A, B, S, out, ctx) {
       crossCheck(sc.id, 'post', B, crossProblems)
 
       // ── engine prediction from snapshot A ──
-      const S = engineStateFrom(A, handIds, memberDefs)
-      // Carry the once-per-X flags live tracks in refs the HUD does not expose
-      // (member._hrUsed, stageDiveUsed) into the mirrored engine state.
-      if (sc.patchEngine) sc.patchEngine(S)
       const card = CARD_DEFS[sc.card]
-      const out = applyCardEffect(sc.card, S, {
-        targetIdx: sc.slot,
-        artifacts: [], passives: [], pacts: [], loot: [],
-        upgraded: false,
-        fightIndex: FIGHT_INDEX, circleNum: CIRCLE_NUM,
-        rng: mkRng(0x51ede5 + sc.id.length),
-        lastRiffId: sc.lastRiffId !== undefined ? sc.lastRiffId : null,
-        selectedUids,
-        selfUid: 'h' + playIdx,
-        emberCost: card ? (card.embers || 0) : 0,
-        bossPassiveId: null,   // fight 13 = 'bloodlust', no cardHeal
-      })
+      const runEngine = (rng) => {
+        const S = engineStateFrom(A, handIds, memberDefs)
+        // Carry the once-per-X flags live tracks in refs the HUD does not expose
+        // (member._hrUsed, stageDiveUsed) into the mirrored engine state.
+        if (sc.patchEngine) sc.patchEngine(S)
+        const out = applyCardEffect(sc.card, S, {
+          targetIdx: sc.slot,
+          artifacts: [], passives: [], pacts: [], loot: [],
+          upgraded: false,
+          fightIndex: FIGHT_INDEX, circleNum: CIRCLE_NUM,
+          rng,
+          lastRiffId: sc.lastRiffId !== undefined ? sc.lastRiffId : null,
+          selectedUids,
+          selfUid: 'h' + playIdx,
+          emberCost: card ? (card.embers || 0) : 0,
+          bossPassiveId: null,   // fight 13 = 'bloodlust', no cardHeal
+        })
+        return { S, out, mm: compare(sc.id, A, B, S, out, ctxExtra) }
+      }
 
-      const mm = compare(sc.id, A, B, S, out, ctxExtra)
-      if (mm.length === 0) {
-        row = { id: sc.id, status: 'PASS', detail: `${liveCardName} → ${targetName}` }
+      // Cards that branch on ONE live Math.random() are run once per possible
+      // roll; live must match one branch on EVERY field. The reported diff is the
+      // CLOSEST branch, so a genuine engine bug still surfaces as a real field
+      // list rather than as "no branch matched". Everything else runs once, on
+      // the fixed per-scenario seed, exactly as before.
+      let engineRun = null, branchTag = ''
+      for (const b of (sc.rngBranches || [null])) {
+        const r = runEngine(b === null ? mkRng(0x51ede5 + sc.id.length) : () => b)
+        if (!engineRun || r.mm.length < engineRun.mm.length) {
+          engineRun = r
+          branchTag = b === null ? '' : `  [live rolled engine-branch rng=${b}]`
+        }
+        if (r.mm.length === 0) break
+      }
+      const mm = engineRun.mm
+      if (sc.rngBranchy) {
+        // Live rolled its own d10 and the engine rolled another. Comparing the
+        // resulting fields is meaningless; report and move on.
+        row = { id: sc.id, status: 'RNG', detail: mm.length + ' field(s) differ (independent rolls)' }
+        rngNotes.push(...mm)
+      } else if (mm.length === 0) {
+        row = { id: sc.id, status: 'PASS', detail: `${liveCardName} → ${targetName}${branchTag}` }
       } else {
         row = { id: sc.id, status: 'MISMATCH', detail: mm.length + ' field(s)' }
         engineBugs.push(...mm)
@@ -622,7 +826,7 @@ function compare(cardId, A, B, S, out, ctx) {
       skipped.push({ id: sc.id, reason: e.message })
     }
     rows.push(row)
-    const mark = row.status === 'PASS' ? '✓' : row.status === 'MISMATCH' ? '✗' : '–'
+    const mark = row.status === 'PASS' ? '✓' : row.status === 'MISMATCH' ? '✗' : row.status === 'RNG' ? '🎲' : '–'
     console.log(`  ${mark} ${row.status.padEnd(9)} ${row.id.padEnd(16)} ${row.detail}`)
   }
 
@@ -641,6 +845,33 @@ function compare(cardId, A, B, S, out, ctx) {
     for (const s of skipped) console.log(`  ${s.id}: ${s.reason}`)
   }
 
+  if (rngNotes.length) {
+    console.log('\n══ RNG-BRANCHY (independent rolls — informational, NOT engine bugs) ══')
+    for (const r of rngNotes) console.log('  ' + r)
+  }
+
+  // ── COVERAGE: any engine card with no scenario is called out by name ──
+  {
+    const covered = new Set(SCENARIOS.map(s2 => s2.card))
+    const uncovered = eng.ENGINE_CARD_IDS.filter(id => !covered.has(id))
+    console.log(`\n══ COVERAGE: ${covered.size}/${eng.ENGINE_CARD_IDS.length} engine cards have a scenario ══`)
+    if (uncovered.length === 0) console.log('  (every engine card is exercised)')
+    else for (const id of uncovered) {
+      console.log(`  UNVERIFIED: ${id}` + (id === 'contract'
+        // Verified Aug 4 2026 — this is NOT laziness, the plant is structurally
+        // impossible: the Record Deal is built inline in the Welcome-to-Hell
+        // branch (App.jsx ~9422) and is deliberately absent from ALL_CARDS, while
+        // the save loader hydrates hand ids with ALL_CARDS.find (App.jsx ~10226),
+        // so a planted 'contract' is silently dropped from the hand. Adding it to
+        // ALL_CARDS to make it plantable would leak a Rare "lose your strongest
+        // member" card into the shop and booster pools, which draw from
+        // getUnlockedCards() without filtering copies:0 (App.jsx ~916). Engine
+        // side it is covered by cardEngine's own self-test.
+        ? '  — Welcome-to-Hell injection only; cannot be planted into a fight-13 hand.'
+        : '  — no scenario. ADD ONE.'))
+    }
+  }
+
   console.log('\n══ NOT OBSERVABLE FROM OUTSIDE (not asserted here) ══')
   for (const l of [
     'pendingEmbers  — Tapped Out\'s "+5 next Strike" is a ref live never renders.',
@@ -652,19 +883,16 @@ function compare(cardId, A, B, S, out, ctx) {
     '                 concern, not an applyCard one, so it is out of scope here.',
     'buffCount      — not rendered numerically; the 3-buff +20% Corruption',
     '                 trigger it drives IS covered, via the corruption field.',
-    'Cards outside the Standard 69: every ALL_CARDS entry with copies:0 (the',
-    '                 alt-deck riffs, Setlist Rewrite, Bootleg Copy, ...) plus the',
-    '                 shopOnly set (Overdrive, Remaster, Sabbath Sigil, Double',
-    '                 Down, Going Broke, Hellfire Rift, Soul Sacrifice, Void',
-    '                 Pact). They never start in a Standard deck, but the shop and',
-    '                 booster pools DO offer them (App.jsx ~916 draws from',
-    '                 getUnlockedCards() unfiltered by copies), so a long run can',
-    '                 acquire them. Untested by this file.',
+    'strikesLeft/fightMaxStrikes — Double Booking\'s +1 IS printed by the HUD',
+    '                 (strikes: n/m) but compare() does not read it; the scenario',
+    '                 still proves the card charges correctly and moves nothing else.',
+    'Sabbath Sigil\'s d10 branch — see the RNG-BRANCHY section.',
   ]) console.log('  ' + l)
 
   const passed = rows.filter(r => r.status === 'PASS').length
   const mism = rows.filter(r => r.status === 'MISMATCH').length
   const skip = rows.filter(r => r.status === 'SKIP').length
-  console.log(`\n${rows.length} tested, ${passed} passed, ${mism} mismatched, ${skip} skipped`)
+  const rng = rows.filter(r => r.status === 'RNG').length
+  console.log(`\n${rows.length} tested, ${passed} passed, ${mism} mismatched, ${skip} skipped, ${rng} rng-branchy`)
   process.exit((mism || skip || crossProblems.length) ? 1 : 0)
 })().catch(e => { console.log('HARNESS FAIL:', e.message); console.log(e.stack); process.exit(1) })

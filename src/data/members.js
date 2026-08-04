@@ -2,10 +2,25 @@
 export const ALL_MUSICIANS=[
   {id:'bjorn',name:'Bjorn',role:'Lead Guitarist',atk:5,hp:6,maxHp:8,emoji:'🎸',keyword:'FRENZIED',desc:'High ATK, fragile. The carry.',bio:'Former blacksmith from Uppsala. Traded his hammer for a guitar at 14. His riffs have literally killed small animals.'},
   {id:'ragnar',name:'Ragnar',role:'Lead Guitarist',atk:4,hp:7,maxHp:9,emoji:'🎸',keyword:'FRENZIED',desc:'Slightly tankier lead.',bio:'Claims to be descended from the real Ragnar Lothbrok. Nobody believes him, but nobody argues when he plays.'},
-  {id:'thor',name:'Thor',role:'Drummer',atk:0,hp:8,maxHp:11,emoji:'🥁',keyword:'DOUBLE TIME',desc:'Lucky drummer. Roll high and the whole band hits harder.',bio:'Not THAT Thor. This one is louder. Broke three drum kits in one show. The venue banned drums after that.'},
+  // Aug 4 2026 — DE-DOMINATED. Thor was 0/8/11 Drummer DOUBLE TIME against Rolf's
+  // 1/9/12 Drummer DOUBLE TIME: same role, same keyword, strictly worse on every
+  // stat, so picking Thor was never correct. Fixing it with ATK would have been
+  // fake — drummers do not swing (App.jsx handleStrike skips role==='Drummer'), so
+  // a drummer's ATK is near-dead weight and Thor would just have been worse in a
+  // different column. The split is now on KEYWORD, which is what actually pays:
+  // both drummers still trigger the band-wide DOUBLE TIME d6 roll (live keys that
+  // off role, not keyword), but Rolf carries the DOUBLE TIME keyword for stacking
+  // while Thor carries ANCHOR and the HP to use it. Rolf = tempo, Thor = wall.
+  {id:'thor',name:'Thor',role:'Drummer',atk:0,hp:10,maxHp:14,emoji:'🥁',keyword:'ANCHOR',desc:'The wall behind the kit. Soaks a lethal hit and keeps the tempo anyway.',bio:'Not THAT Thor. This one is louder. Broke three drum kits in one show. The venue banned drums after that.'},
   {id:'ingrid',name:'Ingrid',role:'Bass Player',atk:3,hp:10,maxHp:14,emoji:'🎵',keyword:'ANCHOR',desc:'High HP. Survives one lethal hit per fight (stack 3+ ANCHORs to protect the whole band).',bio:'The foundation. Ingrid held the band together through two breakups, a lawsuit, and a literal earthquake during a set.'},
   {id:'loki',name:'Loki',role:'Synth Player',atk:3,hp:6,maxHp:8,emoji:'🎹',keyword:'CORRUPT',desc:'Damage scales with Corruption.',bio:'Found a cursed synthesizer in a pawn shop. The more corrupt the signal, the harder it hits. He sleeps with it.'},
-  {id:'grimnir',name:'Grimnir',role:'Vocalist',atk:2,hp:7,maxHp:9,emoji:'🎤',keyword:'DEBUFF',desc:'The Masked One. Reduces boss passive each turn.',bio:'Nobody has seen his face. His voice strips the will from anything that hears it. Even the sound guy wears earplugs.'},
+  // Aug 4 2026 — DE-DOMINATED. Grimnir was 2/7/9 Vocalist DEBUFF against Astrid's
+  // 3/8/11 Vocalist DEBUFF: same role, same keyword, strictly worse on every stat.
+  // Now the two vocalists sit on opposite ends of one axis instead of one being a
+  // worse copy: Astrid is the durable 3/8/11 support, Grimnir is the glass-cannon
+  // 5/5/7 — the highest-ATK DEBUFF in the roster and the frailest body in the game.
+  // Take Astrid if the band needs to survive, Grimnir if it needs to end it now.
+  {id:'grimnir',name:'Grimnir',role:'Vocalist',atk:5,hp:5,maxHp:7,emoji:'🎤',keyword:'DEBUFF',desc:'The Masked One. Strips the boss passive AND hits like a lead. One bad hit from gone.',bio:'Nobody has seen his face. His voice strips the will from anything that hears it. Even the sound guy wears earplugs.'},
   {id:'dag',name:'Dag',role:'Bass Player',atk:2,hp:12,maxHp:16,emoji:'🎵',keyword:'ANCHOR',desc:'Tankiest member.',bio:'16 HP of pure Viking stubbornness. Dag once played a 9-hour set without sitting down. He does not believe in breaks.'},
   {id:'vitalik',name:'Vitalik',role:'Dark Minstrel',atk:6,hp:9,maxHp:12,emoji:'🪈',keyword:'FOLK MAGIC',desc:'Nobody asked. Nobody complained twice.',bio:'Showed up backstage with a carved bone flute. When asked to leave, he played one note. Everyone sat down and listened.'},
   {id:'sigrid',name:'Sigrid',role:'Rhythm Guitarist',atk:3,hp:8,maxHp:11,emoji:'🎸',keyword:'SHREDDER',desc:'+ATK on every same-type chain. Stack riffs.',bio:'Ex-military. Applied the same discipline to guitar that she applied to combat. Each riff is a controlled burst.'},

@@ -8,6 +8,14 @@
 // real ATK growth. Buffs now write permAtkBonus only.
 import{readFileSync}from'fs'
 import * as ENGINE from './src/data/cardEngine.js'
+// Aug 4 2026 — THE SIM NO LONGER KEEPS ITS OWN COPY OF THE GAME'S DATA.
+// It used to hard-code an ENEMIES table (Wanderer baseDmg 4 vs live's 2, 27 wrong
+// maxHp values) and an ALL_MUSICIANS table where every member had hp===maxHp
+// (bjorn 6/6 vs live 6/8, brynja 14/14 vs live 14/19) and tanuki/lucifer_member
+// were missing entirely — so every heal capped ~30% low and the roster was wrong.
+// Both now come from the SAME modules src/App.jsx imports.
+import{ENEMIES as LIVE_ENEMIES}from'./src/data/enemies.js'
+import{ALL_MUSICIANS as LIVE_MUSICIANS}from'./src/data/members.js'
 // vestibule-sim.js v19.1 — Expert AI Simulator for Vestibule
 // Session 16 — +Immediate draws, 15-card loop — +Events, Corruption Thresholds, Blood Oath: ALL mechanics (artifacts, passives, loot, combos, multiplier, hellquake)
 // KEYWORD STACK BONUSES VARIANT — same as v19.1 + per-keyword stack tier bonuses applied at strike time.
@@ -26,6 +34,39 @@ try{BOSS_HP_OVERRIDE=JSON.parse(readFileSync('./boss_hp_override.json','utf8'))}
 }
 // Strip the _comment field if present so it doesn't pollute keyed lookups
 if(BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE._comment)delete BOSS_HP_OVERRIDE._comment;
+// ═══════════════════════════════════════════════════════════════════════════
+// CARDINAL RULE ENFORCEMENT — boss_hp_override.json MUST equal src/data/enemies.js
+// ═══════════════════════════════════════════════════════════════════════════
+// The live game reads enemies.js (getScaledMaxHp); this sim reads the JSON. When
+// they drift the sim measures a game that does not exist. Aug 4 2026 the JSON said
+// Lucifer 666666 and enemies.js said 100000 — a 6.7x difference that silently
+// voided every Lucifer winrate ever published. This check makes that impossible to
+// repeat: it is fatal, loud, and runs before a single game is simulated.
+export function assertBossHpSync(overrideJson,enemyList){
+  const problems=[]
+  const keys=Object.keys(overrideJson||{}).filter(k=>k!=='_comment')
+  if(keys.length!==enemyList.length)problems.push(`entry count: json has ${keys.length}, enemies.js has ${enemyList.length}`)
+  enemyList.forEach((e,i)=>{
+    const v=overrideJson?overrideJson[i]:undefined
+    if(v===undefined)problems.push(`index ${i} (${e.id}): missing from boss_hp_override.json`)
+    else if(v!==e.maxHp)problems.push(`index ${i} (${e.id}): json=${v} but enemies.js maxHp=${e.maxHp}`)
+  })
+  for(const k of keys)if(Number(k)>=enemyList.length)problems.push(`index ${k}: present in json, no such enemy in enemies.js`)
+  return problems
+}
+if(BOSS_HP_OVERRIDE){
+  const _hpProblems=assertBossHpSync(BOSS_HP_OVERRIDE,LIVE_ENEMIES)
+  if(_hpProblems.length){
+    console.error('\n════════════════════════════════════════════════════════════')
+    console.error('FATAL: boss_hp_override.json disagrees with src/data/enemies.js')
+    console.error('The sim would be measuring a game that does not exist.')
+    console.error('CARDINAL RULE: both files change in the SAME commit.')
+    console.error('════════════════════════════════════════════════════════════')
+    for(const p of _hpProblems)console.error('  ✗ '+p)
+    console.error('')
+    process.exit(1)
+  }
+}
 const STAKES={
   bronze:{id:'bronze',name:'Bronze',hpMult:1.30,dmgAdd:0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.0,mentorBonus:0},
   silver:{id:'silver',name:'Silver',hpMult:1.30,dmgAdd:2,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,scoreMult:1.5,mentorBonus:0.05},
@@ -37,54 +78,18 @@ const STAKES={
 const STAKE=STAKES[STAKE_ID]||STAKES.bronze;
 if(HP_OVERRIDE>0)STAKE.hpMult=HP_OVERRIDE;
 
-const ENEMIES=[
-  {id:'wanderer',name:'Wanderer',maxHp:65,baseDmg:4,passiveId:null},
-  {id:'lostsoul',name:'Lost Soul',maxHp:95,baseDmg:5,passiveId:null},
-  {id:'drifter',name:'Drifter',maxHp:140,baseDmg:7,passiveId:null},
-  {id:'siren',name:'Siren',maxHp:145,baseDmg:5,passiveId:'selfbuff'},
-  {id:'tempter',name:'Tempter',maxHp:210,baseDmg:6,passiveId:'selfbuff'},
-  {id:'lust_boss',name:'Seducer',maxHp:310,baseDmg:7,passiveId:'selfbuff2'},
-  {id:'glutton',name:'Glutton',maxHp:200,baseDmg:5,passiveId:'cardHeal3b'},
-  {id:'feaster',name:'Feaster',maxHp:280,baseDmg:6,passiveId:'cardHeal5'},
-  {id:'gluttony_boss',name:'Devourer',maxHp:380,baseDmg:7,passiveId:'cardHeal8'},
-  {id:'miser',name:'Miser',maxHp:280,baseDmg:4,passiveId:'stashSteal'},
-  {id:'hoarder',name:'Hoarder',maxHp:350,baseDmg:5,passiveId:'stashSteal2'},
-  {id:'greed_boss',name:'Usurer',maxHp:580,baseDmg:6,passiveId:'stashSteal3'},
-  {id:'wrathful',name:'Wrathful',maxHp:380,baseDmg:5,passiveId:'selfImmolate'},
-  {id:'berserker',name:'Berserker',maxHp:440,baseDmg:6,passiveId:'bloodlust'},
-  {id:'anger_boss',name:'Warlord',maxHp:580,baseDmg:7,passiveId:'commands'},
-  {id:'heretic',name:'Heretic',maxHp:480,baseDmg:5,passiveId:'corruptPlayer'},
-  {id:'apostate',name:'Apostate',maxHp:580,baseDmg:6,passiveId:'corruptPlayer15'},
-  {id:'heresy_boss',name:'False Prophet',maxHp:800,baseDmg:7,passiveId:'corruptPlayer20'},
-  {id:'brute',name:'Brute',maxHp:580,baseDmg:6,passiveId:'targetHighestHp'},
-  {id:'hunter',name:'Hunter',maxHp:780,baseDmg:7,passiveId:'targetHighestHp2'},
-  {id:'violence_boss',name:'Executioner',maxHp:1050,baseDmg:8,passiveId:'targetHighestHp3'},
-  {id:'trickster',name:'Trickster',maxHp:750,baseDmg:6,passiveId:'fraudShuffle'},
-  {id:'deceiver',name:'Deceiver',maxHp:900,baseDmg:7,passiveId:'fraudShuffle2'},
-  {id:'fraud_boss',name:'Archfraud',maxHp:1150,baseDmg:8,passiveId:'fraudShuffle3'},
-  {id:'traitor',name:'Traitor',maxHp:1100,baseDmg:6,passiveId:'paranoia'},
-  {id:'betrayer',name:'Betrayer',maxHp:1100,baseDmg:7,passiveId:'soulThief'},
-  {id:'lucifer',name:'LUCIFER',maxHp:6666,baseDmg:9,passiveId:'luciferBoss'},
-];
+// Aug 4 2026: was a hand-maintained copy that had drifted from live on EVERY row —
+// Wanderer 65HP/4dmg vs live's 45HP/2dmg, Lucifer 6666 vs 100000, and 25 more.
+// boss_hp_override.json only ever overrode maxHp, so baseDmg stayed wrong forever.
+// Now derived from src/data/enemies.js, the module the live game itself imports.
+const ENEMIES=LIVE_ENEMIES.map(e=>({id:e.id,name:e.id==='lucifer'?'LUCIFER':e.name.replace(/^The /,''),maxHp:e.maxHp,baseDmg:e.baseDmg,passiveId:e.passiveId}));
 
-const ALL_MUSICIANS=[
-  {id:'bjorn',role:'Lead Guitarist',name:'Bjorn',atk:5,hp:6,maxHp:6,keyword:'FRENZIED'},
-  {id:'ragnar',role:'Lead Guitarist',name:'Ragnar',atk:4,hp:7,maxHp:7,keyword:'FRENZIED'},
-  {id:'thor',role:'Drummer',name:'Thor',atk:0,hp:8,maxHp:8,keyword:'DOUBLE TIME'},
-  {id:'ingrid',role:'Bass Player',name:'Ingrid',atk:3,hp:10,maxHp:10,keyword:'ANCHOR'},
-  {id:'loki',role:'Synth Player',name:'Loki',atk:3,hp:6,maxHp:6,keyword:'CORRUPT'},
-  {id:'grimnir',role:'Vocalist',name:'Grimnir',atk:2,hp:7,maxHp:7,keyword:'DEBUFF'},
-  {id:'dag',role:'Bass Player',name:'Dag',atk:2,hp:12,maxHp:12,keyword:'ANCHOR'},
-  {id:'vitalik',role:'Dark Minstrel',name:'Vitalik',atk:6,hp:9,maxHp:9,keyword:'FOLK MAGIC'},
-  {id:'sigrid',role:'Rhythm Guitarist',name:'Sigrid',atk:3,hp:8,maxHp:8,keyword:'SHREDDER'},
-  {id:'gunnar',role:'Rhythm Guitarist',name:'Gunnar',atk:4,hp:7,maxHp:7,keyword:'SHREDDER'},
-  {id:'astrid',role:'Vocalist',name:'Astrid',atk:3,hp:8,maxHp:8,keyword:'DEBUFF'},
-  {id:'freya',role:'Synth Player',name:'Freya',atk:4,hp:5,maxHp:5,keyword:'CORRUPT'},
-  {id:'ulf',role:'Bass Player',name:'Ulf',atk:4,hp:9,maxHp:9,keyword:'ANCHOR'},
-  {id:'brynja',role:'Bass Player',name:'Brynja',atk:1,hp:14,maxHp:14,keyword:'ANCHOR'},
-  {id:'rolf',role:'Drummer',name:'Rolf',atk:1,hp:9,maxHp:9,keyword:'DOUBLE TIME'},
-  {id:'orm',role:'Dark Minstrel',name:'Orm',atk:2,hp:11,maxHp:11,keyword:'HEXED'},
-];
+// Aug 4 2026: was hard-coded with maxHp===hp for all 16 members, so every heal in
+// the sim capped ~30% below live (bjorn 6 vs 8, ragnar 7 vs 9, thor 8 vs 11,
+// ingrid 10 vs 14, dag 12 vs 16, brynja 14 vs 19...) and tanuki/lucifer_member did
+// not exist at all. Now the SAME array src/App.jsx imports. `locked` members are
+// filtered out by pickStartingPair/generateCandidates exactly as live gates them.
+const ALL_MUSICIANS=LIVE_MUSICIANS.map(m=>({id:m.id,role:m.role,name:m.name,atk:m.atk,hp:m.hp,maxHp:m.maxHp,keyword:m.keyword,locked:!!m.locked,unlockAt:m.unlockAt}));
 
 const ALL_CARDS=[
 // MIRROR of src/data/cards.js ALL_CARDS (id/type/rarity/embers/copies/flags).
@@ -188,7 +193,9 @@ const DECK_MANIFESTS={
   shredder:{amp:2,battlecry:3,newstrings:2,encore:3,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,resonancecard:2,crowdsurf:2,demotape:2,soundwall:1,burnset:1,stagedive:1,herbmoney:1,echopedal:2,riffthief:2,feedbackscream:2,devilsdice:1,sonicboom:1,skullsplitter:1,tremolopick:1,harmonicfb:1,doomchord:1,distortion:2,staticcharge:2,deathriff:1,ampstatic:1,dialtoeleven:1,sigdecay:1,bloodritual:1,darktuning:1,soundcheck:2,setbreak:2,wakeup:2,roadie:1,setlist:1,powertap:2,tappedout:2,soundboard:2,groupie:1,ampoverload:1,corrsiphon:2,drainthecrowd:1},
   ritualist:{amp:1,battlecry:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,resonancecard:2,crowdsurf:1,demotape:1,soundwall:1,moshpit:1,newstrings:1,herbmoney:1,burnset:1,distortion:3,darktuning:2,staticcharge:2,dialtoeleven:2,deathriff:2,ampstatic:2,seance:1,bloodritual:1,feedbackloop:1,controlfeedback:1,sigdecay:1,infernalpact:2,cursedstrings:2,possessionriff:1,soulbargain:1,hexdecay:1,offeringpit:1,carrioncall:1,russianroulette:1,soundcheck:2,roadie:2,wakeup:2,setbreak:2,gearcheck:1,doublebooking:1,powertap:2,corrsiphon:2,tappedout:1,groupie:1,soundboard:1,ampoverload:1,pyromaniac:1,ampfeedback:1,drainthecrowd:1},
   engineer:{battlecry:3,amp:2,encore:2,possessedperf:2,heavyriff:2,crowdsurf:2,infencore:1,soundwall:1,burnset:1,shredsolo:2,sonicboom:2,feedbackscream:1,overdriveped:1,harmonicfb:1,tremolopick:1,distortion:2,darktuning:2,ampstatic:1,deathriff:1,staticcharge:1,feedbackloop:1,controlfeedback:1,seance:1,venomriff:2,darkcrescendo:1,setlist:3,soundcheck:2,wakeup:2,setbreak:2,roadie:1,bootlegcopy:2,backstagepass:2,setlistrewrite:2,venueswap:1,gearcheck:1,powertap:2,groupie:2,soundboard:2,corrsiphon:2,secondwind:2,tappedout:1,ampoverload:1,ampfeedback:1,drainthecrowd:1},
-  survivor:{battlecry:3,newstrings:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,crowdsurf:2,amp:1,soundwall:1,resonancecard:1,burnset:1,herbmoney:1,doomchord:3,sonicboom:1,necroticamp:1,distortion:2,staticcharge:2,darktuning:2,deathriff:2,controlfeedback:1,dialtoeleven:1,feedbackloop:1,seance:1,bloodritual:1,sigdecay:1,soundcheck:2,roadie:2,wakeup:2,setlist:2,setbreak:2,doublebooking:2,bootlegcopy:1,backstagepass:1,powertap:2,tappedout:2,ampoverload:2,drainthecrowd:2,groupie:1,soundboard:1,slowburn:1,pyromaniac:1,secondwind:1,corrsiphon:1},
+  // Aug 4 2026: doomchord was 3 (live 2) and sonicboom 1 (live 2) — the only two
+  // rows in any manifest that disagreed with App.jsx DECK_CARD_MANIFESTS (~line 675).
+  survivor:{battlecry:3,newstrings:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,crowdsurf:2,amp:1,soundwall:1,resonancecard:1,burnset:1,herbmoney:1,doomchord:2,sonicboom:2,necroticamp:1,distortion:2,staticcharge:2,darktuning:2,deathriff:2,controlfeedback:1,dialtoeleven:1,feedbackloop:1,seance:1,bloodritual:1,sigdecay:1,soundcheck:2,roadie:2,wakeup:2,setlist:2,setbreak:2,doublebooking:2,bootlegcopy:1,backstagepass:1,powertap:2,tappedout:2,ampoverload:2,drainthecrowd:2,groupie:1,soundboard:1,slowburn:1,pyromaniac:1,secondwind:1,corrsiphon:1},
 }
 const ACTIVE_DECK=DECK_MANIFESTS[DECK_ID]||DECK_MANIFESTS.standard
 const DECK_HP_SCALE={standard:1.85,shredder:2.00,ritualist:1.65,engineer:1.85,survivor:1.75}
@@ -221,13 +228,8 @@ const UPGRADE_PRIORITY={
   doubledown:24,demotape:22,soundboard:20,seance:18,sabbathsigil:16,
   sigdecay:14,setlist:12,setbreak:10,burnset:8,remaster:6,dialtoeleven:4
 }
-const UPGRADE_HP={
-  battlecry:{hp:'target',amt:1},amp:{hp:'target',amt:2},newstrings:{hp:'target',amt:1},
-  encore:{hp:'target',amt:2},resonancecard:{hp:'target',amt:2},soundcheck:{hp:'hurt',amt:1},
-  roadie:{hp:'target',amt:2},wakeup:{hp:'all',amt:2},distortion:{hp:'all',amt:1},
-  controlfeedback:{hp:'all',amt:1},seance:{hp:'all',amt:1},infencore:{hp:'all',amt:1},
-  possessedperf:{hp:'all',amt:2},setbreak:{hp:'weakest',amt:1},soundboard:{hp:'random',amt:1}
-}
+// UPGRADE_HP DELETED (Aug 4 2026). It mirrored cards.js CARD_UPGRADES' `hp`/`hpAmt`
+// fields, which are dead metadata live never reads — see the Doom Forge block below.
 
 // ── ARTIFACTS (shop items, max 3 equipped) ──
 const ARTIFACTS=[
@@ -368,7 +370,7 @@ function improveOrdering(gs){const stage=gs.stage
 let TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
-  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0,eventsTriggered:0,eventMoshPit:0,eventCursedAmp:0,eventBloodOath:0,eventHellfire:0,eventSabbath:0,eventWager:0,whisperDmg:0,hungerExtraCost:0,madnessCards:0,possessionBonus:0,anchorSaves:0,kwStack2Reached:0,kwStack3Reached:0};
+  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0,eventsTriggered:0,eventMoshPit:0,eventCursedAmp:0,eventBloodOath:0,eventHellfire:0,eventSabbath:0,eventWager:0,whisperDmg:0,hungerExtraCost:0,madnessCards:0,possessionBonus:0,anchorSaves:0,kwStack2Reached:0,kwStack3Reached:0,fightsFought:0,strikesTaken:0,oneShotFights:0};
 let CARD_PLAYS={};
 
 function rand(n){return Math.floor(Math.random()*n)}
@@ -376,18 +378,31 @@ function pick(arr){return arr[rand(arr.length)]}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rand(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
 function memberScore(m){return(m.atk+(m.permAtkBonus||0))*3+m.hp+(m.keyword==='FRENZIED'?6:0)+(m.keyword==='CORRUPT'?4:0)+(m.keyword==='FOLK MAGIC'?5:0)+(m.keyword==='HEXED'?3:0)+(m.keyword==='SHREDDER'?3:0)+(m.keyword==='DOUBLE TIME'?2:0)+(m.keyword==='DEBUFF'?2:0)+(m.keyword==='ANCHOR'?1:0)}
 function isUpgraded(m){return m.foil||m.mythic||m.demonic}
-function makeMember(base,foil,mythic,demonic){
-  const m={...base,hp:base.maxHp,tooStoned:false,stoneShield:false,foil:!!foil,mythic:!!mythic,demonic:!!demonic,mentorBonusApplied:false,permAtkBonus:0,tempAtkBonus:0,_lpb:0,_buffCount:0,_hrUsed:false,uid:Math.random().toString(36).slice(2)};
-  if(demonic){m.atk+=4;m.maxHp+=8;m.hp=m.maxHp}else if(mythic){m.atk+=2;m.maxHp+=4;m.hp=m.maxHp}else if(foil){m.atk+=1;m.maxHp+=2;m.hp=m.maxHp}
-  // ── DECK IDENTITY: apply HP modifiers (Survivor +2, Shredder ×0.85) ──
-  if(DECK_ID_DEF.memberHpMod||DECK_ID_DEF.memberHpPct!==1){
+// Aug 4 2026 — members.js has TWO hp fields (`hp` = starting HP, `maxHp` = ceiling)
+// and live uses them differently depending on how the member joined:
+//   * STARTING PAIR (App.jsx startGame ~5445): hp === maxHp === members.js `hp`,
+//     then the deck HP modifiers (Survivor +2, Shredder x0.80) are applied.
+//   * RECRUITS (App.jsx handleRecruitPick -> applyMentorLink ~1026): the
+//     ALL_MUSICIANS entry is spread verbatim, so hp=`hp`, maxHp=`maxHp`, plus the
+//     tier bonus (foil +1/+2, mythic +2/+4, demonic +4/+8) added to BOTH — a
+//     recruit therefore joins BELOW its ceiling and heals are worth something.
+//     Live applies NO deck HP modifier on this path.
+// The sim previously used maxHp for both fields on a table where maxHp===hp, so
+// every member was at its floor and every heal capped ~30% low.
+function makeMember(base,foil,mythic,demonic,isStarter){
+  const m={...base,hp:base.hp,maxHp:isStarter?base.hp:base.maxHp,tooStoned:false,stoneShield:false,foil:!!foil,mythic:!!mythic,demonic:!!demonic,mentorBonusApplied:false,permAtkBonus:0,tempAtkBonus:0,_lpb:0,_buffCount:0,_hrUsed:false,uid:Math.random().toString(36).slice(2)};
+  if(demonic){m.atk+=4;m.maxHp+=8;m.hp+=8}else if(mythic){m.atk+=2;m.maxHp+=4;m.hp+=4}else if(foil){m.atk+=1;m.maxHp+=2;m.hp+=2}
+  // ── DECK IDENTITY: HP modifiers (Survivor +2, Shredder x0.80) — STARTERS ONLY,
+  //    exactly as live: handleRecruitPick never touches deck HP modifiers.
+  if(isStarter&&(DECK_ID_DEF.memberHpMod||DECK_ID_DEF.memberHpPct!==1)){
     m.maxHp=Math.max(1,Math.round((m.maxHp+(DECK_ID_DEF.memberHpMod||0))*(DECK_ID_DEF.memberHpPct||1)))
     m.hp=m.maxHp
   }
+  m.hp=Math.min(m.hp,m.maxHp)
   return m;
 }
 function buildDeck(){const d=[];for(const[id,copies]of Object.entries(ACTIVE_DECK)){const card=ALL_CARDS.find(c=>c.id===id);if(card)for(let i=0;i<copies;i++)d.push({...card,uid:Math.random().toString(36).slice(2)})}return shuffle(d)}
-function pickStartingPair(){const pool=ALL_MUSICIANS.filter(m=>!m.locked);let best=null,bs=-1;for(let i=0;i<40;i++){const a=pick(pool),b=pick(pool);if(a.id===b.id)continue;if(a.keyword==='ANCHOR'&&b.keyword==='ANCHOR')continue;const s=memberScore(a)+memberScore(b);if(s>bs){bs=s;best=[a,b]}}return best.map(b=>makeMember(b,false,false,false))}
+function pickStartingPair(){const pool=ALL_MUSICIANS.filter(m=>!m.locked);let best=null,bs=-1;for(let i=0;i<40;i++){const a=pick(pool),b=pick(pool);if(a.id===b.id)continue;if(a.keyword==='ANCHOR'&&b.keyword==='ANCHOR')continue;const s=memberScore(a)+memberScore(b);if(s>bs){bs=s;best=[a,b]}}return best.map(b=>makeMember(b,false,false,false,true))}
 function arrangeStage(stage){
   const alive=stage.filter(m=>!m.tooStoned),stoned=stage.filter(m=>m.tooStoned);if(alive.length<=1)return stage;
   const pairs=[],used=new Set(),upgraded=alive.filter(m=>isUpgraded(m));
@@ -604,6 +619,37 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
 //    fires live's "+20% Corruption" 3-buff penalty (applyCard, App.jsx ~6157).
 function _lpbAdd(m,n){m._lpb=(m._lpb||0)+n}
 function _liveAtk(m){return m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0)}
+
+// ══════════════════════════════════════════════════════════════════════
+// EMBER COST — full mirror of App.jsx applyCard (~5505-5527)
+// ══════════════════════════════════════════════════════════════════════
+// Aug 4 2026: the sim modelled 5 of live's TWELVE discount sources (and invented a
+// SHREDDER discount live had already deleted), so cards-per-strike was
+// systematically wrong. Every source live has is now here, in live's order:
+// three full-overrides first (nextCardFree / allCardsFree / freeCardsLeft), then
+// the additive stack. `commit` consumes the one-shot charges; the playability
+// filter calls with commit=false so probing a card never spends anything.
+function _hasPas(gs,id){return (gs.passives||[]).some(p=>p&&p.id===id)||(gs.artifacts||[]).some(a=>a&&a.id===id)}
+function cardCost(c,gs,st,commit){
+  const base=Math.max(0,c.embers||0)
+  // ── full-cost overrides (live checks these before any subtraction) ──
+  if(gs._allCardsFree)return 0
+  if(gs._nextCardFree&&c.id!=='doubledown'){if(commit)gs._nextCardFree=false;return 0}
+  if((gs._freeCardsLeft||0)>0&&c.id!=='doubledown'&&base>0){if(commit)gs._freeCardsLeft=Math.max(0,gs._freeCardsLeft-1);return 0}
+  let d=0
+  if(c.foil&&base>=2)d+=1                                                            // 1  foil card
+  if(gs._tripBuff==='SYNESTHESIA')d+=1                                               // 2  SYNESTHESIA trip
+  if((gs._pacts||[]).includes('dark_bargain')&&c.type==='CORRUPT'&&base>=1)d+=1      // 3  dark_bargain pact
+  if((gs._ampFbDiscount||0)>0&&c.type==='RIFF'){d+=1;if(commit)gs._ampFbDiscount=0}  // 4  Amp Feedback
+  if(_hasPas(gs,'reverbtank')&&st.firstOfStrike)d+=1                                 // 5  Reverb Tank
+  if(_hasPas(gs,'fuzzbox')&&c.type==='RIFF')d+=1                                     // 6  Fuzz Box
+  if(_hasPas(gs,'phaserpedal')&&c.type==='CORRUPT')d+=1                              // 7  Phaser
+  if(gs._tripBuff==='GHOST WEED'&&c.type==='CORRUPT')d+=base                         // 8  GHOST WEED trip
+  if(_hasPas(gs,'wahpedal')&&c.type==='CORRUPT'&&!gs._wahUsed){d+=base;if(commit)gs._wahUsed=true} // 9 Wah Pedal
+  if(_hasPas(gs,'cabletester')&&gs.hand.filter(h=>h&&h.id===c.id).length>=2)d+=1     // 10 Cable Tester
+  if(_hasPas(gs,'theconduit'))d+=Math.floor(base/2)                                  // 11 The Conduit
+  return Math.max(0,base-d)                                                          // 12 = the three overrides above
+}
 // ══════════════════════════════════════════════════════════════════════
 // Aug 1 2026 — SINGLE SOURCE OF TRUTH. applyCardSim no longer reimplements
 // cards; it adapts the sim's state to `src/data/cardEngine.js` and calls the
@@ -627,9 +673,9 @@ function _engTargetIdx(card,gs){
   if(id==='russianroulette')return by(m=>m.atk*3+m.hp,lo)
   return by(m=>m.atk,hi) // carry
 }
-function applyCardSim(card,gs,enemy){
+function applyCardSim(card,gs,enemy,emberCost){
   const idx=_engTargetIdx(card,gs)
-  if(idx<0)return
+  if(idx<0)return null
   // Adapt: the sim keeps a dense stage array; the engine expects 5 slots.
   const S={
     stage:(()=>{const a=gs.stage.map(m=>m?{uid:m.uid,name:m.name||m.id,atk:m.atk,hp:m.hp,maxHp:m.maxHp,role:m.role,keyword:m.keyword,tooStoned:!!m.tooStoned,stoneShield:m.stoneShield,tempBuff:!!m.tempBuff,_origAtk:m._origAtk,permAtkBonus:m.permAtkBonus||0,tempAtkBonus:m.tempAtkBonus||0,buffCount:m._buffCount||0,foil:!!m.foil,mythic:!!m.mythic,demonic:!!m.demonic,_hrUsed:!!m._hrUsed,ampedCount:m.ampedThisStrike?1:0,encoreReady:!!m.encoreThisStrike}:null);while(a.length<5)a.push(null);return a})(),
@@ -639,18 +685,29 @@ function applyCardSim(card,gs,enemy){
     hand:gs.hand.map(c=>({id:c.id,uid:c.uid,name:c.id})),
     deck:gs.deck.map(c=>({id:c.id,uid:c.uid,name:c.id})),
     discard:gs.discard.map(c=>({id:c.id,uid:c.uid,name:c.id})),
-    strikesLeft:gs._strikesLeft,discardsLeft:gs._discardsLeft,
+    strikesLeft:gs._strikesLeft,fightMaxStrikes:gs._fightMaxStrikes,discardsLeft:gs._discardsLeft,
     cardsPlayedIds:gs._cardsPlayedIds||[],directDmg:0,pendingDraw:0,pendingEmbers:0,
     flags:{nextCardFree:!!gs._nextCardFree,allCardsFree:!!gs._allCardsFree,freeCardsLeft:gs._freeCardsLeft||0,
       stageDiveUsed:!!gs._stageDiveUsed,possessedActive:!!gs._possessedActive,overdriveActive:!!gs._overdriveActive,
       infencoreActive:!!gs._infencoreActive,bossSkipStrikes:gs._bossSkipStrikes||0,slowBurnStrikes:gs._slowBurn||0,
-      pyromaniacActive:!!gs._pyro,venomDotStacks:gs._venomDot||0,tripBuff:gs._tripBuff,cursedNoHeal:!!gs._cursed}
+      pyromaniacActive:!!gs._pyro,venomDotStacks:gs._venomDot||0,tripBuff:gs._tripBuff,cursedNoHeal:!!gs._cursed,
+      lastRiffId:gs._lastRiffPlayed}
   }
+  // Aug 4 2026 — bossPassiveId was NEVER passed, so the Circle III "heals X per card
+  // played" bosses healed 0 in the sim while live heals 8/15/25 per card on
+  // Glutton/Feaster/Devourer. LIVE BUG PRESERVED: four cards resolve in
+  // handleDropOnStage and `return` before reaching the heal ladder (App.jsx 6288),
+  // so playing setbreak/groupie/setlist/burnset against a Gluttony boss is a free
+  // card. Remaster and Signal Decay DO heal (they have their own copy of the
+  // ladder at 6457/6498). Matching live exactly, not the intent.
+  const _healExempt=card.id==='setbreak'||card.id==='groupie'||card.id==='setlist'||card.id==='burnset'
   const ctx={targetIdx:idx,artifacts:(gs.artifacts||[]).map(a=>a.id),passives:(gs.passives||[]).map(p=>p.id),
     pacts:gs._pacts||[],loot:gs.loot||[],upgraded:!!card.upgraded,fightIndex:gs.fightIndex,
-    circleNum:Math.floor(gs.fightIndex/3)+1,selfUid:card.uid,lastRiffId:gs._lastRiffPlayed,rng:Math.random}
+    circleNum:Math.floor(gs.fightIndex/3)+1,selfUid:card.uid,lastRiffId:gs._lastRiffPlayed,rng:Math.random,
+    emberCost:typeof emberCost==='number'?emberCost:undefined,
+    bossPassiveId:_healExempt?null:enemy.passiveId}
   const res=ENGINE.applyCardEffect(card.id,S,ctx)
-  if(!res||!res.ok)return
+  if(!res||!res.ok)return res||null
   // Write back. The sim's damage formula sums atk+permAtkBonus, so mirror the
   // engine's permAtkBonus (live bookkeeping) rather than folding it into atk.
   for(let i=0;i<gs.stage.length;i++){
@@ -699,6 +756,18 @@ function applyCardSim(card,gs,enemy){
   gs._nextCardFree=S.flags.nextCardFree;gs._allCardsFree=S.flags.allCardsFree;gs._freeCardsLeft=S.flags.freeCardsLeft
   gs._bossSkipStrikes=S.flags.bossSkipStrikes;gs._venomDot=S.flags.venomDotStacks
   gs._cursed=S.flags.cursedNoHeal
+  // Aug 4 2026 — DOUBLE BOOKING WAS A NO-OP. The engine grants +1 strike
+  // (cardEngine IMPL.doublebooking) but the sim never read strikesLeft/
+  // fightMaxStrikes back, so a Rare 3-ember card that reads "+1 extra Strike this
+  // fight" did literally nothing in every sim run while giving +1 live. The strike
+  // loop is bounded by gs._fightMaxStrikes so the extra strike actually materialises.
+  gs._strikesLeft=S.strikesLeft
+  gs._fightMaxStrikes=S.fightMaxStrikes
+  // lastRiff pointer comes from the engine, which deliberately does NOT set it for
+  // burnset — live updates setLastRiffPlayed there but never lastRiffPlayedRef,
+  // and Demo Tape reads the ref (see cardEngine's LAST RIFF TRACKING note).
+  gs._lastRiffPlayed=S.flags.lastRiffId
+  return res
 }
 
 // Genre system removed — reserved for potential future genre-specific deck
@@ -718,8 +787,12 @@ function simFight(gs,phaseHp,luciferPhase){
   const enemy={...baseEnemy,maxHp:effectiveMaxHp,_hp:effectiveMaxHp,_atkBuff:0,_immolateStacks:0}
   const circleNum=Math.floor(fightIdx/3)+1,isBoss=(fightIdx+1)%3===0
   gs.embers=gs.maxEmbers;gs._tappedOutNext=false;gs._drawNextStrike=0;gs._discardsLeft=MAX_DISCARDS;gs.stashStolen=0;gs._tripBuff=null;gs._corruptCardsGiven=[]
+  gs._wahUsed=false // Wah Pedal: "first CORRUPT card each FIGHT is free"
   let maxStrikes=STAKE.maxStrikes+(gs._warDrums?1:0)+(gs._extraStrikes||0)+(DECK_ID_DEF.maxStrikesMod||0);gs._extraStrikes=0
   gs._strikesLeft=maxStrikes
+  // Double Booking (and anything else that grants strikes mid-fight) writes here;
+  // the strike loop is bounded by this, not by the local `maxStrikes` snapshot.
+  gs._fightMaxStrikes=maxStrikes
   // ── DECK SIGNATURES — reset per-fight state ──
   gs._shredderEchoesPending=0
   gs._ritualistPrevCorruption=gs.corruption
@@ -789,13 +862,21 @@ function simFight(gs,phaseHp,luciferPhase){
   }
 
   if(gs._tripBuff==='TIME_DILATION')maxStrikes=Math.max(maxStrikes,5)
+  gs._fightMaxStrikes=maxStrikes
 
   let wthStrikeCount=0
+  let _strikesUsed=0
   // OVERTIME (Jul 31 2026 JV): running out of strikes no longer ends the fight —
   // the boss ENRAGES: damage x2 per overtime strike. Fight ends only in death
   // (either side). Safety cap +8 OT strikes.
-  for(let strike=0;strike<maxStrikes+8;strike++){
-    const _otLevel=Math.max(0,strike-maxStrikes+1)
+  for(let strike=0;strike<gs._fightMaxStrikes+8;strike++){
+    const _otLevel=Math.max(0,strike-gs._fightMaxStrikes+1)
+    // Aug 4 2026: _strikesLeft used to be set once at fight start and never move,
+    // so Limbo's Echo ("x1.3 per Strike remaining") always fired at full value and
+    // Burning Stage's opener check was always true. It is a countdown now, like
+    // live's strikesLeft.
+    gs._strikesLeft=Math.max(0,gs._fightMaxStrikes-strike)
+    TRACK.strikesTaken++;_strikesUsed++
     gs.stage.forEach(m=>{
       // Aug 1 2026 — THE 10x BUG. Expire "this Strike" ATK buffs exactly like live's
       // handleStrikeBody does: restore atk from _origAtk. The sim only ever zeroed
@@ -824,39 +905,55 @@ function simFight(gs,phaseHp,luciferPhase){
 
     gs.stage.filter(m=>m.keyword==='HEXED'&&!m.tooStoned).forEach(m=>{gs.corruption=Math.min(100,gs.corruption+5);m.tempAtkBonus=(m.tempAtkBonus||0)+Math.floor(gs.corruption/12)});
     if(enemy.passiveId==='corruptPlayer')gs.corruption=Math.min(100,gs.corruption+10);
-    if(enemy.passiveId==='corruptPlayer15')gs.corruption=Math.min(100,gs.corruption+50);
+    // Aug 4 2026: was +50. Live (App.jsx ~8460) and enemies.js both say 15 — the sim
+    // was slamming the player to 100% corruption in two strikes on the Apostate.
+    if(enemy.passiveId==='corruptPlayer15')gs.corruption=Math.min(100,gs.corruption+15);
     if(enemy.passiveId==='corruptPlayer20')gs.corruption=Math.min(100,gs.corruption+20);
     if(enemy.passiveId==='selfbuff')enemy._atkBuff+=1;
     if(enemy.passiveId==='selfbuff2')enemy._atkBuff+=2;
 
     // CORRUPTION 75%: Madness — 15% chance lose a card before strike
     if(gs.corruption>=75&&Math.random()<0.15&&gs.hand.length>1){const _mi=rand(gs.hand.length);gs.discard.push(gs.hand.splice(_mi,1)[0]);TRACK.madnessCards++}
-    let shredderUsed=false,evilEyeUsed=!gs.artifacts.some(a=>a.id==='a3');
+    // Aug 4 2026: the per-strike "Evil Eye" free card is gone. Live sets
+    // nextCardFree ONCE per FIGHT for a3 (App.jsx ~8886) — the sim was handing out
+    // a free card every single strike ON TOP of the fight-start nextCardFree below.
+    // The SHREDDER RIFF discount is gone too: live deleted it in commit 4c
+    // ("SHREDDER ember discount removed" — App.jsx ~5506); the keyword now pays out
+    // as per-chain ATK through getEffectiveAtk, which the strike formula already models.
+    const _cst={firstOfStrike:true}
     const alive=gs.stage.filter(m=>!m.tooStoned);if(alive.length===0)break;
     let paranoiaVictimUid=null
     if(enemy.passiveId==='paranoia'&&alive.length>1){const victim=pick(alive);paranoiaVictimUid=victim.uid;const allies=alive.filter(m=>m.uid!==victim.uid);if(allies.length>0){const t=pick(allies);t.hp=Math.max(0,t.hp-3)}}
 
     let cardsPlayed=0;
     for(let att=0;att<15;att++){
+      _cst.firstOfStrike=(gs._cardsPlayedIds||[]).length===0
       const playable=gs.hand.map((c,idx)=>({c,idx})).filter(({c})=>{
-        let cost=c.embers-(gs._tripBuff==='SYNESTHESIA'?1:0);if(gs._allCardsFree)cost=0;else if(!evilEyeUsed)cost=0;else if(gs._nextCardFree)cost=0;
-        else if(!shredderUsed&&c.type==='RIFF'&&alive.some(m=>m.keyword==='SHREDDER'))cost=Math.max(0,cost-1);
-        cost=Math.max(0,cost)
-        if(gs._ampFbDiscount&&c.type==='RIFF')cost=Math.max(0,cost-1);
-        if(c.id==='ampoverload'&&gs._discardsLeft<=0)return false;return gs.embers>=cost;
+        if(c.id==='ampoverload'&&gs._discardsLeft<=0)return false
+        return gs.embers>=cardCost(c,gs,_cst,false)
       });if(playable.length===0)break;
       playable.forEach(p=>{p.score=scoreCard(p.c,gs,enemy,strike,cardsPlayed)});playable.sort((a,b)=>b.score-a.score);
       const best=playable[0];if(best.score<=3)break;
-      const card=best.c;let cost=card.embers-(gs._tripBuff==='SYNESTHESIA'?1:0);
-      if(gs._allCardsFree){cost=0}else if(!evilEyeUsed){cost=0;evilEyeUsed=true}else if(gs._nextCardFree){cost=0;gs._nextCardFree=false}
-      else if(!shredderUsed&&card.type==='RIFF'&&alive.some(m=>m.keyword==='SHREDDER')){cost=Math.max(0,cost-1);shredderUsed=true}
-      if(gs._ampFbDiscount&&card.type==='RIFF'){cost=Math.max(0,cost-1);gs._ampFbDiscount=0}
-      cost=Math.max(0,cost)
-      gs.embers-=cost;gs.hand.splice(best.idx,1);
-      applyCardSim(card,gs,enemy);if(gs._consumeCard){gs._consumeCard=false}else if(card.id!=='contract')gs.discard.push(card);cardsPlayed++;
-      gs._strikeMult=Math.min(10000,Math.round((gs._strikeMult*1.08)*100)/100)
-      if(card.type==='RIFF')gs._lastRiffPlayed=card.id
-      gs._cardsPlayedIds.push(card.id)
+      const card=best.c
+      const cost=cardCost(card,gs,_cst,true)
+      gs.hand.splice(best.idx,1);
+      const _res=applyCardSim(card,gs,enemy,cost)
+      const _ok=!!(_res&&_res.ok)
+      // Aug 4 2026 — SELF-FUNDING CONTRACT HONOURED. The sim used to charge `cost`
+      // unconditionally and throw res.emberCost away, so Soundboard and a successful
+      // Demo Tape cost 1 ember in the sim and 0 live (cardEngine C.freeCost). It also
+      // charged for cards the engine REJECTED; live's applyCard returns false before
+      // spending anything.
+      if(_ok)gs.embers=Math.max(0,gs.embers-(typeof _res.emberCost==='number'?_res.emberCost:cost))
+      if(gs._consumeCard){gs._consumeCard=false}else if(card.id!=='contract')gs.discard.push(card);
+      if(!_ok)continue
+      cardsPlayed++;
+      // NOTE: the x1.08 per-card strike multiplier, the lastRiff pointer and the
+      // cards-played ledger are ALL applied inside cardEngine.applyCardEffect and
+      // written back by applyCardSim. Re-applying them here was a straight double
+      // count: x1.1664 per card against live's x1.08 (a 6-card strike came out
+      // x1.59 too strong) and every card appeared TWICE in _cardsPlayedIds, which
+      // inflated cards3/cards5 relics, FRENZIED riff counts and SHREDDER chains.
       // NOTE: p4 'Feedback Hum' READS as "all EMBER cards +1", but live only wires it
       // into Power Tap and Groupie (App.jsx 5819 / 6365). Modelled there, not generically.
       // ── RITUALIST SIGNATURE: Corruption Feeds — refund 1 ember per 10% gained ──
@@ -1156,6 +1253,10 @@ function simFight(gs,phaseHp,luciferPhase){
   }
 
   const won=enemy._hp<=0,allDead=gs.stage.every(m=>m.tooStoned);
+  // Aug 4 2026: strikes-per-fight is a headline balance number ("fights average
+  // 2.3-2.5 strikes") that the sim never actually measured. It does now.
+  TRACK.fightsFought++
+  if(won&&_strikesUsed<=1)TRACK.oneShotFights++
   if(won){
     gs.fightsSurvived++;
     if(gs.stashStolen>0)gs.stash=Math.min(MAX_STASH,gs.stash+gs.stashStolen);
@@ -1167,7 +1268,7 @@ function simFight(gs,phaseHp,luciferPhase){
       const merch=gs.passives.some(p=>p.id==='p3')?2:0,corrB=gs.corruption>=69?3:0;
       const total=reward+merch+corrB;gs.stash=Math.min(MAX_STASH,gs.stash+total);gs.stashEarned+=total;
       if(isBoss&&gs.loot.includes('stashBoss')){gs.stash=Math.min(MAX_STASH,gs.stash+5);gs.stashEarned+=5}
-      if(gs._strikesLeft>=maxStrikes-1&&gs.artifacts.some(a=>a.id==='a10'))gs._pendingBurnStage=true
+      if(gs._strikesLeft>=gs._fightMaxStrikes-1&&gs.artifacts.some(a=>a.id==='a10'))gs._pendingBurnStage=true
     }
     gs.stage.forEach(m=>{if(!m.tooStoned)m.hp=Math.min(m.maxHp,m.hp+2)});
   }
@@ -1315,7 +1416,13 @@ function simShop(gs){
   if(circleNum>=4){const di=gs.artifacts.findIndex(a=>a.refundAtC4)
     if(di>=0){gs.artifacts.splice(di,1);gs.stash=Math.min(MAX_STASH,gs.stash+9)}}
   if(!gs.circlePassBought){
-    const pool=[{id:'p8',cost:16},{id:'p10',cost:14},{id:'p1',cost:6},{id:'p4',cost:10},{id:'p3',cost:6},{id:'p7',cost:8},{id:'p5',cost:10},{id:'p2',cost:8}];
+    // Aug 4 2026: the ember-discount pedals (relics.js STARTER_PASSIVES) were not in
+    // the sim's pool at ALL, so five of live's twelve cost-discount sources could
+    // never fire here no matter how the sim priced cards. Costs are the real
+    // relics.js costs. Ordered after the p-series so existing pick priority is
+    // unchanged and these only get bought in later circles.
+    const pool=[{id:'p8',cost:16},{id:'p10',cost:14},{id:'p1',cost:6},{id:'p4',cost:10},{id:'p3',cost:6},{id:'p7',cost:8},{id:'p5',cost:10},{id:'p2',cost:8},
+      {id:'fuzzbox',cost:14},{id:'reverbtank',cost:12},{id:'phaserpedal',cost:18},{id:'cabletester',cost:12},{id:'wahpedal',cost:12}];
     for(const pas of pool){const c=Math.ceil(pas.cost*discount);if(gs.stash>=c&&!gs.passives.some(p=>p.id===pas.id)){gs.stash-=c;gs.passives.push(pas);gs.circlePassBought=true;break}}}
   const isBossShop=gs.fightIndex%3===0&&gs.fightIndex>0;
   if(isBossShop){
@@ -1427,16 +1534,14 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
             // Mark cards as upgraded
             gs.deck.forEach(c=>{if(c.id===pick_id)c.upgraded=true})
             gs.discard.forEach(c=>{if(c.id===pick_id)c.upgraded=true})
-            // Apply HP buffs
-            const hpDef=UPGRADE_HP[pick_id]
-            if(hpDef){
-              const alive=gs.stage.filter(m=>!m.tooStoned)
-              if(hpDef.hp==='all')gs.stage.forEach(m=>{if(m){m.maxHp+=hpDef.amt;m.hp+=hpDef.amt}})
-              else if(hpDef.hp==='target'&&alive.length>0){const t=alive.reduce((a,b)=>a.atk>b.atk?a:b);t.maxHp+=hpDef.amt;t.hp+=hpDef.amt}
-              else if(hpDef.hp==='weakest'&&alive.length>0){const w=alive.reduce((a,b)=>a.hp<b.hp?a:b);w.maxHp+=hpDef.amt;w.hp+=hpDef.amt}
-              else if(hpDef.hp==='hurt'){alive.forEach(m=>{if(m.hp<m.maxHp){m.maxHp+=hpDef.amt;m.hp+=hpDef.amt}})}
-              else if(hpDef.hp==='random'&&alive.length>0){const r=pick(alive);r.maxHp+=hpDef.amt;r.hp+=hpDef.amt}
-            }
+            // Aug 4 2026: the sim used to grant a permanent maxHp buff here, driven
+            // by UPGRADE_HP (a mirror of cards.js CARD_UPGRADES `hp`/`hpAmt`).
+            // LIVE GRANTS NOTHING. Nothing in src/App.jsx ever reads those fields —
+            // CARD_UPGRADES is used for the desc string and for key-presence when
+            // deciding what the Forge may offer, and that is all. So the sim's band
+            // was quietly gaining max HP on every forge visit that live never gets.
+            // The lying descs have been rewritten in cards.js; this is the matching
+            // behavioural half.
             TRACK.forgeUpgrades++
           }
         }
@@ -1473,7 +1578,7 @@ const t0=Date.now();
 TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0,caEffects:0,
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
-  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0,eventsTriggered:0,eventMoshPit:0,eventCursedAmp:0,eventBloodOath:0,eventHellfire:0,eventSabbath:0,eventWager:0,whisperDmg:0,hungerExtraCost:0,madnessCards:0,possessionBonus:0,anchorSaves:0,kwStack2Reached:0,kwStack3Reached:0};
+  pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0,eventsTriggered:0,eventMoshPit:0,eventCursedAmp:0,eventBloodOath:0,eventHellfire:0,eventSabbath:0,eventWager:0,whisperDmg:0,hungerExtraCost:0,madnessCards:0,possessionBonus:0,anchorSaves:0,kwStack2Reached:0,kwStack3Reached:0,fightsFought:0,strikesTaken:0,oneShotFights:0};
 CARD_PLAYS={};
 const deathsByFight=new Array(27).fill(0),surviveByFight=new Array(27).fill(0);let wins=0,wthWins=0,totalFights=0,gamesWithLinks=0,totalPacts=0;
 for(let i=0;i<NUM_GAMES;i++){const r=simGame();totalFights+=r.fightsSurvived;totalPacts+=r.pacts;if(r.mentorLinks>0)gamesWithLinks++;
@@ -1499,6 +1604,10 @@ console.log('─'.repeat(80));
 console.log(`\nDeath distribution by circle:`);
 for(let c=1;c<=9;c++){let d=0;for(let f=(c-1)*3;f<c*3;f++)d+=deathsByFight[f];console.log(`  Circle ${c}: ${(d/NUM_GAMES*100).toFixed(1)}% of runs end here`)}
 console.log(`  Lucifer wins: ${(wins/NUM_GAMES*100).toFixed(2)}%`);
+console.log(`\n⚔ PACE:`)
+console.log(`  Fights fought: ${TRACK.fightsFought.toLocaleString()}`)
+console.log(`  Avg strikes per fight: ${(TRACK.strikesTaken/Math.max(1,TRACK.fightsFought)).toFixed(2)}`)
+console.log(`  One-shot fights (won in 1 strike): ${(TRACK.oneShotFights/Math.max(1,TRACK.fightsFought)*100).toFixed(1)}%`)
 console.log(`\n🔮 CORRUPTION THRESHOLDS:`)
 console.log(`  Whisper dmg (25%): ${TRACK.whisperDmg.toLocaleString()}`)
 console.log(`  Hunger extra cost (50%): applied via shop mult`)
