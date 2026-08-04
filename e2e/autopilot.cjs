@@ -614,12 +614,19 @@ async function shopTick(s) {
   const stripM = t.match(/STAGE ORDER[^]*?(?=⛧ THIS CIRCLE|⛧ ARTIFACT|⛧ EFFECT PEDAL|🎸 CARDS)/i)
   let bandSize = stripM ? (stripM[0].match(/⟩/g) || []).length : null
   if (bandSize === null) {
-    const domCount = await P.evaljs(`(() => {
-      const strip = [...document.querySelectorAll('div')].find(d => /STAGE ORDER/i.test(d.textContent || ''))
-      if (!strip) return null
-      return (strip.textContent.match(/⟩/g) || []).length
-    })()`).catch(() => null)
-    bandSize = domCount
+    // Aug 4: cache per shop visit — this fired an extra DOM round-trip on every
+    // single shop tick when the text regex missed, which is a big slice of the
+    // "shop feels slow" complaint.
+    if (BOT._bandCacheSig === BOT.lastShopSig && BOT._bandCache !== undefined) bandSize = BOT._bandCache
+    else {
+      const domCount = await P.evaljs(`(() => {
+        const strip = [...document.querySelectorAll('div')].find(d => /STAGE ORDER/i.test(d.textContent || ''))
+        if (!strip) return null
+        return (strip.textContent.match(/⟩/g) || []).length
+      })()`).catch(() => null)
+      bandSize = domCount
+      BOT._bandCache = domCount; BOT._bandCacheSig = BOT.lastShopSig
+    }
     if (bandSize === null) ev('parse_miss', { field: 'bandSize', note: 'member packs skipped this shop' })
   }
   const buy = async (label, why) => {
@@ -748,14 +755,54 @@ async function shopTick(s) {
 async function recruitTick(s) {
   // RecruitScreen after buying a pack: pick best candidate (sim pickBestCandidate policy).
   // Candidate cards are plain divs (not cursor:pointer) — query the DOM directly.
+  // Aug 4 2026: READ THE GAME'S OWN "CAN I TAKE THIS?" SIGNAL.
+  // RecruitScreen's card handler opens with `if(blockedDbl) return` — a SILENT
+  // no-op when the band already has a DOUBLE TIME member. The bot kept choosing a
+  // second drummer, the click did nothing, it retried, then passed and burned a
+  // 10-40 stash pack, leaving empty band slots (JV: "it would open member packs
+  // but not pick a new member even though there are empty slots").
+  // The game already renders the answer: canAdd drives BOTH cursor (pointer vs
+  // not-allowed) and opacity (1 vs 0.4). Read those and only consider takeable
+  // cards — covers the DOUBLE TIME block AND the no-empty-slot case without the
+  // bot having to model either rule itself.
+  // ── Aug 4 2026: selector rebuilt from a LIVE DOM DUMP, not guesswork ──
+  // Actual recruit screen structure (measured):
+  //   [0] w=409 cursor=crosshair  <- CONTAINER wrapping both cards
+  //   [1] w=195 cursor=pointer    <- the real card (h=308)
+  //   [2] w=193 cursor=pointer    <- an inner block of the SAME card (h=156)
+  //   [3] w=195 cursor=pointer    <- second card
+  // Two earlier attempts failed on this: dedupe-by-text-prefix treated the FOIL
+  // banner and stat block as different candidates, and "keep the outermost node"
+  // kept the CONTAINER — so the bot clicked the gap between the cards, retried,
+  // and finally passed, burning the pack (band never grew past 2).
+  // Correct rule: only elements the game itself made interactive (cursor pointer,
+  // or not-allowed when blocked), then one per screen column, tallest wins.
   let cands = await P.evaljs(`(() => {
-    const seen = {}
-    return [...document.querySelectorAll('div')].filter(d => {
-      const t = d.textContent || ''; const r = d.getBoundingClientRect()
-      return /ATK\\s*\\d/.test(t) && /HP\\s*\\d/.test(t) && t.length < 350 && r.height > innerHeight * 0.12 && r.width > innerWidth * 0.06 && r.width < innerWidth * 0.22
-    }).map(d => { const r = d.getBoundingClientRect(); return { t: d.textContent.replace(/\\s+/g, ' ').slice(0, 120), x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } })
-      .filter(c => { const k = c.t.slice(0, 25); return seen[k] ? false : (seen[k] = 1) })
+    const hits = [...document.querySelectorAll('div')].filter(d => {
+      const t = d.textContent || ''; const r = d.getBoundingClientRect(); const cs = getComputedStyle(d)
+      if (!/ATK\\s*\\d/.test(t) || !/HP\\s*\\d/.test(t) || t.length >= 350) return false
+      if (!(r.height > innerHeight * 0.12 && r.width > 120 && r.width < innerWidth * 0.22)) return false
+      return cs.cursor === 'pointer' || cs.cursor === 'not-allowed'
+    })
+    const byCol = new Map()
+    for (const d of hits) {
+      const r = d.getBoundingClientRect(); const col = Math.round(r.x / 40)
+      const prev = byCol.get(col)
+      if (!prev || r.height > prev.getBoundingClientRect().height) byCol.set(col, d)
+    }
+    return [...byCol.values()].map(d => {
+      const r = d.getBoundingClientRect(); const cs = getComputedStyle(d)
+      return {
+        t: d.textContent.replace(/\\s+/g, ' ').slice(0, 120),
+        x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2),
+        takeable: cs.cursor === 'pointer' && parseFloat(cs.opacity || '1') > 0.6
+      }
+    }).sort((a, b) => a.x - b.x)
   })()`).catch(() => [])
+  const blocked = cands.filter(c => !c.takeable)
+  if (blocked.length) ev('recruit_blocked', { count: blocked.length, cards: blocked.map(c => c.t.slice(0, 26)), why: 'game marks not-allowed (dup DOUBLE TIME / no empty slot)' })
+  const takeable = cands.filter(c => c.takeable)
+  if (takeable.length) cands = takeable
   if (cands.length) {
     // stack-tier bonus: favor keywords the band already runs (parsed from stage strip earlier runs — approximate with pair bonus)
     const scored = cands.map(c => { const { p, kw } = memberScoreFromText(c.t); return { ...c, p, kw } })
@@ -774,22 +821,45 @@ async function recruitTick(s) {
       picked: (bestSafe.t.match(/([A-Z][a-z]+)/) || [])[1] || bestSafe.t.slice(0, 14)
     })
     ev('recruit_pick', { pick: bestSafe.t.slice(0, 50), score: bestSafe.p })
-    // Aug 1: a recruit click that silently misses used to hang here until the 60s
-    // watchdog restarted the run (observed once in a 3-minute smoke run). Verify
-    // the screen actually moved; retry at the card's upper third, which is inside
-    // the portrait rather than the description text, before giving up and passing.
-    const beforeSig = s.text.slice(0, 300)
-    await P.click(bestSafe.x, bestSafe.y)
-    await P.connect().then(p => p.waitForTimeout(600))
-    let moved = (await P.state().catch(() => ({ text: '' }))).text.slice(0, 300) !== beforeSig
-    if (!moved) {
-      await P.click(bestSafe.x, Math.round(bestSafe.y - (bestSafe.h || 120) * 0.3)).catch(() => {})
-      await P.connect().then(p => p.waitForTimeout(700))
-      moved = (await P.state().catch(() => ({ text: '' }))).text.slice(0, 300) !== beforeSig
-      ev('recruit_retry', { worked: moved })
-      if (!moved) { try { await P.clickText('pass') } catch (e) {} }
+    // ── Aug 4 2026: DO NOT THROW AWAY A PURCHASED PACK ────────────────────
+    // The Aug-3 version diffed the first 300 chars of screen text 600ms after the
+    // click and, if it hadn't changed yet, clicked "pass" — which SKIPS the recruit
+    // entirely and burns the 10-40 stash pack, leaving empty band slots. JV saw
+    // exactly that: "it would open member packs but not pick a new member even
+    // though there are empty slots." Two errors: (a) 600ms is shorter than the
+    // pack-open animation, so a successful pick often looked like a failure, and
+    // (b) `bestSafe.h` doesn't exist on these DOM records, so the retry clicked a
+    // guessed offset that could land on dead space.
+    //
+    // Now: poll for a REAL state change (recruit screen gone, or a follow-up modal),
+    // retry the SAME card a few times, and never voluntarily pass while the pack is
+    // unspent. Passing is a last resort only after the screen refuses to respond.
+    const recruitGone = async () => {
+      const st = await P.state().catch(() => null)
+      if (!st) return { done: false, st: null }
+      const T = st.text.toUpperCase()
+      const stillPicking = /CHOOSE ONE MUSICIAN|RECRUIT A MEMBER/.test(T)
+      const followUp = /BAND IS FULL|DEVIL'S CONTRACT|KEEP THIS ONE/.test(T)
+      return { done: !stillPicking || followUp, st }
     }
-    const after = await P.state()
+    let after = null, took = false
+    for (let attempt = 0; attempt < 3 && !took; attempt++) {
+      await P.click(bestSafe.x, bestSafe.y).catch(() => {})
+      // poll up to ~2.4s — the pack-open/join animation is well over 600ms
+      for (let i = 0; i < 8; i++) {
+        await P.connect().then(p => p.waitForTimeout(300))
+        const r = await recruitGone()
+        if (r.done) { took = true; after = r.st; break }
+        after = r.st
+      }
+      if (!took) ev('recruit_retry', { attempt: attempt + 1, card: bestSafe.t.slice(0, 24) })
+    }
+    if (!took) {
+      // Only now is passing justified — the screen is genuinely unresponsive.
+      ev('recruit_unresponsive', { msg: 'card clicks not registering — passing to avoid a hang', card: bestSafe.t.slice(0, 30) })
+      try { await P.clickText('pass') } catch (e) {}
+    }
+    if (!after) after = await P.state()
     const at = after.text.toUpperCase()
     if (at.includes("DEVIL'S CONTRACT")) { ev('lucifer_declined', {}); await P.clickText('walk away').catch(() => {}) }
     else if (at.includes('BAND IS FULL')) {
@@ -817,8 +887,11 @@ async function recruitTick(s) {
     // button (onPick fires on the card click), so by now we're back in the shop and
     // 'recruit'/'welcome' match the shop's OWN pack tiles → it bought a second pack
     // it never intended. Only sweep if we're genuinely still on a recruit screen.
-    const stillRecruit = await P.state().then(st => screenType(st)).catch(() => 'unknown')
-    if (stillRecruit === 'recruit') {
+    // Aug 4: this used to burn a full state() + screenType round-trip on EVERY
+    // recruit just to decide whether to press a confirm button that RecruitScreen
+    // does not have (onPick fires on the card click). We already hold `after` from
+    // the poll above — reuse it instead of re-reading the DOM.
+    if (after && /CHOOSE ONE MUSICIAN|RECRUIT A MEMBER/i.test(after.text)) {
       for (const b of ['add to band', 'confirm', 'take', 'join']) { try { await P.clickText(b); break } catch (e) {} }
     }
   } else {
