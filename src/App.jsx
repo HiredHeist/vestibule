@@ -6637,7 +6637,7 @@ function App(){
     // Aug 1 2026 forensic log: a bot run got full victory with Lucifer at 178k HP.
     // Every caller is supposed to have verified the kill; this logs who called and
     // with what state so a bad caller can't hide. Cheap, stays in prod builds.
-    try{console.log('[VICTORY]','fi='+fightIndex,'hp='+enemyHp,'phase='+luciferPhase,'stack:',new Error().stack.split('\n').slice(2,6).join(' <- '))}catch(e){}
+    try{console.log('[VICTORY]','fi='+fightIndex,'hp='+enemyHp,'liveHp='+enemyHpRef.current,'phase='+luciferPhase,'stack:',new Error().stack.split('\n').slice(2,6).join(' <- '))}catch(e){}
     // ── LUCIFER PHASE-1 INTERCEPT (Aug 1 2026) ────────────────────────────
     // Killing phase 1 must open phase 2, never end the run. handleStrikeBody had
     // its own transition, but ~15 OTHER kill paths call triggerVictory directly
@@ -7924,7 +7924,15 @@ function App(){
 
     const bc=getCenter(bossRef)
     let delay=0
-    const startHp=enemyHp // save for final calc
+    // ── Aug 3 2026: THE PHANTOM-VICTORY ROOT CAUSE ───────────────────────
+    // This read the STALE `enemyHp` closure value. Between fights, and during
+    // Lucifer's phase 1 -> 2 handoff, enemyHp is transiently 0 — so a strike that
+    // resolved in that window computed startHp = 0, therefore newEHp = 0 - dmg <= 0,
+    // therefore INSTANT VICTORY on a boss at full health. The overnight ledger caught
+    // it 16 times, including "won" against Lucifer phase 2 at 330,548 / 333,333 HP
+    // while the band was only dealing ~2-4k per strike. Every fight it faked is
+    // balance data we have to throw away. Read the live ref instead.
+    const startHp=(enemyHpRef.current!==undefined&&enemyHpRef.current!==null)?enemyHpRef.current:enemyHp
     // Compute per-member damage for cascade display
     const memberDmgs=[]
     actives.forEach(function(m){
@@ -8230,6 +8238,7 @@ function App(){
       // CRITICAL EXCEPTION: lethal strikes apply immediately, otherwise the
       // Lucifer phase 2 transition + victory triggers race with the cascade.
       const _applyHpDrop=()=>{
+        enemyHpRef.current=Math.min(enemyHpRef.current,newEHp) // keep the ref exact; useEffect sync lags a render
         setEnemyHp(prev=>Math.min(prev,newEHp))
         if(enemy.passiveId==='luciferBoss'){
           const atkGain=luciferPhase===1?1:2
@@ -8332,6 +8341,13 @@ function App(){
         }
       }
 
+      // Aug 3 2026: never award a win off a zero/blank starting HP — that is the
+      // signature of a strike landing mid-transition, not of a real kill.
+      if(newEHp<=0&&startHp<=0){
+        try{console.log('[VICTORY-BLOCKED] strike resolved with startHp='+startHp+' (boss mid-transition) — not a kill')}catch(e){}
+        setAnimPhase('idle')
+        return
+      }
       if(newEHp<=0){
         // LUCIFER PHASE TRANSITION: Phase 1 → Phase 2.
         // Aug 1 2026: body extracted to enterLuciferPhase2 so the ~15 direct-damage

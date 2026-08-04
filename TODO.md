@@ -28,6 +28,42 @@ Bot run beat the entire game in 13 minutes. Ledger forensics found and fixed:
    phase 2 "died" at 76k, Executive at 85k) — forensic tap now live: autopilot
    pipes game console (incl. [VICTORY] caller stacks) into the ledger as
    game_console events. Next uploaded ledger names the culprit.
+## 🚨 AUG 3 OVERNIGHT POST-MORTEM — why a day produced 22 minutes
+**The 60s guardrail WORKED.** Ledger proof: HARD_WATCHDOG fired at 05:50, 05:51 and
+05:52, escalated to HARD_EXIT ("rig wedged after 3 fires"), run-bot.bat relaunched a
+fresh browser, and the bot played on from 05:52 to 06:03. The night did not end on a
+hang. It ended on two bugs of mine:
+
+1. **PHANTOM VICTORY — root cause found (was: `const startHp=enemyHp`).** That read the
+   STALE closure value. Between fights, and across Lucifer's phase 1->2 handoff, enemyHp
+   is transiently 0, so a strike resolving in that window computed
+   `newEHp = 0 - dmg <= 0` => INSTANT WIN against a full-health boss. The ledger caught
+   it **16 times** in 22 minutes, ending with "victory" over Lucifer phase 2 at
+   **330,548 / 333,333 HP** while the band was only dealing ~2-4k per strike.
+   FIXED: `startHp` now reads `enemyHpRef.current`; `_applyHpDrop` keeps that ref exact
+   (no render lag); and a hard guard blocks any "kill" where `startHp<=0`
+   (logs `[VICTORY-BLOCKED]`). The `[VICTORY]` line now prints `liveHp` too, so a stale
+   read can never be mistaken for a real one again.
+   ⚠️ **ALL BALANCE DATA FROM THIS RUN IS VOID** — every fight from fi=7 on was faked.
+2. **The bot ENDED THE SESSION on a win** (`break` in the victory handler). An overnight
+   grind wants many runs; a victory is the end of a RUN, not the night. Now it records
+   the win, wipes the save, and starts a fresh run (`run_end` carries a `wins` counter).
+
+OTHER FINDINGS (real, from the salvageable parts of the ledger):
+- **Trip spam:** 38 trips in 22 min, **every single one at bossPct=100 with reason
+  'low strikes'** — the desperate-trip condition is misreading strikesLeft, so shrooms
+  and acid are burned as openers on full-health bosses. ~2 wasted per fight.
+- **Relics DO get bought now** (3 artifacts + 3 pedals) — the Aug-1 blindness fix works.
+  But 10x `skip artifact: stash 36 < 40+4`: the +4 stash reserve blocks purchases the
+  bot can nearly afford. Loosen the reserve.
+- **3x `effect pedal: tile not clickable`** — the pedal tile-name parse still misses on
+  some layouts.
+- **35 strikes fired on non-combat screens** (`fi=0 bossHp=None`) — harmless clicks, but
+  they pollute the ledger and waste ticks.
+- **Only 41 of 82 cards ever played**; targeting is 144 Tanuki / 91 Ragnar (correct carry
+  doctrine, but half the card pool is untested by the bot).
+- Play-fail rate 12% (was 53% pre-rebuild).
+
 ## 🛡 OVERNIGHT RELIABILITY HARDENING (Aug 1) — three real killers found by testing
 JV asked for 100% confidence that an overnight run can't hang. Testing the actual
 failure modes (rather than reading the code) found three things that would each have

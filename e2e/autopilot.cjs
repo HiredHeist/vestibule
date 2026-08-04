@@ -811,7 +811,7 @@ async function main() {
     })
     pg.on('pageerror', e2 => ev('game_pageerror', { msg: String(e2 && e2.message || e2).slice(0, 400) }))
   } catch (e) {}
-  let tick = 0, opTimeouts = 0
+  let tick = 0, opTimeouts = 0, winCount = 0
   // Fires on the SAME 60s budget as the in-loop check, but from outside the loop
   // so a hung await or an error-path `continue` cannot suppress it.
   startHardWatchdog(STALL_MS, () => {
@@ -962,7 +962,24 @@ async function main() {
         else await P.clickText('continue').catch(() => P.clickText('skip tutorial').catch(() => P.clickText('enter the vestibule')))
       }
       else if (type === 'death') { const f = await P.shot('death-' + Date.now()); ev('run_end', { result: 'death', shot: f, text: s.text.slice(0, 1200) }); await P.clickText('play again').catch(() => P.clickText('try again').catch(() => {})) }
-      else if (type === 'victory') { const f = await P.shot('VICTORY-' + Date.now()); ev('run_end', { result: 'VICTORY', shot: f, text: s.text.slice(0, 2000) }); break } // strict markers only — fight-win screens mentioning Lucifer no longer end the session
+      else if (type === 'victory') {
+        // Aug 3 2026: this used to `break`, ENDING THE WHOLE SESSION on a win. JV left
+        // the bot for a day and got 22 minutes of data because it "won" at 06:03 and
+        // stopped. An overnight grind wants MANY runs — a victory is the end of a run,
+        // not the end of the night. Record it, then start a fresh run and keep going.
+        const f = await P.shot('VICTORY-' + Date.now())
+        winCount++
+        ev('run_end', { result: 'VICTORY', wins: winCount, shot: f, text: s.text.slice(0, 2000) })
+        const vp = await P.evaljs('({w:innerWidth,h:innerHeight})').catch(() => null)
+        if (vp) await P.click(Math.round(vp.w / 2), Math.round(vp.h * 0.9)).catch(() => {})
+        await P.evaljs("localStorage.removeItem('vst_save_v4'); setTimeout(()=>location.reload(),50); 'x'").catch(() => {})
+        await new Promise(r => setTimeout(r, 5000))
+        preferNewRun = true
+        resetRunEconomy()
+        strikeNumThisFight = 0; playedIdsThisFight.length = 0; firedChainsThisFight = new Set(); hrUsedThisFight.clear()
+        lastHash = ''; stuck = 0
+        ev('run_start', { preferNewRun: true, afterWin: true })
+      }
       else { for (const b of OVERLAY_BTNS) { try { await P.clickText(b); break } catch (e) {} } ev('unknown_screen', { text: s.text.slice(0, 300) }) }
     } catch (e) { ev('error', { msg: e.message, type }); if (/op timeout/.test(e.message)) await global.__opTimeout() }
     await new Promise(r => setTimeout(r, 800))
