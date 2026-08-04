@@ -1,0 +1,9 @@
+{
+  "_comment": "Same recommendation measured under the SHIPPED sim policy (no CHAIN_FORCE, no chain-drafted proxy) — i.e. what `node vestibule-sim-kwstacks.js 5000 bronze` will print after the patch.",
+  "stake":"bronze","deck":"standard","policy":{},
+  "atkScales":[0.5,1,2],
+  "variants":[
+    {"name":"W-BASE shipped","env":{}},
+    {"name":"W-REC ladder+atk","env":{"CHAIN_MODEL":"hybrid","CHAIN_DIM":"1.60,1.25,1.10,1.02","CHAIN_ADD_PCT":"0.75","CHAIN_ADD_WHEN":"post"}}
+  ]
+}

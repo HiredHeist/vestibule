@@ -1,0 +1,7 @@
+{"atkScales":[1],"variants":[
+{"name":"seek1","env":{"CHAIN_SEEK":"1"}},
+{"name":"seek3","env":{"CHAIN_SEEK":"3"}},
+{"name":"seek8","env":{"CHAIN_SEEK":"8"}},
+{"name":"seek20","env":{"CHAIN_SEEK":"20"}},
+{"name":"seek60","env":{"CHAIN_SEEK":"60"}}
+]}

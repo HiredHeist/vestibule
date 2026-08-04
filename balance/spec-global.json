@@ -1,0 +1,15 @@
+{
+  "_comment": "GRID 3 — does capping the WHOLE amplification stack (variant G) do what capping strikeMult alone could not? Good-player proxy + live-parity chain frequency.",
+  "stake":"bronze","deck":"standard",
+  "policy": { "CHAIN_FORCE":"1.9","DECK_THIN":"20","HAND_BONUS":"2","EMBER_REFILL":"2" },
+  "atkScales":[0.5,1,2],
+  "variants":[
+    {"name":"BASE shipped x1.78","env":{}},
+    {"name":"A2 dim 1.60/1.25/1.1","env":{"CHAIN_MODEL":"dim","CHAIN_DIM":"1.60,1.25,1.10,1.02"}},
+    {"name":"G  glob knee10 k1.0","env":{"GLOBAL_KNEE":"10","GLOBAL_K":"1.0"}},
+    {"name":"G2 glob knee6 k0.7","env":{"GLOBAL_KNEE":"6","GLOBAL_K":"0.7"}},
+    {"name":"G3 glob knee4 k0.5","env":{"GLOBAL_KNEE":"4","GLOBAL_K":"0.5"}},
+    {"name":"A2+G2 dim+glob6","env":{"CHAIN_MODEL":"dim","CHAIN_DIM":"1.60,1.25,1.10,1.02","GLOBAL_KNEE":"6","GLOBAL_K":"0.7"}},
+    {"name":"A+G2 dim1.78+glob6","env":{"CHAIN_MODEL":"dim","CHAIN_DIM":"1.78,1.40,1.20,1.05","GLOBAL_KNEE":"6","GLOBAL_K":"0.7"}}
+  ]
+}

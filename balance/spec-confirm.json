@@ -1,0 +1,11 @@
+{
+  "_comment": "HEADLINE CONFIRMATION — shipped chain rule vs the recommendation, live-parity chain frequency + good-player proxy, 4,000 games/cell.",
+  "stake":"bronze","deck":"standard",
+  "policy": {"CHAIN_FORCE":"1.9","DECK_THIN":"20","HAND_BONUS":"2","EMBER_REFILL":"2"},
+  "atkScales":[0.5,1,2],
+  "variants":[
+    {"name":"SHIPPED x1.78 flat","env":{}},
+    {"name":"RECOMMENDED P1+P2","env":{"CHAIN_MODEL":"hybrid","CHAIN_DIM":"1.60,1.25,1.10,1.02","CHAIN_ADD_PCT":"0.75","CHAIN_ADD_WHEN":"post"}},
+    {"name":"P1 only (ladder)","env":{"CHAIN_MODEL":"dim","CHAIN_DIM":"1.60,1.25,1.10,1.02"}}
+  ]
+}

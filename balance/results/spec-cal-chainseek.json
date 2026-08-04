@@ -1,0 +1,376 @@
+{
+ "spec": {
+  "atkScales": [
+   1
+  ],
+  "variants": [
+   {
+    "name": "seek1",
+    "env": {
+     "CHAIN_SEEK": "1"
+    }
+   },
+   {
+    "name": "seek3",
+    "env": {
+     "CHAIN_SEEK": "3"
+    }
+   },
+   {
+    "name": "seek8",
+    "env": {
+     "CHAIN_SEEK": "8"
+    }
+   },
+   {
+    "name": "seek20",
+    "env": {
+     "CHAIN_SEEK": "20"
+    }
+   },
+   {
+    "name": "seek60",
+    "env": {
+     "CHAIN_SEEK": "60"
+    }
+   }
+  ]
+ },
+ "games": 1500,
+ "results": [
+  {
+   "variant": "seek3",
+   "atk": 1,
+   "env": {
+    "CHAIN_SEEK": "3",
+    "ATK_SCALE": "1"
+   },
+   "label": "seek3",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 1
+   },
+   "winRate": 5,
+   "avgFightReached": 14.24,
+   "deathsByCircle": {
+    "C1": 23.27,
+    "C2": 11.87,
+    "C3": 14.53,
+    "C4": 2.8,
+    "C5": 3,
+    "C6": 0.8,
+    "C7": 1.87,
+    "C8": 2.93,
+    "C9": 33.93
+   },
+   "strikesPerFight": 3.4,
+   "oneShotRate": 23.7,
+   "chainsPerStrike": 0.263,
+   "cardsPerStrike": 3.96,
+   "chainsPerFight": 0.89,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 76.5,
+    "1": 20.9,
+    "2": 2.5,
+    "3": 0.1
+   },
+   "ampMedian": 5.87,
+   "ampP90": 18.97,
+   "ampP99": 65.67,
+   "ampMax": 1156.6,
+   "ampN": 50027,
+   "multMedian": 1.47,
+   "multP90": 2.62,
+   "chainShareMedian": 1,
+   "chainShareP90": 1.78,
+   "bandAtkShare": 1.765,
+   "seconds": 44.6
+  },
+  {
+   "variant": "seek1",
+   "atk": 1,
+   "env": {
+    "CHAIN_SEEK": "1",
+    "ATK_SCALE": "1"
+   },
+   "label": "seek1",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 1
+   },
+   "winRate": 4.8,
+   "avgFightReached": 14.48,
+   "deathsByCircle": {
+    "C1": 20.73,
+    "C2": 12.07,
+    "C3": 16,
+    "C4": 3.07,
+    "C5": 2.53,
+    "C6": 0.8,
+    "C7": 2.47,
+    "C8": 3.87,
+    "C9": 33.67
+   },
+   "strikesPerFight": 3.42,
+   "oneShotRate": 23.4,
+   "chainsPerStrike": 0.258,
+   "cardsPerStrike": 3.94,
+   "chainsPerFight": 0.88,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 76.8,
+    "1": 20.6,
+    "2": 2.4,
+    "3": 0.1,
+    "4": 0
+   },
+   "ampMedian": 5.74,
+   "ampP90": 18.34,
+   "ampP99": 64.03,
+   "ampMax": 1163.5,
+   "ampN": 51075,
+   "multMedian": 1.47,
+   "multP90": 2.62,
+   "chainShareMedian": 1,
+   "chainShareP90": 1.78,
+   "bandAtkShare": 0.674,
+   "seconds": 45.3
+  },
+  {
+   "variant": "seek8",
+   "atk": 1,
+   "env": {
+    "CHAIN_SEEK": "8",
+    "ATK_SCALE": "1"
+   },
+   "label": "seek8",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 1
+   },
+   "winRate": 4.67,
+   "avgFightReached": 13.96,
+   "deathsByCircle": {
+    "C1": 22.87,
+    "C2": 11.53,
+    "C3": 17.33,
+    "C4": 2.73,
+    "C5": 2.2,
+    "C6": 0.93,
+    "C7": 1.93,
+    "C8": 3.07,
+    "C9": 32.73
+   },
+   "strikesPerFight": 3.43,
+   "oneShotRate": 23.3,
+   "chainsPerStrike": 0.26,
+   "cardsPerStrike": 3.93,
+   "chainsPerFight": 0.89,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 76.7,
+    "1": 20.7,
+    "2": 2.5,
+    "3": 0.1,
+    "4": 0
+   },
+   "ampMedian": 5.8,
+   "ampP90": 18.27,
+   "ampP99": 57.42,
+   "ampMax": 1103,
+   "ampN": 49752,
+   "multMedian": 1.47,
+   "multP90": 2.62,
+   "chainShareMedian": 1,
+   "chainShareP90": 1.78,
+   "bandAtkShare": 1.506,
+   "seconds": 43.2
+  },
+  {
+   "variant": "seek20",
+   "atk": 1,
+   "env": {
+    "CHAIN_SEEK": "20",
+    "ATK_SCALE": "1"
+   },
+   "label": "seek20",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 1
+   },
+   "winRate": 5.07,
+   "avgFightReached": 14.75,
+   "deathsByCircle": {
+    "C1": 21.07,
+    "C2": 9.8,
+    "C3": 17.13,
+    "C4": 3.07,
+    "C5": 2,
+    "C6": 0.8,
+    "C7": 2.67,
+    "C8": 3.33,
+    "C9": 35.07
+   },
+   "strikesPerFight": 3.38,
+   "oneShotRate": 24,
+   "chainsPerStrike": 0.268,
+   "cardsPerStrike": 3.98,
+   "chainsPerFight": 0.91,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 76.1,
+    "1": 21.1,
+    "2": 2.7,
+    "3": 0.1,
+    "4": 0
+   },
+   "ampMedian": 5.96,
+   "ampP90": 19.01,
+   "ampP99": 63,
+   "ampMax": 1672,
+   "ampN": 51379,
+   "multMedian": 1.47,
+   "multP90": 2.62,
+   "chainShareMedian": 1,
+   "chainShareP90": 1.78,
+   "bandAtkShare": 1.016,
+   "seconds": 46.8
+  },
+  {
+   "variant": "seek60",
+   "atk": 1,
+   "env": {
+    "CHAIN_SEEK": "60",
+    "ATK_SCALE": "1"
+   },
+   "label": "seek60",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 1
+   },
+   "winRate": 4.73,
+   "avgFightReached": 14.2,
+   "deathsByCircle": {
+    "C1": 21.8,
+    "C2": 12.6,
+    "C3": 16.4,
+    "C4": 2.73,
+    "C5": 2.2,
+    "C6": 1,
+    "C7": 1.6,
+    "C8": 3,
+    "C9": 33.93
+   },
+   "strikesPerFight": 3.37,
+   "oneShotRate": 24.3,
+   "chainsPerStrike": 0.263,
+   "cardsPerStrike": 3.98,
+   "chainsPerFight": 0.89,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 76.4,
+    "1": 21,
+    "2": 2.5,
+    "3": 0.1,
+    "4": 0
+   },
+   "ampMedian": 5.9,
+   "ampP90": 19.05,
+   "ampP99": 67.06,
+   "ampMax": 1790.6,
+   "ampN": 49126,
+   "multMedian": 1.47,
+   "multP90": 2.62,
+   "chainShareMedian": 1,
+   "chainShareP90": 1.78,
+   "bandAtkShare": 1.109,
+   "seconds": 21.8
+  }
+ ]
+}

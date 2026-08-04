@@ -1,0 +1,7 @@
+{"atkScales":[1],"variants":[
+{"name":"P0 shipped-AI","env":{}},
+{"name":"P1 hand+3","env":{"HAND_BONUS":"3"}},
+{"name":"P2 hand+3 emb+2","env":{"HAND_BONUS":"3","EMBER_REFILL":"2"}},
+{"name":"P3 hand+5 emb+4","env":{"HAND_BONUS":"5","EMBER_REFILL":"4"}},
+{"name":"P4 hand+8 emb+8","env":{"HAND_BONUS":"8","EMBER_REFILL":"8"}}
+]}

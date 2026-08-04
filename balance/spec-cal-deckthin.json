@@ -1,0 +1,8 @@
+{"atkScales":[1],"variants":[
+{"name":"P0 shipped","env":{}},
+{"name":"T40","env":{"DECK_THIN":"40"}},
+{"name":"T28","env":{"DECK_THIN":"28"}},
+{"name":"T20","env":{"DECK_THIN":"20"}},
+{"name":"T20 h+2 e+2","env":{"DECK_THIN":"20","HAND_BONUS":"2","EMBER_REFILL":"2"}},
+{"name":"T14 h+2 e+2","env":{"DECK_THIN":"14","HAND_BONUS":"2","EMBER_REFILL":"2"}}
+]}

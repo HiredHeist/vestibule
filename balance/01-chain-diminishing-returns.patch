@@ -1,0 +1,126 @@
+# PATCH 1/2 — Riff Chain diminishing returns
+#
+#   The Nth chain in a strike is worth [1.60, 1.25, 1.10, 1.02][N-1] instead of a flat x1.78.
+#   Apply with:  git apply balance/01-chain-diminishing-returns.patch
+#
+#   Touches: src/data/cards.js (new export), src/App.jsx (chain firing block),
+#            vestibule-sim-kwstacks.js (the same rule in the sim).
+#   Nothing else reads 1.78. Verified: grep -n "1\.78" src/ vestibule-sim-kwstacks.js
+
+diff --git a/src/data/cards.js b/src/data/cards.js
+index ca61f99..a468588 100644
+--- a/src/data/cards.js
++++ b/src/data/cards.js
+@@ -188,6 +188,19 @@ export const RIFF_CHAINS=[
+   {id:'demon_core',name:'DEMON CORE',cards:['sabbathsigil','overdrive'],color:'#ff0044',emoji:'⛧'},
+   {id:'last_stand',name:'LAST STAND',cards:['stagedive','wakeup'],color:'#00ddff',emoji:'💪'},
+ ]
++// ── RIFF CHAIN DIMINISHING RETURNS ─────────────────────────────────────────
++// The Nth chain completed IN ONE STRIKE is worth CHAIN_MULT_LADDER[N-1]; the
++// last entry repeats for every chain past it. Before this the rate was a flat
++// x1.78 with no cap, no decay and no cost, so k chains in a strike were worth
++// 1.78^k — measured p90 amplification x68 and a 32% chance of one-shotting a
++// BOSS. The first chain is deliberately still the biggest single multiplier a
++// card play can produce; only the stack is flattened.
++// Keep in sync with the copy in vestibule-sim-kwstacks.js.
++export const CHAIN_MULT_LADDER = [1.60, 1.25, 1.10, 1.02]
++export function chainMultFor(nthZeroBased){
++  return CHAIN_MULT_LADDER[Math.min(nthZeroBased, CHAIN_MULT_LADDER.length - 1)]
++}
++
+ // ── CORRUPTION GIFTS ────────────────────────────────────────────────────────
+ // The cards actually handed out when Corruption crosses 25% / 50% / 75%.
+ // Aug 4 2026:
+diff --git a/src/App.jsx b/src/App.jsx
+index 339f5c0..7b06030 100644
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -82,7 +82,7 @@
+ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+ import {ENEMIES} from './data/enemies.js'
+ import {ALL_MUSICIANS} from './data/members.js'
+-import {ALL_CARDS,CARD_UPGRADES,RIFF_CHAINS,CORRUPTION_CARDS} from './data/cards.js'
++import {ALL_CARDS,CARD_UPGRADES,RIFF_CHAINS,CORRUPTION_CARDS,chainMultFor} from './data/cards.js'
+ import {STARTER_ARTIFACTS,MYTHIC_ARTIFACTS,CIRCLE_ARTIFACTS,STARTER_PASSIVES,MYTHIC_PEDALS,BOSS_LOOT,PACT_REWARDS} from './data/relics.js'
+ import {SLY_LINES,TOUR_QUOTES,BOSS_QUOTES,BOSS_BIOS,LOADING_TIPS,REWARD_TIPS,TUTORIAL_TIPS,BOSS_PORTRAITS,STONED_PORTRAITS,STAGE_PORTRAITS,MEMBER_PORTRAITS,IDLE_PORTRAITS,TUTORIAL_MEMBERS,ACHIEVEMENTS,HELL_EVENTS} from './data/flavor.js'
+ let _uidCounter=Date.now()
+@@ -6780,12 +6780,22 @@ function App(){
+           const disc=JSON.parse(localStorage.getItem('vst_combos_discovered')||'[]')
+           if(!disc.includes(chain.id)){disc.push(chain.id);localStorage.setItem('vst_combos_discovered',JSON.stringify(disc))}
+         }
++        // ── DIMINISHING RETURNS (balance pass) ──
++        // combosFiredRef holds the chains ALREADY fired this strike, and this
++        // chain is pushed onto it further down, so its length is this chain's
++        // 0-based index within the strike. Chains still fire unlimited times —
++        // they just stop compounding at 1.78^k.
++        const _chainNth=combosFiredRef.current.length
++        const _chainBase=chainMultFor(_chainNth)
+         setChainCallout(chain.name);setTimeout(()=>setChainCallout(null),1200)
+-          setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.78*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
++          setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*_chainBase*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
+         playSfx('chain_combo');triggerShake(18,600);setChainFlashActive(true);setTimeout(()=>setChainFlashActive(false),600);
+-        // Octave Pedal: first chain each fight has its mult applied twice (×1.78 → ×3.17)
++        // Octave Pedal: first chain each fight has its mult applied twice.
++        // It reads _chainBase, so the pedal is still "double the chain you just
++        // fired" — and because the pedal only ever fires on the FIRST chain of a
++        // fight, it always doubles the top rung of the ladder.
+         const _octaveActive=activePassives.some(p=>p.id==='octavepedal')&&!octavePedalFiredRef.current
+-        const _chainMult=_octaveActive?(1.78*1.78):1.78
++        const _chainMult=_octaveActive?(_chainBase*_chainBase):_chainBase
+         if(_octaveActive){octavePedalFiredRef.current=true;addLog('🎼 Octave Pedal! First chain DOUBLED → ×'+_chainMult.toFixed(2))}
+         setStrikeMult(p=>Math.min(10000,Math.round((p*_chainMult)*100)/100));showFirstTimeTip('chain','Riff Chains fire when you play BOTH cards of a pair in the same Strike. Check Rules for all 16 chains!',addLog);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×'+_chainMult.toFixed(2)+' MULTIPLIER!')
+         combosFiredRef.current.push(chain.id)
+@@ -11788,7 +11798,7 @@ function App(){
+         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:comboFlash.color,letterSpacing:4,marginTop:10,animation:'slamScale 3s ease forwards',zIndex:1,textShadow:`0 0 20px ${comboFlash.color},2px 2px 0 #000`}}>{comboFlash.card1}  +  {comboFlash.card2}</div>
+         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:Math.min(42,20+Math.floor((comboFlash.mult||1)*6)),fontWeight:900,color:'var(--text-gold)',letterSpacing:6,marginTop:6,animation:'slamScale 3s ease forwards',zIndex:1,textShadow:'0 0 20px rgba(255,200,0,0.8),2px 2px 0 #000'}}>×{(comboFlash.mult||1).toFixed(2)} DAMAGE</div>
+         {/* Multiplier — THE money shot, biggest element */}
+-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:80,fontWeight:900,color:'var(--text-primary)',textShadow:`0 0 40px ${comboFlash.color},0 0 80px rgba(255,200,0,0.6),0 0 120px ${comboFlash.color}44,4px 4px 0 #000`,letterSpacing:6,marginTop:12,animation:'slamScale 3s ease forwards',zIndex:1}}>×{comboFlash.mult?.toFixed(2)||'1.78'}</div>
++        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:80,fontWeight:900,color:'var(--text-primary)',textShadow:`0 0 40px ${comboFlash.color},0 0 80px rgba(255,200,0,0.6),0 0 120px ${comboFlash.color}44,4px 4px 0 #000`,letterSpacing:6,marginTop:12,animation:'slamScale 3s ease forwards',zIndex:1}}>×{comboFlash.mult?.toFixed(2)||'1.60'}</div>
+         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:comboFlash.color,letterSpacing:8,textTransform:'uppercase',marginTop:4,zIndex:1,textShadow:'0 0 15px rgba(0,0,0,0.95)',animation:'slamScale 3s ease forwards'}}>STRIKE MULTIPLIER</div>
+       </div>}
+       {/* CIRCLE CLEARED FLASH */}
+diff --git a/vestibule-sim-kwstacks.js b/vestibule-sim-kwstacks.js
+index 2d2968e..2af1650 100644
+--- a/vestibule-sim-kwstacks.js
++++ b/vestibule-sim-kwstacks.js
+@@ -288,6 +288,8 @@ const BOSS_LOOT_SIM=[
+ ]
+ 
+ // ── RIFF CHAINS (16 combos) ──
++// Mirror of CHAIN_MULT_LADDER in src/data/cards.js. Nth chain in one strike.
++const CHAIN_MULT_LADDER_SIM=[1.60, 1.25, 1.10, 1.02]
+ const RIFF_CHAINS_SIM=[
+   ['resonancecard','infencore'],['darktuning','overdrive'],['bloodritual','wakeup'],
+   ['possessedperf','encore'],['distortion','feedbackloop'],['battlecry','stagedive'],
+@@ -818,7 +820,7 @@ function simFight(gs,phaseHp,luciferPhase){
+   if(gs.loot.includes('freeFirst'))gs._nextCardFree=true
+   if(gs.artifacts.some(a=>a.id==='a3'))gs._nextCardFree=true
+   if(gs._pendingBurnStage){gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+5);gs._pendingBurnStage=false}
+-  gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set();gs._allCardsFree=false;gs._hellquakeFired=false
++  gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set();gs._chainsThisStrike=0;gs._allCardsFree=false;gs._hellquakeFired=false
+   // ── KEYWORD STACK: ANCHOR fight-start init ───────
+   gs._anchorSavesUsed=0
+   // Compute ANCHOR tier at fight start (recomputed each strike but capped here)
+@@ -984,7 +986,12 @@ function simFight(gs,phaseHp,luciferPhase){
+           if(!gs._firedChains)gs._firedChains=new Set()
+           const ck=chain[0]+'+'+chain[1]
+           if(!gs._firedChains.has(ck)){
+-            gs._firedChains.add(ck);gs._strikeMult=Math.min(10000,Math.round((gs._strikeMult*1.78)*100)/100)
++            // ── DIMINISHING RETURNS — keep in sync with CHAIN_MULT_LADDER in
++            //    src/data/cards.js (the sim keeps its own copy of card data).
++            const _nth=(gs._chainsThisStrike||0);gs._chainsThisStrike=_nth+1
++            const _cl=CHAIN_MULT_LADDER_SIM
++            const _cm=_cl[Math.min(_nth,_cl.length-1)]
++            gs._firedChains.add(ck);gs._strikeMult=Math.min(10000,Math.round((gs._strikeMult*_cm)*100)/100)
+             // CHAIN INSTANT DAMAGE REMOVED to match live (App.jsx v0.7.7 May 4 2026):
+             // the x1.78 multiplier is the whole payoff; the old +10%-band-ATK hit was
+             // double-dipping and does not exist in the live build.
+@@ -1157,7 +1164,7 @@ function simFight(gs,phaseHp,luciferPhase){
+     if(aliveNow.some(m=>m.keyword==='FOLK MAGIC')&&Math.random()<0.2)gs.embers=gs.maxEmbers;
+     gs.highestStrike=Math.max(gs.highestStrike,strikeDmg);gs.totalDamage+=strikeDmg;
+     // Reset multiplier + combo tracking for next strike
+-    gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set()
++    gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set();gs._chainsThisStrike=0
+     if(gs.artifacts.some(a=>a.id==='a3'))gs._nextCardFree=true
+ 
+     if(enemy.passiveId==='soulThief'){const st=aliveNow.filter(m=>(m.permAtkBonus||0)>0);if(st.length>0){const v=pick(st);v.permAtkBonus=(v.permAtkBonus||0)-1;gs.stolenAtkPool++;enemy._atkBuff+=1}}

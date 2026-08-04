@@ -521,10 +521,16 @@ function emitRecon(g, fightIndex) {
 // (App.jsx ~6239). Read THAT and emit chain_confirmed.
 const CHAIN_BY_NAME = {}
 try { for (const c of (require('./carddata.json').chainMeta || [])) CHAIN_BY_NAME[c.name.toUpperCase()] = c } catch (e) {}
-// The log panel keeps a rolling window and is cleared between fights, so an
-// index cursor would double-count. Track a per-line occurrence count instead and
-// emit only the growth; reset it whenever a new fight starts.
-const chainLogSeen = new Map()
+// CURSOR, not an occurrence count. window.__devLog is APPEND-ONLY for the whole
+// run — it is NOT cleared between fights (only the on-screen log panel is). The
+// old code counted occurrences per distinct line and cleared that map at every
+// fight boundary, so after each fight EVERY historical chain line re-counted as
+// new. Measured on JV's Aug-4 ledger: 124 chain_confirmed rows from SEVEN real
+// chain events, one line emitted 44 times — a 17x overcount that made chains
+// look like a 1.9-per-strike spam mechanic when the true rate is 0.20.
+// A cursor cannot drift this way. Reset it only when __devLog itself resets
+// (page reload / new run), detected by the log shrinking.
+let devLogCursor = 0
 // Boss loot is announced ONLY in the combat log (App.jsx ~7414 addLog('🏆 Boss
 // Loot: ...')) — there is no loot rail in combat — so this is the one place a
 // player, or the bot, can learn that The Blade (x3.0 at EXACTLY 1 card) is live.
@@ -549,20 +555,21 @@ async function scanChainLog() {
   // log itself is an OVERLAY that is closed almost all the time — so scanning
   // visible text could never see a chain line. That is why chain_confirmed was
   // 0 across every session while chain_fired (the bot's own inference) was 31.
-  const lines = await P.evaljs(
-    `(() => ((window.__devLog||[]).map(e=>e&&e.msg||'').filter(m=>m.indexOf('RIFF CHAIN:')>=0)))()`
+  // Pull the whole log WITH its length so we can advance a cursor over it.
+  const res = await P.evaljs(
+    `(() => { const d = window.__devLog || []; return { n: d.length, msgs: d.map(e => e && e.msg || '') } })()`
   ).catch(() => null)
-  if (!Array.isArray(lines)) return
-  const now = new Map()
-  for (const l of lines) now.set(l, (now.get(l) || 0) + 1)
-  for (const [raw, n] of now) {
-    const had = chainLogSeen.get(raw) || 0
-    if (n <= had) continue
+  if (!res || !Array.isArray(res.msgs)) return
+  // __devLog shrank => the page reloaded (new run). Start over.
+  if (res.n < devLogCursor) devLogCursor = 0
+  const fresh = res.msgs.slice(devLogCursor)
+  devLogCursor = res.n
+  for (const raw of fresh) {
+    if (raw.indexOf('RIFF CHAIN:') < 0) continue
     const nm = (raw.match(/⛧ RIFF CHAIN:\s*\S*\s*([A-Z][A-Z' ]+?)!/) || [])[1]
     const meta = nm ? CHAIN_BY_NAME[nm.trim().toUpperCase()] : null
     const mult = (raw.match(/×([\d.]+)\s*MULTIPLIER/) || [])[1]
-    for (let i = had; i < n; i++) ev('chain_confirmed', { chain: meta ? meta.cards.join('+') : null, name: nm ? nm.trim() : null, mult: mult ? +mult : null, source: 'game_log', line: raw.slice(0, 120) })
-    chainLogSeen.set(raw, n)
+    ev('chain_confirmed', { chain: meta ? meta.cards.join('+') : null, name: nm ? nm.trim() : null, mult: mult ? +mult : null, source: 'game_log', line: raw.slice(0, 120) })
   }
 }
 
@@ -620,7 +627,7 @@ async function combatTick(s) {
   if (g.bossHp !== null && g.bossMaxHp && g.bossHp === g.bossMaxHp) {
     strikeNumThisFight = 0; playedIdsThisFight.length = 0; cardsThisStrike.length = 0
     firedChainsThisFight = new Set(); hrUsedThisFight.clear(); tripUsedThisFight = false
-    chainLogSeen.clear(); pendingStrike = null
+    pendingStrike = null
   }
   lastBossHp = g.bossHp
   // resolve the fight index ONCE per tick, then reconstruct the previous strike's
@@ -939,7 +946,7 @@ async function startRun(why, extra) {
   summaryPending = true; runActive = true
   strikeNumThisFight = 0; playedIdsThisFight.length = 0; cardsThisStrike.length = 0
   firedChainsThisFight = new Set(); hrUsedThisFight.clear(); tripUsedThisFight = false
-  chainLogSeen.clear(); pendingStrike = null; FIGHT.idx = -1
+  devLogCursor = 0; pendingStrike = null; FIGHT.idx = -1
   resetRunEconomy()
   ev('run_start', Object.assign({ why }, extra || {}))
   let deck = null, stake = null

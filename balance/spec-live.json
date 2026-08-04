@@ -1,0 +1,27 @@
+{
+  "_comment": "MAIN GRID — regime L (live-parity chain frequency). CHAIN_FORCE=1.9 tops every strike up to the chain rate the live bot actually measured (1.9/strike), because no sim policy reaches past 0.67. See CHAIN_BALANCE.md 'the calibration gap'.",
+  "stake": "bronze",
+  "deck": "standard",
+  "policy": { "CHAIN_FORCE": "1.9" },
+  "atkScales": [0.5, 1, 2],
+  "variants": [
+    { "name": "BASE shipped x1.78",   "env": {} },
+    { "name": "A  dim 1.78/1.4/1.2",  "env": { "CHAIN_MODEL": "dim", "CHAIN_DIM": "1.78,1.40,1.20,1.05" } },
+    { "name": "A2 dim 1.60/1.25/1.1", "env": { "CHAIN_MODEL": "dim", "CHAIN_DIM": "1.60,1.25,1.10,1.02" } },
+    { "name": "B  once per fight",    "env": { "CHAIN_SCOPE": "fight" } },
+    { "name": "C1 flat x1.40",        "env": { "CHAIN_MULT": "1.40" } },
+    { "name": "C2 flat x1.25",        "env": { "CHAIN_MULT": "1.25" } },
+    { "name": "D  add 1.0xATK",       "env": { "CHAIN_MODEL": "add", "CHAIN_ADD_PCT": "1.0" } },
+    { "name": "D2 add 0.5xATK",       "env": { "CHAIN_MODEL": "add", "CHAIN_ADD_PCT": "0.5" } },
+    { "name": "E  softcap knee10",    "env": { "SOFTCAP_KNEE": "10", "SOFTCAP_K": "1.0" } },
+    { "name": "E2 softcap knee5 k.7", "env": { "SOFTCAP_KNEE": "5", "SOFTCAP_K": "0.7" } },
+    { "name": "F  cost 2 embers",     "env": { "CHAIN_EMBER_COST": "2" } },
+    { "name": "F2 cost 8 corruption", "env": { "CHAIN_CORR_COST": "8" } },
+    { "name": "A+E dim + knee10",     "env": { "CHAIN_MODEL": "dim", "CHAIN_DIM": "1.78,1.40,1.20,1.05", "SOFTCAP_KNEE": "10", "SOFTCAP_K": "1.0" } },
+    { "name": "A+D hyb 1.4/1.15+.6",  "env": { "CHAIN_MODEL": "hybrid", "CHAIN_DIM": "1.40,1.15,1.05,1.02", "CHAIN_ADD_PCT": "0.6" } },
+    { "name": "A+B dim + per-fight",  "env": { "CHAIN_MODEL": "dim", "CHAIN_DIM": "1.78,1.40,1.20,1.05", "CHAIN_SCOPE": "fight" } },
+    { "name": "D+E add + knee10",     "env": { "CHAIN_MODEL": "add", "CHAIN_ADD_PCT": "1.0", "SOFTCAP_KNEE": "10", "SOFTCAP_K": "1.0" } },
+    { "name": "A+F dim + 2 embers",   "env": { "CHAIN_MODEL": "dim", "CHAIN_DIM": "1.78,1.40,1.20,1.05", "CHAIN_EMBER_COST": "2" } },
+    { "name": "NONE chains worth 0",  "env": { "CHAIN_MODEL": "none" } }
+  ]
+}

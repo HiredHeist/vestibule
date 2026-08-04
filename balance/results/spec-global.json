@@ -1,0 +1,6303 @@
+{
+ "spec": {
+  "_comment": "GRID 3 — does capping the WHOLE amplification stack (variant G) do what capping strikeMult alone could not? Good-player proxy + live-parity chain frequency.",
+  "stake": "bronze",
+  "deck": "standard",
+  "policy": {
+   "CHAIN_FORCE": "1.9",
+   "DECK_THIN": "20",
+   "HAND_BONUS": "2",
+   "EMBER_REFILL": "2"
+  },
+  "atkScales": [
+   0.5,
+   1,
+   2
+  ],
+  "variants": [
+   {
+    "name": "BASE shipped x1.78",
+    "env": {}
+   },
+   {
+    "name": "A2 dim 1.60/1.25/1.1",
+    "env": {
+     "CHAIN_MODEL": "dim",
+     "CHAIN_DIM": "1.60,1.25,1.10,1.02"
+    }
+   },
+   {
+    "name": "G  glob knee10 k1.0",
+    "env": {
+     "GLOBAL_KNEE": "10",
+     "GLOBAL_K": "1.0"
+    }
+   },
+   {
+    "name": "G2 glob knee6 k0.7",
+    "env": {
+     "GLOBAL_KNEE": "6",
+     "GLOBAL_K": "0.7"
+    }
+   },
+   {
+    "name": "G3 glob knee4 k0.5",
+    "env": {
+     "GLOBAL_KNEE": "4",
+     "GLOBAL_K": "0.5"
+    }
+   },
+   {
+    "name": "A2+G2 dim+glob6",
+    "env": {
+     "CHAIN_MODEL": "dim",
+     "CHAIN_DIM": "1.60,1.25,1.10,1.02",
+     "GLOBAL_KNEE": "6",
+     "GLOBAL_K": "0.7"
+    }
+   },
+   {
+    "name": "A+G2 dim1.78+glob6",
+    "env": {
+     "CHAIN_MODEL": "dim",
+     "CHAIN_DIM": "1.78,1.40,1.20,1.05",
+     "GLOBAL_KNEE": "6",
+     "GLOBAL_K": "0.7"
+    }
+   }
+  ]
+ },
+ "games": 1500,
+ "results": [
+  {
+   "variant": "BASE shipped x1.78",
+   "atk": 1,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "ATK_SCALE": "1"
+   },
+   "label": "BASE shipped x1.78",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 1
+   },
+   "winRate": 21.6,
+   "avgFightReached": 24.42,
+   "deathsByCircle": {
+    "C1": 0.4,
+    "C2": 1.4,
+    "C3": 3.8,
+    "C4": 1.6,
+    "C5": 3.13,
+    "C6": 2,
+    "C7": 4,
+    "C8": 6.07,
+    "C9": 56
+   },
+   "strikesPerFight": 2.28,
+   "oneShotRate": 48.3,
+   "chainsPerStrike": 2.022,
+   "cardsPerStrike": 4.75,
+   "chainsPerFight": 4.61,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 7.4,
+    "1": 31.9,
+    "2": 30.6,
+    "3": 17.6,
+    "4": 8,
+    "5": 3.2,
+    "6": 1,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0,
+    "11": 0
+   },
+   "ampMedian": 18.56,
+   "ampP90": 69.3,
+   "ampP99": 262.51,
+   "ampMax": 5388.8,
+   "ampN": 44960,
+   "multMedian": 4.65,
+   "multP90": 13.72,
+   "chainShareMedian": 3.17,
+   "chainShareP90": 10.04,
+   "bandAtkShare": 0.139,
+   "seconds": 48.3,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 2026,
+     "chPerStrike": 1.999,
+     "cardsPerStrike": 3.72,
+     "ampMed": 2.25,
+     "ampP90": 3.7
+    },
+    {
+     "f": 2,
+     "strikes": 2421,
+     "chPerStrike": 2.036,
+     "cardsPerStrike": 3.6,
+     "ampMed": 2.72,
+     "ampP90": 5.05
+    },
+    {
+     "f": 3,
+     "strikes": 651,
+     "chPerStrike": 2.034,
+     "cardsPerStrike": 4.44,
+     "ampMed": 3.22,
+     "ampP90": 5.6
+    },
+    {
+     "f": 4,
+     "strikes": 2114,
+     "chPerStrike": 2.074,
+     "cardsPerStrike": 4.27,
+     "ampMed": 3.69,
+     "ampP90": 6.52
+    },
+    {
+     "f": 5,
+     "strikes": 2894,
+     "chPerStrike": 1.998,
+     "cardsPerStrike": 4.06,
+     "ampMed": 5.53,
+     "ampP90": 11.78
+    },
+    {
+     "f": 6,
+     "strikes": 524,
+     "chPerStrike": 2.025,
+     "cardsPerStrike": 4.35,
+     "ampMed": 5.64,
+     "ampP90": 12.65
+    },
+    {
+     "f": 7,
+     "strikes": 2281,
+     "chPerStrike": 2.016,
+     "cardsPerStrike": 4.62,
+     "ampMed": 7.28,
+     "ampP90": 14.58
+    },
+    {
+     "f": 8,
+     "strikes": 3975,
+     "chPerStrike": 2.026,
+     "cardsPerStrike": 4.34,
+     "ampMed": 11.98,
+     "ampP90": 27.3
+    },
+    {
+     "f": 9,
+     "strikes": 1688,
+     "chPerStrike": 2.021,
+     "cardsPerStrike": 4.83,
+     "ampMed": 7.86,
+     "ampP90": 13.43
+    },
+    {
+     "f": 10,
+     "strikes": 2000,
+     "chPerStrike": 2.055,
+     "cardsPerStrike": 4.76,
+     "ampMed": 10.56,
+     "ampP90": 20.05
+    },
+    {
+     "f": 11,
+     "strikes": 3540,
+     "chPerStrike": 2.047,
+     "cardsPerStrike": 4.52,
+     "ampMed": 14.12,
+     "ampP90": 34.62
+    },
+    {
+     "f": 12,
+     "strikes": 1852,
+     "chPerStrike": 2.034,
+     "cardsPerStrike": 4.84,
+     "ampMed": 10.94,
+     "ampP90": 19.98
+    },
+    {
+     "f": 13,
+     "strikes": 2271,
+     "chPerStrike": 2.042,
+     "cardsPerStrike": 4.7,
+     "ampMed": 12.93,
+     "ampP90": 27.4
+    },
+    {
+     "f": 14,
+     "strikes": 3709,
+     "chPerStrike": 2.012,
+     "cardsPerStrike": 4.58,
+     "ampMed": 16.38,
+     "ampP90": 39.62
+    },
+    {
+     "f": 15,
+     "strikes": 2081,
+     "chPerStrike": 2.049,
+     "cardsPerStrike": 4.86,
+     "ampMed": 14.31,
+     "ampP90": 32.1
+    },
+    {
+     "f": 16,
+     "strikes": 2478,
+     "chPerStrike": 2.002,
+     "cardsPerStrike": 4.8,
+     "ampMed": 17.2,
+     "ampP90": 38.84
+    },
+    {
+     "f": 17,
+     "strikes": 3194,
+     "chPerStrike": 2.013,
+     "cardsPerStrike": 4.78,
+     "ampMed": 18.79,
+     "ampP90": 53.71
+    },
+    {
+     "f": 18,
+     "strikes": 2318,
+     "chPerStrike": 2.016,
+     "cardsPerStrike": 4.94,
+     "ampMed": 17.47,
+     "ampP90": 38.97
+    },
+    {
+     "f": 19,
+     "strikes": 2854,
+     "chPerStrike": 1.989,
+     "cardsPerStrike": 4.89,
+     "ampMed": 18.55,
+     "ampP90": 49.32
+    },
+    {
+     "f": 20,
+     "strikes": 3679,
+     "chPerStrike": 1.993,
+     "cardsPerStrike": 4.86,
+     "ampMed": 20.96,
+     "ampP90": 59.95
+    },
+    {
+     "f": 21,
+     "strikes": 3291,
+     "chPerStrike": 2.033,
+     "cardsPerStrike": 4.97,
+     "ampMed": 21.94,
+     "ampP90": 62.67
+    },
+    {
+     "f": 22,
+     "strikes": 3916,
+     "chPerStrike": 2.019,
+     "cardsPerStrike": 4.98,
+     "ampMed": 23.13,
+     "ampP90": 69.35
+    },
+    {
+     "f": 23,
+     "strikes": 4489,
+     "chPerStrike": 2.018,
+     "cardsPerStrike": 5.02,
+     "ampMed": 24.86,
+     "ampP90": 79.35
+    },
+    {
+     "f": 24,
+     "strikes": 2287,
+     "chPerStrike": 2,
+     "cardsPerStrike": 5.09,
+     "ampMed": 23.79,
+     "ampP90": 72.9
+    },
+    {
+     "f": 25,
+     "strikes": 2049,
+     "chPerStrike": 2.038,
+     "cardsPerStrike": 5.12,
+     "ampMed": 22.38,
+     "ampP90": 61.74
+    },
+    {
+     "f": 26,
+     "strikes": 13432,
+     "chPerStrike": 2.023,
+     "cardsPerStrike": 5.15,
+     "ampMed": 34.18,
+     "ampP90": 137.29
+    }
+   ]
+  },
+  {
+   "variant": "BASE shipped x1.78",
+   "atk": 0.5,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "ATK_SCALE": "0.5"
+   },
+   "label": "BASE shipped x1.78",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 0.5
+   },
+   "winRate": 21.2,
+   "avgFightReached": 23.59,
+   "deathsByCircle": {
+    "C1": 1.4,
+    "C2": 2.67,
+    "C3": 5.6,
+    "C4": 2.4,
+    "C5": 2.27,
+    "C6": 1.67,
+    "C7": 3.27,
+    "C8": 6.6,
+    "C9": 52.93
+   },
+   "strikesPerFight": 2.41,
+   "oneShotRate": 43.7,
+   "chainsPerStrike": 2.031,
+   "cardsPerStrike": 4.78,
+   "chainsPerFight": 4.89,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 7,
+    "1": 31.9,
+    "2": 30.9,
+    "3": 17.7,
+    "4": 8.2,
+    "5": 3.1,
+    "6": 1,
+    "7": 0.2,
+    "8": 0.1,
+    "9": 0,
+    "10": 0,
+    "12": 0
+   },
+   "ampMedian": 18.47,
+   "ampP90": 67.73,
+   "ampP99": 256.34,
+   "ampMax": 1585.6,
+   "ampN": 47898,
+   "multMedian": 4.66,
+   "multP90": 14.74,
+   "chainShareMedian": 3.17,
+   "chainShareP90": 10.04,
+   "bandAtkShare": 0.145,
+   "seconds": 50.4,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 2526,
+     "chPerStrike": 1.961,
+     "cardsPerStrike": 3.54,
+     "ampMed": 2.42,
+     "ampP90": 4.63
+    },
+    {
+     "f": 2,
+     "strikes": 2876,
+     "chPerStrike": 2.027,
+     "cardsPerStrike": 3.49,
+     "ampMed": 3.4,
+     "ampP90": 6.57
+    },
+    {
+     "f": 3,
+     "strikes": 818,
+     "chPerStrike": 1.982,
+     "cardsPerStrike": 4.35,
+     "ampMed": 3.54,
+     "ampP90": 6.44
+    },
+    {
+     "f": 4,
+     "strikes": 2335,
+     "chPerStrike": 2.013,
+     "cardsPerStrike": 4.17,
+     "ampMed": 4.25,
+     "ampP90": 8.02
+    },
+    {
+     "f": 5,
+     "strikes": 3031,
+     "chPerStrike": 2.009,
+     "cardsPerStrike": 4.1,
+     "ampMed": 6.97,
+     "ampP90": 15.17
+    },
+    {
+     "f": 6,
+     "strikes": 639,
+     "chPerStrike": 2.095,
+     "cardsPerStrike": 4.46,
+     "ampMed": 8.48,
+     "ampP90": 17.33
+    },
+    {
+     "f": 7,
+     "strikes": 2407,
+     "chPerStrike": 1.985,
+     "cardsPerStrike": 4.54,
+     "ampMed": 8.66,
+     "ampP90": 17.04
+    },
+    {
+     "f": 8,
+     "strikes": 4263,
+     "chPerStrike": 2,
+     "cardsPerStrike": 4.33,
+     "ampMed": 13.54,
+     "ampP90": 31.65
+    },
+    {
+     "f": 9,
+     "strikes": 1682,
+     "chPerStrike": 2.042,
+     "cardsPerStrike": 4.89,
+     "ampMed": 9.45,
+     "ampP90": 16.84
+    },
+    {
+     "f": 10,
+     "strikes": 1978,
+     "chPerStrike": 2.05,
+     "cardsPerStrike": 4.85,
+     "ampMed": 11.46,
+     "ampP90": 22.29
+    },
+    {
+     "f": 11,
+     "strikes": 3595,
+     "chPerStrike": 2.037,
+     "cardsPerStrike": 4.67,
+     "ampMed": 15.06,
+     "ampP90": 35.18
+    },
+    {
+     "f": 12,
+     "strikes": 1800,
+     "chPerStrike": 2.058,
+     "cardsPerStrike": 4.96,
+     "ampMed": 11.52,
+     "ampP90": 22.22
+    },
+    {
+     "f": 13,
+     "strikes": 2192,
+     "chPerStrike": 2.047,
+     "cardsPerStrike": 4.83,
+     "ampMed": 13.78,
+     "ampP90": 29.84
+    },
+    {
+     "f": 14,
+     "strikes": 3612,
+     "chPerStrike": 2.066,
+     "cardsPerStrike": 4.72,
+     "ampMed": 17.83,
+     "ampP90": 43.73
+    },
+    {
+     "f": 15,
+     "strikes": 2055,
+     "chPerStrike": 2.062,
+     "cardsPerStrike": 4.93,
+     "ampMed": 14.53,
+     "ampP90": 31.65
+    },
+    {
+     "f": 16,
+     "strikes": 2530,
+     "chPerStrike": 2.039,
+     "cardsPerStrike": 4.86,
+     "ampMed": 17.32,
+     "ampP90": 39.64
+    },
+    {
+     "f": 17,
+     "strikes": 3266,
+     "chPerStrike": 2.024,
+     "cardsPerStrike": 4.88,
+     "ampMed": 20.28,
+     "ampP90": 53.57
+    },
+    {
+     "f": 18,
+     "strikes": 2360,
+     "chPerStrike": 2.061,
+     "cardsPerStrike": 5,
+     "ampMed": 18.18,
+     "ampP90": 44.67
+    },
+    {
+     "f": 19,
+     "strikes": 2856,
+     "chPerStrike": 2.044,
+     "cardsPerStrike": 4.98,
+     "ampMed": 20.27,
+     "ampP90": 53.04
+    },
+    {
+     "f": 20,
+     "strikes": 3671,
+     "chPerStrike": 2.034,
+     "cardsPerStrike": 4.99,
+     "ampMed": 21.56,
+     "ampP90": 63.1
+    },
+    {
+     "f": 21,
+     "strikes": 3428,
+     "chPerStrike": 2.01,
+     "cardsPerStrike": 5.04,
+     "ampMed": 21.96,
+     "ampP90": 61.87
+    },
+    {
+     "f": 22,
+     "strikes": 3881,
+     "chPerStrike": 2.06,
+     "cardsPerStrike": 5.04,
+     "ampMed": 22.66,
+     "ampP90": 68.33
+    },
+    {
+     "f": 23,
+     "strikes": 4445,
+     "chPerStrike": 2.038,
+     "cardsPerStrike": 5.07,
+     "ampMed": 25.35,
+     "ampP90": 83.11
+    },
+    {
+     "f": 24,
+     "strikes": 2213,
+     "chPerStrike": 2.061,
+     "cardsPerStrike": 5.13,
+     "ampMed": 23.9,
+     "ampP90": 68.98
+    },
+    {
+     "f": 25,
+     "strikes": 2058,
+     "chPerStrike": 2.011,
+     "cardsPerStrike": 5.16,
+     "ampMed": 22.53,
+     "ampP90": 57.46
+    },
+    {
+     "f": 26,
+     "strikes": 13394,
+     "chPerStrike": 2.031,
+     "cardsPerStrike": 5.22,
+     "ampMed": 33.72,
+     "ampP90": 138.36
+    }
+   ]
+  },
+  {
+   "variant": "BASE shipped x1.78",
+   "atk": 2,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "ATK_SCALE": "2"
+   },
+   "label": "BASE shipped x1.78",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 2
+   },
+   "winRate": 24.93,
+   "avgFightReached": 25.72,
+   "deathsByCircle": {
+    "C1": 0.07,
+    "C2": 0.33,
+    "C3": 1.53,
+    "C4": 0.67,
+    "C5": 1.4,
+    "C6": 1.73,
+    "C7": 3.4,
+    "C8": 5.33,
+    "C9": 60.6
+   },
+   "strikesPerFight": 2.12,
+   "oneShotRate": 54.4,
+   "chainsPerStrike": 2.024,
+   "cardsPerStrike": 4.78,
+   "chainsPerFight": 4.3,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 7.2,
+    "1": 31.6,
+    "2": 31.3,
+    "3": 17.6,
+    "4": 8,
+    "5": 3,
+    "6": 0.9,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0
+   },
+   "ampMedian": 19.77,
+   "ampP90": 71.33,
+   "ampP99": 259.24,
+   "ampMax": 2209.8,
+   "ampN": 41359,
+   "multMedian": 4.66,
+   "multP90": 13.72,
+   "chainShareMedian": 3.17,
+   "chainShareP90": 10.04,
+   "bandAtkShare": 0.088,
+   "seconds": 40.1,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 1641,
+     "chPerStrike": 2.098,
+     "cardsPerStrike": 3.8,
+     "ampMed": 2.08,
+     "ampP90": 2.61
+    },
+    {
+     "f": 2,
+     "strikes": 1914,
+     "chPerStrike": 2.031,
+     "cardsPerStrike": 3.87,
+     "ampMed": 2.6,
+     "ampP90": 4
+    },
+    {
+     "f": 3,
+     "strikes": 364,
+     "chPerStrike": 2.074,
+     "cardsPerStrike": 4.55,
+     "ampMed": 2.89,
+     "ampP90": 4.1
+    },
+    {
+     "f": 4,
+     "strikes": 1928,
+     "chPerStrike": 1.984,
+     "cardsPerStrike": 4.3,
+     "ampMed": 2.91,
+     "ampP90": 5.15
+    },
+    {
+     "f": 5,
+     "strikes": 2512,
+     "chPerStrike": 1.974,
+     "cardsPerStrike": 4.18,
+     "ampMed": 4.5,
+     "ampP90": 9.78
+    },
+    {
+     "f": 6,
+     "strikes": 316,
+     "chPerStrike": 2.13,
+     "cardsPerStrike": 4.77,
+     "ampMed": 3.77,
+     "ampP90": 7.86
+    },
+    {
+     "f": 7,
+     "strikes": 2067,
+     "chPerStrike": 2.033,
+     "cardsPerStrike": 4.65,
+     "ampMed": 5.94,
+     "ampP90": 11.51
+    },
+    {
+     "f": 8,
+     "strikes": 3400,
+     "chPerStrike": 2.055,
+     "cardsPerStrike": 4.38,
+     "ampMed": 10.55,
+     "ampP90": 23.93
+    },
+    {
+     "f": 9,
+     "strikes": 1617,
+     "chPerStrike": 2.058,
+     "cardsPerStrike": 4.93,
+     "ampMed": 6.84,
+     "ampP90": 12.18
+    },
+    {
+     "f": 10,
+     "strikes": 1846,
+     "chPerStrike": 2.019,
+     "cardsPerStrike": 4.88,
+     "ampMed": 8.95,
+     "ampP90": 15.8
+    },
+    {
+     "f": 11,
+     "strikes": 3146,
+     "chPerStrike": 2.028,
+     "cardsPerStrike": 4.62,
+     "ampMed": 12.98,
+     "ampP90": 28.37
+    },
+    {
+     "f": 12,
+     "strikes": 1792,
+     "chPerStrike": 2.047,
+     "cardsPerStrike": 4.84,
+     "ampMed": 10.12,
+     "ampP90": 17.57
+    },
+    {
+     "f": 13,
+     "strikes": 2083,
+     "chPerStrike": 2.012,
+     "cardsPerStrike": 4.79,
+     "ampMed": 11.8,
+     "ampP90": 22.15
+    },
+    {
+     "f": 14,
+     "strikes": 3327,
+     "chPerStrike": 2.048,
+     "cardsPerStrike": 4.63,
+     "ampMed": 15.5,
+     "ampP90": 36.77
+    },
+    {
+     "f": 15,
+     "strikes": 2043,
+     "chPerStrike": 2.07,
+     "cardsPerStrike": 4.81,
+     "ampMed": 12.66,
+     "ampP90": 25.95
+    },
+    {
+     "f": 16,
+     "strikes": 2395,
+     "chPerStrike": 2.024,
+     "cardsPerStrike": 4.8,
+     "ampMed": 16.01,
+     "ampP90": 33.83
+    },
+    {
+     "f": 17,
+     "strikes": 3047,
+     "chPerStrike": 1.999,
+     "cardsPerStrike": 4.7,
+     "ampMed": 18.27,
+     "ampP90": 47.7
+    },
+    {
+     "f": 18,
+     "strikes": 2308,
+     "chPerStrike": 2.028,
+     "cardsPerStrike": 4.88,
+     "ampMed": 16.53,
+     "ampP90": 37.01
+    },
+    {
+     "f": 19,
+     "strikes": 2673,
+     "chPerStrike": 2.073,
+     "cardsPerStrike": 4.84,
+     "ampMed": 18.72,
+     "ampP90": 44.76
+    },
+    {
+     "f": 20,
+     "strikes": 3457,
+     "chPerStrike": 2.068,
+     "cardsPerStrike": 4.82,
+     "ampMed": 20.4,
+     "ampP90": 59.97
+    },
+    {
+     "f": 21,
+     "strikes": 3399,
+     "chPerStrike": 1.981,
+     "cardsPerStrike": 4.9,
+     "ampMed": 21.04,
+     "ampP90": 55.11
+    },
+    {
+     "f": 22,
+     "strikes": 4079,
+     "chPerStrike": 2.001,
+     "cardsPerStrike": 4.85,
+     "ampMed": 21.65,
+     "ampP90": 64.83
+    },
+    {
+     "f": 23,
+     "strikes": 4566,
+     "chPerStrike": 2.032,
+     "cardsPerStrike": 4.93,
+     "ampMed": 23.96,
+     "ampP90": 76.7
+    },
+    {
+     "f": 24,
+     "strikes": 2456,
+     "chPerStrike": 1.945,
+     "cardsPerStrike": 5.04,
+     "ampMed": 22.42,
+     "ampP90": 60.63
+    },
+    {
+     "f": 25,
+     "strikes": 2236,
+     "chPerStrike": 1.974,
+     "cardsPerStrike": 5.08,
+     "ampMed": 21.58,
+     "ampP90": 56.38
+    },
+    {
+     "f": 26,
+     "strikes": 15398,
+     "chPerStrike": 2.021,
+     "cardsPerStrike": 5.11,
+     "ampMed": 32.63,
+     "ampP90": 126.02
+    }
+   ]
+  },
+  {
+   "variant": "A2 dim 1.60/1.25/1.1",
+   "atk": 0.5,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "CHAIN_MODEL": "dim",
+    "CHAIN_DIM": "1.60,1.25,1.10,1.02",
+    "ATK_SCALE": "0.5"
+   },
+   "label": "A2 dim 1.60/1.25/1.1",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "dim",
+    "mult": 1.78,
+    "dim": [
+     1.6,
+     1.25,
+     1.1,
+     1.02
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 0.5
+   },
+   "winRate": 6.73,
+   "avgFightReached": 19.82,
+   "deathsByCircle": {
+    "C1": 6.53,
+    "C2": 5.73,
+    "C3": 12.33,
+    "C4": 2.73,
+    "C5": 2.8,
+    "C6": 2.2,
+    "C7": 3.33,
+    "C8": 5.67,
+    "C9": 51.93
+   },
+   "strikesPerFight": 2.88,
+   "oneShotRate": 30,
+   "chainsPerStrike": 2.027,
+   "cardsPerStrike": 4.79,
+   "chainsPerFight": 5.83,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 6.9,
+    "1": 32.1,
+    "2": 31,
+    "3": 17.5,
+    "4": 8.2,
+    "5": 3,
+    "6": 0.9,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0,
+    "11": 0
+   },
+   "ampMedian": 13.33,
+   "ampP90": 35.58,
+   "ampP99": 120.2,
+   "ampMax": 2057.6,
+   "ampN": 54333,
+   "multMedian": 2.78,
+   "multP90": 3.43,
+   "chainShareMedian": 2,
+   "chainShareP90": 2.24,
+   "bandAtkShare": 0.741,
+   "seconds": 42.7,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 3545,
+     "chPerStrike": 2.007,
+     "cardsPerStrike": 3.24,
+     "ampMed": 2.36,
+     "ampP90": 3.2
+    },
+    {
+     "f": 2,
+     "strikes": 3762,
+     "chPerStrike": 2.006,
+     "cardsPerStrike": 3.35,
+     "ampMed": 2.89,
+     "ampP90": 4.66
+    },
+    {
+     "f": 3,
+     "strikes": 1122,
+     "chPerStrike": 2.039,
+     "cardsPerStrike": 4.42,
+     "ampMed": 3.7,
+     "ampP90": 6.11
+    },
+    {
+     "f": 4,
+     "strikes": 2221,
+     "chPerStrike": 2.013,
+     "cardsPerStrike": 4.37,
+     "ampMed": 4.35,
+     "ampP90": 7.57
+    },
+    {
+     "f": 5,
+     "strikes": 3457,
+     "chPerStrike": 2.05,
+     "cardsPerStrike": 4.21,
+     "ampMed": 6.85,
+     "ampP90": 12.3
+    },
+    {
+     "f": 6,
+     "strikes": 925,
+     "chPerStrike": 1.984,
+     "cardsPerStrike": 4.57,
+     "ampMed": 8.34,
+     "ampP90": 12.15
+    },
+    {
+     "f": 7,
+     "strikes": 2504,
+     "chPerStrike": 2.024,
+     "cardsPerStrike": 4.65,
+     "ampMed": 9.09,
+     "ampP90": 14.03
+    },
+    {
+     "f": 8,
+     "strikes": 5397,
+     "chPerStrike": 2.036,
+     "cardsPerStrike": 4.49,
+     "ampMed": 10.72,
+     "ampP90": 18.01
+    },
+    {
+     "f": 9,
+     "strikes": 1419,
+     "chPerStrike": 2.098,
+     "cardsPerStrike": 5.01,
+     "ampMed": 9.39,
+     "ampP90": 15.86
+    },
+    {
+     "f": 10,
+     "strikes": 1856,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 4.94,
+     "ampMed": 10.69,
+     "ampP90": 17.36
+    },
+    {
+     "f": 11,
+     "strikes": 4018,
+     "chPerStrike": 2.034,
+     "cardsPerStrike": 4.79,
+     "ampMed": 12.15,
+     "ampP90": 20.99
+    },
+    {
+     "f": 12,
+     "strikes": 1563,
+     "chPerStrike": 2.063,
+     "cardsPerStrike": 5.04,
+     "ampMed": 11.28,
+     "ampP90": 19.67
+    },
+    {
+     "f": 13,
+     "strikes": 2108,
+     "chPerStrike": 2.033,
+     "cardsPerStrike": 4.89,
+     "ampMed": 12.33,
+     "ampP90": 22.29
+    },
+    {
+     "f": 14,
+     "strikes": 4062,
+     "chPerStrike": 2.011,
+     "cardsPerStrike": 4.82,
+     "ampMed": 13.08,
+     "ampP90": 26.84
+    },
+    {
+     "f": 15,
+     "strikes": 1834,
+     "chPerStrike": 2.004,
+     "cardsPerStrike": 5.05,
+     "ampMed": 12.92,
+     "ampP90": 24.69
+    },
+    {
+     "f": 16,
+     "strikes": 2389,
+     "chPerStrike": 2.024,
+     "cardsPerStrike": 5.01,
+     "ampMed": 13.99,
+     "ampP90": 28.72
+    },
+    {
+     "f": 17,
+     "strikes": 3345,
+     "chPerStrike": 2.043,
+     "cardsPerStrike": 5.02,
+     "ampMed": 14.78,
+     "ampP90": 34.91
+    },
+    {
+     "f": 18,
+     "strikes": 2114,
+     "chPerStrike": 2.035,
+     "cardsPerStrike": 5.1,
+     "ampMed": 15.05,
+     "ampP90": 30.28
+    },
+    {
+     "f": 19,
+     "strikes": 2712,
+     "chPerStrike": 2.025,
+     "cardsPerStrike": 5.12,
+     "ampMed": 15.33,
+     "ampP90": 36.47
+    },
+    {
+     "f": 20,
+     "strikes": 3739,
+     "chPerStrike": 1.997,
+     "cardsPerStrike": 5.1,
+     "ampMed": 15.32,
+     "ampP90": 39.45
+    },
+    {
+     "f": 21,
+     "strikes": 3371,
+     "chPerStrike": 2.033,
+     "cardsPerStrike": 5.15,
+     "ampMed": 16.71,
+     "ampP90": 40.56
+    },
+    {
+     "f": 22,
+     "strikes": 4276,
+     "chPerStrike": 2.053,
+     "cardsPerStrike": 5.13,
+     "ampMed": 16.85,
+     "ampP90": 41.23
+    },
+    {
+     "f": 23,
+     "strikes": 4936,
+     "chPerStrike": 2.024,
+     "cardsPerStrike": 5.18,
+     "ampMed": 17.02,
+     "ampP90": 44.13
+    },
+    {
+     "f": 24,
+     "strikes": 1955,
+     "chPerStrike": 2.003,
+     "cardsPerStrike": 5.23,
+     "ampMed": 17.41,
+     "ampP90": 47.96
+    },
+    {
+     "f": 25,
+     "strikes": 1788,
+     "chPerStrike": 2.014,
+     "cardsPerStrike": 5.23,
+     "ampMed": 17.49,
+     "ampP90": 45.68
+    },
+    {
+     "f": 26,
+     "strikes": 10744,
+     "chPerStrike": 2.029,
+     "cardsPerStrike": 5.22,
+     "ampMed": 21.27,
+     "ampP90": 69.85
+    }
+   ]
+  },
+  {
+   "variant": "A2 dim 1.60/1.25/1.1",
+   "atk": 1,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "CHAIN_MODEL": "dim",
+    "CHAIN_DIM": "1.60,1.25,1.10,1.02",
+    "ATK_SCALE": "1"
+   },
+   "label": "A2 dim 1.60/1.25/1.1",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "dim",
+    "mult": 1.78,
+    "dim": [
+     1.6,
+     1.25,
+     1.1,
+     1.02
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 1
+   },
+   "winRate": 8.67,
+   "avgFightReached": 21.26,
+   "deathsByCircle": {
+    "C1": 1.2,
+    "C2": 5.27,
+    "C3": 10.53,
+    "C4": 2.93,
+    "C5": 4,
+    "C6": 3,
+    "C7": 3.67,
+    "C8": 7.13,
+    "C9": 53.6
+   },
+   "strikesPerFight": 2.79,
+   "oneShotRate": 33.3,
+   "chainsPerStrike": 2.021,
+   "cardsPerStrike": 4.78,
+   "chainsPerFight": 5.63,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 7.2,
+    "1": 31.9,
+    "2": 31,
+    "3": 17.5,
+    "4": 8.2,
+    "5": 3,
+    "6": 0.9,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0
+   },
+   "ampMedian": 13.13,
+   "ampP90": 34.49,
+   "ampP99": 118.3,
+   "ampMax": 1465.5,
+   "ampN": 55143,
+   "multMedian": 2.78,
+   "multP90": 3.43,
+   "chainShareMedian": 2,
+   "chainShareP90": 2.24,
+   "bandAtkShare": 0.586,
+   "seconds": 44.6,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 2544,
+     "chPerStrike": 1.991,
+     "cardsPerStrike": 3.54,
+     "ampMed": 2.35,
+     "ampP90": 3.17
+    },
+    {
+     "f": 2,
+     "strikes": 3171,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 3.45,
+     "ampMed": 2.72,
+     "ampP90": 4.04
+    },
+    {
+     "f": 3,
+     "strikes": 1031,
+     "chPerStrike": 1.988,
+     "cardsPerStrike": 4.25,
+     "ampMed": 3.27,
+     "ampP90": 4.85
+    },
+    {
+     "f": 4,
+     "strikes": 2326,
+     "chPerStrike": 2.039,
+     "cardsPerStrike": 4.3,
+     "ampMed": 3.65,
+     "ampP90": 6
+    },
+    {
+     "f": 5,
+     "strikes": 3513,
+     "chPerStrike": 2.001,
+     "cardsPerStrike": 4.06,
+     "ampMed": 5.31,
+     "ampP90": 10.91
+    },
+    {
+     "f": 6,
+     "strikes": 817,
+     "chPerStrike": 1.998,
+     "cardsPerStrike": 4.45,
+     "ampMed": 7.05,
+     "ampP90": 11.22
+    },
+    {
+     "f": 7,
+     "strikes": 2515,
+     "chPerStrike": 2.028,
+     "cardsPerStrike": 4.58,
+     "ampMed": 8.19,
+     "ampP90": 13.43
+    },
+    {
+     "f": 8,
+     "strikes": 5385,
+     "chPerStrike": 1.999,
+     "cardsPerStrike": 4.44,
+     "ampMed": 10.05,
+     "ampP90": 17.11
+    },
+    {
+     "f": 9,
+     "strikes": 1559,
+     "chPerStrike": 2.036,
+     "cardsPerStrike": 4.97,
+     "ampMed": 8.8,
+     "ampP90": 13.21
+    },
+    {
+     "f": 10,
+     "strikes": 1989,
+     "chPerStrike": 2.027,
+     "cardsPerStrike": 4.9,
+     "ampMed": 10.17,
+     "ampP90": 16.49
+    },
+    {
+     "f": 11,
+     "strikes": 4282,
+     "chPerStrike": 2.052,
+     "cardsPerStrike": 4.73,
+     "ampMed": 11.56,
+     "ampP90": 20.03
+    },
+    {
+     "f": 12,
+     "strikes": 1716,
+     "chPerStrike": 2.054,
+     "cardsPerStrike": 4.96,
+     "ampMed": 10.65,
+     "ampP90": 17.46
+    },
+    {
+     "f": 13,
+     "strikes": 2273,
+     "chPerStrike": 2.086,
+     "cardsPerStrike": 4.82,
+     "ampMed": 11.6,
+     "ampP90": 20.19
+    },
+    {
+     "f": 14,
+     "strikes": 4471,
+     "chPerStrike": 2.03,
+     "cardsPerStrike": 4.76,
+     "ampMed": 12.26,
+     "ampP90": 23.75
+    },
+    {
+     "f": 15,
+     "strikes": 2066,
+     "chPerStrike": 2.009,
+     "cardsPerStrike": 4.96,
+     "ampMed": 12.23,
+     "ampP90": 21.31
+    },
+    {
+     "f": 16,
+     "strikes": 2619,
+     "chPerStrike": 2.073,
+     "cardsPerStrike": 4.91,
+     "ampMed": 13.14,
+     "ampP90": 27.37
+    },
+    {
+     "f": 17,
+     "strikes": 3654,
+     "chPerStrike": 2.029,
+     "cardsPerStrike": 4.94,
+     "ampMed": 14.17,
+     "ampP90": 32.61
+    },
+    {
+     "f": 18,
+     "strikes": 2277,
+     "chPerStrike": 2.009,
+     "cardsPerStrike": 5.03,
+     "ampMed": 13.91,
+     "ampP90": 29.31
+    },
+    {
+     "f": 19,
+     "strikes": 3069,
+     "chPerStrike": 1.992,
+     "cardsPerStrike": 4.98,
+     "ampMed": 14.34,
+     "ampP90": 32.8
+    },
+    {
+     "f": 20,
+     "strikes": 4076,
+     "chPerStrike": 2.026,
+     "cardsPerStrike": 4.99,
+     "ampMed": 14.32,
+     "ampP90": 37.04
+    },
+    {
+     "f": 21,
+     "strikes": 3788,
+     "chPerStrike": 2.011,
+     "cardsPerStrike": 5.04,
+     "ampMed": 15.47,
+     "ampP90": 38.7
+    },
+    {
+     "f": 22,
+     "strikes": 4534,
+     "chPerStrike": 2.009,
+     "cardsPerStrike": 5.06,
+     "ampMed": 16.05,
+     "ampP90": 37.82
+    },
+    {
+     "f": 23,
+     "strikes": 5233,
+     "chPerStrike": 2.017,
+     "cardsPerStrike": 5.07,
+     "ampMed": 16.49,
+     "ampP90": 40.86
+    },
+    {
+     "f": 24,
+     "strikes": 2114,
+     "chPerStrike": 1.968,
+     "cardsPerStrike": 5.16,
+     "ampMed": 16.97,
+     "ampP90": 45.89
+    },
+    {
+     "f": 25,
+     "strikes": 1871,
+     "chPerStrike": 2.009,
+     "cardsPerStrike": 5.21,
+     "ampMed": 16.84,
+     "ampP90": 43.04
+    },
+    {
+     "f": 26,
+     "strikes": 11010,
+     "chPerStrike": 2.027,
+     "cardsPerStrike": 5.24,
+     "ampMed": 20.76,
+     "ampP90": 69.61
+    }
+   ]
+  },
+  {
+   "variant": "A2 dim 1.60/1.25/1.1",
+   "atk": 2,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "CHAIN_MODEL": "dim",
+    "CHAIN_DIM": "1.60,1.25,1.10,1.02",
+    "ATK_SCALE": "2"
+   },
+   "label": "A2 dim 1.60/1.25/1.1",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "dim",
+    "mult": 1.78,
+    "dim": [
+     1.6,
+     1.25,
+     1.1,
+     1.02
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 2
+   },
+   "winRate": 10.07,
+   "avgFightReached": 22.98,
+   "deathsByCircle": {
+    "C1": 0.07,
+    "C2": 2.8,
+    "C3": 6.4,
+    "C4": 2.13,
+    "C5": 3.67,
+    "C6": 2.47,
+    "C7": 4.93,
+    "C8": 7.93,
+    "C9": 59.53
+   },
+   "strikesPerFight": 2.59,
+   "oneShotRate": 40.8,
+   "chainsPerStrike": 2.028,
+   "cardsPerStrike": 4.83,
+   "chainsPerFight": 5.25,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 6.9,
+    "1": 32,
+    "2": 31.1,
+    "3": 17.6,
+    "4": 8.1,
+    "5": 3,
+    "6": 1,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0,
+    "11": 0
+   },
+   "ampMedian": 13.58,
+   "ampP90": 36.53,
+   "ampP99": 123.25,
+   "ampMax": 2724.4,
+   "ampN": 52558,
+   "multMedian": 2.78,
+   "multP90": 3.43,
+   "chainShareMedian": 2,
+   "chainShareP90": 2.24,
+   "bandAtkShare": 0.454,
+   "seconds": 42.7,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 1763,
+     "chPerStrike": 2.031,
+     "cardsPerStrike": 3.76,
+     "ampMed": 2.04,
+     "ampP90": 2.71
+    },
+    {
+     "f": 2,
+     "strikes": 2269,
+     "chPerStrike": 1.994,
+     "cardsPerStrike": 3.73,
+     "ampMed": 2.64,
+     "ampP90": 3.86
+    },
+    {
+     "f": 3,
+     "strikes": 616,
+     "chPerStrike": 2.067,
+     "cardsPerStrike": 4.33,
+     "ampMed": 2.69,
+     "ampP90": 4.15
+    },
+    {
+     "f": 4,
+     "strikes": 2176,
+     "chPerStrike": 2.006,
+     "cardsPerStrike": 4.22,
+     "ampMed": 3.04,
+     "ampP90": 4.56
+    },
+    {
+     "f": 5,
+     "strikes": 3313,
+     "chPerStrike": 1.997,
+     "cardsPerStrike": 4.01,
+     "ampMed": 4.24,
+     "ampP90": 8.03
+    },
+    {
+     "f": 6,
+     "strikes": 599,
+     "chPerStrike": 2.082,
+     "cardsPerStrike": 4.63,
+     "ampMed": 5.32,
+     "ampP90": 9.69
+    },
+    {
+     "f": 7,
+     "strikes": 2355,
+     "chPerStrike": 2.083,
+     "cardsPerStrike": 4.66,
+     "ampMed": 6.38,
+     "ampP90": 11.84
+    },
+    {
+     "f": 8,
+     "strikes": 4721,
+     "chPerStrike": 2.017,
+     "cardsPerStrike": 4.44,
+     "ampMed": 9.47,
+     "ampP90": 15.91
+    },
+    {
+     "f": 9,
+     "strikes": 1572,
+     "chPerStrike": 2.044,
+     "cardsPerStrike": 4.98,
+     "ampMed": 7.64,
+     "ampP90": 11.88
+    },
+    {
+     "f": 10,
+     "strikes": 1949,
+     "chPerStrike": 2.047,
+     "cardsPerStrike": 4.85,
+     "ampMed": 9.36,
+     "ampP90": 14.54
+    },
+    {
+     "f": 11,
+     "strikes": 4198,
+     "chPerStrike": 2.008,
+     "cardsPerStrike": 4.64,
+     "ampMed": 10.93,
+     "ampP90": 18.96
+    },
+    {
+     "f": 12,
+     "strikes": 1793,
+     "chPerStrike": 1.977,
+     "cardsPerStrike": 4.97,
+     "ampMed": 10.01,
+     "ampP90": 15.95
+    },
+    {
+     "f": 13,
+     "strikes": 2313,
+     "chPerStrike": 2.05,
+     "cardsPerStrike": 4.8,
+     "ampMed": 10.95,
+     "ampP90": 18.82
+    },
+    {
+     "f": 14,
+     "strikes": 4405,
+     "chPerStrike": 2.019,
+     "cardsPerStrike": 4.72,
+     "ampMed": 11.99,
+     "ampP90": 22.63
+    },
+    {
+     "f": 15,
+     "strikes": 2091,
+     "chPerStrike": 2.045,
+     "cardsPerStrike": 4.97,
+     "ampMed": 12.24,
+     "ampP90": 20.72
+    },
+    {
+     "f": 16,
+     "strikes": 2671,
+     "chPerStrike": 2.027,
+     "cardsPerStrike": 4.91,
+     "ampMed": 13.28,
+     "ampP90": 26.05
+    },
+    {
+     "f": 17,
+     "strikes": 3788,
+     "chPerStrike": 2.042,
+     "cardsPerStrike": 4.87,
+     "ampMed": 13.5,
+     "ampP90": 31.34
+    },
+    {
+     "f": 18,
+     "strikes": 2468,
+     "chPerStrike": 2.001,
+     "cardsPerStrike": 5,
+     "ampMed": 13.63,
+     "ampP90": 28.22
+    },
+    {
+     "f": 19,
+     "strikes": 3237,
+     "chPerStrike": 2.019,
+     "cardsPerStrike": 4.93,
+     "ampMed": 13.71,
+     "ampP90": 33.08
+    },
+    {
+     "f": 20,
+     "strikes": 4446,
+     "chPerStrike": 2.039,
+     "cardsPerStrike": 4.91,
+     "ampMed": 13.92,
+     "ampP90": 33.49
+    },
+    {
+     "f": 21,
+     "strikes": 3940,
+     "chPerStrike": 2.046,
+     "cardsPerStrike": 5.06,
+     "ampMed": 14.98,
+     "ampP90": 36.3
+    },
+    {
+     "f": 22,
+     "strikes": 4805,
+     "chPerStrike": 2.011,
+     "cardsPerStrike": 5.06,
+     "ampMed": 15.17,
+     "ampP90": 37.29
+    },
+    {
+     "f": 23,
+     "strikes": 5440,
+     "chPerStrike": 2.037,
+     "cardsPerStrike": 5.1,
+     "ampMed": 16.35,
+     "ampP90": 39.86
+    },
+    {
+     "f": 24,
+     "strikes": 2205,
+     "chPerStrike": 2.037,
+     "cardsPerStrike": 5.18,
+     "ampMed": 17.79,
+     "ampP90": 46.57
+    },
+    {
+     "f": 25,
+     "strikes": 1969,
+     "chPerStrike": 2.016,
+     "cardsPerStrike": 5.22,
+     "ampMed": 17.33,
+     "ampP90": 43.42
+    },
+    {
+     "f": 26,
+     "strikes": 12402,
+     "chPerStrike": 2.035,
+     "cardsPerStrike": 5.22,
+     "ampMed": 21.45,
+     "ampP90": 69.78
+    }
+   ]
+  },
+  {
+   "variant": "G  glob knee10 k1.0",
+   "atk": 0.5,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "GLOBAL_KNEE": "10",
+    "GLOBAL_K": "1.0",
+    "ATK_SCALE": "0.5"
+   },
+   "label": "G  glob knee10 k1.0",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 0.5
+   },
+   "winRate": 2.07,
+   "avgFightReached": 21.96,
+   "deathsByCircle": {
+    "C1": 1.07,
+    "C2": 3.8,
+    "C3": 7.93,
+    "C4": 1.73,
+    "C5": 3.93,
+    "C6": 2.73,
+    "C7": 4.93,
+    "C8": 8.8,
+    "C9": 63
+   },
+   "strikesPerFight": 2.89,
+   "oneShotRate": 30,
+   "chainsPerStrike": 2.017,
+   "cardsPerStrike": 4.79,
+   "chainsPerFight": 5.83,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 7.1,
+    "1": 32.3,
+    "2": 30.8,
+    "3": 17.4,
+    "4": 8.1,
+    "5": 3.1,
+    "6": 1,
+    "7": 0.2,
+    "8": 0.1,
+    "9": 0,
+    "10": 0
+   },
+   "ampMedian": 18.3,
+   "ampP90": 35.73,
+   "ampP99": 79.12,
+   "ampMax": 139.1,
+   "ampN": 60220,
+   "multMedian": 4.66,
+   "multP90": 13.72,
+   "chainShareMedian": 3.17,
+   "chainShareP90": 10.04,
+   "bandAtkShare": 4.154,
+   "seconds": 42.6,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 2597,
+     "chPerStrike": 1.981,
+     "cardsPerStrike": 3.46,
+     "ampMed": 2.41,
+     "ampP90": 4.33
+    },
+    {
+     "f": 2,
+     "strikes": 2929,
+     "chPerStrike": 1.968,
+     "cardsPerStrike": 3.46,
+     "ampMed": 3.16,
+     "ampP90": 6.29
+    },
+    {
+     "f": 3,
+     "strikes": 867,
+     "chPerStrike": 2.044,
+     "cardsPerStrike": 4.33,
+     "ampMed": 3.46,
+     "ampP90": 6.71
+    },
+    {
+     "f": 4,
+     "strikes": 2257,
+     "chPerStrike": 2.047,
+     "cardsPerStrike": 4.24,
+     "ampMed": 4.1,
+     "ampP90": 8.5
+    },
+    {
+     "f": 5,
+     "strikes": 3164,
+     "chPerStrike": 2.007,
+     "cardsPerStrike": 4.11,
+     "ampMed": 7.15,
+     "ampP90": 16.39
+    },
+    {
+     "f": 6,
+     "strikes": 675,
+     "chPerStrike": 2.016,
+     "cardsPerStrike": 4.66,
+     "ampMed": 8.08,
+     "ampP90": 18.4
+    },
+    {
+     "f": 7,
+     "strikes": 2434,
+     "chPerStrike": 2.009,
+     "cardsPerStrike": 4.63,
+     "ampMed": 10,
+     "ampP90": 19
+    },
+    {
+     "f": 8,
+     "strikes": 4993,
+     "chPerStrike": 2.018,
+     "cardsPerStrike": 4.37,
+     "ampMed": 14.26,
+     "ampP90": 25.66
+    },
+    {
+     "f": 9,
+     "strikes": 1641,
+     "chPerStrike": 2.007,
+     "cardsPerStrike": 4.91,
+     "ampMed": 9.42,
+     "ampP90": 17.11
+    },
+    {
+     "f": 10,
+     "strikes": 1987,
+     "chPerStrike": 2.003,
+     "cardsPerStrike": 4.85,
+     "ampMed": 12.45,
+     "ampP90": 22.72
+    },
+    {
+     "f": 11,
+     "strikes": 4203,
+     "chPerStrike": 2.019,
+     "cardsPerStrike": 4.68,
+     "ampMed": 15.29,
+     "ampP90": 27.15
+    },
+    {
+     "f": 12,
+     "strikes": 1800,
+     "chPerStrike": 2.035,
+     "cardsPerStrike": 4.88,
+     "ampMed": 12.94,
+     "ampP90": 23.21
+    },
+    {
+     "f": 13,
+     "strikes": 2431,
+     "chPerStrike": 2.042,
+     "cardsPerStrike": 4.79,
+     "ampMed": 15.58,
+     "ampP90": 26.48
+    },
+    {
+     "f": 14,
+     "strikes": 4642,
+     "chPerStrike": 2.025,
+     "cardsPerStrike": 4.71,
+     "ampMed": 16.93,
+     "ampP90": 29.49
+    },
+    {
+     "f": 15,
+     "strikes": 2138,
+     "chPerStrike": 2.035,
+     "cardsPerStrike": 5.01,
+     "ampMed": 16.31,
+     "ampP90": 27.18
+    },
+    {
+     "f": 16,
+     "strikes": 2962,
+     "chPerStrike": 2.004,
+     "cardsPerStrike": 4.89,
+     "ampMed": 17.55,
+     "ampP90": 30.71
+    },
+    {
+     "f": 17,
+     "strikes": 4270,
+     "chPerStrike": 2.037,
+     "cardsPerStrike": 4.89,
+     "ampMed": 19.6,
+     "ampP90": 34.57
+    },
+    {
+     "f": 18,
+     "strikes": 2664,
+     "chPerStrike": 2,
+     "cardsPerStrike": 5.01,
+     "ampMed": 18.45,
+     "ampP90": 31.15
+    },
+    {
+     "f": 19,
+     "strikes": 3590,
+     "chPerStrike": 2.052,
+     "cardsPerStrike": 4.97,
+     "ampMed": 19.66,
+     "ampP90": 34.06
+    },
+    {
+     "f": 20,
+     "strikes": 4899,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 5,
+     "ampMed": 20.38,
+     "ampP90": 35.55
+    },
+    {
+     "f": 21,
+     "strikes": 4340,
+     "chPerStrike": 2.031,
+     "cardsPerStrike": 5.06,
+     "ampMed": 20.46,
+     "ampP90": 36.57
+    },
+    {
+     "f": 22,
+     "strikes": 5207,
+     "chPerStrike": 2.027,
+     "cardsPerStrike": 5.04,
+     "ampMed": 21.17,
+     "ampP90": 37.58
+    },
+    {
+     "f": 23,
+     "strikes": 5947,
+     "chPerStrike": 2,
+     "cardsPerStrike": 5.07,
+     "ampMed": 21.15,
+     "ampP90": 38.5
+    },
+    {
+     "f": 24,
+     "strikes": 2501,
+     "chPerStrike": 2.008,
+     "cardsPerStrike": 5.13,
+     "ampMed": 22.74,
+     "ampP90": 39.43
+    },
+    {
+     "f": 25,
+     "strikes": 2234,
+     "chPerStrike": 2.007,
+     "cardsPerStrike": 5.15,
+     "ampMed": 21.54,
+     "ampP90": 39.56
+    },
+    {
+     "f": 26,
+     "strikes": 12461,
+     "chPerStrike": 2.011,
+     "cardsPerStrike": 5.17,
+     "ampMed": 24.61,
+     "ampP90": 51.15
+    }
+   ]
+  },
+  {
+   "variant": "G  glob knee10 k1.0",
+   "atk": 1,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "GLOBAL_KNEE": "10",
+    "GLOBAL_K": "1.0",
+    "ATK_SCALE": "1"
+   },
+   "label": "G  glob knee10 k1.0",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 1
+   },
+   "winRate": 2.4,
+   "avgFightReached": 23.08,
+   "deathsByCircle": {
+    "C1": 0.33,
+    "C2": 1.93,
+    "C3": 4.8,
+    "C4": 2.73,
+    "C5": 2.33,
+    "C6": 3.07,
+    "C7": 5.53,
+    "C8": 9,
+    "C9": 67.87
+   },
+   "strikesPerFight": 2.78,
+   "oneShotRate": 34,
+   "chainsPerStrike": 2.028,
+   "cardsPerStrike": 4.8,
+   "chainsPerFight": 5.65,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 7.1,
+    "1": 32,
+    "2": 30.6,
+    "3": 17.6,
+    "4": 8.3,
+    "5": 3.1,
+    "6": 1,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0
+   },
+   "ampMedian": 18.77,
+   "ampP90": 36.67,
+   "ampP99": 79.72,
+   "ampMax": 136.4,
+   "ampN": 59422,
+   "multMedian": 4.66,
+   "multP90": 14.74,
+   "chainShareMedian": 3.17,
+   "chainShareP90": 10.04,
+   "bandAtkShare": 4.1,
+   "seconds": 42.7,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 2008,
+     "chPerStrike": 2.028,
+     "cardsPerStrike": 3.71,
+     "ampMed": 2.27,
+     "ampP90": 3.73
+    },
+    {
+     "f": 2,
+     "strikes": 2421,
+     "chPerStrike": 1.976,
+     "cardsPerStrike": 3.61,
+     "ampMed": 2.84,
+     "ampP90": 5.33
+    },
+    {
+     "f": 3,
+     "strikes": 628,
+     "chPerStrike": 2.03,
+     "cardsPerStrike": 4.4,
+     "ampMed": 3.43,
+     "ampP90": 5.24
+    },
+    {
+     "f": 4,
+     "strikes": 2139,
+     "chPerStrike": 2.073,
+     "cardsPerStrike": 4.29,
+     "ampMed": 3.54,
+     "ampP90": 6.4
+    },
+    {
+     "f": 5,
+     "strikes": 2883,
+     "chPerStrike": 2.007,
+     "cardsPerStrike": 4.09,
+     "ampMed": 5.94,
+     "ampP90": 13.32
+    },
+    {
+     "f": 6,
+     "strikes": 480,
+     "chPerStrike": 2.054,
+     "cardsPerStrike": 4.69,
+     "ampMed": 6.92,
+     "ampP90": 14.46
+    },
+    {
+     "f": 7,
+     "strikes": 2296,
+     "chPerStrike": 2.037,
+     "cardsPerStrike": 4.62,
+     "ampMed": 7.98,
+     "ampP90": 16.21
+    },
+    {
+     "f": 8,
+     "strikes": 4633,
+     "chPerStrike": 2.016,
+     "cardsPerStrike": 4.34,
+     "ampMed": 12.97,
+     "ampP90": 23.64
+    },
+    {
+     "f": 9,
+     "strikes": 1661,
+     "chPerStrike": 2.047,
+     "cardsPerStrike": 4.86,
+     "ampMed": 8.45,
+     "ampP90": 16.04
+    },
+    {
+     "f": 10,
+     "strikes": 2037,
+     "chPerStrike": 2.011,
+     "cardsPerStrike": 4.77,
+     "ampMed": 11.09,
+     "ampP90": 19.75
+    },
+    {
+     "f": 11,
+     "strikes": 4206,
+     "chPerStrike": 2.038,
+     "cardsPerStrike": 4.59,
+     "ampMed": 15.13,
+     "ampP90": 26.65
+    },
+    {
+     "f": 12,
+     "strikes": 1835,
+     "chPerStrike": 2.068,
+     "cardsPerStrike": 4.88,
+     "ampMed": 11.89,
+     "ampP90": 20.64
+    },
+    {
+     "f": 13,
+     "strikes": 2401,
+     "chPerStrike": 2.039,
+     "cardsPerStrike": 4.79,
+     "ampMed": 14.93,
+     "ampP90": 25.93
+    },
+    {
+     "f": 14,
+     "strikes": 4614,
+     "chPerStrike": 2.033,
+     "cardsPerStrike": 4.64,
+     "ampMed": 16.39,
+     "ampP90": 28.68
+    },
+    {
+     "f": 15,
+     "strikes": 2282,
+     "chPerStrike": 2.039,
+     "cardsPerStrike": 4.91,
+     "ampMed": 15.34,
+     "ampP90": 26.72
+    },
+    {
+     "f": 16,
+     "strikes": 3154,
+     "chPerStrike": 2,
+     "cardsPerStrike": 4.84,
+     "ampMed": 17.17,
+     "ampP90": 29.56
+    },
+    {
+     "f": 17,
+     "strikes": 4451,
+     "chPerStrike": 2.011,
+     "cardsPerStrike": 4.83,
+     "ampMed": 19.28,
+     "ampP90": 33.27
+    },
+    {
+     "f": 18,
+     "strikes": 2803,
+     "chPerStrike": 2.035,
+     "cardsPerStrike": 4.94,
+     "ampMed": 18.58,
+     "ampP90": 31.04
+    },
+    {
+     "f": 19,
+     "strikes": 3683,
+     "chPerStrike": 2.05,
+     "cardsPerStrike": 4.9,
+     "ampMed": 19.1,
+     "ampP90": 33.86
+    },
+    {
+     "f": 20,
+     "strikes": 5005,
+     "chPerStrike": 2.054,
+     "cardsPerStrike": 4.94,
+     "ampMed": 20.24,
+     "ampP90": 35.78
+    },
+    {
+     "f": 21,
+     "strikes": 4597,
+     "chPerStrike": 2.013,
+     "cardsPerStrike": 5.03,
+     "ampMed": 20.18,
+     "ampP90": 36.48
+    },
+    {
+     "f": 22,
+     "strikes": 5405,
+     "chPerStrike": 2.056,
+     "cardsPerStrike": 5.04,
+     "ampMed": 21.19,
+     "ampP90": 37.82
+    },
+    {
+     "f": 23,
+     "strikes": 6296,
+     "chPerStrike": 2.01,
+     "cardsPerStrike": 5.07,
+     "ampMed": 22.03,
+     "ampP90": 38.81
+    },
+    {
+     "f": 24,
+     "strikes": 2672,
+     "chPerStrike": 2.019,
+     "cardsPerStrike": 5.12,
+     "ampMed": 22.5,
+     "ampP90": 40.22
+    },
+    {
+     "f": 25,
+     "strikes": 2337,
+     "chPerStrike": 2.019,
+     "cardsPerStrike": 5.15,
+     "ampMed": 22.84,
+     "ampP90": 39.93
+    },
+    {
+     "f": 26,
+     "strikes": 13525,
+     "chPerStrike": 2.023,
+     "cardsPerStrike": 5.16,
+     "ampMed": 25.08,
+     "ampP90": 53.18
+    }
+   ]
+  },
+  {
+   "variant": "G  glob knee10 k1.0",
+   "atk": 2,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "GLOBAL_KNEE": "10",
+    "GLOBAL_K": "1.0",
+    "ATK_SCALE": "2"
+   },
+   "label": "G  glob knee10 k1.0",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 2
+   },
+   "winRate": 3.8,
+   "avgFightReached": 24.46,
+   "deathsByCircle": {
+    "C1": 0.13,
+    "C2": 0.53,
+    "C3": 1.6,
+    "C4": 1.07,
+    "C5": 2,
+    "C6": 2.13,
+    "C7": 5.2,
+    "C8": 8.6,
+    "C9": 74.93
+   },
+   "strikesPerFight": 2.6,
+   "oneShotRate": 40.6,
+   "chainsPerStrike": 2.029,
+   "cardsPerStrike": 4.77,
+   "chainsPerFight": 5.27,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 7.3,
+    "1": 31.6,
+    "2": 30.9,
+    "3": 17.6,
+    "4": 8.1,
+    "5": 3.2,
+    "6": 1,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0
+   },
+   "ampMedian": 19.25,
+   "ampP90": 37.55,
+   "ampP99": 81.35,
+   "ampMax": 128.9,
+   "ampN": 56129,
+   "multMedian": 4.66,
+   "multP90": 14.74,
+   "chainShareMedian": 3.17,
+   "chainShareP90": 10.04,
+   "bandAtkShare": 4.138,
+   "seconds": 43,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 1649,
+     "chPerStrike": 2.048,
+     "cardsPerStrike": 3.82,
+     "ampMed": 2.07,
+     "ampP90": 2.61
+    },
+    {
+     "f": 2,
+     "strikes": 1942,
+     "chPerStrike": 2.004,
+     "cardsPerStrike": 3.79,
+     "ampMed": 2.47,
+     "ampP90": 4.15
+    },
+    {
+     "f": 3,
+     "strikes": 408,
+     "chPerStrike": 2.042,
+     "cardsPerStrike": 4.39,
+     "ampMed": 3.13,
+     "ampP90": 4.11
+    },
+    {
+     "f": 4,
+     "strikes": 1891,
+     "chPerStrike": 2.007,
+     "cardsPerStrike": 4.32,
+     "ampMed": 3,
+     "ampP90": 5.05
+    },
+    {
+     "f": 5,
+     "strikes": 2492,
+     "chPerStrike": 2.007,
+     "cardsPerStrike": 4.16,
+     "ampMed": 4.95,
+     "ampP90": 10.26
+    },
+    {
+     "f": 6,
+     "strikes": 329,
+     "chPerStrike": 1.924,
+     "cardsPerStrike": 4.69,
+     "ampMed": 5.24,
+     "ampP90": 8.62
+    },
+    {
+     "f": 7,
+     "strikes": 2120,
+     "chPerStrike": 2.03,
+     "cardsPerStrike": 4.61,
+     "ampMed": 6.01,
+     "ampP90": 11.61
+    },
+    {
+     "f": 8,
+     "strikes": 3965,
+     "chPerStrike": 2.006,
+     "cardsPerStrike": 4.29,
+     "ampMed": 11.35,
+     "ampP90": 22.25
+    },
+    {
+     "f": 9,
+     "strikes": 1628,
+     "chPerStrike": 2.072,
+     "cardsPerStrike": 4.89,
+     "ampMed": 6.75,
+     "ampP90": 12.61
+    },
+    {
+     "f": 10,
+     "strikes": 1899,
+     "chPerStrike": 2.033,
+     "cardsPerStrike": 4.8,
+     "ampMed": 9.3,
+     "ampP90": 16.35
+    },
+    {
+     "f": 11,
+     "strikes": 3635,
+     "chPerStrike": 2.013,
+     "cardsPerStrike": 4.58,
+     "ampMed": 14.14,
+     "ampP90": 25.49
+    },
+    {
+     "f": 12,
+     "strikes": 1829,
+     "chPerStrike": 2.039,
+     "cardsPerStrike": 4.79,
+     "ampMed": 10.61,
+     "ampP90": 18.38
+    },
+    {
+     "f": 13,
+     "strikes": 2325,
+     "chPerStrike": 2.009,
+     "cardsPerStrike": 4.69,
+     "ampMed": 13.32,
+     "ampP90": 23.2
+    },
+    {
+     "f": 14,
+     "strikes": 4191,
+     "chPerStrike": 2.025,
+     "cardsPerStrike": 4.51,
+     "ampMed": 16.07,
+     "ampP90": 28.08
+    },
+    {
+     "f": 15,
+     "strikes": 2204,
+     "chPerStrike": 2.085,
+     "cardsPerStrike": 4.78,
+     "ampMed": 15.23,
+     "ampP90": 25.33
+    },
+    {
+     "f": 16,
+     "strikes": 2920,
+     "chPerStrike": 2.024,
+     "cardsPerStrike": 4.66,
+     "ampMed": 17,
+     "ampP90": 29.29
+    },
+    {
+     "f": 17,
+     "strikes": 4242,
+     "chPerStrike": 2.027,
+     "cardsPerStrike": 4.63,
+     "ampMed": 19.07,
+     "ampP90": 33.48
+    },
+    {
+     "f": 18,
+     "strikes": 2777,
+     "chPerStrike": 2.045,
+     "cardsPerStrike": 4.8,
+     "ampMed": 18.1,
+     "ampP90": 31.08
+    },
+    {
+     "f": 19,
+     "strikes": 3679,
+     "chPerStrike": 2.008,
+     "cardsPerStrike": 4.73,
+     "ampMed": 18.96,
+     "ampP90": 33.38
+    },
+    {
+     "f": 20,
+     "strikes": 5089,
+     "chPerStrike": 2.064,
+     "cardsPerStrike": 4.76,
+     "ampMed": 19.67,
+     "ampP90": 36.18
+    },
+    {
+     "f": 21,
+     "strikes": 4604,
+     "chPerStrike": 2.045,
+     "cardsPerStrike": 4.89,
+     "ampMed": 20.69,
+     "ampP90": 36.51
+    },
+    {
+     "f": 22,
+     "strikes": 5610,
+     "chPerStrike": 2.047,
+     "cardsPerStrike": 4.97,
+     "ampMed": 21.11,
+     "ampP90": 37.37
+    },
+    {
+     "f": 23,
+     "strikes": 6748,
+     "chPerStrike": 1.985,
+     "cardsPerStrike": 5.02,
+     "ampMed": 21.31,
+     "ampP90": 38.33
+    },
+    {
+     "f": 24,
+     "strikes": 2908,
+     "chPerStrike": 2.054,
+     "cardsPerStrike": 5.08,
+     "ampMed": 22.13,
+     "ampP90": 39.82
+    },
+    {
+     "f": 25,
+     "strikes": 2636,
+     "chPerStrike": 2.013,
+     "cardsPerStrike": 5.11,
+     "ampMed": 21.92,
+     "ampP90": 39.14
+    },
+    {
+     "f": 26,
+     "strikes": 15230,
+     "chPerStrike": 2.037,
+     "cardsPerStrike": 5.18,
+     "ampMed": 25.1,
+     "ampP90": 49.48
+    }
+   ]
+  },
+  {
+   "variant": "G2 glob knee6 k0.7",
+   "atk": 0.5,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "GLOBAL_KNEE": "6",
+    "GLOBAL_K": "0.7",
+    "ATK_SCALE": "0.5"
+   },
+   "label": "G2 glob knee6 k0.7",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 0.5
+   },
+   "winRate": 0.47,
+   "avgFightReached": 19.96,
+   "deathsByCircle": {
+    "C1": 2,
+    "C2": 4.07,
+    "C3": 13.73,
+    "C4": 3.87,
+    "C5": 4.8,
+    "C6": 3.93,
+    "C7": 4.33,
+    "C8": 10.13,
+    "C9": 52.67
+   },
+   "strikesPerFight": 3.37,
+   "oneShotRate": 21.2,
+   "chainsPerStrike": 2.032,
+   "cardsPerStrike": 4.82,
+   "chainsPerFight": 6.84,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 6.9,
+    "1": 32.1,
+    "2": 31,
+    "3": 17.4,
+    "4": 8.1,
+    "5": 3.2,
+    "6": 1,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0,
+    "11": 0
+   },
+   "ampMedian": 11.87,
+   "ampP90": 18.99,
+   "ampP99": 36.53,
+   "ampMax": 63.6,
+   "ampN": 68357,
+   "multMedian": 4.66,
+   "multP90": 14.74,
+   "chainShareMedian": 3.17,
+   "chainShareP90": 10.04,
+   "bandAtkShare": 7.071,
+   "seconds": 41.6,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 2581,
+     "chPerStrike": 1.98,
+     "cardsPerStrike": 3.51,
+     "ampMed": 2.43,
+     "ampP90": 4.62
+    },
+    {
+     "f": 2,
+     "strikes": 2948,
+     "chPerStrike": 1.982,
+     "cardsPerStrike": 3.49,
+     "ampMed": 3.43,
+     "ampP90": 6.78
+    },
+    {
+     "f": 3,
+     "strikes": 868,
+     "chPerStrike": 2.079,
+     "cardsPerStrike": 4.3,
+     "ampMed": 3.77,
+     "ampP90": 7.23
+    },
+    {
+     "f": 4,
+     "strikes": 2344,
+     "chPerStrike": 1.977,
+     "cardsPerStrike": 4.29,
+     "ampMed": 4.7,
+     "ampP90": 8.5
+    },
+    {
+     "f": 5,
+     "strikes": 3601,
+     "chPerStrike": 2.056,
+     "cardsPerStrike": 4.12,
+     "ampMed": 7.97,
+     "ampP90": 12.63
+    },
+    {
+     "f": 6,
+     "strikes": 977,
+     "chPerStrike": 2.02,
+     "cardsPerStrike": 4.63,
+     "ampMed": 8.52,
+     "ampP90": 13.27
+    },
+    {
+     "f": 7,
+     "strikes": 2854,
+     "chPerStrike": 2.075,
+     "cardsPerStrike": 4.6,
+     "ampMed": 9.13,
+     "ampP90": 13.57
+    },
+    {
+     "f": 8,
+     "strikes": 6847,
+     "chPerStrike": 2.015,
+     "cardsPerStrike": 4.37,
+     "ampMed": 10.32,
+     "ampP90": 15.26
+    },
+    {
+     "f": 9,
+     "strikes": 1658,
+     "chPerStrike": 2.055,
+     "cardsPerStrike": 4.93,
+     "ampMed": 9.33,
+     "ampP90": 13.29
+    },
+    {
+     "f": 10,
+     "strikes": 2230,
+     "chPerStrike": 2.011,
+     "cardsPerStrike": 4.88,
+     "ampMed": 10.13,
+     "ampP90": 14.46
+    },
+    {
+     "f": 11,
+     "strikes": 4961,
+     "chPerStrike": 2.062,
+     "cardsPerStrike": 4.74,
+     "ampMed": 10.97,
+     "ampP90": 16.04
+    },
+    {
+     "f": 12,
+     "strikes": 1906,
+     "chPerStrike": 2.059,
+     "cardsPerStrike": 4.97,
+     "ampMed": 10.54,
+     "ampP90": 14.9
+    },
+    {
+     "f": 13,
+     "strikes": 2620,
+     "chPerStrike": 2.062,
+     "cardsPerStrike": 4.9,
+     "ampMed": 11.15,
+     "ampP90": 16.51
+    },
+    {
+     "f": 14,
+     "strikes": 5275,
+     "chPerStrike": 2.017,
+     "cardsPerStrike": 4.81,
+     "ampMed": 11.59,
+     "ampP90": 16.91
+    },
+    {
+     "f": 15,
+     "strikes": 2325,
+     "chPerStrike": 2.039,
+     "cardsPerStrike": 5.02,
+     "ampMed": 11.65,
+     "ampP90": 16.78
+    },
+    {
+     "f": 16,
+     "strikes": 3317,
+     "chPerStrike": 2.007,
+     "cardsPerStrike": 4.99,
+     "ampMed": 12.05,
+     "ampP90": 18.03
+    },
+    {
+     "f": 17,
+     "strikes": 4870,
+     "chPerStrike": 2.029,
+     "cardsPerStrike": 4.93,
+     "ampMed": 12.63,
+     "ampP90": 18.83
+    },
+    {
+     "f": 18,
+     "strikes": 2746,
+     "chPerStrike": 2.054,
+     "cardsPerStrike": 5.09,
+     "ampMed": 12.31,
+     "ampP90": 17.87
+    },
+    {
+     "f": 19,
+     "strikes": 3824,
+     "chPerStrike": 2.041,
+     "cardsPerStrike": 5.03,
+     "ampMed": 12.61,
+     "ampP90": 18.95
+    },
+    {
+     "f": 20,
+     "strikes": 5207,
+     "chPerStrike": 2.064,
+     "cardsPerStrike": 5.07,
+     "ampMed": 12.81,
+     "ampP90": 19.83
+    },
+    {
+     "f": 21,
+     "strikes": 4681,
+     "chPerStrike": 2.048,
+     "cardsPerStrike": 5.08,
+     "ampMed": 13.04,
+     "ampP90": 19.65
+    },
+    {
+     "f": 22,
+     "strikes": 5514,
+     "chPerStrike": 2.017,
+     "cardsPerStrike": 5.07,
+     "ampMed": 13.01,
+     "ampP90": 20.09
+    },
+    {
+     "f": 23,
+     "strikes": 6313,
+     "chPerStrike": 2.041,
+     "cardsPerStrike": 5.12,
+     "ampMed": 13.28,
+     "ampP90": 20.84
+    },
+    {
+     "f": 24,
+     "strikes": 2536,
+     "chPerStrike": 2.016,
+     "cardsPerStrike": 5.19,
+     "ampMed": 13.51,
+     "ampP90": 21.38
+    },
+    {
+     "f": 25,
+     "strikes": 2196,
+     "chPerStrike": 2.012,
+     "cardsPerStrike": 5.21,
+     "ampMed": 13.69,
+     "ampP90": 22.02
+    },
+    {
+     "f": 26,
+     "strikes": 9939,
+     "chPerStrike": 2.029,
+     "cardsPerStrike": 5.23,
+     "ampMed": 14.32,
+     "ampP90": 26.72
+    }
+   ]
+  },
+  {
+   "variant": "G2 glob knee6 k0.7",
+   "atk": 1,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "GLOBAL_KNEE": "6",
+    "GLOBAL_K": "0.7",
+    "ATK_SCALE": "1"
+   },
+   "label": "G2 glob knee6 k0.7",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 1
+   },
+   "winRate": 0.53,
+   "avgFightReached": 20.86,
+   "deathsByCircle": {
+    "C1": 0.4,
+    "C2": 2.47,
+    "C3": 12.87,
+    "C4": 2.8,
+    "C5": 4.73,
+    "C6": 4,
+    "C7": 5.73,
+    "C8": 11.73,
+    "C9": 54.73
+   },
+   "strikesPerFight": 3.28,
+   "oneShotRate": 24.8,
+   "chainsPerStrike": 2.023,
+   "cardsPerStrike": 4.85,
+   "chainsPerFight": 6.63,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 7,
+    "1": 31.9,
+    "2": 31.3,
+    "3": 17.3,
+    "4": 8.1,
+    "5": 3.1,
+    "6": 1,
+    "7": 0.3,
+    "8": 0,
+    "9": 0,
+    "10": 0,
+    "11": 0
+   },
+   "ampMedian": 12.09,
+   "ampP90": 19.62,
+   "ampP99": 37.34,
+   "ampMax": 65.3,
+   "ampN": 68313,
+   "multMedian": 4.66,
+   "multP90": 14.74,
+   "chainShareMedian": 3.17,
+   "chainShareP90": 10.04,
+   "bandAtkShare": 6.994,
+   "seconds": 41.1,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 2054,
+     "chPerStrike": 1.956,
+     "cardsPerStrike": 3.62,
+     "ampMed": 2.24,
+     "ampP90": 3.7
+    },
+    {
+     "f": 2,
+     "strikes": 2470,
+     "chPerStrike": 1.947,
+     "cardsPerStrike": 3.58,
+     "ampMed": 2.83,
+     "ampP90": 5.54
+    },
+    {
+     "f": 3,
+     "strikes": 675,
+     "chPerStrike": 2.041,
+     "cardsPerStrike": 4.34,
+     "ampMed": 3.22,
+     "ampP90": 5.63
+    },
+    {
+     "f": 4,
+     "strikes": 2212,
+     "chPerStrike": 1.973,
+     "cardsPerStrike": 4.23,
+     "ampMed": 3.75,
+     "ampP90": 7.05
+    },
+    {
+     "f": 5,
+     "strikes": 3406,
+     "chPerStrike": 2.007,
+     "cardsPerStrike": 4.02,
+     "ampMed": 6.69,
+     "ampP90": 11.47
+    },
+    {
+     "f": 6,
+     "strikes": 811,
+     "chPerStrike": 1.968,
+     "cardsPerStrike": 4.46,
+     "ampMed": 7.22,
+     "ampP90": 11.62
+    },
+    {
+     "f": 7,
+     "strikes": 2724,
+     "chPerStrike": 1.993,
+     "cardsPerStrike": 4.56,
+     "ampMed": 8.4,
+     "ampP90": 12.95
+    },
+    {
+     "f": 8,
+     "strikes": 6227,
+     "chPerStrike": 2.055,
+     "cardsPerStrike": 4.32,
+     "ampMed": 10.12,
+     "ampP90": 15.2
+    },
+    {
+     "f": 9,
+     "strikes": 1627,
+     "chPerStrike": 2.119,
+     "cardsPerStrike": 4.96,
+     "ampMed": 8.99,
+     "ampP90": 13.14
+    },
+    {
+     "f": 10,
+     "strikes": 2182,
+     "chPerStrike": 2.027,
+     "cardsPerStrike": 4.88,
+     "ampMed": 9.99,
+     "ampP90": 14.64
+    },
+    {
+     "f": 11,
+     "strikes": 4932,
+     "chPerStrike": 2.062,
+     "cardsPerStrike": 4.71,
+     "ampMed": 10.82,
+     "ampP90": 16.08
+    },
+    {
+     "f": 12,
+     "strikes": 1958,
+     "chPerStrike": 2.017,
+     "cardsPerStrike": 4.93,
+     "ampMed": 10.33,
+     "ampP90": 14.49
+    },
+    {
+     "f": 13,
+     "strikes": 2717,
+     "chPerStrike": 2.035,
+     "cardsPerStrike": 4.86,
+     "ampMed": 11.04,
+     "ampP90": 16.1
+    },
+    {
+     "f": 14,
+     "strikes": 5424,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 4.79,
+     "ampMed": 11.51,
+     "ampP90": 17.06
+    },
+    {
+     "f": 15,
+     "strikes": 2466,
+     "chPerStrike": 2.002,
+     "cardsPerStrike": 4.95,
+     "ampMed": 11.23,
+     "ampP90": 16.44
+    },
+    {
+     "f": 16,
+     "strikes": 3502,
+     "chPerStrike": 2.01,
+     "cardsPerStrike": 4.94,
+     "ampMed": 11.97,
+     "ampP90": 17.9
+    },
+    {
+     "f": 17,
+     "strikes": 5185,
+     "chPerStrike": 2.048,
+     "cardsPerStrike": 4.93,
+     "ampMed": 12.73,
+     "ampP90": 18.93
+    },
+    {
+     "f": 18,
+     "strikes": 3026,
+     "chPerStrike": 2.04,
+     "cardsPerStrike": 5.02,
+     "ampMed": 12.47,
+     "ampP90": 18.38
+    },
+    {
+     "f": 19,
+     "strikes": 4160,
+     "chPerStrike": 1.986,
+     "cardsPerStrike": 4.98,
+     "ampMed": 12.43,
+     "ampP90": 19.01
+    },
+    {
+     "f": 20,
+     "strikes": 5672,
+     "chPerStrike": 2.033,
+     "cardsPerStrike": 5.04,
+     "ampMed": 13.06,
+     "ampP90": 20.05
+    },
+    {
+     "f": 21,
+     "strikes": 4981,
+     "chPerStrike": 2.037,
+     "cardsPerStrike": 5.18,
+     "ampMed": 13.12,
+     "ampP90": 20.52
+    },
+    {
+     "f": 22,
+     "strikes": 5933,
+     "chPerStrike": 2.042,
+     "cardsPerStrike": 5.18,
+     "ampMed": 13.3,
+     "ampP90": 20.97
+    },
+    {
+     "f": 23,
+     "strikes": 6598,
+     "chPerStrike": 2.042,
+     "cardsPerStrike": 5.18,
+     "ampMed": 13.53,
+     "ampP90": 21.37
+    },
+    {
+     "f": 24,
+     "strikes": 2691,
+     "chPerStrike": 1.956,
+     "cardsPerStrike": 5.24,
+     "ampMed": 13.96,
+     "ampP90": 22.31
+    },
+    {
+     "f": 25,
+     "strikes": 2274,
+     "chPerStrike": 2.011,
+     "cardsPerStrike": 5.27,
+     "ampMed": 14.14,
+     "ampP90": 21.78
+    },
+    {
+     "f": 26,
+     "strikes": 10291,
+     "chPerStrike": 2.02,
+     "cardsPerStrike": 5.27,
+     "ampMed": 14.81,
+     "ampP90": 27.89
+    }
+   ]
+  },
+  {
+   "variant": "G2 glob knee6 k0.7",
+   "atk": 2,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "GLOBAL_KNEE": "6",
+    "GLOBAL_K": "0.7",
+    "ATK_SCALE": "2"
+   },
+   "label": "G2 glob knee6 k0.7",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 2
+   },
+   "winRate": 0.8,
+   "avgFightReached": 23,
+   "deathsByCircle": {
+    "C1": 0.07,
+    "C2": 0.8,
+    "C3": 4.93,
+    "C4": 2.67,
+    "C5": 3.87,
+    "C6": 3.07,
+    "C7": 5.87,
+    "C8": 10.87,
+    "C9": 67.07
+   },
+   "strikesPerFight": 3.07,
+   "oneShotRate": 30.6,
+   "chainsPerStrike": 2.025,
+   "cardsPerStrike": 4.83,
+   "chainsPerFight": 6.23,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 7.1,
+    "1": 32.3,
+    "2": 30.5,
+    "3": 17.3,
+    "4": 8.3,
+    "5": 3.1,
+    "6": 1,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0,
+    "11": 0
+   },
+   "ampMedian": 12.2,
+   "ampP90": 19.55,
+   "ampP99": 38.44,
+   "ampMax": 62.4,
+   "ampN": 68204,
+   "multMedian": 4.66,
+   "multP90": 14.74,
+   "chainShareMedian": 3.17,
+   "chainShareP90": 10.04,
+   "bandAtkShare": 7.127,
+   "seconds": 40.9,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 1658,
+     "chPerStrike": 2.01,
+     "cardsPerStrike": 3.88,
+     "ampMed": 2.09,
+     "ampP90": 2.61
+    },
+    {
+     "f": 2,
+     "strikes": 1907,
+     "chPerStrike": 1.996,
+     "cardsPerStrike": 3.82,
+     "ampMed": 2.42,
+     "ampP90": 4.03
+    },
+    {
+     "f": 3,
+     "strikes": 382,
+     "chPerStrike": 2.026,
+     "cardsPerStrike": 4.42,
+     "ampMed": 2.25,
+     "ampP90": 4.64
+    },
+    {
+     "f": 4,
+     "strikes": 1912,
+     "chPerStrike": 2.018,
+     "cardsPerStrike": 4.24,
+     "ampMed": 3.06,
+     "ampP90": 5.42
+    },
+    {
+     "f": 5,
+     "strikes": 2753,
+     "chPerStrike": 2.018,
+     "cardsPerStrike": 4.14,
+     "ampMed": 5.49,
+     "ampP90": 9.91
+    },
+    {
+     "f": 6,
+     "strikes": 428,
+     "chPerStrike": 2.124,
+     "cardsPerStrike": 4.76,
+     "ampMed": 5.66,
+     "ampP90": 8.95
+    },
+    {
+     "f": 7,
+     "strikes": 2355,
+     "chPerStrike": 2.008,
+     "cardsPerStrike": 4.61,
+     "ampMed": 7.18,
+     "ampP90": 11.43
+    },
+    {
+     "f": 8,
+     "strikes": 5146,
+     "chPerStrike": 2.038,
+     "cardsPerStrike": 4.26,
+     "ampMed": 9.58,
+     "ampP90": 14.5
+    },
+    {
+     "f": 9,
+     "strikes": 1679,
+     "chPerStrike": 2.077,
+     "cardsPerStrike": 4.86,
+     "ampMed": 7.62,
+     "ampP90": 11.65
+    },
+    {
+     "f": 10,
+     "strikes": 2156,
+     "chPerStrike": 2.008,
+     "cardsPerStrike": 4.73,
+     "ampMed": 9.18,
+     "ampP90": 13.62
+    },
+    {
+     "f": 11,
+     "strikes": 4777,
+     "chPerStrike": 2.017,
+     "cardsPerStrike": 4.49,
+     "ampMed": 10.5,
+     "ampP90": 15.47
+    },
+    {
+     "f": 12,
+     "strikes": 2004,
+     "chPerStrike": 2.052,
+     "cardsPerStrike": 4.81,
+     "ampMed": 9.94,
+     "ampP90": 14.25
+    },
+    {
+     "f": 13,
+     "strikes": 2686,
+     "chPerStrike": 2.031,
+     "cardsPerStrike": 4.75,
+     "ampMed": 10.72,
+     "ampP90": 16.21
+    },
+    {
+     "f": 14,
+     "strikes": 5310,
+     "chPerStrike": 2.021,
+     "cardsPerStrike": 4.63,
+     "ampMed": 11.14,
+     "ampP90": 16.37
+    },
+    {
+     "f": 15,
+     "strikes": 2525,
+     "chPerStrike": 2.06,
+     "cardsPerStrike": 4.88,
+     "ampMed": 11.33,
+     "ampP90": 16.36
+    },
+    {
+     "f": 16,
+     "strikes": 3488,
+     "chPerStrike": 2.051,
+     "cardsPerStrike": 4.82,
+     "ampMed": 11.97,
+     "ampP90": 17.92
+    },
+    {
+     "f": 17,
+     "strikes": 5256,
+     "chPerStrike": 2.04,
+     "cardsPerStrike": 4.8,
+     "ampMed": 12.71,
+     "ampP90": 18.64
+    },
+    {
+     "f": 18,
+     "strikes": 3199,
+     "chPerStrike": 2.019,
+     "cardsPerStrike": 4.91,
+     "ampMed": 12.26,
+     "ampP90": 18.5
+    },
+    {
+     "f": 19,
+     "strikes": 4387,
+     "chPerStrike": 2.031,
+     "cardsPerStrike": 4.89,
+     "ampMed": 12.34,
+     "ampP90": 18.53
+    },
+    {
+     "f": 20,
+     "strikes": 6064,
+     "chPerStrike": 2.016,
+     "cardsPerStrike": 4.9,
+     "ampMed": 12.74,
+     "ampP90": 19.41
+    },
+    {
+     "f": 21,
+     "strikes": 5535,
+     "chPerStrike": 2.013,
+     "cardsPerStrike": 5.02,
+     "ampMed": 12.88,
+     "ampP90": 19.68
+    },
+    {
+     "f": 22,
+     "strikes": 6832,
+     "chPerStrike": 2.002,
+     "cardsPerStrike": 5.07,
+     "ampMed": 13.02,
+     "ampP90": 19.92
+    },
+    {
+     "f": 23,
+     "strikes": 7811,
+     "chPerStrike": 2.035,
+     "cardsPerStrike": 5.11,
+     "ampMed": 13.28,
+     "ampP90": 20.59
+    },
+    {
+     "f": 24,
+     "strikes": 3201,
+     "chPerStrike": 2.044,
+     "cardsPerStrike": 5.18,
+     "ampMed": 13.74,
+     "ampP90": 22.2
+    },
+    {
+     "f": 25,
+     "strikes": 2769,
+     "chPerStrike": 2.042,
+     "cardsPerStrike": 5.22,
+     "ampMed": 13.72,
+     "ampP90": 21.78
+    },
+    {
+     "f": 26,
+     "strikes": 12676,
+     "chPerStrike": 2.009,
+     "cardsPerStrike": 5.23,
+     "ampMed": 14.29,
+     "ampP90": 26.54
+    }
+   ]
+  },
+  {
+   "variant": "G3 glob knee4 k0.5",
+   "atk": 0.5,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "GLOBAL_KNEE": "4",
+    "GLOBAL_K": "0.5",
+    "ATK_SCALE": "0.5"
+   },
+   "label": "G3 glob knee4 k0.5",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 0.5
+   },
+   "winRate": 0.07,
+   "avgFightReached": 16.5,
+   "deathsByCircle": {
+    "C1": 2.2,
+    "C2": 10.13,
+    "C3": 24.6,
+    "C4": 4.53,
+    "C5": 4.93,
+    "C6": 3.47,
+    "C7": 5,
+    "C8": 9.67,
+    "C9": 35.4
+   },
+   "strikesPerFight": 3.79,
+   "oneShotRate": 14.2,
+   "chainsPerStrike": 2.03,
+   "cardsPerStrike": 4.84,
+   "chainsPerFight": 7.69,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 6.8,
+    "1": 32.3,
+    "2": 30.9,
+    "3": 17.4,
+    "4": 8.2,
+    "5": 3.1,
+    "6": 1,
+    "7": 0.3,
+    "8": 0,
+    "9": 0,
+    "10": 0
+   },
+   "ampMedian": 7.56,
+   "ampP90": 10.86,
+   "ampP99": 18.89,
+   "ampMax": 29.2,
+   "ampN": 66883,
+   "multMedian": 4.66,
+   "multP90": 14.74,
+   "chainShareMedian": 3.17,
+   "chainShareP90": 10.04,
+   "bandAtkShare": 11.461,
+   "seconds": 42.6,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 2669,
+     "chPerStrike": 2.007,
+     "cardsPerStrike": 3.46,
+     "ampMed": 2.44,
+     "ampP90": 4.89
+    },
+    {
+     "f": 2,
+     "strikes": 3459,
+     "chPerStrike": 1.959,
+     "cardsPerStrike": 3.39,
+     "ampMed": 3.71,
+     "ampP90": 6
+    },
+    {
+     "f": 3,
+     "strikes": 1162,
+     "chPerStrike": 2.019,
+     "cardsPerStrike": 4.3,
+     "ampMed": 4.45,
+     "ampP90": 6.56
+    },
+    {
+     "f": 4,
+     "strikes": 2689,
+     "chPerStrike": 1.995,
+     "cardsPerStrike": 4.25,
+     "ampMed": 4.9,
+     "ampP90": 7.11
+    },
+    {
+     "f": 5,
+     "strikes": 4683,
+     "chPerStrike": 2.054,
+     "cardsPerStrike": 4.07,
+     "ampMed": 6.08,
+     "ampP90": 8.32
+    },
+    {
+     "f": 6,
+     "strikes": 1568,
+     "chPerStrike": 2.021,
+     "cardsPerStrike": 4.68,
+     "ampMed": 6.44,
+     "ampP90": 8.63
+    },
+    {
+     "f": 7,
+     "strikes": 3339,
+     "chPerStrike": 1.989,
+     "cardsPerStrike": 4.72,
+     "ampMed": 6.51,
+     "ampP90": 8.7
+    },
+    {
+     "f": 8,
+     "strikes": 7538,
+     "chPerStrike": 2.041,
+     "cardsPerStrike": 4.52,
+     "ampMed": 7,
+     "ampP90": 9.36
+    },
+    {
+     "f": 9,
+     "strikes": 1489,
+     "chPerStrike": 2.023,
+     "cardsPerStrike": 5.01,
+     "ampMed": 6.57,
+     "ampP90": 8.72
+    },
+    {
+     "f": 10,
+     "strikes": 2053,
+     "chPerStrike": 2.088,
+     "cardsPerStrike": 4.95,
+     "ampMed": 7.1,
+     "ampP90": 9.22
+    },
+    {
+     "f": 11,
+     "strikes": 4817,
+     "chPerStrike": 2.075,
+     "cardsPerStrike": 4.86,
+     "ampMed": 7.3,
+     "ampP90": 9.8
+    },
+    {
+     "f": 12,
+     "strikes": 1685,
+     "chPerStrike": 2.005,
+     "cardsPerStrike": 5,
+     "ampMed": 7.1,
+     "ampP90": 9.33
+    },
+    {
+     "f": 13,
+     "strikes": 2456,
+     "chPerStrike": 2.03,
+     "cardsPerStrike": 4.96,
+     "ampMed": 7.38,
+     "ampP90": 9.91
+    },
+    {
+     "f": 14,
+     "strikes": 4840,
+     "chPerStrike": 2.015,
+     "cardsPerStrike": 4.96,
+     "ampMed": 7.56,
+     "ampP90": 10.03
+    },
+    {
+     "f": 15,
+     "strikes": 2074,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 5.09,
+     "ampMed": 7.64,
+     "ampP90": 10.17
+    },
+    {
+     "f": 16,
+     "strikes": 2944,
+     "chPerStrike": 2.085,
+     "cardsPerStrike": 5.07,
+     "ampMed": 7.9,
+     "ampP90": 10.76
+    },
+    {
+     "f": 17,
+     "strikes": 4380,
+     "chPerStrike": 2.026,
+     "cardsPerStrike": 5.09,
+     "ampMed": 8.1,
+     "ampP90": 10.99
+    },
+    {
+     "f": 18,
+     "strikes": 2472,
+     "chPerStrike": 2.021,
+     "cardsPerStrike": 5.15,
+     "ampMed": 7.89,
+     "ampP90": 10.63
+    },
+    {
+     "f": 19,
+     "strikes": 3423,
+     "chPerStrike": 2.05,
+     "cardsPerStrike": 5.15,
+     "ampMed": 8,
+     "ampP90": 11.16
+    },
+    {
+     "f": 20,
+     "strikes": 4716,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 5.15,
+     "ampMed": 8.2,
+     "ampP90": 11.28
+    },
+    {
+     "f": 21,
+     "strikes": 4015,
+     "chPerStrike": 2.051,
+     "cardsPerStrike": 5.22,
+     "ampMed": 8.31,
+     "ampP90": 11.74
+    },
+    {
+     "f": 22,
+     "strikes": 4750,
+     "chPerStrike": 2.033,
+     "cardsPerStrike": 5.21,
+     "ampMed": 8.29,
+     "ampP90": 11.81
+    },
+    {
+     "f": 23,
+     "strikes": 5285,
+     "chPerStrike": 2.034,
+     "cardsPerStrike": 5.26,
+     "ampMed": 8.42,
+     "ampP90": 12.34
+    },
+    {
+     "f": 24,
+     "strikes": 2036,
+     "chPerStrike": 2.035,
+     "cardsPerStrike": 5.26,
+     "ampMed": 8.72,
+     "ampP90": 12.77
+    },
+    {
+     "f": 25,
+     "strikes": 1729,
+     "chPerStrike": 2.023,
+     "cardsPerStrike": 5.35,
+     "ampMed": 8.72,
+     "ampP90": 12.96
+    },
+    {
+     "f": 26,
+     "strikes": 6582,
+     "chPerStrike": 2.01,
+     "cardsPerStrike": 5.31,
+     "ampMed": 8.87,
+     "ampP90": 15.28
+    }
+   ]
+  },
+  {
+   "variant": "G3 glob knee4 k0.5",
+   "atk": 1,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "GLOBAL_KNEE": "4",
+    "GLOBAL_K": "0.5",
+    "ATK_SCALE": "1"
+   },
+   "label": "G3 glob knee4 k0.5",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 1
+   },
+   "winRate": 0.2,
+   "avgFightReached": 17.95,
+   "deathsByCircle": {
+    "C1": 0.07,
+    "C2": 6.33,
+    "C3": 23.53,
+    "C4": 4.13,
+    "C5": 5,
+    "C6": 3.87,
+    "C7": 5.93,
+    "C8": 11.2,
+    "C9": 39.73
+   },
+   "strikesPerFight": 3.69,
+   "oneShotRate": 18.8,
+   "chainsPerStrike": 2.028,
+   "cardsPerStrike": 4.79,
+   "chainsPerFight": 7.49,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 6.8,
+    "1": 32,
+    "2": 31.2,
+    "3": 17.7,
+    "4": 8.1,
+    "5": 3,
+    "6": 1,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0
+   },
+   "ampMedian": 7.64,
+   "ampP90": 11.04,
+   "ampP99": 19.02,
+   "ampMax": 31.8,
+   "ampN": 69380,
+   "multMedian": 4.65,
+   "multP90": 13.72,
+   "chainShareMedian": 3.17,
+   "chainShareP90": 10.04,
+   "bandAtkShare": 11.468,
+   "seconds": 39.9,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 2054,
+     "chPerStrike": 2.034,
+     "cardsPerStrike": 3.65,
+     "ampMed": 2.27,
+     "ampP90": 4
+    },
+    {
+     "f": 2,
+     "strikes": 2574,
+     "chPerStrike": 2.029,
+     "cardsPerStrike": 3.61,
+     "ampMed": 3.44,
+     "ampP90": 5.38
+    },
+    {
+     "f": 3,
+     "strikes": 771,
+     "chPerStrike": 2.004,
+     "cardsPerStrike": 4.3,
+     "ampMed": 3.95,
+     "ampP90": 5.78
+    },
+    {
+     "f": 4,
+     "strikes": 2400,
+     "chPerStrike": 1.986,
+     "cardsPerStrike": 4.14,
+     "ampMed": 4.36,
+     "ampP90": 6.26
+    },
+    {
+     "f": 5,
+     "strikes": 4217,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 3.94,
+     "ampMed": 5.67,
+     "ampP90": 7.94
+    },
+    {
+     "f": 6,
+     "strikes": 1183,
+     "chPerStrike": 2.068,
+     "cardsPerStrike": 4.52,
+     "ampMed": 6.2,
+     "ampP90": 8.38
+    },
+    {
+     "f": 7,
+     "strikes": 3259,
+     "chPerStrike": 2.065,
+     "cardsPerStrike": 4.42,
+     "ampMed": 6.31,
+     "ampP90": 8.53
+    },
+    {
+     "f": 8,
+     "strikes": 7682,
+     "chPerStrike": 2.033,
+     "cardsPerStrike": 4.26,
+     "ampMed": 6.85,
+     "ampP90": 9.2
+    },
+    {
+     "f": 9,
+     "strikes": 1563,
+     "chPerStrike": 2.026,
+     "cardsPerStrike": 4.89,
+     "ampMed": 6.6,
+     "ampP90": 8.65
+    },
+    {
+     "f": 10,
+     "strikes": 2191,
+     "chPerStrike": 2.024,
+     "cardsPerStrike": 4.82,
+     "ampMed": 6.87,
+     "ampP90": 9.01
+    },
+    {
+     "f": 11,
+     "strikes": 5256,
+     "chPerStrike": 2.023,
+     "cardsPerStrike": 4.68,
+     "ampMed": 7.17,
+     "ampP90": 9.61
+    },
+    {
+     "f": 12,
+     "strikes": 1802,
+     "chPerStrike": 2.051,
+     "cardsPerStrike": 4.93,
+     "ampMed": 7.05,
+     "ampP90": 9.49
+    },
+    {
+     "f": 13,
+     "strikes": 2682,
+     "chPerStrike": 2.013,
+     "cardsPerStrike": 4.83,
+     "ampMed": 7.32,
+     "ampP90": 9.87
+    },
+    {
+     "f": 14,
+     "strikes": 5465,
+     "chPerStrike": 2.041,
+     "cardsPerStrike": 4.84,
+     "ampMed": 7.47,
+     "ampP90": 10.06
+    },
+    {
+     "f": 15,
+     "strikes": 2313,
+     "chPerStrike": 2,
+     "cardsPerStrike": 4.96,
+     "ampMed": 7.46,
+     "ampP90": 10.05
+    },
+    {
+     "f": 16,
+     "strikes": 3357,
+     "chPerStrike": 2.002,
+     "cardsPerStrike": 4.93,
+     "ampMed": 7.75,
+     "ampP90": 10.39
+    },
+    {
+     "f": 17,
+     "strikes": 5031,
+     "chPerStrike": 2.053,
+     "cardsPerStrike": 4.95,
+     "ampMed": 8.12,
+     "ampP90": 11.06
+    },
+    {
+     "f": 18,
+     "strikes": 2817,
+     "chPerStrike": 2.021,
+     "cardsPerStrike": 5.06,
+     "ampMed": 7.87,
+     "ampP90": 10.86
+    },
+    {
+     "f": 19,
+     "strikes": 3876,
+     "chPerStrike": 2.053,
+     "cardsPerStrike": 5.05,
+     "ampMed": 8.06,
+     "ampP90": 11.09
+    },
+    {
+     "f": 20,
+     "strikes": 5302,
+     "chPerStrike": 2.034,
+     "cardsPerStrike": 5.08,
+     "ampMed": 8.23,
+     "ampP90": 11.52
+    },
+    {
+     "f": 21,
+     "strikes": 4516,
+     "chPerStrike": 1.995,
+     "cardsPerStrike": 5.15,
+     "ampMed": 8.28,
+     "ampP90": 11.68
+    },
+    {
+     "f": 22,
+     "strikes": 5318,
+     "chPerStrike": 2.034,
+     "cardsPerStrike": 5.16,
+     "ampMed": 8.37,
+     "ampP90": 12.06
+    },
+    {
+     "f": 23,
+     "strikes": 5914,
+     "chPerStrike": 2.036,
+     "cardsPerStrike": 5.18,
+     "ampMed": 8.45,
+     "ampP90": 12.34
+    },
+    {
+     "f": 24,
+     "strikes": 2300,
+     "chPerStrike": 1.994,
+     "cardsPerStrike": 5.17,
+     "ampMed": 8.63,
+     "ampP90": 12.43
+    },
+    {
+     "f": 25,
+     "strikes": 1920,
+     "chPerStrike": 2.055,
+     "cardsPerStrike": 5.22,
+     "ampMed": 8.72,
+     "ampP90": 12.65
+    },
+    {
+     "f": 26,
+     "strikes": 7358,
+     "chPerStrike": 2.012,
+     "cardsPerStrike": 5.22,
+     "ampMed": 8.95,
+     "ampP90": 15.9
+    }
+   ]
+  },
+  {
+   "variant": "A2+G2 dim+glob6",
+   "atk": 0.5,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "CHAIN_MODEL": "dim",
+    "CHAIN_DIM": "1.60,1.25,1.10,1.02",
+    "GLOBAL_KNEE": "6",
+    "GLOBAL_K": "0.7",
+    "ATK_SCALE": "0.5"
+   },
+   "label": "A2+G2 dim+glob6",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "dim",
+    "mult": 1.78,
+    "dim": [
+     1.6,
+     1.25,
+     1.1,
+     1.02
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 0.5
+   },
+   "winRate": 0.53,
+   "avgFightReached": 18.14,
+   "deathsByCircle": {
+    "C1": 5.13,
+    "C2": 7.6,
+    "C3": 17.6,
+    "C4": 3.13,
+    "C5": 3.6,
+    "C6": 2.67,
+    "C7": 4.53,
+    "C8": 8.87,
+    "C9": 46.33
+   },
+   "strikesPerFight": 3.57,
+   "oneShotRate": 15.1,
+   "chainsPerStrike": 2.023,
+   "cardsPerStrike": 4.81,
+   "chainsPerFight": 7.22,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 7,
+    "1": 32.3,
+    "2": 30.8,
+    "3": 17.4,
+    "4": 8.2,
+    "5": 3,
+    "6": 1,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "11": 0
+   },
+   "ampMedian": 9.7,
+   "ampP90": 15.1,
+   "ampP99": 34.43,
+   "ampMax": 56.1,
+   "ampN": 68024,
+   "multMedian": 2.78,
+   "multP90": 3.43,
+   "chainShareMedian": 2,
+   "chainShareP90": 2.24,
+   "bandAtkShare": 8.47,
+   "seconds": 44.3,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 3476,
+     "chPerStrike": 1.988,
+     "cardsPerStrike": 3.35,
+     "ampMed": 2.38,
+     "ampP90": 3.18
+    },
+    {
+     "f": 2,
+     "strikes": 3853,
+     "chPerStrike": 1.93,
+     "cardsPerStrike": 3.36,
+     "ampMed": 2.86,
+     "ampP90": 4.75
+    },
+    {
+     "f": 3,
+     "strikes": 1145,
+     "chPerStrike": 1.997,
+     "cardsPerStrike": 4.43,
+     "ampMed": 4.02,
+     "ampP90": 6.96
+    },
+    {
+     "f": 4,
+     "strikes": 2380,
+     "chPerStrike": 2,
+     "cardsPerStrike": 4.34,
+     "ampMed": 4.64,
+     "ampP90": 7.94
+    },
+    {
+     "f": 5,
+     "strikes": 3953,
+     "chPerStrike": 2.013,
+     "cardsPerStrike": 4.16,
+     "ampMed": 7.11,
+     "ampP90": 9.45
+    },
+    {
+     "f": 6,
+     "strikes": 1193,
+     "chPerStrike": 2.053,
+     "cardsPerStrike": 4.67,
+     "ampMed": 7.92,
+     "ampP90": 9.86
+    },
+    {
+     "f": 7,
+     "strikes": 2940,
+     "chPerStrike": 2.023,
+     "cardsPerStrike": 4.66,
+     "ampMed": 7.98,
+     "ampP90": 10.22
+    },
+    {
+     "f": 8,
+     "strikes": 6814,
+     "chPerStrike": 2.039,
+     "cardsPerStrike": 4.5,
+     "ampMed": 8.62,
+     "ampP90": 10.91
+    },
+    {
+     "f": 9,
+     "strikes": 1453,
+     "chPerStrike": 1.949,
+     "cardsPerStrike": 4.98,
+     "ampMed": 8.37,
+     "ampP90": 10.55
+    },
+    {
+     "f": 10,
+     "strikes": 2022,
+     "chPerStrike": 2.053,
+     "cardsPerStrike": 4.98,
+     "ampMed": 8.97,
+     "ampP90": 11.29
+    },
+    {
+     "f": 11,
+     "strikes": 4748,
+     "chPerStrike": 2.035,
+     "cardsPerStrike": 4.87,
+     "ampMed": 9.2,
+     "ampP90": 11.78
+    },
+    {
+     "f": 12,
+     "strikes": 1706,
+     "chPerStrike": 2.05,
+     "cardsPerStrike": 5,
+     "ampMed": 9.05,
+     "ampP90": 11.55
+    },
+    {
+     "f": 13,
+     "strikes": 2403,
+     "chPerStrike": 2.064,
+     "cardsPerStrike": 4.99,
+     "ampMed": 9.39,
+     "ampP90": 12.58
+    },
+    {
+     "f": 14,
+     "strikes": 4937,
+     "chPerStrike": 2.027,
+     "cardsPerStrike": 4.89,
+     "ampMed": 9.54,
+     "ampP90": 12.65
+    },
+    {
+     "f": 15,
+     "strikes": 2166,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 5.04,
+     "ampMed": 9.78,
+     "ampP90": 13.13
+    },
+    {
+     "f": 16,
+     "strikes": 3047,
+     "chPerStrike": 2.046,
+     "cardsPerStrike": 5.03,
+     "ampMed": 10.17,
+     "ampP90": 13.99
+    },
+    {
+     "f": 17,
+     "strikes": 4533,
+     "chPerStrike": 2.044,
+     "cardsPerStrike": 5.01,
+     "ampMed": 10.42,
+     "ampP90": 14.93
+    },
+    {
+     "f": 18,
+     "strikes": 2644,
+     "chPerStrike": 2.057,
+     "cardsPerStrike": 5.09,
+     "ampMed": 10.33,
+     "ampP90": 14.41
+    },
+    {
+     "f": 19,
+     "strikes": 3685,
+     "chPerStrike": 2.016,
+     "cardsPerStrike": 5.06,
+     "ampMed": 10.31,
+     "ampP90": 14.99
+    },
+    {
+     "f": 20,
+     "strikes": 4950,
+     "chPerStrike": 2.052,
+     "cardsPerStrike": 5.08,
+     "ampMed": 10.53,
+     "ampP90": 15.78
+    },
+    {
+     "f": 21,
+     "strikes": 4408,
+     "chPerStrike": 2.009,
+     "cardsPerStrike": 5.11,
+     "ampMed": 10.71,
+     "ampP90": 16.2
+    },
+    {
+     "f": 22,
+     "strikes": 5153,
+     "chPerStrike": 2.045,
+     "cardsPerStrike": 5.15,
+     "ampMed": 10.88,
+     "ampP90": 16.6
+    },
+    {
+     "f": 23,
+     "strikes": 5758,
+     "chPerStrike": 2.034,
+     "cardsPerStrike": 5.15,
+     "ampMed": 11.08,
+     "ampP90": 17.4
+    },
+    {
+     "f": 24,
+     "strikes": 2296,
+     "chPerStrike": 2.02,
+     "cardsPerStrike": 5.17,
+     "ampMed": 11.56,
+     "ampP90": 18.32
+    },
+    {
+     "f": 25,
+     "strikes": 1971,
+     "chPerStrike": 2.016,
+     "cardsPerStrike": 5.22,
+     "ampMed": 11.86,
+     "ampP90": 19.15
+    },
+    {
+     "f": 26,
+     "strikes": 8808,
+     "chPerStrike": 2.002,
+     "cardsPerStrike": 5.25,
+     "ampMed": 12.05,
+     "ampP90": 28.82
+    }
+   ]
+  },
+  {
+   "variant": "G3 glob knee4 k0.5",
+   "atk": 2,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "GLOBAL_KNEE": "4",
+    "GLOBAL_K": "0.5",
+    "ATK_SCALE": "2"
+   },
+   "label": "G3 glob knee4 k0.5",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "flat",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 2
+   },
+   "winRate": 0.13,
+   "avgFightReached": 20.41,
+   "deathsByCircle": {
+    "C1": 0,
+    "C2": 1.27,
+    "C3": 14.07,
+    "C4": 4.07,
+    "C5": 5.6,
+    "C6": 5.4,
+    "C7": 6.2,
+    "C8": 14.73,
+    "C9": 48.53
+   },
+   "strikesPerFight": 3.58,
+   "oneShotRate": 23.4,
+   "chainsPerStrike": 2.036,
+   "cardsPerStrike": 4.83,
+   "chainsPerFight": 7.29,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 6.9,
+    "1": 31.9,
+    "2": 31,
+    "3": 17.6,
+    "4": 8,
+    "5": 3.1,
+    "6": 1,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0
+   },
+   "ampMedian": 7.76,
+   "ampP90": 11.21,
+   "ampP99": 18.88,
+   "ampMax": 29.8,
+   "ampN": 74928,
+   "multMedian": 4.66,
+   "multP90": 14.74,
+   "chainShareMedian": 3.17,
+   "chainShareP90": 10.04,
+   "bandAtkShare": 11.62,
+   "seconds": 53.5,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 1658,
+     "chPerStrike": 2.017,
+     "cardsPerStrike": 3.89,
+     "ampMed": 2.07,
+     "ampP90": 2.63
+    },
+    {
+     "f": 2,
+     "strikes": 1968,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 3.8,
+     "ampMed": 2.63,
+     "ampP90": 4.55
+    },
+    {
+     "f": 3,
+     "strikes": 451,
+     "chPerStrike": 1.911,
+     "cardsPerStrike": 4.45,
+     "ampMed": 2.64,
+     "ampP90": 4.5
+    },
+    {
+     "f": 4,
+     "strikes": 1967,
+     "chPerStrike": 2.05,
+     "cardsPerStrike": 4.31,
+     "ampMed": 3.92,
+     "ampP90": 5.49
+    },
+    {
+     "f": 5,
+     "strikes": 3347,
+     "chPerStrike": 1.97,
+     "cardsPerStrike": 3.96,
+     "ampMed": 5.12,
+     "ampP90": 7.39
+    },
+    {
+     "f": 6,
+     "strikes": 762,
+     "chPerStrike": 1.984,
+     "cardsPerStrike": 4.6,
+     "ampMed": 5.7,
+     "ampP90": 7.84
+    },
+    {
+     "f": 7,
+     "strikes": 2865,
+     "chPerStrike": 2.066,
+     "cardsPerStrike": 4.58,
+     "ampMed": 6.06,
+     "ampP90": 8.34
+    },
+    {
+     "f": 8,
+     "strikes": 7183,
+     "chPerStrike": 1.996,
+     "cardsPerStrike": 4.18,
+     "ampMed": 6.7,
+     "ampP90": 9.13
+    },
+    {
+     "f": 9,
+     "strikes": 1808,
+     "chPerStrike": 2.034,
+     "cardsPerStrike": 4.86,
+     "ampMed": 6.51,
+     "ampP90": 8.39
+    },
+    {
+     "f": 10,
+     "strikes": 2433,
+     "chPerStrike": 2.048,
+     "cardsPerStrike": 4.78,
+     "ampMed": 6.9,
+     "ampP90": 9.16
+    },
+    {
+     "f": 11,
+     "strikes": 5642,
+     "chPerStrike": 2.045,
+     "cardsPerStrike": 4.63,
+     "ampMed": 7.18,
+     "ampP90": 9.68
+    },
+    {
+     "f": 12,
+     "strikes": 2117,
+     "chPerStrike": 2.025,
+     "cardsPerStrike": 4.83,
+     "ampMed": 7.02,
+     "ampP90": 9.29
+    },
+    {
+     "f": 13,
+     "strikes": 3133,
+     "chPerStrike": 2.002,
+     "cardsPerStrike": 4.71,
+     "ampMed": 7.27,
+     "ampP90": 9.84
+    },
+    {
+     "f": 14,
+     "strikes": 6248,
+     "chPerStrike": 2.059,
+     "cardsPerStrike": 4.66,
+     "ampMed": 7.47,
+     "ampP90": 10.18
+    },
+    {
+     "f": 15,
+     "strikes": 2780,
+     "chPerStrike": 2.045,
+     "cardsPerStrike": 4.94,
+     "ampMed": 7.51,
+     "ampP90": 10.09
+    },
+    {
+     "f": 16,
+     "strikes": 3881,
+     "chPerStrike": 2.081,
+     "cardsPerStrike": 4.9,
+     "ampMed": 7.79,
+     "ampP90": 10.72
+    },
+    {
+     "f": 17,
+     "strikes": 5877,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 4.9,
+     "ampMed": 8.03,
+     "ampP90": 11.12
+    },
+    {
+     "f": 18,
+     "strikes": 3318,
+     "chPerStrike": 2.039,
+     "cardsPerStrike": 5.04,
+     "ampMed": 7.87,
+     "ampP90": 10.72
+    },
+    {
+     "f": 19,
+     "strikes": 4637,
+     "chPerStrike": 2.06,
+     "cardsPerStrike": 4.99,
+     "ampMed": 7.99,
+     "ampP90": 11.3
+    },
+    {
+     "f": 20,
+     "strikes": 6419,
+     "chPerStrike": 2.041,
+     "cardsPerStrike": 5.05,
+     "ampMed": 8.19,
+     "ampP90": 11.47
+    },
+    {
+     "f": 21,
+     "strikes": 5632,
+     "chPerStrike": 2.024,
+     "cardsPerStrike": 5.11,
+     "ampMed": 8.18,
+     "ampP90": 11.68
+    },
+    {
+     "f": 22,
+     "strikes": 6559,
+     "chPerStrike": 2.064,
+     "cardsPerStrike": 5.12,
+     "ampMed": 8.3,
+     "ampP90": 11.74
+    },
+    {
+     "f": 23,
+     "strikes": 7147,
+     "chPerStrike": 2.044,
+     "cardsPerStrike": 5.17,
+     "ampMed": 8.44,
+     "ampP90": 12.17
+    },
+    {
+     "f": 24,
+     "strikes": 2804,
+     "chPerStrike": 2.024,
+     "cardsPerStrike": 5.2,
+     "ampMed": 8.66,
+     "ampP90": 12.46
+    },
+    {
+     "f": 25,
+     "strikes": 2354,
+     "chPerStrike": 2.1,
+     "cardsPerStrike": 5.25,
+     "ampMed": 8.8,
+     "ampP90": 12.83
+    },
+    {
+     "f": 26,
+     "strikes": 8981,
+     "chPerStrike": 2.023,
+     "cardsPerStrike": 5.26,
+     "ampMed": 8.9,
+     "ampP90": 13.98
+    }
+   ]
+  },
+  {
+   "variant": "A2+G2 dim+glob6",
+   "atk": 1,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "CHAIN_MODEL": "dim",
+    "CHAIN_DIM": "1.60,1.25,1.10,1.02",
+    "GLOBAL_KNEE": "6",
+    "GLOBAL_K": "0.7",
+    "ATK_SCALE": "1"
+   },
+   "label": "A2+G2 dim+glob6",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "dim",
+    "mult": 1.78,
+    "dim": [
+     1.6,
+     1.25,
+     1.1,
+     1.02
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 1
+   },
+   "winRate": 0.47,
+   "avgFightReached": 18.83,
+   "deathsByCircle": {
+    "C1": 1.6,
+    "C2": 6.4,
+    "C3": 17.6,
+    "C4": 3.87,
+    "C5": 4.67,
+    "C6": 2.8,
+    "C7": 5.8,
+    "C8": 11.73,
+    "C9": 45.07
+   },
+   "strikesPerFight": 3.51,
+   "oneShotRate": 17.9,
+   "chainsPerStrike": 2.023,
+   "cardsPerStrike": 4.8,
+   "chainsPerFight": 7.09,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 6.9,
+    "1": 32.4,
+    "2": 30.9,
+    "3": 17.3,
+    "4": 8.1,
+    "5": 3.1,
+    "6": 1,
+    "7": 0.2,
+    "8": 0.1,
+    "9": 0,
+    "10": 0
+   },
+   "ampMedian": 9.78,
+   "ampP90": 14.93,
+   "ampP99": 34.82,
+   "ampMax": 52.6,
+   "ampN": 68292,
+   "multMedian": 2.78,
+   "multP90": 3.43,
+   "chainShareMedian": 2,
+   "chainShareP90": 2.24,
+   "bandAtkShare": 8.593,
+   "seconds": 40.8,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 2547,
+     "chPerStrike": 1.956,
+     "cardsPerStrike": 3.5,
+     "ampMed": 2.36,
+     "ampP90": 3.04
+    },
+    {
+     "f": 2,
+     "strikes": 3210,
+     "chPerStrike": 1.994,
+     "cardsPerStrike": 3.41,
+     "ampMed": 2.75,
+     "ampP90": 4.19
+    },
+    {
+     "f": 3,
+     "strikes": 1028,
+     "chPerStrike": 2.044,
+     "cardsPerStrike": 4.21,
+     "ampMed": 3.17,
+     "ampP90": 4.98
+    },
+    {
+     "f": 4,
+     "strikes": 2360,
+     "chPerStrike": 2.053,
+     "cardsPerStrike": 4.23,
+     "ampMed": 3.57,
+     "ampP90": 6.33
+    },
+    {
+     "f": 5,
+     "strikes": 3863,
+     "chPerStrike": 1.987,
+     "cardsPerStrike": 4.03,
+     "ampMed": 6.04,
+     "ampP90": 9.06
+    },
+    {
+     "f": 6,
+     "strikes": 994,
+     "chPerStrike": 2.004,
+     "cardsPerStrike": 4.45,
+     "ampMed": 7.41,
+     "ampP90": 9.41
+    },
+    {
+     "f": 7,
+     "strikes": 2919,
+     "chPerStrike": 2.028,
+     "cardsPerStrike": 4.53,
+     "ampMed": 7.77,
+     "ampP90": 9.98
+    },
+    {
+     "f": 8,
+     "strikes": 6737,
+     "chPerStrike": 2.019,
+     "cardsPerStrike": 4.4,
+     "ampMed": 8.42,
+     "ampP90": 10.9
+    },
+    {
+     "f": 9,
+     "strikes": 1575,
+     "chPerStrike": 2.134,
+     "cardsPerStrike": 4.86,
+     "ampMed": 8.31,
+     "ampP90": 10.47
+    },
+    {
+     "f": 10,
+     "strikes": 2181,
+     "chPerStrike": 2.017,
+     "cardsPerStrike": 4.87,
+     "ampMed": 8.75,
+     "ampP90": 11.36
+    },
+    {
+     "f": 11,
+     "strikes": 5022,
+     "chPerStrike": 2.023,
+     "cardsPerStrike": 4.73,
+     "ampMed": 9.01,
+     "ampP90": 11.8
+    },
+    {
+     "f": 12,
+     "strikes": 1826,
+     "chPerStrike": 1.993,
+     "cardsPerStrike": 4.93,
+     "ampMed": 8.91,
+     "ampP90": 11.6
+    },
+    {
+     "f": 13,
+     "strikes": 2595,
+     "chPerStrike": 2.04,
+     "cardsPerStrike": 4.9,
+     "ampMed": 9.46,
+     "ampP90": 12.37
+    },
+    {
+     "f": 14,
+     "strikes": 5246,
+     "chPerStrike": 2.073,
+     "cardsPerStrike": 4.86,
+     "ampMed": 9.53,
+     "ampP90": 12.67
+    },
+    {
+     "f": 15,
+     "strikes": 2274,
+     "chPerStrike": 1.991,
+     "cardsPerStrike": 5.02,
+     "ampMed": 9.71,
+     "ampP90": 13.02
+    },
+    {
+     "f": 16,
+     "strikes": 3253,
+     "chPerStrike": 2.063,
+     "cardsPerStrike": 4.98,
+     "ampMed": 10.03,
+     "ampP90": 14.03
+    },
+    {
+     "f": 17,
+     "strikes": 4906,
+     "chPerStrike": 2.026,
+     "cardsPerStrike": 4.96,
+     "ampMed": 10.31,
+     "ampP90": 14.96
+    },
+    {
+     "f": 18,
+     "strikes": 2834,
+     "chPerStrike": 2.02,
+     "cardsPerStrike": 5.03,
+     "ampMed": 10.22,
+     "ampP90": 14.52
+    },
+    {
+     "f": 19,
+     "strikes": 3920,
+     "chPerStrike": 2.026,
+     "cardsPerStrike": 5.03,
+     "ampMed": 10.43,
+     "ampP90": 14.92
+    },
+    {
+     "f": 20,
+     "strikes": 5432,
+     "chPerStrike": 2.024,
+     "cardsPerStrike": 5.05,
+     "ampMed": 10.55,
+     "ampP90": 15.77
+    },
+    {
+     "f": 21,
+     "strikes": 4572,
+     "chPerStrike": 2.04,
+     "cardsPerStrike": 5.14,
+     "ampMed": 10.8,
+     "ampP90": 15.67
+    },
+    {
+     "f": 22,
+     "strikes": 5421,
+     "chPerStrike": 2.013,
+     "cardsPerStrike": 5.14,
+     "ampMed": 10.77,
+     "ampP90": 15.74
+    },
+    {
+     "f": 23,
+     "strikes": 5978,
+     "chPerStrike": 2.037,
+     "cardsPerStrike": 5.16,
+     "ampMed": 11.04,
+     "ampP90": 16.4
+    },
+    {
+     "f": 24,
+     "strikes": 2282,
+     "chPerStrike": 2.016,
+     "cardsPerStrike": 5.23,
+     "ampMed": 12.08,
+     "ampP90": 17.78
+    },
+    {
+     "f": 25,
+     "strikes": 1950,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 5.22,
+     "ampMed": 12.04,
+     "ampP90": 17.68
+    },
+    {
+     "f": 26,
+     "strikes": 8544,
+     "chPerStrike": 1.998,
+     "cardsPerStrike": 5.28,
+     "ampMed": 11.97,
+     "ampP90": 22.65
+    }
+   ]
+  },
+  {
+   "variant": "A2+G2 dim+glob6",
+   "atk": 2,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "CHAIN_MODEL": "dim",
+    "CHAIN_DIM": "1.60,1.25,1.10,1.02",
+    "GLOBAL_KNEE": "6",
+    "GLOBAL_K": "0.7",
+    "ATK_SCALE": "2"
+   },
+   "label": "A2+G2 dim+glob6",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "dim",
+    "mult": 1.78,
+    "dim": [
+     1.6,
+     1.25,
+     1.1,
+     1.02
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 2
+   },
+   "winRate": 0.67,
+   "avgFightReached": 21.13,
+   "deathsByCircle": {
+    "C1": 0.2,
+    "C2": 2.33,
+    "C3": 10.4,
+    "C4": 3.33,
+    "C5": 5.6,
+    "C6": 4.13,
+    "C7": 6.27,
+    "C8": 12.53,
+    "C9": 54.53
+   },
+   "strikesPerFight": 3.29,
+   "oneShotRate": 25.1,
+   "chainsPerStrike": 2.025,
+   "cardsPerStrike": 4.82,
+   "chainsPerFight": 6.66,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 7.2,
+    "1": 32,
+    "2": 30.6,
+    "3": 17.4,
+    "4": 8.2,
+    "5": 3.2,
+    "6": 1,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0
+   },
+   "ampMedian": 9.97,
+   "ampP90": 15.66,
+   "ampP99": 34.59,
+   "ampMax": 53.1,
+   "ampN": 69399,
+   "multMedian": 2.78,
+   "multP90": 3.43,
+   "chainShareMedian": 2,
+   "chainShareP90": 2.24,
+   "bandAtkShare": 8.614,
+   "seconds": 47.1,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 1763,
+     "chPerStrike": 2.043,
+     "cardsPerStrike": 3.83,
+     "ampMed": 2.18,
+     "ampP90": 2.73
+    },
+    {
+     "f": 2,
+     "strikes": 2286,
+     "chPerStrike": 1.972,
+     "cardsPerStrike": 3.66,
+     "ampMed": 2.58,
+     "ampP90": 3.73
+    },
+    {
+     "f": 3,
+     "strikes": 576,
+     "chPerStrike": 2.083,
+     "cardsPerStrike": 4.37,
+     "ampMed": 2.97,
+     "ampP90": 4.2
+    },
+    {
+     "f": 4,
+     "strikes": 2208,
+     "chPerStrike": 2.005,
+     "cardsPerStrike": 4.19,
+     "ampMed": 3.05,
+     "ampP90": 4.7
+    },
+    {
+     "f": 5,
+     "strikes": 3381,
+     "chPerStrike": 2.016,
+     "cardsPerStrike": 3.98,
+     "ampMed": 4.37,
+     "ampP90": 8.18
+    },
+    {
+     "f": 6,
+     "strikes": 741,
+     "chPerStrike": 1.991,
+     "cardsPerStrike": 4.55,
+     "ampMed": 5.4,
+     "ampP90": 8.63
+    },
+    {
+     "f": 7,
+     "strikes": 2600,
+     "chPerStrike": 2.025,
+     "cardsPerStrike": 4.56,
+     "ampMed": 6.9,
+     "ampP90": 9.63
+    },
+    {
+     "f": 8,
+     "strikes": 5945,
+     "chPerStrike": 2.028,
+     "cardsPerStrike": 4.29,
+     "ampMed": 8.2,
+     "ampP90": 10.63
+    },
+    {
+     "f": 9,
+     "strikes": 1656,
+     "chPerStrike": 2.074,
+     "cardsPerStrike": 4.89,
+     "ampMed": 7.87,
+     "ampP90": 10.38
+    },
+    {
+     "f": 10,
+     "strikes": 2222,
+     "chPerStrike": 2.03,
+     "cardsPerStrike": 4.82,
+     "ampMed": 8.51,
+     "ampP90": 10.98
+    },
+    {
+     "f": 11,
+     "strikes": 5144,
+     "chPerStrike": 2.019,
+     "cardsPerStrike": 4.58,
+     "ampMed": 8.88,
+     "ampP90": 11.38
+    },
+    {
+     "f": 12,
+     "strikes": 1996,
+     "chPerStrike": 2.032,
+     "cardsPerStrike": 4.94,
+     "ampMed": 8.97,
+     "ampP90": 11.42
+    },
+    {
+     "f": 13,
+     "strikes": 2770,
+     "chPerStrike": 2.029,
+     "cardsPerStrike": 4.83,
+     "ampMed": 9.27,
+     "ampP90": 12.59
+    },
+    {
+     "f": 14,
+     "strikes": 5594,
+     "chPerStrike": 2.034,
+     "cardsPerStrike": 4.73,
+     "ampMed": 9.36,
+     "ampP90": 12.52
+    },
+    {
+     "f": 15,
+     "strikes": 2528,
+     "chPerStrike": 2.048,
+     "cardsPerStrike": 4.94,
+     "ampMed": 9.69,
+     "ampP90": 13.18
+    },
+    {
+     "f": 16,
+     "strikes": 3482,
+     "chPerStrike": 2.019,
+     "cardsPerStrike": 4.95,
+     "ampMed": 10.02,
+     "ampP90": 14.25
+    },
+    {
+     "f": 17,
+     "strikes": 5251,
+     "chPerStrike": 2.023,
+     "cardsPerStrike": 4.91,
+     "ampMed": 10.38,
+     "ampP90": 15.19
+    },
+    {
+     "f": 18,
+     "strikes": 3134,
+     "chPerStrike": 2.036,
+     "cardsPerStrike": 4.98,
+     "ampMed": 10.29,
+     "ampP90": 14.7
+    },
+    {
+     "f": 19,
+     "strikes": 4304,
+     "chPerStrike": 2.047,
+     "cardsPerStrike": 4.96,
+     "ampMed": 10.37,
+     "ampP90": 15.21
+    },
+    {
+     "f": 20,
+     "strikes": 5979,
+     "chPerStrike": 2.053,
+     "cardsPerStrike": 4.99,
+     "ampMed": 10.46,
+     "ampP90": 15.77
+    },
+    {
+     "f": 21,
+     "strikes": 5234,
+     "chPerStrike": 2.017,
+     "cardsPerStrike": 5.07,
+     "ampMed": 10.68,
+     "ampP90": 16.34
+    },
+    {
+     "f": 22,
+     "strikes": 6335,
+     "chPerStrike": 2,
+     "cardsPerStrike": 5.09,
+     "ampMed": 10.67,
+     "ampP90": 16.38
+    },
+    {
+     "f": 23,
+     "strikes": 7093,
+     "chPerStrike": 2.006,
+     "cardsPerStrike": 5.15,
+     "ampMed": 10.91,
+     "ampP90": 16.92
+    },
+    {
+     "f": 24,
+     "strikes": 2765,
+     "chPerStrike": 2.021,
+     "cardsPerStrike": 5.13,
+     "ampMed": 11.38,
+     "ampP90": 18.53
+    },
+    {
+     "f": 25,
+     "strikes": 2357,
+     "chPerStrike": 2.062,
+     "cardsPerStrike": 5.17,
+     "ampMed": 11.58,
+     "ampP90": 18.97
+    },
+    {
+     "f": 26,
+     "strikes": 10273,
+     "chPerStrike": 2.023,
+     "cardsPerStrike": 5.19,
+     "ampMed": 11.89,
+     "ampP90": 27.2
+    }
+   ]
+  },
+  {
+   "variant": "A+G2 dim1.78+glob6",
+   "atk": 0.5,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "CHAIN_MODEL": "dim",
+    "CHAIN_DIM": "1.78,1.40,1.20,1.05",
+    "GLOBAL_KNEE": "6",
+    "GLOBAL_K": "0.7",
+    "ATK_SCALE": "0.5"
+   },
+   "label": "A+G2 dim1.78+glob6",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "dim",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 0.5
+   },
+   "winRate": 0.4,
+   "avgFightReached": 18.72,
+   "deathsByCircle": {
+    "C1": 3.27,
+    "C2": 6.8,
+    "C3": 17.6,
+    "C4": 3.67,
+    "C5": 3.6,
+    "C6": 2.67,
+    "C7": 4.07,
+    "C8": 9.13,
+    "C9": 48.8
+   },
+   "strikesPerFight": 3.46,
+   "oneShotRate": 17.5,
+   "chainsPerStrike": 2.028,
+   "cardsPerStrike": 4.82,
+   "chainsPerFight": 7.03,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 6.9,
+    "1": 31.9,
+    "2": 31,
+    "3": 17.7,
+    "4": 8.1,
+    "5": 3,
+    "6": 0.9,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0,
+    "12": 0
+   },
+   "ampMedian": 10.58,
+   "ampP90": 16.28,
+   "ampP99": 37.37,
+   "ampMax": 53,
+   "ampN": 67146,
+   "multMedian": 3.65,
+   "multP90": 4.74,
+   "chainShareMedian": 2.49,
+   "chainShareP90": 3.14,
+   "bandAtkShare": 7.841,
+   "seconds": 48.9,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 3038,
+     "chPerStrike": 1.97,
+     "cardsPerStrike": 3.39,
+     "ampMed": 2.7,
+     "ampP90": 4
+    },
+    {
+     "f": 2,
+     "strikes": 3491,
+     "chPerStrike": 2.002,
+     "cardsPerStrike": 3.4,
+     "ampMed": 3.41,
+     "ampP90": 5.5
+    },
+    {
+     "f": 3,
+     "strikes": 1102,
+     "chPerStrike": 1.958,
+     "cardsPerStrike": 4.37,
+     "ampMed": 4.29,
+     "ampP90": 7.23
+    },
+    {
+     "f": 4,
+     "strikes": 2334,
+     "chPerStrike": 2.028,
+     "cardsPerStrike": 4.35,
+     "ampMed": 5.1,
+     "ampP90": 7.92
+    },
+    {
+     "f": 5,
+     "strikes": 3849,
+     "chPerStrike": 2.006,
+     "cardsPerStrike": 4.17,
+     "ampMed": 7.58,
+     "ampP90": 10.46
+    },
+    {
+     "f": 6,
+     "strikes": 1075,
+     "chPerStrike": 2.035,
+     "cardsPerStrike": 4.63,
+     "ampMed": 8.39,
+     "ampP90": 10.49
+    },
+    {
+     "f": 7,
+     "strikes": 2945,
+     "chPerStrike": 2.097,
+     "cardsPerStrike": 4.65,
+     "ampMed": 8.78,
+     "ampP90": 11.27
+    },
+    {
+     "f": 8,
+     "strikes": 6908,
+     "chPerStrike": 2.006,
+     "cardsPerStrike": 4.42,
+     "ampMed": 9.4,
+     "ampP90": 11.97
+    },
+    {
+     "f": 9,
+     "strikes": 1511,
+     "chPerStrike": 2.064,
+     "cardsPerStrike": 4.93,
+     "ampMed": 9,
+     "ampP90": 11.57
+    },
+    {
+     "f": 10,
+     "strikes": 2057,
+     "chPerStrike": 2.033,
+     "cardsPerStrike": 4.9,
+     "ampMed": 9.58,
+     "ampP90": 12.32
+    },
+    {
+     "f": 11,
+     "strikes": 4650,
+     "chPerStrike": 2.051,
+     "cardsPerStrike": 4.77,
+     "ampMed": 9.98,
+     "ampP90": 12.79
+    },
+    {
+     "f": 12,
+     "strikes": 1720,
+     "chPerStrike": 2.064,
+     "cardsPerStrike": 4.97,
+     "ampMed": 9.85,
+     "ampP90": 12.77
+    },
+    {
+     "f": 13,
+     "strikes": 2492,
+     "chPerStrike": 2.01,
+     "cardsPerStrike": 4.85,
+     "ampMed": 10.07,
+     "ampP90": 13.73
+    },
+    {
+     "f": 14,
+     "strikes": 4903,
+     "chPerStrike": 2.031,
+     "cardsPerStrike": 4.84,
+     "ampMed": 10.34,
+     "ampP90": 14.08
+    },
+    {
+     "f": 15,
+     "strikes": 2157,
+     "chPerStrike": 2.04,
+     "cardsPerStrike": 5.04,
+     "ampMed": 10.7,
+     "ampP90": 14.29
+    },
+    {
+     "f": 16,
+     "strikes": 3029,
+     "chPerStrike": 2.017,
+     "cardsPerStrike": 5.01,
+     "ampMed": 11.02,
+     "ampP90": 15.16
+    },
+    {
+     "f": 17,
+     "strikes": 4438,
+     "chPerStrike": 2.049,
+     "cardsPerStrike": 5.02,
+     "ampMed": 11.35,
+     "ampP90": 16.22
+    },
+    {
+     "f": 18,
+     "strikes": 2626,
+     "chPerStrike": 2.027,
+     "cardsPerStrike": 5.09,
+     "ampMed": 11.34,
+     "ampP90": 15.8
+    },
+    {
+     "f": 19,
+     "strikes": 3592,
+     "chPerStrike": 2.019,
+     "cardsPerStrike": 5.1,
+     "ampMed": 11.32,
+     "ampP90": 16.3
+    },
+    {
+     "f": 20,
+     "strikes": 4968,
+     "chPerStrike": 1.997,
+     "cardsPerStrike": 5.08,
+     "ampMed": 11.39,
+     "ampP90": 17.05
+    },
+    {
+     "f": 21,
+     "strikes": 4343,
+     "chPerStrike": 2.057,
+     "cardsPerStrike": 5.17,
+     "ampMed": 11.71,
+     "ampP90": 17.26
+    },
+    {
+     "f": 22,
+     "strikes": 5338,
+     "chPerStrike": 2.042,
+     "cardsPerStrike": 5.18,
+     "ampMed": 11.65,
+     "ampP90": 17.43
+    },
+    {
+     "f": 23,
+     "strikes": 6106,
+     "chPerStrike": 2.054,
+     "cardsPerStrike": 5.19,
+     "ampMed": 11.83,
+     "ampP90": 18.25
+    },
+    {
+     "f": 24,
+     "strikes": 2448,
+     "chPerStrike": 2.027,
+     "cardsPerStrike": 5.28,
+     "ampMed": 12.58,
+     "ampP90": 19.88
+    },
+    {
+     "f": 25,
+     "strikes": 2066,
+     "chPerStrike": 1.999,
+     "cardsPerStrike": 5.26,
+     "ampMed": 12.73,
+     "ampP90": 19.43
+    },
+    {
+     "f": 26,
+     "strikes": 9141,
+     "chPerStrike": 2.026,
+     "cardsPerStrike": 5.26,
+     "ampMed": 13.01,
+     "ampP90": 31.88
+    }
+   ]
+  },
+  {
+   "variant": "A+G2 dim1.78+glob6",
+   "atk": 1,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "CHAIN_MODEL": "dim",
+    "CHAIN_DIM": "1.78,1.40,1.20,1.05",
+    "GLOBAL_KNEE": "6",
+    "GLOBAL_K": "0.7",
+    "ATK_SCALE": "1"
+   },
+   "label": "A+G2 dim1.78+glob6",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "dim",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 1
+   },
+   "winRate": 0.53,
+   "avgFightReached": 20.04,
+   "deathsByCircle": {
+    "C1": 1,
+    "C2": 5.13,
+    "C3": 13.27,
+    "C4": 3.53,
+    "C5": 5.33,
+    "C6": 3.53,
+    "C7": 5.53,
+    "C8": 9.47,
+    "C9": 52.67
+   },
+   "strikesPerFight": 3.38,
+   "oneShotRate": 21.1,
+   "chainsPerStrike": 2.03,
+   "cardsPerStrike": 4.85,
+   "chainsPerFight": 6.86,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 7,
+    "1": 32.1,
+    "2": 30.7,
+    "3": 17.5,
+    "4": 8.3,
+    "5": 3.1,
+    "6": 0.9,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0
+   },
+   "ampMedian": 10.8,
+   "ampP90": 16.18,
+   "ampP99": 36.03,
+   "ampMax": 53.4,
+   "ampN": 68808,
+   "multMedian": 3.65,
+   "multP90": 4.75,
+   "chainShareMedian": 2.49,
+   "chainShareP90": 3.14,
+   "bandAtkShare": 7.97,
+   "seconds": 45.6,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 2232,
+     "chPerStrike": 1.988,
+     "cardsPerStrike": 3.65,
+     "ampMed": 2.6,
+     "ampP90": 3.67
+    },
+    {
+     "f": 2,
+     "strikes": 2769,
+     "chPerStrike": 2.01,
+     "cardsPerStrike": 3.53,
+     "ampMed": 3.16,
+     "ampP90": 4.94
+    },
+    {
+     "f": 3,
+     "strikes": 834,
+     "chPerStrike": 2.049,
+     "cardsPerStrike": 4.34,
+     "ampMed": 3.48,
+     "ampP90": 5.47
+    },
+    {
+     "f": 4,
+     "strikes": 2300,
+     "chPerStrike": 1.975,
+     "cardsPerStrike": 4.28,
+     "ampMed": 4.06,
+     "ampP90": 6.56
+    },
+    {
+     "f": 5,
+     "strikes": 3669,
+     "chPerStrike": 2.043,
+     "cardsPerStrike": 4.02,
+     "ampMed": 6.33,
+     "ampP90": 9.84
+    },
+    {
+     "f": 6,
+     "strikes": 835,
+     "chPerStrike": 2.008,
+     "cardsPerStrike": 4.67,
+     "ampMed": 7.91,
+     "ampP90": 10.22
+    },
+    {
+     "f": 7,
+     "strikes": 2818,
+     "chPerStrike": 2.004,
+     "cardsPerStrike": 4.62,
+     "ampMed": 8.32,
+     "ampP90": 10.93
+    },
+    {
+     "f": 8,
+     "strikes": 6473,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 4.4,
+     "ampMed": 9.32,
+     "ampP90": 11.88
+    },
+    {
+     "f": 9,
+     "strikes": 1635,
+     "chPerStrike": 2.065,
+     "cardsPerStrike": 4.94,
+     "ampMed": 8.93,
+     "ampP90": 11.35
+    },
+    {
+     "f": 10,
+     "strikes": 2195,
+     "chPerStrike": 2.006,
+     "cardsPerStrike": 4.93,
+     "ampMed": 9.61,
+     "ampP90": 12.14
+    },
+    {
+     "f": 11,
+     "strikes": 5019,
+     "chPerStrike": 2.061,
+     "cardsPerStrike": 4.75,
+     "ampMed": 10.01,
+     "ampP90": 12.8
+    },
+    {
+     "f": 12,
+     "strikes": 1890,
+     "chPerStrike": 2.054,
+     "cardsPerStrike": 4.97,
+     "ampMed": 9.92,
+     "ampP90": 12.51
+    },
+    {
+     "f": 13,
+     "strikes": 2712,
+     "chPerStrike": 2.05,
+     "cardsPerStrike": 4.9,
+     "ampMed": 10.26,
+     "ampP90": 13.52
+    },
+    {
+     "f": 14,
+     "strikes": 5480,
+     "chPerStrike": 2.066,
+     "cardsPerStrike": 4.81,
+     "ampMed": 10.56,
+     "ampP90": 13.61
+    },
+    {
+     "f": 15,
+     "strikes": 2297,
+     "chPerStrike": 2.091,
+     "cardsPerStrike": 5.05,
+     "ampMed": 10.84,
+     "ampP90": 14.15
+    },
+    {
+     "f": 16,
+     "strikes": 3322,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 5,
+     "ampMed": 11.06,
+     "ampP90": 15.06
+    },
+    {
+     "f": 17,
+     "strikes": 5019,
+     "chPerStrike": 2.022,
+     "cardsPerStrike": 4.95,
+     "ampMed": 11.26,
+     "ampP90": 16.11
+    },
+    {
+     "f": 18,
+     "strikes": 2862,
+     "chPerStrike": 1.993,
+     "cardsPerStrike": 5.09,
+     "ampMed": 11.22,
+     "ampP90": 15.32
+    },
+    {
+     "f": 19,
+     "strikes": 3958,
+     "chPerStrike": 2.012,
+     "cardsPerStrike": 5.07,
+     "ampMed": 11.3,
+     "ampP90": 15.85
+    },
+    {
+     "f": 20,
+     "strikes": 5372,
+     "chPerStrike": 2.047,
+     "cardsPerStrike": 5.06,
+     "ampMed": 11.61,
+     "ampP90": 16.86
+    },
+    {
+     "f": 21,
+     "strikes": 4814,
+     "chPerStrike": 2.029,
+     "cardsPerStrike": 5.13,
+     "ampMed": 11.64,
+     "ampP90": 16.94
+    },
+    {
+     "f": 22,
+     "strikes": 5851,
+     "chPerStrike": 2.026,
+     "cardsPerStrike": 5.12,
+     "ampMed": 11.59,
+     "ampP90": 17.17
+    },
+    {
+     "f": 23,
+     "strikes": 6533,
+     "chPerStrike": 2.021,
+     "cardsPerStrike": 5.16,
+     "ampMed": 11.84,
+     "ampP90": 17.63
+    },
+    {
+     "f": 24,
+     "strikes": 2621,
+     "chPerStrike": 2.039,
+     "cardsPerStrike": 5.22,
+     "ampMed": 12.5,
+     "ampP90": 19.25
+    },
+    {
+     "f": 25,
+     "strikes": 2243,
+     "chPerStrike": 2.033,
+     "cardsPerStrike": 5.24,
+     "ampMed": 12.52,
+     "ampP90": 19.47
+    },
+    {
+     "f": 26,
+     "strikes": 9876,
+     "chPerStrike": 2.026,
+     "cardsPerStrike": 5.22,
+     "ampMed": 12.88,
+     "ampP90": 25.77
+    }
+   ]
+  },
+  {
+   "variant": "A+G2 dim1.78+glob6",
+   "atk": 2,
+   "env": {
+    "CHAIN_FORCE": "1.9",
+    "DECK_THIN": "20",
+    "HAND_BONUS": "2",
+    "EMBER_REFILL": "2",
+    "CHAIN_MODEL": "dim",
+    "CHAIN_DIM": "1.78,1.40,1.20,1.05",
+    "GLOBAL_KNEE": "6",
+    "GLOBAL_K": "0.7",
+    "ATK_SCALE": "2"
+   },
+   "label": "A+G2 dim1.78+glob6",
+   "games": 1500,
+   "stake": "bronze",
+   "deck": "standard",
+   "seed": 0,
+   "cfg": {
+    "model": "dim",
+    "mult": 1.78,
+    "dim": [
+     1.78,
+     1.4,
+     1.2,
+     1.05
+    ],
+    "scope": "strike",
+    "addPct": 1,
+    "knee": 0,
+    "k": 1,
+    "emberCost": 0,
+    "corrCost": 0,
+    "atkScale": 2
+   },
+   "winRate": 0.8,
+   "avgFightReached": 22.27,
+   "deathsByCircle": {
+    "C1": 0.2,
+    "C2": 1.07,
+    "C3": 7.07,
+    "C4": 3.33,
+    "C5": 3.67,
+    "C6": 3.6,
+    "C7": 6.47,
+    "C8": 12.73,
+    "C9": 61.07
+   },
+   "strikesPerFight": 3.21,
+   "oneShotRate": 27.2,
+   "chainsPerStrike": 2.033,
+   "cardsPerStrike": 4.81,
+   "chainsPerFight": 6.53,
+   "chainsBlockedCost": 0,
+   "chainHist": {
+    "0": 7.1,
+    "1": 31.7,
+    "2": 30.9,
+    "3": 17.6,
+    "4": 8.3,
+    "5": 3.2,
+    "6": 0.9,
+    "7": 0.3,
+    "8": 0.1,
+    "9": 0,
+    "10": 0
+   },
+   "ampMedian": 10.96,
+   "ampP90": 16.44,
+   "ampP99": 35.78,
+   "ampMax": 49.8,
+   "ampN": 70485,
+   "multMedian": 3.65,
+   "multP90": 4.7,
+   "chainShareMedian": 2.49,
+   "chainShareP90": 3.14,
+   "bandAtkShare": 8.085,
+   "seconds": 25.6,
+   "byFight": [
+    {
+     "f": 0,
+     "strikes": 0,
+     "chPerStrike": 0,
+     "cardsPerStrike": 0,
+     "ampMed": 0,
+     "ampP90": 0
+    },
+    {
+     "f": 1,
+     "strikes": 1670,
+     "chPerStrike": 2.005,
+     "cardsPerStrike": 3.8,
+     "ampMed": 2.23,
+     "ampP90": 2.82
+    },
+    {
+     "f": 2,
+     "strikes": 2073,
+     "chPerStrike": 1.993,
+     "cardsPerStrike": 3.7,
+     "ampMed": 2.72,
+     "ampP90": 4.17
+    },
+    {
+     "f": 3,
+     "strikes": 461,
+     "chPerStrike": 2.043,
+     "cardsPerStrike": 4.5,
+     "ampMed": 2.72,
+     "ampP90": 4.07
+    },
+    {
+     "f": 4,
+     "strikes": 2014,
+     "chPerStrike": 2.02,
+     "cardsPerStrike": 4.3,
+     "ampMed": 3.4,
+     "ampP90": 5.28
+    },
+    {
+     "f": 5,
+     "strikes": 3130,
+     "chPerStrike": 2.027,
+     "cardsPerStrike": 3.98,
+     "ampMed": 4.96,
+     "ampP90": 8.73
+    },
+    {
+     "f": 6,
+     "strikes": 598,
+     "chPerStrike": 2.08,
+     "cardsPerStrike": 4.64,
+     "ampMed": 6.16,
+     "ampP90": 9.18
+    },
+    {
+     "f": 7,
+     "strikes": 2470,
+     "chPerStrike": 2.077,
+     "cardsPerStrike": 4.61,
+     "ampMed": 7.17,
+     "ampP90": 10.48
+    },
+    {
+     "f": 8,
+     "strikes": 5697,
+     "chPerStrike": 2.012,
+     "cardsPerStrike": 4.26,
+     "ampMed": 8.88,
+     "ampP90": 11.62
+    },
+    {
+     "f": 9,
+     "strikes": 1683,
+     "chPerStrike": 2.07,
+     "cardsPerStrike": 4.9,
+     "ampMed": 8.25,
+     "ampP90": 10.93
+    },
+    {
+     "f": 10,
+     "strikes": 2222,
+     "chPerStrike": 2.055,
+     "cardsPerStrike": 4.77,
+     "ampMed": 9.25,
+     "ampP90": 12.17
+    },
+    {
+     "f": 11,
+     "strikes": 4957,
+     "chPerStrike": 2.033,
+     "cardsPerStrike": 4.6,
+     "ampMed": 9.71,
+     "ampP90": 12.51
+    },
+    {
+     "f": 12,
+     "strikes": 1999,
+     "chPerStrike": 2.06,
+     "cardsPerStrike": 4.86,
+     "ampMed": 9.83,
+     "ampP90": 12.52
+    },
+    {
+     "f": 13,
+     "strikes": 2746,
+     "chPerStrike": 2.041,
+     "cardsPerStrike": 4.79,
+     "ampMed": 10.08,
+     "ampP90": 13.11
+    },
+    {
+     "f": 14,
+     "strikes": 5539,
+     "chPerStrike": 2.047,
+     "cardsPerStrike": 4.62,
+     "ampMed": 10.29,
+     "ampP90": 13.59
+    },
+    {
+     "f": 15,
+     "strikes": 2625,
+     "chPerStrike": 2.066,
+     "cardsPerStrike": 4.86,
+     "ampMed": 10.46,
+     "ampP90": 13.87
+    },
+    {
+     "f": 16,
+     "strikes": 3663,
+     "chPerStrike": 2.049,
+     "cardsPerStrike": 4.79,
+     "ampMed": 10.85,
+     "ampP90": 14.71
+    },
+    {
+     "f": 17,
+     "strikes": 5414,
+     "chPerStrike": 2.064,
+     "cardsPerStrike": 4.83,
+     "ampMed": 11.16,
+     "ampP90": 15.85
+    },
+    {
+     "f": 18,
+     "strikes": 3225,
+     "chPerStrike": 2.023,
+     "cardsPerStrike": 4.96,
+     "ampMed": 11.08,
+     "ampP90": 15.28
+    },
+    {
+     "f": 19,
+     "strikes": 4601,
+     "chPerStrike": 2.002,
+     "cardsPerStrike": 4.9,
+     "ampMed": 11.03,
+     "ampP90": 15.85
+    },
+    {
+     "f": 20,
+     "strikes": 6229,
+     "chPerStrike": 2.029,
+     "cardsPerStrike": 4.95,
+     "ampMed": 11.38,
+     "ampP90": 16.49
+    },
+    {
+     "f": 21,
+     "strikes": 5619,
+     "chPerStrike": 2.029,
+     "cardsPerStrike": 5.05,
+     "ampMed": 11.54,
+     "ampP90": 16.83
+    },
+    {
+     "f": 22,
+     "strikes": 6673,
+     "chPerStrike": 2.053,
+     "cardsPerStrike": 5.08,
+     "ampMed": 11.72,
+     "ampP90": 16.84
+    },
+    {
+     "f": 23,
+     "strikes": 7609,
+     "chPerStrike": 2.02,
+     "cardsPerStrike": 5.1,
+     "ampMed": 11.95,
+     "ampP90": 17.51
+    },
+    {
+     "f": 24,
+     "strikes": 3031,
+     "chPerStrike": 2.018,
+     "cardsPerStrike": 5.14,
+     "ampMed": 12.69,
+     "ampP90": 18.79
+    },
+    {
+     "f": 25,
+     "strikes": 2682,
+     "chPerStrike": 2.042,
+     "cardsPerStrike": 5.18,
+     "ampMed": 12.62,
+     "ampP90": 19
+    },
+    {
+     "f": 26,
+     "strikes": 11624,
+     "chPerStrike": 2.017,
+     "cardsPerStrike": 5.2,
+     "ampMed": 12.72,
+     "ampP90": 23.23
+    }
+   ]
+  }
+ ]
+}
