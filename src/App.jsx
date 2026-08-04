@@ -7540,7 +7540,12 @@ function App(){
       // The cascade block owns the kill; it releases this hold when it resolves.
       setTimeout(()=>{
         if(strikeInFlightRef.current>0){
-          try{console.warn('[STALE-TIMER-BLOCKED] victory safety net — strike pipeline still resolving, cascade owns the kill')}catch(e){}
+          // NOT a stale timer — this is the normal, expected handoff: the strike
+          // pipeline is mid-cascade and will own the kill itself, so the safety
+          // net stands down. Logged at debug level under its own tag so that a
+          // REAL cross-fight leak ([STALE-TIMER-BLOCKED]) stays visible instead
+          // of being buried under ~5 of these per fight.
+          try{console.debug('[VICTORY-DEFERRED] cascade owns the kill')}catch(e){}
           return
         }
         // ── PHANTOM VICTORY FIX (Aug 1 2026) ──────────────────────────────

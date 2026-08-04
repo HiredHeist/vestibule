@@ -246,7 +246,9 @@ vst_achievement_*         Per-achievement unlock flags
 - Run: `node vestibule-sim-kwstacks.js [numGames] [stake] [deck]`
 - Models: cards, passives, artifacts, pacts, loot, combos, mentor links, drugs, hellquakes, corruption thresholds, random events, blood oath, full keyword stack tier scaling
 - **Live HP sync:** sim reads `boss_hp_override.json` at repo root for current ENEMIES maxHp values, then applies `deck.hpScale` (1.85 default Standard). Matches live `getScaledMaxHp` exactly. **When live boss HPs change, update `boss_hp_override.json` in the same commit.**
-- Latest 5K Bronze sim (**Aug 1 2026, post-parity-fix**): **Lucifer wins 10.30%**, Circle-1 deaths 24.3%, Circle-9 deaths 39.5%, fights average **2.3-2.5 strikes** (23-46% one-shot). Sim models true ember economy + overtime enrage.
+- Latest 5K Bronze/Standard sim (**Aug 4 2026, post full-audit**): **Lucifer wins 4.48%**, Circle-1 deaths 22.6%, Circle-9 deaths 33.7%, **3.42 strikes per fight**, 23.5% one-shot. Cross-validated: the live bot measured **3.44 strikes/fight** on the same build, and JV's machine independently reproduced 4.40% and 4.90% on 2K runs.
+- ⚠️ **The Aug 1 "10.30%" figure was void.** `enemies.js` had Lucifer at `maxHp:100000` while `boss_hp_override.json` said `666666`, so the sim fought a final boss with **6.67× the live HP** — a direct violation of the sync rule below. Fixed Aug 4; `assertBossHpSync()` now runs at sim module load and `process.exit(1)`s before a single game is simulated, and `e2e/test-card-parity.cjs` asserts the same thing. The "2.3-2.5 strikes" figure was never a measurement at all — no strikes-per-fight counter existed in the sim until Aug 4.
+- Aug 4 also removed a **duplicated per-card ×1.08** (the engine already applied it, so the sim compounded at ×1.1664/card), a phantom SHREDDER ember discount live had deleted, a free Doom Forge max-HP grant live never gave, and missing Gluttony `cardHeal` (Circle III bosses healed 8/15/25 per card live and 0 in the sim).
 - ⚠️ **Every sim number produced before Aug 1 2026 was WRONG.** The sim double-counted
   permanent ATK (buffs wrote both `atk` and `permAtkBonus` while damage summed both, so
   every +X ATK card was worth 2X), invented an entire Hellquake table that silently
@@ -269,6 +271,26 @@ RESOLVED Jul 31 2026: the winrate discrepancy was the sim's phantom per-strike e
 (N minutes). Decision ledger: `e2e/session3-events.jsonl`. CRITICAL: play cards via the
 quick-play click path (click card → click member), never mouse-drag (native drag loop
 swallows CDP input). Full ops guide + rig lessons: HANDOFF.md.
+
+**The rig is SILENT by default** (`e2e/driver.cjs`) — muted three ways, because the game's
+SFX are AudioContext oscillators that `setAudioMuted` does not reliably cover. `VST_AUDIO=1`
+to hear it.
+
+**Rig lessons learned the hard way (Aug 4 2026) — do not regress these:**
+- **Never detect a screen by substring-matching button text.** Combat was detected by
+  looking for "strike" across all clickables, and half of `relics.js` says "...this strike"
+  in its effect text — so any shop stocking Solo Sermon classified as COMBAT and the run
+  died there. Match the exact label (`⛧ STRIKE ⛧`), and test global overlays FIRST.
+- **Read the game log from `window.__devLog`, not `document.body.innerText`.** `addLog`
+  writes to `__devLog` unconditionally, but the combat log is an overlay that is closed
+  almost always. Scanning visible text reported **0 riff chains across every session ever
+  logged** while chains were firing normally.
+- **`pkill -f "e2e/driver.cjs"` kills your own shell** (pkill matches its own command line).
+  Use `pkill -f "[e]2e/driver.cjs"`.
+- **Verify exit codes, not piped output.** `npm run check | tail` reports `tail`'s status.
+- **`new URL(..., import.meta.url).pathname` is broken on Windows** — yields `/C:/...`,
+  which resolves to `C:\C:\...`. Use `fileURLToPath`. This silently disabled the design-rules
+  gate on JV's machine for its entire existence.
 
 ---
 
