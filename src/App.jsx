@@ -5389,6 +5389,37 @@ function App(){
     fullRunLogRef.current=[m,...fullRunLogRef.current]
     setLog(p=>[m,...p.slice(0,99)])
   }
+  // ── BOT BRIDGE: publish the game's exact state (engine-S shape) to
+  // window.__vstState so the overnight bot can run the shared expert brain
+  // (src/data/cardEval.js) on real numbers instead of DOM guesses. Matches
+  // cardEngine.applyCardEffect's expected S + the ctx cardEval needs.
+  useEffect(()=>{
+    if(typeof window==='undefined')return
+    try{
+      const _en=ENEMIES[fightIndex]||{}
+      const _mm=m=>m?{uid:m.uid,name:m.name||m.id,id:m.id,atk:m.atk,hp:m.hp,maxHp:m.maxHp,role:m.role,keyword:m.keyword,
+        tooStoned:!!m.tooStoned,cursed:!!m.cursed,stoneShield:m.stoneShield||0,tempBuff:!!m.tempBuff,_origAtk:m._origAtk,
+        permAtkBonus:m.permAtkBonus||0,tempAtkBonus:m.tempAtkBonus||0,buffCount:m.buffCount||0,
+        foil:!!m.foil,mythic:!!m.mythic,demonic:!!m.demonic,_hrUsed:!!m._hrUsed,
+        ampedCount:m.ampedThisStrike?1:0,encoreReady:!!m.encoreReady}:null
+      const _cc=c=>c?{id:c.id,uid:c.uid,name:c.name||c.id,embers:c.embers,type:c.type}:null
+      window.__vstState={
+        v:1,ts:Date.now(),
+        S:{stage:[0,1,2,3,4].map(i=>_mm(stage[i])),corruption,embers,maxEmbers,stash,strikeMult,
+          bossHp:enemyHp,bossMaxHp:scaledMaxHp||_en.maxHp||enemyHp,bossDebuff:0,
+          hand:hand.map(_cc).filter(Boolean),deck:deck.map(_cc).filter(Boolean),discard:discardPile.map(_cc).filter(Boolean),
+          strikesLeft,fightMaxStrikes,discardsLeft,cardsPlayedIds:cardsPlayedRef.current||[],
+          directDmg:0,pendingDraw:0,pendingEmbers:0,
+          flags:{nextCardFree:!!nextCardFree,allCardsFree:false,freeCardsLeft:0,stageDiveUsed:!!stageDiveUsed,
+            setlistRewriteUsed:!!setlistRewriteUsed,possessedActive:false,overdriveActive:false,infencoreActive:false,
+            bossSkipStrikes:0,slowBurnStrikes:slowBurnStrikes||0,pyromaniacActive:false,venomDotStacks:0,
+            tripBuff:null,cursedNoHeal:false,lastRiffId:lastRiffPlayedRef.current}},
+        ctx:{artifacts:(activeArtifacts||[]).map(a=>a.id),passives:(activePassives||[]).map(p=>p.id),
+          pacts:chosenPacts||[],loot:collectedLoot||[],fightIndex,circleNum:Math.floor(fightIndex/3)+1,
+          bossPassiveId:_en.passiveId||null,strikesLeft}
+      }
+    }catch(e){}
+  },[stage,hand,deck,discardPile,corruption,embers,maxEmbers,stash,strikeMult,enemyHp,scaledMaxHp,strikesLeft,fightMaxStrikes,discardsLeft,fightIndex,chosenPacts,collectedLoot,activeArtifacts,activePassives,nextCardFree,stageDiveUsed,setlistRewriteUsed,slowBurnStrikes])
   const addFloat=(v,x,y,color,big)=>{big=big||false;const id=fid.current++;if(localStorage.getItem('vst_dmgnums')==='off')return;setFloats(p=>[...p,{id,v,x,y,color:color||'#dd2222',big}]);spawnParticles(x,y,big?12:5,color||'#dd2222',big?80:40)}
   const remFloat=id=>setFloats(p=>p.filter(f=>f.id!==id))
   // ── BOOT SCREEN — venue marquee, dismiss on any key/click ──────

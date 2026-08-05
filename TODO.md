@@ -14,6 +14,15 @@ Verified against current code first — most AUDIT_AUG1 "open" items were alread
 
 Verified: engine self-test 86/86 · `npm run check` CLEAN · eslint parse-clean (0 syntax errors) · sim runs clean across decks (no NaN/crash) · independent code-audit passed. **UNVERIFIED: `vite build`** (sandbox lacks the Linux rolldown binding — confirm on Windows). Fixes are UNCOMMITTED; `.gitattributes` added to normalize line endings.
 
+## 🧠 AUG 5 — EXPERT BRAIN (cardEval.js) — sim done, bot next
+
+- **NEW `src/data/cardEval.js`** — the shared evaluator. Scores a card by PLAYING it through `cardEngine` on a throwaway state copy and measuring the outcome (boss dmg, band ATK×remaining strikes, embers, HP, draw, strike-mult; mild corruption penalty). No per-card table → auto-updates forever + understands adjacency/corruption/combos. Verified: madnesscard 752, secondwind 24, bloodharmony 13 > battlecry 4.9.
+- **Sim uses it** — `scoreCard` → `evaluateCard` (old heuristic only as fallback for illegal plays). Factored `_buildEngineState` so the apply path and the scorer share one hydration (no drift). Sim runs clean, ~4.35% Bronze/Standard, barely slower.
+- **`App.jsx` publishes `window.__vstState`** — engine-shaped state (like `__devLog`) so the BOT can read real numbers and run the same brain.
+
+### ⬜ BOT WIRING (the last mile — needs a LIVE test session, ~30 min)
+The bot must (1) read `window.__vstState`, (2) score playable cards via `cardEval.evaluateCard`, (3) fall back to the heuristic if unavailable. **BLOCKER for shipping blind:** the bot's dig/discard decisions use score THRESHOLDS (e.g. "dig if best card < 40") tuned to the old 0–100 scale; cardEval scores on a damage-equivalent scale, so the thresholds must be re-tuned against live test hands (can't run the bot headless). Do this with JV running test hands + the `expert_brain` diagnostic event. Until then the overnight bot uses the freshly-synced heuristic (competent, current).
+
 ## 🔎 AUG 5 — PRE-FLIGHT AUDIT (help text + bot rig synced to tonight's changes)
 
 Before the overnight live run, cross-checked all of tonight's changes against player-facing text and the bot's decision code.

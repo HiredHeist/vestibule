@@ -8,6 +8,7 @@
 // real ATK growth. Buffs now write permAtkBonus only.
 import{readFileSync}from'fs'
 import * as ENGINE from './src/data/cardEngine.js'
+import { evaluateCard as EVAL_evaluateCard } from './src/data/cardEval.js'
 // Aug 4 2026 — THE SIM NO LONGER KEEPS ITS OWN COPY OF THE GAME'S DATA.
 // It used to hard-code an ENEMIES table (Wanderer baseDmg 4 vs live's 2, 27 wrong
 // maxHp values) and an ALL_MUSICIANS table where every member had hp===maxHp
@@ -545,7 +546,12 @@ function rollTrip(type){
 }
 
 function scoreCard(card,gs,enemy,strikeNum,cardsPlayed){
-  let base=_scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed);
+  // EXPERT BRAIN: score the card by simulating it through the shared engine and
+  // measuring how much the position improved (cardEval). Auto-updates with any card
+  // change. Falls back to the old hand-tuned heuristic only if the play is illegal.
+  const _b=_buildEngineState(card,gs,enemy,undefined);
+  let base=_b?EVAL_evaluateCard(card.id,_b.S,_b.ctx):-999;
+  if(base<=-999)base=_scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed);
   // CHAIN BONUS: completing a chain is worth +40 priority
   const played=gs._cardsPlayedIds||[];
   const fired=gs._firedChains||new Set();
@@ -687,7 +693,7 @@ function _engTargetIdx(card,gs){
   if(id==='russianroulette')return by(m=>m.atk*3+m.hp,lo)
   return by(m=>m.atk,hi) // carry
 }
-function applyCardSim(card,gs,enemy,emberCost){
+function _buildEngineState(card,gs,enemy,emberCost){
   const idx=_engTargetIdx(card,gs)
   if(idx<0)return null
   // Adapt: the sim keeps a dense stage array; the engine expects 5 slots.
@@ -718,8 +724,14 @@ function applyCardSim(card,gs,enemy,emberCost){
   const ctx={targetIdx:idx,artifacts:(gs.artifacts||[]).map(a=>a.id),passives:(gs.passives||[]).map(p=>p.id),
     pacts:gs._pacts||[],loot:gs.loot||[],upgraded:!!card.upgraded,fightIndex:gs.fightIndex,
     circleNum:Math.floor(gs.fightIndex/3)+1,selfUid:card.uid,lastRiffId:gs._lastRiffPlayed,rng:Math.random,
-    emberCost:typeof emberCost==='number'?emberCost:undefined,
+    emberCost:typeof emberCost==='number'?emberCost:undefined,strikesLeft:gs._strikesLeft,
     bossPassiveId:_healExempt?null:enemy.passiveId}
+  return {idx,S,ctx}
+}
+function applyCardSim(card,gs,enemy,emberCost){
+  const _b=_buildEngineState(card,gs,enemy,emberCost)
+  if(!_b)return null
+  const S=_b.S,ctx=_b.ctx
   const res=ENGINE.applyCardEffect(card.id,S,ctx)
   if(!res||!res.ok)return res||null
   // Write back. The sim's damage formula sums atk+permAtkBonus, so mirror the
