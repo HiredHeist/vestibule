@@ -5,18 +5,23 @@
 
 ---
 
-## 🔧 UNCOMMITTED FIXES (Aug 5 session — verify build, then commit + push)
+## ✅ PUSHED — Aug 5 card fixes (commit `a263913`)
 
-Changed files: `src/App.jsx`, `src/data/cardEngine.js`, `src/data/cards.js`, `vestibule-sim-kwstacks.js`, new `.gitattributes`.
+Setlist Rewrite (no-op → free once-per-Strike scry) · rule-1 `setHand`-inside-`setDeck` sweep (Gear Check, Backstage Pass, Sonic Boom, Devil's Dice) · Cursed Strings +6 ATK with a real "can't be healed this fight" drawback wired at every heal site · `engineUid` determinism fix · `.gitattributes` for line-ending hygiene.
 
-- **Setlist Rewrite** — was a no-op; now a FREE once-per-Strike scry (peek top 3, discard costliest, keep 2). Wired in App + engine + sim (`setlistRewriteUsed` in PER_STRIKE_RESETS).
-- **Rule-1 sweep** — removed every `setHand`-inside-`setDeck` violation: Gear Check, Backstage Pass, Sonic Boom, Devil's Dice. Deferred `setHand` via `setTimeout` off refs (Venue-Swap pattern).
-- **Cursed Strings** — now +6 ATK this Strike with a REAL "can't be healed this fight" drawback, guarded at every member-heal site (roadie, soundcheck, wake up, séance, controlled feedback, their replay variants, folk aura, cosmic-unity trip, post-fight heal) + engine `canHeal` + sim round-trip (`_cursed`). Cleared at every fight boundary + Encore.
-- **`engineUid`** — no longer a module-global counter (determinism/parity break); seeds off `S._uidSeq`. Copy cards now guard `MAX_HAND`.
+## 🎸 UNCOMMITTED — Aug 5 BAND EQUALIZATION (Batch B — push via `push-fixes.bat`)
 
-Verified: engine self-test 86/86 · `npm run check` CLEAN · eslint parse-clean · sim runs clean, no NaN/crashes · independent code-audit passed after heal-site fixes. **NOT yet verified: `vite build`** (sandbox can't build — Linux native binding). Confirm on Windows before/at push.
+Changed files: `src/App.jsx`, `src/data/members.js`, `vestibule-sim-kwstacks.js`.
 
-⚠️ **Two stale git lock files** were left by the sandbox and must be deleted on Windows before committing: `.git/HEAD.lock` and `.git/refs/heads/playtest/session2.lock`.
+- **Boss HP is deck-independent** — per-deck `hpScale` unified to 1.85; all decks fight the same blind (matches JV's Balatro principle).
+- **Band equalized** — every recruitable member on one budget (`maxHp + 3×ATK = 27`), differing by shape + keyword, no strictly-better picks. Members start at full HP. Deck stat-fudges removed (Survivor +2 HP, Shredder ×0.80).
+- **BLASTBEAT** (was DOUBLE TIME) — flat ×1.5 band damage, no dice, STACKS; multiple drummers allowed (Thor + Rolf both BLASTBEAT). Drummer's Stick relic now reliable.
+- **TRICKSTER** (Tanuki, was ANCHOR) — relays both neighbors' auras. **FOLK MAGIC** 25%/heal-2, **HEXED** +1 ATK per 8%. **Second Wind** revive 25%→15%.
+- **Sim result:** 5 decks converged to **4.6–7.2%** (was 3.6–8.5); Shredder aggro worst→mid (3.62→6.07%).
+
+Verified: engine self-test 86/86 · eslint parse-clean · sim clean across decks, no NaN/crashes. **NOT verified: `vite build` + in-game feel** of the App.jsx combat changes (BLASTBEAT stacking, TRICKSTER aura) — the build gate on push catches compile errors; playtest the feel.
+
+⚠️ If a git write left stale `.git/*.lock` files, `push-fixes.bat` clears them first.
 
 ---
 

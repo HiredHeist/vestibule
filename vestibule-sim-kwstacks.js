@@ -210,7 +210,7 @@ const DECK_MANIFESTS={
   survivor:{battlecry:3,newstrings:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,crowdsurf:2,amp:1,soundwall:1,resonancecard:1,burnset:1,herbmoney:1,doomchord:2,sonicboom:2,necroticamp:1,distortion:2,staticcharge:2,darktuning:2,deathriff:2,controlfeedback:1,dialtoeleven:1,feedbackloop:1,seance:1,bloodritual:1,sigdecay:1,soundcheck:2,roadie:2,wakeup:2,setlist:2,setbreak:2,doublebooking:2,bootlegcopy:1,backstagepass:1,powertap:2,tappedout:2,ampoverload:2,drainthecrowd:2,groupie:1,soundboard:1,slowburn:1,pyromaniac:1,secondwind:1,corrsiphon:1},
 }
 const ACTIVE_DECK=DECK_MANIFESTS[DECK_ID]||DECK_MANIFESTS.standard
-const DECK_HP_SCALE={standard:1.85,shredder:2.00,ritualist:1.65,engineer:1.85,survivor:1.75}
+const DECK_HP_SCALE={standard:1.85,shredder:1.85,ritualist:1.85,engineer:1.85,survivor:1.85}
 const HP_SCALE=DECK_HP_SCALE[DECK_ID]||1.0
 
 // ── DECK IDENTITY (commit 3/4 — synced with src/App.jsx STARTER_DECKS) ──
@@ -218,10 +218,10 @@ const HP_SCALE=DECK_HP_SCALE[DECK_ID]||1.0
 // and may have a signature mechanic that fires during combat.
 const DECK_IDENTITY={
   standard: {handSize:5, startEmbers:5, startCorruption:0, memberHpMod:0, memberHpPct:1.0, maxStrikesMod:0, signature:null,                 scoreMult:1.0},
-  shredder: {handSize:6, startEmbers:5, startCorruption:0, memberHpMod:0, memberHpPct:0.80,maxStrikesMod:0, signature:'riff_chain_echo',    scoreMult:1.4},
+  shredder: {handSize:6, startEmbers:5, startCorruption:0, memberHpMod:0, memberHpPct:1.0, maxStrikesMod:0, signature:'riff_chain_echo',    scoreMult:1.4},
   ritualist:{handSize:5, startEmbers:4, startCorruption:15,memberHpMod:0, memberHpPct:1.0, maxStrikesMod:0, signature:'corruption_feeds',   scoreMult:1.6},
   engineer: {handSize:5, startEmbers:5, startCorruption:0, memberHpMod:0, memberHpPct:1.0, maxStrikesMod:0, signature:'copier',             scoreMult:1.2},
-  survivor: {handSize:5, startEmbers:5, startCorruption:0, memberHpMod:2, memberHpPct:1.0, maxStrikesMod:0, signature:'second_wind',        scoreMult:1.3},
+  survivor: {handSize:5, startEmbers:5, startCorruption:0, memberHpMod:0, memberHpPct:1.0, maxStrikesMod:0, signature:'second_wind',        scoreMult:1.3},
 }
 const DECK_ID_DEF=DECK_IDENTITY[DECK_ID]||DECK_IDENTITY.standard
 
@@ -344,26 +344,28 @@ const MAX_STRIKES=4,MAX_DISCARDS=4,HAND_SIZE=6,MAX_STASH=420,MAX_EMBERS_CAP=8;
 const circleBaseMin=[8,6,7,8,9,9,11,11,14],circleBaseRange=[3,4,4,3,4,4,5,5,7]; // v12 stash tightening
 const MENTOR_LINK_BONUS={foil:{atk:1,hp:2,mult:1.25},mythic:{atk:2,hp:4,mult:1.5},demonic:{atk:4,hp:8,mult:2.0}};
 // ═══ BAND AURAS (v0.8) — adjacency bonuses radiating to neighboring stage slots ═══
+function _kwAuraVal(kw,ctx){switch(kw){
+  case 'FRENZIED':case 'DEBUFF':case 'BLASTBEAT':return 1
+  case 'CORRUPT':return ctx.corruption>=50?1:0
+  case 'HEXED':return ctx.corruption>=25?1:0
+  case 'SHREDDER':return ctx.shredderHits>0?1:0
+  default:return 0}}
 function auraAtkMap(stage,ctx){const map={}
   for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue;let a=0
     for(const j of[i-1,i+1]){const n=stage[j];if(!n||n.tooStoned)continue
-      switch(n.keyword){
-        case 'FRENZIED':case 'DEBUFF':case 'DOUBLE TIME':a+=1;break
-        case 'CORRUPT':if(ctx.corruption>=50)a+=1;break
-        case 'HEXED':if(ctx.corruption>=25)a+=1;break
-        case 'SHREDDER':if(ctx.shredderHits>0)a+=1;break
-      }}
+      if(n.keyword==='TRICKSTER'){const other=stage[2*j-i];if(other&&!other.tooStoned)a+=_kwAuraVal(other.keyword,ctx);a+=1}
+      else a+=_kwAuraVal(n.keyword,ctx)}
     if(a>0)map[m.uid]=a}
   return map}
 function anchorAuraReduction(stage,uid){for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.uid!==uid)continue;let r=0
   for(const j of[i-1,i+1]){const n=stage[j];if(n&&!n.tooStoned&&n.keyword==='ANCHOR')r+=1}return r}return 0}
 function folkAuraHeal(stage){for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue;let h=0
-  for(const j of[i-1,i+1]){const n=stage[j];if(n&&!n.tooStoned&&n.keyword==='FOLK MAGIC')h+=1}
+  for(const j of[i-1,i+1]){const n=stage[j];if(n&&!n.tooStoned&&n.keyword==='FOLK MAGIC')h+=2}
   if(h>0)m.hp=Math.min(m.maxHp,m.hp+h)}}
 function auraStaticScore(stage){let s=0
   for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue
     for(const j of[i-1,i+1]){const n=stage[j];if(!n||n.tooStoned)continue
-      switch(n.keyword){case 'FRENZIED':case 'DEBUFF':case 'DOUBLE TIME':s+=3;break
+      switch(n.keyword){case 'FRENZIED':case 'DEBUFF':case 'BLASTBEAT':case 'TRICKSTER':s+=3;break
         case 'ANCHOR':case 'FOLK MAGIC':s+=2;break
         case 'CORRUPT':case 'HEXED':case 'SHREDDER':s+=1.5;break}}}
   return s}
@@ -388,7 +390,7 @@ let CARD_PLAYS={};
 function rand(n){return Math.floor(Math.random()*n)}
 function pick(arr){return arr[rand(arr.length)]}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rand(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
-function memberScore(m){return(m.atk+(m.permAtkBonus||0))*3+m.hp+(m.keyword==='FRENZIED'?6:0)+(m.keyword==='CORRUPT'?4:0)+(m.keyword==='FOLK MAGIC'?5:0)+(m.keyword==='HEXED'?3:0)+(m.keyword==='SHREDDER'?3:0)+(m.keyword==='DOUBLE TIME'?2:0)+(m.keyword==='DEBUFF'?2:0)+(m.keyword==='ANCHOR'?1:0)}
+function memberScore(m){return(m.atk+(m.permAtkBonus||0))*3+m.hp+(m.keyword==='FRENZIED'?6:0)+(m.keyword==='CORRUPT'?4:0)+(m.keyword==='FOLK MAGIC'?5:0)+(m.keyword==='HEXED'?3:0)+(m.keyword==='SHREDDER'?3:0)+(m.keyword==='BLASTBEAT'?5:0)+(m.keyword==='TRICKSTER'?4:0)+(m.keyword==='DEBUFF'?2:0)+(m.keyword==='ANCHOR'?1:0)}
 function isUpgraded(m){return m.foil||m.mythic||m.demonic}
 // Aug 4 2026 — members.js has TWO hp fields (`hp` = starting HP, `maxHp` = ceiling)
 // and live uses them differently depending on how the member joined:
@@ -852,8 +854,10 @@ function simFight(gs,phaseHp,luciferPhase){
   // themselves deal no damage. The sim keyed off the DOUBLE TIME keyword and applied
   // the roll to that member's own 0-1 ATK, i.e. almost nothing.
   const _hasDrummer=gs.stage.some(m=>m&&!m.tooStoned&&m.role==='Drummer')
-  const _dblRoll=_hasDrummer?rand(6)+1:0
-  const _bandDbl=!_hasDrummer?1:(_dblRoll<=2?1.0:_dblRoll<=4?1.5:2.0)
+  // BLASTBEAT: flat +50% band damage per drummer, no dice, STACKS.
+  const _drummerCount=gs.stage.filter(m=>m&&!m.tooStoned&&m.role==='Drummer').length
+  const _dblRoll=0
+  const _bandDbl=_drummerCount>0?Math.round(Math.pow(1.5,_drummerCount)*100)/100:1
   const dtMult={}
   gs.deck=shuffle([...gs.deck,...gs.discard]);gs.discard=[];gs.hand=[];
 
@@ -916,7 +920,7 @@ function simFight(gs,phaseHp,luciferPhase){
     // WTH: inject contract every 2 strikes
     if(gs._wthFight){wthStrikeCount++;if(wthStrikeCount%2===0&&wthStrikeCount>0)gs.hand.push({id:'contract',type:'CORRUPT',rarity:'Rare',embers:0,uid:'ctr'+wthStrikeCount})}
 
-    gs.stage.filter(m=>m.keyword==='HEXED'&&!m.tooStoned).forEach(m=>{gs.corruption=Math.min(100,gs.corruption+5);m.tempAtkBonus=(m.tempAtkBonus||0)+Math.floor(gs.corruption/12)});
+    gs.stage.filter(m=>m.keyword==='HEXED'&&!m.tooStoned).forEach(m=>{gs.corruption=Math.min(100,gs.corruption+5);m.tempAtkBonus=(m.tempAtkBonus||0)+Math.floor(gs.corruption/8)});
     if(enemy.passiveId==='corruptPlayer')gs.corruption=Math.min(100,gs.corruption+10);
     // Aug 4 2026: was +50. Live (App.jsx ~8460) and enemies.js both say 15 — the sim
     // was slamming the player to 100% corruption in two strikes on the Apostate.
@@ -1167,7 +1171,7 @@ function simFight(gs,phaseHp,luciferPhase){
       if(fires>0&&lootDef)strikeDmg=Math.round(strikeDmg*Math.pow(lootDef.mult,fires))
     }
     if(gs._strikeMult>1.0)strikeDmg=Math.round(strikeDmg*gs._strikeMult)
-    if(aliveNow.some(m=>m.keyword==='FOLK MAGIC')&&Math.random()<0.2)gs.embers=gs.maxEmbers;
+    if(aliveNow.some(m=>m.keyword==='FOLK MAGIC')&&Math.random()<0.25)gs.embers=gs.maxEmbers;
     gs.highestStrike=Math.max(gs.highestStrike,strikeDmg);gs.totalDamage+=strikeDmg;
     // Reset multiplier + combo tracking for next strike
     gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set()
@@ -1235,7 +1239,7 @@ function simFight(gs,phaseHp,luciferPhase){
       if(!gs._survivorSavesUsed)gs._survivorSavesUsed=new Set()
       if(gs._survivorSavesUsed.has(t.uid))return false
       gs._survivorSavesUsed.add(t.uid)
-      t.hp=Math.max(1,Math.ceil(t.maxHp*0.25))
+      t.hp=Math.max(1,Math.ceil(t.maxHp*0.15))
       TRACK.survivorSaves=(TRACK.survivorSaves||0)+1
       return true
     }
@@ -1406,7 +1410,7 @@ function simShop(gs){
       perCorruptCard:DECK_ID==='ritualist'?2.2:0.8,perSameRole:1.6,allSameType:0.05,
       corrupt100exact:DECK_ID==='ritualist'?0.25:0.04,lastMemberStanding:0.02,
       discardedStrike:0.55,perDiscardStrike:0.6,earlyCircle:gs.fightIndex<9?1.0:0,
-      doubleTimeRolled:gs.stage.some(m=>m.keyword==='DOUBLE TIME')?0.44:0,
+      doubleTimeRolled:gs.stage.some(m=>m&&!m.tooStoned&&m.role==='Drummer')?1.0:0,
       perOtherArtifact:gs.artifacts.length,goatStackOther:1.0}
     const o=gs._relicOffer
     const eF=_pri[o.multTrigger]!==undefined?_pri[o.multTrigger]:0.3

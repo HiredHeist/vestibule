@@ -406,14 +406,24 @@ function getEffectiveAtk(m,ctx){
 // ═══ BAND AURAS (v0.8) — every member radiates a small bonus to ADJACENT stage slots.
 // Stoned members neither emit nor receive. Edge slots have 1 neighbor, center 2.
 // Mirrors vestibule-sim-kwstacks.js aura engine (sim-validated at 10K games/deck).
+function _keywordAuraVal(kw,ctx){
+  switch(kw){
+    case 'FRENZIED':case 'DEBUFF':case 'BLASTBEAT':return 1
+    case 'CORRUPT':return (ctx.corruption||0)>=50?1:0
+    case 'HEXED':return (ctx.corruption||0)>=25?1:0
+    case 'SHREDDER':return (ctx.shredderHits||0)>0?1:0
+    default:return 0
+  }}
 function _auraAtkMap(stage,ctx){const map={}
   for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue;let a=0
     for(const j of[i-1,i+1]){const n=stage[j];if(!n||n.tooStoned)continue
-      switch(n.keyword){
-        case 'FRENZIED':case 'DEBUFF':case 'DOUBLE TIME':a+=1;break
-        case 'CORRUPT':if((ctx.corruption||0)>=50)a+=1;break
-        case 'HEXED':if((ctx.corruption||0)>=25)a+=1;break
-        case 'SHREDDER':if((ctx.shredderHits||0)>0)a+=1;break
+      if(n.keyword==='TRICKSTER'){
+        // TRICKSTER copies both neighbors' auras: relay this TRICKSTER's OTHER neighbor's
+        // ATK-aura to m, plus a base +1 of its own. (v1: copies ATK auras only.)
+        const other=stage[2*j-i];if(other&&!other.tooStoned)a+=_keywordAuraVal(other.keyword,ctx)
+        a+=1
+      }else{
+        a+=_keywordAuraVal(n.keyword,ctx)
       }}
     if(a>0)map[m.uid]=a}
   return map}
@@ -423,18 +433,19 @@ function _anchorAuraRed(stage,uid){
   return r}
 function _folkAuraHealMap(stage){let any=false;const map={}
   for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue;let h=0
-    for(const j of[i-1,i+1]){const n=stage[j];if(n&&!n.tooStoned&&n.keyword==='FOLK MAGIC')h+=1}
+    for(const j of[i-1,i+1]){const n=stage[j];if(n&&!n.tooStoned&&n.keyword==='FOLK MAGIC')h+=2}
     if(h>0){map[i]=h;any=true}}
   return any?map:null}
 const KEYWORD_DESC={
   'FRENZIED':'+ATK per RIFF played each Strike. Stack more for bigger bonus (1/2/4×). ⟡AURA: neighbors +1 ATK.',
-  'DOUBLE TIME':'Drummer rolls d6 each fight: 5-6=×2 damage, 3-4=×1.5, 1-2=×1. (Only one drummer per band.) ⟡AURA: neighbors +1 ATK.',
+  'BLASTBEAT':'Every drummer makes the whole band hit ×1.5 harder — flat, reliable, and it STACKS (2 drummers = ×2.25). Multiple drummers allowed. ⟡AURA: neighbors +1 ATK.',
   'ANCHOR':'Saves an ANCHOR member from a lethal hit. 1 stack = save 1 ANCHOR/fight. 2 stacks = save 2 ANCHORs/fight. 3+ stacks = ANY member can be saved (4 saves/fight). Stack 3+ ANCHORs to protect the whole band. ⟡AURA: neighbors take −1 boss damage.',
   'CORRUPT':'+ATK from Corruption (×1/×2/×4 by stack tier). Thrives in chaos. ⟡AURA: neighbors +1 ATK at ≥50% Corruption.',
   'DEBUFF':'Reduces boss damage by 2 each Strike, stacking permanently this fight. ⟡AURA: neighbors +1 ATK.',
-  'FOLK MAGIC':'20% chance each Strike to refill all Embers. ⟡AURA: neighbors heal 1 each Strike.',
+  'FOLK MAGIC':'25% chance each Strike to refill all Embers. ⟡AURA: neighbors heal 2 each Strike.',
   'SHREDDER':'+ATK per consecutive same-type card chain played each Strike (1/2/4×). ⟡AURA: neighbors +1 ATK when a chain fires.',
-  'HEXED':'Gains +Corruption each Strike, ATK scales with Corruption. ⟡AURA: neighbors +1 ATK at ≥25% Corruption.',
+  'HEXED':'Gains +5% Corruption each Strike, +1 ATK per 8% Corruption. ⟡AURA: neighbors +1 ATK at ≥25% Corruption.',
+  'TRICKSTER':'Mythical shapeshifter. Copies the aura of BOTH neighbors and passes each to the other, plus +1 ATK of its own. Place him between your two strongest. ⟡AURA: relays both neighbors.',
   'FALLEN':'Cannot be healed. Loses 1 HP per Strike. If Lucifer dies, game over. Max 3 band members.',
 }
 
@@ -793,10 +804,10 @@ function markTutorialDone(){localStorage.setItem('vst_tutorial','done')}
 //   scoreMult       — final-score multiplier for leaderboard (stacks with stake.scoreMult)
 const STARTER_DECKS=[
   {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced for all playstyles. The honest fight.',requirement:null,color:'#c8a060',hpScale:1.85,scoreMult:1.0},
-  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. +1 hand size. Band starts at 80% HP — glass cannons. SIGNATURE: Riff Chain Echo — every chain fires a second time at 33% damage on the next strike.',requirement:'beat_standard',color:'#ff4400',hpScale:2.00,memberHpPct:0.80,handSize:6,signature:'riff_chain_echo',scoreMult:1.4},
-  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Start each fight at 15% corruption. 4 starting embers. SIGNATURE: Corruption Feeds — every 10% corruption gained refunds 1 ember (max 5/strike).',requirement:'beat_shredder',color:'#cc44ff',hpScale:1.65,startEmbers:4,startCorruption:15,signature:'corruption_feeds',scoreMult:1.6},
+  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. 38 RIFF cards. +1 hand size. Band starts at 80% HP — glass cannons. SIGNATURE: Riff Chain Echo — every chain fires a second time at 33% damage on the next strike.',requirement:'beat_standard',color:'#ff4400',hpScale:1.85,memberHpPct:1.0,handSize:6,signature:'riff_chain_echo',scoreMult:1.4},
+  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power. 26 CORRUPT cards. Start each fight at 15% corruption. 4 starting embers. SIGNATURE: Corruption Feeds — every 10% corruption gained refunds 1 ember (max 5/strike).',requirement:'beat_shredder',color:'#cc44ff',hpScale:1.85,startEmbers:4,startCorruption:15,signature:'corruption_feeds',scoreMult:1.6},
   {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Combo nerd. 18 UTILITY cards. SIGNATURE: Copier — every UTILITY card has a 25% chance to add a copy of itself to your hand. Copies can\'t re-copy. Stack the engine.',requirement:'beat_ritualist',color:'#44aaff',hpScale:1.85,signature:'copier',scoreMult:1.2},
-  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. Each band member starts with +2 max HP. SIGNATURE: Second Wind — each member gets ONE per-fight save: when they would go Too Stoned, they instead heal to 25% HP. Stacks across the band.',requirement:'beat_engineer',color:'#44cc44',hpScale:1.75,memberHpMod:2,maxStrikesMod:0,signature:'second_wind',scoreMult:1.3},
+  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything. SIGNATURE: Second Wind — each member gets ONE per-fight save: when they would go Too Stoned, they instead revive at 15% HP. Stacks across the band.',requirement:'beat_engineer',color:'#44cc44',hpScale:1.85,memberHpMod:0,maxStrikesMod:0,signature:'second_wind',scoreMult:1.3},
 ]
 function getUnlockedDecks(){
   const achs=getAchievements()
@@ -1039,7 +1050,7 @@ function genRecruitPack(fightIndex=0){
 }
 
 // ── MENTOR LINK SYSTEM ────────────────────────────────────────────
-const KW_BOND_COLOR={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800','FALLEN':'#ff0000'}
+const KW_BOND_COLOR={'FRENZIED':'#ee2222','BLASTBEAT':'#ff8800','TRICKSTER':'#e8b84a','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800','FALLEN':'#ff0000'}
 function memberTier(m){return m&&m.demonic?'demonic':m&&m.mythic?'mythic':m&&m.foil?'foil':'base'}
 function tierAtkBonus(m){return m.demonic?4:m.mythic?2:m.foil?1:0}
 function tierHpBonus(m){return m.demonic?8:m.mythic?4:m.foil?2:0}
@@ -1231,7 +1242,7 @@ function BoosterScreen({onComplete,seed}){
   }
   const [pool]=useState(getRandom8)
   const toggle=id=>setSel(p=>p.includes(id)?p.filter(x=>x!==id):p.length<2?[...p,id]:p)
-  const kwColor={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
+  const kwColor={'FRENZIED':'#ee2222','BLASTBEAT':'#ff8800','TRICKSTER':'#e8b84a','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
   return(
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,padding:'12px 42px 10px 42px',overflow:'hidden'}}>
       <div style={{fontFamily:"'BreakGothicFont',cursive",fontSize:60,color:'var(--text-blood)',textShadow:'0 0 40px rgba(180,0,0,0.8),0 0 80px rgba(140,0,0,0.5),3px 3px 0 #000',flexShrink:0,letterSpacing:14}}>Opening Night</div>
@@ -1385,7 +1396,7 @@ function PawnShopModal({stage, deck, discard, stash, salesLeft, onSellMember, on
           // greyed out reading "Need 2+ members" while the handler would have
           // allowed the sale.
           const cantSell = members.length<=2
-          const bc = {'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}[m.keyword]||'#e8a820'
+          const bc = {'FRENZIED':'#ee2222','BLASTBEAT':'#ff8800','TRICKSTER':'#e8b84a','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}[m.keyword]||'#e8a820'
           const tierColor = m.demonic?'#ffd700':m.mythic?'#dd88ff':m.foil?'#88ccff':null
           return(
             <div key={m.uid||i} style={{width:180,background:'linear-gradient(180deg,#1a1008,#0e0804)',border:'1px solid '+(tierColor||'rgba(160,80,240,0.4)'),borderRadius:7,overflow:'hidden',opacity:cantSell?0.5:1}}>
@@ -4596,7 +4607,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,onEncore,streakWins,strea
 
 function DemonicConflictScreen({conflict,onChoice}){
   const {incoming,existing}=conflict
-  const kwc={'FRENZIED':'#ee2222','DOUBLE TIME':'#ff8800','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
+  const kwc={'FRENZIED':'#ee2222','BLASTBEAT':'#ff8800','TRICKSTER':'#e8b84a','ANCHOR':'#33dd33','CORRUPT':'#cc44ff','DEBUFF':'#4488ff','FOLK MAGIC':'#44ddaa','SHREDDER':'#ff4488','HEXED':'#cc8800'}
   function MemberCard({m,onPick,label}){
     const bc=kwc[m.keyword]||'#e8a820'
     return(
@@ -8557,14 +8568,13 @@ function App(){
       return s+effectiveAtk+cleanLivingBonus
     },0)+p10Bonus
     let _bkRunning=dmg
-    // DOUBLE TIME d6 multiplier
-    let dblMode='', dblMult=1
+    // BLASTBEAT: each drummer makes the whole band hit +50% harder — flat, no dice, STACKS.
+    let dblMult=1
     if(hasDbl){
-      if(dblRoll<=2){dblMult=1.0;dblMode='STANDARD'}
-      else if(dblRoll<=4){dblMult=1.5;dblMode='OFF BEAT'}
-      else{dblMult=2;dblMode='DOUBLE TIME'}
+      const _bbCount=actives.filter(m=>m.role==='Drummer').length
+      dblMult=Math.round(Math.pow(1.5,_bbCount)*100)/100
       dmg=Math.round(dmg*dblMult);_bkRunning=dmg
-      if(dblMult!==1)_breakdownLines.push({type:'multiply',label:dblMode+' ×'+dblMult,label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff8800'})
+      _breakdownLines.push({type:'multiply',label:'BLASTBEAT ×'+dblMult,label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff8800'})
     }
     // Aug 4 2026 (phase 3): the Encore bonus did NOT exclude the paranoia victim, unlike
     // the base sum, the DOUBLE TIME tier-3 bonus and memberDmgs. Against The Traitor a
@@ -8624,7 +8634,7 @@ function App(){
         // Grant ATK based on new corruption level
         setStage(prevStage=>prevStage.map(m=>{
           if(!m||m.tooStoned||m.keyword!=='HEXED')return m
-          const hexAtk=Math.floor(nc/10)
+          const hexAtk=Math.floor(nc/8)
           const baseAtk=ALL_MUSICIANS.find(mu=>mu.id===m.id)?.atk||2
           return Object.assign({},m,{atk:Math.max(m.atk,baseAtk+hexAtk)})
         }))
@@ -8633,8 +8643,8 @@ function App(){
       addLog('🟠 HEXED! Corruption +'+5*hexedMembers.length+'%. Orm grows stronger.')
     }
     const hasFolkMagic=actives.some(m=>m.keyword==='FOLK MAGIC')
-    const folkMagicFired=hasFolkMagic&&Math.random()<0.2
-    addLog('⚔ Band attacks for '+dmg+'!'+(hasDbl?' ('+dblMode+' ×'+dblMult+'!)':'')+(folkMagicFired?' 🪈 FOLK MAGIC!':''))
+    const folkMagicFired=hasFolkMagic&&Math.random()<0.25
+    addLog('⚔ Band attacks for '+dmg+'!'+(hasDbl?' (BLASTBEAT ×'+dblMult+'!)':'')+(folkMagicFired?' 🪈 FOLK MAGIC!':''))
 
     const bc=getCenter(bossRef)
     let delay=0
@@ -8824,7 +8834,7 @@ function App(){
       // Lucifer on stage check
       const luciferOnStage=stage.some(m=>m&&(m.id==='lucifer'||m.name==='Lucifer'))
       // Drummer DOUBLE TIME rolled this fight (uses existing dblRoll state)
-      const drummerDT=dblRoll>=5
+      const drummerDT=stage.some(m=>m&&!m.tooStoned&&m.role==='Drummer')
       // First card played type (for setlist artifact)
       const firstCardType=cardsThisStrike.length>0?cardsThisStrike[0].type:null
       // All members healthy (≥50% HP) for Gaffer Tape
@@ -10395,7 +10405,7 @@ function App(){
     const stoned=stage.find(m=>m&&m.tooStoned&&!survivorSavesUsedRef.current.has(m.uid))
     if(!stoned)return
     survivorSavesUsedRef.current.add(stoned.uid)
-    const reviveHp=Math.max(1,Math.ceil(stoned.maxHp*0.25))
+    const reviveHp=Math.max(1,Math.ceil(stoned.maxHp*0.15))
     setStage(p=>p.map(m=>m&&m.uid===stoned.uid?Object.assign({},m,{tooStoned:false,hp:reviveHp,bloodOath:false}):m))
     addLog('🛡️ SECOND WIND! '+stoned.name+' refuses to stay down — healed to '+reviveHp+' HP!')
     addFloat('🛡 SECOND WIND',window.innerWidth/2,window.innerHeight*0.4,'#44cc44',true)
@@ -12145,7 +12155,7 @@ function App(){
             const _vmDiscardsFight = (discardsThisFightRef && discardsThisFightRef.current) || 0
             const _vmDiscardsStrike = (discardsThisStrikeRef && discardsThisStrikeRef.current) || 0
             const _vmLuciferOnStage = stage.some(m=>m&&(m.id==='lucifer'||m.name==='Lucifer'))
-            const _vmDrumDT = dblRoll>=5
+            const _vmDrumDT = stage.some(m=>m&&!m.tooStoned&&m.role==='Drummer')
             const _vmFirstType = _vmCardsThisStrike.length>0 ? _vmCardsThisStrike[0].type : null
             const _vmAllHealthy = stage.filter(m=>m).every(m=>m.hp>=Math.ceil(m.maxHp/2))
             const _vmAliveAll = stage.filter(m=>m&&m.hp>0).length
@@ -12306,8 +12316,8 @@ function App(){
             },0)+p10Bonus
             // 2) Drummer × dblMult (NOT always ×2 — depends on dblRoll: ≤2=1×, 3-4=1.5×, 5-6=2×)
             const hasDbl=actives.some(m=>m.role==='Drummer')
-            if(hasDbl&&dblRoll!==null){
-              const dblMult=dblRoll<=2?1.0:dblRoll<=4?1.5:2.0
+            if(hasDbl){
+              const dblMult=Math.round(Math.pow(1.5,actives.filter(m=>m.role==='Drummer').length)*100)/100
               dmg=Math.round(dmg*dblMult)
             }
             // 3) Encore: members with encoreReady get a SECOND attack (added separately)
@@ -12368,7 +12378,7 @@ function App(){
             const _discFight = (discardsThisFightRef && discardsThisFightRef.current) || 0
             const _discStrike = (discardsThisStrikeRef && discardsThisStrikeRef.current) || 0
             const _lucStg = stage.some(m=>m&&(m.id==='lucifer'||m.name==='Lucifer'))
-            const _drumDT = dblRoll>=5
+            const _drumDT = stage.some(m=>m&&!m.tooStoned&&m.role==='Drummer')
             const _firstT = _cardsThis.length>0 ? _cardsThis[0].type : null
             const _allHlth = stage.filter(m=>m).every(m=>m.hp>=Math.ceil(m.maxHp/2))
             const _aliveAll = stage.filter(m=>m&&m.hp>0).length

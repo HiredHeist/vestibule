@@ -14,6 +14,21 @@ Verified against current code first — most AUDIT_AUG1 "open" items were alread
 
 Verified: engine self-test 86/86 · `npm run check` CLEAN · eslint parse-clean (0 syntax errors) · sim runs clean across decks (no NaN/crash) · independent code-audit passed. **UNVERIFIED: `vite build`** (sandbox lacks the Linux rolldown binding — confirm on Windows). Fixes are UNCOMMITTED; `.gitattributes` added to normalize line endings.
 
+## 🎸 AUG 5 — BATCH B: BAND EQUALIZATION + FIXED BOSS HP (App.jsx + members.js + sim)
+
+Design shift per JV: boss HP is a fixed Balatro-style blind (no per-deck fudge); decks are balanced through the *band*, not the boss.
+
+1. **Boss HP deck-independent** — `hpScale` unified to 1.85 for all 5 decks (was 1.65–2.00). Removes the invisible per-deck boss multiplier. Confirmed the imbalance was never the boss: unifying it barely moved win rates — the band was the lever.
+2. **Band equalized** — every recruitable member re-stated to one budget (`maxHp + 3×ATK = 27`), differing by shape (glass cannon ↔ wall) + keyword. No strictly-better picks (Vitalik/Tanuki de-monstered, Freya/Loki de-trapped). Members start at full HP. Tanuki (unlock) ~31 budget.
+3. **Deck stat-fudges removed** — Survivor `memberHpMod:2` → 0, Shredder `memberHpPct:0.80` → 1.0. Decks differ by signature, not blanket member stats.
+4. **DOUBLE TIME → BLASTBEAT** — flat ×1.5 band damage, no d6, STACKS (Math.pow(1.5,drummers)). Multiple drummers allowed (removed one-drummer gate; Thor + Rolf both BLASTBEAT). Drummer's Stick relic trigger `doubleTimeRolled` now fires whenever a drummer is present. `dblRoll` state is now vestigial/cosmetic (still rolled, unused for damage) — clean up later.
+5. **TRICKSTER** (new, Tanuki) — relays each neighbor's ATK-aura to the other + base 1 (v1: ATK auras only, not ANCHOR/FOLK). **FOLK MAGIC** 20%→25% refill, aura heal 1→2. **HEXED** +1 ATK per 10%→8% corruption. **Second Wind** revive 25%→15%.
+
+Sim (Bronze, 3K/deck): Standard 4.63 · Engineer 5.10 · Ritualist 5.73 · Shredder 6.07 · Survivor 7.17 — a 1.6× spread (was 2.4×), aggro viable. Engine self-test 86/86, eslint parse-clean, no NaN/crashes.
+
+⬜ **NEEDS PLAYTEST:** App.jsx combat changes (BLASTBEAT stacking, TRICKSTER aura) verified by parse + sim numbers only — the sim doesn't run the live strike pipeline. Eyeball in-game.
+⬜ Update the color maps / KEYWORD_DESC / tutorial text audit for BLASTBEAT/TRICKSTER (functional done; a few cosmetic DOUBLE TIME strings may linger in help text).
+
 ## 🩸 AUG 4 — PHASE 1: CRASHES, FREEZES AND UNREACHABLE UI (App.jsx)
 
 Audit-driven sweep of every hard-stop in `src/App.jsx`. `no-undef` is now ZERO in
