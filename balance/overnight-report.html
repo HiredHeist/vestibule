@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vestibule — Overnight Playtest, 107 runs</title>
+<style>
+:root{color-scheme:light dark}
+.viz-root{
+  color-scheme:light;
+  --surface-0:#f4f4f2; --surface-1:#fcfcfb; --border:#e2e1dd;
+  --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#78766f;
+  --series-1:#2a78d6; --series-2:#eb6834;
+  --good:#1baf7a; --bad:#e34948; --warn:#eda100;
+}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])) .viz-root{
+  color-scheme:dark;
+  --surface-0:#111110; --surface-1:#1a1a19; --border:#33322f;
+  --text-primary:#fff; --text-secondary:#c3c2b7; --text-muted:#8e8c83;
+  --series-1:#3987e5; --series-2:#d95926;
+  --good:#199e70; --bad:#e66767; --warn:#c98500;
+}}
+:root[data-theme="dark"] .viz-root{
+  color-scheme:dark;
+  --surface-0:#111110; --surface-1:#1a1a19; --border:#33322f;
+  --text-primary:#fff; --text-secondary:#c3c2b7; --text-muted:#8e8c83;
+  --series-1:#3987e5; --series-2:#d95926;
+  --good:#199e70; --bad:#e66767; --warn:#c98500;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-0);font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.viz-root{background:var(--surface-0);color:var(--text-primary);min-height:100vh;padding:32px 24px 64px}
+.wrap{max-width:980px;margin:0 auto}
+h1{font-size:24px;margin:0 0 4px;letter-spacing:-.01em}
+h2{font-size:16px;margin:38px 0 4px;letter-spacing:-.005em}
+.sub{color:var(--text-secondary);font-size:13px;margin:0 0 6px}
+.note{color:var(--text-muted);font-size:12.5px;margin:4px 0 14px}
+.card{background:var(--surface-1);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-top:12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:16px}
+.tile{background:var(--surface-1);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.tile .n{font-size:30px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.tile .l{font-size:12.5px;color:var(--text-secondary);margin-top:5px}
+.tile .d{font-size:12px;color:var(--text-muted);margin-top:3px}
+.row{display:grid;grid-template-columns:104px 1fr 76px;align-items:center;gap:10px;margin:5px 0;font-size:13px}
+.row .lab{color:var(--text-secondary);text-align:right;font-variant-numeric:tabular-nums}
+.row .val{color:var(--text-primary);font-variant-numeric:tabular-nums;font-size:12.5px}
+.track{background:var(--surface-0);border-radius:4px;height:19px;position:relative;overflow:hidden}
+.bar{height:100%;border-radius:0 4px 4px 0;background:var(--series-1)}
+.bar.s2{background:var(--series-2)}
+.bar.bad{background:var(--bad)} .bar.good{background:var(--good)}
+.pair{display:flex;flex-direction:column;gap:2px}
+.legend{display:flex;gap:16px;align-items:center;font-size:12.5px;color:var(--text-secondary);margin:10px 0 12px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px}
+table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums}
+th{color:var(--text-secondary);font-weight:500;font-size:12px}
+td.n,th.n{text-align:right}
+.verdict{border-left:3px solid var(--series-2);padding:2px 0 2px 14px;margin:14px 0}
+.verdict b{display:block;margin-bottom:2px}
+details{margin-top:10px}summary{cursor:pointer;font-size:12.5px;color:var(--text-secondary)}
+.ok{color:var(--good)}.no{color:var(--bad)}
+.toggle{position:fixed;top:14px;right:16px;background:var(--surface-1);border:1px solid var(--border);color:var(--text-secondary);border-radius:7px;padding:6px 11px;font-size:12px;cursor:pointer}
+</style></head>
+<body><div class="viz-root">
+<button class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">◐ theme</button>
+<div class="wrap">
+
+<h1>Vestibule — overnight playtest</h1>
+<p class="sub">8.00 hours · 107 complete runs · 50,887 events · build <code>93db1a3</code> · Bronze / Standard</p>
+
+<div class="tiles">
+  <div class="tile"><div class="n">22%</div><div class="l">Runs won</div><div class="d">24 of 107 killed Lucifer</div></div>
+  <div class="tile"><div class="n" style="color:var(--bad)">47%</div><div class="l">Died in fight 0</div><div class="d">50 runs, to The Wanderer</div></div>
+  <div class="tile"><div class="n">56%</div><div class="l">Win rate past fight 3</div><div class="d">the game is decided early</div></div>
+  <div class="tile"><div class="n">0.21</div><div class="l">Chains per strike</div><div class="d">already rare, not spam</div></div>
+</div>
+
+<div class="verdict">
+  <b>The headline: this is not a game that's too easy. It's a game with no middle.</b>
+  Nearly half of all runs die to the first boss. Almost everything that survives the first three fights goes on to win.
+  Only 10 of 107 runs ended anywhere between Circle 2 and Circle 8.
+</div>
+
+<h2>Where runs end</h2>
+<p class="note">The difficulty curve is bimodal — a wall at the start, then near-open road. A healthy roguelite loses runs across the whole arc.</p>
+<div class="card" id="wall"></div>
+
+<h2>Survival funnel</h2>
+<p class="note">Attrition happens almost entirely in fights 0–3. From fight 3 to fight 26 the game sheds only 11 of 43 runs.</p>
+<div class="card" id="funnel"></div>
+
+<h2>Win rate, conditional on getting there</h2>
+<p class="note">Reaching fight 3 more than doubles your odds versus starting a run. After that the number barely moves — the run is effectively decided.</p>
+<div class="card" id="cond"></div>
+
+<h2>Band ATK growth — winners vs runs that died at fight 0</h2>
+<p class="note">Median band ATK by fight. The two groups start nearly level (17 vs 15); by fight 2 the winners are 44% ahead and compounding. Runs that die at fight 0 bottom out at a median band ATK of 4.</p>
+<div class="legend">
+  <span><i style="background:var(--series-1)"></i>Winners (n=24)</span>
+  <span><i style="background:var(--series-2)"></i>Died at fight 0–2 (n=63)</span>
+</div>
+<div class="card" id="atk"></div>
+
+<h2>Strikes to kill each boss</h2>
+<p class="note">Fight 0 is a grind at a median of 9 strikes — deep into overtime, with only 4 strikes allotted. Every later fight sits at a healthy 3–4.</p>
+<div class="card" id="strikes"></div>
+
+<h2>Damage amplification</h2>
+<p class="note">Damage dealt ÷ band ATK, non-lethal strikes only (n=2,373). Lethal strikes are excluded — a kill logs the boss at 0 HP, so overkill is unmeasurable and every killing blow would report a fake ceiling.</p>
+<div class="tiles">
+  <div class="tile"><div class="n">×1.06</div><div class="l">Median</div><div class="d">typical strike ≈ raw band ATK</div></div>
+  <div class="tile"><div class="n">×4.42</div><div class="l">p90</div><div class="d">a good strike</div></div>
+  <div class="tile"><div class="n">×29.5</div><div class="l">p99</div><div class="d">the combo payoff</div></div>
+  <div class="tile"><div class="n">×1220</div><div class="l">Max</div><div class="d">once in 2,373 strikes</div></div>
+</div>
+<p class="note">This is the number that refutes the “multipliers are out of control” theory. In a typical strike the multiplier stack contributes about 6%. The heavy tail is real but rare — which is what a combo system should look like.</p>
+
+<h2>Most-played cards</h2>
+<p class="note">Share of 7,691 card plays. No card exceeds 6% — the distribution is flat and healthy, with no single dominant auto-include.</p>
+<div class="card" id="cards"></div>
+
+<h2>Rig integrity</h2>
+<div class="card">
+<table>
+<tr><th>Check</th><th class="n">Result</th></tr>
+<tr><td>Crashes / uncaught exceptions</td><td class="n ok">0</td></tr>
+<tr><td>Hard stalls / watchdog fires</td><td class="n ok">0</td></tr>
+<tr><td>Unknown screens</td><td class="n ok">34 of 50,887 (0.07%)</td></tr>
+<tr><td>Runs started vs ended</td><td class="n ok">107 / 106</td></tr>
+<tr><td>Card play failures</td><td class="n">1,390 of 9,081 (15%)</td></tr>
+<tr><td>Strikes with unreadable boss HP</td><td class="n no">1,620 of 4,738 (34%)</td></tr>
+<tr><td>Cards the bot could not name</td><td class="n">13</td></tr>
+</table>
+<p class="note" style="margin-bottom:0">The one number to fix: 34% of strikes logged an unreadable boss HP, so per-fight pacing is measured on two thirds of the data. It does not affect win rate, funnel or card-share figures, which are counted from run and play events directly.</p>
+</div>
+
+<details><summary>Chain-rate measurement note</summary>
+<p class="note">The raw ledger contains 15,756 <code>chain_confirmed</code> rows, which is a counting artifact — the detector re-emitted the whole log history after every fight boundary. Deduplicated it is 918 (0.29/strike); the bot's independent inference says 0.21/strike, and the simulator says 0.26/strike. Three methods agree that chains fire roughly once every four to five strikes. The raw figure is the bug I had already reported and has since been fixed.</p>
+</details>
+
+</div></div>
+<script>
+const bars=(el,rows,opt={})=>{
+  const max=opt.max||Math.max(...rows.map(r=>r.v));
+  el.innerHTML=rows.map(r=>`<div class="row"><span class="lab">${r.k}</span>
+    <span class="track"><span class="bar ${r.c||''}" style="width:${Math.max(1.2,100*r.v/max)}%"></span></span>
+    <span class="val">${r.t??r.v}</span></div>`).join('');
+};
+bars(document.getElementById('wall'),[
+ {k:'Circle 1',v:64,t:'64 runs · 60%',c:'bad'},{k:'Circle 2',v:2,t:'2 · 2%'},{k:'Circle 3',v:6,t:'6 · 6%'},
+ {k:'Circle 4',v:1,t:'1 · 1%'},{k:'Circle 5',v:1,t:'1 · 1%'},{k:'Circle 6',v:0,t:'0'},{k:'Circle 7',v:1,t:'1 · 1%'},
+ {k:'Circle 8',v:0,t:'0'},{k:'Circle 9',v:32,t:'32 · 30%',c:'good'}]);
+bars(document.getElementById('funnel'),[
+ {k:'fight 0',v:107,t:'107 · 100%'},{k:'fight 1',v:56,t:'56 · 52%'},{k:'fight 2',v:48,t:'48 · 45%'},
+ {k:'fight 3',v:43,t:'43 · 40%'},{k:'fight 8',v:40,t:'40 · 37%'},{k:'fight 14',v:34,t:'34 · 32%'},
+ {k:'fight 20',v:32,t:'32 · 30%'},{k:'fight 26',v:32,t:'32 · 30%'}]);
+bars(document.getElementById('cond'),[
+ {k:'start a run',v:22,t:'22%  n=107'},{k:'reach f1',v:43,t:'43%  n=56'},{k:'reach f2',v:50,t:'50%  n=48'},
+ {k:'reach f3',v:56,t:'56%  n=43'},{k:'reach f6',v:59,t:'59%  n=41'}],{max:100});
+const W=[17,35,62,84,122,115,138,165,212],D=[15,24,43,null,null,null,null,null,null],mx=212;
+document.getElementById('atk').innerHTML=W.map((w,i)=>`<div class="row"><span class="lab">fight ${i}</span>
+  <span class="pair">
+    <span class="track" style="height:9px"><span class="bar" style="width:${100*w/mx}%"></span></span>
+    <span class="track" style="height:9px">${D[i]!=null?`<span class="bar s2" style="width:${100*D[i]/mx}%"></span>`:''}</span>
+  </span>
+  <span class="val">${w}${D[i]!=null?' / '+D[i]:' / —'}</span></div>`).join('');
+bars(document.getElementById('strikes'),[
+ {k:'fight 0',v:9,t:'9 strikes',c:'bad'},{k:'fight 1',v:5,t:'5'},{k:'fight 2',v:4,t:'4'},{k:'fight 3',v:3,t:'3'},
+ {k:'fight 8',v:5,t:'5'},{k:'fight 13',v:3,t:'3'},{k:'fight 18',v:3,t:'3'},{k:'fight 22',v:3,t:'3'},{k:'fight 26',v:4,t:'4'}]);
+bars(document.getElementById('cards'),[
+ {k:'battlecry',v:463,t:'463 · 6.0%'},{k:'infencore',v:371,t:'371 · 4.8%'},{k:'distortion',v:366,t:'366 · 4.8%'},
+ {k:'encore',v:360,t:'360 · 4.7%'},{k:'resonancecard',v:313,t:'313 · 4.1%'},{k:'soundboard',v:278,t:'278 · 3.6%'},
+ {k:'deathriff',v:255,t:'255 · 3.3%'},{k:'moshpit',v:248,t:'248 · 3.2%'},{k:'amp',v:248,t:'248 · 3.2%'},
+ {k:'possessedperf',v:242,t:'242 · 3.1%'},{k:'groupie',v:241,t:'241 · 3.1%'},{k:'newstrings',v:230,t:'230 · 3.0%'}]);
+</script></body></html>

@@ -1,0 +1,35 @@
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -9275,7 +9275,9 @@
+            functional setStrikesLeft(p=>p-1) above does not update it), so the first
+            overtime strike computed _ot=0 and dealt NO enrage at all. The strike-counter
+            display already used 1-strikesLeft, so UI and damage disagreed by one strike. */}
+-        {const _ot=Math.max(0,1-strikesLeft);if(_ot>0){scaledBaseDmg=scaledBaseDmg*Math.pow(2,_ot);addLog('🔥 OVERTIME x'+Math.pow(2,_ot)+' — the crowd turns on you!')}}
++        // V1 (NO OVERTIME): unreachable — the fight ends the moment the allowance
++        // runs out, so there is no overtime strike for the boss to enrage on.
++        {const _ot=0;if(_ot>0){scaledBaseDmg=scaledBaseDmg*Math.pow(2,_ot)}}
+         // v0.7.1: Possession bonus removed — boss damage no longer scales with player corruption.
+         // The cost lives in Hangover (next fight, next shop), not in this fight.
+         // v0.7.2: bossSkipStrikes — DMT BREAKTHROUGH / K-HOLE trips can fully skip
+@@ -9480,7 +9482,11 @@
+             setAnimPhase('idle');setStrikingMemberIdx(-1);setStrikeAnim(null);setBossStrikeAnim(null);setFlyingCard(null);setSelected([]);
+             // Check out-of-strikes death AFTER this strike resolves
+             setStrikesLeft(function(cur){
+-              if(false){ // OVERTIME (Jul 31 2026 JV): out-of-strikes no longer ends the fight.
++              // V1 (NO OVERTIME): out of strikes with the boss alive ends the run.
++              // The enemyHpRef guard is load-bearing — this updater runs AFTER the
++              // strike resolves, and a kill on the final strike must resolve as a WIN.
++              const _bossAlive=!(enemyHpRef.current!==undefined&&enemyHpRef.current!==null&&enemyHpRef.current<=0)
++              if(cur<=0&&_bossAlive){
+                 if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins. But you already conquered Hell.')}else{setDeathCause('beaten');setLastKillingBlow((enemy?.name||'The boss')+' hit for '+((enemy?.baseDmg||0)+(activeStake?.dmgAdd||0))+' damage');playSfx('defeat')};
+                 {const _rs=calcRunScore(stats,false);saveRunHistory(stats,false,enemy,runSeed);
+                 // Achievement checks at game end
+@@ -12250,7 +12256,7 @@
+           {/* Strike pips — directly under STRIKE button */}
+           <div style={{display:'flex',alignItems:'center',gap:6,justifyContent:'center'}}>
+             <PhaseDots left={strikesLeft} total={fightMaxStrikes} color='#c41e3a' wide={true}/>
+-            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:strikesLeft<=1?22:strikesLeft<=2?18:15,fontWeight:900,color:strikesLeft<=1?'#ff2200':strikesLeft<=2?'#ff4400':'var(--blood)',letterSpacing:1,textShadow:strikesLeft<=1?'0 0 12px rgba(255,0,0,0.8)':'none'}}><span key={'sl-'+strikesLeft} style={{animation:strikesLeft<=1?'memberHitShake 0.4s ease-out, inkStamp 0.4s ease-out':strikesLeft<=2?'inkStamp 0.4s ease-out, pulse 0.8s ease infinite alternate':'inkStamp 0.4s ease-out',display:'inline-block'}}>{strikesLeft>0?strikesLeft+'/'+fightMaxStrikes:'☠ OVERTIME ×'+Math.pow(2,1-strikesLeft)}</span></span>
++            <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:strikesLeft<=1?22:strikesLeft<=2?18:15,fontWeight:900,color:strikesLeft<=1?'#ff2200':strikesLeft<=2?'#ff4400':'var(--blood)',letterSpacing:1,textShadow:strikesLeft<=1?'0 0 12px rgba(255,0,0,0.8)':'none'}}><span key={'sl-'+strikesLeft} style={{animation:strikesLeft<=1?'memberHitShake 0.4s ease-out, inkStamp 0.4s ease-out':strikesLeft<=2?'inkStamp 0.4s ease-out, pulse 0.8s ease infinite alternate':'inkStamp 0.4s ease-out',display:'inline-block'}}>{strikesLeft>0?strikesLeft+'/'+fightMaxStrikes:'☠ NO STRIKES LEFT'}</span></span>
+           </div>
+           {/* DAMAGE PREVIEW — below pips, big stamp animation */}
+           {/* ACTIVE BUFF BADGES — CHAIN chip removed (redundant with multiplier box). TEMP ATK kept since it shows team total. */}

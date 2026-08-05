@@ -1,0 +1,31 @@
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -7394,6 +7394,10 @@
+           if(!m||!m.hangoverHpDebuff)return m
+           return Object.assign({},m,{maxHp:m.maxHp+m.hangoverHpDebuff,hangoverHpDebuff:0})
+         }))
++        // V5: Too Stoned is a PER-FIGHT penalty. Wake everyone at 25% max HP so the
++        // band always fields a full stage next fight — HP attrition still exists, it
++        // just cannot end the run.
++        setStage(prev=>prev.map(m=>m&&m.tooStoned?Object.assign({},m,{tooStoned:false,hp:Math.max(1,Math.ceil(m.maxHp*0.25))}):m))
+         // Post-fight heal (disabled on higher stakes)
+         if(activeStake.healAfterFight){setStage(prev=>prev.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m))}
+         // Victory flash before shop (circle cleared extra for bosses)
+@@ -9330,7 +9334,7 @@
+                 else{ns2[ai]=Object.assign({},ns2[ai],{hp:Math.max(0,newHp)})}
+               }
+               const allStoned=ns2.filter(m=>m).every(m=>m.tooStoned)
+-              if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else if(tutorialFight>0){setShowTutorialMsg('You got stoned! No worries, try that one again.');setTimeout(()=>startTutorialFight(tutorialFight),2000);return}else{setDeathCause('stoned');playSfx('defeat')};setTimeout(()=>{clearSave();setGameState('end')},800)}
++              if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else if(tutorialFight>0){setShowTutorialMsg('You got stoned! No worries, try that one again.');setTimeout(()=>startTutorialFight(tutorialFight),2000);return}else{/* V5: a wipe is NOT a loss. The band deals no ATK for the rest of the fight; the run ends only if the HP number is missed. */playSfx('defeat');addLog('💀 TOTAL WIPEOUT — the band is out. No damage for the rest of this fight.')}}
+               return ns2
+             })
+             setDamageFlash(true);triggerShake(10,350);setTimeout(()=>setDamageFlash(false),400)
+@@ -9390,7 +9394,7 @@
+               } // end blood oath else
+             }
+             const allStoned=ns2.filter(function(m){return m}).every(function(m){return m.tooStoned})
+-            if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{setDeathCause('stoned');playSfx('defeat')};const _bc=Math.floor(fightIndex/3)+1;if(_bc>bestRunCircle){localStorage.setItem('vst_best_circle',_bc.toString())};recordLegacyRun(stage,stats,false,Math.floor(fightIndex/3)+1);setTimeout(function(){clearSave();setGameState('end')},800)}
++            if(allStoned){discover('allstoned','TOTAL WIPEOUT');if(welcomeToHell==='fighting'){setDeathCause('victory');setWelcomeToHell('lost');addLog('📝 The Executive wins this round. But you already conquered Hell.')}else{/* V5: see the matching branch above — a wipe costs output, not the run. */playSfx('defeat');addLog('💀 TOTAL WIPEOUT — the band is out. No damage for the rest of this fight.')}}
+             return ns2
+           })
+           if(!_stdAnchorSaved&&stage[stage.indexOf(target)]&&!stage[stage.indexOf(target)].tooStoned&&(stage[stage.indexOf(target)].hp-actualDmg)<=0&&!stage[stage.indexOf(target)].stoneShield)addLog('💨 '+target.name+' is TOO STONED!')

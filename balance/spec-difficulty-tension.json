@@ -1,0 +1,14 @@
+{
+  "_comment": "TENSION TRADE-OFF SWEEP. The recommended set with the whole V20F curve scaled by HP_CURVE_MULT. Shows the exchange rate between 'fights feel tense' (share reaching the 4th strike, one-shot rate) and win rate. Also carries the boss-shaped V20B for comparison.",
+  "stake":"bronze","deck":"standard",
+  "regime": {"NO_SKIP":"1","START_PICK":"1","V1_NO_OVERTIME":"1","V5_HP_NOT_LOSS":"1","V6_FULL_HEAL":"1","LUCIFER_HP":"curve"},
+  "policies":["good","weak"],
+  "variants":[
+    {"name":"V20F x1.0 (recommended)","env":{"HP_CURVE_MODE":"v20f"}},
+    {"name":"V20F x1.3","env":{"HP_CURVE_MODE":"v20f","HP_CURVE_MULT":"1.3"}},
+    {"name":"V20F x1.6","env":{"HP_CURVE_MODE":"v20f","HP_CURVE_MULT":"1.6"}},
+    {"name":"V20F x2.0","env":{"HP_CURVE_MODE":"v20f","HP_CURVE_MULT":"2.0"}},
+    {"name":"V20B boss-shaped","env":{"HP_CURVE_MODE":"v20b"}},
+    {"name":"V20B x1.3","env":{"HP_CURVE_MODE":"v20b","HP_CURVE_MULT":"1.3"}}
+  ]
+}

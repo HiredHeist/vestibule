@@ -1,0 +1,21 @@
+--- a/e2e/test-card-parity.cjs
++++ b/e2e/test-card-parity.cjs
+@@ -100,8 +100,18 @@
+   if (rows.length === 0) problems.push('could not parse any enemy out of src/data/enemies.js')
+   const keys = Object.keys(json).filter(k => k !== '_comment')
+   if (keys.length !== rows.length) problems.push(`entry count: json ${keys.length}, enemies.js ${rows.length}`)
++  // LUCIFER IS EXEMPT — the same exemption vestibule-sim-kwstacks.js:49 carries.
++  // App.jsx getScaledMaxHp (~5209) special-cases passiveId==='luciferBoss' and
++  // returns a FLAT 333,333 per phase / 666,666 total with NO deck hpScale, so
++  // enemies.js maxHp:100000 is DEAD DATA for him and the override's 666666 is
++  // the true value. Without this branch the assertion fails on a CORRECT repo
++  // and the bot rig cannot start.
++  const LUCIFER_TOTAL = 666666
+   rows.forEach((e, i) => {
+     if (json[i] === undefined) problems.push(`index ${i} (${e.id}): missing from boss_hp_override.json`)
++    else if (e.id === 'lucifer') {
++      if (json[i] !== LUCIFER_TOTAL) problems.push(`index ${i} (lucifer): json=${json[i]} but the live special case is a flat ${LUCIFER_TOTAL}`)
++    }
+     else if (json[i] !== e.maxHp) problems.push(`index ${i} (${e.id}): json=${json[i]} enemies.js=${e.maxHp}`)
+   })
+   if (problems.length) {

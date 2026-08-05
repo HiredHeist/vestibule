@@ -1,0 +1,17 @@
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -7394,8 +7394,12 @@
+           if(!m||!m.hangoverHpDebuff)return m
+           return Object.assign({},m,{maxHp:m.maxHp+m.hangoverHpDebuff,hangoverHpDebuff:0})
+         }))
+-        // Post-fight heal (disabled on higher stakes)
+-        if(activeStake.healAfterFight){setStage(prev=>prev.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m))}
++        // V6: FULL HEAL BETWEEN EVERY FIGHT — no attrition carried forward, on any
++        // stake. Every fight is entered at full strength, so the only thing that ends
++        // a run is missing the HP number. This deliberately overrides the stake's
++        // healAfterFight flag; to keep partial attrition on the harder stakes, gate
++        // the un-stoning on activeStake.healAfterFight and leave the heal at +2.
++        setStage(prev=>prev.map(m=>m?Object.assign({},m,{tooStoned:false,stoneShield:false,hp:m.maxHp}):m))
+         // Victory flash before shop (circle cleared extra for bosses)
+         const isBossKill=(fightIndex+1)%3===0
+     if(isBossKill&&collectedLoot.includes('golden_tooth')){setStash(p=>Math.min(MAX_STASH,p+5));addLog('🪙 Golden Tooth! +5 bonus Stash.')}

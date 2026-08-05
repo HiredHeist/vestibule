@@ -1,0 +1,47 @@
+{
+ "_comment": "FINAL CONFIRMATION, 6,000 games/cell, CORRECTED Lucifer (flat 666,666, no deck scale). REC-A = flat pass-rate curve; REC-C = Balatro-shaped curve (comfortable Small/Big, boss is the check, Circle IX is the Ante-8 wall).",
+ "stake": "bronze",
+ "deck": "standard",
+ "regime": {
+  "NO_SKIP": "1",
+  "START_PICK": "1"
+ },
+ "policies": [
+  "good",
+  "weak"
+ ],
+ "variants": [
+  {
+   "name": "BASE shipped",
+   "env": {}
+  },
+  {
+   "name": "REC-A V1+V5+V6+V20F",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1",
+    "V6_FULL_HEAL": "1",
+    "HP_CURVE_MODE": "v20f"
+   }
+  },
+  {
+   "name": "REC-C V1+V5+V6+V20C",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1",
+    "V6_FULL_HEAL": "1",
+    "HP_CURVE_MODE": "v20c"
+   }
+  },
+  {
+   "name": "REC-C+V8",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1",
+    "V6_FULL_HEAL": "1",
+    "V8_FIXED_DRUM": "1",
+    "HP_CURVE_MODE": "v20c"
+   }
+  }
+ ]
+}

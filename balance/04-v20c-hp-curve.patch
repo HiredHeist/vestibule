@@ -1,0 +1,215 @@
+--- a/src/data/enemies.js
++++ b/src/data/enemies.js
+@@ -9,39 +9,39 @@
+   // Hard nerf: 45 HP base × 1.85 deck = 83 displayed; 2 dmg/strike means
+   // members at 6 HP survive 4 hits comfortably. Goal: ~95% win rate.
+   // Lost Soul (278) and Drifter (629) UNCHANGED — real game starts fight 2.
+-  {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:45,baseDmg:2,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
+-  {id:'lostsoul',tagline:'You were lost before you started.',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:44,baseDmg:5,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
+-  {id:'drifter',tagline:'110 HP and pure aggression.',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:115,baseDmg:7,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
++  {id:'wanderer',tagline:'Could not even find the exit.',name:'The Wanderer',circle:'Circle I — Limbo',subtitle:'Fight 1 of 3',maxHp:17,baseDmg:2,emoji:'👤',passive:'A lost soul with no purpose. Attacks randomly.',passiveId:null},
++  {id:'lostsoul',tagline:'You were lost before you started.',name:'The Lost Soul',circle:'Circle I — Limbo',subtitle:'Fight 2 of 3',maxHp:41,baseDmg:5,emoji:'💀',passive:'A stronger damned spirit. Hunger drives its blows.',passiveId:null},
++  {id:'drifter',tagline:'110 HP and pure aggression.',name:'The Drifter',circle:'Circle I — Limbo',subtitle:'Circle Boss — Fight 3 of 3',maxHp:110,baseDmg:7,emoji:'👁',passive:'Pure relentless pressure.',passiveId:null},
+   // ── CIRCLE II: LUST — Enemy buffs itself each strike ─────────
+-  {id:'siren',tagline:'She sang. You listened. You lost.',name:'The Siren',circle:'Circle II — Lust',subtitle:'Fight 1 of 3',maxHp:127,baseDmg:5,emoji:'🌊',passive:'Seductive. Gains +1 damage each Strike.',passiveId:'selfbuff'},
+-  {id:'tempter',tagline:'Temptation wins again.',name:'The Tempter',circle:'Circle II — Lust',subtitle:'Fight 2 of 3',maxHp:220,baseDmg:6,emoji:'🌹',passive:'Enthralling. Gains +1 damage each Strike. Starts stronger.',passiveId:'selfbuff'},
+-  {id:'lust_boss',tagline:'Irresistible to the end.',name:'The Seducer',circle:'Circle II — Lust',subtitle:'Circle Boss — Fight 3 of 3',maxHp:650,baseDmg:7,emoji:'💋',passive:'Irresistible. Gains +2 damage each Strike. Dangerous if left alive.',passiveId:'selfbuff2'},
++  {id:'siren',tagline:'She sang. You listened. You lost.',name:'The Siren',circle:'Circle II — Lust',subtitle:'Fight 1 of 3',maxHp:170,baseDmg:5,emoji:'🌊',passive:'Seductive. Gains +1 damage each Strike.',passiveId:'selfbuff'},
++  {id:'tempter',tagline:'Temptation wins again.',name:'The Tempter',circle:'Circle II — Lust',subtitle:'Fight 2 of 3',maxHp:260,baseDmg:6,emoji:'🌹',passive:'Enthralling. Gains +1 damage each Strike. Starts stronger.',passiveId:'selfbuff'},
++  {id:'lust_boss',tagline:'Irresistible to the end.',name:'The Seducer',circle:'Circle II — Lust',subtitle:'Circle Boss — Fight 3 of 3',maxHp:530,baseDmg:7,emoji:'💋',passive:'Irresistible. Gains +2 damage each Strike. Dangerous if left alive.',passiveId:'selfbuff2'},
+   // ── CIRCLE III: GLUTTONY — Heals when you play cards ─────────
+-  {id:'glutton',tagline:'It ate your strikes for breakfast.',name:'The Glutton',circle:'Circle III — Gluttony',subtitle:'Fight 1 of 3',maxHp:439,baseDmg:5,emoji:'🍖',passive:'Insatiable. Heals 8 HP every time a card is played.',passiveId:'cardHeal3b'},
+-  {id:'feaster',tagline:'Still hungry. Always hungry.',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:719,baseDmg:6,emoji:'🦷',passive:'Voracious. Heals 15 HP every time a card is played.',passiveId:'cardHeal5'},
+-  {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:2577,baseDmg:7,emoji:'🕳',passive:'Endless hunger. Heals 25 HP per card played. Strike fast.',passiveId:'cardHeal8'},
++  {id:'glutton',tagline:'It ate your strikes for breakfast.',name:'The Glutton',circle:'Circle III — Gluttony',subtitle:'Fight 1 of 3',maxHp:550,baseDmg:5,emoji:'🍖',passive:'Insatiable. Heals 8 HP every time a card is played.',passiveId:'cardHeal3b'},
++  {id:'feaster',tagline:'Still hungry. Always hungry.',name:'The Feaster',circle:'Circle III — Gluttony',subtitle:'Fight 2 of 3',maxHp:590,baseDmg:6,emoji:'🦷',passive:'Voracious. Heals 15 HP every time a card is played.',passiveId:'cardHeal5'},
++  {id:'gluttony_boss',tagline:'Everything gets devoured eventually.',name:'The Devourer',circle:'Circle III — Gluttony',subtitle:'Circle Boss — Fight 3 of 3',maxHp:1000,baseDmg:7,emoji:'🕳',passive:'Endless hunger. Heals 25 HP per card played. Strike fast.',passiveId:'cardHeal8'},
+   // ── CIRCLE IV: GREED — Steals stash each strike ──────────────
+-  {id:'miser',tagline:'You could not afford to win.',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:635,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1🌿 from your Stash each Strike. Win to take it back.',passiveId:'stashSteal'},
+-  {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:1140,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2🌿 per Strike. Your stash is its stash.',passiveId:'stashSteal2'},
+-  {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:3756,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3🌿 per Strike. Pure greed compounded.',passiveId:'stashSteal3'},
++  {id:'miser',tagline:'You could not afford to win.',name:'The Miser',circle:'Circle IV — Greed',subtitle:'Fight 1 of 3',maxHp:890,baseDmg:4,emoji:'💰',passive:'Greedy. Steals 1🌿 from your Stash each Strike. Win to take it back.',passiveId:'stashSteal'},
++  {id:'hoarder',tagline:'It had more patience than you.',name:'The Hoarder',circle:'Circle IV — Greed',subtitle:'Fight 2 of 3',maxHp:1100,baseDmg:5,emoji:'🪙',passive:'Avaricious. Steals 2🌿 per Strike. Your stash is its stash.',passiveId:'stashSteal2'},
++  {id:'greed_boss',tagline:'Debt always comes due.',name:'The Usurer',circle:'Circle IV — Greed',subtitle:'Circle Boss — Fight 3 of 3',maxHp:1900,baseDmg:6,emoji:'🏦',passive:'Extracting. Steals 3🌿 per Strike. Pure greed compounded.',passiveId:'stashSteal3'},
+   // ── CIRCLE V: ANGER — Hits harder the more you buff ─────────
+-  {id:'wrathful',tagline:'It rages itself to death.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:1302,baseDmg:5,emoji:'🔥',passive:'Self-immolating rage. Loses 8% HP each Strike but deals +50% damage cumulatively. Outlast it.',passiveId:'selfImmolate'},
+-  {id:'berserker',tagline:'Wounded fury — strike fast or weather the storm.',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:2274,baseDmg:6,emoji:'⚔️',passive:'Bloodlust. Below 50% HP, attacks deal double damage.',passiveId:'bloodlust'},
+-  {id:'anger_boss',tagline:'The commander of the damned.',name:'The Warlord',circle:'Circle V — Anger',subtitle:'Circle Boss — Fight 3 of 3',maxHp:5880,baseDmg:7,emoji:'💢',passive:'Commands. Each Strike, applies a random debuff: -1 ATK to all members, lose 1 ember, OR discard 1 hand card.',passiveId:'commands'},
++  {id:'wrathful',tagline:'It rages itself to death.',name:'The Wrathful',circle:'Circle V — Anger',subtitle:'Fight 1 of 3',maxHp:2300,baseDmg:5,emoji:'🔥',passive:'Self-immolating rage. Loses 8% HP each Strike but deals +50% damage cumulatively. Outlast it.',passiveId:'selfImmolate'},
++  {id:'berserker',tagline:'Wounded fury — strike fast or weather the storm.',name:'The Berserker',circle:'Circle V — Anger',subtitle:'Fight 2 of 3',maxHp:1600,baseDmg:6,emoji:'⚔️',passive:'Bloodlust. Below 50% HP, attacks deal double damage.',passiveId:'bloodlust'},
++  {id:'anger_boss',tagline:'The commander of the damned.',name:'The Warlord',circle:'Circle V — Anger',subtitle:'Circle Boss — Fight 3 of 3',maxHp:3000,baseDmg:7,emoji:'💢',passive:'Commands. Each Strike, applies a random debuff: -1 ATK to all members, lose 1 ember, OR discard 1 hand card.',passiveId:'commands'},
+   // ── CIRCLE VI: HERESY — Corrupts your corruption system ──────
+-  {id:'heretic',tagline:'Your soul is sufficiently corrupted now.',name:'The Heretic',circle:'Circle VI — Heresy',subtitle:'Fight 1 of 3',maxHp:2681,baseDmg:5,emoji:'🔱',passive:'Blasphemous. Each Strike raises your Corruption by 10%.',passiveId:'corruptPlayer'},
+-  {id:'apostate',tagline:'Corruption claimed another believer.',name:'The Apostate',circle:'Circle VI — Heresy',subtitle:'Fight 2 of 3',maxHp:4576,baseDmg:6,emoji:'⛧',passive:'Corrupting. Raises Corruption by 15% each Strike.',passiveId:'corruptPlayer15'},
+-  {id:'heresy_boss',tagline:'Even your chaos served its doctrine.',name:'The False Prophet',circle:'Circle VI — Heresy',subtitle:'Circle Boss — Fight 3 of 3',maxHp:8352,baseDmg:7,emoji:'📖',passive:'Toxic doctrine. Corruption +20% per Strike. Hellquake territory every fight.',passiveId:'corruptPlayer20'},
++  {id:'heretic',tagline:'Your soul is sufficiently corrupted now.',name:'The Heretic',circle:'Circle VI — Heresy',subtitle:'Fight 1 of 3',maxHp:2600,baseDmg:5,emoji:'🔱',passive:'Blasphemous. Each Strike raises your Corruption by 10%.',passiveId:'corruptPlayer'},
++  {id:'apostate',tagline:'Corruption claimed another believer.',name:'The Apostate',circle:'Circle VI — Heresy',subtitle:'Fight 2 of 3',maxHp:2900,baseDmg:6,emoji:'⛧',passive:'Corrupting. Raises Corruption by 15% each Strike.',passiveId:'corruptPlayer15'},
++  {id:'heresy_boss',tagline:'Even your chaos served its doctrine.',name:'The False Prophet',circle:'Circle VI — Heresy',subtitle:'Circle Boss — Fight 3 of 3',maxHp:5300,baseDmg:7,emoji:'📖',passive:'Toxic doctrine. Corruption +20% per Strike. Hellquake territory every fight.',passiveId:'corruptPlayer20'},
+   // ── CIRCLE VII: VIOLENCE — Targets your healthiest member ────
+-  {id:'brute',tagline:'Your healthiest fell first.',name:'The Brute',circle:'Circle VII — Violence',subtitle:'Fight 1 of 3',maxHp:4991,baseDmg:6,emoji:'🗡️',passive:'Calculated. Always targets the member with highest HP.',passiveId:'targetHighestHp'},
+-  {id:'hunter',tagline:'Prey spotted. Prey eliminated.',name:'The Hunter',circle:'Circle VII — Violence',subtitle:'Fight 2 of 3',maxHp:8025,baseDmg:7,emoji:'🏹',passive:'Predatory. Targets highest HP member. Deals +50% damage to them.',passiveId:'targetHighestHp2'},
+-  {id:'violence_boss',tagline:'The sentence was carried out.',name:'The Executioner',circle:'Circle VII — Violence',subtitle:'Circle Boss — Fight 3 of 3',maxHp:13290,baseDmg:8,emoji:'🩸',passive:'Methodical. Targets highest HP and deals double damage. Protect your strongest.',passiveId:'targetHighestHp3'},
++  {id:'brute',tagline:'Your healthiest fell first.',name:'The Brute',circle:'Circle VII — Violence',subtitle:'Fight 1 of 3',maxHp:3700,baseDmg:6,emoji:'🗡️',passive:'Calculated. Always targets the member with highest HP.',passiveId:'targetHighestHp'},
++  {id:'hunter',tagline:'Prey spotted. Prey eliminated.',name:'The Hunter',circle:'Circle VII — Violence',subtitle:'Fight 2 of 3',maxHp:4000,baseDmg:7,emoji:'🏹',passive:'Predatory. Targets highest HP member. Deals +50% damage to them.',passiveId:'targetHighestHp2'},
++  {id:'violence_boss',tagline:'The sentence was carried out.',name:'The Executioner',circle:'Circle VII — Violence',subtitle:'Circle Boss — Fight 3 of 3',maxHp:7000,baseDmg:8,emoji:'🩸',passive:'Methodical. Targets highest HP and deals double damage. Protect your strongest.',passiveId:'targetHighestHp3'},
+   // ── CIRCLE VIII: FRAUD — Shuffles your hand after each strike ──
+-  {id:'trickster',tagline:'You played right into its hands.',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:14200,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle'},
+-  {id:'deceiver',tagline:'Nothing was what it seemed.',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:20387,baseDmg:7,emoji:'🎭',passive:'Manipulative. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle2'},
+-  {id:'fraud_boss',tagline:'The greatest con: you thought you could win.',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:29201,baseDmg:8,emoji:'🪞',passive:'Master of lies. After each Strike, 2 cards in hand are discarded and replaced.',passiveId:'fraudShuffle3'},
++  {id:'trickster',tagline:'You played right into its hands.',name:'The Trickster',circle:'Circle VIII — Fraud',subtitle:'Fight 1 of 3',maxHp:6000,baseDmg:6,emoji:'🃏',passive:'Deceptive. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle'},
++  {id:'deceiver',tagline:'Nothing was what it seemed.',name:'The Deceiver',circle:'Circle VIII — Fraud',subtitle:'Fight 2 of 3',maxHp:6500,baseDmg:7,emoji:'🎭',passive:'Manipulative. After each Strike, 1 random card in hand is discarded and replaced.',passiveId:'fraudShuffle2'},
++  {id:'fraud_boss',tagline:'The greatest con: you thought you could win.',name:'The Archfraud',circle:'Circle VIII — Fraud',subtitle:'Circle Boss — Fight 3 of 3',maxHp:11000,baseDmg:8,emoji:'🪞',passive:'Master of lies. After each Strike, 2 cards in hand are discarded and replaced.',passiveId:'fraudShuffle3'},
+   // ── CIRCLE IX: TREACHERY ──────────────────────────────────────
+-  {id:'traitor',tagline:'Your own band turned on you.',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:10289,baseDmg:6,emoji:'🗝️',passive:'Paranoia. Each Strike, 1 random member refuses to attack and deals 3 damage to an ally.',passiveId:'paranoia'},
+-  {id:'betrayer',tagline:'It stole everything you built.',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:12176,baseDmg:7,emoji:'🔒',passive:'Soul Thief. Each Strike, steals 1 permanent ATK from a random member. Returned on victory.',passiveId:'soulThief'},
++  {id:'traitor',tagline:'Your own band turned on you.',name:'The Traitor',circle:'Circle IX — Treachery',subtitle:'Fight 1 of 3',maxHp:7200,baseDmg:6,emoji:'🗝️',passive:'Paranoia. Each Strike, 1 random member refuses to attack and deals 3 damage to an ally.',passiveId:'paranoia'},
++  {id:'betrayer',tagline:'It stole everything you built.',name:'The Betrayer',circle:'Circle IX — Treachery',subtitle:'Fight 2 of 3',maxHp:10000,baseDmg:7,emoji:'🔒',passive:'Soul Thief. Each Strike, steals 1 permanent ATK from a random member. Returned on victory.',passiveId:'soulThief'},
+   {id:'lucifer',tagline:'He has seen better challengers. A lot of them.',name:'Lucifer',circle:'Circle IX — Treachery',subtitle:'⛧ The Final Circle — Fight 3 of 3',maxHp:100000,baseDmg:9,emoji:'😈',passive:'The Lord of Hell. Your victories weaken him. Two phases. The ultimate test.',passiveId:'luciferBoss'},
+ ]
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -5206,11 +5206,11 @@
+   // If we ever want stake.hpMult to actually affect combat, wire it into the fight-start
+   // formula AND this helper at the same time.
+   const getScaledMaxHp=useCallback((e)=>{
+-    // LUCIFER (Jul 31 2026, JV): flat 666,666 total — 333,333 per phase. No deck
++    // LUCIFER: flat 72,000 total — 36,000 per phase. No deck
+     // scaling, no boss-kill reduction. The number IS the design.
+     if(e&&(e.passiveId==='luciferBoss'||e.id==='lucifer')){
+       const _lhl=parseInt(localStorage.getItem('vst_heat')||'1')
+-      return Math.ceil(333333*(1+Math.max(0,_lhl-1)*0.15)*(encoreMode?2.0:1.0)) // 666,666 total at Heat 1, scales with NG+
++      return Math.ceil(36000*(1+Math.max(0,_lhl-1)*0.15)*(encoreMode?2.0:1.0)) // 666,666 total at Heat 1, scales with NG+
+     }
+     if(!e)return 0
+     const _ds=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).hpScale||1
+@@ -7171,7 +7171,7 @@
+     beginFightToken()
+     setLuciferPhase(2);luciferPhaseRef.current=2
+     const _lh2=parseInt(localStorage.getItem('vst_heat')||'1')
+-    const _lucP2Hp=Math.ceil(333333*(1+Math.max(0,_lh2-1)*0.15)*(encoreMode?2.0:1.0))
++    const _lucP2Hp=Math.ceil(36000*(1+Math.max(0,_lh2-1)*0.15)*(encoreMode?2.0:1.0))
+     setEnemyHp(_lucP2Hp);enemyHpRef.current=_lucP2Hp;setScaledMaxHp(_lucP2Hp)
+     setBossRageAtk(0);bossRageAtkRef.current=0
+     strikeInFlightRef.current=0
+@@ -7185,10 +7185,10 @@
+     setTripUsedThisFight(false)
+     setFightTripBuff(null)
+     setActiveTripEffect(null)
+-    setLuciferCinematic({text:'THE ICE SHATTERS',hp:333333,phase:2})
++    setLuciferCinematic({text:'THE ICE SHATTERS',hp:36000,phase:2})
+     setTimeout(()=>setLuciferCinematic(null),4000)
+     addLog('⛧ THE ICE SHATTERS ⛧')
+-    addLog('😈 Phase 2: Satan, Lord of the Flies — 333,333 HP')
++    addLog('😈 Phase 2: Satan, Lord of the Flies — 36,000 HP')
+     addLog('⛧ Band revived! Full HP, Embers, Strikes, Discards reset!')
+     setAnimPhase('idle')
+   },[encoreMode,maxEmbers,selectedDeck,activeStake,addLog])
+@@ -9645,12 +9645,12 @@
+     // game because of this. Must check nextIdx (the fight being entered).
+     if(nextIdx===26){
+       const _lheat=parseInt(localStorage.getItem('vst_heat')||'1')
+-      const luciferActualHp=Math.ceil(333333*(1+Math.max(0,_lheat-1)*0.15)*(encoreMode?2.0:1.0)) // phase 1 of 2 — 666,666 total at Heat 1, scales with NG+/Encore
++      const luciferActualHp=Math.ceil(36000*(1+Math.max(0,_lheat-1)*0.15)*(encoreMode?2.0:1.0)) // phase 1 of 2 — 666,666 total at Heat 1, scales with NG+/Encore
+       setEnemyHp(luciferActualHp)
+       setScaledMaxHp(luciferActualHp) // display max must match — generic set above used 185,000
+       setLuciferPhase(1);luciferPhaseRef.current=1
+       addLog('⛧ THE DEVIL HIMSELF — 666,666 HP ACROSS TWO FORMS ⛧')
+-      addLog('🧊 Phase 1: Lucifer, Frozen in Cocytus — 333,333 HP')
++      addLog('🧊 Phase 1: Lucifer, Frozen in Cocytus — 36,000 HP')
+       // Show cinematic overlay
+       setLuciferCinematic({text:'666,666 HP. BRING EVERYTHING.',hp:luciferActualHp})
+       setTimeout(()=>setLuciferCinematic(null),5000)
+@@ -10262,7 +10262,7 @@
+     // Resume = fight restart, so phase 1 fresh is correct even for a mid-P2 save.
+     if(sv.fi===26){
+       const _lh=parseInt(localStorage.getItem('vst_heat')||'1')
+-      const _lhp=Math.ceil(333333*(1+Math.max(0,_lh-1)*0.15)*(encoreMode?2.0:1.0))
++      const _lhp=Math.ceil(36000*(1+Math.max(0,_lh-1)*0.15)*(encoreMode?2.0:1.0))
+       setEnemyHp(_lhp);enemyHpRef.current=_lhp;setScaledMaxHp(_lhp);setLuciferPhase(1);luciferPhaseRef.current=1
+     } else {
+       setLuciferPhase(0);luciferPhaseRef.current=0
+--- a/boss_hp_override.json
++++ b/boss_hp_override.json
+@@ -1,31 +1,31 @@
+ {
+- "0": 45,
+- "1": 44,
+- "2": 115,
+- "3": 127,
+- "4": 220,
+- "5": 650,
+- "6": 439,
+- "7": 719,
+- "8": 2577,
+- "9": 635,
+- "10": 1140,
+- "11": 3756,
+- "12": 1302,
+- "13": 2274,
+- "14": 5880,
+- "15": 2681,
+- "16": 4576,
+- "17": 8352,
+- "18": 4991,
+- "19": 8025,
+- "20": 13290,
+- "21": 14200,
+- "22": 20387,
+- "23": 29201,
+- "24": 10289,
+- "25": 12176,
+- "26": 666666,
+- "_comment": "MIRROR of src/data/enemies.js maxHp, indexed by ENEMIES position. CARDINAL RULE: this file and src/data/enemies.js MUST be updated in the SAME commit — the sim reads this file, the live game reads enemies.js via getScaledMaxHp, and any drift means the sim measures a game that does not exist. Enforced by vestibule-sim-kwstacks.js on load and by e2e/test-card-parity.cjs.",
+- "_lucifer_exception": "Entry 26 (Lucifer) is DELIBERATELY 666666 and NOT the 100000 in enemies.js. Lucifer is special-cased in App.jsx getScaledMaxHp (~line 5209): it returns a FLAT 333,333 per phase / 666,666 total, with NO deck hpScale and no boss-kill reduction, keyed on passiveId===luciferBoss. The maxHp:100000 field in enemies.js is DEAD DATA for Lucifer — nothing reads it for the actual fight. vestibule-sim-kwstacks.js:1488 hardcodes the same 666666 and splits it into two phases, which is CORRECT and matches live. Aug 4 2026: this entry was briefly \"synced\" to 100000 on the mistaken belief that the 666666 was a cardinal-rule violation. It is not — it is the real fight value. The sync assertion must EXEMPT entry 26."
+-}
+\ No newline at end of file
++ "0": 17,
++ "1": 41,
++ "2": 110,
++ "3": 170,
++ "4": 260,
++ "5": 530,
++ "6": 550,
++ "7": 590,
++ "8": 1000,
++ "9": 890,
++ "10": 1100,
++ "11": 1900,
++ "12": 2300,
++ "13": 1600,
++ "14": 3000,
++ "15": 2600,
++ "16": 2900,
++ "17": 5300,
++ "18": 3700,
++ "19": 4000,
++ "20": 7000,
++ "21": 6000,
++ "22": 6500,
++ "23": 11000,
++ "24": 7200,
++ "25": 10000,
++ "26": 72000,
++ "_comment": "MIRROR of src/data/enemies.js maxHp, indexed by ENEMIES position. CARDINAL RULE: this file and src/data/enemies.js MUST be updated in the SAME commit — the sim reads this file, the live game reads enemies.js via getScaledMaxHp, and any drift means the sim measures a game that does not exist. Enforced by vestibule-sim-kwstacks.js on load and by e2e/test-card-parity.cjs. Aug 5 2026: refitted to the V20C balatro-shaped published difficulty curve (balance/DIFFICULTY_CURVE.md).",
++ "_lucifer_exception": "Entry 26 (Lucifer) is DELIBERATELY 72000 and NOT the 100000 in enemies.js. Lucifer is special-cased in App.jsx getScaledMaxHp (~line 5209): it returns a FLAT 36,000 per phase / 72,000 total, with NO deck hpScale and no boss-kill reduction, keyed on passiveId===luciferBoss. The maxHp:100000 field in enemies.js is DEAD DATA for Lucifer — nothing reads it for the actual fight. vestibule-sim-kwstacks.js:1488 hardcodes the same 72000 and splits it into two phases, which is CORRECT and matches live. Aug 4 2026: this entry was briefly \"synced\" to 100000 on the mistaken belief that the 72000 was a cardinal-rule violation. It is not — it is the real fight value. The sync assertion must EXEMPT entry 26. Aug 5 2026: the flat total moved 666,666 -> 72,000 (36,000 per phase) as part of the difficulty refit; App.jsx's seven literals, this entry and the sim's exemption constant all moved together."
++}
+--- a/vestibule-sim-kwstacks.js
++++ b/vestibule-sim-kwstacks.js
+@@ -59,7 +59,7 @@
+     const v=overrideJson?overrideJson[i]:undefined
+     if(v===undefined)problems.push(`index ${i} (${e.id}): missing from boss_hp_override.json`)
+     else if(LUCIFER_EXEMPT(e)){
+-      if(v!==666666)problems.push(`index ${i} (lucifer): json=${v} but the live special case is a flat 666666 (333,333 x2 phases)`)
++      if(v!==72000)problems.push(`index ${i} (lucifer): json=${v} but the live special case is a flat 72000 (36000 x2 phases)`)
+     }
+     else if(v!==e.maxHp)problems.push(`index ${i} (${e.id}): json=${v} but enemies.js maxHp=${e.maxHp}`)
+   })
+@@ -1497,7 +1497,7 @@
+ 
+     if(f===26){
+       TRACK.luciferReached++
+-      const actualHp=666666 // Jul 31 2026 JV: flat, no scaling — 333,333 per phase
++      const actualHp=72000 // flat, no scaling — 36,000 per phase
+       const phase1Hp=Math.ceil(actualHp/2)
+       const phase2Hp=actualHp-phase1Hp
+       const r1=simFight(gs,phase1Hp,1)

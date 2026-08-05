@@ -1,0 +1,137 @@
+From 881e8d823f170352d88493823fe5262e032f38ab Mon Sep 17 00:00:00 2001
+From: "Claude (playtest rig)" <noreply@anthropic.com>
+Date: Wed, 5 Aug 2026 03:53:19 +0000
+Subject: [PATCH] =?UTF-8?q?revert=20my=20bad=20Lucifer=20"sync"=20?=
+ =?UTF-8?q?=E2=80=94=20666666=20was=20correct;=20exempt=20it=20in=20both?=
+ =?UTF-8?q?=20gates?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+I reported a cardinal-rule violation between enemies.js (maxHp:100000) and
+boss_hp_override.json (666666) and "fixed" it by syncing the override down
+to 100000. That was backwards.
+
+App.jsx getScaledMaxHp (~5209) SPECIAL-CASES Lucifer and returns a flat
+333,333 per phase / 666,666 total, with no deck hpScale and no boss-kill
+reduction. Confirmed at seven sites in App.jsx. The maxHp:100000 field in
+enemies.js is DEAD DATA for Lucifer — nothing reads it for the real fight.
+So 666666 was the true value and the sim's own hardcode at :1488 already
+matched live. There was never a divergence.
+
+Consequences of the bad "fix":
+  - it silently made the JSON disagree with the live fight
+  - a later balance experiment took the same wrong turn, cut Lucifer to
+    185,000 (3.6x easier than shipped) and reported a 24.5% win rate that
+    was pure artifact. Retracted.
+
+Both sync gates now EXEMPT Lucifer and assert it against 666666 instead:
+vestibule-sim-kwstacks.js assertBossHpSync and e2e/test-card-parity.cjs.
+The parity gate mattered urgently — it exits 1 on a CORRECT repo, which
+would have failed run-tests.bat and blocked the whole rig.
+
+Also guarded an unguarded reduce in devils_wager (:1341) that threw
+"Reduce of empty array" when every member was already Too Stoned —
+roughly 1 run in 90,000.
+
+Verified: parity gate passes across all 27 enemies; 20,000-game sim runs
+clean at 4.46% Lucifer / 3.42 strikes per fight.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01K51v5rNtmBvtkLJ9b9FXhR
+---
+ boss_hp_override.json     |  7 ++++---
+ e2e/test-card-parity.cjs  | 11 ++++++++++-
+ vestibule-sim-kwstacks.js | 19 +++++++++++++++++--
+ 3 files changed, 31 insertions(+), 6 deletions(-)
+
+diff --git a/boss_hp_override.json b/boss_hp_override.json
+index 61cca5c..9d8d57a 100644
+--- a/boss_hp_override.json
++++ b/boss_hp_override.json
+@@ -1,5 +1,4 @@
+ {
+- "_comment": "MIRROR of src/data/enemies.js maxHp, indexed by ENEMIES position. CARDINAL RULE: this file and src/data/enemies.js MUST be updated in the SAME commit — the sim reads this file, the live game reads enemies.js via getScaledMaxHp, and any drift means the sim measures a game that does not exist. Enforced automatically: vestibule-sim-kwstacks.js throws on load if any entry disagrees, and e2e/test-card-parity.cjs asserts the same before it connects. Aug 4 2026: entry 26 (Lucifer) said 666666 while enemies.js says 100000 — the sim had been fighting a 1,233,332 HP Lucifer (666666 x 1.85 deck scale) against live's 185,000, which voided every Lucifer winrate ever reported. Synced to enemies.js.",
+  "0": 45,
+  "1": 44,
+  "2": 115,
+@@ -26,5 +25,7 @@
+  "23": 29201,
+  "24": 10289,
+  "25": 12176,
+- "26": 100000
+-}
++ "26": 666666,
++ "_comment": "MIRROR of src/data/enemies.js maxHp, indexed by ENEMIES position. CARDINAL RULE: this file and src/data/enemies.js MUST be updated in the SAME commit — the sim reads this file, the live game reads enemies.js via getScaledMaxHp, and any drift means the sim measures a game that does not exist. Enforced by vestibule-sim-kwstacks.js on load and by e2e/test-card-parity.cjs.",
++ "_lucifer_exception": "Entry 26 (Lucifer) is DELIBERATELY 666666 and NOT the 100000 in enemies.js. Lucifer is special-cased in App.jsx getScaledMaxHp (~line 5209): it returns a FLAT 333,333 per phase / 666,666 total, with NO deck hpScale and no boss-kill reduction, keyed on passiveId===luciferBoss. The maxHp:100000 field in enemies.js is DEAD DATA for Lucifer — nothing reads it for the actual fight. vestibule-sim-kwstacks.js:1488 hardcodes the same 666666 and splits it into two phases, which is CORRECT and matches live. Aug 4 2026: this entry was briefly \"synced\" to 100000 on the mistaken belief that the 666666 was a cardinal-rule violation. It is not — it is the real fight value. The sync assertion must EXEMPT entry 26."
++}
+\ No newline at end of file
+diff --git a/e2e/test-card-parity.cjs b/e2e/test-card-parity.cjs
+index 7e12eb6..12d916a 100644
+--- a/e2e/test-card-parity.cjs
++++ b/e2e/test-card-parity.cjs
+@@ -98,10 +98,19 @@
+   const rows = [...src.matchAll(/\{id:'([a-z_0-9]+)',[^}]*?maxHp:(\d+)/g)].map(m => ({ id: m[1], maxHp: +m[2] }))
+   const problems = []
+   if (rows.length === 0) problems.push('could not parse any enemy out of src/data/enemies.js')
+-  const keys = Object.keys(json).filter(k => k !== '_comment')
++  const keys = Object.keys(json).filter(k => !k.startsWith('_'))
+   if (keys.length !== rows.length) problems.push(`entry count: json ${keys.length}, enemies.js ${rows.length}`)
+   rows.forEach((e, i) => {
+     if (json[i] === undefined) problems.push(`index ${i} (${e.id}): missing from boss_hp_override.json`)
++    // LUCIFER IS EXEMPT. App.jsx getScaledMaxHp (~5209) special-cases
++    // passiveId==='luciferBoss' and returns a FLAT 333,333 per phase / 666,666
++    // total with NO deck hpScale. The maxHp:100000 in enemies.js is dead data
++    // for Lucifer. The override's 666666 is the real fight value, and the sim
++    // hardcodes the same number. Without this branch the gate exits 1 on a
++    // CORRECT repo and blocks the whole bot rig.
++    else if (e.id === 'lucifer') {
++      if (json[i] !== 666666) problems.push(`index ${i} (lucifer): json=${json[i]} but the live special case is a flat 666666 (333,333 x2 phases)`)
++    }
+     else if (json[i] !== e.maxHp) problems.push(`index ${i} (${e.id}): json=${json[i]} enemies.js=${e.maxHp}`)
+   })
+   if (problems.length) {
+diff --git a/vestibule-sim-kwstacks.js b/vestibule-sim-kwstacks.js
+index 2d2968e..d240956 100644
+--- a/vestibule-sim-kwstacks.js
++++ b/vestibule-sim-kwstacks.js
+@@ -44,11 +44,23 @@ if(BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE._comment)delete BOSS_HP_OVERRIDE._comment;
+ // repeat: it is fatal, loud, and runs before a single game is simulated.
+ export function assertBossHpSync(overrideJson,enemyList){
+   const problems=[]
+-  const keys=Object.keys(overrideJson||{}).filter(k=>k!=='_comment')
++  const keys=Object.keys(overrideJson||{}).filter(k=>!k.startsWith('_'))
+   if(keys.length!==enemyList.length)problems.push(`entry count: json has ${keys.length}, enemies.js has ${enemyList.length}`)
++  // LUCIFER IS EXEMPT — and this exemption is load-bearing, not a fudge.
++  // App.jsx getScaledMaxHp (~5209) special-cases passiveId==='luciferBoss' and
++  // returns a FLAT 333,333 per phase / 666,666 total with NO deck hpScale. The
++  // maxHp:100000 in enemies.js is DEAD DATA for Lucifer — nothing reads it for
++  // the real fight. The override's 666666 is the true value, and the sim's own
++  // hardcode at ~1488 already matches it.
++  // Aug 4 2026: this entry was briefly "synced" to 100000 on the mistaken belief
++  // that 666666 was a cardinal-rule violation. It was not. Do not re-sync it.
++  const LUCIFER_EXEMPT=e=>e && (e.passiveId==='luciferBoss'||e.id==='lucifer')
+   enemyList.forEach((e,i)=>{
+     const v=overrideJson?overrideJson[i]:undefined
+     if(v===undefined)problems.push(`index ${i} (${e.id}): missing from boss_hp_override.json`)
++    else if(LUCIFER_EXEMPT(e)){
++      if(v!==666666)problems.push(`index ${i} (lucifer): json=${v} but the live special case is a flat 666666 (333,333 x2 phases)`)
++    }
+     else if(v!==e.maxHp)problems.push(`index ${i} (${e.id}): json=${v} but enemies.js maxHp=${e.maxHp}`)
+   })
+   for(const k of keys)if(Number(k)>=enemyList.length)problems.push(`index ${k}: present in json, no such enemy in enemies.js`)
+@@ -1326,7 +1338,10 @@ function simEvent(gs){
+       if(Math.random()<0.5){
+         gs.stage.forEach(m=>{if(!m.tooStoned){m.permAtkBonus=(m.permAtkBonus||0)+3}})
+       }else{
+-        const strongest=alive.reduce((a,b)=>a.atk>b.atk?a:b);
++        // Guard the reduce: `alive` can be empty here (every member Too Stoned
++        // by the time the event fires) and an unguarded reduce with no initial
++        // value throws "Reduce of empty array". Crashed ~1 run in 90,000.
++        const strongest=alive.length?alive.reduce((a,b)=>a.atk>b.atk?a:b):null;
+         if(strongest){strongest.hp=0;strongest.tooStoned=true}
+       }
+       TRACK.eventWager++
+-- 
+2.43.0
+

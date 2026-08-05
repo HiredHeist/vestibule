@@ -1,0 +1,188 @@
+{
+ "_comment": "MAIN VARIANT GRID, RE-RUN on the CORRECTED Lucifer basis (flat 666,666 total, no deck scale \u2014 App.jsx getScaledMaxHp ~5209 special-cases him and enemies.js maxHp:100000 is dead data). Regime: NO_SKIP (the sim otherwise never fights The Wanderer) + START_PICK=1 (the sim otherwise drafts the best of 40 starting pairs). Curve entry 26 is read as Lucifer's FLAT TOTAL.",
+ "stake": "bronze",
+ "deck": "standard",
+ "regime": {
+  "NO_SKIP": "1",
+  "START_PICK": "1"
+ },
+ "policies": [
+  "good",
+  "weak"
+ ],
+ "variants": [
+  {
+   "name": "BASE (shipped rules)",
+   "env": {}
+  },
+  {
+   "name": "V1 no overtime",
+   "env": {
+    "V1_NO_OVERTIME": "1"
+   }
+  },
+  {
+   "name": "V5 hp not loss",
+   "env": {
+    "V5_HP_NOT_LOSS": "1"
+   }
+  },
+  {
+   "name": "V6 full heal",
+   "env": {
+    "V6_FULL_HEAL": "1"
+   }
+  },
+  {
+   "name": "V8 fixed drummer",
+   "env": {
+    "V8_FIXED_DRUM": "1"
+   }
+  },
+  {
+   "name": "V9 exp curve",
+   "env": {
+    "HP_CURVE_MODE": "v9"
+   }
+  },
+  {
+   "name": "V11 atk cap",
+   "env": {
+    "V11_ATK_CAP": "1"
+   }
+  },
+  {
+   "name": "V20 median-fit curve",
+   "env": {
+    "HP_CURVE_MODE": "v20"
+   }
+  },
+  {
+   "name": "V20F flat-fit curve",
+   "env": {
+    "HP_CURVE_MODE": "v20f"
+   }
+  },
+  {
+   "name": "V20C balatro curve",
+   "env": {
+    "HP_CURVE_MODE": "v20c"
+   }
+  },
+  {
+   "name": "V1+V5",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1"
+   }
+  },
+  {
+   "name": "V1+V5+V6",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1",
+    "V6_FULL_HEAL": "1"
+   }
+  },
+  {
+   "name": "V1+V5+V6+V20",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1",
+    "V6_FULL_HEAL": "1",
+    "HP_CURVE_MODE": "v20"
+   }
+  },
+  {
+   "name": "V1+V5+V6+V9",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1",
+    "V6_FULL_HEAL": "1",
+    "HP_CURVE_MODE": "v9"
+   }
+  },
+  {
+   "name": "V1+V5+V6+V9+V11",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1",
+    "V6_FULL_HEAL": "1",
+    "HP_CURVE_MODE": "v9",
+    "V11_ATK_CAP": "1"
+   }
+  },
+  {
+   "name": "V1+V5+V6+V8+V20",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1",
+    "V6_FULL_HEAL": "1",
+    "V8_FIXED_DRUM": "1",
+    "HP_CURVE_MODE": "v20"
+   }
+  },
+  {
+   "name": "V1+V20F (no V5/V6)",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "HP_CURVE_MODE": "v20f"
+   }
+  },
+  {
+   "name": "V1+V5+V6+V20F",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1",
+    "V6_FULL_HEAL": "1",
+    "HP_CURVE_MODE": "v20f"
+   }
+  },
+  {
+   "name": "V1+V5+V6+V8+V20F",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1",
+    "V6_FULL_HEAL": "1",
+    "V8_FIXED_DRUM": "1",
+    "HP_CURVE_MODE": "v20f"
+   }
+  },
+  {
+   "name": "V1+V20C (no V5/V6)",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "HP_CURVE_MODE": "v20c"
+   }
+  },
+  {
+   "name": "V1+V5+V6+V20C",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1",
+    "V6_FULL_HEAL": "1",
+    "HP_CURVE_MODE": "v20c"
+   }
+  },
+  {
+   "name": "V1+V5+V6+V8+V20C",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1",
+    "V6_FULL_HEAL": "1",
+    "V8_FIXED_DRUM": "1",
+    "HP_CURVE_MODE": "v20c"
+   }
+  },
+  {
+   "name": "V1+V5+V6+V11+V20C",
+   "env": {
+    "V1_NO_OVERTIME": "1",
+    "V5_HP_NOT_LOSS": "1",
+    "V6_FULL_HEAL": "1",
+    "V11_ATK_CAP": "1",
+    "HP_CURVE_MODE": "v20c"
+   }
+  }
+ ]
+}
