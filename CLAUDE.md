@@ -6,6 +6,15 @@ This is the canonical dev reference. If something here conflicts with another do
 
 ---
 
+## 👉 NEW SESSION? READ `START_HERE.md` FIRST
+
+`START_HERE.md` carries the current project state, the **retracted numbers that
+must not be re-derived** (the Lucifer HP "cardinal-rule violation" is a FALSE
+ALARM — do not re-sync it), the open design decision, and how JV works. This file
+(`CLAUDE.md`) is the canonical *rules*; `START_HERE.md` is the canonical *state*.
+
+---
+
 ## 🔒 WORKFLOW RULE — READ FIRST EVERY SESSION
 
 **Every commit that changes code MUST update TODO.md in the same commit.** If file structure, key code locations, rules, or constants change, CLAUDE.md updates in the same commit too. No separate "docs" commits — they rot. Stale docs cost more than no docs.

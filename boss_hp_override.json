@@ -1,5 +1,4 @@
 {
- "_comment": "MIRROR of src/data/enemies.js maxHp, indexed by ENEMIES position. CARDINAL RULE: this file and src/data/enemies.js MUST be updated in the SAME commit — the sim reads this file, the live game reads enemies.js via getScaledMaxHp, and any drift means the sim measures a game that does not exist. Enforced automatically: vestibule-sim-kwstacks.js throws on load if any entry disagrees, and e2e/test-card-parity.cjs asserts the same before it connects. Aug 4 2026: entry 26 (Lucifer) said 666666 while enemies.js says 100000 — the sim had been fighting a 1,233,332 HP Lucifer (666666 x 1.85 deck scale) against live's 185,000, which voided every Lucifer winrate ever reported. Synced to enemies.js.",
  "0": 45,
  "1": 44,
  "2": 115,
@@ -26,5 +25,7 @@
  "23": 29201,
  "24": 10289,
  "25": 12176,
- "26": 100000
+ "26": 666666,
+ "_comment": "MIRROR of src/data/enemies.js maxHp, indexed by ENEMIES position. CARDINAL RULE: this file and src/data/enemies.js MUST be updated in the SAME commit — the sim reads this file, the live game reads enemies.js via getScaledMaxHp, and any drift means the sim measures a game that does not exist. Enforced by vestibule-sim-kwstacks.js on load and by e2e/test-card-parity.cjs.",
+ "_lucifer_exception": "Entry 26 (Lucifer) is DELIBERATELY 666666 and NOT the 100000 in enemies.js. Lucifer is special-cased in App.jsx getScaledMaxHp (~line 5209): it returns a FLAT 333,333 per phase / 666,666 total, with NO deck hpScale and no boss-kill reduction, keyed on passiveId===luciferBoss. The maxHp:100000 field in enemies.js is DEAD DATA for Lucifer — nothing reads it for the actual fight. vestibule-sim-kwstacks.js:1488 hardcodes the same 666666 and splits it into two phases, which is CORRECT and matches live. Aug 4 2026: this entry was briefly \"synced\" to 100000 on the mistaken belief that the 666666 was a cardinal-rule violation. It is not — it is the real fight value. The sync assertion must EXEMPT entry 26."
 }

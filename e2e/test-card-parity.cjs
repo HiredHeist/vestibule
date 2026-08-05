@@ -98,10 +98,19 @@
   const rows = [...src.matchAll(/\{id:'([a-z_0-9]+)',[^}]*?maxHp:(\d+)/g)].map(m => ({ id: m[1], maxHp: +m[2] }))
   const problems = []
   if (rows.length === 0) problems.push('could not parse any enemy out of src/data/enemies.js')
-  const keys = Object.keys(json).filter(k => k !== '_comment')
+  const keys = Object.keys(json).filter(k => !k.startsWith('_'))
   if (keys.length !== rows.length) problems.push(`entry count: json ${keys.length}, enemies.js ${rows.length}`)
   rows.forEach((e, i) => {
     if (json[i] === undefined) problems.push(`index ${i} (${e.id}): missing from boss_hp_override.json`)
+    // LUCIFER IS EXEMPT. App.jsx getScaledMaxHp (~5209) special-cases
+    // passiveId==='luciferBoss' and returns a FLAT 333,333 per phase / 666,666
+    // total with NO deck hpScale. The maxHp:100000 in enemies.js is dead data
+    // for Lucifer. The override's 666666 is the real fight value, and the sim
+    // hardcodes the same number. Without this branch the gate exits 1 on a
+    // CORRECT repo and blocks the whole bot rig.
+    else if (e.id === 'lucifer') {
+      if (json[i] !== 666666) problems.push(`index ${i} (lucifer): json=${json[i]} but the live special case is a flat 666666 (333,333 x2 phases)`)
+    }
     else if (json[i] !== e.maxHp) problems.push(`index ${i} (${e.id}): json=${json[i]} enemies.js=${e.maxHp}`)
   })
   if (problems.length) {

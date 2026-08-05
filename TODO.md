@@ -1820,3 +1820,41 @@ Stakes (Bronze→Demonic) already exist. Make the meta-progress LOUD. After-run 
 **Stale doc cleanup is the cheapest unlock for the next session** — see Priority 3.3. After that, every session starts faster.
 
 **The game is mechanically close to done.** What's left is polish, art, and the dopamine layer — which is where AAA-feel actually lives. Don't underestimate this phase. A mediocre game with great juice ships better than a great game with mediocre juice.
+
+## BALANCE EXPERIMENTS (Aug 4 2026) — `balance/`, nothing applied
+
+Measured from a real 8-hour / 107-run overnight bot session plus simulator
+sweeps. **No balance change has been made to the game.** Patches are staged in
+`balance/` and are `git apply`-ready.
+
+- `DIFFICULTY_CURVE.md` — the main experiment. Live difficulty is BIMODAL: 60%
+  of runs die in Circle 1, 30% reach Circle 9, only 9% end anywhere between.
+  47% of all runs die in fight 0. Conditional win rate is 22% at start but 56%
+  past fight 3, then flat — the run is decided in the first ten minutes.
+  Recommended set (V1 no-overtime + V5 band-HP-not-a-loss-condition + V6
+  full-heal-between-fights + V20C refit curve) moves that to 11.3% / 50.1% /
+  15.8% at a 22.8% win rate, with Too-Stoned deaths eliminated.
+  KEY INSIGHT: difficulty must be CONCENTRATED, not flat — two comfortable
+  fights then a circle-boss check, matching Balatro's Small/Big/Boss rhythm and
+  Vestibule's existing 3-fights-per-circle skeleton. Measured pass rhythm
+  .98/.99/.91 per circle, .79 per Lucifer phase.
+- `CHAIN_BALANCE.md` — earlier experiment. Superseded in motivation: chains are
+  NOT a spam mechanic. They fire ~0.21/strike (three independent methods agree).
+  The 1.9/strike figure that motivated it was a counter bug, fixed in b58f997.
+- `overnight-report.html` — the 107-run dashboard.
+
+⚠ TWO NUMBERS PREVIOUSLY REPORTED ARE RETRACTED:
+1. The "cardinal rule violation" between enemies.js (100000) and
+   boss_hp_override.json (666666) for Lucifer was a FALSE ALARM. Lucifer is
+   special-cased in getScaledMaxHp (~5209) at a flat 333,333/phase; the
+   enemies.js field is dead data. 666666 is correct. Both sync gates now exempt
+   it (881e8d8). Do not "fix" this again.
+2. Damage amplification is NOT reliably measurable from the current ledger.
+   The x30 figure used a denominator excluding same-strike buffs; the x1.06
+   figure suffered survivorship bias (excluding lethal strikes excludes every
+   big strike). At x1.06 killing Lucifer would take 1,048 strikes against ~92
+   thrown per run. Fix the metric before sizing anything with it.
+
+OPEN, needs JV's design call: whether to apply the recommended set. Skill
+sensitivity (does deck quality change outcomes) improves but is NOT fixed by
+any variant tested — the lever there is multiplier-stack variance, not boss HP.

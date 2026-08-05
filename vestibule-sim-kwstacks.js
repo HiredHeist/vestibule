@@ -44,11 +44,23 @@ if(BOSS_HP_OVERRIDE&&BOSS_HP_OVERRIDE._comment)delete BOSS_HP_OVERRIDE._comment;
 // repeat: it is fatal, loud, and runs before a single game is simulated.
 export function assertBossHpSync(overrideJson,enemyList){
   const problems=[]
-  const keys=Object.keys(overrideJson||{}).filter(k=>k!=='_comment')
+  const keys=Object.keys(overrideJson||{}).filter(k=>!k.startsWith('_'))
   if(keys.length!==enemyList.length)problems.push(`entry count: json has ${keys.length}, enemies.js has ${enemyList.length}`)
+  // LUCIFER IS EXEMPT — and this exemption is load-bearing, not a fudge.
+  // App.jsx getScaledMaxHp (~5209) special-cases passiveId==='luciferBoss' and
+  // returns a FLAT 333,333 per phase / 666,666 total with NO deck hpScale. The
+  // maxHp:100000 in enemies.js is DEAD DATA for Lucifer — nothing reads it for
+  // the real fight. The override's 666666 is the true value, and the sim's own
+  // hardcode at ~1488 already matches it.
+  // Aug 4 2026: this entry was briefly "synced" to 100000 on the mistaken belief
+  // that 666666 was a cardinal-rule violation. It was not. Do not re-sync it.
+  const LUCIFER_EXEMPT=e=>e && (e.passiveId==='luciferBoss'||e.id==='lucifer')
   enemyList.forEach((e,i)=>{
     const v=overrideJson?overrideJson[i]:undefined
     if(v===undefined)problems.push(`index ${i} (${e.id}): missing from boss_hp_override.json`)
+    else if(LUCIFER_EXEMPT(e)){
+      if(v!==666666)problems.push(`index ${i} (lucifer): json=${v} but the live special case is a flat 666666 (333,333 x2 phases)`)
+    }
     else if(v!==e.maxHp)problems.push(`index ${i} (${e.id}): json=${v} but enemies.js maxHp=${e.maxHp}`)
   })
   for(const k of keys)if(Number(k)>=enemyList.length)problems.push(`index ${k}: present in json, no such enemy in enemies.js`)
@@ -1326,7 +1338,10 @@ function simEvent(gs){
       if(Math.random()<0.5){
         gs.stage.forEach(m=>{if(!m.tooStoned){m.permAtkBonus=(m.permAtkBonus||0)+3}})
       }else{
-        const strongest=alive.reduce((a,b)=>a.atk>b.atk?a:b);
+        // Guard the reduce: `alive` can be empty here (every member Too Stoned
+        // by the time the event fires) and an unguarded reduce with no initial
+        // value throws "Reduce of empty array". Crashed ~1 run in 90,000.
+        const strongest=alive.length?alive.reduce((a,b)=>a.atk>b.atk?a:b):null;
         if(strongest){strongest.hp=0;strongest.tooStoned=true}
       }
       TRACK.eventWager++
