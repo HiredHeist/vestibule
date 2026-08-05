@@ -9,7 +9,14 @@
 
 Setlist Rewrite (no-op → free once-per-Strike scry) · rule-1 `setHand`-inside-`setDeck` sweep (Gear Check, Backstage Pass, Sonic Boom, Devil's Dice) · Cursed Strings +6 ATK with a real "can't be healed this fight" drawback wired at every heal site · `engineUid` determinism fix · `.gitattributes` for line-ending hygiene.
 
-## 🎸 UNCOMMITTED — Aug 5 BAND EQUALIZATION (Batch B — push via `push-fixes.bat`)
+## 🃏 UNCOMMITTED — Aug 5 BATCH C: revive dead cards (push via `push-fixes.bat`)
+
+Changed files: `src/App.jsx`, `src/data/cardEngine.js`, `src/data/cards.js`, `vestibule-sim-kwstacks.js`.
+
+- **Blood Harmony** → permanent +2 to target + both neighbours (positional). **Tremolo Pick** → +4 ATK permanent at 2+ cards. **Sabbath Sigil** Hellquake rolls 9/10 floored (never a run-ender). **Second Wind** → refill + draw 1. **Slow Burn** → +2/+2/+2. **Amp Feedback** → FREE. **Drain the Crowd** → +3 embers. **Corruption Siphon** → +4 embers.
+- Verified: engine 86/86, parse-clean, no crashes, win rates steady. ⚠️ The sim's static-policy bot can't measure individual card buffs (it doesn't draft/play RIFF utility) — the **live bot** is the judge.
+
+## ✅ PUSHED — Aug 5 BAND EQUALIZATION (Batch B, commit `560a955`)
 
 Changed files: `src/App.jsx`, `src/data/members.js`, `vestibule-sim-kwstacks.js`.
 

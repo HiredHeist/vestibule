@@ -1005,17 +1005,15 @@ IMPL.sabbathsigil = (S, C, out) => {
     label = 'FEEDBACK!'
     log(out, '⛧ HELLQUAKE: FEEDBACK! Boss energised but you gain 3 Embers!')
   } else if (roll === 9) {
-    S.discard.push(...S.hand)
-    S.hand.length = 0
-    label = 'CURSED!'
-    log(out, '⛧ HELLQUAKE: THE RIFF CURSE! Hand obliterated!')
+    // Batch C floor: lose 2 random cards, not the whole hand.
+    for (let k = 0; k < 2 && S.hand.length > 0; k++) S.discard.push(S.hand.splice(Math.floor(C.rng() * S.hand.length), 1)[0])
+    label = 'STATIC!'
+    log(out, '⛧ HELLQUAKE: STATIC BURST! 2 cards lost to the noise.')
   } else {
-    const av2 = alive(S)
-    if (av2.length > 0) { const v = pick(av2, C.rng); v.hp = 0; v.tooStoned = true; v.bloodOath = false }
-    // Boss heal clamps to the SCALED max HP, never an unscaled base.
+    // Batch C floor: the boss recovers a little — but nobody falls.
     S.bossHp = Math.min(num(S.bossMaxHp, S.bossHp), num(S.bossHp) + 15)
-    label = 'WIPEOUT!'
-    log(out, '⛧ HELLQUAKE: TOTAL WIPEOUT! A member falls and the boss recovers!')
+    label = 'SURGE!'
+    log(out, '⛧ HELLQUAKE: FEEDBACK SURGE! The boss shrugs off some damage.')
   }
   out.effects.push({ type: 'hellquake', text: label, roll })
   float(out, label, 'boss')
@@ -1091,13 +1089,12 @@ IMPL.doomchord = (S, C, out) => {
 
 IMPL.bloodharmony = (S, C, out) => {
   if (!C.m) return false
-  // TEXT-MISMATCH: text says "Same keyword? +3 instead" — live never checks
-  // keywords and always grants +2.
-  tempAtk(C.m, 2); bumpBuff(C.m)
+  // Batch C: now PERMANENT +2 to target + both neighbours (positional board-builder).
+  permAtk(C.m, 2); bumpBuff(C.m)
   S.stage.forEach((s, i) => {
-    if (s && !s.tooStoned && Math.abs(i - C.t) === 1) { tempAtk(s, 2); bumpBuff(s) }
+    if (s && !s.tooStoned && Math.abs(i - C.t) === 1) { permAtk(s, 2); bumpBuff(s) }
   })
-  log(out, '🩸 Blood Harmony! ' + C.m.name + ' + adjacent +2 ATK!')
+  log(out, '🩸 Blood Harmony! ' + C.m.name + ' + adjacent +2 ATK permanently!')
 }
 
 IMPL.sonicboom = (S, C, out) => {
@@ -1110,13 +1107,12 @@ IMPL.sonicboom = (S, C, out) => {
 
 IMPL.tremolopick = (S, C, out) => {
   if (!C.m) return false
-  // Counts the ledger's LENGTH, exactly like live (App.jsx ~6006 reads
-  // cardsPlayedRef.current.length). That deliberately includes the synthetic
-  // '_smokebreak_discard' / '_echo:' entries live pushes — see the CARDS-PLAYED
-  // LEDGER note in applyCardEffect. Do not "fix" this into a real-card filter.
-  const bonus = (S.cardsPlayedIds || []).length >= 3 ? 4 : 1
-  tempAtk(C.m, bonus); bumpBuff(C.m)
-  log(out, '⚡ Tremolo Pick! ' + C.m.name + ' +' + bonus + ' ATK!' + (bonus >= 4 ? ' (3+ cards = bonus!)' : ''))
+  // Batch C: 2+ cards played this Strike → +4 PERMANENT (combo finisher). Else +1 this Strike.
+  // Ledger LENGTH includes synthetic '_smokebreak_discard'/'_echo:' entries — matches live.
+  const combo = (S.cardsPlayedIds || []).length >= 2
+  if (combo) { permAtk(C.m, 4); bumpBuff(C.m); log(out, '⚡ Tremolo Pick! ' + C.m.name + ' +4 ATK permanently! (2+ cards)'); return }
+  tempAtk(C.m, 1); bumpBuff(C.m)
+  log(out, '⚡ Tremolo Pick! ' + C.m.name + ' +1 ATK this Strike.')
 }
 
 IMPL.harmonicfb = (S, C, out) => {
@@ -1363,7 +1359,8 @@ IMPL.bootlegcopy = (S, C, out) => {
 IMPL.secondwind = (S, C, out) => {
   const gain = num(S.maxEmbers) - num(S.embers)
   S.embers = num(S.maxEmbers)
-  log(out, '💨 Second Wind! +' + gain + ' embers! (filled to max)')
+  draw(S, 1, C.rng)
+  log(out, '💨 Second Wind! +' + gain + ' embers (max) + drew 1!')
 }
 
 IMPL.pyromaniac = (S, C, out) => {
@@ -1373,9 +1370,9 @@ IMPL.pyromaniac = (S, C, out) => {
 }
 
 IMPL.slowburn = (S, C, out) => {
-  addEmbers(S, 1)
+  addEmbers(S, 2)
   S.flags.slowBurnStrikes = num(S.flags.slowBurnStrikes) + 2
-  log(out, '🕯️ Slow Burn! +1 ember now, +1 per strike for next 2 strikes.')
+  log(out, '🕯️ Slow Burn! +2 embers now, +2 per strike for next 2 strikes.')
 }
 
 IMPL.ampfeedback = (S, C, out) => {
@@ -1390,14 +1387,14 @@ IMPL.drainthecrowd = (S, C, out) => {
     const v = pick(av, C.rng)
     v.hp = Math.max(1, num(v.hp) - 2)
   }
-  addEmbers(S, 2)
-  log(out, '🧛 Drain the Crowd! +2 embers. Random member -2 HP.')
+  addEmbers(S, 3)
+  log(out, '🧛 Drain the Crowd! +3 embers. Random member -2 HP.')
 }
 
 IMPL.corrsiphon = (S, C, out) => {
-  addEmbers(S, 3)
+  addEmbers(S, 4)
   addCorruption(S, 8)
-  log(out, '🌀 Corruption Siphon! +3 embers. Corruption +8%.')
+  log(out, '🌀 Corruption Siphon! +4 embers. Corruption +8%.')
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

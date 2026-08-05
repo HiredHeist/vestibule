@@ -6476,15 +6476,15 @@ function App(){
         setBossDebuff(p=>p-4) // negative debuff = extra boss damage for 2 strikes effectively
         hqMsg='⛧ HELLQUAKE: FEEDBACK! Boss energised but you gain 3 Embers!';hqFloat='FEEDBACK!';hqColor='#ff8800';hqDesc='+3 Embers gained — but the boss is energised for 2 Strikes.'
       } else if(roll===9){
-        // 9: THE RIFF CURSE — entire hand discarded, no redraw (negative)
-        setHand([]);setDiscardPile(p=>[...p,...hand])
-        hqMsg='⛧ HELLQUAKE: THE RIFF CURSE! Hand obliterated!';hqFloat='CURSED!';hqColor='#880000';hqDesc='Your entire hand has been obliterated. No redraw.'
+        // 9: STATIC BURST (Batch C floor) — lose 2 random cards, not the whole hand.
+        const _keep=[...hand];const _lost=[]
+        for(let k=0;k<2&&_keep.length>0;k++){_lost.push(_keep.splice(Math.floor(Math.random()*_keep.length),1)[0])}
+        setHand(_keep);setDiscardPile(p=>[...p,..._lost])
+        hqMsg='⛧ HELLQUAKE: STATIC BURST! 2 cards lost to the noise.';hqFloat='STATIC!';hqColor='#880000';hqDesc='2 cards were lost to the static.'
       } else {
-        // 10: TOTAL WIPEOUT — random member Too Stoned AND boss heals 15 (negative)
-        const alive2=ns.filter(m=>m&&!m.tooStoned)
-        if(alive2.length>0){const v2=alive2[Math.floor(Math.random()*alive2.length)];const vi2=ns.indexOf(v2);ns[vi2]=Object.assign({},v2,{hp:0,tooStoned:true,bloodOath:false})}
+        // 10: FEEDBACK SURGE (Batch C floor) — boss recovers a little, but nobody falls.
         setEnemyHp(function(prev){return Math.min(scaledMaxHp||enemy.maxHp,prev+15)})
-        hqMsg='⛧ HELLQUAKE: TOTAL WIPEOUT! A member falls and the boss recovers!';hqFloat='WIPEOUT!';hqColor='#440000';hqDesc='A member fell and the boss recovered 15 HP.'
+        hqMsg='⛧ HELLQUAKE: FEEDBACK SURGE! The boss shrugs off some damage.';hqFloat='SURGE!';hqColor='#440000';hqDesc='The boss recovered 15 HP.'
       }
       // Dramatic flash then reveal
       setHellquakeAnim({text:hqFloat,color:hqColor,desc:hqDesc})
@@ -6532,9 +6532,10 @@ function App(){
       else msg='🎵 Doom Chord! '+m.name+' +4 ATK!'
     }
     else if(card.id==='bloodharmony'){
-      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,tempBuff:true,buffCount:(m.buffCount||0)+1})
-      ns=ns.map((s,i)=>{if(s&&!s.tooStoned&&Math.abs(i-slotIdx)===1)return Object.assign({},s,{atk:s.atk+2,tempBuff:true,buffCount:(s.buffCount||0)+1});return s})
-      msg='🩸 Blood Harmony! '+m.name+' + adjacent +2 ATK!'
+      // Batch C: now PERMANENT +2 to target + both neighbours (positional board-builder).
+      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2,buffCount:(m.buffCount||0)+1})
+      ns=ns.map((s,i)=>{if(s&&!s.tooStoned&&Math.abs(i-slotIdx)===1)return Object.assign({},s,{atk:s.atk+2,permAtkBonus:(s.permAtkBonus||0)+2,buffCount:(s.buffCount||0)+1});return s})
+      msg='🩸 Blood Harmony! '+m.name+' + adjacent +2 ATK permanently!'
     }
     else if(card.id==='sonicboom'){
       ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+2,tempBuff:true,buffCount:(s.buffCount||0)+1}):s)
@@ -6544,9 +6545,11 @@ function App(){
       msg='💥 Sonic Boom! ALL members +2 ATK! Draw 1!'
     }
     else if(card.id==='tremolopick'){
-      if(!m)return false;const bonus=cardsPlayedRef.current.length>=3?4:1
-      ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,tempBuff:true,buffCount:(m.buffCount||0)+1})
-      msg='⚡ Tremolo Pick! '+m.name+' +'+bonus+' ATK!'+(bonus>=4?' (3+ cards = bonus!)':'')
+      // Batch C: 2+ cards this Strike → +4 PERMANENT (combo finisher). Else +1 this Strike.
+      if(!m)return false;const combo=cardsPlayedRef.current.length>=2
+      if(combo)ns[slotIdx]=Object.assign({},m,{atk:m.atk+4,permAtkBonus:(m.permAtkBonus||0)+4,buffCount:(m.buffCount||0)+1})
+      else ns[slotIdx]=Object.assign({},m,{atk:m.atk+1,tempBuff:true,buffCount:(m.buffCount||0)+1})
+      msg=combo?('⚡ Tremolo Pick! '+m.name+' +4 ATK permanently! (2+ cards)'):('⚡ Tremolo Pick! '+m.name+' +1 ATK this Strike.')
     }
     else if(card.id==='harmonicfb'){
       if(!m)return false;const riffCount=cardsPlayedRef.current.filter(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c&&c.type==='RIFF'}).length
@@ -6715,15 +6718,17 @@ function App(){
     }
     else if(card.id==='secondwind'){
       const gain=maxEmbers-embers;setEmbers(maxEmbers)
-      msg='💨 Second Wind! +'+gain+' embers! (filled to max)'
+      const _d=[...deckRef.current];const _drawn=_d.length>0?[_d.pop()]:[]
+      setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._drawn]),0)
+      msg='💨 Second Wind! +'+gain+' embers (max) + drew 1!'
     }
     else if(card.id==='pyromaniac'){
       setEmbers(p=>Math.min(maxEmbers,p+2));setPyromaniacActive(true)
       msg='🧨 Pyromaniac! +2 embers! Spend ALL before Strike → +3 ATK to all!'
     }
     else if(card.id==='slowburn'){
-      setEmbers(p=>Math.min(maxEmbers,p+1));setSlowBurnStrikes(p=>p+2)
-      msg='🕯️ Slow Burn! +1 ember now, +1 per strike for next 2 strikes.'
+      setEmbers(p=>Math.min(maxEmbers,p+2));setSlowBurnStrikes(p=>p+2)
+      msg='🕯️ Slow Burn! +2 embers now, +2 per strike for next 2 strikes.'
     }
     else if(card.id==='ampfeedback'){
       setEmbers(p=>Math.min(maxEmbers,p+2));setAmpFeedbackDiscount(1)
@@ -6731,12 +6736,12 @@ function App(){
     }
     else if(card.id==='drainthecrowd'){
       const alive=ns.filter(s=>s&&!s.tooStoned);if(alive.length>0){const v=alive[Math.floor(Math.random()*alive.length)];const vi=ns.indexOf(v);ns[vi]=Object.assign({},v,{hp:Math.max(1,v.hp-2)})}
-      setEmbers(p=>Math.min(maxEmbers,p+2))
-      msg='🧛 Drain the Crowd! +2 embers. Random member -2 HP.'
+      setEmbers(p=>Math.min(maxEmbers,p+3))
+      msg='🧛 Drain the Crowd! +3 embers. Random member -2 HP.'
     }
     else if(card.id==='corrsiphon'){
-      setEmbers(p=>Math.min(maxEmbers,p+3));setCorruption(p=>Math.min(100,p+8))
-      msg='🌀 Corruption Siphon! +3 embers. Corruption +8%.'
+      setEmbers(p=>Math.min(maxEmbers,p+4));setCorruption(p=>Math.min(100,p+8))
+      msg='🌀 Corruption Siphon! +4 embers. Corruption +8%.'
     }
 
     // Single-member buff corruption trigger
@@ -8504,7 +8509,7 @@ function App(){
     const _atkCtx={corruption,tier:_kwStacks.tier,riffsThisStrike:_riffsThisStrike,shredderHits:_shredderHits,auraAtk:_auraAtkMap(stage,{corruption,shredderHits:_shredderHits})}
 
     if(pendingEmbers>0){setEmbers(p=>Math.min(maxEmbers,p+pendingEmbers));addLog('🪙 +'+pendingEmbers+' Embers from Tapped Out!');playEmber();setPendingEmbers(0)}
-    if(slowBurnStrikes>0){setEmbers(p=>Math.min(maxEmbers,p+1));addLog('🕯️ Slow Burn: +1 ember');setSlowBurnStrikes(p=>p-1)}
+    if(slowBurnStrikes>0){setEmbers(p=>Math.min(maxEmbers,p+2));addLog('🕯️ Slow Burn: +2 embers');setSlowBurnStrikes(p=>p-1)}
     // Aug 4 2026 (phase 3): tempBuff without _origAtk NEVER expires — the expiry block
     // requires `nm.tempBuff && nm._origAtk!==undefined`. Pyromaniac was handing out
     // +3 PERMANENT ATK to every member on every proc (4 strikes = +12 for the rest of

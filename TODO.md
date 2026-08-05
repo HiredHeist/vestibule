@@ -14,6 +14,18 @@ Verified against current code first — most AUDIT_AUG1 "open" items were alread
 
 Verified: engine self-test 86/86 · `npm run check` CLEAN · eslint parse-clean (0 syntax errors) · sim runs clean across decks (no NaN/crash) · independent code-audit passed. **UNVERIFIED: `vite build`** (sandbox lacks the Linux rolldown binding — confirm on Windows). Fixes are UNCOMMITTED; `.gitattributes` added to normalize line endings.
 
+## 🃏 AUG 5 — BATCH C: REVIVE DEAD CARDS (App.jsx + cardEngine.js + cards.js + sim)
+
+All eight were verified working-but-weak first (not broken). Buffs:
+- **Blood Harmony** — this-Strike → PERMANENT +2 to target + both neighbours (positional board-builder).
+- **Tremolo Pick** — 2+ cards this Strike → +4 ATK PERMANENT (was this-Strike, 3-card gate).
+- **Sabbath Sigil** — Hellquake d10 floored: roll 9 discards 2 (was whole hand), roll 10 boss heals but nobody falls (was lose a member). Kept as the one deliberate "gambler" card.
+- **Second Wind** — refill embers to max + draw 1. **Slow Burn** — +2 now, +2/strike ×2 (was +1/+1). **Amp Feedback** — 0 embers (was 1). **Drain the Crowd** — +3 embers (was +2). **Corruption Siphon** — +4 embers (was +3).
+
+Verified: engine self-test 86/86, eslint parse-clean, sim clean, win rates steady. Sim-visible revival: corrsiphon (dead→10.7/g staple), drain + ampfeedback (strong).
+
+⬜ **The sim can't measure individual card buffs.** Its bot uses hardcoded DRAFT + PLAY value tables (`vestibule-sim-kwstacks.js` ~608–620), so buffing a card's *effect* doesn't change whether the bot acquires/plays it (bumped a few play-scores; the draft layer is the real gate). This is a heuristic-bot limit, not a bug — the LIVE bot rig (real perception) is the correct judge of card power. Sim = macro (deck win rates, difficulty, boss HP); live bot = micro (individual cards).
+
 ## 🎸 AUG 5 — BATCH B: BAND EQUALIZATION + FIXED BOSS HP (App.jsx + members.js + sim)
 
 Design shift per JV: boss HP is a fixed Balatro-style blind (no per-deck fudge); decks are balanced through the *band*, not the boss.

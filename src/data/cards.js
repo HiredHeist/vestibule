@@ -69,9 +69,9 @@ export const ALL_CARDS=[
   {id:'feedbackscream',name:'Feedback Scream',type:'RIFF',rarity:'Uncommon',emoji:'📢',embers:2,effect:'+4 ATK permanently. Costs 2 HP. Power at a price.',color:'#ff4444',typeColor:'#cc2222',copies:0},
   {id:'skullsplitter',name:'Skull Splitter',type:'RIFF',rarity:'Uncommon',emoji:'💀',embers:2,effect:'+3 ATK permanently. 10+ ATK target? +5 instead.',color:'#cc2222',typeColor:'#aa0000',copies:0},
   {id:'doomchord',name:'Doom Chord',type:'RIFF',rarity:'Uncommon',emoji:'🎵',embers:2,effect:'+4 ATK this Strike. At 50%+ Corruption, adjacent members get +4 too.',color:'#6622aa',typeColor:'#440088',copies:0},
-  {id:'bloodharmony',name:'Blood Harmony',type:'RIFF',rarity:'Common',emoji:'🩸',embers:1,effect:'+2 ATK this Strike to the target AND both neighbours.',color:'#cc4466',typeColor:'#aa2244',copies:0},
+  {id:'bloodharmony',name:'Blood Harmony',type:'RIFF',rarity:'Common',emoji:'🩸',embers:1,effect:'+2 ATK permanently to the target AND both neighbours.',color:'#cc4466',typeColor:'#aa2244',copies:0},
   {id:'sonicboom',name:'Sonic Boom',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'ALL members +2 ATK this Strike. Draw 1.',color:'#ff8800',typeColor:'#cc6600',copies:0},
-  {id:'tremolopick',name:'Tremolo Pick',type:'RIFF',rarity:'Common',emoji:'⚡',embers:1,effect:'+1 ATK this Strike. +4 instead if you already played 3+ cards.',color:'#ffcc00',typeColor:'#ccaa00',copies:0},
+  {id:'tremolopick',name:'Tremolo Pick',type:'RIFF',rarity:'Common',emoji:'⚡',embers:1,effect:'+1 ATK this Strike. +4 ATK permanently if you already played 2+ cards this Strike.',color:'#ffcc00',typeColor:'#ccaa00',copies:0},
   {id:'harmonicfb',name:'Harmonic Feedback',type:'RIFF',rarity:'Uncommon',emoji:'🎶',embers:0,effect:'FREE. +1 ATK permanently per RIFF played this Strike (minimum +1).',color:'#44aaff',typeColor:'#2288dd',copies:0},
   // Aug 4 2026 — DIFFERENTIATED PAIR. shredsolo's only effect is `encoreReady=true`
   // — byte-identical to Encore (Uncommon, 2 embers) — while its text promised a
@@ -105,12 +105,12 @@ export const ALL_CARDS=[
   {id:'venueswap',name:'Venue Swap',type:'UTILITY',rarity:'Uncommon',emoji:'🏟️',embers:1,effect:'Shuffle hand away. Draw 6 fresh cards.',color:'#4488aa',typeColor:'#226688',copies:0},
   {id:'doublebooking',name:'Double Booking',type:'UTILITY',rarity:'Rare',emoji:'📅',embers:3,effect:'+1 extra Strike this fight. Game changer.',color:'#ff8844',typeColor:'#dd6622',copies:0},
   {id:'bootlegcopy',name:'Bootleg Copy',type:'UTILITY',rarity:'Uncommon',emoji:'📀',embers:1,effect:'Copy the first other card in your hand. The copy joins your deck.',color:'#44cccc',typeColor:'#22aaaa',copies:0},
-  {id:'secondwind',name:'Second Wind',type:'EMBER',rarity:'Common',emoji:'💨',embers:0,effect:'Gain embers equal to your empty ember slots. Better when depleted.',color:'#cc8844',typeColor:'#aa6622',copies:0},
+  {id:'secondwind',name:'Second Wind',type:'EMBER',rarity:'Common',emoji:'💨',embers:0,effect:'Refill embers to max, then draw 1 card.',color:'#cc8844',typeColor:'#aa6622',copies:0},
   {id:'pyromaniac',name:'Pyromaniac',type:'EMBER',rarity:'Uncommon',emoji:'🧨',embers:1,effect:'+2 embers. If you spend ALL embers this strike, all members +3 ATK.',color:'#ff4400',typeColor:'#dd2200',copies:0},
-  {id:'slowburn',name:'Slow Burn',type:'EMBER',rarity:'Common',emoji:'🕯️',embers:0,effect:'+1 ember now. +1 ember at start of next 2 strikes. Delayed investment.',color:'#ff8866',typeColor:'#dd6644',copies:0},
-  {id:'ampfeedback',name:'Amp Feedback',type:'EMBER',rarity:'Common',emoji:'🔌',embers:1,effect:'+2 Embers. Next RIFF costs 1 less.',color:'#88cc44',typeColor:'#66aa22',copies:0},
-  {id:'drainthecrowd',name:'Drain the Crowd',type:'EMBER',rarity:'Common',emoji:'🧛',embers:0,effect:'+2 Embers. A random member loses 2 HP (never below 1).',color:'#aa2244',typeColor:'#880022',copies:0},
-  {id:'corrsiphon',name:'Corruption Siphon',type:'EMBER',rarity:'Common',emoji:'🌀',embers:0,effect:'+3 Embers. +8% Corruption.',color:'#8844aa',typeColor:'#662288',copies:0},
+  {id:'slowburn',name:'Slow Burn',type:'EMBER',rarity:'Common',emoji:'🕯️',embers:0,effect:'+2 embers now. +2 embers at start of next 2 strikes. Delayed investment.',color:'#ff8866',typeColor:'#dd6644',copies:0},
+  {id:'ampfeedback',name:'Amp Feedback',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'FREE. +2 Embers. Next RIFF costs 1 less.',color:'#88cc44',typeColor:'#66aa22',copies:0},
+  {id:'drainthecrowd',name:'Drain the Crowd',type:'EMBER',rarity:'Common',emoji:'🧛',embers:0,effect:'+3 Embers. A random member loses 2 HP (never below 1).',color:'#aa2244',typeColor:'#880022',copies:0},
+  {id:'corrsiphon',name:'Corruption Siphon',type:'EMBER',rarity:'Common',emoji:'🌀',embers:0,effect:'+4 Embers. +8% Corruption.',color:'#8844aa',typeColor:'#662288',copies:0},
 ]
 // ── CARD UPGRADES (Doom Forge, ⛧ gold cards) ────────────────────────────────
 // Aug 4 2026 — REWRITTEN AGAINST THE CODE. Every desc below used to describe an

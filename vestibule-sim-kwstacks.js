@@ -605,8 +605,8 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
     case 'whispercard':return 74;case 'hungercard':return 66;case 'madnesscard':return 88;
     case 'dark_whisper':return 70;case 'blood_price':return 74;case 'void_pact':return 72;
     case 'feedbackscream':return 65;case 'skullsplitter':return highestAtk>=10?80:62;
-    case 'doomchord':return corruption>=50?78:55;case 'bloodharmony':return 52;case 'sonicboom':return 72;
-    case 'tremolopick':return cardsPlayed>=3?70:35;
+    case 'doomchord':return corruption>=50?78:55;case 'bloodharmony':return 70;case 'sonicboom':return 72;
+    case 'tremolopick':return cardsPlayed>=2?72:35;
     case 'shredsolo':return highestAtk>=8?80:50;case 'harmonicfb':return(gs._cardsPlayedIds||[]).filter(x=>ALL_CARDS.find(c=>c.id===x&&c.type==='RIFF')).length>=3?78:25;
     case 'overdriveped':return gs._strikeMult>=1.5?85:55;case 'devilsdice':return 55;case 'necroticamp':return corruption>=60?85:corruption>=40?60:20;
     case 'soulbargain':return 72;case 'venomriff':return 60;case 'offeringpit':return alive.length>=4?65:20;
@@ -616,7 +616,7 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
     case 'russianroulette':return alive.length>=4?60:30;case 'gearcheck':return 48;case 'setlistrewrite':return gs._setlistRewriteUsed?0:30;
     case 'backstagepass':return embers>=2?65:30;case 'venueswap':return hand.length<=3?60:20;case 'doublebooking':return 92;
     case 'bootlegcopy':return 55;case 'secondwind':return embers===0?90:embers<=2?50:10;case 'pyromaniac':return embers<=2?68:25;
-    case 'slowburn':return strikeNum===0?65:30;case 'ampfeedback':return embers<=2?70:30;
+    case 'slowburn':return strikeNum===0?72:48;case 'ampfeedback':return embers<=2?72:40;
     case 'drainthecrowd':return embers<=2?65:20;case 'corrsiphon':return embers<=2&&corruption<60?72:15;
     default:return 5;
   }
@@ -912,7 +912,7 @@ function simFight(gs,phaseHp,luciferPhase){
     gs._ritualistRefundsThisStrike=0
     drawCards(gs,Math.max(0,handSize-gs.hand.length));gs._drawNextStrike=0;
     if(gs._tappedOutNext){gs.embers=Math.min(gs.maxEmbers,gs.embers+5);gs._tappedOutNext=false}
-    if(gs._slowBurnStrikes>0){gs.embers=Math.min(gs.maxEmbers,gs.embers+1);gs._slowBurnStrikes--}
+    if(gs._slowBurnStrikes>0){gs.embers=Math.min(gs.maxEmbers,gs.embers+2);gs._slowBurnStrikes--}
     // Jul 31 2026 JV RULING: embers do NOT refill per strike — they persist across
     // the whole fight; only ember cards / FOLK MAGIC refunds add. (Old refill here
     // inflated every historical winrate number.)
