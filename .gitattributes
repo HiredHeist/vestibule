@@ -1,0 +1,32 @@
+# Normalize line endings so Windows (CRLF) and Linux/CI (LF) agree.
+# Text files are stored as LF in the repo; git handles the working-tree copy.
+* text=auto
+
+# Source and text formats — always LF in the repo.
+*.js   text eol=lf
+*.jsx  text eol=lf
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.json text eol=lf
+*.css  text eol=lf
+*.html text eol=lf
+*.md   text eol=lf
+*.mjs  text eol=lf
+*.cjs  text eol=lf
+*.sh   text eol=lf
+
+# Binary assets — never touch line endings.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.mp3  binary
+*.wav  binary
+*.ogg  binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.otf  binary
+*.ico  binary
+*.pdf  binary

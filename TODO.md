@@ -1,7 +1,18 @@
 # VESTIBULE — TODO
 
-*Last updated: Aug 1, 2026 — Lucifer HP bug + debug-key hole killed; Balatro HP curve shipped*
-*Branch state: main = audited stable · playtest/session2 = bot rig WIP (see HANDOFF.md)*
+*Last updated: Aug 5, 2026 — card-fix session (uncommitted, pending build-verify + push)*
+*Branch state: main = audited stable · playtest/session2 = bot rig WIP + Aug 5 card fixes (see HANDOFF.md)*
+
+## 🎸 AUG 5 — CARD CORRECTNESS FIXES (uncommitted; App.jsx + cardEngine.js + cards.js + sim)
+
+Verified against current code first — most AUDIT_AUG1 "open" items were already closed by the Aug 4 phases (War Drums lifetime key, `getShopCost`, temp-buff never-expire normalization pass, boss-heal clamp). Genuinely-open items fixed this session:
+
+1. **Setlist Rewrite** was a pure no-op (log line only). Now FREE, once-per-Strike scry: peek top 3, discard the costliest, keep 2 on top. Wired in App.jsx (guard + `setSetlistRewriteUsed`, registered in `PER_STRIKE_RESETS`, added to applyCard deps), `cardEngine.js` (`S.flags.setlistRewriteUsed`), and the sim (per-strike reset + flag map + scorer). Sim play rate 28→15.8/g once capped.
+2. **Cardinal RULE 1 sweep** — removed every remaining `setHand`-inside-`setDeck` updater: Gear Check, Backstage Pass, Sonic Boom, Devil's Dice jackpot. All now compute off `deckRef.current`, `setDeck` directly, and defer `setHand` via `setTimeout` (Venue-Swap pattern). Zero violations remain.
+3. **Cursed Strings** — was +3 with a dead `cursed` flag (drawback never wired). Now +6 ATK this Strike, and `cursed` is READ at every member-heal site (roadie, soundcheck, wake up, séance, controlled feedback, roadie/blood-harmony replay variants, folk-magic aura, cosmic-unity trip, post-fight heal) + `cardEngine.canHeal` + sim `_cursed` round-trip. Cleared at all three fight-boundary resets + Encore. Also fixed its never-expire bug (`_origAtk` now captured). cards.js text updated.
+4. **`engineUid` determinism** — replaced module-global `_uidCounter` with `S._uidSeq` (a module global broke same-seed reproducibility / live-sim parity). Copy cards (echo/riffthief/bootleg) now guard `MAX_HAND` before pushing.
+
+Verified: engine self-test 86/86 · `npm run check` CLEAN · eslint parse-clean (0 syntax errors) · sim runs clean across decks (no NaN/crash) · independent code-audit passed. **UNVERIFIED: `vite build`** (sandbox lacks the Linux rolldown binding — confirm on Windows). Fixes are UNCOMMITTED; `.gitattributes` added to normalize line endings.
 
 ## 🩸 AUG 4 — PHASE 1: CRASHES, FREEZES AND UNREACHABLE UI (App.jsx)
 

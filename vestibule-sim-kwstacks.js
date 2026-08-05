@@ -611,7 +611,7 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
     case 'cursedstrings':return 55;case 'hexdecay':return enemy._hp>=500?75:45;
     case 'infernalpact':return corruption<50?65:10;case 'carrioncall':return stage.some(m=>m.tooStoned)?90:0;
     case 'possessionriff':return 78;case 'darkcrescendo':return corruption>=80?98:0;case 'hellfirerift':return corruption<80?90:60;case 'soulsacrifice':return 85;case 'voidpact':return corruption<75?95:50;
-    case 'russianroulette':return alive.length>=4?60:30;case 'gearcheck':return 48;case 'setlistrewrite':return 30;
+    case 'russianroulette':return alive.length>=4?60:30;case 'gearcheck':return 48;case 'setlistrewrite':return gs._setlistRewriteUsed?0:30;
     case 'backstagepass':return embers>=2?65:30;case 'venueswap':return hand.length<=3?60:20;case 'doublebooking':return 92;
     case 'bootlegcopy':return 55;case 'secondwind':return embers===0?90:embers<=2?50:10;case 'pyromaniac':return embers<=2?68:25;
     case 'slowburn':return strikeNum===0?65:30;case 'ampfeedback':return embers<=2?70:30;
@@ -690,7 +690,7 @@ function applyCardSim(card,gs,enemy,emberCost){
   if(idx<0)return null
   // Adapt: the sim keeps a dense stage array; the engine expects 5 slots.
   const S={
-    stage:(()=>{const a=gs.stage.map(m=>m?{uid:m.uid,name:m.name||m.id,atk:m.atk,hp:m.hp,maxHp:m.maxHp,role:m.role,keyword:m.keyword,tooStoned:!!m.tooStoned,stoneShield:m.stoneShield,tempBuff:!!m.tempBuff,_origAtk:m._origAtk,permAtkBonus:m.permAtkBonus||0,tempAtkBonus:m.tempAtkBonus||0,buffCount:m._buffCount||0,foil:!!m.foil,mythic:!!m.mythic,demonic:!!m.demonic,_hrUsed:!!m._hrUsed,ampedCount:m.ampedThisStrike?1:0,encoreReady:!!m.encoreThisStrike}:null);while(a.length<5)a.push(null);return a})(),
+    stage:(()=>{const a=gs.stage.map(m=>m?{uid:m.uid,name:m.name||m.id,atk:m.atk,hp:m.hp,maxHp:m.maxHp,role:m.role,keyword:m.keyword,tooStoned:!!m.tooStoned,cursed:!!m._cursed,stoneShield:m.stoneShield,tempBuff:!!m.tempBuff,_origAtk:m._origAtk,permAtkBonus:m.permAtkBonus||0,tempAtkBonus:m.tempAtkBonus||0,buffCount:m._buffCount||0,foil:!!m.foil,mythic:!!m.mythic,demonic:!!m.demonic,_hrUsed:!!m._hrUsed,ampedCount:m.ampedThisStrike?1:0,encoreReady:!!m.encoreThisStrike}:null);while(a.length<5)a.push(null);return a})(),
     corruption:gs.corruption,embers:gs.embers,maxEmbers:gs.maxEmbers,stash:gs.stash,
     strikeMult:gs._strikeMult||1,
     bossHp:enemy._hp,bossMaxHp:enemy.maxHp,bossDebuff:0,
@@ -700,7 +700,7 @@ function applyCardSim(card,gs,enemy,emberCost){
     strikesLeft:gs._strikesLeft,fightMaxStrikes:gs._fightMaxStrikes,discardsLeft:gs._discardsLeft,
     cardsPlayedIds:gs._cardsPlayedIds||[],directDmg:0,pendingDraw:0,pendingEmbers:0,
     flags:{nextCardFree:!!gs._nextCardFree,allCardsFree:!!gs._allCardsFree,freeCardsLeft:gs._freeCardsLeft||0,
-      stageDiveUsed:!!gs._stageDiveUsed,possessedActive:!!gs._possessedActive,overdriveActive:!!gs._overdriveActive,
+      stageDiveUsed:!!gs._stageDiveUsed,setlistRewriteUsed:!!gs._setlistRewriteUsed,possessedActive:!!gs._possessedActive,overdriveActive:!!gs._overdriveActive,
       infencoreActive:!!gs._infencoreActive,bossSkipStrikes:gs._bossSkipStrikes||0,slowBurnStrikes:gs._slowBurn||0,
       pyromaniacActive:!!gs._pyro,venomDotStacks:gs._venomDot||0,tripBuff:gs._tripBuff,cursedNoHeal:!!gs._cursed,
       lastRiffId:gs._lastRiffPlayed}
@@ -727,7 +727,7 @@ function applyCardSim(card,gs,enemy,emberCost){
     if(!src||!dst)continue
     dst.atk=src.atk;dst.hp=src.hp;dst.maxHp=src.maxHp
     dst.tooStoned=src.tooStoned;dst.stoneShield=src.stoneShield
-    dst.tempBuff=src.tempBuff;dst._origAtk=src._origAtk
+    dst.tempBuff=src.tempBuff;dst._origAtk=src._origAtk;dst._cursed=src.cursed
     dst.permAtkBonus=0 // engine keeps ALL damage in .atk (verified: battlecry 5->6, perm stays 0)
     dst.tempAtkBonus=0 // engine folds temp deltas into .atk; keeping this double-counts
     dst._buffCount=src.buffCount;dst._hrUsed=src._hrUsed
@@ -760,6 +760,7 @@ function applyCardSim(card,gs,enemy,emberCost){
   gs._drawNextStrike=(gs._drawNextStrike||0)+(S.pendingDraw||0)
   gs._tappedOutNext=(S.pendingEmbers||0)>0?S.pendingEmbers:gs._tappedOutNext
   gs._stageDiveUsed=S.flags.stageDiveUsed
+  gs._setlistRewriteUsed=S.flags.setlistRewriteUsed
   // DO NOT propagate possessed/overdrive/infencore/amped: the engine already
   // applied those multipliers directly to member .atk (live semantics). The sim's
   // strike formula ALSO multiplies by these flags, which made Possessed
@@ -899,7 +900,7 @@ function simFight(gs,phaseHp,luciferPhase){
       if(m.tempBuff&&m._origAtk!==undefined){m.atk=m._origAtk;m._origAtk=undefined;m.tempBuff=false}
       m.tempAtkBonus=0;m.ampedThisStrike=0;m.encoreThisStrike=false});
     gs._directDmg=0;gs._overdriveActive=false;gs._infencoreActive=false;gs._possessedActive=false;gs._nextCardFree=false;
-    gs._stageDiveUsed=false;gs._lastRiffPlayed=null;gs._ampFbDiscount=0;gs.stage.forEach(m=>{m._skipAttack=false});
+    gs._stageDiveUsed=false;gs._setlistRewriteUsed=false;gs._lastRiffPlayed=null;gs._ampFbDiscount=0;gs.stage.forEach(m=>{m._skipAttack=false});
     // ── DECK IDENTITY: hand size override (Engineer 7, Shredder 6) ──
     const _baseHand=DECK_ID_DEF.handSize||HAND_SIZE
     const handSize=_baseHand+(gs._speedDemon?1:0)+(gs._drawNextStrike||0);

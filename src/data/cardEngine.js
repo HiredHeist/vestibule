@@ -99,11 +99,14 @@ function shuffle(arr, rng) {
   return a
 }
 
-let _uidCounter = 0
-/** Deterministic uid for engine-created cards (echopedal / riffthief / bootlegcopy). */
-function engineUid(rng) {
-  _uidCounter = (_uidCounter + 1) % 1e9
-  return 'eng' + Math.floor(rng() * 1e9).toString(36) + _uidCounter.toString(36)
+/**
+ * Deterministic uid for engine-created cards (echopedal / riffthief / bootlegcopy).
+ * The sequence counter lives on the engine state `S`, NOT module scope — a module
+ * global made two identical-seed runs mint different uids (determinism/parity break).
+ */
+function engineUid(S, rng) {
+  S._uidSeq = (num(S._uidSeq) + 1) % 1e9
+  return 'eng' + Math.floor(rng() * 1e9).toString(36) + S._uidSeq.toString(36)
 }
 
 /** All non-null, non-Too-Stoned stage members. */
@@ -151,8 +154,8 @@ function rawAtk(mem, delta) { mem.atk = num(mem.atk) + delta }
 
 function bumpBuff(mem) { mem.buffCount = num(mem.buffCount) + 1 }
 
-/** FALLEN members cannot be healed (live guards every heal site with this). */
-const canHeal = (mem) => mem && mem.keyword !== 'FALLEN'
+/** FALLEN members cannot be healed; nor can a member cursed by Cursed Strings (this fight). */
+const canHeal = (mem) => mem && mem.keyword !== 'FALLEN' && !mem.cursed
 
 function heal(mem, amount) {
   if (!canHeal(mem)) return 0
@@ -1043,7 +1046,8 @@ function copyLastPlayed(S, C, out, emoji, verb) {
   }
   const def = CARD_DEFS[lastId]
   if (!def) { log(out, emoji + ' no valid card to echo'); return }
-  S.hand.push(Object.assign({}, def, { uid: engineUid(C.rng) }))
+  if (S.hand.length >= MAX_HAND) { log(out, emoji + ' hand is full'); return }
+  S.hand.push(Object.assign({}, def, { uid: engineUid(S, C.rng) }))
   S.flags.nextCardFree = true
   log(out, emoji + ' ' + verb + ' ' + def.name + ' — play it FREE!')
 }
@@ -1194,15 +1198,12 @@ IMPL.offeringpit = (S, C, out) => {
 
 IMPL.cursedstrings = (S, C, out) => {
   if (!C.m) return false
-  tempAtk(C.m, 3)
+  // 3B: +6 ATK this strike; `cursed` is now READ by canHeal, so this member
+  // cannot be healed for the rest of the fight (cleared at the fight boundary).
+  tempAtk(C.m, 6)
   bumpBuff(C.m)
-  // LIVE NO-OP: live sets `cursed:true` on the member but NOTHING in App.jsx
-  // ever reads `.cursed` — the "cannot heal this fight" clause does nothing.
-  // (The sim mirrors the dead flag as `_cursed`, also never read.) Kept so the
-  // field exists if the drawback is ever implemented.
   C.m.cursed = true
-  S.flags.cursedNoHeal = true
-  log(out, '🪡 Cursed Strings! ' + C.m.name + ' +3 ATK! (cannot be healed this fight)')
+  log(out, '🪡 Cursed Strings! ' + C.m.name + " +6 ATK — but can't be healed this fight!")
 }
 
 IMPL.hexdecay = (S, C, out) => {
@@ -1289,16 +1290,26 @@ IMPL.russianroulette = (S, C, out) => {
 
 // ── UTILITY (alt decks) ────────────────────────────────────────────────────
 IMPL.gearcheck = (S, C, out) => {
-  // TEXT-MISMATCH: text says "Draw 2, discard 1"; live only draws 2 — the
-  // discard half is never implemented.
   draw(S, 2, C.rng)
-  log(out, '🔧 Gear Check! Draw 2, discard 1 from hand.')
+  log(out, '🔧 Gear Check! Drew 2 cards.')
 }
 
 IMPL.setlistrewrite = (S, C, out) => {
-  // LIVE NO-OP: applyCard's entire body is a log line. There is no deck-peek or
-  // reorder UI anywhere in App.jsx — the card does literally nothing.
-  log(out, '📝 Setlist Rewrite! Top 3 cards reordered.')
+  // 1B Scry: peek the top 3 (next to draw), discard the costliest, keep the rest on top.
+  // Option A: FREE but once per Strike — reject a second play (caller must not charge).
+  if (S.flags && S.flags.setlistRewriteUsed) { log(out, '📝 Setlist Rewrite — once per Strike.'); return false }
+  const n = Math.min(3, S.deck.length)
+  if (n === 0) { log(out, '📝 Setlist Rewrite! Deck is empty.'); return }
+  const top = S.deck.splice(S.deck.length - n, n)
+  const cost = (c) => num(CARD_DEFS[c.id] ? CARD_DEFS[c.id].embers : 0)
+  let wi = 0
+  for (let i = 1; i < top.length; i++) if (cost(top[i]) > cost(top[wi])) wi = i
+  const tossed = top.splice(wi, 1)[0]
+  S.deck.push(...top)
+  S.discard.push(tossed)
+  if (S.flags) S.flags.setlistRewriteUsed = true
+  const tn = CARD_DEFS[tossed.id] ? CARD_DEFS[tossed.id].name : tossed.id
+  log(out, '📝 Setlist Rewrite! Tossed ' + tn + ', kept ' + top.length + ' on top.')
 }
 
 IMPL.backstagepass = (S, C, out) => {
@@ -1343,7 +1354,8 @@ IMPL.bootlegcopy = (S, C, out) => {
   // copy was destroyed and the card did nothing at all. App.jsx ~6660.
   const best = S.hand.filter(c => c && c.id !== 'bootlegcopy')[0]
   if (!best) { log(out, '📀 Bootleg Copy! Nothing to copy.'); return }
-  S.hand.push(Object.assign({}, best, { uid: engineUid(C.rng) }))
+  if (S.hand.length >= MAX_HAND) { log(out, '📀 Bootleg Copy! Hand is full.'); return }
+  S.hand.push(Object.assign({}, best, { uid: engineUid(S, C.rng) }))
   log(out, '📀 Bootleg Copy! Copied best card in hand!')
 }
 
@@ -1463,6 +1475,7 @@ export function newEngineState(partial = {}) {
       allCardsFree: false,
       freeCardsLeft: 0,
       stageDiveUsed: false,
+      setlistRewriteUsed: false,
       possessedActive: false,
       overdriveActive: false,
       infencoreActive: false,

@@ -4979,6 +4979,7 @@ function App(){
   const [corruption,setCorruption]=useState(0)
 
   const [stageDiveUsed,setStageDiveUsed]=useState(false)
+  const [setlistRewriteUsed,setSetlistRewriteUsed]=useState(false)
 
   // ── PARTICLE SYSTEM — lightweight CSS-animated particles ──────
   const [vfxParticles,setVfxParticles]=useState([])
@@ -5645,6 +5646,7 @@ function App(){
     combosFiredRef:()=>{combosFiredRef.current=[]},
     discardsThisStrikeRef:()=>{discardsThisStrikeRef.current=0},
     ritualistEmberRefundsThisStrikeRef:()=>{ritualistEmberRefundsThisStrikeRef.current=0},
+    setlistRewriteUsed:()=>setSetlistRewriteUsed(false),
     // A3 Evil Eye reads "The first card you play each STRIKE costs 0 Embers",
     // but nextCardFree was armed only at fight start and consumed by the first
     // card played — one free card per FIGHT, a 4× shortfall at Bronze. Re-arm
@@ -6077,7 +6079,7 @@ function App(){
     else if(card.id==='battlecry'){if(!m)return false;const bcBonus=(activePassives.some(p=>p.id==='p7')?2:1)+(card.upgraded?1:0);ns[slotIdx]=Object.assign({},m,{atk:m.atk+bcBonus,buffCount:(m.buffCount||0)+1});msg='🤘 '+m.name+' Battle Cry! +'+bcBonus+' ATK forever!';addBuff(m.uid,'+'+bcBonus+' ATK','#ee2222');addFloat('+'+bcBonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4400')}
     else if(card.id==='newstrings'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,buffCount:(m.buffCount||0)+1});msg='🎸 '+m.name+' +2 ATK permanently!';addBuff(m.uid,'+2 ATK','#ee2222');addFloat('+2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#e8a820')}
     else if(card.id==='encore'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{encoreReady:true,buffCount:(m.buffCount||0)+1});msg='🔁 '+m.name+' encores!';addBuff(m.uid,'ENCORE','#dd2222');addFloat('ENCORE!',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#dd2222')}
-    else if(card.id==='roadie'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{stoneShield:2,hp:m.keyword==='FALLEN'?m.hp:Math.min(m.maxHp,m.hp+2),buffCount:(m.buffCount||0)+1});msg='🛡 '+m.name+' shielded for 2 Strikes and healed 2 HP!'}
+    else if(card.id==='roadie'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{stoneShield:2,hp:(m.keyword==='FALLEN'||m.cursed)?m.hp:Math.min(m.maxHp,m.hp+2),buffCount:(m.buffCount||0)+1});msg='🛡 '+m.name+' shielded for 2 Strikes and healed 2 HP!'}
     else if(card.id==='stagedive'){
       if(!m)return false
       const dmg=m.hp
@@ -6090,7 +6092,7 @@ function App(){
     }
     else if(card.id==='wakeup'){
       // Heal all active members 2 HP
-      ns=ns.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m)
+      ns=ns.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'&&!m.cursed?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m)
       // Revive first Too Stoned member with 50% permanent ATK loss
       const stonedIdx=ns.findIndex(m=>m&&m.tooStoned)
       if(stonedIdx>=0){
@@ -6108,7 +6110,7 @@ function App(){
     }
     else if(card.id==='soundcheck'){
       const injuredCount=ns.filter(m=>m&&!m.tooStoned&&m.hp<m.maxHp).length
-      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.keyword==='FALLEN'?m.hp:Math.min(m.maxHp,m.hp+4),atk:m.hp<m.maxHp&&m.keyword!=='FALLEN'?m.atk+1:m.atk,tempBuff:m.hp<m.maxHp&&m.keyword!=='FALLEN'?true:m.tempBuff,_origAtk:m.hp<m.maxHp&&!m._origAtk&&m.keyword!=='FALLEN'?m.atk:m._origAtk}):m)
+      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:(m.keyword==='FALLEN'||m.cursed)?m.hp:Math.min(m.maxHp,m.hp+4),atk:m.hp<m.maxHp&&m.keyword!=='FALLEN'?m.atk+1:m.atk,tempBuff:m.hp<m.maxHp&&m.keyword!=='FALLEN'?true:m.tempBuff,_origAtk:m.hp<m.maxHp&&!m._origAtk&&m.keyword!=='FALLEN'?m.atk:m._origAtk}):m)
       msg='🔊 Sound Check! All +4 HP'+(injuredCount>0?' + '+injuredCount+' injured member(s) +1 ATK!':'!');stage.filter(x=>x&&!x.tooStoned).forEach(x=>addBuff(x.uid,'+HP','#33dd33'))
       addFloat('+4 HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')
     }
@@ -6153,7 +6155,7 @@ function App(){
       const cfTarget=ns[slotIdx]
       if(cfTarget&&!cfTarget.tooStoned){
         const healAmt=cfTarget.maxHp-cfTarget.hp
-        ns[slotIdx]=Object.assign({},cfTarget,{hp:cfTarget.keyword==='FALLEN'?cfTarget.hp:cfTarget.maxHp})
+        ns[slotIdx]=Object.assign({},cfTarget,{hp:(cfTarget.keyword==='FALLEN'||cfTarget.cursed)?cfTarget.hp:cfTarget.maxHp})
         msg='🎚 Controlled Feedback! Corruption → 50%. '+cfTarget.name+' fully healed!'
         addFloat('+'+healAmt+'❤',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#44dd44')
       } else {
@@ -6317,7 +6319,7 @@ function App(){
     }
     else if(card.id==='seance'){
       const healAmt=corruption>=50?6:3
-      ns=ns.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+healAmt)}):m)
+      ns=ns.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'&&!m.cursed?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+healAmt)}):m)
       msg='🔮 Séance! All members +'+healAmt+' HP'+(corruption>=50?' (≥50% corruption: bonus heal!)':'')
       addFloat('+'+healAmt+' HP',getCenter(bossRef).x,getCenter(bossRef).y-70,'#22aa44')
     }
@@ -6525,7 +6527,9 @@ function App(){
     }
     else if(card.id==='sonicboom'){
       ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+2,tempBuff:true,buffCount:(s.buffCount||0)+1}):s)
-      setDeck(d=>{if(d.length>0){const c=d[d.length-1];setHand(h=>[...h,c]);return d.slice(0,-1)}return d})
+      // RULE 1 fix (was setHand inside setDeck).
+      const _d=[...deckRef.current];const _drawn=_d.length>0?[_d.pop()]:[]
+      setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._drawn]),0)
       msg='💥 Sonic Boom! ALL members +2 ATK! Draw 1!'
     }
     else if(card.id==='tremolopick'){
@@ -6550,7 +6554,7 @@ function App(){
       const roll=Math.floor(Math.random()*6)+1
       if(roll<=2){msg='🎲 Devil\'s Dice: rolled '+roll+'. Nothing happens!'}
       else if(roll<=4){ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+3,tempBuff:true}):s);msg='🎲 Devil\'s Dice: rolled '+roll+'! ALL +3 ATK!'}
-      else{ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+5,tempBuff:true}):s);setDeck(d=>{const drawn=d.slice(-2);setHand(h=>[...h,...drawn]);return d.slice(0,-2)});msg='🎲 Devil\'s Dice: rolled '+roll+'! ALL +5 ATK + draw 2! JACKPOT!'}
+      else{ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+5,tempBuff:true}):s);const _dd=[...deckRef.current];const _ddr=_dd.splice(Math.max(0,_dd.length-2));setDeck(_dd);setTimeout(()=>setHand(h=>[...h,..._ddr]),0);msg='🎲 Devil\'s Dice: rolled '+roll+'! ALL +5 ATK + draw 2! JACKPOT!'}
     }
     else if(card.id==='necroticamp'){
       const bonus=Math.floor(corruption/20);ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+bonus,tempBuff:true}):s)
@@ -6579,8 +6583,10 @@ function App(){
       msg='🕳️ Offering! '+m.name+' skips attack, '+target.name+' +8 ATK! Corruption +10%'
     }
     else if(card.id==='cursedstrings'){
-      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+3,tempBuff:true,buffCount:(m.buffCount||0)+1,cursed:true})
-      msg='🪡 Cursed Strings! '+m.name+' +3 ATK! (cannot be healed this fight)'
+      // 3B: +6 ATK this strike (fixed the never-expire bug: tempBuff now carries _origAtk),
+      // and the `cursed` flag is now actually read by every heal site this fight.
+      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+6,tempBuff:true,_origAtk:m._origAtk!==undefined?m._origAtk:m.atk,buffCount:(m.buffCount||0)+1,cursed:true})
+      msg='🪡 Cursed Strings! '+m.name+" +6 ATK — but can't be healed this fight!"
     }
     else if(card.id==='hexdecay'){
       const dmg=Math.floor(enemyHp*0.15);const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp)
@@ -6632,13 +6638,30 @@ function App(){
       else{ns[slotIdx]=Object.assign({},m,{atk:m.atk+8,tempBuff:true,stoneShield:2});msg='🔫 Russian Roulette: '+m.name+' rolled 6! +8 ATK + Shield! 🛡️'}
     }
     else if(card.id==='gearcheck'){
-      setDeck(d=>{const drawn=d.slice(-2);setHand(h=>[...h,...drawn]);return d.slice(0,-2)})
-      msg='🔧 Gear Check! Draw 2, discard 1 from hand.'
+      // RULE 1 fix: never setHand inside a setDeck updater. Compute off the ref,
+      // set deck directly, defer the hand append past handleDropOnStage's plain setHand(remaining).
+      const _d=[...deckRef.current];const _drawn=_d.splice(Math.max(0,_d.length-2))
+      setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._drawn]),0)
+      msg='🔧 Gear Check! Drew 2 cards.'
     }
-    else if(card.id==='setlistrewrite'){msg='📝 Setlist Rewrite! Top 3 cards reordered.'}
+    else if(card.id==='setlistrewrite'){
+      // 1B Scry: peek top 3 (next to draw), discard the costliest, keep the rest on top.
+      // Option A: FREE but once per Strike (mirrors Stage Dive) — kills the free-spam.
+      if(setlistRewriteUsed){addLog('📝 Setlist Rewrite — once per Strike.');return false}
+      const _d=[...deckRef.current];const _top=_d.splice(Math.max(0,_d.length-3))
+      if(_top.length>0){
+        let _wi=0;for(let i=1;i<_top.length;i++){if((_top[i].embers||0)>(_top[_wi].embers||0))_wi=i}
+        const _tossed=_top.splice(_wi,1)[0]
+        _d.push(..._top);setDeck(_d);setDiscardPile(p=>[...p,_tossed])
+        setSetlistRewriteUsed(true)
+        msg='📝 Setlist Rewrite! Tossed '+_tossed.name+', kept '+_top.length+' on top.'
+      }else{msg='📝 Setlist Rewrite! Deck is empty.'}
+    }
     else if(card.id==='backstagepass'){
       nextCardFreeRef.current=true;setNextCardFree(true)
-      setDeck(d=>{if(d.length>0){const c=d[d.length-1];setHand(h=>[...h,c]);return d.slice(0,-1)}return d})
+      // RULE 1 fix (was setHand inside setDeck).
+      const _d=[...deckRef.current];const _drawn=_d.length>0?[_d.pop()]:[]
+      setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._drawn]),0)
       msg='🎫 Backstage Pass! Next card is FREE! Draw 1!'
     }
     else if(card.id==='venueswap'){
@@ -6849,7 +6872,7 @@ function App(){
     else if(enemy.passiveId==='cardHeal3b')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+8))
     else if(enemy.passiveId==='cardHeal8')setEnemyHp(p=>p<=0?p:Math.min(scaledMaxHp||enemy.maxHp,p+25))
     return true
-  },[embers,stage,corruption,stageDiveUsed,deck,discardPile,hand,bossRef,stageRefs,selected,fightTripBuff,enemy,enemyHp,maxEmbers,activePassives,activeArtifacts,chosenPacts,fightIndex,collectedLoot])
+  },[embers,stage,corruption,stageDiveUsed,setlistRewriteUsed,deck,discardPile,hand,bossRef,stageRefs,selected,fightTripBuff,enemy,enemyHp,maxEmbers,activePassives,activeArtifacts,chosenPacts,fightIndex,collectedLoot])
 
   const handleDropOnStage=useCallback((slotIdx,uidOverride)=>{
     // QUICK-PLAY FIX (Jul 31 2026): quick-play called this synchronously after
@@ -7175,7 +7198,7 @@ function App(){
     setEnemyHp(_lucP2Hp);enemyHpRef.current=_lucP2Hp;setScaledMaxHp(_lucP2Hp)
     setBossRageAtk(0);bossRageAtkRef.current=0
     strikeInFlightRef.current=0
-    setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,stoneShield:false,tempBuff:false,encoreReady:false,ampedThisStrike:false}):null))
+    setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,stoneShield:false,tempBuff:false,encoreReady:false,ampedThisStrike:false,cursed:false}):null))
     setEmbers(maxEmbers)
     const _lucDeckStrMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
     setStrikesLeft(activeStake.maxStrikes+_lucDeckStrMod)
@@ -7395,7 +7418,7 @@ function App(){
           return Object.assign({},m,{maxHp:m.maxHp+m.hangoverHpDebuff,hangoverHpDebuff:0})
         }))
         // Post-fight heal (disabled on higher stakes)
-        if(activeStake.healAfterFight){setStage(prev=>prev.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m))}
+        if(activeStake.healAfterFight){setStage(prev=>prev.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'&&!m.cursed?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m))}
         // Victory flash before shop (circle cleared extra for bosses)
         const isBossKill=(fightIndex+1)%3===0
     if(isBossKill&&collectedLoot.includes('golden_tooth')){setStash(p=>Math.min(MAX_STASH,p+5));addLog('🪙 Golden Tooth! +5 bonus Stash.')}
@@ -7850,7 +7873,7 @@ function App(){
         {name:'SYNESTHESIA',desc:'All cards cost 1 less ember this fight!',color:'#cc44ff',buffName:'SYNESTHESIA',
           apply:()=>{addLog('🍄 SYNESTHESIA! All cards cost 1 less ember!')}},
         {name:'COSMIC UNITY',desc:'All healed to full HP + Stonewall!',color:'#44ddaa',buffName:'COSMIC UNITY',
-          apply:()=>{setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp,stoneShield:2}):m));addLog('🍄 COSMIC UNITY! Full HP + Stonewall for all!')}},
+          apply:()=>{setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.cursed?m.hp:m.maxHp,stoneShield:2}):m));addLog('🍄 COSMIC UNITY! Full HP + Stonewall for all!')}},
         // ── New v0.7.2 effects ──
         {name:'BLOTTER REVELATION',desc:'Next 3 cards play FREE.',color:'#ffaa44',buffName:'BLOTTER REVELATION',instant:true,
           apply:()=>{setFreeCardsLeft(3);freeCardsLeftRef.current=3;addLog('🍄 BLOTTER REVELATION! The setlist reveals itself — next 3 cards play FREE.')}},
@@ -8210,7 +8233,7 @@ function App(){
           }
           // Roadie: shield + heal target
           else if(card.id==='roadie'&&m){
-            ns[slotIdx]=Object.assign({},m,{stoneShield:2,hp:m.keyword==='FALLEN'?m.hp:Math.min(m.maxHp,m.hp+2)})
+            ns[slotIdx]=Object.assign({},m,{stoneShield:2,hp:(m.keyword==='FALLEN'||m.cursed)?m.hp:Math.min(m.maxHp,m.hp+2)})
           }
           // Wake Up Call: revive a Too Stoned member at 50% HP
           else if(card.id==='wakeup'){
@@ -8232,7 +8255,7 @@ function App(){
           }
           // Blood Harmony: +1 ATK to all + 1 HP heal to all
           else if(card.id==='bloodharmony'){
-            ns=ns.map(mm=>mm&&!mm.tooStoned?Object.assign({},mm,{atk:mm.atk+1,permAtkBonus:(mm.permAtkBonus||0)+1,hp:Math.min(mm.maxHp,mm.hp+1)}):mm)
+            ns=ns.map(mm=>mm&&!mm.tooStoned?Object.assign({},mm,{atk:mm.atk+1,permAtkBonus:(mm.permAtkBonus||0)+1,hp:mm.cursed?mm.hp:Math.min(mm.maxHp,mm.hp+1)}):mm)
           }
           // Blood Ritual: sacrifice 25% target HP, deal that as damage
           else if(card.id==='bloodritual'&&m){
@@ -8952,7 +8975,7 @@ function App(){
       }
       const _totalStrikeDmg=finalDmg+_shredderEchoDmg
       // v0.8 FOLK MAGIC aura — adjacent members heal 1 per folk neighbor after each strike
-      setStage(p=>{const hm=_folkAuraHealMap(p);return hm?p.map((m,i)=>m&&hm[i]?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+hm[i])}):m):p})
+      setStage(p=>{const hm=_folkAuraHealMap(p);return hm?p.map((m,i)=>m&&hm[i]&&!m.cursed?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+hm[i])}):m):p})
       // Aug 4 2026 (phase 3): overkill was ALWAYS 0 — newEHp is clamped at 0 by
       // Math.max BEFORE Math.abs() reads it, so _ok was |0|. Keep the unclamped value.
       const _rawEHp=startHp-_totalStrikeDmg
@@ -9535,7 +9558,7 @@ function App(){
         setEmbers(maxEmbers)
         const allCards=[...handRef.current,...deckRef.current,...discRef.current].sort(()=>Math.random()-.5)
         setHand(allCards.slice(0,hs));setDeck(allCards.slice(hs));setDiscardPile([])
-        setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined}):null))
+        setStage(p=>p.map(m=>m?Object.assign({},m,{hp:m.maxHp,tooStoned:false,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined,cursed:false}):null))
         setWelcomeToHell('fighting')
       },3000)
       return
@@ -9661,7 +9684,7 @@ function App(){
     // re-roll folded in). This block used to roll it TWICE — once here without
     // Drum Throne, once again ~90 lines below with it.
     setStage(p=>{
-      const reset=p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined,_sustainUsed:undefined,_hrUsed:undefined}):null)
+      const reset=p.map(m=>m?Object.assign({},m,{tooStoned:false,hp:m.maxHp,buffCount:0,tempBuff:false,encoreReady:false,stoneShield:false,atk:m._origAtk!==undefined?m._origAtk:m.atk,_origAtk:undefined,_sustainUsed:undefined,_hrUsed:undefined,cursed:false}):null)
       return scanMentorLinks(reset)
     })
     // Redeal hand from current deck+discard
@@ -10290,7 +10313,7 @@ function App(){
     setEnemyHp(_wHp);setScaledMaxHp(_wHp);enemyHpRef.current=_wHp
     const _encDeckStrMod=(STARTER_DECKS.find(d=>d.id===selectedDeck)||{}).maxStrikesMod||0
     setStrikesLeft(activeStake.maxStrikes+_encDeckStrMod);setFightMaxStrikes(activeStake.maxStrikes+_encDeckStrMod);setDiscardsLeft(4);setFightMaxDiscards(4)
-    setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp}):m))
+    setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:m.maxHp,cursed:false}):m))
     setGameState('playing');setAnimPhase('idle');setDeathCause(null)
     victoryFiredRef.current=false
     corruptCardsGivenRef.current=[]

@@ -85,7 +85,7 @@ export const ALL_CARDS=[
   {id:'soulbargain',name:'Soul Bargain',type:'CORRUPT',rarity:'Uncommon',emoji:'👿',embers:0,effect:'+5 ATK this Strike. -3 HP. +5% Corruption. Blood for power.',color:'#8800cc',typeColor:'#6600aa',copies:0},
   {id:'venomriff',name:'Venom Riff',type:'CORRUPT',rarity:'Uncommon',emoji:'🐍',embers:1,effect:'+3 ATK permanently. +5% Corruption.',color:'#44aa44',typeColor:'#228822',copies:0},
   {id:'offeringpit',name:'Offering to the Pit',type:'CORRUPT',rarity:'Rare',emoji:'🕳️',embers:2,effect:'A random OTHER member gets +8 ATK this Strike. Corruption +10%.',color:'#660066',typeColor:'#440044',copies:0},
-  {id:'cursedstrings',name:'Cursed Strings',type:'CORRUPT',rarity:'Common',emoji:'🪡',embers:1,effect:'+3 ATK this Strike.',color:'#880088',typeColor:'#660066',copies:0},
+  {id:'cursedstrings',name:'Cursed Strings',type:'CORRUPT',rarity:'Common',emoji:'🪡',embers:1,effect:"+6 ATK this Strike. That member can't be healed this fight.",color:'#880088',typeColor:'#660066',copies:0},
   {id:'hexdecay',name:'Hex of Decay',type:'CORRUPT',rarity:'Rare',emoji:'🦠',embers:3,effect:'Boss loses 15% of current HP. +15% Corruption.',color:'#448844',typeColor:'#226622',copies:0},
   {id:'infernalpact',name:'Infernal Pact',type:'CORRUPT',rarity:'Rare',emoji:'📜',embers:0,effect:'FREE. Set corruption to 66%. All members +2 ATK permanently.',color:'#cc4400',typeColor:'#aa2200',copies:0},
   {id:'carrioncall',name:'Carrion Call',type:'CORRUPT',rarity:'Rare',emoji:'🦅',embers:1,effect:'Revive a Too Stoned member at 1 HP with +5 ATK. Corruption +20%.',color:'#886622',typeColor:'#664400',copies:0},
@@ -100,7 +100,7 @@ export const ALL_CARDS=[
   // ⚠ LIVE NO-OP: applyCard's whole body for this card is a log line — there is no
   // deck-peek or reorder UI anywhere in src/App.jsx. Kept in the data (removing it
   // would change deck manifests) but it does nothing. See LIVE-SIDE FIXES NEEDED.
-  {id:'setlistrewrite',name:'Setlist Rewrite',type:'UTILITY',rarity:'Common',emoji:'📝',embers:0,effect:'FREE. Look at top 3 cards of deck, reorder them.',color:'#88aacc',typeColor:'#6688aa',copies:0},
+  {id:'setlistrewrite',name:'Setlist Rewrite',type:'UTILITY',rarity:'Common',emoji:'📝',embers:0,effect:'FREE. Look at top 3 of your deck; discard the costliest, keep 2 on top.',color:'#88aacc',typeColor:'#6688aa',copies:0},
   {id:'backstagepass',name:'Backstage Pass',type:'UTILITY',rarity:'Uncommon',emoji:'🎫',embers:2,effect:'Next card is FREE. Draw 1.',color:'#ccaa44',typeColor:'#aa8822',copies:0},
   {id:'venueswap',name:'Venue Swap',type:'UTILITY',rarity:'Uncommon',emoji:'🏟️',embers:1,effect:'Shuffle hand away. Draw 6 fresh cards.',color:'#4488aa',typeColor:'#226688',copies:0},
   {id:'doublebooking',name:'Double Booking',type:'UTILITY',rarity:'Rare',emoji:'📅',embers:3,effect:'+1 extra Strike this fight. Game changer.',color:'#ff8844',typeColor:'#dd6622',copies:0},
