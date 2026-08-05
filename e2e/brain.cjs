@@ -149,7 +149,7 @@ const EMBER_NET = {
 const DEMOTAPE_ATK_VALUE = {
   infencore: 95, overdrive: 86, amp: 82, distortion: 74, doubledown: 40,
   resonancecard: 66, shredsolo: 58, doomchord: 55, devilsdice: 55, overdriveped: 50,
-  moshpit: 50, heavyriff: 45, bloodharmony: 45, riffthief: 45, tremolopick: 45,
+  moshpit: 50, heavyriff: 45, bloodharmony: 62, riffthief: 45, tremolopick: 58,
   possessedperf: 35, herbmoney: 25, demotape: 20,
 }
 const DEMOTAPE_DMG = {   // replays that deal DIRECT damage — value them against the strike
@@ -364,14 +364,14 @@ function scoreBase(def, ctx) {
     case 'powertap': return emberRoom ? 84 : 20
     case 'staticcharge': return emberRoom ? (corruption === 0 ? 86 : 80) : 20
     case 'secondwind': return embers === 0 ? 90 : embers <= 2 ? 60 : 8
-    case 'corrsiphon': return (emberRoom ? 70 : 25) + corr
+    case 'corrsiphon': return (emberRoom ? 75 : 30) + corr
     case 'ampoverload': return ((ctx.gs && ctx.gs.discardsLeft) > 0) ? (emberRoom ? 81 : 25) : 3
     case 'groupie': return emberRoom ? 66 : 30
     case 'soundboard': return emberRoom ? 64 : 30
-    case 'ampfeedback': return emberRoom ? 68 : 28
-    case 'drainthecrowd': return emberRoom ? 64 : 20
+    case 'ampfeedback': return emberRoom ? 74 : 40
+    case 'drainthecrowd': return emberRoom ? 70 : 24
     case 'pyromaniac': return emberRoom ? 66 : 25
-    case 'slowburn': return ctx.strikeNum === 0 ? 65 : 30
+    case 'slowburn': return ctx.strikeNum === 0 ? 72 : 48
     case 'tappedout': return ctx.strikeNum < 3 ? 78 : 18
     // Smoke Break DUMPS 15% CORRUPTION and, with no pre-selection, discards a
     // RANDOM card (cardEngine IMPL.setbreak). At 62% corruption that trades a ×1.5
@@ -425,8 +425,8 @@ function scoreBase(def, ctx) {
     case 'soulbargain': return clamp(72 + corr, 0, 92)
     case 'cursedstrings': return 55
     case 'doomchord': return corruption >= 50 ? 78 : 55
-    case 'bloodharmony': return 52
-    case 'tremolopick': return ctx.cardsPlayed >= 3 ? 70 : 35
+    case 'bloodharmony': return 70
+    case 'tremolopick': return ctx.cardsPlayed >= 2 ? 72 : 35
     // Counts RIFFs THIS STRIKE. The old code counted the whole FIGHT, so it read 78
     // permanently from the second strike onward. cardEngine reads S.cardsPlayedIds,
     // which live resets every strike.
@@ -583,7 +583,7 @@ for (const m of MUSICIANS) { KW_BY_NAME[m.name.toLowerCase()] = m.keyword; ROLE_
 // Emitter weights: unconditional ATK auras first, then the conditional ones
 // discounted by how often the condition holds mid-run, then the defensive auras.
 const AURA_W = {
-  FRENZIED: 3, DEBUFF: 3, 'DOUBLE TIME': 3,   // +1 ATK to neighbours, always
+  FRENZIED: 3, DEBUFF: 3, BLASTBEAT: 3, TRICKSTER: 3,   // +1 ATK to neighbours, always
   HEXED: 2.5,                                  // +1 ATK at >=25% corruption
   CORRUPT: 2,                                  // +1 ATK at >=50% corruption
   SHREDDER: 1.5,                               // +1 ATK only while a same-type chain runs
@@ -949,7 +949,7 @@ function relicBuyScore(idOrName, ctx) {
 // many the band already has (_stackTier: 1 -> 1, 2 -> 2, 3+ -> 4), so the second
 // SHREDDER is worth far more than the first.
 // cand: {name, atk, hp, role, keyword, tier}   band: same shape, already on stage
-const KW_UNIT = { FRENZIED: 7, CORRUPT: 6, SHREDDER: 6, HEXED: 5, DEBUFF: 5, 'FOLK MAGIC': 4, ANCHOR: 3, 'DOUBLE TIME': 3 }
+const KW_UNIT = { FRENZIED: 7, CORRUPT: 6, SHREDDER: 6, BLASTBEAT: 6, HEXED: 5, DEBUFF: 5, TRICKSTER: 5, 'FOLK MAGIC': 4, ANCHOR: 3 }
 const TIER_BONUS = { demonic: 46, mythic: 26, foil: 12 }
 function recruitScore(cand, band) {
   if (!cand) return { score: 0 }

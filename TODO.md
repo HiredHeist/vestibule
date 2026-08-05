@@ -14,6 +14,15 @@ Verified against current code first — most AUDIT_AUG1 "open" items were alread
 
 Verified: engine self-test 86/86 · `npm run check` CLEAN · eslint parse-clean (0 syntax errors) · sim runs clean across decks (no NaN/crash) · independent code-audit passed. **UNVERIFIED: `vite build`** (sandbox lacks the Linux rolldown binding — confirm on Windows). Fixes are UNCOMMITTED; `.gitattributes` added to normalize line endings.
 
+## 🔎 AUG 5 — PRE-FLIGHT AUDIT (help text + bot rig synced to tonight's changes)
+
+Before the overnight live run, cross-checked all of tonight's changes against player-facing text and the bot's decision code.
+- **In-game help fixed** (were stale, would mislead a playtest): tutorial keyword grid + FAQ "Member Keywords" + Shredder deck desc — now describe BLASTBEAT (not DOUBLE TIME d6), TRICKSTER, FOLK MAGIC 25%/heal-2, HEXED per-8%. Card text (cards.js) was already correct.
+- **E2E bot rig updated** so the overnight run judges the NEW game: `autopilot.cjs` keyword regex + `KW_W` now include BLASTBEAT/TRICKSTER; `brain.cjs` neighbour-aura table, `KW_UNIT`, `scoreCard` play-values and draft-value table refreshed for the buffed cards. Multiple drummers: the bot reads the game's `canAdd` signal, so no hardcoded block — it will stack drummers now.
+
+### ⬜ ROOT CAUSE + DURABLE FIX (the "why doesn't the bot auto-update?" problem)
+Card **effects** are unified in `cardEngine.js` (live + sim share it), but card **values** (how much the bot wants a card) are **hand-maintained tables copied in THREE places**: the sim's `scoreCard`, `e2e/brain.cjs`, and `e2e/autopilot.cjs` KW weights. Nothing links "card now does X" to "value it Y", so every balance change silently rots them (brain.cjs even comments it "had drifted"). **Fix:** replace the hand-scored tables with *evaluation-based* scoring — have the bot score a card by simulating it through the shared `cardEngine` and measuring the outcome (damage/board/embers). Auto-updates forever + understands real interactions (adjacency, corruption, combos) like an expert. ~1–2 day project; the real answer to "play like a 1000-hour player."
+
 ## 🃏 AUG 5 — BATCH C: REVIVE DEAD CARDS (App.jsx + cardEngine.js + cards.js + sim)
 
 All eight were verified working-but-weak first (not broken). Buffs:

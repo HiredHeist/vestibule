@@ -310,7 +310,7 @@ async function perceive(opts) {
         }
       }
       const role = (flat.match(/(Rhythm Guitarist|Lead Guitarist|Bass Player|Synth Player|Drummer|Vocalist|Dark Minstrel|Keyboardist)/) || [])[1] || ''
-      const kw = (flat.match(/(FRENZIED|DOUBLE TIME|ANCHOR|CORRUPT|DEBUFF|FOLK MAGIC|SHREDDER|HEXED|FALLEN)/) || [])[1] || ''
+      const kw = (flat.match(/(FRENZIED|BLASTBEAT|TRICKSTER|ANCHOR|CORRUPT|DEBUFF|FOLK MAGIC|SHREDDER|HEXED|FALLEN)/) || [])[1] || ''
       // nested divs re-match the same member; keep the LARGEST box per name
       const prevIdx = out.members.findIndex(x => x.name === nm[1])
       if (prevIdx !== -1) { if (out.members[prevIdx]._area >= r.width * r.height) continue; out.members.splice(prevIdx, 1) }
@@ -1125,7 +1125,7 @@ async function descentTick(s) {
 // ── ECONOMY DOCTRINE — ported from vestibule-sim-kwstacks.js simShop() ──
 // members-first packs, keyword-stack candidate scoring, relic + pedal per circle,
 // drug reserves (shrooms if stash>=16, acid if stash>=22), then leave.
-const KW_W = { FRENZIED: 6, 'FOLK MAGIC': 5, CORRUPT: 4, HEXED: 3, SHREDDER: 3, 'DOUBLE TIME': 2, DEBUFF: 2, ANCHOR: 1 }
+const KW_W = { FRENZIED: 6, 'FOLK MAGIC': 5, BLASTBEAT: 5, TRICKSTER: 5, CORRUPT: 4, HEXED: 3, SHREDDER: 3, DEBUFF: 2, ANCHOR: 1 }
 const BOT = { boughtThisShop: new Set(), lastShopSig: '', artifacts: 0, pedals: 0 }
 // Aug 1: these are module-global and were never reset, so after the first run
 // filled 3 artifacts the relic branch was dead for every later run in the session.
@@ -1231,7 +1231,7 @@ async function slotSwapTick(s) {
 function parseMemberTile(t) {
   const atkm = t.match(/ATK\s*(\d+)/i)
   const hpm = t.match(/HP\s*(\d+)/i)
-  const kw = ((t.match(/(FRENZIED|DOUBLE TIME|ANCHOR|CORRUPT|DEBUFF|FOLK MAGIC|SHREDDER|HEXED|FALLEN)/i) || [])[1] || '').toUpperCase()
+  const kw = ((t.match(/(FRENZIED|BLASTBEAT|TRICKSTER|ANCHOR|CORRUPT|DEBUFF|FOLK MAGIC|SHREDDER|HEXED|FALLEN)/i) || [])[1] || '').toUpperCase()
   const role = (t.match(/(Rhythm Guitarist|Lead Guitarist|Bass Player|Synth Player|Drummer|Vocalist|Dark Minstrel|The Devil)/i) || [])[1] || ''
   const name = memberName(t)
   const roster = ROSTER_BY_NAME[String(name).toLowerCase()]
@@ -1543,7 +1543,7 @@ async function recruitTick(s) {
     }).sort((a, b) => a.x - b.x)
   })()`).catch(() => [])
   const blocked = cands.filter(c => !c.takeable)
-  if (blocked.length) ev('recruit_blocked', { count: blocked.length, cards: blocked.map(c => c.t.slice(0, 26)), why: 'game marks not-allowed (dup DOUBLE TIME / no empty slot)' })
+  if (blocked.length) ev('recruit_blocked', { count: blocked.length, cards: blocked.map(c => c.t.slice(0, 26)), why: 'game marks not-allowed (no empty slot / band rule)' })
   const takeable = cands.filter(c => c.takeable)
   if (takeable.length) cands = takeable
   if (cands.length) {
