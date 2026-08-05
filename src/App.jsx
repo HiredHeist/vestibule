@@ -1286,7 +1286,7 @@ function BoosterScreen({onComplete,seed}){
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-blood)',textTransform:'uppercase',fontWeight:900}}>ATK</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,color:'var(--text-blood)',lineHeight:1}}>{m.atk}</div>
                   </div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,color:kwc,fontWeight:900,textAlign:'center',letterSpacing:0.5,maxWidth:100}}>{kw}{(()=>{const _l=getMemberLegacy(m.id);return _l&&_l.runs>0?<div style={{fontSize:13,color:'var(--text-secondary)',marginTop:2}}>{_l.nickname||(_l.runs+' runs')}</div>:null})()}</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:17,color:kwc,fontWeight:900,textAlign:'center',letterSpacing:0.5,maxWidth:100}}>{kw}</div>
                   <div style={{textAlign:'center'}}>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-positive)',textTransform:'uppercase',fontWeight:900}}>HP</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:38,fontWeight:900,color:'var(--text-positive)',lineHeight:1}}>{m.hp}</div>
@@ -10748,7 +10748,6 @@ function App(){
             ['♻ Pawn Shop','Sell unwanted members or cards for Stash. Burn cards to permanently remove them from your deck (deck thinning). Access via the shop.'],
             ['🏆 Mastery','Every card play earns mastery XP. 4 tiers: Novice (10 plays), Adept (50), Master (200), Legendary (666). View progress in the Mastery Gallery from the main menu.'],
             ['💀 Trophy Wall','The Hall of Damnation tracks every boss you\'ve killed. Kills, best damage, best stake — all recorded. 28 trophies to collect.'],
-            ['📊 Band Legacy','Your band members remember past runs. They track wins, deaths, total damage, and earn nicknames (The Immortal, Bonecrusher, The Legendary). Visible on Opening Night.'],
             ['🎯 Stakes','6 difficulty levels: Bronze (standard), Silver (+2 boss dmg), Gold (+3 boss dmg, +25% shop prices), Obsidian (+38% boss HP, no post-fight heal), Blood (+48% boss HP, start at 10% corruption), Demonic (max 3 Strikes, +66% boss HP).'],
             ['🌍 Daily Challenge','A shared daily seed. Everyone faces the same RNG. Your best daily score is tracked. Play from the main menu or end screen.'],
             ['📜 Combat Log','Press ESC during combat to open the pause menu, then click Combat Log to review every event in the current run. Also available on the end screen as Run Log.'],

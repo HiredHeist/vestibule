@@ -1,7 +1,23 @@
 # VESTIBULE — TODO
 
-*Last updated: Aug 5, 2026 — card-fix session (uncommitted, pending build-verify + push)*
+*Last updated: Aug 5, 2026 — skill-pass R&D + skip-fix + nickname removal (uncommitted, pending build-verify + push)*
 *Branch state: main = audited stable · playtest/session2 = bot rig WIP + Aug 5 card fixes (see HANDOFF.md)*
+
+## 🎯 SKILL-BASED REBALANCE (Aug 5 — sim R&D done, env-gated; needs LIVE-BOT validation)
+
+Goal (JV): a highly skill-based deckbuilder — **random play should LOSE**, crafted combos rare + rewarding + naneinf, **not spammable**. **No damage caps** (preserve the Balatro big-number fantasy).
+
+Proven in the sim this session:
+
+- **The disease, quantified:** today's game rewards spam over skill — baseline **LAZY 7.6% win > SKILLED 4.0%**, and the spam player almost never dies in Circle 1 (1.1% vs 23.9%).
+- **Skip-fight-1 was a bug** (sim only; the live bot already never skips) — FIXED, C1 deaths 24%→~2%, baseline 4.0%→5.33%.
+- **The two real levers:** (1) **ember economy** — keep the per-fight pool, plug the leaks (`SP_EMBER_GEN_CAP` bounds total per-fight ember generation without deleting EMBER cards / Ritualist refunds); (2) **chains carry the damage** — `SP_RAW_DMG` dampens raw unconnected-card damage so combos, not spam, do the work. Output caps + corruption-tax tried and rejected as band-aids.
+
+Open / next:
+
+1. [ ] **Validate leak-plug + chains-dominant on the LIVE BOT.** The sim's greedy bot can't build combos, so it can't measure the chain payoff — every aggressive sim config just makes everyone die in C1. Only the live engine-builder can show the skill gap.
+2. [ ] Port a mild, tuned `SP_EMBER_GEN_CAP` + `SP_RAW_DMG` combo into the live game (App.jsx / cardEngine), run the overnight bot, read the death distribution + win rate.
+3. [ ] Make riff-chains genuinely dominant in the **live** damage formula (the sim scaler is only a proxy).
 
 ## 🎸 AUG 5 — CARD CORRECTNESS FIXES (uncommitted; App.jsx + cardEngine.js + cards.js + sim)
 

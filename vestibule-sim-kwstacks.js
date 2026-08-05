@@ -91,6 +91,43 @@ const STAKES={
 const STAKE=STAKES[STAKE_ID]||STAKES.bronze;
 if(HP_OVERRIDE>0)STAKE.hpMult=HP_OVERRIDE;
 
+// ═══════════════════════════════════════════════════════════════════════════
+// SKILL PASS / LAZY EXPERIMENTAL FLAGS (Aug 5 2026) — ALL DEFAULT OFF
+// With no env vars set every branch below is dead code and the sim's output is
+// byte-identical to the pre-change build (~4.3% Bronze/Standard). Toggle with:
+//   SKILL_PASS=1   new anti-snowball ruleset (see (a)-(e) at their use-sites)
+//   LAZY=1         degraded "spam" player (greedy random play, no planning)
+//   SP_MULT_CAP=N          strikeMult hard cap under SKILL_PASS (default 30)
+//   SP_STRIKE_CAP_PCT=F    single-strike dmg cap as fraction of boss max HP (0.40)
+// ═══════════════════════════════════════════════════════════════════════════
+const SKILL_PASS = process.env.SKILL_PASS==='1';
+const LAZY       = process.env.LAZY==='1';
+const SP_MULT_CAP        = parseFloat(process.env.SP_MULT_CAP)||30;
+const SP_STRIKE_CAP_PCT  = parseFloat(process.env.SP_STRIKE_CAP_PCT)||0.40;
+const SP_CAP_ALL         = process.env.SP_CAP_ALL==='1';   // apply single-strike dmg cap to ALL fights, not just bosses
+const SP_THRESH          = (process.env.SP_THRESH!==undefined)?parseFloat(process.env.SP_THRESH):0.5; // skilled play-quit threshold under SKILL_PASS (default 0.5 = use nearly every positive-value card, so only DECISION QUALITY differs from lazy)
+const SP_CORR_PER_CARD   = parseFloat(process.env.SP_CORR_PER_CARD)||0; // (anti-spam) corruption added per card played beyond the SP_CORR_FREE-th in a strike, under SKILL_PASS
+const SP_CORR_FREE       = (process.env.SP_CORR_FREE!==undefined)?parseInt(process.env.SP_CORR_FREE):3; // cards per strike that are "free" of the volume-corruption tax
+const SP_EMBER_PER_STRIKE= parseFloat(process.env.SP_EMBER_PER_STRIKE)||0; // (anti-flood) reset embers to this fixed budget each strike under SKILL_PASS (StS energy model); 0=off
+const SP_EMBER_GEN_CAP   = (process.env.SP_EMBER_GEN_CAP!==undefined)?parseFloat(process.env.SP_EMBER_GEN_CAP):-1; // (leak-plug) max TOTAL embers a fight can GENERATE beyond its per-fight pool (bounds EMBER cards / refunds / free-grants without deleting them); -1=off
+const SP_RAW_DMG         = parseFloat(process.env.SP_RAW_DMG)||1; // (chains-dominant) scaler on raw band-ATK damage BEFORE multipliers under SKILL_PASS — <1 makes unconnected card spam weak so CHAINS carry the damage; 1=off
+const SP_EMBER_LEAK_CAP  = parseFloat(process.env.SP_EMBER_LEAK_CAP)||0; // (task1 LEAK-PLUG) cap TOTAL bonus embers gained from generation sources within a FIGHT (beyond the per-fight starting pool) under SKILL_PASS; 0=off. Bounds — does not delete — a7/p1/hellfire/Burn-Stage/tapped-out/slow-burn/FOLK MAGIC/Ritualist refunds and ember-generation cards.
+const SP_CHAIN_MULT      = parseFloat(process.env.SP_CHAIN_MULT)||1.0;   // (task2 CHAINS-DOMINANT) scale the per-chain strikeMult bump (base ×1.78) under SKILL_PASS; 1.0=no-op
+const SP_RAW_DMG_MULT    = parseFloat(process.env.SP_RAW_DMG_MULT)||1.0; // (task2 CHAINS-DOMINANT) scale the raw (non-multiplier) member-ATK strike contribution under SKILL_PASS so raw card-ATK can be dialed DOWN; 1.0=no-op
+
+// (task1) SKILL_PASS ember-leak accountant. Bounds cumulative bonus-ember generation
+// per fight to SP_EMBER_LEAK_CAP. Returns how much of `want` may actually be granted
+// (0..want) and books it against the per-fight counter (gs._spEmberGenUsed, reset at
+// fight start). No-op (returns `want` untouched) unless SKILL_PASS && SP_EMBER_LEAK_CAP>0.
+function spEmberGain(gs, want){
+  if(!(SKILL_PASS&&SP_EMBER_LEAK_CAP>0))return want
+  if(want<=0)return want
+  const used=gs._spEmberGenUsed||0
+  const grant=Math.min(want,Math.max(0,SP_EMBER_LEAK_CAP-used))
+  gs._spEmberGenUsed=used+grant
+  return grant
+}
+
 // Aug 4 2026: was a hand-maintained copy that had drifted from live on EVERY row —
 // Wanderer 65HP/4dmg vs live's 45HP/2dmg, Lucifer 6666 vs 100000, and 25 more.
 // boss_hp_override.json only ever overrode maxHp, so baseDmg stayed wrong forever.
@@ -439,6 +476,7 @@ function generateCandidates(pack){const pool=ALL_MUSICIANS.filter(m=>!m.locked),
     const r=Math.random(),tier=r<pack.demonicChance?'demonic':r<pack.demonicChance+pack.mythicChance?'mythic':r<pack.demonicChance+pack.mythicChance+pack.foilChance?'foil':'base';
     candidates.push(makeMember(base,tier==='foil',tier==='mythic',tier==='demonic'))}return candidates}
 function pickBestCandidate(candidates,stage){
+  if(LAZY)return candidates[rand(candidates.length)] // LAZY: draft/shop picks are random
   const stageBasicRoles=stage.filter(m=>!isUpgraded(m)).map(m=>m.role)
   const stageUpgradedRoles=stage.filter(m=>isUpgraded(m)).map(m=>m.role)
   // ── KEYWORD STACK AI: count current stacks so we can favor synergy picks ──
@@ -510,20 +548,18 @@ function applyPact(pactId,gs){
 
 // ── DESCENT AI: decide whether to skip fights ──
 function decideDescentSkips(gs,circleNum){
-  const skips=[]
-  const alive=gs.stage.filter(m=>!m.tooStoned),bandPower=alive.reduce((s,m)=>s+m.atk+(m.permAtkBonus||0),0)+alive.length*3
-  const allHealthy=alive.every(m=>m.hp>=m.maxHp*0.7)
-  // Conservative: only skip if overpowered AND healthy (forfeits stash+shop)
-  // C1 only: skip fight 1 — trivial enemies, reward is worth more than 27HP fight
-  if(circleNum===1&&alive.length>=2){skips.push(0);TRACK.fightsSkipped++}
-  // C2-C3: skip fight 1 only if 4+ members and healthy
-  else if(circleNum<=3&&alive.length>=4&&allHealthy){skips.push(0);TRACK.fightsSkipped++}
-  // C4+: never skip — stash too valuable, fights provide deck cycling
-  return skips
+  // Aug 5 2026 (JV): NEVER skip fight 0. Sim proved skipping the first fight of a
+  // circle forfeits the shop (and in C1 the FREE Welcome member pack), sending you
+  // into the boss under-equipped — baseline skilled C1 deaths were 24% WITH this
+  // heuristic vs 1.8% without, and win rate 4.0%->5.65%. Skipping is strictly bad
+  // given the free pack + stash + deck-cycling value. Left as a stub in case a
+  // genuinely good route-planning skip is designed later.
+  return []
 }
 
 // ── DECK THINNING AI: burn weak commons at pawn shop ──
 function burnWeakCards(gs){
+  if(LAZY)return; // LAZY: no deck thinning
   const weakCards=['dialtoeleven','setbreak','setlist'];
   const circleNum=Math.floor(gs.fightIndex/3)+1;
   if(circleNum<3)return; // don't thin early
@@ -749,7 +785,12 @@ function applyCardSim(card,gs,enemy,emberCost){
     dst.encoreThisStrike=src.encoreReady
   }
   gs.corruption=Math.max(0,Math.min(100,S.corruption))
-  gs.embers=S.embers;gs.stash=S.stash;gs._strikeMult=S.strikeMult
+  // (task1) route positive ember deltas (card-generated embers, e.g. Power Tap/Groupie/
+  // Soundboard) through the per-fight leak cap under SKILL_PASS. Negative deltas (net
+  // spend) pass through untouched. Default path (cap off): gs.embers=S.embers verbatim.
+  if(SKILL_PASS&&SP_EMBER_LEAK_CAP>0){const _d=S.embers-gs.embers;gs.embers=_d>0?gs.embers+spEmberGain(gs,_d):S.embers}
+  else gs.embers=S.embers
+  gs.stash=S.stash;gs._strikeMult=S.strikeMult
   gs._discardsLeft=S.discardsLeft
   // CRITICAL: the sim's piles hold FULL card objects (embers/type/rarity/copies).
   // Mapping them back as {id,uid} stubs strips .embers, so every card's cost read
@@ -813,7 +854,8 @@ function simFight(gs,phaseHp,luciferPhase){
   }
   const enemy={...baseEnemy,maxHp:effectiveMaxHp,_hp:effectiveMaxHp,_atkBuff:0,_immolateStacks:0}
   const circleNum=Math.floor(fightIdx/3)+1,isBoss=(fightIdx+1)%3===0
-  gs.embers=gs.maxEmbers;gs._tappedOutNext=false;gs._drawNextStrike=0;gs._discardsLeft=MAX_DISCARDS;gs.stashStolen=0;gs._tripBuff=null;gs._corruptCardsGiven=[]
+  gs.embers=gs.maxEmbers;gs._tappedOutNext=false;gs._drawNextStrike=0;gs._discardsLeft=MAX_DISCARDS;gs.stashStolen=0;gs._tripBuff=null;gs._corruptCardsGiven=[];gs._spGenUsed=0
+  gs._spEmberGenUsed=0 // (task1) reset per-fight bonus-ember generation counter (leak cap)
   gs._wahUsed=false // Wah Pedal: "first CORRUPT card each FIGHT is free"
   let maxStrikes=STAKE.maxStrikes+(gs._warDrums?1:0)+(gs._extraStrikes||0)+(DECK_ID_DEF.maxStrikesMod||0);gs._extraStrikes=0
   gs._strikesLeft=maxStrikes
@@ -831,21 +873,33 @@ function simFight(gs,phaseHp,luciferPhase){
   if(gs.artifacts.some(a=>a.id==='a1')){const lg=gs.stage.find(m=>m.role==='Lead Guitarist'&&!m.tooStoned);if(lg){lg.permAtkBonus=(lg.permAtkBonus||0)+1}}
   if(gs.artifacts.some(a=>a.id==='a2'))gs.corruption=Math.max(gs.corruption,15);
   if(gs.artifacts.some(a=>a.id==='a4')){const al=gs.stage.filter(m=>!m.tooStoned);if(al.length)pick(al).stoneShield=2}
-  if(gs.artifacts.some(a=>a.id==='a7'))gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+1);
+  if(gs.artifacts.some(a=>a.id==='a7'))gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+spEmberGain(gs,1));
   if(gs.artifacts.some(a=>a.id==='ca1')){gs.stage.filter(m=>!m.tooStoned).forEach(m=>{m.permAtkBonus=(m.permAtkBonus||0)+1});TRACK.caEffects++}
   const hasHellfire=gs.artifacts.some(a=>a.id==='ca2');
   const hasCrown=gs.artifacts.some(a=>a.id==='ca3');
   const hasWailing=gs.artifacts.some(a=>a.id==='ca4');
-  if(gs.passives.some(p=>p.id==='p1'))gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+1);
-  if(hasHellfire)gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+2);
+  if(gs.passives.some(p=>p.id==='p1'))gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+spEmberGain(gs,1));
+  if(hasHellfire)gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+spEmberGain(gs,2));
   if(gs.passives.some(p=>p.id==='p2')){const al=gs.stage.filter(m=>!m.tooStoned);if(al.length){const t=pick(al);t.hp=Math.min(t.maxHp,t.hp+3)}}
   if(gs.passives.some(p=>p.id==='p8'))gs.stage.forEach(m=>{if(!m.tooStoned)m.stoneShield=2});
   let p10=gs.passives.some(p=>p.id==='p10');
   // Boss loot fight-start effects
   if(gs.loot.includes('freeFirst'))gs._nextCardFree=true
   if(gs.artifacts.some(a=>a.id==='a3'))gs._nextCardFree=true
-  if(gs._pendingBurnStage){gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+5);gs._pendingBurnStage=false}
+  if(gs._pendingBurnStage){gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+spEmberGain(gs,5));gs._pendingBurnStage=false}
   gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set();gs._allCardsFree=false;gs._hellquakeFired=false
+  // ── SKILL PASS (d): boss rule-changer debuffs, Circle 3 boss onward ──
+  // These flags flip only on the specific boss fights below. They persist for the
+  // whole fight (reset unconditionally here each fight, so no leak between fights).
+  gs._spEmberTax=false;gs._spSilenceTop=false;gs._spChainBlock=false
+  if(SKILL_PASS&&isBoss){
+    // emberTax  — C3 & C6 bosses: every card costs +1 ember this fight
+    if(circleNum===3||circleNum===6)gs._spEmberTax=true
+    // silenceTop — C4 & C7 bosses: the single highest-ATK alive member deals 0
+    if(circleNum===4||circleNum===7)gs._spSilenceTop=true
+    // chainBlock — C5, C8 bosses & Lucifer: riff chains build NO strikeMult
+    if(circleNum===5||circleNum===8||enemy.passiveId==='luciferBoss')gs._spChainBlock=true
+  }
   // ── KEYWORD STACK: ANCHOR fight-start init ───────
   gs._anchorSavesUsed=0
   // Compute ANCHOR tier at fight start (recomputed each strike but capped here)
@@ -905,6 +959,9 @@ function simFight(gs,phaseHp,luciferPhase){
     // Burning Stage's opener check was always true. It is a countdown now, like
     // live's strikesLeft.
     gs._strikesLeft=Math.max(0,gs._fightMaxStrikes-strike)
+    // (anti-flood) Slay-the-Spire-style per-strike energy: embers reset to a small fixed
+    // budget each strike so you CANNOT dump your whole hand — you must pick 2-3 cards.
+    if(SKILL_PASS&&SP_EMBER_PER_STRIKE>0)gs.embers=SP_EMBER_PER_STRIKE
     TRACK.strikesTaken++;_strikesUsed++
     gs.stage.forEach(m=>{
       // Aug 1 2026 — THE 10x BUG. Expire "this Strike" ATK buffs exactly like live's
@@ -923,8 +980,8 @@ function simFight(gs,phaseHp,luciferPhase){
     // ── RITUALIST SIGNATURE: reset per-strike ember refund cap ──
     gs._ritualistRefundsThisStrike=0
     drawCards(gs,Math.max(0,handSize-gs.hand.length));gs._drawNextStrike=0;
-    if(gs._tappedOutNext){gs.embers=Math.min(gs.maxEmbers,gs.embers+5);gs._tappedOutNext=false}
-    if(gs._slowBurnStrikes>0){gs.embers=Math.min(gs.maxEmbers,gs.embers+2);gs._slowBurnStrikes--}
+    if(gs._tappedOutNext){gs.embers=Math.min(gs.maxEmbers,gs.embers+spEmberGain(gs,5));gs._tappedOutNext=false}
+    if(gs._slowBurnStrikes>0){gs.embers=Math.min(gs.maxEmbers,gs.embers+spEmberGain(gs,2));gs._slowBurnStrikes--}
     // Jul 31 2026 JV RULING: embers do NOT refill per strike — they persist across
     // the whole fight; only ember cards / FOLK MAGIC refunds add. (Old refill here
     // inflated every historical winrate number.)
@@ -957,14 +1014,22 @@ function simFight(gs,phaseHp,luciferPhase){
     let cardsPlayed=0;
     for(let att=0;att<15;att++){
       _cst.firstOfStrike=(gs._cardsPlayedIds||[]).length===0
+      const _spTax=(SKILL_PASS&&gs._spEmberTax)?1:0 // (d) emberTax: +1 ember/card
       const playable=gs.hand.map((c,idx)=>({c,idx})).filter(({c})=>{
         if(c.id==='ampoverload'&&gs._discardsLeft<=0)return false
-        return gs.embers>=cardCost(c,gs,_cst,false)
+        return gs.embers>=cardCost(c,gs,_cst,false)+_spTax
       });if(playable.length===0)break;
-      playable.forEach(p=>{p.score=scoreCard(p.c,gs,enemy,strike,cardsPlayed)});playable.sort((a,b)=>b.score-a.score);
-      const best=playable[0];if(best.score<=3)break;
+      let best
+      if(LAZY){
+        // LAZY: no scoring, no threshold — play a random affordable card greedily.
+        best=playable[rand(playable.length)]
+      } else {
+        playable.forEach(p=>{p.score=scoreCard(p.c,gs,enemy,strike,cardsPlayed)});playable.sort((a,b)=>b.score-a.score);
+        best=playable[0];if(best.score<=(SKILL_PASS?SP_THRESH:3))break;
+      }
       const card=best.c
       const cost=cardCost(card,gs,_cst,true)
+      const _eBefore=gs.embers // (leak-plug) snapshot to measure this card's ember GENERATION
       gs.hand.splice(best.idx,1);
       const _res=applyCardSim(card,gs,enemy,cost)
       const _ok=!!(_res&&_res.ok)
@@ -973,10 +1038,13 @@ function simFight(gs,phaseHp,luciferPhase){
       // Demo Tape cost 1 ember in the sim and 0 live (cardEngine C.freeCost). It also
       // charged for cards the engine REJECTED; live's applyCard returns false before
       // spending anything.
-      if(_ok)gs.embers=Math.max(0,gs.embers-(typeof _res.emberCost==='number'?_res.emberCost:cost))
+      const _spent=_ok?((typeof _res.emberCost==='number'?_res.emberCost:cost)+_spTax):0
+      if(_ok)gs.embers=Math.max(0,gs.embers-_spent)
+      if(SKILL_PASS&&SP_EMBER_GEN_CAP>=0){const _gen=gs.embers-(_eBefore-_spent);if(_gen>0){const _allow=Math.max(0,SP_EMBER_GEN_CAP-(gs._spGenUsed||0));const _keep=Math.min(_gen,_allow);gs._spGenUsed=(gs._spGenUsed||0)+_keep;gs.embers=Math.max(0,gs.embers-(_gen-_keep))}} // (leak-plug) bound TOTAL per-fight ember generation to SP_EMBER_GEN_CAP
       if(gs._consumeCard){gs._consumeCard=false}else if(card.id!=='contract')gs.discard.push(card);
       if(!_ok)continue
       cardsPlayed++;
+      if(SKILL_PASS&&SP_CORR_PER_CARD>0&&cardsPlayed>SP_CORR_FREE)gs.corruption=Math.min(100,gs.corruption+SP_CORR_PER_CARD); // (anti-spam) volume-corruption tax: flooding a strike tips you toward losing the band
       // NOTE: the x1.08 per-card strike multiplier, the lastRiff pointer and the
       // cards-played ledger are ALL applied inside cardEngine.applyCardEffect and
       // written back by applyCardSim. Re-applying them here was a straight double
@@ -993,7 +1061,7 @@ function simFight(gs,phaseHp,luciferPhase){
           const stepsAfter=Math.floor(gs.corruption/10)
           const newSteps=Math.max(0,stepsAfter-stepsBefore)
           const remaining=Math.max(0,5-(gs._ritualistRefundsThisStrike||0))
-          const refund=Math.min(newSteps,remaining)
+          const refund=spEmberGain(gs,Math.min(newSteps,remaining)) // (task1) also bounded by per-fight leak cap
           if(refund>0){
             gs.embers=Math.min(gs.maxEmbers,gs.embers+refund)
             gs._ritualistRefundsThisStrike=(gs._ritualistRefundsThisStrike||0)+refund
@@ -1013,7 +1081,17 @@ function simFight(gs,phaseHp,luciferPhase){
           if(!gs._firedChains)gs._firedChains=new Set()
           const ck=chain[0]+'+'+chain[1]
           if(!gs._firedChains.has(ck)){
-            gs._firedChains.add(ck);gs._strikeMult=Math.min(10000,Math.round((gs._strikeMult*1.78)*100)/100)
+            gs._firedChains.add(ck);
+            // (a) flatten the runaway cap to SP_MULT_CAP (default 30) under SKILL_PASS;
+            // (d) chainBlock bosses build NO strikeMult at all. Default path unchanged.
+            if(!(SKILL_PASS&&gs._spChainBlock)){
+              const _mcap=SKILL_PASS?SP_MULT_CAP:10000
+              // (task2 CHAINS-DOMINANT) scale the per-chain ×1.78 bump by SP_CHAIN_MULT
+              // under SKILL_PASS so hitting chains can be made to pay far more. Default
+              // SP_CHAIN_MULT=1.0 → ×1.78 exactly (no-op).
+              const _bump=SKILL_PASS?1.78*SP_CHAIN_MULT:1.78
+              gs._strikeMult=Math.min(_mcap,Math.round((gs._strikeMult*_bump)*100)/100)
+            }
             // CHAIN INSTANT DAMAGE REMOVED to match live (App.jsx v0.7.7 May 4 2026):
             // the x1.78 multiplier is the whole payoff; the old +10%-band-ATK hit was
             // double-dipping and does not exist in the live build.
@@ -1060,9 +1138,16 @@ function simFight(gs,phaseHp,luciferPhase){
       else if(_t===4)TRACK.kwStack3Reached++
     }
 
+    // (d) silenceTop: single highest base-ATK alive member contributes 0 this strike.
+    let _spSilenceUid=null
+    if(SKILL_PASS&&gs._spSilenceTop&&aliveNow.length){
+      let _mx=-1
+      for(const _m of aliveNow){const _a=_m.atk+(_m.permAtkBonus||0)+(_m.tempAtkBonus||0);if(_a>_mx){_mx=_a;_spSilenceUid=_m.uid}}
+    }
     for(const m of aliveNow){
       if(paranoiaVictimUid&&m.uid===paranoiaVictimUid)continue;
       if(m._skipAttack)continue;
+      if(_spSilenceUid&&m.uid===_spSilenceUid)continue; // (d) silenced top attacker
       let atk=m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0);
       // KEYWORD STACK BONUSES (per-member)
       if(m.keyword==='FRENZIED'&&_frenziedTier>0)atk+=_riffsThisStrike*_frenziedTier
@@ -1076,6 +1161,11 @@ function simFight(gs,phaseHp,luciferPhase){
       if(m.encoreThisStrike||m._kwDoubleStrike)strikeDmg+=Math.max(0,atk);
     }
     if(gs._infencoreActive)strikeDmg*=2;
+    // (task2 CHAINS-DOMINANT) dial the RAW (non-multiplier) member-ATK contribution
+    // down by SP_RAW_DMG_MULT under SKILL_PASS. Applied to the flat base BEFORE the
+    // chain strikeMult (line ~1250), so a chain-firing deck recovers via its large
+    // strikeMult while unconnected raw card-ATK stays weak. Default 1.0 → no-op.
+    if(SKILL_PASS&&SP_RAW_DMG_MULT!==1.0)strikeDmg=Math.round(strikeDmg*SP_RAW_DMG_MULT);
     folkAuraHeal(gs.stage)
     let _mentorAdd=0
     let mentorMult=1.0;for(const link of links){const mn=gs.stage[link.mentorIdx],pr=gs.stage[link.protegeIdx];
@@ -1086,6 +1176,7 @@ function simFight(gs,phaseHp,luciferPhase){
         // link measured 356 vs live's 252, and 712 vs 326 with two links.
         _mentorAdd+=Math.round((mn.atk+pr.atk)*(link.mult-1));TRACK.linkStrikesFired++}}
     if(_bandDbl>1)strikeDmg=Math.round(strikeDmg*_bandDbl)
+    if(SKILL_PASS&&SP_RAW_DMG!==1)strikeDmg=Math.round(strikeDmg*SP_RAW_DMG) // (chains-dominant) dampen raw band damage so chains/multipliers carry the strike
     strikeDmg+=_mentorAdd;TRACK.linkBonusDmg+=_mentorAdd;
     // Aug 1 2026: BAND SYNERGY was missing from the sim entirely. Live (App.jsx
     // ~7843) multiplies the whole strike by 1.35/1.20/1.10 when 5/4/3 members have
@@ -1103,6 +1194,10 @@ function simFight(gs,phaseHp,luciferPhase){
     if(corrMult>1)strikeDmg=Math.round(strikeDmg*corrMult)
     // Artifact multiplier triggers
     let artMult=1.0
+    // (b) SKILL_PASS: relics + loot ADD instead of COMPOUND. Every firing relic/loot
+    // contributes (mult-1)*fires to a single relicBonus, applied once as ×(1+bonus).
+    // artMult stays 1.0 under SKILL_PASS so the legacy `if(artMult>1)` line is a no-op.
+    let relicBonus=0
     const _cpc=(gs._cardsPlayedIds||[]).length
     const _cf=gs._firedChains?gs._firedChains.size:0
     const _sc=gs.stage.filter(m=>m.tooStoned).length
@@ -1159,13 +1254,14 @@ function simFight(gs,phaseHp,luciferPhase){
       if(art.multTrigger==='corruptedClean'&&gs.corruption===100&&_sc===0)fires=1
       if(art.multTrigger==='goatStackOther'){
         const others=Math.max(0,gs.artifacts.length-1)
-        artMult*=(art.mult||2.0)*Math.pow(1.3,others)
+        const _gm=(art.mult||2.0)*Math.pow(1.3,others)
+        if(SKILL_PASS)relicBonus+=(_gm-1);else artMult*=_gm
         continue
       }
       // Skip in sim (need full game state):
       // - embers5, discardedFight, earlyCircle, perDiscardStrike, doubleTimeRolled,
       //   luciferOnStage, sigilOpener, tongueDamage
-      if(fires>0)artMult*=Math.pow(art.mult,fires)
+      if(fires>0){if(SKILL_PASS)relicBonus+=(art.mult-1)*fires;else artMult*=Math.pow(art.mult,fires)}
     }
     // ca1 'always' legacy trigger now handled by alwaysOn above
     if(artMult>1)strikeDmg=Math.round(strikeDmg*artMult)
@@ -1180,10 +1276,19 @@ function simFight(gs,phaseHp,luciferPhase){
       if(lid==='the_blade'&&_cpc===1)fires=1
       if(lid==='mask_of_lies')fires=new Set(_lootAlive.map(m=>m.keyword)).size
       const lootDef=[{id:'limbos_echo',mult:1.15},{id:'endless_hunger',mult:1.3},{id:'berserker_rage',mult:1.5},{id:'heretics_brand',mult:1.3},{id:'the_blade',mult:2.0},{id:'mask_of_lies',mult:1.2}].find(l=>l.id===lid)
-      if(fires>0&&lootDef)strikeDmg=Math.round(strikeDmg*Math.pow(lootDef.mult,fires))
+      if(fires>0&&lootDef){if(SKILL_PASS)relicBonus+=(lootDef.mult-1)*fires;else strikeDmg=Math.round(strikeDmg*Math.pow(lootDef.mult,fires))}
     }
+    // (b) apply the single additive relic+loot bonus once, under SKILL_PASS only.
+    if(SKILL_PASS&&relicBonus>0)strikeDmg=Math.round(strikeDmg*(1+relicBonus))
+    // strikeMult stays multiplicative but is already capped at SP_MULT_CAP under SKILL_PASS.
     if(gs._strikeMult>1.0)strikeDmg=Math.round(strikeDmg*gs._strikeMult)
-    if(aliveNow.some(m=>m.keyword==='FOLK MAGIC')&&Math.random()<0.25)gs.embers=gs.maxEmbers;
+    // (c) per-strike damage cap: on BOSS fights, no single strike exceeds
+    // SP_STRIKE_CAP_PCT of boss MAX hp (enemy.maxHp is the per-phase max — Lucifer
+    // already splits phases). This forces >=ceil(1/pct) strikes to down a boss.
+    // Trivial non-boss fights are left uncapped so a skilled band can blitz them and
+    // conserve HP (the per-circle heal means that HP has to last all 3 fights).
+    if(SKILL_PASS&&SP_CAP_ALL)strikeDmg=Math.min(strikeDmg,Math.ceil(enemy.maxHp*SP_STRIKE_CAP_PCT)) // damage cap OFF by default (JV: preserve the naneinf fantasy) — only if SP_CAP_ALL
+    if(aliveNow.some(m=>m.keyword==='FOLK MAGIC')&&Math.random()<0.25){const _fmGain=spEmberGain(gs,Math.max(0,gs.maxEmbers-gs.embers));gs.embers=Math.min(gs.maxEmbers,gs.embers+_fmGain)} // (task1) FOLK MAGIC refill bounded by leak cap
     gs.highestStrike=Math.max(gs.highestStrike,strikeDmg);gs.totalDamage+=strikeDmg;
     // Reset multiplier + combo tracking for next strike
     gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set()
@@ -1299,7 +1404,10 @@ function simFight(gs,phaseHp,luciferPhase){
       if(isBoss&&gs.loot.includes('stashBoss')){gs.stash=Math.min(MAX_STASH,gs.stash+5);gs.stashEarned+=5}
       if(gs._strikesLeft>=gs._fightMaxStrikes-1&&gs.artifacts.some(a=>a.id==='a10'))gs._pendingBurnStage=true
     }
-    gs.stage.forEach(m=>{if(!m.tooStoned)m.hp=Math.min(m.maxHp,m.hp+2)});
+    // (e) heal cadence. Default: +2 every fight. SKILL_PASS: heal to FULL only after
+    // clearing a full circle (the boss fight); HP persists between fights within a circle.
+    if(!SKILL_PASS)gs.stage.forEach(m=>{if(!m.tooStoned)m.hp=Math.min(m.maxHp,m.hp+2)});
+    else if(isBoss)gs.stage.forEach(m=>{m.tooStoned=false;m.hp=m.maxHp});// circle-clear full rest revives the band
   }
   return{won,allDead};
 }
@@ -1532,7 +1640,12 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
     } else {
       const result=simFight(gs,null,0)
       if(result.won){
-        if(STAKE.healAfterFight)gs.stage.forEach(m=>{if(m&&!m.tooStoned)m.hp=Math.min(m.maxHp,m.hp+2)})
+        // (e) heal cadence — see simFight. Default per-fight +2; SKILL_PASS heals to
+        // full only on a circle clear (boss fight); HP persists within the circle.
+        if(STAKE.healAfterFight){
+          if(!SKILL_PASS)gs.stage.forEach(m=>{if(m&&!m.tooStoned)m.hp=Math.min(m.maxHp,m.hp+2)})
+          else if(isBoss)gs.stage.forEach(m=>{if(m){m.tooStoned=false;m.hp=m.maxHp}})// circle-clear full rest revives the band
+        }
         // PACT: after boss kills, choose best of 2 random pacts
         if(isBoss&&gs._pacts.length<9){
           const available=PACT_IDS.filter(p=>!gs._pacts.includes(p));

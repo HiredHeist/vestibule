@@ -1,9 +1,17 @@
 # VESTIBULE — STATUS
 
 *The glance view. `START_HERE.md` is the deep reference, `TODO.md` is the full backlog, this is "where are we right now."*
-*Last updated: Aug 5, 2026 — card-fix session (uncommitted, pending push).*
+*Last updated: Aug 5, 2026 — skill-pass R&D + skip-fix + nickname removal (uncommitted, pending push).*
 
 ---
+
+## 🧪 UNCOMMITTED — Aug 5 SKILL-PASS R&D + skip-fix + Band Legacy removal (push via `push-fixes.bat`)
+
+Changed files: `src/App.jsx` (Band Legacy nicknames removed), `vestibule-sim-kwstacks.js` (skip-fix + Skill-Pass scaffolding — env-gated, default-OFF).
+
+- **Band Legacy nicknames REMOVED** (JV: clutter) — on-card render + stale FAQ entry gone; tracking fns left as harmless no-ops.
+- **Descent skip-fix (sim):** `decideDescentSkips` no longer skips fight 1 of a circle (that forfeited the free Welcome member pack → boss under-equipped). Baseline SKILLED C1 deaths **24%→~2%**, win **4.0%→5.33%**. Now `return []`, matching the live bot which already never skips. **Changes the sim default** (a real improvement).
+- **Skill-based R&D (all env-gated, default-OFF — NOT live yet):** goal is a genuinely skill-based deckbuilder — random play should LOSE, crafted combos rare/rewarding/naneinf, not spammable. **Key finding: today's game rewards spam over skill** (baseline LAZY **7.6%** > SKILLED **4.0%**; lazy almost never dies in C1). The levers that matter are the **ember economy** (`SP_EMBER_GEN_CAP` per-fight leak-plug) and **chains-carry-the-damage** (`SP_RAW_DMG`); damage caps rejected (naneinf). ⚠️ **The sim can't validate chains-dominant** — its greedy bot doesn't build combos, so every aggressive config just makes everyone die. **Next: validate on the LIVE BOT.** Full flag list: `SKILL_PASS, LAZY, SP_EMBER_GEN_CAP, SP_RAW_DMG, SP_EMBER_PER_STRIKE, SP_MULT_CAP, SP_CAP_ALL, SP_STRIKE_CAP_PCT, SP_THRESH, SP_CORR_PER_CARD`.
 
 ## ✅ PUSHED — Aug 5 card fixes (commit `a263913`)
 
