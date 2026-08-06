@@ -1106,13 +1106,12 @@ IMPL.sonicboom = (S, C, out) => {
 }
 
 IMPL.tremolopick = (S, C, out) => {
-  if (!C.m) return false
-  // Batch C: 2+ cards played this Strike → +4 PERMANENT (combo finisher). Else +1 this Strike.
-  // Ledger LENGTH includes synthetic '_smokebreak_discard'/'_echo:' entries — matches live.
-  const combo = (S.cardsPlayedIds || []).length >= 2
-  if (combo) { permAtk(C.m, 4); bumpBuff(C.m); log(out, '⚡ Tremolo Pick! ' + C.m.name + ' +4 ATK permanently! (2+ cards)'); return }
-  tempAtk(C.m, 1); bumpBuff(C.m)
-  log(out, '⚡ Tremolo Pick! ' + C.m.name + ' +1 ATK this Strike.')
+  // Riff Barrage (synergy): +2 ATK to ALL members per RIFF card already played
+  // this Strike (max +12). All-target now — no single-target guard.
+  const riffs = (S.cardsPlayedIds || []).filter(id => cardTypeOf(id) === 'RIFF').length
+  const b = Math.min(12, riffs * 2)
+  for (const m of alive(S)) { rawAtk(m, b); m.tempAtkBonus = num(m.tempAtkBonus) + b; bumpBuff(m) }
+  log(out, '⚡ Riff Barrage! All members +' + b + ' ATK! (' + riffs + ' RIFFs played)')
 }
 
 IMPL.harmonicfb = (S, C, out) => {
@@ -1286,8 +1285,12 @@ IMPL.russianroulette = (S, C, out) => {
 
 // ── UTILITY (alt decks) ────────────────────────────────────────────────────
 IMPL.gearcheck = (S, C, out) => {
-  draw(S, 2, C.rng)
-  log(out, '🔧 Gear Check! Drew 2 cards.')
+  // Feedback Engine (synergy): ×strikeMult scaling with DISTINCT card ids played
+  // this Strike (the combo engine). +8% per distinct card already played.
+  const distinct = new Set(S.cardsPlayedIds || []).size
+  const factor = 1 + 0.08 * distinct
+  mulStrikeMult(S, factor)
+  log(out, '🔧 Feedback Engine! Strike multiplier ×' + factor.toFixed(2) + ' (' + distinct + ' distinct cards)')
 }
 
 IMPL.setlistrewrite = (S, C, out) => {
@@ -1382,13 +1385,15 @@ IMPL.ampfeedback = (S, C, out) => {
 }
 
 IMPL.drainthecrowd = (S, C, out) => {
+  // Death's Bargain (synergy): +1 ATK to ALL members per 10% of the band's total
+  // HP that is MISSING (comeback). All-target, this Strike.
   const av = alive(S)
-  if (av.length > 0) {
-    const v = pick(av, C.rng)
-    v.hp = Math.max(1, num(v.hp) - 2)
-  }
-  addEmbers(S, 3)
-  log(out, '🧛 Drain the Crowd! +3 embers. Random member -2 HP.')
+  let cur = 0, mx = 0
+  for (const m of av) { cur += num(m.hp); mx += num(m.maxHp, num(m.hp)) }
+  const missing = mx > 0 ? (mx - cur) / mx : 0
+  const b = Math.floor(missing * 10)
+  for (const m of av) { rawAtk(m, b); m.tempAtkBonus = num(m.tempAtkBonus) + b; bumpBuff(m) }
+  log(out, "🧛 Death's Bargain! All members +" + b + ' ATK! (' + Math.round(missing * 100) + '% band HP missing)')
 }
 
 IMPL.corrsiphon = (S, C, out) => {

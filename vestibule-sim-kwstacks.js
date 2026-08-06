@@ -228,7 +228,7 @@ const ALL_CARDS=[
   {id:'pyromaniac',type:'EMBER',rarity:'Uncommon',embers:1,copies:0},
   {id:'slowburn',type:'EMBER',rarity:'Common',embers:0,copies:0},
   {id:'ampfeedback',type:'EMBER',rarity:'Common',embers:1,copies:0},
-  {id:'drainthecrowd',type:'EMBER',rarity:'Common',embers:0,copies:0},
+  {id:'drainthecrowd',type:'CORRUPT',rarity:'Common',embers:1,copies:0},
   {id:'corrsiphon',type:'CORRUPT',rarity:'Common',embers:1,copies:0},
 ];
 
@@ -647,18 +647,18 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
     case 'dark_whisper':return 70;case 'blood_price':return 74;case 'void_pact':return 72;
     case 'feedbackscream':return 65;case 'skullsplitter':return highestAtk>=10?80:62;
     case 'doomchord':return corruption>=50?78:55;case 'bloodharmony':return 70;case 'sonicboom':return 72;
-    case 'tremolopick':return cardsPlayed>=2?72:35;
+    case 'tremolopick':{const _rb=(gs._cardsPlayedIds||[]).filter(x=>ALL_CARDS.find(c=>c.id===x&&c.type==='RIFF')).length;return _rb>=3?80:_rb>=1?55:25;}
     case 'shredsolo':return highestAtk>=8?80:50;case 'harmonicfb':return(gs._cardsPlayedIds||[]).filter(x=>ALL_CARDS.find(c=>c.id===x&&c.type==='RIFF')).length>=3?78:25;
     case 'overdriveped':return gs._strikeMult>=1.5?85:55;case 'devilsdice':return 55;case 'necroticamp':return corruption>=60?85:corruption>=40?60:20;
     case 'soulbargain':return 72;case 'venomriff':return 60;case 'offeringpit':return alive.length>=4?65:20;
     case 'cursedstrings':return 55;case 'hexdecay':return enemy._hp>=500?75:45;
     case 'infernalpact':return corruption<50?65:10;case 'carrioncall':return stage.some(m=>m.tooStoned)?90:0;
     case 'possessionriff':return 78;case 'darkcrescendo':return corruption>=80?98:0;case 'hellfirerift':return corruption<80?90:60;case 'soulsacrifice':return 85;case 'voidpact':return corruption<75?95:50;
-    case 'russianroulette':return alive.length>=4?60:30;case 'gearcheck':return 48;case 'setlistrewrite':return gs._setlistRewriteUsed?0:30;
+    case 'russianroulette':return alive.length>=4?60:30;case 'gearcheck':{const _fd=new Set(gs._cardsPlayedIds||[]).size;return _fd>=3?72:_fd>=1?48:22;}case 'setlistrewrite':return gs._setlistRewriteUsed?0:30;
     case 'backstagepass':return embers>=2?65:30;case 'venueswap':return hand.length<=3?60:20;case 'doublebooking':return 92;
     case 'bootlegcopy':return 55;case 'secondwind':return embers===0?90:embers<=2?50:10;case 'pyromaniac':return embers<=2?68:25;
     case 'slowburn':return strikeNum===0?72:48;case 'ampfeedback':return embers<=2?72:40;
-    case 'drainthecrowd':return embers<=2?65:20;case 'corrsiphon':return corruption>=30?55+Math.floor(corruption/10)*3:20;
+    case 'drainthecrowd':{let _c=0,_m=0;for(const s of alive){_c+=s.hp;_m+=(s.maxHp||s.hp)}const _miss=_m>0?(_m-_c)/_m:0;return _miss>=0.4?72:_miss>=0.2?48:18;}case 'corrsiphon':return corruption>=30?55+Math.floor(corruption/10)*3:20;
     default:return 5;
   }
 }

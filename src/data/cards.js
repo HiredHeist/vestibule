@@ -71,7 +71,7 @@ export const ALL_CARDS=[
   {id:'doomchord',name:'Doom Chord',type:'RIFF',rarity:'Uncommon',emoji:'🎵',embers:2,effect:'+4 ATK this Strike. At 50%+ Corruption, adjacent members get +4 too.',color:'#6622aa',typeColor:'#440088',copies:0},
   {id:'bloodharmony',name:'Blood Harmony',type:'RIFF',rarity:'Common',emoji:'🩸',embers:1,effect:'+2 ATK permanently to the target AND both neighbours.',color:'#cc4466',typeColor:'#aa2244',copies:0},
   {id:'sonicboom',name:'Sonic Boom',type:'RIFF',rarity:'Rare',emoji:'💥',embers:3,effect:'ALL members +2 ATK this Strike. Draw 1.',color:'#ff8800',typeColor:'#cc6600',copies:0},
-  {id:'tremolopick',name:'Tremolo Pick',type:'RIFF',rarity:'Common',emoji:'⚡',embers:1,effect:'+1 ATK this Strike. +4 ATK permanently if you already played 2+ cards this Strike.',color:'#ffcc00',typeColor:'#ccaa00',copies:0},
+  {id:'tremolopick',name:'Riff Barrage',type:'RIFF',rarity:'Common',emoji:'⚡',embers:1,effect:'+2 ATK to ALL members per RIFF card already played this Strike (max +12). (Synergy: rewards a RIFF-dense deck.)',color:'#ffcc00',typeColor:'#ccaa00',copies:0},
   {id:'harmonicfb',name:'Harmonic Feedback',type:'RIFF',rarity:'Uncommon',emoji:'🎶',embers:0,effect:'FREE. +1 ATK permanently per RIFF played this Strike (minimum +1).',color:'#44aaff',typeColor:'#2288dd',copies:0},
   // Aug 4 2026 — DIFFERENTIATED PAIR. shredsolo's only effect is `encoreReady=true`
   // — byte-identical to Encore (Uncommon, 2 embers) — while its text promised a
@@ -96,7 +96,7 @@ export const ALL_CARDS=[
   {id:'voidpact',name:'Pact of the Void',type:'CORRUPT',rarity:'Rare',emoji:'🕳',embers:0,effect:'FREE. Strike multiplier ×2.5 this strike ONLY. +25% corruption. Total commitment.',color:'#440088',typeColor:'#220044',copies:0,shopOnly:true},
   {id:'darkcrescendo',name:'Dark Crescendo',type:'CORRUPT',rarity:'Rare',emoji:'🌑',embers:0,effect:'FREE. If corruption ≥80%, TRIPLE your strike multiplier.',color:'#220044',typeColor:'#110022',copies:0},
   {id:'russianroulette',name:'Russian Roulette',type:'CORRUPT',rarity:'Uncommon',emoji:'🔫',embers:0,effect:'FREE. Roll d6. 1: target goes Too Stoned. 2-5: +4 ATK this Strike. 6: +8 ATK this Strike + Shield.',color:'#cc2244',typeColor:'#aa0022',copies:0},
-  {id:'gearcheck',name:'Gear Check',type:'UTILITY',rarity:'Common',emoji:'🔧',embers:1,effect:'Draw 2 cards.',color:'#888888',typeColor:'#666666',copies:0},
+  {id:'gearcheck',name:'Feedback Engine',type:'UTILITY',rarity:'Common',emoji:'🔧',embers:1,effect:'×strikeMult scales with DISTINCT cards played this Strike (+8% each) — the combo engine. (Synergy: rewards a varied combo deck.)',color:'#888888',typeColor:'#666666',copies:0},
   // ⚠ LIVE NO-OP: applyCard's whole body for this card is a log line — there is no
   // deck-peek or reorder UI anywhere in src/App.jsx. Kept in the data (removing it
   // would change deck manifests) but it does nothing. See LIVE-SIDE FIXES NEEDED.
@@ -109,7 +109,7 @@ export const ALL_CARDS=[
   {id:'pyromaniac',name:'Pyromaniac',type:'EMBER',rarity:'Uncommon',emoji:'🧨',embers:1,effect:'+2 embers. If you spend ALL embers this strike, all members +3 ATK.',color:'#ff4400',typeColor:'#dd2200',copies:0},
   {id:'slowburn',name:'Slow Burn',type:'EMBER',rarity:'Common',emoji:'🕯️',embers:0,effect:'+2 embers now. +2 embers at start of next 2 strikes. Delayed investment.',color:'#ff8866',typeColor:'#dd6644',copies:0},
   {id:'ampfeedback',name:'Amp Feedback',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'FREE. +2 Embers. Next RIFF costs 1 less.',color:'#88cc44',typeColor:'#66aa22',copies:0},
-  {id:'drainthecrowd',name:'Drain the Crowd',type:'EMBER',rarity:'Common',emoji:'🧛',embers:0,effect:'+3 Embers. A random member loses 2 HP (never below 1).',color:'#aa2244',typeColor:'#880022',copies:0},
+  {id:'drainthecrowd',name:"Death's Bargain",type:'CORRUPT',rarity:'Common',emoji:'🧛',embers:1,effect:"+1 ATK to ALL members per 10% of the band's total HP that is MISSING (comeback). (Synergy: rewards an outlast / low-HP deck.)",color:'#aa2244',typeColor:'#880022',copies:0},
   {id:'corrsiphon',name:'Corruption Nexus',type:'CORRUPT',rarity:'Common',emoji:'🌀',embers:1,effect:'+1 ATK to ALL members per 10% Corruption, this Strike. (Synergy: rewards a corruption-heavy deck.)',color:'#8844aa',typeColor:'#662288',copies:0},
 ]
 // ── CARD UPGRADES (Doom Forge, ⛧ gold cards) ────────────────────────────────

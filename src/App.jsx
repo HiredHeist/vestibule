@@ -5062,6 +5062,8 @@ function App(){
   const wahPedalUsedRef=useRef(false)
   // Octave Pedal: tracks whether first chain double has fired this fight
   const octavePedalFiredRef=useRef(false)
+  // Eternal Encore chain: fraction of the FINAL strike mult carried into the next strike
+  const eternalCarryRef=useRef(0)
   // Tablet of Az'Tothoth (mythic): tracks first-chain-of-fight upgrade
   const tabletFiredRef=useRef(false)
   // The Looper / Echoplex: queued retriggers for end of strike
@@ -5613,6 +5615,7 @@ function App(){
     lastRiffPlayedRef:()=>{lastRiffPlayedRef.current=null},
     strikeMult:()=>setStrikeMult(1.0),
     strikeMultRef:()=>{strikeMultRef.current=1.0},
+    eternalCarryRef:()=>{eternalCarryRef.current=0},
     multMilestonesRef:()=>{multMilestonesRef.current={2:false,4:false,8:false,16:false}},
     // ── drugs / trips: a trip is explicitly ONE fight long ──
     tripUsedThisFight:()=>setTripUsedThisFight(false),
@@ -6577,11 +6580,11 @@ function App(){
       msg='💥 Sonic Boom! ALL members +2 ATK! Draw 1!'
     }
     else if(card.id==='tremolopick'){
-      // Batch C: 2+ cards this Strike → +4 PERMANENT (combo finisher). Else +1 this Strike.
-      if(!m)return false;const combo=cardsPlayedRef.current.length>=2
-      if(combo)ns[slotIdx]=Object.assign({},m,{atk:m.atk+4,permAtkBonus:(m.permAtkBonus||0)+4,buffCount:(m.buffCount||0)+1})
-      else ns[slotIdx]=Object.assign({},m,{atk:m.atk+1,tempBuff:true,buffCount:(m.buffCount||0)+1})
-      msg=combo?('⚡ Tremolo Pick! '+m.name+' +4 ATK permanently! (2+ cards)'):('⚡ Tremolo Pick! '+m.name+' +1 ATK this Strike.')
+      // Riff Barrage (synergy): +2 ATK to ALL members per RIFF already played this Strike (max +12).
+      const _rbRiffs=cardsPlayedRef.current.filter(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c&&c.type==='RIFF'}).length
+      const _rbB=Math.min(12,_rbRiffs*2)
+      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+_rbB,tempAtkBonus:(m.tempAtkBonus||0)+_rbB,buffCount:(m.buffCount||0)+1}):m)
+      msg='⚡ Riff Barrage! All members +'+_rbB+' ATK! ('+_rbRiffs+' RIFFs played)'
     }
     else if(card.id==='harmonicfb'){
       if(!m)return false;const riffCount=cardsPlayedRef.current.filter(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c&&c.type==='RIFF'}).length
@@ -6684,11 +6687,11 @@ function App(){
       else{ns[slotIdx]=Object.assign({},m,{atk:m.atk+8,tempBuff:true,stoneShield:2});msg='🔫 Russian Roulette: '+m.name+' rolled 6! +8 ATK + Shield! 🛡️'}
     }
     else if(card.id==='gearcheck'){
-      // RULE 1 fix: never setHand inside a setDeck updater. Compute off the ref,
-      // set deck directly, defer the hand append past handleDropOnStage's plain setHand(remaining).
-      const _d=[...deckRef.current];const _drawn=_d.splice(Math.max(0,_d.length-2))
-      setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._drawn]),0)
-      msg='🔧 Gear Check! Drew 2 cards.'
+      // Feedback Engine (synergy): ×strikeMult scaling with DISTINCT cards played this Strike — the combo engine.
+      const _feDistinct=new Set(cardsPlayedRef.current).size
+      const _feFactor=1+0.08*_feDistinct
+      setStrikeMult(p=>Math.min(10000,Math.round(p*_feFactor*100)/100));strikeMultRef.current=Math.min(10000,Math.round(strikeMultRef.current*_feFactor*100)/100)
+      msg='🔧 Feedback Engine! Strike multiplier ×'+_feFactor.toFixed(2)+' ('+_feDistinct+' distinct cards)'
     }
     else if(card.id==='setlistrewrite'){
       // 1B Scry: peek top 3 (next to draw), discard the costliest, keep the rest on top.
@@ -6767,9 +6770,13 @@ function App(){
       msg='🔌 Amp Feedback! +2 embers. Next RIFF costs 1 less.'
     }
     else if(card.id==='drainthecrowd'){
-      const alive=ns.filter(s=>s&&!s.tooStoned);if(alive.length>0){const v=alive[Math.floor(Math.random()*alive.length)];const vi=ns.indexOf(v);ns[vi]=Object.assign({},v,{hp:Math.max(1,v.hp-2)})}
-      setEmbers(p=>Math.min(maxEmbers,p+3))
-      msg='🧛 Drain the Crowd! +3 embers. Random member -2 HP.'
+      // Death's Bargain (synergy): +1 ATK to all per 10% of the band's total HP that is MISSING (comeback).
+      const _dbAlive=ns.filter(s=>s&&!s.tooStoned)
+      let _dbCur=0,_dbMax=0;for(const s of _dbAlive){_dbCur+=s.hp;_dbMax+=(s.maxHp||s.hp)}
+      const _dbMissing=_dbMax>0?(_dbMax-_dbCur)/_dbMax:0
+      const _dbB=Math.floor(_dbMissing*10)
+      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+_dbB,tempAtkBonus:(m.tempAtkBonus||0)+_dbB,buffCount:(m.buffCount||0)+1}):m)
+      msg='🧛 Death\'s Bargain! All members +'+_dbB+' ATK! ('+Math.round(_dbMissing*100)+'% band HP missing)'
     }
     else if(card.id==='corrsiphon'){
       // Corruption Nexus (synergy): +1 ATK to all per 10% Corruption — scales with a corruption build.
@@ -6873,6 +6880,9 @@ function App(){
         const _chainMult=_octaveActive?(_baseMult*_baseMult):_baseMult
         if(_octaveActive){octavePedalFiredRef.current=true;addLog('🎼 Octave Pedal! First chain DOUBLED → ×'+_chainMult.toFixed(2))}
         if(_chainMult>1)setStrikeMult(p=>Math.min(10000,Math.round((p*_chainMult)*100)/100))
+        // ETERNAL ENCORE: carry a fraction of the FINAL strike mult into the next strike
+        // (applied at the per-strike reset in handleStrike). Mirrors the sim's _eternalCarry.
+        if(_fx.carry)eternalCarryRef.current=_fx.carry
         let _fxLog=''
         if(_fx.embers){setEmbers(p=>Math.min(maxEmbers,p+_fx.embers));_fxLog+=' +'+_fx.embers+'🔥'}
         if(_fx.corr){setCorruption(p=>Math.max(0,Math.min(100,p+_fx.corr)));_fxLog+=(_fx.corr>0?' +':' ')+_fx.corr+'% Corr'}
@@ -8279,9 +8289,14 @@ function App(){
           else if(card.id==='sonicboom'){
             ns=ns.map(mm=>mm&&!mm.tooStoned?Object.assign({},mm,{atk:mm.atk+2}):mm)
           }
-          else if(card.id==='tremolopick'&&m){
-            const tpBonus=cardsPlayedRef.current.length>=3?4:1
-            ns[slotIdx]=Object.assign({},m,{atk:m.atk+tpBonus})
+          else if(card.id==='tremolopick'){
+            // Riff Barrage replay: +2 ATK to ALL per RIFF already played this Strike (max +12).
+            const rbRiffs=cardsPlayedRef.current.filter(id=>{
+              const realId=String(id).startsWith('_echo:')?String(id).slice(6):id
+              const c=ALL_CARDS.find(x=>x.id===realId);return c&&c.type==='RIFF'
+            }).length
+            const rbB=Math.min(12,rbRiffs*2)
+            ns=ns.map(mm=>mm&&!mm.tooStoned?Object.assign({},mm,{atk:mm.atk+rbB,tempAtkBonus:(mm.tempAtkBonus||0)+rbB}):mm)
           }
           else if(card.id==='harmonicfb'){
             const riffsP=cardsPlayedRef.current.filter(id=>{
@@ -8530,7 +8545,14 @@ function App(){
     // v0.7.2: Trip-driven strike-mult start values
     //   REALITY GLITCH (acid):  ×2.0 every strike
     //   OVERMIND (DMT):         ×3.0 every strike
-    const _newStrikeStart=fightTripBuff==='OVERMIND'?3.0:fightTripBuff==='REALITY GLITCH'?2.0:1.0
+    const _tripBase=fightTripBuff==='OVERMIND'?3.0:fightTripBuff==='REALITY GLITCH'?2.0:1.0
+    // ETERNAL ENCORE chain: carry a fraction of the FINAL mult of the strike just
+    // resolved into the next strike's starting mult. Mirrors the sim's
+    // gs._strikeMult=1.0+(carry?round((final-1)*carry):0). currentMult here IS that
+    // final mult. Added on top of any trip base so trips + carry coexist, then cleared.
+    const _eternalBonus=eternalCarryRef.current?Math.round((currentMult-1)*eternalCarryRef.current*100)/100:0
+    if(eternalCarryRef.current)eternalCarryRef.current=0
+    const _newStrikeStart=Math.min(10000,Math.round((_tripBase+Math.max(0,_eternalBonus))*100)/100)
     setStrikeMult(_newStrikeStart);strikeMultRef.current=_newStrikeStart
     setMemberBuffs({});
     // animPhase guard removed here — wrapper handleStrike checks it before calling.
