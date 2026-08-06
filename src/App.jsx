@@ -82,7 +82,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import {ENEMIES} from './data/enemies.js'
 import {ALL_MUSICIANS} from './data/members.js'
-import {ALL_CARDS,CARD_UPGRADES,RIFF_CHAINS,CORRUPTION_CARDS} from './data/cards.js'
+import {ALL_CARDS,CARD_UPGRADES,RIFF_CHAINS,CORRUPTION_CARDS,CHAIN_EFFECTS} from './data/cards.js'
 import {STARTER_ARTIFACTS,MYTHIC_ARTIFACTS,CIRCLE_ARTIFACTS,STARTER_PASSIVES,MYTHIC_PEDALS,BOSS_LOOT,PACT_REWARDS} from './data/relics.js'
 import {SLY_LINES,TOUR_QUOTES,BOSS_QUOTES,BOSS_BIOS,LOADING_TIPS,REWARD_TIPS,TUTORIAL_TIPS,BOSS_PORTRAITS,STONED_PORTRAITS,STAGE_PORTRAITS,MEMBER_PORTRAITS,IDLE_PORTRAITS,TUTORIAL_MEMBERS,ACHIEVEMENTS,HELL_EVENTS} from './data/flavor.js'
 let _uidCounter=Date.now()
@@ -6860,13 +6860,27 @@ function App(){
           if(!disc.includes(chain.id)){disc.push(chain.id);localStorage.setItem('vst_combos_discovered',JSON.stringify(disc))}
         }
         setChainCallout(chain.name);setTimeout(()=>setChainCallout(null),1200)
-          setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*1.78*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
+          setComboFlash({name:chain.name,color:chain.color,emoji:chain.emoji,mult:Math.round(strikeMultRef.current*((CHAIN_EFFECTS[chain.id]?.mult)||1.78)*100)/100,card1:ALL_CARDS.find(c=>c.id===chain.cards[0])?.name||chain.cards[0],card2:ALL_CARDS.find(c=>c.id===chain.cards[1])?.name||chain.cards[1]})
         playSfx('chain_combo');triggerShake(18,600);setChainFlashActive(true);setTimeout(()=>setChainFlashActive(false),600);
-        // Octave Pedal: first chain each fight has its mult applied twice (×1.78 → ×3.17)
-        const _octaveActive=activePassives.some(p=>p.id==='octavepedal')&&!octavePedalFiredRef.current
-        const _chainMult=_octaveActive?(1.78*1.78):1.78
+        // UNIQUE CHAIN EFFECTS (Aug 6 2026): each chain does something DISTINCT — data in
+        // cards.js CHAIN_EFFECTS (shared with the sim, sim-validated). Cheap chains = small
+        // utility, epic 5e = huge. (Eternal Encore's mult-carry is a flagged follow-up.)
+        const _fx=CHAIN_EFFECTS[chain.id]||{mult:1.78}
+        const _baseMult=_fx.mult||1
+        const _octaveActive=activePassives.some(p=>p.id==='octavepedal')&&!octavePedalFiredRef.current&&_baseMult>1
+        const _chainMult=_octaveActive?(_baseMult*_baseMult):_baseMult
         if(_octaveActive){octavePedalFiredRef.current=true;addLog('🎼 Octave Pedal! First chain DOUBLED → ×'+_chainMult.toFixed(2))}
-        setStrikeMult(p=>Math.min(10000,Math.round((p*_chainMult)*100)/100));showFirstTimeTip('chain','Riff Chains fire when you play a pair BACK-TO-BACK — one card immediately after the other. Sequence matters! Check Rules for all 16 chains!',addLog);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×'+_chainMult.toFixed(2)+' MULTIPLIER!')
+        if(_chainMult>1)setStrikeMult(p=>Math.min(10000,Math.round((p*_chainMult)*100)/100))
+        let _fxLog=''
+        if(_fx.embers){setEmbers(p=>Math.min(maxEmbers,p+_fx.embers));_fxLog+=' +'+_fx.embers+'🔥'}
+        if(_fx.corr){setCorruption(p=>Math.max(0,Math.min(100,p+_fx.corr)));_fxLog+=(_fx.corr>0?' +':' ')+_fx.corr+'% Corr'}
+        if(_fx.atkAll){setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+_fx.atkAll,tempAtkBonus:(m.tempAtkBonus||0)+_fx.atkAll,buffCount:(m.buffCount||0)+1}):m));_fxLog+=' +'+_fx.atkAll+' ATK all'}
+        if(_fx.heal){setStage(prev=>prev.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+_fx.heal)}):m));_fxLog+=' +'+_fx.heal+' HP all'}
+        if(_fx.bandHp){setStage(prev=>prev.map(m=>{if(!m||m.tooStoned)return m;const _nh=Math.max(0,m.hp+_fx.bandHp);return Object.assign({},m,{hp:_nh,tooStoned:_nh<=0})}));_fxLog+=' '+_fx.bandHp+' HP all'}
+        {let _dd=0;if(_fx.bonusDmg)_dd+=_fx.bonusDmg;if(_fx.dmgFromCorr)_dd+=Math.round(corruption*_fx.dmgFromCorr);if(_fx.corrToDmg){_dd+=corruption;setCorruption(0)}
+         if(_dd>0){const _nh=Math.max(0,enemyHp-_dd);setEnemyHp(_nh);if(_nh<=0)setTimeout(()=>triggerVictoryRef.current&&triggerVictoryRef.current(),500);addFloat(_dd,getCenter(bossRef).x,getCenter(bossRef).y-60,'#ff3300',true);_fxLog+=' '+_dd+' dmg'}}
+        showFirstTimeTip('chain','Riff Chains fire when you play a pair BACK-TO-BACK — one card immediately after the other. Sequence matters! Check Rules for all 16 chains!',addLog)
+        addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ×'+_chainMult.toFixed(2)+' MULTIPLIER'+(_fxLog?' —'+_fxLog:''))
         combosFiredRef.current.push(chain.id)
         // Mythic unlock tracking: Tablet of Az'Tothoth requires all 16 chains in one run
         chainsFiredThisRunRef.current.add(chain.id)
