@@ -24,14 +24,19 @@ import { applyCardEffect } from './cardEngine.js'
 // The value knobs — the ONLY strategy numbers we maintain (was an 82-card table).
 // A point of value ≈ one point of boss damage. Everything else is expressed in
 // those terms so the bot trades ATK vs embers vs draw vs healing on one scale.
+// The auto-tuner (tune-veteran.mjs) overrides any weight via env var EVAL_W_<name>.
+// Browser-safe: when there's no process.env (the live game), it falls back to the
+// baked defaults, so this never affects the shipped game.
+const _envW = (typeof process !== 'undefined' && process.env) ? process.env : {}
+const _w = (k, d) => (_envW['EVAL_W_' + k] !== undefined ? parseFloat(_envW['EVAL_W_' + k]) : d)
 export const EVAL_WEIGHTS = {
-  bossDamage: 1.0,     // immediate damage to the boss
-  atkPerStrike: 0.9,   // +1 ATK is worth ~0.9 dmg for each remaining strike
-  ember: 3.5,          // an ember enables more plays this fight
-  heal: 0.7,           // a point of band HP (survival)
-  draw: 4.0,           // a card in hand (card advantage)
-  strikeMult: 0.5,     // ×mult applied to current band ATK over remaining strikes
-  corruptionCost: 0.25, // mild penalty for raising Corruption (double-edged)
+  bossDamage: _w('bossDamage', 1.0),     // immediate damage to the boss
+  atkPerStrike: _w('atkPerStrike', 0.9), // +1 ATK is worth ~0.9 dmg for each remaining strike
+  ember: _w('ember', 3.5),               // an ember enables more plays this fight
+  heal: _w('heal', 0.7),                 // a point of band HP (survival)
+  draw: _w('draw', 4.0),                 // a card in hand (card advantage)
+  strikeMult: _w('strikeMult', 0.5),     // ×mult applied to current band ATK over remaining strikes
+  corruptionCost: _w('corruptionCost', 0.25), // mild penalty for raising Corruption (double-edged)
 }
 
 function _metric(S) {

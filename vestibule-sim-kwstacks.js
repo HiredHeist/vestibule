@@ -8,7 +8,7 @@
 // real ATK growth. Buffs now write permAtkBonus only.
 import{readFileSync}from'fs'
 import * as ENGINE from './src/data/cardEngine.js'
-import { evaluateCard as EVAL_evaluateCard } from './src/data/cardEval.js'
+import { evaluateCard as EVAL_evaluateCard, EVAL_WEIGHTS } from './src/data/cardEval.js'
 // Aug 4 2026 — THE SIM NO LONGER KEEPS ITS OWN COPY OF THE GAME'S DATA.
 // It used to hard-code an ENEMIES table (Wanderer baseDmg 4 vs live's 2, 27 wrong
 // maxHp values) and an ALL_MUSICIANS table where every member had hp===maxHp
@@ -113,6 +113,7 @@ const SP_EMBER_GEN_CAP   = (process.env.SP_EMBER_GEN_CAP!==undefined)?parseFloat
 const SP_RAW_DMG         = parseFloat(process.env.SP_RAW_DMG)||1; // (chains-dominant) scaler on raw band-ATK damage BEFORE multipliers under SKILL_PASS — <1 makes unconnected card spam weak so CHAINS carry the damage; 1=off
 const SP_EMBER_LEAK_CAP  = parseFloat(process.env.SP_EMBER_LEAK_CAP)||0; // (task1 LEAK-PLUG) cap TOTAL bonus embers gained from generation sources within a FIGHT (beyond the per-fight starting pool) under SKILL_PASS; 0=off. Bounds — does not delete — a7/p1/hellfire/Burn-Stage/tapped-out/slow-burn/FOLK MAGIC/Ritualist refunds and ember-generation cards.
 const SP_CHAIN_MULT      = parseFloat(process.env.SP_CHAIN_MULT)||1.0;   // (task2 CHAINS-DOMINANT) scale the per-chain strikeMult bump (base ×1.78) under SKILL_PASS; 1.0=no-op
+const SP_CHAIN_ORDER     = process.env.SP_CHAIN_ORDER!=='0';             // (SKILL) DEFAULT ON, matching the live game (Aug 6): chains fire only if the pair is played BACK-TO-BACK (consecutively, either direction) — a real sequencing test a spammer rarely hits. SP_CHAIN_ORDER=0 restores the old "both played, any order" for A/B.
 const SP_RAW_DMG_MULT    = parseFloat(process.env.SP_RAW_DMG_MULT)||1.0; // (task2 CHAINS-DOMINANT) scale the raw (non-multiplier) member-ATK strike contribution under SKILL_PASS so raw card-ATK can be dialed DOWN; 1.0=no-op
 
 // (task1) SKILL_PASS ember-leak accountant. Bounds cumulative bonus-ember generation
@@ -764,6 +765,88 @@ function _buildEngineState(card,gs,enemy,emberCost){
     bossPassiveId:_healExempt?null:enemy.passiveId}
   return {idx,S,ctx}
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  COMBO-LOOKAHEAD PLANNER (Aug 6 2026) — the "veteran" brain, gated by PLANNER=1.
+//  The greedy scorer picks the best SINGLE card plus a hardcoded +40 "chain" nudge,
+//  so it fires chains reflexively. A veteran instead PLANS a loaded strike: stacks
+//  ATK and lands the chain in the SAME strike (strikeMult resets each strike, so a
+//  chain only pays INSIDE the strike it fires). This searches short sequences of
+//  plays through the REAL engine + the REAL chain-fire, and returns the first card
+//  of the sequence whose end-of-strike position is best — so chains are valued by
+//  the ACTUAL damage they produce and only fired when they pay off (JV: not spammed).
+// ═══════════════════════════════════════════════════════════════════════════
+const PLANNER    = process.env.PLANNER==='1';
+const PLAN_DEPTH = parseInt(process.env.PLAN_DEPTH)||3;
+const PLAN_BEAM  = parseInt(process.env.PLAN_BEAM)||3;
+// Planner terminal-state weights (small — the strike damage should dominate). The
+// ember weight is deliberately LOW: leftover embers at end-of-strike are near-worthless,
+// so valuing them high made the planner hoard embers and under-play (worse than random).
+const PLAN_W_ember = process.env.PLAN_W_ember!==undefined?parseFloat(process.env.PLAN_W_ember):0.3;
+const PLAN_W_draw  = process.env.PLAN_W_draw!==undefined?parseFloat(process.env.PLAN_W_draw):0.4;
+const PLAN_W_corr  = process.env.PLAN_W_corr!==undefined?parseFloat(process.env.PLAN_W_corr):0.25;
+function _cloneS(S){return{...S,stage:(S.stage||[]).map(m=>m?{...m}:null),hand:(S.hand||[]).map(c=>({...c})),deck:(S.deck||[]).map(c=>({...c})),discard:(S.discard||[]).map(c=>({...c})),cardsPlayedIds:(S.cardsPlayedIds||[]).slice(),flags:{...(S.flags||{})},_fired:new Set(S._fired||[])}}
+function _bandAtk(S){let a=0;for(const m of(S.stage||[])){if(m&&!m.tooStoned)a+=(m.atk||0)+(m.permAtkBonus||0)+(m.tempAtkBonus||0)}return a}
+// Value of a mid-strike loadout = the strike it WOULD deal now (bandATK×mult) + any
+// direct card damage already done + retained resources − corruption. Rewards loaded
+// strikes, so a chain is only "worth it" when it multiplies a big band.
+function _posVal(S,initBossHp){
+  // Damage-focused: the imminent strike (bandATK×mult) + direct card damage already
+  // done dominate. Leftover embers/cards at end-of-strike carry only a SMALL future
+  // value (unspent embers are near-worthless), so they don't cause the planner to
+  // hoard and under-play. Weights are env-tunable (PLAN_W_*) for the auto-tuner.
+  return _bandAtk(S)*(S.strikeMult||1)
+    + Math.max(0,initBossHp-(S.bossHp||0))
+    + PLAN_W_ember*(S.embers||0)
+    + PLAN_W_draw*(S.hand||[]).length
+    - PLAN_W_corr*(S.corruption||0)
+}
+// Apply a card to engine-state S in place; mirrors the play loop's cost + hand-splice
+// + played-ledger + REAL riff-chain fire. Returns false if the engine rejects it.
+function _applyToS(card,S,ctx,cost){
+  let res;try{res=ENGINE.applyCardEffect(card.id,S,{rng:Math.random,...ctx})}catch(e){return false}
+  if(!res||!res.ok)return false
+  const spent=(typeof res.emberCost==='number'?res.emberCost:cost)||0
+  S.embers=Math.max(0,(S.embers||0)-spent) // S.embers already reflects any generation the card did
+  const hi=(S.hand||[]).findIndex(c=>c.id===card.id);if(hi>=0)S.hand.splice(hi,1)
+  S.cardsPlayedIds=(S.cardsPlayedIds||[]).concat(card.id)
+  if(!S._fired)S._fired=new Set()
+  for(const chain of RIFF_CHAINS_SIM){
+    const _cp=S.cardsPlayedIds
+    const _hit=SP_CHAIN_ORDER
+      ? (_cp.length>=2&&((_cp[_cp.length-2]===chain[0]&&_cp[_cp.length-1]===chain[1])||(_cp[_cp.length-2]===chain[1]&&_cp[_cp.length-1]===chain[0])))
+      : (_cp.includes(chain[0])&&_cp.includes(chain[1]))
+    if(_hit){
+      const ck=chain[0]+'+'+chain[1]
+      if(!S._fired.has(ck)){S._fired.add(ck);const _bump=1.78*(SP_CHAIN_MULT||1);const _mcap=SKILL_PASS?SP_MULT_CAP:10000;S.strikeMult=Math.min(_mcap,Math.round((S.strikeMult||1)*_bump*100)/100)}
+    }
+  }
+  return true
+}
+// Return the id of the best card to play RIGHT NOW (or null = stop/strike), by
+// searching sequences up to PLAN_DEPTH deep (beam PLAN_BEAM).
+function _planStrike(gs,enemy){
+  if(!gs.hand.length)return null
+  const b=_buildEngineState(gs.hand[0],gs,enemy);if(!b)return null
+  const baseS=b.S; baseS._fired=new Set(gs._firedChains||[])
+  const initBossHp=baseS.bossHp||0
+  const info=new Map()
+  for(const c of gs.hand){if(info.has(c.id))continue;const bb=_buildEngineState(c,gs,enemy);if(!bb)continue;info.set(c.id,{ctx:bb.ctx,cost:cardCost(c,gs,{firstOfStrike:false},false),card:c})}
+  const afford=(S,nfo)=>(S.flags&&(S.flags.allCardsFree||S.flags.nextCardFree))||(S.embers||0)>=nfo.cost
+  const uniq=hand=>{const seen=new Set(),out=[];for(const c of(hand||[])){if(seen.has(c.id))continue;seen.add(c.id);out.push(c)}return out}
+  function bestVal(S,depth){
+    let v=_posVal(S,initBossHp)
+    if(depth<=0)return v
+    const scored=[]
+    for(const c of uniq(S.hand)){const nfo=info.get(c.id);if(!nfo||!afford(S,nfo))continue;const S2=_cloneS(S);if(!_applyToS(nfo.card,S2,nfo.ctx,nfo.cost))continue;scored.push({S2,v:_posVal(S2,initBossHp)})}
+    scored.sort((a,b)=>b.v-a.v)
+    for(const s of scored.slice(0,PLAN_BEAM))v=Math.max(v,bestVal(s.S2,depth-1))
+    return v
+  }
+  let pick=null,pickVal=_posVal(baseS,initBossHp)
+  for(const c of uniq(baseS.hand)){const nfo=info.get(c.id);if(!nfo||!afford(baseS,nfo))continue;const S2=_cloneS(baseS);if(!_applyToS(nfo.card,S2,nfo.ctx,nfo.cost))continue;const lv=bestVal(S2,PLAN_DEPTH-1);if(lv>pickVal+0.01){pickVal=lv;pick=nfo.card.id}}
+  return pick
+}
 function applyCardSim(card,gs,enemy,emberCost){
   const _b=_buildEngineState(card,gs,enemy,emberCost)
   if(!_b)return null
@@ -1020,7 +1103,14 @@ function simFight(gs,phaseHp,luciferPhase){
         return gs.embers>=cardCost(c,gs,_cst,false)+_spTax
       });if(playable.length===0)break;
       let best
-      if(LAZY){
+      if(PLANNER&&!LAZY){
+        // VETERAN: plan a loaded strike via sequence search; null = stop and strike.
+        const _pid=_planStrike(gs,enemy)
+        if(!_pid)break
+        const _pi=playable.findIndex(p=>p.c.id===_pid)
+        if(_pi<0)break
+        best=playable[_pi]
+      } else if(LAZY){
         // LAZY: no scoring, no threshold — play a random affordable card greedily.
         best=playable[rand(playable.length)]
       } else {
@@ -1040,7 +1130,7 @@ function simFight(gs,phaseHp,luciferPhase){
       // spending anything.
       const _spent=_ok?((typeof _res.emberCost==='number'?_res.emberCost:cost)+_spTax):0
       if(_ok)gs.embers=Math.max(0,gs.embers-_spent)
-      if(SKILL_PASS&&SP_EMBER_GEN_CAP>=0){const _gen=gs.embers-(_eBefore-_spent);if(_gen>0){const _allow=Math.max(0,SP_EMBER_GEN_CAP-(gs._spGenUsed||0));const _keep=Math.min(_gen,_allow);gs._spGenUsed=(gs._spGenUsed||0)+_keep;gs.embers=Math.max(0,gs.embers-(_gen-_keep))}} // (leak-plug) bound TOTAL per-fight ember generation to SP_EMBER_GEN_CAP
+      if(SP_EMBER_GEN_CAP>=0){const _gen=gs.embers-(_eBefore-_spent);if(_gen>0){const _allow=Math.max(0,SP_EMBER_GEN_CAP-(gs._spGenUsed||0));const _keep=Math.min(_gen,_allow);gs._spGenUsed=(gs._spGenUsed||0)+_keep;gs.embers=Math.max(0,gs.embers-(_gen-_keep))}} // (leak-plug) bound TOTAL per-fight ember generation to SP_EMBER_GEN_CAP
       if(gs._consumeCard){gs._consumeCard=false}else if(card.id!=='contract')gs.discard.push(card);
       if(!_ok)continue
       cardsPlayed++;
@@ -1075,9 +1165,14 @@ function simFight(gs,phaseHp,luciferPhase){
         gs.hand.push({...card,uid:Math.random().toString(36).slice(2),_copied:true})
         gs._engineerCopies=(gs._engineerCopies||0)+1
       }
-      // Riff chain detection
+      // Riff chain detection — default: both played (any order). SP_CHAIN_ORDER:
+      // the two must be the LAST two plays, in order (A then B) — a sequencing skill test.
       for(const chain of RIFF_CHAINS_SIM){
-        if(gs._cardsPlayedIds.includes(chain[0])&&gs._cardsPlayedIds.includes(chain[1])){
+        const _cp=gs._cardsPlayedIds
+        const _hit=SP_CHAIN_ORDER
+          ? (_cp.length>=2&&((_cp[_cp.length-2]===chain[0]&&_cp[_cp.length-1]===chain[1])||(_cp[_cp.length-2]===chain[1]&&_cp[_cp.length-1]===chain[0])))
+          : (_cp.includes(chain[0])&&_cp.includes(chain[1]))
+        if(_hit){
           if(!gs._firedChains)gs._firedChains=new Set()
           const ck=chain[0]+'+'+chain[1]
           if(!gs._firedChains.has(ck)){
@@ -1086,10 +1181,9 @@ function simFight(gs,phaseHp,luciferPhase){
             // (d) chainBlock bosses build NO strikeMult at all. Default path unchanged.
             if(!(SKILL_PASS&&gs._spChainBlock)){
               const _mcap=SKILL_PASS?SP_MULT_CAP:10000
-              // (task2 CHAINS-DOMINANT) scale the per-chain ×1.78 bump by SP_CHAIN_MULT
-              // under SKILL_PASS so hitting chains can be made to pay far more. Default
-              // SP_CHAIN_MULT=1.0 → ×1.78 exactly (no-op).
-              const _bump=SKILL_PASS?1.78*SP_CHAIN_MULT:1.78
+              // SP_CHAIN_MULT now applies WHENEVER set (decoupled from SKILL_PASS) so
+              // chain payoff can be tuned on the otherwise-normal game. Default 1.0 → ×1.78.
+              const _bump=1.78*(SP_CHAIN_MULT||1)
               gs._strikeMult=Math.min(_mcap,Math.round((gs._strikeMult*_bump)*100)/100)
             }
             // CHAIN INSTANT DAMAGE REMOVED to match live (App.jsx v0.7.7 May 4 2026):

@@ -6843,8 +6843,16 @@ function App(){
       }
     }
     const played=cardsPlayedRef.current
+    // Aug 6 2026 (JV): riff chains are ORDER/SEQUENCE-dependent — the pair must be played
+    // BACK-TO-BACK (consecutively, either direction). "both sometime this Strike, any order"
+    // used to fire for free, so dumping your hand triggered every chain by volume; now it's
+    // a real sequencing skill (a spammer rarely plays a specific pair adjacently). Sim parity: SP_CHAIN_ORDER.
+    const _pn=played.length
+    const _lastId=_pn>0?played[_pn-1]:null, _prevId=_pn>1?played[_pn-2]:null
     for(const chain of RIFF_CHAINS){
-      if(played.includes(chain.cards[0])&&played.includes(chain.cards[1])&&!combosFiredRef.current.includes(chain.id)){
+      const _c0=chain.cards[0],_c1=chain.cards[1]
+      const _consecutive=_prevId!==null&&((_prevId===_c0&&_lastId===_c1)||(_prevId===_c1&&_lastId===_c0))
+      if(_consecutive&&!combosFiredRef.current.includes(chain.id)){
         if(!combosDiscoveredThisRun.includes(chain.id)){
           setCombosDiscoveredThisRun(p=>[...p,chain.id])
           // Track lifetime discoveries
@@ -6858,7 +6866,7 @@ function App(){
         const _octaveActive=activePassives.some(p=>p.id==='octavepedal')&&!octavePedalFiredRef.current
         const _chainMult=_octaveActive?(1.78*1.78):1.78
         if(_octaveActive){octavePedalFiredRef.current=true;addLog('🎼 Octave Pedal! First chain DOUBLED → ×'+_chainMult.toFixed(2))}
-        setStrikeMult(p=>Math.min(10000,Math.round((p*_chainMult)*100)/100));showFirstTimeTip('chain','Riff Chains fire when you play BOTH cards of a pair in the same Strike. Check Rules for all 16 chains!',addLog);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×'+_chainMult.toFixed(2)+' MULTIPLIER!')
+        setStrikeMult(p=>Math.min(10000,Math.round((p*_chainMult)*100)/100));showFirstTimeTip('chain','Riff Chains fire when you play a pair BACK-TO-BACK — one card immediately after the other. Sequence matters! Check Rules for all 16 chains!',addLog);addLog('⛧ RIFF CHAIN: '+chain.emoji+' '+chain.name+'! ('+ALL_CARDS.find(c=>c.id===chain.cards[0])?.name+' + '+ALL_CARDS.find(c=>c.id===chain.cards[1])?.name+') ×'+_chainMult.toFixed(2)+' MULTIPLIER!')
         combosFiredRef.current.push(chain.id)
         // Mythic unlock tracking: Tablet of Az'Tothoth requires all 16 chains in one run
         chainsFiredThisRunRef.current.add(chain.id)
@@ -10732,7 +10740,7 @@ function App(){
             ['⛓ Mentor Links','Place a Foil/Mythic/Demonic member directly LEFT of a basic member with the same role. They form a Mentor Link — a permanent damage multiplier that fires every Strike while both are alive.'],
             ['✨ Member Tiers','Members come in tiers: Basic (standard), Foil (+1 ATK/HP, -1 Ember on cards), Mythic (+3 ATK/HP), Demonic (+5 ATK/HP, golden glow). Higher tiers appear in better packs.'],
             ['🃏 Card Types','RIFF (purple): Direct damage and ATK buffs. CORRUPT (red): Corruption-scaling power. UTILITY (green): Healing, draw, and economy. EMBER (orange): Ember management and recovery.'],
-            ['⛧ Riff Chains','Playing specific card pairs triggers Riff Chains — massive combo bonuses! Chains multiply your Strike damage (e.g., Battle Cry + Stage Dive = DEATH WISH). 16 chains to discover. The celebration shows which cards triggered it.'],
+            ['⛧ Riff Chains','Play a specific card pair BACK-TO-BACK — one immediately after the other — to trigger a Riff Chain for a massive combo bonus! Sequence matters: dumping the cards in random order won\'t fire it. Chains multiply your Strike damage (e.g., Battle Cry → Stage Dive = DEATH WISH). A partner card glows the moment you play its pair-mate. 16 chains to discover.'],
             ['×️ Strike Multiplier','Every card played MULTIPLIES your Strike by ×1.08. Riff Chains multiply by ×1.78. Multiple chains stack multiplicatively. 6 cards + 1 chain = ×2.83. Stack artifacts for the god run. The multiplier resets each Strike.'],
             ['🌀 Corruption','A risk/reward axis from 0-100%. Some cards and enemies raise it. CORRUPT keyword members get stronger at high corruption. Overdrive requires 60%+. Feedback Loop and Amp the Static scale with it.'],
             ['⚠ Corruption & Hangover','Corruption powers CORRUPT cards (purple). The peak corruption you hit during a fight becomes your HANGOVER for the next fight + shop. Hangover ≥50% = +20% shop prices. ≥75% = +40%. ≥100% = +60%. Each member loses ⌊hangover/33⌋ max HP next fight (restored at boss kill). Peaking at 100% also shaves 15% of that fight\'s stash payout. Corruption can never end your run — the cost is always tomorrow.'],
@@ -12492,7 +12500,7 @@ function App(){
             </div>
           </>)})()}
           {(handSort==='none'?hand:handSort==='embers'?[...hand].sort((a,b)=>b.embers-a.embers):[...hand].sort((a,b)=>({'Common':0,'Uncommon':1,'Rare':2}[b.rarity]||0)-({'Common':0,'Uncommon':1,'Rare':2}[a.rarity]||0))).filter(Boolean).map((card,i)=>(
-            <HandCard key={card.uid} card={card} index={i} total={hand.length} chainReady={RIFF_CHAINS.some(ch=>ch.cards.includes(card.id)&&(hand.some(c2=>c2.uid!==card.uid&&ch.cards.includes(c2.id))||(cardsPlayedRef.current||[]).some(pid=>ch.cards.includes(pid)&&pid!==card.id)))} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
+            <HandCard key={card.uid} card={card} index={i} total={hand.length} chainReady={(()=>{const _lp=cardsPlayedRef.current||[];const _l=_lp.length?_lp[_lp.length-1]:null;return _l!=null&&_l!==card.id&&RIFF_CHAINS.some(ch=>ch.cards.includes(card.id)&&ch.cards.includes(_l))})()} isUsed={card.id==='stagedive'&&stageDiveUsed} lastRiffPlayed={card.id==='demotape'?lastRiffPlayed:null}
               isHovered={hovered===i} isSelected={selected.includes(card.uid)||quickPlayCardUid===card.uid}
               anyHovered={hovered!==null}
               canAfford={card.embers===0||embers>=card.embers}
