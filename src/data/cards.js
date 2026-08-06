@@ -188,6 +188,44 @@ export const RIFF_CHAINS=[
   {id:'demon_core',name:'DEMON CORE',cards:['sabbathsigil','overdrive'],color:'#ff0044',emoji:'⛧'},
   {id:'last_stand',name:'LAST STAND',cards:['stagedive','wakeup'],color:'#00ddff',emoji:'💪'},
 ]
+
+// ── UNIQUE CHAIN EFFECTS (Aug 6 2026) ───────────────────────────────────────
+// Each riff chain now does something DISTINCT, tiered by difficulty (combined ember
+// cost of its pair): cheap chains = small utility, epic 5e chains = run-defining.
+// SHARED by the live game and the sim so they never drift. Fields the combat engine
+// applies when a chain fires:
+//   mult        strikeMult multiplier (the classic bump; was a flat 1.78 for all)
+//   embers      +embers (capped at maxEmbers)
+//   corr        +/- Corruption (negative = purge)
+//   atkAll      +ATK to every alive member THIS strike (temp)
+//   bandHp      +/- HP to every alive member (negative = sacrifice)
+//   heal        +HP to every alive member (shield/heal flavor)
+//   bonusDmg    flat bonus damage added to this strike
+//   dmgFromCorr bonus strike damage = current Corruption × this
+//   corrToDmg   bonus strike damage = current Corruption, then Corruption → 0
+//   carry       fraction of the resulting strikeMult that carries to next strike
+export const CHAIN_EFFECTS = {
+  // CHEAP (1–2e) — small, snappy
+  clean_machine:  { mult: 1.4, corr: -10 },        // Purge: cleanse the corruption
+  noise_gate:     { mult: 1.4, embers: 2 },        // Feedback: fuel
+  mosh_madness:   { mult: 1.0, atkAll: 3 },        // whole pit swings
+  power_surge:    { mult: 1.6, embers: 3 },        // Overcharge
+  // MID (3–4e) — meaty & themed
+  blood_pact:     { mult: 2.2, bandHp: -5 },       // blood for power
+  soul_harvest:   { mult: 1.0, dmgFromCorr: 2 },   // reap corruption as damage
+  dark_sacrifice: { mult: 2.0, atkAll: 2, bandHp: -3 }, // ritual
+  demon_core:     { mult: 2.2, corr: 15 },         // unstable power
+  shred_storm:    { mult: 1.6, atkAll: 6 },        // guitar-solo storm
+  death_wish:     { mult: 2.6, bandHp: -5 },       // reckless
+  wall_of_sound:  { mult: 1.8, heal: 6 },          // defensive wall
+  feedback_hell:  { mult: 2.0, corrToDmg: true },  // dump all corruption into damage
+  last_stand:     { mult: 1.9, heal: 8 },          // comeback
+  // EPIC (5e) — huge
+  hellfire:       { mult: 3.0, bonusDmg: 15 },     // inferno
+  triple_threat:  { mult: 3.0 },                   // three-headed strike
+  eternal_encore: { mult: 3.0, carry: 0.5 },       // half the mult carries to next strike (the "god combo")
+}
+
 // ── CORRUPTION GIFTS ────────────────────────────────────────────────────────
 // The cards actually handed out when Corruption crosses 25% / 50% / 75%.
 // Aug 4 2026:
