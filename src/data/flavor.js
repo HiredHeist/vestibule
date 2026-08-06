@@ -170,7 +170,7 @@ export const BOSS_BIOS={
 export const LOADING_TIPS=[
   'Corruption above 40% MULTIPLIES your damage. Risk = reward.',
   'Burning cards from your deck means you draw combos faster.',
-  'Riff Chains fire when you play BOTH cards of a pair. Check the Rules for all 16 chains.',
+  'Riff Chains fire when you play a pair BACK-TO-BACK — one card right after the other. Check the Rules for all 16 chains.',
   'Artifacts with ×MULT triggers are your Jokers. Stack them for nuclear damage.',
   'Playing 4+ cards before Striking activates Vintage Guitar (×1.3).',
   'The Pawn Shop lets you burn bad cards. A 50-card deck beats a 69-card deck.',
@@ -219,8 +219,8 @@ export const TUTORIAL_TIPS={
     {id:"t2_corrupt_card",text:"CORRUPT cards (red) are risky. They raise corruption but can be very powerful.",target:"hand",position:"above"},
   ],
   3:[
-    {id:"t3_chain_intro",text:"Certain card pairs trigger Riff Chains — powerful combos that multiply your damage. Battle Cry + Stage Dive is one. But you only have 5 Embers and they cost 6 total...",target:"hand",position:"above"},
-    {id:"t3_ember_mgmt",text:"Here is the trick: play Battle Cry first (2 Embers), then play Groupie (costs 1, but GIVES you 2 back). Now you have enough for Stage Dive (4 Embers). Ember management is key!",target:"embers",position:"left"},
+    {id:"t3_chain_intro",text:"Certain card pairs trigger Riff Chains — powerful combos! But you must play the pair BACK-TO-BACK, one right after the other. Battle Cry → Stage Dive is one. They cost 6 Embers though, and you only have 5...",target:"hand",position:"above"},
+    {id:"t3_ember_mgmt",text:"The trick: play Groupie FIRST (costs 1, GIVES 2 back — now you have 6 Embers). THEN play Battle Cry and Stage Dive BACK-TO-BACK to fire the DEATH WISH chain! Sequencing + ember management is the skill.",target:"embers",position:"left"},
   ],
 }
 export const BOSS_PORTRAITS={

@@ -10584,6 +10584,8 @@ function App(){
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'var(--text-blood)',textShadow:'0 0 20px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:6}}>Paused</div>
       {gameState!=='menu'&&<button onClick={()=>{if(window.confirm('Abandon this run? The tour ends here — no refunds from Hell.')){clearSave();setShowPauseOptions(false);handleReset()}}}
         style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:3,color:'var(--text-blood)',background:'rgba(60,10,10,0.5)',border:'1px solid var(--text-blood)',borderRadius:7,padding:'10px 28px',cursor:'pointer',width:'100%'}}>🏳 ABANDON RUN</button>}
+      <button onClick={()=>{setShowPauseOptions(false);setMenuView('rules')}}
+        style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:3,color:'var(--text-gold)',background:'rgba(40,25,5,0.5)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:7,padding:'10px 28px',cursor:'pointer',width:'100%'}}>📜 RULES</button>
       <div style={{display:'flex',flexDirection:'column',gap:10,width:'100%'}}>
         {[
           ['Scanlines','vst_scanlines',localStorage.getItem('vst_scanlines')!=='off'],
@@ -10656,7 +10658,10 @@ function App(){
   // ── COLD OPEN SPLASH — overlays menu on first ever launch
   const ColdOpenOverlay=coldOpenPhase!==null&&coldOpenPhase<5?<ColdOpenScreen phase={coldOpenPhase}/>:null
   // ── MAIN MENU ──────────────────────────────────────────────
-  if(gameState==='menu'){
+  // menuView!=null lets the Rules/Options/Unlocks overlays render MID-RUN too (the code
+  // below is just harmless const reads), so a paused player can open the Rules. Back
+  // (setMenuView(null)) drops straight back into the game since the guard goes false.
+  if(gameState==='menu'||menuView){
     const lt=lifetimeScore||0
     const earned=UNLOCK_MILESTONES.filter(u=>lt>=u.score)
     const achs=getAchievements()
@@ -10757,7 +10762,7 @@ function App(){
             ['✨ Member Tiers','Members come in tiers: Basic (standard), Foil (+1 ATK/HP, -1 Ember on cards), Mythic (+3 ATK/HP), Demonic (+5 ATK/HP, golden glow). Higher tiers appear in better packs.'],
             ['🃏 Card Types','RIFF (purple): Direct damage and ATK buffs. CORRUPT (red): Corruption-scaling power. UTILITY (green): Healing, draw, and economy. EMBER (orange): Ember management and recovery.'],
             ['⛧ Riff Chains','Play a specific card pair BACK-TO-BACK — one immediately after the other — to trigger a Riff Chain for a massive combo bonus! Sequence matters: dumping the cards in random order won\'t fire it. Chains multiply your Strike damage (e.g., Battle Cry → Stage Dive = DEATH WISH). A partner card glows the moment you play its pair-mate. 16 chains to discover.'],
-            ['×️ Strike Multiplier','Every card played MULTIPLIES your Strike by ×1.08. Riff Chains multiply by ×1.78. Multiple chains stack multiplicatively. 6 cards + 1 chain = ×2.83. Stack artifacts for the god run. The multiplier resets each Strike.'],
+            ['×️ Strike Multiplier','Every card played MULTIPLIES your Strike by ×1.08. Riff Chains — played BACK-TO-BACK — each do something UNIQUE and multiply your Strike (×1.4 for cheap combos, up to ×3+ for the hardest). Mults stack multiplicatively. Stack artifacts for the god run. The multiplier resets each Strike.'],
             ['🌀 Corruption','A risk/reward axis from 0-100%. Some cards and enemies raise it. CORRUPT keyword members get stronger at high corruption. Overdrive requires 60%+. Feedback Loop and Amp the Static scale with it.'],
             ['⚠ Corruption & Hangover','Corruption powers CORRUPT cards (purple). The peak corruption you hit during a fight becomes your HANGOVER for the next fight + shop. Hangover ≥50% = +20% shop prices. ≥75% = +40%. ≥100% = +60%. Each member loses ⌊hangover/33⌋ max HP next fight (restored at boss kill). Peaking at 100% also shaves 15% of that fight\'s stash payout. Corruption can never end your run — the cost is always tomorrow.'],
             ['💀 Corruption = Power','Corruption is a MULTIPLIER. 40%=×1.2, 60%=×1.5, 80%=×2.0, 100%=×3.0 damage but the boss hits +3 harder. Risk vs reward — ride the corruption wave.'],
