@@ -9,6 +9,7 @@
 import{readFileSync}from'fs'
 import * as ENGINE from './src/data/cardEngine.js'
 import { evaluateCard as EVAL_evaluateCard, EVAL_WEIGHTS } from './src/data/cardEval.js'
+import { RIFF_CHAINS as RIFF_CHAINS_DEF, CHAIN_EFFECTS } from './src/data/cards.js'
 // Aug 4 2026 — THE SIM NO LONGER KEEPS ITS OWN COPY OF THE GAME'S DATA.
 // It used to hard-code an ENEMIES table (Wanderer baseDmg 4 vs live's 2, 27 wrong
 // maxHp values) and an ALL_MUSICIANS table where every member had hp===maxHp
@@ -339,14 +340,11 @@ const BOSS_LOOT_SIM=[
 ]
 
 // ── RIFF CHAINS (16 combos) ──
-const RIFF_CHAINS_SIM=[
-  ['resonancecard','infencore'],['darktuning','overdrive'],['bloodritual','wakeup'],
-  ['possessedperf','encore'],['distortion','feedbackloop'],['battlecry','stagedive'],
-  ['encore','infencore'],['staticcharge','deathriff'],['soundwall','amp'],
-  ['feedbackloop','ampstatic'],['moshpit','battlecry'],['bloodritual','seance'],
-  ['burnset','groupie'],['powertap','newstrings'],['sabbathsigil','overdrive'],
-  ['stagedive','wakeup']
-]
+// Derived from the SHARED cards.js definitions (single source of truth — no drift).
+// RIFF_CHAINS_DEF carries {id,cards,...}; RIFF_CHAINS_SIM is the pair-only view used by
+// the scorer/planner; CHAIN_EFFECTS gives each chain its unique effect.
+const RIFF_CHAINS_SIM=RIFF_CHAINS_DEF.map(c=>c.cards)
+const _CHAIN_BY_PAIR=Object.fromEntries(RIFF_CHAINS_DEF.map(c=>[c.cards[0]+'+'+c.cards[1],c.id]))
 
 // ── HELLQUAKE D10 EFFECTS ──
 // Aug 1 2026: this table was pure fiction (200 flat damage / 25%-30% boss-HP nukes /
@@ -796,6 +794,7 @@ function _posVal(S,initBossHp){
   // value (unspent embers are near-worthless), so they don't cause the planner to
   // hoard and under-play. Weights are env-tunable (PLAN_W_*) for the auto-tuner.
   return _bandAtk(S)*(S.strikeMult||1)
+    + (S._bonusDmg||0)
     + Math.max(0,initBossHp-(S.bossHp||0))
     + PLAN_W_ember*(S.embers||0)
     + PLAN_W_draw*(S.hand||[]).length
@@ -818,7 +817,7 @@ function _applyToS(card,S,ctx,cost){
       : (_cp.includes(chain[0])&&_cp.includes(chain[1]))
     if(_hit){
       const ck=chain[0]+'+'+chain[1]
-      if(!S._fired.has(ck)){S._fired.add(ck);const _bump=1.78*(SP_CHAIN_MULT||1);const _mcap=SKILL_PASS?SP_MULT_CAP:10000;S.strikeMult=Math.min(_mcap,Math.round((S.strikeMult||1)*_bump*100)/100)}
+      if(!S._fired.has(ck)){S._fired.add(ck);const _fx=CHAIN_EFFECTS[_CHAIN_BY_PAIR[ck]]||{mult:1.78};const _bump=(_fx.mult||1)*(SP_CHAIN_MULT||1);const _mcap=SKILL_PASS?SP_MULT_CAP:10000;if(_bump>1)S.strikeMult=Math.min(_mcap,Math.round((S.strikeMult||1)*_bump*100)/100);if(_fx.atkAll){for(const m of S.stage){if(m&&!m.tooStoned)m.tempAtkBonus=(m.tempAtkBonus||0)+_fx.atkAll}}if(_fx.bonusDmg)S._bonusDmg=(S._bonusDmg||0)+_fx.bonusDmg;if(_fx.dmgFromCorr)S._bonusDmg=(S._bonusDmg||0)+Math.round((S.corruption||0)*_fx.dmgFromCorr);if(_fx.corrToDmg)S._bonusDmg=(S._bonusDmg||0)+(S.corruption||0)}
     }
   }
   return true
@@ -970,7 +969,7 @@ function simFight(gs,phaseHp,luciferPhase){
   if(gs.loot.includes('freeFirst'))gs._nextCardFree=true
   if(gs.artifacts.some(a=>a.id==='a3'))gs._nextCardFree=true
   if(gs._pendingBurnStage){gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+spEmberGain(gs,5));gs._pendingBurnStage=false}
-  gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set();gs._allCardsFree=false;gs._hellquakeFired=false
+  gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set();gs._allCardsFree=false;gs._hellquakeFired=false;gs._eternalCarry=0;gs._chainBonusDmg=0
   // ── SKILL PASS (d): boss rule-changer debuffs, Circle 3 boss onward ──
   // These flags flip only on the specific boss fights below. They persist for the
   // whole fight (reset unconditionally here each fight, so no leak between fights).
@@ -1177,18 +1176,23 @@ function simFight(gs,phaseHp,luciferPhase){
           const ck=chain[0]+'+'+chain[1]
           if(!gs._firedChains.has(ck)){
             gs._firedChains.add(ck);
-            // (a) flatten the runaway cap to SP_MULT_CAP (default 30) under SKILL_PASS;
-            // (d) chainBlock bosses build NO strikeMult at all. Default path unchanged.
+            // UNIQUE CHAIN EFFECTS (Aug 6 2026): each chain does something distinct, tiered
+            // by difficulty. Data lives in cards.js CHAIN_EFFECTS (shared with live).
+            const _fx=CHAIN_EFFECTS[_CHAIN_BY_PAIR[ck]]||{mult:1.78}
             if(!(SKILL_PASS&&gs._spChainBlock)){
               const _mcap=SKILL_PASS?SP_MULT_CAP:10000
-              // SP_CHAIN_MULT now applies WHENEVER set (decoupled from SKILL_PASS) so
-              // chain payoff can be tuned on the otherwise-normal game. Default 1.0 → ×1.78.
-              const _bump=1.78*(SP_CHAIN_MULT||1)
-              gs._strikeMult=Math.min(_mcap,Math.round((gs._strikeMult*_bump)*100)/100)
+              const _bump=(_fx.mult||1)*(SP_CHAIN_MULT||1)
+              if(_bump>1)gs._strikeMult=Math.min(_mcap,Math.round((gs._strikeMult*_bump)*100)/100)
+              if(_fx.carry)gs._eternalCarry=_fx.carry // carry computed from the FINAL mult at strike end
             }
-            // CHAIN INSTANT DAMAGE REMOVED to match live (App.jsx v0.7.7 May 4 2026):
-            // the x1.78 multiplier is the whole payoff; the old +10%-band-ATK hit was
-            // double-dipping and does not exist in the live build.
+            if(_fx.embers)gs.embers=Math.min(gs.maxEmbers,gs.embers+_fx.embers)
+            if(_fx.corr)gs.corruption=Math.max(0,Math.min(100,gs.corruption+_fx.corr))
+            if(_fx.atkAll){gs.stage.filter(m=>!m.tooStoned).forEach(m=>{m.tempAtkBonus=(m.tempAtkBonus||0)+_fx.atkAll})}
+            if(_fx.bandHp){gs.stage.filter(m=>!m.tooStoned).forEach(m=>{m.hp=Math.max(0,m.hp+_fx.bandHp);if(m.hp<=0)m.tooStoned=true})}
+            if(_fx.heal){gs.stage.filter(m=>!m.tooStoned).forEach(m=>{m.hp=Math.min(m.maxHp,m.hp+_fx.heal)})}
+            if(_fx.bonusDmg)gs._chainBonusDmg=(gs._chainBonusDmg||0)+_fx.bonusDmg
+            if(_fx.dmgFromCorr)gs._chainBonusDmg=(gs._chainBonusDmg||0)+Math.round(gs.corruption*_fx.dmgFromCorr)
+            if(_fx.corrToDmg){gs._chainBonusDmg=(gs._chainBonusDmg||0)+gs.corruption;gs.corruption=0}
             TRACK.combosTriggered=(TRACK.combosTriggered||0)+1
             // ── SHREDDER SIGNATURE: queue echo for next strike ──
             if(DECK_ID_DEF.signature==='riff_chain_echo'){
@@ -1376,6 +1380,7 @@ function simFight(gs,phaseHp,luciferPhase){
     if(SKILL_PASS&&relicBonus>0)strikeDmg=Math.round(strikeDmg*(1+relicBonus))
     // strikeMult stays multiplicative but is already capped at SP_MULT_CAP under SKILL_PASS.
     if(gs._strikeMult>1.0)strikeDmg=Math.round(strikeDmg*gs._strikeMult)
+    if(gs._chainBonusDmg)strikeDmg+=gs._chainBonusDmg // flat chain-effect bonus damage (burn / corruption-reap), added AFTER the multiplier
     // (c) per-strike damage cap: on BOSS fights, no single strike exceeds
     // SP_STRIKE_CAP_PCT of boss MAX hp (enemy.maxHp is the per-phase max — Lucifer
     // already splits phases). This forces >=ceil(1/pct) strikes to down a boss.
@@ -1385,7 +1390,7 @@ function simFight(gs,phaseHp,luciferPhase){
     if(aliveNow.some(m=>m.keyword==='FOLK MAGIC')&&Math.random()<0.25){const _fmGain=spEmberGain(gs,Math.max(0,gs.maxEmbers-gs.embers));gs.embers=Math.min(gs.maxEmbers,gs.embers+_fmGain)} // (task1) FOLK MAGIC refill bounded by leak cap
     gs.highestStrike=Math.max(gs.highestStrike,strikeDmg);gs.totalDamage+=strikeDmg;
     // Reset multiplier + combo tracking for next strike
-    gs._strikeMult=1.0;gs._cardsPlayedIds=[];gs._firedChains=new Set()
+    gs._strikeMult=1.0+(gs._eternalCarry?Math.round((gs._strikeMult-1)*gs._eternalCarry*100)/100:0);gs._eternalCarry=0;gs._chainBonusDmg=0;gs._cardsPlayedIds=[];gs._firedChains=new Set() // ETERNAL ENCORE: carry a fraction of the FINAL mult into next strike
     if(gs.artifacts.some(a=>a.id==='a3'))gs._nextCardFree=true
 
     if(enemy.passiveId==='soulThief'){const st=aliveNow.filter(m=>(m.permAtkBonus||0)>0);if(st.length>0){const v=pick(st);v.permAtkBonus=(v.permAtkBonus||0)-1;gs.stolenAtkPool++;enemy._atkBuff+=1}}
