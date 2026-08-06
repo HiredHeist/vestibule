@@ -6772,8 +6772,10 @@ function App(){
       msg='🧛 Drain the Crowd! +3 embers. Random member -2 HP.'
     }
     else if(card.id==='corrsiphon'){
-      setEmbers(p=>Math.min(maxEmbers,p+4));setCorruption(p=>Math.min(100,p+8))
-      msg='🌀 Corruption Siphon! +4 embers. Corruption +8%.'
+      // Corruption Nexus (synergy): +1 ATK to all per 10% Corruption — scales with a corruption build.
+      const _cnB=Math.floor(corruption/10)
+      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+_cnB,tempAtkBonus:(m.tempAtkBonus||0)+_cnB,buffCount:(m.buffCount||0)+1}):m)
+      msg='🌀 Corruption Nexus! All members +'+_cnB+' ATK (from '+corruption+'% Corruption)!'
     }
 
     // Single-member buff corruption trigger

@@ -229,7 +229,7 @@ const ALL_CARDS=[
   {id:'slowburn',type:'EMBER',rarity:'Common',embers:0,copies:0},
   {id:'ampfeedback',type:'EMBER',rarity:'Common',embers:1,copies:0},
   {id:'drainthecrowd',type:'EMBER',rarity:'Common',embers:0,copies:0},
-  {id:'corrsiphon',type:'EMBER',rarity:'Common',embers:0,copies:0},
+  {id:'corrsiphon',type:'CORRUPT',rarity:'Common',embers:1,copies:0},
 ];
 
 // ── KEYWORD STACK SYSTEM (variant) ───────────────────────────────
@@ -658,7 +658,7 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
     case 'backstagepass':return embers>=2?65:30;case 'venueswap':return hand.length<=3?60:20;case 'doublebooking':return 92;
     case 'bootlegcopy':return 55;case 'secondwind':return embers===0?90:embers<=2?50:10;case 'pyromaniac':return embers<=2?68:25;
     case 'slowburn':return strikeNum===0?72:48;case 'ampfeedback':return embers<=2?72:40;
-    case 'drainthecrowd':return embers<=2?65:20;case 'corrsiphon':return embers<=2&&corruption<60?72:15;
+    case 'drainthecrowd':return embers<=2?65:20;case 'corrsiphon':return corruption>=30?55+Math.floor(corruption/10)*3:20;
     default:return 5;
   }
 }

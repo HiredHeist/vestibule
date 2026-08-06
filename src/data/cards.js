@@ -110,7 +110,7 @@ export const ALL_CARDS=[
   {id:'slowburn',name:'Slow Burn',type:'EMBER',rarity:'Common',emoji:'🕯️',embers:0,effect:'+2 embers now. +2 embers at start of next 2 strikes. Delayed investment.',color:'#ff8866',typeColor:'#dd6644',copies:0},
   {id:'ampfeedback',name:'Amp Feedback',type:'EMBER',rarity:'Common',emoji:'🔌',embers:0,effect:'FREE. +2 Embers. Next RIFF costs 1 less.',color:'#88cc44',typeColor:'#66aa22',copies:0},
   {id:'drainthecrowd',name:'Drain the Crowd',type:'EMBER',rarity:'Common',emoji:'🧛',embers:0,effect:'+3 Embers. A random member loses 2 HP (never below 1).',color:'#aa2244',typeColor:'#880022',copies:0},
-  {id:'corrsiphon',name:'Corruption Siphon',type:'EMBER',rarity:'Common',emoji:'🌀',embers:0,effect:'+4 Embers. +8% Corruption.',color:'#8844aa',typeColor:'#662288',copies:0},
+  {id:'corrsiphon',name:'Corruption Nexus',type:'CORRUPT',rarity:'Common',emoji:'🌀',embers:1,effect:'+1 ATK to ALL members per 10% Corruption, this Strike. (Synergy: rewards a corruption-heavy deck.)',color:'#8844aa',typeColor:'#662288',copies:0},
 ]
 // ── CARD UPGRADES (Doom Forge, ⛧ gold cards) ────────────────────────────────
 // Aug 4 2026 — REWRITTEN AGAINST THE CODE. Every desc below used to describe an

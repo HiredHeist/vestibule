@@ -1392,9 +1392,10 @@ IMPL.drainthecrowd = (S, C, out) => {
 }
 
 IMPL.corrsiphon = (S, C, out) => {
-  addEmbers(S, 4)
-  addCorruption(S, 8)
-  log(out, '🌀 Corruption Siphon! +4 embers. Corruption +8%.')
+  // Corruption Nexus (synergy): +1 ATK to all per 10% Corruption, this strike.
+  const b = Math.floor(num(S.corruption) / 10)
+  for (const m of alive(S)) { rawAtk(m, b); m.tempAtkBonus = num(m.tempAtkBonus) + b; bumpBuff(m) }
+  log(out, '🌀 Corruption Nexus! All members +' + b + ' ATK (from ' + num(S.corruption) + '% Corruption)!')
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
