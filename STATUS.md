@@ -5,6 +5,11 @@
 
 ---
 
+## 🌙 OVERNIGHT (Aug 5→6, autonomous) — victory-hang FIXED + turnkey plan
+
+- **Bot victory-hang FIXED** (`e2e/autopilot.cjs`, node --check clean): after a full-game win the bot looped on a no-op Opening Night draft (45 confirms in tonight's ledger) until the 60s watchdog. Added a `draftConfirmStreak` loop-breaker → clean reload in ~3 ticks. **Untested on the live Electron bot** — verify tomorrow (Shift+W to force a win).
+- **`TOMORROW.md` written** — the pick-up-and-go plan. Two hard findings: (1) I can't `vite build` in-sandbox (missing native binding — env, not code), so no unverified live edits overnight; (2) **the sim is useless for tuning these levers** — a 5% raw nerf tanks it 6.5%→0.7%; only the live bot can tune. Refined plan: port ONLY a gentle ember leak-plug to live first (the raw-damage scaler is just a global nerf, not true chains-dominant).
+
 ## 🧪 UNCOMMITTED — Aug 5 SKILL-PASS R&D + skip-fix + Band Legacy removal (push via `push-fixes.bat`)
 
 Changed files: `src/App.jsx` (Band Legacy nicknames removed), `vestibule-sim-kwstacks.js` (skip-fix + Skill-Pass scaffolding — env-gated, default-OFF).

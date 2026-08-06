@@ -1675,6 +1675,14 @@ function memberName(text) {
 // "SELECT 2 MUSICIANS" until exactly N are selected, then "TAKE THE STAGE".
 const draftPickCount = txt => { const m = String(txt).match(/SELECT\s+(\d+)\s+MUSICIAN/i); return m ? +m[1] : 2 }
 let lastDraftSig = ''
+// Aug 5 2026 (JV: "hangs on the next round after winning"): after a full-game
+// VICTORY the reload can land on an Opening Night whose TAKE THE STAGE button is
+// present but a no-op (confirm doesn't advance) — the bot then re-confirms the
+// same draft forever (tonight's ledger: 45 draft_confirms in one stuck stretch)
+// until the 60s watchdog fires. This counter breaks that loop in ~3 ticks and
+// forces a clean reload so the next run starts fresh. Reset in the main loop the
+// moment we leave the draft screen.
+let draftConfirmStreak = 0
 async function draftTick(s) {
   // v2 (Jul 30): VERIFY-AFTER-EACH-CLICK. Candidate clicks TOGGLE selection and the
   // layout shifts on select — blind double-clicks can toggle forever (the "spaz").
@@ -1719,6 +1727,18 @@ async function draftTick(s) {
     const ready = stageBtn(st)
     if (ready) {
       const seed = (st.text.match(/RUN SEED:\s*([A-Z0-9]+)/i) || [])[1]
+      // Loop-breaker: if we've already confirmed this draft screen several times
+      // without ever advancing (the post-victory no-op-button hang), stop clicking
+      // the dead button and force a clean reload to the menu instead.
+      draftConfirmStreak++
+      if (draftConfirmStreak >= 3) {
+        const shot = await P.shot('draft-stuck-reload-' + Date.now()).catch(() => null)
+        ev('draft_stuck_reload', { confirms: draftConfirmStreak, seed, shot, text: st.text.slice(0, 400) })
+        draftConfirmStreak = 0; lastDraftSig = ''
+        await P.evaljs("localStorage.removeItem('vst_save_v4'); setTimeout(()=>location.reload(),50); 'x'").catch(() => {})
+        await new Promise(r => setTimeout(r, 5000))
+        return
+      }
       await P.click(ready.x, ready.y)
       ev('draft_confirm', { attempt, seed })
       // ONE outcome row per draft with the names actually confirmed. draft_click
@@ -1890,6 +1910,7 @@ async function main() {
     const hash = s.text.slice(0, 500)
     stuck = (hash === lastHash) ? stuck + 1 : 0; lastHash = hash
     const type = await screenType(s)
+    if (type !== 'draft') draftConfirmStreak = 0 // reset the post-victory draft loop-breaker once we advance off Opening Night
     // ── 60-SECOND STALL WATCHDOG (JV, Aug 1) ────────────────────────────
     // Absolute wall-clock guard, independent of the click-based `stuck`
     // counter (which the audit showed could be reset forever by a button that
