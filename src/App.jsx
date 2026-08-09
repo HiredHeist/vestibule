@@ -243,8 +243,8 @@ function unlockAchievement(id){
 // ── UNLOCK MILESTONES ──────────────────────────────────────────
 const UNLOCK_MILESTONES=[
   {score:1000,type:'card',id:'moshpit',label:'New Card: Mosh Pit',emoji:'🤘'},
-  {score:3000,type:'member',id:'tanuki',label:'New Member: Tanuki',emoji:'🦝'},
   {score:5000,type:'artifact',id:'wardrums',label:'New Artifact: War Drums',emoji:'🪘'},
+  {score:8000,type:'member',id:'tanuki',label:'New Member: Tanuki',emoji:'🦝'},
   {score:10000,type:'card',id:'bloodritual',label:'New Card: Blood Ritual',emoji:'🩸'},
   {score:15000,type:'foil',id:'vitalik_foil',label:'Foil Vitalik in Packs',emoji:'✨'},
   {score:25000,type:'shop',id:'demonic_c3',label:'Demonic Pack from C3',emoji:'😈'},
@@ -418,6 +418,13 @@ function getKeywordStacks(stage){
 //   - shredderHits: consecutive same-type pair count this strike (for SHREDDER, commit 4c)
 //   - tier: function(keyword) → 0/1/2/4 (from getKeywordStacks)
 // Always returns m.atk for stoned members (caller filters those out anyway).
+// "Strongest member" = displayed strength: base ATK + permanent bonuses (the card's "7+5"
+// readout). Standardized Aug 6 2026 — every "strongest member" pick (Devil's Wager, Blood
+// Oath, Record Deal contract, boss-loot buffs) now agrees with the biggest number on the
+// card. Previously they compared raw m.atk only, so a heavily-buffed member could be passed
+// over for a higher-base one, which felt wrong ("why did my 12-ATK carry survive and my
+// 8-base die?"). Does NOT include tempAtkBonus/keyword/aura (those are situational, not shown as the card's standing ATK).
+function memberStrength(m){return ((m&&m.atk)||0)+((m&&m.permAtkBonus)||0)}
 function getEffectiveAtk(m,ctx){
   if(!m)return 0
   let atk=m.atk
@@ -1354,7 +1361,7 @@ function BoosterScreen({onComplete,seed}){
               {m.locked?(
                 <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'18px 8px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)',gap:6}}>
                   <div style={{fontSize:30,opacity:0.5}}>🔒</div>
-                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',letterSpacing:2,textAlign:'center',textTransform:'uppercase'}}>Can you find the key?</div>
+                  <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',letterSpacing:2,textAlign:'center',textTransform:'uppercase'}}>{m.unlockAt?('Reach '+m.unlockAt.toLocaleString()+' lifetime score'):'Locked'}</div>
                 </div>
               ):(
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 12px 8px',background:'rgba(0,0,0,0.72)',borderTop:'1px solid rgba(255,255,255,0.06)'}}>
@@ -6213,7 +6220,7 @@ function App(){
 
     // CONTRACT CARD (Welcome to Hell)
     if(card.id==='contract'){
-      const alive=ns.filter(m=>m&&!m.tooStoned).sort((a,b)=>b.atk-a.atk)
+      const alive=ns.filter(m=>m&&!m.tooStoned).sort((a,b)=>memberStrength(b)-memberStrength(a))
       if(alive.length<=1){addLog('📝 Cannot sign — need at least 2 members!');return false}
       const strongest=alive[0]
       const sIdx=ns.findIndex(m=>m&&m.uid===strongest.uid)
@@ -7619,8 +7626,8 @@ function App(){
             if(loot.effect==='atk1all')setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1}):m))
             else if(loot.effect==='hp3all')setStage(p=>p.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):m))
             else if(loot.effect==='hp4all')setStage(p=>p.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+4,hp:m.hp+4}):m))
-            else if(loot.effect==='atk2strong'){const al=stage.filter(m=>m&&!m.tooStoned);if(al.length){const s=al.reduce((a,b)=>a.atk>b.atk?a:b);setStage(p=>p.map(m=>m&&m.uid===s.uid?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2}):m))}}
-            else if(loot.effect==='atk3strong'){const al=stage.filter(m=>m&&!m.tooStoned);if(al.length){const s=al.reduce((a,b)=>a.atk>b.atk?a:b);setStage(p=>p.map(m=>m&&m.uid===s.uid?Object.assign({},m,{atk:m.atk+3,permAtkBonus:(m.permAtkBonus||0)+3}):m))}}
+            else if(loot.effect==='atk2strong'){const al=stage.filter(m=>m&&!m.tooStoned);if(al.length){const s=al.reduce((a,b)=>memberStrength(a)>memberStrength(b)?a:b);setStage(p=>p.map(m=>m&&m.uid===s.uid?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2}):m))}}
+            else if(loot.effect==='atk3strong'){const al=stage.filter(m=>m&&!m.tooStoned);if(al.length){const s=al.reduce((a,b)=>memberStrength(a)>memberStrength(b)?a:b);setStage(p=>p.map(m=>m&&m.uid===s.uid?Object.assign({},m,{atk:m.atk+3,permAtkBonus:(m.permAtkBonus||0)+3}):m))}}
             addLog('🏆 Boss Loot: '+loot.emoji+' '+loot.name+' — '+loot.desc)
             setCollectedLoot(p=>[...p,loot.id])
             setCircleClearedData(p=>p?{...p,loot}:p)
@@ -8087,7 +8094,7 @@ function App(){
             setStage(prev=>{
               const alive=prev.filter(m=>m&&!m.tooStoned)
               if(alive.length===0)return prev
-              const top=alive.reduce((a,b)=>a.atk>b.atk?a:b)
+              const top=alive.reduce((a,b)=>memberStrength(a)>memberStrength(b)?a:b)
               return prev.map(m=>m&&m.uid===top.uid?Object.assign({},m,{atk:m.atk*2,tempAtkBonus:(m.tempAtkBonus||0)+top.atk}):m)
             })
             addLog('🍄 DOOM CRYSTAL! One vision. One blade. Highest ATK doubled.')
@@ -10055,7 +10062,7 @@ function App(){
       if(choice==='A'){
         // Strongest member gets +5 ATK but gains bloodOath flag
         if(alive.length>0){
-          const strongest=alive.reduce((a,b)=>a.atk>b.atk?a:b)
+          const strongest=alive.reduce((a,b)=>memberStrength(a)>memberStrength(b)?a:b)
           setStage(p=>p.map(m=>m&&m.uid===strongest.uid?Object.assign({},m,{atk:m.atk+5,permAtkBonus:(m.permAtkBonus||0)+5,bloodOath:true}):m))
           addLog('✍ '+strongest.name+' signs the Blood Oath! +5 ATK. But one hit from a boss and they die.')
         }
@@ -10103,7 +10110,7 @@ function App(){
         } else {
           // TAILS — strongest member dies
           if(alive.length>0){
-            const strongest=alive.reduce((a,b)=>a.atk>b.atk?a:b)
+            const strongest=alive.reduce((a,b)=>memberStrength(a)>memberStrength(b)?a:b)
             setStage(p=>p.map(m=>m&&m.uid===strongest.uid?Object.assign({},m,{hp:0,tooStoned:true,bloodOath:false}):m))
             addLog('🪙 TAILS. '+strongest.name+' collapses. The Devil laughs.')
             playSfx('member_down')
@@ -11683,7 +11690,7 @@ function App(){
             if(hasHp){
               const alive=stage.filter(m=>m&&!m.tooStoned)
               if(up.hp==='all')setStage(prev=>prev.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+up.hpAmt,hp:m.hp+up.hpAmt}):m))
-              else if(up.hp==='target'&&alive.length>0){const t=alive.reduce((a,b)=>a.atk>b.atk?a:b);setStage(prev=>prev.map(m=>m&&m.uid===t.uid?Object.assign({},m,{maxHp:m.maxHp+up.hpAmt,hp:m.hp+up.hpAmt}):m))}
+              else if(up.hp==='target'&&alive.length>0){const t=alive.reduce((a,b)=>memberStrength(a)>memberStrength(b)?a:b);setStage(prev=>prev.map(m=>m&&m.uid===t.uid?Object.assign({},m,{maxHp:m.maxHp+up.hpAmt,hp:m.hp+up.hpAmt}):m))}
               else if(up.hp==='weakest'&&alive.length>0){const w=alive.reduce((a,b)=>a.hp<b.hp?a:b);setStage(prev=>prev.map(m=>m&&m.uid===w.uid?Object.assign({},m,{maxHp:m.maxHp+up.hpAmt,hp:m.hp+up.hpAmt}):m))}
               else if(up.hp==='hurt'){setStage(prev=>prev.map(m=>m&&!m.tooStoned&&m.hp<m.maxHp?Object.assign({},m,{maxHp:m.maxHp+up.hpAmt,hp:m.hp+up.hpAmt}):m))}
               else if(up.hp==='random'&&alive.length>0){const r=alive[Math.floor(Math.random()*alive.length)];setStage(prev=>prev.map(m=>m&&m.uid===r.uid?Object.assign({},m,{maxHp:m.maxHp+up.hpAmt,hp:m.hp+up.hpAmt}):m))}
@@ -12154,8 +12161,8 @@ function App(){
                 <div key={i} style={{position:'relative'}}
                   onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='1'}}
                   onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-artip]');if(t)t.style.opacity='0'}}>
-                  {a?<div style={{width:100,height:108,border:'2px solid rgba(200,140,30,0.65)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 14px rgba(200,140,20,0.35),inset 0 0 8px rgba(200,140,20,0.1)',cursor:'help'}}><ArtifactArtImg id={a.id} emoji={a.emoji} size={36} style={{animation:triggeredArtifactId===a.id?'artifactTrigger 0.5s ease-out':'none',transform:triggeredArtifactId===a.id?'scale(1.4)':'scale(1)',transition:'transform 0.15s'}}/><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:0.5,color:'var(--text-secondary)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 4px'}}>{a.name}</div>{a.mult&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-gold)',textShadow:'0 0 8px rgba(255,136,0,0.5)'}}>×{a.mult}</div>}</div>
-                  :<div style={{width:100,height:108,border:'1px dashed rgba(200,160,50,0.4)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:38,opacity:0.45,textShadow:'0 0 12px rgba(255,180,0,0.4)'}}>⛧</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:1.5,color:'rgba(220,170,70,0.65)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,fontWeight:900}}>Artifact</div></div>}
+                  {a?<div style={{width:100,height:90,border:'2px solid rgba(200,140,30,0.65)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,background:'linear-gradient(180deg,rgba(40,24,6,0.95),rgba(20,12,3,0.95))',boxShadow:'0 0 14px rgba(200,140,20,0.35),inset 0 0 8px rgba(200,140,20,0.1)',cursor:'help'}}><ArtifactArtImg id={a.id} emoji={a.emoji} size={36} style={{animation:triggeredArtifactId===a.id?'artifactTrigger 0.5s ease-out':'none',transform:triggeredArtifactId===a.id?'scale(1.4)':'scale(1)',transition:'transform 0.15s'}}/><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:0.5,color:'var(--text-secondary)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,padding:'0 4px'}}>{a.name}</div>{a.mult&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-gold)',textShadow:'0 0 8px rgba(255,136,0,0.5)'}}>×{a.mult}</div>}</div>
+                  :<div style={{width:100,height:90,border:'1px dashed rgba(200,160,50,0.4)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(30,18,4,0.65)'}}><div style={{fontSize:38,opacity:0.45,textShadow:'0 0 12px rgba(255,180,0,0.4)'}}>⛧</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:1.5,color:'rgba(220,170,70,0.65)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,fontWeight:900}}>Artifact</div></div>}
                   {a&&<div data-artip="" style={{opacity:0,transition:'opacity 0.15s',position:'absolute',left:88,top:0,zIndex:99999,pointerEvents:'none',minWidth:200,maxWidth:280,background:'rgba(12,7,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 10px',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:700,color:'var(--text-gold)',marginBottom:4}}>{a.emoji} {a.name}</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',fontStyle:'italic',lineHeight:1.4}}>{a.effect}</div>
@@ -12177,11 +12184,11 @@ function App(){
                 <div key={'p'+i} style={{position:'relative'}}
                   onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-passtip]');if(t)t.style.opacity='1'}}
                   onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-passtip]');if(t)t.style.opacity='0'}}>
-                  {p?<div style={{width:100,height:108,border:'2px solid rgba(153,51,204,0.65)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,background:'linear-gradient(180deg,rgba(34,12,48,0.95),rgba(18,6,28,0.95))',boxShadow:'0 0 14px rgba(153,51,204,0.4),inset 0 0 8px rgba(153,51,204,0.12)',cursor:'help'}}>
+                  {p?<div style={{width:100,height:90,border:'2px solid rgba(153,51,204,0.65)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,background:'linear-gradient(180deg,rgba(34,12,48,0.95),rgba(18,6,28,0.95))',boxShadow:'0 0 14px rgba(153,51,204,0.4),inset 0 0 8px rgba(153,51,204,0.12)',cursor:'help'}}>
                     <div style={{fontSize:38,filter:'drop-shadow(0 0 8px rgba(204,136,255,0.5))',lineHeight:1}}>{p.emoji}</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:0.5,color:'var(--tier-mythic)',textTransform:'uppercase',textAlign:'center',lineHeight:1.1,padding:'0 4px'}}>{p.name}</div>
                   </div>
-                  :<div style={{width:100,height:108,border:'1px dashed rgba(153,51,204,0.4)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(20,8,30,0.65)'}}>
+                  :<div style={{width:100,height:90,border:'1px dashed rgba(153,51,204,0.4)',borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:5,background:'rgba(20,8,30,0.65)'}}>
                     <div style={{fontSize:32,opacity:0.5,textShadow:'0 0 12px rgba(204,136,255,0.4)',lineHeight:1}}>⚡</div>
                     <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:1.5,color:'rgba(200,150,235,0.7)',textTransform:'uppercase',textAlign:'center',lineHeight:1.2,fontWeight:900}}>Effect<br/>Pedal</div>
                   </div>}
@@ -12834,7 +12841,7 @@ function ScaleRoot(){
   },[])
   return(
     <div style={{width:'100vw',height:'100vh',overflow:'hidden',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}>
-      <div id="vst-scale-root" style={{width:DESIGN_W,height:DESIGN_H,transform:`scale(${scale})`,transformOrigin:'center center',position:'relative'}}>
+      <div id="vst-scale-root" style={{width:DESIGN_W,height:DESIGN_H,flex:'0 0 auto',flexShrink:0,transform:`scale(${scale})`,transformOrigin:'center center',position:'relative'}}>
         <ErrorBoundary><App/></ErrorBoundary>
       </div>
     </div>

@@ -35,6 +35,6 @@ export const ALL_MUSICIANS=[
   // Aug 5 2026 — Tanuki keyword ANCHOR -> TRICKSTER (mythical shapeshifter). Copies the
   // aura of BOTH neighbors; place him between your two best. Reward unlock, so his budget
   // (~31) sits above the base 27.
-  {id:'tanuki',name:'Tanuki',role:'Bass Player',atk:8,hp:7,maxHp:7,emoji:'🦝',keyword:'TRICKSTER',desc:'Mythical shapeshifter. Copies the aura of BOTH neighbors — position him between your best.',locked:true,unlockAt:3000,bio:'A raccoon-dog from Japanese folklore. How he ended up in a Norse doom metal band is a question nobody dares ask.'},
+  {id:'tanuki',name:'Tanuki',role:'Trickster',atk:8,hp:7,maxHp:7,emoji:'🦝',keyword:'TRICKSTER',desc:'Mythical shapeshifter. Copies the aura of BOTH neighbors — position him between your best.',locked:true,unlockAt:8000,bio:'A raccoon-dog from Japanese folklore. How he ended up in a Norse doom metal band is a question nobody dares ask.'},
   {id:'lucifer_member',name:'Lucifer',role:'The Devil',atk:20,hp:69,maxHp:96,emoji:'😈',keyword:'FALLEN',desc:'Cannot be healed. Loses 1 HP per strike. If he dies, game over. Max 3 band members. Sell for 69 herb.',locked:true,unlockAt:100000,bio:'The actual Devil. Joined the band out of boredom. Unstoppable power, but his HP drains every strike. A ticking time bomb of pure evil.'},
 ]
