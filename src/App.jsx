@@ -1352,13 +1352,17 @@ function genBoosterPacks(circleNum){
     {id:'rarevinyl',name:'Rare Vinyl',emoji:'🖤',cost:38,desc:'1 Rare + 30% Foil chance. Pick 1.',minCircle:4},
     {id:'cursed',name:'Cursed Demo',emoji:'⛧',cost:60,desc:'1 Rare guaranteed. 50% Foil, 20% Mythic, 5% Double-Mythic.',minCircle:6},
   ]
-  // Aug 4 2026: was `.slice(-3)` while the shop rendered `.slice(0,2)` of the
-  // result — i.e. the two LEAST advanced of the three most advanced. From
-  // circle 6 the list is [vinyl, rarevinyl, cursed] and Cursed Demo — 60🌿, the
-  // only Mythic-chance pack in the game — was never purchasable in any run.
-  // Return exactly the two slots the shop renders.
-  // C1: cassette+cdr · C2-3: cdr+vinyl · C4-5: vinyl+rarevinyl · C6+: rarevinyl+cursed
-  return allPacks.filter(p=>cn>=p.minCircle).slice(-2)
+  // Aug 9 2026: the shop's two card-pack slots are now a RANDOM draw for variety —
+  // it used to deterministically show the top two tiers, so every visit at a given
+  // circle looked identical. Pool = the top 3 circle-eligible tiers (keeps higher
+  // packs gated by minCircle and keeps the weakest tier from clogging late shops);
+  // draw 2 distinct at random. Circle 1 only has 2 eligible, so it stays cassette+cdr.
+  const eligible=allPacks.filter(p=>cn>=p.minCircle)
+  const pool=eligible.slice(-3)
+  if(pool.length<=2) return pool.slice(-2)
+  const a=[...pool]
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  return a.slice(0,2).sort((x,y)=>x.cost-y.cost)
 }
 
 // Recruitment packs
