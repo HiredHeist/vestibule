@@ -180,17 +180,43 @@ TOTAL_CARDS:       82 unique cards
 
 ### Deck HP scaling (the actual combat multiplier)
 
-| Deck | hpScale | Identity |
-|---|---|---|
-| Standard | 1.85 | Balanced |
-| Shredder | 2.00 | Pure aggro |
-| Ritualist | 1.65 | Corruption-power |
-| Engineer | 1.85 | Combo / copy |
-| Survivor | 1.75 | Outlast |
+**CORRUPTION REWORK (Aug 6 2026):** two knobs now — `hpScale` (regular bosses) and
+`luciferScale` (final boss only). The 4 clean decks lost the old accidental corruption
+damage, so they run `hpScale 1.0` + a low `luciferScale` (Lucifer's 55× cliff was tuned
+around corruption ×3). Ritualist keeps the tall wall because its corruption gamble
+supplies the burst. Sim mirror: `DECK_HP_SCALE` / `DECK_LUCIFER_SCALE` +
+`LUCIFER_SCALE` in `vestibule-sim-kwstacks.js`; live mirror: `STARTER_DECKS` +
+`getScaledMaxHp`. **Keep the two files' values identical.**
+
+| Deck | hpScale | luciferScale | Identity | Veteran win% (Bronze, ~1200 games) |
+|---|---|---|---|---|
+| Standard | 1.00 | 0.26 | Balanced, corruption-free | ~9.1% |
+| Shredder | 1.00 | 0.21 | Pure aggro, corruption-free | ~10.9% |
+| Ritualist | 1.50 | 0.58 | Corruption gamble (ONLY corrupt deck) | ~8.6% |
+| Engineer | 1.00 | 0.24 | Combo/copy, corruption-free | ~9.6% |
+| Survivor | 1.00 | 0.35 | Outlast, corruption-free | ~10.3% |
 
 Combat formula (use `getScaledMaxHp` helper):
-`Math.ceil(enemy.maxHp × deck.hpScale × heatMult × encoreMult)`
-where `heatMult = 1 + max(0, heatLevel - 1) × 0.15` and `encoreMult = 2.0 if encoreMode else 1.0`.
+`Math.ceil(enemy.maxHp × deck.hpScale × heatMult × encoreMult)` for regular bosses;
+Lucifer = `Math.ceil(333333 × deck.luciferScale × heatMult × encoreMult)` per phase.
+`heatMult = 1 + max(0, heatLevel - 1) × 0.15` and `encoreMult = 2.0 if encoreMode else 1.0`.
+
+### Corruption (Aug 6 2026 rework — a Ritualist-only GAMBLE)
+
+- Corruption is isolated to **the Ritualist deck**. The other 4 decks are 100%
+  corruption-free: zero CORRUPT cards, zero corruption-referencing RIFFs
+  (overdrive/doomchord/necroticamp), no CORRUPT/HEXED band members, and enemy
+  "corrupt the player" passives are inert on them. Draft/shop/booster/recruit pools
+  filter corruption content via `getUnlockedCards`/`getRecruitableMusicians` (they
+  read `vst_active_deck`).
+- **Gamble ramp (halved from old 1.2→3.0):** dmg ×1.10/1.22/1.40/1.60 at
+  40/60/80/100%. Helper `corrDamageMult(c)` (App.jsx) / `CORR_MULT_*` (sim).
+- **Downside:** boss damage taken scales `×(1 + CORR_DMG_TAKEN·corruption/100)`,
+  `CORR_DMG_TAKEN = 0.60` (+60% incoming at 100%). Push for a burst, then purge.
+- **Gifts REMOVED:** the 25/50/75% auto-inject of free CORRUPT cards is gone.
+- **Hangover simplified:** ONE cost — end a fight at 50%+ corruption → next shop +20%
+  (`shopHungerMult`). The old per-member max-HP debuff and stash cut are deleted.
+- **Red tint** now only appears at 80%+ corruption and is subtle.
 
 ---
 

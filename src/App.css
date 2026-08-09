@@ -208,6 +208,12 @@ body {
   100% { opacity: 0; }
 }
 
+/* Boss Blind banner — subtle blood-glow throb so the active rule-changer reads as a threat */
+@keyframes blindPulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(140,20,20,0.45); }
+  50%      { box-shadow: 0 0 20px rgba(180,30,30,0.75); }
+}
+
 /* Slow breathing — for atmospheric backgrounds */
 @keyframes altarBreath {
   0%, 100% { opacity: 1; }

@@ -215,8 +215,9 @@ export const TUTORIAL_TIPS={
     {id:"t1_strike",text:"When you have played your cards, hit STRIKE. Every band member attacks the enemy with their ATK. More buffs = more damage.",target:"strike",position:"left"},
   ],
   2:[
-    {id:"t2_corruption",text:"See the meter on the right? That is Corruption. Some cards raise it. Higher corruption means more danger... but also more power.",target:"corruption",position:"left"},
-    {id:"t2_corrupt_card",text:"CORRUPT cards (red) are risky. They raise corruption but can be very powerful.",target:"hand",position:"above"},
+    {id:"t2_perm_buff",text:"This one is tougher. Permanent ATK buffs (Battle Cry, New Strings, Sound Wall) stick for the whole fight — stack them early and every Strike hits harder.",target:"hand",position:"above"},
+    {id:"t2_heal",text:"Getting low? Smoke Break and Roadie keep your band alive. Outlasting the enemy is half the fight.",target:"hand",position:"above"},
+    {id:"t2_first_chain",text:"Try playing Sound Wall then Amp It Up back-to-back — that fires the WALL OF SOUND riff chain for a big damage bump. Card pairs played in sequence are the key to real power.",target:"hand",position:"above"},
   ],
   3:[
     {id:"t3_chain_intro",text:"Certain card pairs trigger Riff Chains — powerful combos! But you must play the pair BACK-TO-BACK, one right after the other. Battle Cry → Stage Dive is one. They cost 6 Embers though, and you only have 5...",target:"hand",position:"above"},

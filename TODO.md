@@ -1,7 +1,26 @@
 # VESTIBULE — TODO
 
-*Last updated: Aug 5, 2026 — skill-pass R&D + skip-fix + nickname removal (uncommitted, pending build-verify + push)*
+*Last updated: Aug 6, 2026 — CORRUPTION REWORK (uncommitted, pending build-verify + push)*
 *Branch state: main = audited stable · playtest/session2 = bot rig WIP + Aug 5 card fixes (see HANDOFF.md)*
+
+## ⛧ CORRUPTION REWORK (Aug 6 2026 — sim-validated, live mirrored, NEEDS BUILD-VERIFY)
+
+Corruption is now a deliberate **Ritualist-only GAMBLE**. Done this session (sim +
+App.jsx mirrored; App.jsx not build-verified here):
+
+- [x] **4 clean decks** (Standard/Shredder/Engineer/Survivor): zero CORRUPT cards, zero
+  corruption-referencing RIFFs, no CORRUPT/HEXED members, refilled to 69. Sim & live
+  manifests byte-identical (verified).
+- [x] **Corruption = gamble:** dmg ramp halved (1.10/1.22/1.40/1.60), NEW downside boss
+  dmg taken `×(1+0.60·corr/100)`. `corrDamageMult` + `CORR_DMG_TAKEN`.
+- [x] **Two-knob HP:** `hpScale` (regular) + `luciferScale` (final wall), per deck.
+- [x] **Gifts removed** (25/50/75% auto-inject deleted).
+- [x] **Hangover simplified** to one cost: 50%+ peak → next shop +20%.
+- [x] **Red tint** subtle, 80%+ only. **Tutorial** reworked off corruption (WALL OF
+  SOUND chain lesson). FAQ / FIRST_TIPS / deck descriptions updated.
+- [x] **Veteran (Bronze, ~1200g each):** std 9.1 · shred 10.9 · rit 8.0 · eng 9.6 · surv 10.3 — all in the 8–11% target.
+- [ ] **BUILD-VERIFY App.jsx on push** (can't `vite build` in sandbox). Run the live bot to confirm the 4 decks never surface corruption and Ritualist plays the gamble.
+- [ ] GDD.md / other docs still reference the old corruption model — full doc pass pending.
 
 ## 🎯 SKILL-BASED REBALANCE (Aug 5 — sim R&D done, env-gated; needs LIVE-BOT validation)
 

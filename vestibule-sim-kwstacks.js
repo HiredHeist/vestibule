@@ -102,6 +102,7 @@ if(HP_OVERRIDE>0)STAKE.hpMult=HP_OVERRIDE;
 //   SP_STRIKE_CAP_PCT=F    single-strike dmg cap as fraction of boss max HP (0.40)
 // ═══════════════════════════════════════════════════════════════════════════
 const SKILL_PASS = process.env.SKILL_PASS==='1';
+const BLINDS     = process.env.BLINDS==='1'; // Balatro-style random boss blinds on circle bosses (see simFight)
 const LAZY       = process.env.LAZY==='1';
 const SP_MULT_CAP        = parseFloat(process.env.SP_MULT_CAP)||30;
 const SP_STRIKE_CAP_PCT  = parseFloat(process.env.SP_STRIKE_CAP_PCT)||0.40;
@@ -112,6 +113,16 @@ const SP_CORR_FREE       = (process.env.SP_CORR_FREE!==undefined)?parseInt(proce
 const SP_EMBER_PER_STRIKE= parseFloat(process.env.SP_EMBER_PER_STRIKE)||0; // (anti-flood) reset embers to this fixed budget each strike under SKILL_PASS (StS energy model); 0=off
 const SP_EMBER_GEN_CAP   = (process.env.SP_EMBER_GEN_CAP!==undefined)?parseFloat(process.env.SP_EMBER_GEN_CAP):-1; // (leak-plug) max TOTAL embers a fight can GENERATE beyond its per-fight pool (bounds EMBER cards / refunds / free-grants without deleting them); -1=off
 const SP_RAW_DMG         = parseFloat(process.env.SP_RAW_DMG)||1; // (chains-dominant) scaler on raw band-ATK damage BEFORE multipliers under SKILL_PASS — <1 makes unconnected card spam weak so CHAINS carry the damage; 1=off
+// ── CORRUPTION GAMBLE KNOBS (Aug 6 2026 rework) ─────────────────────────────
+// Corruption is no longer a free damage stat. The power gain is roughly HALVED
+// vs the old 1.2→3.0 ramp, and every point of corruption now RAISES incoming boss
+// damage — pushing corruption is a genuine risk/reward bet, best used for timed
+// bursts (spike a boss, then purge) rather than parked at 100%.
+const CORR_MULT_40  = parseFloat(process.env.CORR_MULT_40) ||1.10; // dmg multiplier at 40%+ corruption (was 1.20)
+const CORR_MULT_60  = parseFloat(process.env.CORR_MULT_60) ||1.22; // at 60%+ (was 1.50)
+const CORR_MULT_80  = parseFloat(process.env.CORR_MULT_80) ||1.40; // at 80%+ (was 2.00)
+const CORR_MULT_100 = parseFloat(process.env.CORR_MULT_100)||1.60; // at 100%  (was 3.00)
+const CORR_DMG_TAKEN= (process.env.CORR_DMG_TAKEN!==undefined)?parseFloat(process.env.CORR_DMG_TAKEN):0.60; // boss damage taken scales +this*(corruption/100); 0.60 = +60% incoming at 100%
 const SP_EMBER_LEAK_CAP  = parseFloat(process.env.SP_EMBER_LEAK_CAP)||0; // (task1 LEAK-PLUG) cap TOTAL bonus embers gained from generation sources within a FIGHT (beyond the per-fight starting pool) under SKILL_PASS; 0=off. Bounds — does not delete — a7/p1/hellfire/Burn-Stage/tapped-out/slow-burn/FOLK MAGIC/Ritualist refunds and ember-generation cards.
 const SP_CHAIN_MULT      = parseFloat(process.env.SP_CHAIN_MULT)||1.0;   // (task2 CHAINS-DOMINANT) scale the per-chain strikeMult bump (base ×1.78) under SKILL_PASS; 1.0=no-op
 const SP_CHAIN_ORDER     = process.env.SP_CHAIN_ORDER!=='0';             // (SKILL) DEFAULT ON, matching the live game (Aug 6): chains fire only if the pair is played BACK-TO-BACK (consecutively, either direction) — a real sequencing test a spammer rarely hits. SP_CHAIN_ORDER=0 restores the old "both played, any order" for A/B.
@@ -241,17 +252,29 @@ function stackTier(n){return n>=3?4:n===2?2:n>=1?1:0}
 
 // DECK MANIFESTS
 const DECK_MANIFESTS={
-  standard:{amp:2,battlecry:4,newstrings:2,encore:3,infencore:3,possessedperf:2,stagedive:2,crowdsurf:2,heavyriff:2,soundwall:1,deathriff:2,moshpit:2,resonancecard:3,demotape:2,burnset:1,herbmoney:1,distortion:3,dialtoeleven:2,sigdecay:1,staticcharge:2,darktuning:2,ampstatic:2,feedbackloop:1,controlfeedback:1,seance:1,bloodritual:1,soundcheck:2,roadie:2,setlist:2,setbreak:2,wakeup:2,groupie:2,powertap:2,tappedout:2,ampoverload:1,soundboard:2},
-  shredder:{amp:2,battlecry:3,newstrings:2,encore:3,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,resonancecard:2,crowdsurf:2,demotape:2,soundwall:1,burnset:1,stagedive:1,herbmoney:1,echopedal:2,riffthief:2,feedbackscream:2,devilsdice:1,sonicboom:1,skullsplitter:1,tremolopick:1,harmonicfb:1,doomchord:1,distortion:2,staticcharge:2,deathriff:1,ampstatic:1,dialtoeleven:1,sigdecay:1,bloodritual:1,darktuning:1,soundcheck:2,setbreak:2,wakeup:2,roadie:1,setlist:1,powertap:2,tappedout:2,soundboard:2,groupie:1,ampoverload:1,corrsiphon:2,drainthecrowd:1},
+  // CORRUPTION REWORK (Aug 6 2026): the 4 non-Ritualist decks are 100% corruption-
+  // free — zero CORRUPT-type cards, zero corruption-referencing RIFFs (overdrive/
+  // doomchord/necroticamp). Freed slots refilled with on-theme non-corrupt cards to
+  // hold DECK_SIZE=69. Corruption is now a deliberate CHOICE isolated to Ritualist.
+  standard:{amp:4,battlecry:4,newstrings:4,encore:3,infencore:3,possessedperf:2,stagedive:2,crowdsurf:4,heavyriff:2,soundwall:3,moshpit:4,resonancecard:3,demotape:2,burnset:1,herbmoney:1,soundcheck:2,roadie:4,setlist:3,setbreak:2,wakeup:3,groupie:3,powertap:3,tappedout:2,ampoverload:1,soundboard:2,sonicboom:1,bloodharmony:1},
+  shredder:{amp:2,battlecry:4,newstrings:2,encore:3,infencore:2,possessedperf:2,heavyriff:2,moshpit:3,resonancecard:2,crowdsurf:3,demotape:2,soundwall:1,burnset:1,stagedive:1,herbmoney:1,echopedal:2,riffthief:2,feedbackscream:3,devilsdice:2,sonicboom:3,skullsplitter:3,tremolopick:2,harmonicfb:2,soundcheck:2,setbreak:2,wakeup:2,roadie:1,setlist:1,powertap:2,tappedout:2,soundboard:2,groupie:1,ampoverload:1,bloodharmony:2,shredsolo:1},
   ritualist:{amp:1,battlecry:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,resonancecard:2,crowdsurf:1,demotape:1,soundwall:1,moshpit:1,newstrings:1,herbmoney:1,burnset:1,distortion:3,darktuning:2,staticcharge:2,dialtoeleven:2,deathriff:2,ampstatic:2,seance:1,bloodritual:1,feedbackloop:1,controlfeedback:1,sigdecay:1,infernalpact:2,cursedstrings:2,possessionriff:1,soulbargain:1,hexdecay:1,offeringpit:1,carrioncall:1,russianroulette:1,soundcheck:2,roadie:2,wakeup:2,setbreak:2,gearcheck:1,doublebooking:1,powertap:2,corrsiphon:2,tappedout:1,groupie:1,soundboard:1,ampoverload:1,pyromaniac:1,ampfeedback:1,drainthecrowd:1},
-  engineer:{battlecry:3,amp:2,encore:2,possessedperf:2,heavyriff:2,crowdsurf:2,infencore:1,soundwall:1,burnset:1,shredsolo:2,sonicboom:2,feedbackscream:1,overdriveped:1,harmonicfb:1,tremolopick:1,distortion:2,darktuning:2,ampstatic:1,deathriff:1,staticcharge:1,feedbackloop:1,controlfeedback:1,seance:1,venomriff:2,darkcrescendo:1,setlist:3,soundcheck:2,wakeup:2,setbreak:2,roadie:1,bootlegcopy:2,backstagepass:2,setlistrewrite:2,venueswap:1,gearcheck:1,powertap:2,groupie:2,soundboard:2,corrsiphon:2,secondwind:2,tappedout:1,ampoverload:1,ampfeedback:1,drainthecrowd:1},
-  // Aug 4 2026: doomchord was 3 (live 2) and sonicboom 1 (live 2) — the only two
-  // rows in any manifest that disagreed with App.jsx DECK_CARD_MANIFESTS (~line 675).
-  survivor:{battlecry:3,newstrings:2,encore:2,infencore:2,possessedperf:2,heavyriff:2,moshpit:2,crowdsurf:2,amp:1,soundwall:1,resonancecard:1,burnset:1,herbmoney:1,doomchord:2,sonicboom:2,necroticamp:1,distortion:2,staticcharge:2,darktuning:2,deathriff:2,controlfeedback:1,dialtoeleven:1,feedbackloop:1,seance:1,bloodritual:1,sigdecay:1,soundcheck:2,roadie:2,wakeup:2,setlist:2,setbreak:2,doublebooking:2,bootlegcopy:1,backstagepass:1,powertap:2,tappedout:2,ampoverload:2,drainthecrowd:2,groupie:1,soundboard:1,slowburn:1,pyromaniac:1,secondwind:1,corrsiphon:1},
+  engineer:{battlecry:3,amp:2,encore:2,possessedperf:2,heavyriff:2,crowdsurf:2,infencore:1,soundwall:1,burnset:1,shredsolo:2,sonicboom:3,feedbackscream:1,overdriveped:1,harmonicfb:2,tremolopick:1,setlist:4,soundcheck:2,wakeup:2,setbreak:2,roadie:1,bootlegcopy:4,backstagepass:4,setlistrewrite:4,venueswap:3,gearcheck:3,powertap:2,groupie:3,soundboard:3,secondwind:3,tappedout:1,ampoverload:1,ampfeedback:1},
+  survivor:{battlecry:4,newstrings:3,encore:2,infencore:2,possessedperf:2,heavyriff:2,moshpit:4,crowdsurf:2,amp:1,soundwall:1,resonancecard:1,burnset:1,herbmoney:1,sonicboom:4,soundcheck:4,roadie:4,wakeup:4,setlist:2,setbreak:2,doublebooking:2,bootlegcopy:1,backstagepass:3,powertap:2,tappedout:2,ampoverload:2,groupie:1,soundboard:1,slowburn:3,pyromaniac:1,secondwind:3,bloodharmony:2},
 }
 const ACTIVE_DECK=DECK_MANIFESTS[DECK_ID]||DECK_MANIFESTS.standard
-const DECK_HP_SCALE={standard:1.85,shredder:1.85,ritualist:1.85,engineer:1.85,survivor:1.85}
-const HP_SCALE=DECK_HP_SCALE[DECK_ID]||1.0
+// CORRUPTION REWORK (Aug 6 2026): the 4 clean decks lost the old accidental
+// corruption damage (bosses used to corrupt you → free x1.2–3.0). Regular-boss HP
+// scaling drops to 1.0 for them so the descent stays a fair fight; Ritualist keeps
+// 1.85 because its corruption gamble supplies the burst.
+const DECK_HP_SCALE={standard:1.00,shredder:1.00,ritualist:1.50,engineer:0.90,survivor:1.00}
+const HP_SCALE=parseFloat(process.env.HP_SCALE)||DECK_HP_SCALE[DECK_ID]||1.0
+// CORRUPTION REWORK: Lucifer's 55x HP cliff was designed around the old corruption
+// x3 burst. Honest (corruption-free) decks need a shallower final wall. LUCIFER_SCALE
+// scales ONLY the final boss, letting mid-game difficulty (HP_SCALE) stay meaningful.
+// Ritualist keeps its corruption burst so runs the tallest Lucifer.
+const DECK_LUCIFER_SCALE={standard:0.26,shredder:0.21,ritualist:0.58,engineer:0.20,survivor:0.35}
+const LUCIFER_SCALE=parseFloat(process.env.LUCIFER_SCALE)||DECK_LUCIFER_SCALE[DECK_ID]||1.0
 
 // ── DECK IDENTITY (commit 3/4 — synced with src/App.jsx STARTER_DECKS) ──
 // Mirrors the schema from main app. Each deck overrides opening conditions
@@ -264,6 +287,8 @@ const DECK_IDENTITY={
   survivor: {handSize:5, startEmbers:5, startCorruption:0, memberHpMod:0, memberHpPct:1.0, maxStrikesMod:0, signature:'second_wind',        scoreMult:1.3},
 }
 const DECK_ID_DEF=DECK_IDENTITY[DECK_ID]||DECK_IDENTITY.standard
+// Corruption is a deliberate CHOICE isolated to the Ritualist deck.
+const CORR_ON=DECK_ID==='ritualist'
 
 // ── PACT REWARDS (12 options, sim picks best 1 of 2 offered) ──
 const PACT_IDS=['ember_surge','iron_strings','thick_skin','dark_bargain','speed_demon','blood_price','clean_living','corruption_engine','merchants_eye','stone_wall','sixth_slot','war_drums'];
@@ -382,7 +407,7 @@ const circleBaseMin=[8,6,7,8,9,9,11,11,14],circleBaseRange=[3,4,4,3,4,4,5,5,7]; 
 const MENTOR_LINK_BONUS={foil:{atk:1,hp:2,mult:1.25},mythic:{atk:2,hp:4,mult:1.5},demonic:{atk:4,hp:8,mult:2.0}};
 // ═══ BAND AURAS (v0.8) — adjacency bonuses radiating to neighboring stage slots ═══
 function _kwAuraVal(kw,ctx){switch(kw){
-  case 'FRENZIED':case 'DEBUFF':case 'BLASTBEAT':return 1
+  case 'FRENZIED':case 'DEBUFF':case 'BLASTBEAT':case 'DISSONANCE':case 'DIRGE':return 1
   case 'CORRUPT':return ctx.corruption>=50?1:0
   case 'HEXED':return ctx.corruption>=25?1:0
   case 'SHREDDER':return ctx.shredderHits>0?1:0
@@ -402,7 +427,7 @@ function folkAuraHeal(stage){for(let i=0;i<stage.length;i++){const m=stage[i];if
 function auraStaticScore(stage){let s=0
   for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue
     for(const j of[i-1,i+1]){const n=stage[j];if(!n||n.tooStoned)continue
-      switch(n.keyword){case 'FRENZIED':case 'DEBUFF':case 'BLASTBEAT':case 'TRICKSTER':s+=3;break
+      switch(n.keyword){case 'FRENZIED':case 'DEBUFF':case 'BLASTBEAT':case 'TRICKSTER':case 'DISSONANCE':case 'DIRGE':s+=3;break
         case 'ANCHOR':case 'FOLK MAGIC':s+=2;break
         case 'CORRUPT':case 'HEXED':case 'SHREDDER':s+=1.5;break}}}
   return s}
@@ -423,11 +448,33 @@ let TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSel
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
   pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0,eventsTriggered:0,eventMoshPit:0,eventCursedAmp:0,eventBloodOath:0,eventHellfire:0,eventSabbath:0,eventWager:0,whisperDmg:0,hungerExtraCost:0,madnessCards:0,possessionBonus:0,anchorSaves:0,kwStack2Reached:0,kwStack3Reached:0,fightsFought:0,strikesTaken:0,oneShotFights:0};
 let CARD_PLAYS={};
+// MEMBER LEADERBOARD instrument (Aug 6 2026): per-member contribution across a run.
+// dmg = raw ATK summed into strikeDmg BEFORE multipliers (a fair "how hard do they
+// swing" proxy). Drummers `continue` before dealing damage (they buff), so they read
+// 0 dmg and are reported as BUFFERS separately. fights = roster-presence count;
+// games/won = per-run pick + win-when-used (via gs._membersUsed).
+let MEMBER_STATS={};
+function _ms(id){return MEMBER_STATS[id]||(MEMBER_STATS[id]={dmg:0,fights:0,games:0,won:0})}
 
 function rand(n){return Math.floor(Math.random()*n)}
 function pick(arr){return arr[rand(arr.length)]}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rand(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
-function memberScore(m){return(m.atk+(m.permAtkBonus||0))*3+m.hp+(m.keyword==='FRENZIED'?6:0)+(m.keyword==='CORRUPT'?4:0)+(m.keyword==='FOLK MAGIC'?5:0)+(m.keyword==='HEXED'?3:0)+(m.keyword==='SHREDDER'?3:0)+(m.keyword==='BLASTBEAT'?5:0)+(m.keyword==='TRICKSTER'?4:0)+(m.keyword==='DEBUFF'?2:0)+(m.keyword==='ANCHOR'?1:0)}
+// Aug 6 2026 — DRAFT VALUATION rebalance. Every recruitable member sits on budget 27
+// (atk*3+hp), so this keyword weight IS the pick-rate dial. Old weights (FRENZIED 6 →
+// ANCHOR 1) produced the exact pick gradient we measured (Bjorn/Ragnar ~80% → ANCHOR
+// ~14%, drummers dead at 1-6%). Flattened to reflect the post-BLASTBEAT-fix reality:
+// non-drummer keywords equal (a genuine choice), BLASTBEAT high because drummers carry
+// a smaller body budget (~20-21) yet now provide the ×1.5^count band multiplier.
+const BB_MULT=parseFloat(process.env.BB_MULT)||1.35; // BLASTBEAT per-drummer band mult. 1.5 was auto-include; 1.35 makes a drummer a real ~33% choice. MIRROR in App.jsx ~8753.
+const BB_WEIGHT=parseInt(process.env.BB_WEIGHT)||8;   // (legacy) unused now that drummers are special-cased in memberScore via DRUM_SCORE
+const KW_DRAFT_WEIGHT={FRENZIED:4,CORRUPT:4,'FOLK MAGIC':4,HEXED:4,SHREDDER:4,BLASTBEAT:BB_WEIGHT,TRICKSTER:5,DEBUFF:4,ANCHOR:4,DISSONANCE:4,DIRGE:4};
+// Drummers deal 0 ATK, so the atk*3+hp budget formula can't value them (it would either
+// starve them → never drafted, or fatten their HP into a free wall → auto-include). They
+// are special-cased to a flat competitive score (just below the 31 attackers sit at), so
+// the planner considers them when band composition favors the ×BB_MULT band multiplier
+// but doesn't auto-default to one. DRUM_SCORE is env-tunable for the pick-rate sweep.
+const DRUM_SCORE=parseInt(process.env.DRUM_SCORE)||31;
+function memberScore(m){if(m.role==='Drummer')return DRUM_SCORE;return(m.atk+(m.permAtkBonus||0))*3+m.hp+(KW_DRAFT_WEIGHT[m.keyword]||0)}
 function isUpgraded(m){return m.foil||m.mythic||m.demonic}
 // Aug 4 2026 — members.js has TWO hp fields (`hp` = starting HP, `maxHp` = ceiling)
 // and live uses them differently depending on how the member joined:
@@ -453,7 +500,11 @@ function makeMember(base,foil,mythic,demonic,isStarter){
   return m;
 }
 function buildDeck(){const d=[];for(const[id,copies]of Object.entries(ACTIVE_DECK)){const card=ALL_CARDS.find(c=>c.id===id);if(card)for(let i=0;i<copies;i++)d.push({...card,uid:Math.random().toString(36).slice(2)})}return shuffle(d)}
-function pickStartingPair(){const pool=ALL_MUSICIANS.filter(m=>!m.locked);let best=null,bs=-1;for(let i=0;i<40;i++){const a=pick(pool),b=pick(pool);if(a.id===b.id)continue;if(a.keyword==='ANCHOR'&&b.keyword==='ANCHOR')continue;const s=memberScore(a)+memberScore(b);if(s>bs){bs=s;best=[a,b]}}return best.map(b=>makeMember(b,false,false,false,true))}
+// CORRUPTION REWORK (Aug 6 2026): corruption members (CORRUPT synth players + the
+// HEXED corruption-generator) are ONLY offered on the Ritualist deck. The 4 clean
+// decks never see them, so a beginner never encounters corruption via the roster.
+function rosterPool(){return ALL_MUSICIANS.filter(m=>!m.locked&&(DECK_ID==='ritualist'||(m.keyword!=='CORRUPT'&&m.keyword!=='HEXED')))}
+function pickStartingPair(){const pool=rosterPool();let best=null,bs=-1;for(let i=0;i<40;i++){const a=pick(pool),b=pick(pool);if(a.id===b.id)continue;if(a.keyword==='ANCHOR'&&b.keyword==='ANCHOR')continue;const s=memberScore(a)+memberScore(b);if(s>bs){bs=s;best=[a,b]}}return best.map(b=>makeMember(b,false,false,false,true))}
 function arrangeStage(stage){
   const alive=stage.filter(m=>!m.tooStoned),stoned=stage.filter(m=>m.tooStoned);if(alive.length<=1)return stage;
   const pairs=[],used=new Set(),upgraded=alive.filter(m=>isUpgraded(m));
@@ -470,7 +521,7 @@ function scanMentorLinks(stage){
       if(!right.mentorBonusApplied){right.permAtkBonus=(right.permAtkBonus||0)+bonus.atk;right.maxHp+=bonus.hp;right.hp=Math.min(right.hp+bonus.hp,right.maxHp);right.mentorBonusApplied=true;TRACK.linksFormed++}
       links.push({mentorIdx:i,protegeIdx:i+1,tier,mult:bonus.mult+STAKE.mentorBonus})}}return links;
 }
-function generateCandidates(pack){const pool=ALL_MUSICIANS.filter(m=>!m.locked),candidates=[],usedIds=new Set();
+function generateCandidates(pack){const pool=rosterPool(),candidates=[],usedIds=new Set();
   for(let i=0;i<pack.numCandidates;i++){const available=pool.filter(m=>!usedIds.has(m.id));if(available.length===0)break;const base=pick(available);usedIds.add(base.id);
     const r=Math.random(),tier=r<pack.demonicChance?'demonic':r<pack.demonicChance+pack.mythicChance?'mythic':r<pack.demonicChance+pack.mythicChance+pack.foilChance?'foil':'base';
     candidates.push(makeMember(base,tier==='foil',tier==='mythic',tier==='demonic'))}return candidates}
@@ -537,7 +588,7 @@ function applyPact(pactId,gs){
     case 'speed_demon':gs._speedDemon=true;break;
     case 'blood_price':break; // 9x blood ritual (handled in card scoring)
     case 'clean_living':break; // +2 ATK at 0% corruption
-    case 'corruption_engine':gs.corruption=Math.min(100,gs.corruption+5);break;
+    case 'corruption_engine':if(CORR_ON)gs.corruption=Math.min(100,gs.corruption+5);break;
     case 'merchants_eye':break; // 20% off shop
     case 'stone_wall':break; // -1 boss dmg
     case 'sixth_slot':break; // +1 member slot (handled in shop)
@@ -624,7 +675,7 @@ function _scoreCardBase(card,gs,enemy,strikeNum,cardsPlayed){
     // Aug 1 2026: deathriff/feedbackloop are ATK buffs live, NOT direct damage —
     // rescored accordingly (old scores assumed a corruption-scaled nuke).
     case 'deathriff':return 66;case 'feedbackloop':return corruption>=50?66:48;
-    case 'herbmoney':return stash>=10?65:0;case 'goingbroke':return stash>=50?62:5;
+    case 'herbmoney':return 46;case 'goingbroke':return stash>=50?62:5;
     case 'resonancecard':{const lo=Math.min(...alive.map(m=>m.atk+(m.permAtkBonus||0)+(m.tempAtkBonus||0)));return highestAtk-lo>=3?54:8};case 'ampstatic':return corruption>=50?52:26;
     case 'doubledown':return cardsPlayed===0&&embers>=3?74:28;
     case 'distortion':return 57;case 'dialtoeleven':return corruption<50?44:14;
@@ -953,7 +1004,7 @@ function simFight(gs,phaseHp,luciferPhase){
 
   // Fight start artifacts
   if(gs.artifacts.some(a=>a.id==='a1')){const lg=gs.stage.find(m=>m.role==='Lead Guitarist'&&!m.tooStoned);if(lg){lg.permAtkBonus=(lg.permAtkBonus||0)+1}}
-  if(gs.artifacts.some(a=>a.id==='a2'))gs.corruption=Math.max(gs.corruption,15);
+  if(CORR_ON&&gs.artifacts.some(a=>a.id==='a2'))gs.corruption=Math.max(gs.corruption,15);
   if(gs.artifacts.some(a=>a.id==='a4')){const al=gs.stage.filter(m=>!m.tooStoned);if(al.length)pick(al).stoneShield=2}
   if(gs.artifacts.some(a=>a.id==='a7'))gs.embers=Math.min(MAX_EMBERS_CAP,gs.embers+spEmberGain(gs,1));
   if(gs.artifacts.some(a=>a.id==='ca1')){gs.stage.filter(m=>!m.tooStoned).forEach(m=>{m.permAtkBonus=(m.permAtkBonus||0)+1});TRACK.caEffects++}
@@ -973,7 +1024,7 @@ function simFight(gs,phaseHp,luciferPhase){
   // ── SKILL PASS (d): boss rule-changer debuffs, Circle 3 boss onward ──
   // These flags flip only on the specific boss fights below. They persist for the
   // whole fight (reset unconditionally here each fight, so no leak between fights).
-  gs._spEmberTax=false;gs._spSilenceTop=false;gs._spChainBlock=false
+  gs._spEmberTax=false;gs._spSilenceTop=false;gs._spChainBlock=false;gs._blindArmor=false;gs._blindName=null
   if(SKILL_PASS&&isBoss){
     // emberTax  — C3 & C6 bosses: every card costs +1 ember this fight
     if(circleNum===3||circleNum===6)gs._spEmberTax=true
@@ -982,15 +1033,39 @@ function simFight(gs,phaseHp,luciferPhase){
     // chainBlock — C5, C8 bosses & Lucifer: riff chains build NO strikeMult
     if(circleNum===5||circleNum===8||enemy.passiveId==='luciferBoss')gs._spChainBlock=true
   }
+  // ── BOSS BLINDS (Aug 6 2026, BLINDS=1) — Balatro-style: each circle boss rolls a
+  // random rule-changer. Punishes the BURST ENGINE that trivializes the mid-game with
+  // tension it can't out-damage. (Lucifer excluded — he's already the endgame wall.)
+  if(BLINDS&&isBoss&&circleNum<9){
+    // TIERED pool — every circle boss is a blind, but they scale with depth so early
+    // circles stay beginner-friendly and Hell gets nastier as you descend.
+    // chainblock & armor are SELF-SCALING: they punish the engine, which barely exists
+    // early (mild) but dominates late (harsh) — so they lead the early tiers. Resource-
+    // punishers (silence/deadline/embertax) hit hardest when you're starved, so they're
+    // saved for when you can absorb them.
+    let _pool=circleNum<=3?['chainblock','armor']                        // GENTLE (C1-3)
+             :circleNum<=6?['chainblock','armor','embertax','deadline']  // MEDIUM (C4-6)
+             :['armor','chainblock','silence','deadline']                // HARSH (C7-8)
+    if(process.env.BLIND_POOL)_pool=process.env.BLIND_POOL.split(',')    // test override
+    const _b=_pool[Math.floor(Math.random()*_pool.length)]
+    gs._blindName=_b
+    if(_b==='chainblock')gs._spChainBlock=true
+    else if(_b==='embertax')gs._spEmberTax=true
+    else if(_b==='silence')gs._spSilenceTop=true
+    else if(_b==='deadline')gs._fightMaxStrikes=Math.max(1,gs._fightMaxStrikes-1)
+    else if(_b==='armor')gs._blindArmor=true
+    TRACK.blinds=TRACK.blinds||{};TRACK.blinds[_b]=(TRACK.blinds[_b]||0)+1
+  }
   // ── KEYWORD STACK: ANCHOR fight-start init ───────
   gs._anchorSavesUsed=0
   // Compute ANCHOR tier at fight start (recomputed each strike but capped here)
   {const _anchorCount=gs.stage.filter(m=>!m.tooStoned&&m.keyword==='ANCHOR').reduce((s,m)=>s+(m.foil?2:1),0);
    gs._anchorTier=stackTier(_anchorCount)}
   // Pact: clean_living bonus
-  // CORRUPTION THRESHOLDS at fight start
-  if(gs.corruption>=25){const _alive=gs.stage.filter(m=>!m.tooStoned);if(_alive.length>0){const _w=_alive.reduce((a,b)=>a.hp<b.hp?a:b);_w.hp=Math.max(1,_w.hp-1);TRACK.whisperDmg++}}
-  if(gs.corruption>=100&&!gs._possessionFired){gs._possessionFired=true;gs.stage.forEach(m=>{if(!m.tooStoned&&m.keyword==='CORRUPT'){m.permAtkBonus=(m.permAtkBonus||0)+3}});TRACK.possessionBonus++}
+  // CORRUPTION THRESHOLDS at fight start — only ever fire on the Ritualist deck.
+  if(!CORR_ON)gs.corruption=0
+  if(CORR_ON&&gs.corruption>=25){const _alive=gs.stage.filter(m=>!m.tooStoned);if(_alive.length>0){const _w=_alive.reduce((a,b)=>a.hp<b.hp?a:b);_w.hp=Math.max(1,_w.hp-1);TRACK.whisperDmg++}}
+  if(CORR_ON&&gs.corruption>=100&&!gs._possessionFired){gs._possessionFired=true;gs.stage.forEach(m=>{if(!m.tooStoned&&m.keyword==='CORRUPT'){m.permAtkBonus=(m.permAtkBonus||0)+3}});TRACK.possessionBonus++}
   if(gs._pacts.includes('clean_living')&&gs.corruption<15)gs.stage.filter(m=>!m.tooStoned).forEach(m=>{m.tempAtkBonus=(m.tempAtkBonus||0)+2});
   // Pact: stone_wall
   const stoneWallActive=gs._pacts.includes('stone_wall');
@@ -1016,8 +1091,8 @@ function simFight(gs,phaseHp,luciferPhase){
   if(gs.heldAcid&&(fightIdx>=21||fightIdx===26||gs._wthFight||(isBoss&&circleNum>=6)||(fightIsHard&&bandIsWeak))){
     const trip=rollTrip('acid');gs.heldAcid=false;TRACK.acidUsed++
     gs._tripBuff=trip
-    if(trip==='EGO_DISSOLUTION'){gs.corruption=69;gs.stage.filter(m=>!m.tooStoned).forEach(m=>{m.permAtkBonus=(m.permAtkBonus||0)+3})}
-    else if(trip==='BAD_ACID'){gs.corruption=100}
+    if(trip==='EGO_DISSOLUTION'){if(CORR_ON)gs.corruption=69;gs.stage.filter(m=>!m.tooStoned).forEach(m=>{m.permAtkBonus=(m.permAtkBonus||0)+3})}
+    else if(trip==='BAD_ACID'){if(CORR_ON)gs.corruption=100}
   } else if(gs.heldShrooms&&(fightIsHard||bandIsWeak||(isBoss&&circleNum>=3))){
     const trip=rollTrip('shrooms');gs.heldShrooms=false;TRACK.shroomsUsed++
     gs._tripBuff=trip
@@ -1035,6 +1110,7 @@ function simFight(gs,phaseHp,luciferPhase){
   // the boss ENRAGES: damage x2 per overtime strike. Fight ends only in death
   // (either side). Safety cap +8 OT strikes.
   for(let strike=0;strike<gs._fightMaxStrikes+8;strike++){
+    if(!CORR_ON)gs.corruption=0 // clean decks are corruption-free at all times
     const _otLevel=Math.max(0,strike-gs._fightMaxStrikes+1)
     // Aug 4 2026: _strikesLeft used to be set once at fight start and never move,
     // so Limbo's Echo ("x1.3 per Strike remaining") always fired at full value and
@@ -1071,12 +1147,15 @@ function simFight(gs,phaseHp,luciferPhase){
     // WTH: inject contract every 2 strikes
     if(gs._wthFight){wthStrikeCount++;if(wthStrikeCount%2===0&&wthStrikeCount>0)gs.hand.push({id:'contract',type:'CORRUPT',rarity:'Rare',embers:0,uid:'ctr'+wthStrikeCount})}
 
-    gs.stage.filter(m=>m.keyword==='HEXED'&&!m.tooStoned).forEach(m=>{gs.corruption=Math.min(100,gs.corruption+5);m.tempAtkBonus=(m.tempAtkBonus||0)+Math.floor(gs.corruption/8)});
-    if(enemy.passiveId==='corruptPlayer')gs.corruption=Math.min(100,gs.corruption+10);
-    // Aug 4 2026: was +50. Live (App.jsx ~8460) and enemies.js both say 15 — the sim
-    // was slamming the player to 100% corruption in two strikes on the Apostate.
-    if(enemy.passiveId==='corruptPlayer15')gs.corruption=Math.min(100,gs.corruption+15);
-    if(enemy.passiveId==='corruptPlayer20')gs.corruption=Math.min(100,gs.corruption+20);
+    // CORRUPTION REWORK (Aug 6 2026): corruption is isolated to the RITUALIST deck.
+    // On the 4 clean decks the player has no corrupt cards and no corruption members,
+    // so boss "corrupt the player" passives are inert — a beginner never accrues it.
+    if(CORR_ON){
+      gs.stage.filter(m=>m.keyword==='HEXED'&&!m.tooStoned).forEach(m=>{gs.corruption=Math.min(100,gs.corruption+5);m.tempAtkBonus=(m.tempAtkBonus||0)+Math.floor(gs.corruption/8)});
+      if(enemy.passiveId==='corruptPlayer')gs.corruption=Math.min(100,gs.corruption+10);
+      if(enemy.passiveId==='corruptPlayer15')gs.corruption=Math.min(100,gs.corruption+15);
+      if(enemy.passiveId==='corruptPlayer20')gs.corruption=Math.min(100,gs.corruption+20);
+    }
     if(enemy.passiveId==='selfbuff')enemy._atkBuff+=1;
     if(enemy.passiveId==='selfbuff2')enemy._atkBuff+=2;
 
@@ -1096,7 +1175,7 @@ function simFight(gs,phaseHp,luciferPhase){
     let cardsPlayed=0;
     for(let att=0;att<15;att++){
       _cst.firstOfStrike=(gs._cardsPlayedIds||[]).length===0
-      const _spTax=(SKILL_PASS&&gs._spEmberTax)?1:0 // (d) emberTax: +1 ember/card
+      const _spTax=gs._spEmberTax?1:0 // (d) emberTax: +1 ember/card (SKILL_PASS or BLINDS)
       const playable=gs.hand.map((c,idx)=>({c,idx})).filter(({c})=>{
         if(c.id==='ampoverload'&&gs._discardsLeft<=0)return false
         return gs.embers>=cardCost(c,gs,_cst,false)+_spTax
@@ -1179,7 +1258,7 @@ function simFight(gs,phaseHp,luciferPhase){
             // UNIQUE CHAIN EFFECTS (Aug 6 2026): each chain does something distinct, tiered
             // by difficulty. Data lives in cards.js CHAIN_EFFECTS (shared with live).
             const _fx=CHAIN_EFFECTS[_CHAIN_BY_PAIR[ck]]||{mult:1.78}
-            if(!(SKILL_PASS&&gs._spChainBlock)){
+            if(!gs._spChainBlock){
               const _mcap=SKILL_PASS?SP_MULT_CAP:10000
               const _bump=(_fx.mult||1)*(SP_CHAIN_MULT||1)
               if(_bump>1)gs._strikeMult=Math.min(_mcap,Math.round((gs._strikeMult*_bump)*100)/100)
@@ -1226,6 +1305,10 @@ function simFight(gs,phaseHp,luciferPhase){
     if(_cardsPlayed.length>=2){let _run=1;for(let _i=1;_i<_cardsPlayed.length;_i++){
       if(CARD_TYPE_BY_ID[_cardsPlayed[_i]]===CARD_TYPE_BY_ID[_cardsPlayed[_i-1]]){_run++;_shredderHits++}else _run=1
     }}
+    // DISSONANCE (Freya/Loki): +1 ATK per DISTINCT OTHER keyword on the alive stage.
+    // DIRGE (Orm): +1 ATK per 4 cards in the discard pile (ramps as the fight runs long).
+    const _dissoDistinct=Object.keys(_kwStacks).filter(k=>k!=='DISSONANCE').length
+    const _dirgeBonus=Math.floor(gs.discard.length/4)
     const _auraAtk=auraAtkMap(gs.stage,{corruption:gs.corruption,shredderHits:_shredderHits,drumRollOk:Object.values(dtMult).some(v=>v>=1.5)})
     // DOUBLE TIME stack-3: all members attack twice this strike
     if(_doubleTimeTier>=4){for(const _m of aliveNow)_m._kwDoubleStrike=true}
@@ -1238,7 +1321,7 @@ function simFight(gs,phaseHp,luciferPhase){
 
     // (d) silenceTop: single highest base-ATK alive member contributes 0 this strike.
     let _spSilenceUid=null
-    if(SKILL_PASS&&gs._spSilenceTop&&aliveNow.length){
+    if(gs._spSilenceTop&&aliveNow.length){
       let _mx=-1
       for(const _m of aliveNow){const _a=_m.atk+(_m.permAtkBonus||0)+(_m.tempAtkBonus||0);if(_a>_mx){_mx=_a;_spSilenceUid=_m.uid}}
     }
@@ -1251,13 +1334,22 @@ function simFight(gs,phaseHp,luciferPhase){
       if(m.keyword==='FRENZIED'&&_frenziedTier>0)atk+=_riffsThisStrike*_frenziedTier
       if(m.keyword==='CORRUPT')atk+=Math.floor(gs.corruption/12)*Math.max(1,_corruptTier)
       if(m.keyword==='SHREDDER'&&_shredderTier>0)atk+=_shredderHits*_shredderTier
+      if(m.keyword==='DISSONANCE')atk+=_dissoDistinct
+      if(m.keyword==='DIRGE')atk+=_dirgeBonus
       atk+=_auraAtk[m.uid]||0
       if(m.ampedThisStrike)atk*=Math.pow(2,m.ampedThisStrike);if(gs._possessedActive)atk*=3;if(gs._overdriveActive)atk*=2;
       if(dtMult[m.uid]!==undefined)atk=Math.floor(atk*dtMult[m.uid]);
+      gs._membersUsed.add(m.id); // (leaderboard) member acted this run
       if(m.role==='Drummer')continue // live: drummers buff, they don't swing
-      strikeDmg+=Math.max(0,atk);
-      if(m.encoreThisStrike||m._kwDoubleStrike)strikeDmg+=Math.max(0,atk);
+      const _mc=Math.max(0,atk);strikeDmg+=_mc;_ms(m.id).dmg+=_mc;
+      if(m.encoreThisStrike||m._kwDoubleStrike){strikeDmg+=_mc;_ms(m.id).dmg+=_mc;}
     }
+    // BLASTBEAT (parity fix Aug 6 2026): each drummer makes the whole band hit ×1.5,
+    // STACKING as 1.5^count (2 drummers = ×2.25). Live App.jsx ~8749 does this; the sim
+    // never did, so drummers dealt 0 AND buffed nothing — the veteran bot correctly never
+    // picked them (1-6%). Applied to the base member-ATK sum, matching live's order.
+    {const _bbCount=aliveNow.filter(m=>m.role==='Drummer').length;
+     if(_bbCount>0)strikeDmg=Math.round(strikeDmg*Math.pow(BB_MULT,_bbCount));}
     if(gs._infencoreActive)strikeDmg*=2;
     // (task2 CHAINS-DOMINANT) dial the RAW (non-multiplier) member-ATK contribution
     // down by SP_RAW_DMG_MULT under SKILL_PASS. Applied to the flat base BEFORE the
@@ -1288,7 +1380,7 @@ function simFight(gs,phaseHp,luciferPhase){
     if(gs._tripBuff==='DIMENSIONAL_RIFT'||gs._tripBuff==='FRACTAL_VISION')strikeDmg*=2;
     // Apply strike multiplier (0.03 per card played + 0.15 per combo)
     // Corruption power multiplier
-    const corrMult=gs.corruption>=100?3.0:gs.corruption>=80?2.0:gs.corruption>=60?1.5:gs.corruption>=40?1.2:1.0
+    const corrMult=gs.corruption>=100?CORR_MULT_100:gs.corruption>=80?CORR_MULT_80:gs.corruption>=60?CORR_MULT_60:gs.corruption>=40?CORR_MULT_40:1.0
     if(corrMult>1)strikeDmg=Math.round(strikeDmg*corrMult)
     // Artifact multiplier triggers
     let artMult=1.0
@@ -1387,6 +1479,7 @@ function simFight(gs,phaseHp,luciferPhase){
     // Trivial non-boss fights are left uncapped so a skilled band can blitz them and
     // conserve HP (the per-circle heal means that HP has to last all 3 fights).
     if(SKILL_PASS&&SP_CAP_ALL)strikeDmg=Math.min(strikeDmg,Math.ceil(enemy.maxHp*SP_STRIKE_CAP_PCT)) // damage cap OFF by default (JV: preserve the naneinf fantasy) — only if SP_CAP_ALL
+    if(gs._blindArmor)strikeDmg=Math.min(strikeDmg,Math.ceil(enemy.maxHp*(parseFloat(process.env.BLIND_ARMOR_PCT)||0.40))) // ARMOR blind: this boss shrugs off any single hit above the cap → forces multiple strikes (naneinf preserved elsewhere)
     if(aliveNow.some(m=>m.keyword==='FOLK MAGIC')&&Math.random()<0.25){const _fmGain=spEmberGain(gs,Math.max(0,gs.maxEmbers-gs.embers));gs.embers=Math.min(gs.maxEmbers,gs.embers+_fmGain)} // (task1) FOLK MAGIC refill bounded by leak cap
     gs.highestStrike=Math.max(gs.highestStrike,strikeDmg);gs.totalDamage+=strikeDmg;
     // Reset multiplier + combo tracking for next strike
@@ -1405,7 +1498,9 @@ function simFight(gs,phaseHp,luciferPhase){
     enemy._hp-=(strikeDmg+_echoDmg);if(enemy._hp<=0)break;
 
     // BOSS ATTACKS
-    let bossDmg=(enemy.baseDmg+enemy._atkBuff+STAKE.dmgAdd+(gs.corruption>=100?3:0))*Math.pow(2,_otLevel);
+    // CORRUPTION DOWNSIDE: the deeper you're corrupted, the harder the boss hits.
+    // Legible, continuous cost that makes high corruption a real gamble.
+    let bossDmg=Math.floor((enemy.baseDmg+enemy._atkBuff+STAKE.dmgAdd)*(1+CORR_DMG_TAKEN*(gs.corruption/100)))*Math.pow(2,_otLevel);
     if(stoneWallActive)bossDmg=Math.max(1,bossDmg-1);
     if(enemy.passiveId==='stashSteal'&&gs.stash>0){const s=Math.min(gs.stash,1);gs.stash-=s;gs.stashStolen+=s}
     if(enemy.passiveId==='stashSteal2'&&gs.stash>0){const s=Math.min(gs.stash,1);gs.stash-=s;gs.stashStolen+=s}
@@ -1489,6 +1584,7 @@ function simFight(gs,phaseHp,luciferPhase){
   // Aug 4 2026: strikes-per-fight is a headline balance number ("fights average
   // 2.3-2.5 strikes") that the sim never actually measured. It does now.
   TRACK.fightsFought++
+  for(const _sm of gs.stage){if(_sm)_ms(_sm.id).fights++} // (leaderboard) roster presence
   if(won&&_strikesUsed<=1)TRACK.oneShotFights++
   if(won){
     gs.fightsSurvived++;
@@ -1575,7 +1671,7 @@ function simEvent(gs){
 
 // 50% Hunger applied inside simShop via priceMult
 function simShop(gs){
-  const hungerMult=gs.corruption>=50?1.25:1.0
+  const hungerMult=gs.corruption>=50?1.20:1.0 // HANGOVER simplified: single flat +20% shop cost at 50%+ corruption (matches live shopHungerMult)
   const priceMult=(gs._pacts.includes('merchants_eye')?0.8:1.0)*hungerMult
 
   const circleNum=Math.floor(gs.fightIndex/3)+1;
@@ -1640,7 +1736,7 @@ function simShop(gs){
       gs.stash-=c;gs.artifacts.push(o);gs.circleArtBought=true
       TRACK.artPicks=TRACK.artPicks||{};TRACK.artPicks[o.id]=(TRACK.artPicks[o.id]||0)+1
       gs._relicOffer=null
-      if(o.startCorr&&gs.corruption<o.startCorr)gs.corruption=o.startCorr
+      if(CORR_ON&&o.startCorr&&gs.corruption<o.startCorr)gs.corruption=o.startCorr
     }else if(gs.stash>=c&&gs.artifacts.length>=3){
       // consider replacing the weakest owned relic if the offer is clearly stronger
       let wi=-1,wv=1e9
@@ -1694,7 +1790,7 @@ function simShop(gs){
 function newGame(){
   const _sE=DECK_ID_DEF.startEmbers!=null?DECK_ID_DEF.startEmbers:STAKE.startEmbers
   const _sC=DECK_ID_DEF.startCorruption!=null&&DECK_ID_DEF.startCorruption>STAKE.startCorruption?DECK_ID_DEF.startCorruption:STAKE.startCorruption
-  return{stage:pickStartingPair(),deck:buildDeck(),discard:[],hand:[],stash:3,embers:_sE,maxEmbers:_sE,corruption:_sC,fightIndex:0,bossKills:0,artifacts:[],passives:[],fightsSurvived:0,totalDamage:0,highestStrike:0,stashEarned:0,tooStonedCount:0,won:false,mentorLinks:[],lastCircle:1,stashStolen:0,
+  return{stage:pickStartingPair(),deck:buildDeck(),discard:[],hand:[],stash:3,embers:_sE,maxEmbers:_sE,corruption:_sC,fightIndex:0,bossKills:0,artifacts:[],passives:[],fightsSurvived:0,totalDamage:0,highestStrike:0,stashEarned:0,tooStonedCount:0,won:false,mentorLinks:[],lastCircle:1,stashStolen:0,_membersUsed:new Set(),
   heldShrooms:false,heldAcid:false,stolenAtkPool:0,circleArtBought:false,circlePassBought:false,
   _pacts:[],_speedDemon:false,_warDrums:false,_genreCounts:{RIFF:0,CORRUPT:0,UTILITY:0,EMBER:0},_activeGenre:null,_wthFight:false,_contractsPlayed:0,_upgradedCards:[],loot:[],_strikeMult:1.0,_cardsPlayedIds:[],_firstStrike:true,_allCardsFree:false,_nextCardFree:false,_pendingBurnStage:false,_eventsSeenThisRun:[],_corruptionLocked:false,_bloodOathUid:null,_possessionFired:false,
   // ── DECK SIGNATURE TRACKING ──
@@ -1724,7 +1820,13 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
 
     if(f===26){
       TRACK.luciferReached++
-      const actualHp=666666 // Jul 31 2026 JV: flat, no scaling — 333,333 per phase
+      // CORRUPTION REWORK (Aug 6 2026): Lucifer now honours the per-deck hpScale like
+      // every other boss, so hpScale is a single clean difficulty knob per deck. Clean
+      // (corruption-free) decks run a lower hpScale to compensate for losing the old
+      // corruption ×3 burst that used to crack the wall; Ritualist keeps a higher one.
+      // Base 666,666 is unchanged (333,333 per phase before scaling). Live
+      // getScaledMaxHp mirrors this exactly.
+      const actualHp=Math.ceil(666666*LUCIFER_SCALE)
       const phase1Hp=Math.ceil(actualHp/2)
       const phase2Hp=actualHp-phase1Hp
       const r1=simFight(gs,phase1Hp,1)
@@ -1814,6 +1916,7 @@ function simGame(){const gs=newGame();let deathFight=-1,deathCause='';
       if(r.won){wthWon=true;TRACK.wthWins++}
     }
   }
+  for(const _uid of gs._membersUsed){_ms(_uid).games++;if(gs.won)_ms(_uid).won++} // (leaderboard) per-run pick + win-when-used
   return{won:gs.won,wthWon,deathFight,deathCause,fightsSurvived:gs.fightsSurvived,totalDamage:gs.totalDamage,highestStrike:gs.highestStrike,stageSize:gs.stage.length,mentorLinks:gs.mentorLinks.length,pacts:gs._pacts.length,upgrades:gs._upgradedCards.length}}
 
 // ── RUN SIMULATION ──
@@ -1823,7 +1926,7 @@ TRACK={linksFormed:0,linkStrikesFired:0,linkBonusDmg:0,packsOpened:0,pawnSells:0
   shroomsBought:0,acidBought:0,shroomsUsed:0,acidUsed:0,goodTrips:0,badTrips:0,bunkTrips:0,
   luciferReached:0,luciferP1Kills:0,luciferWins:0,
   pactsChosen:0,fightsSkipped:0,cardsDeleted:0,genreActivations:0,wthEntered:0,wthWins:0,contractsSigned:0,forgeUpgrades:0,combosTriggered:0,hellquakesFired:0,bossLootCollected:0,artifactsBought:0,passivesBought:0,eventsTriggered:0,eventMoshPit:0,eventCursedAmp:0,eventBloodOath:0,eventHellfire:0,eventSabbath:0,eventWager:0,whisperDmg:0,hungerExtraCost:0,madnessCards:0,possessionBonus:0,anchorSaves:0,kwStack2Reached:0,kwStack3Reached:0,fightsFought:0,strikesTaken:0,oneShotFights:0};
-CARD_PLAYS={};
+CARD_PLAYS={};MEMBER_STATS={};
 const deathsByFight=new Array(27).fill(0),surviveByFight=new Array(27).fill(0);let wins=0,wthWins=0,totalFights=0,gamesWithLinks=0,totalPacts=0;
 for(let i=0;i<NUM_GAMES;i++){const r=simGame();totalFights+=r.fightsSurvived;totalPacts+=r.pacts;if(r.mentorLinks>0)gamesWithLinks++;
   if(r.won){wins++;if(r.wthWon)wthWins++;for(let f=0;f<27;f++)surviveByFight[f]++}else{for(let f=0;f<r.deathFight;f++)surviveByFight[f]++;deathsByFight[r.deathFight]++}}
@@ -1869,7 +1972,9 @@ console.log(`\n⛧ NEW FEATURE STATS:`);
 console.log(`  Pacts chosen: ${TRACK.pactsChosen.toLocaleString()} (${(totalPacts/NUM_GAMES).toFixed(1)} avg/game)`);
 console.log(`  Fights skipped: ${TRACK.fightsSkipped.toLocaleString()} (${(TRACK.fightsSkipped/NUM_GAMES).toFixed(1)} avg/game)`);
 console.log(`  Cards deleted (burn): ${TRACK.cardsDeleted.toLocaleString()} (${(TRACK.cardsDeleted/NUM_GAMES).toFixed(1)} avg/game)`);
-console.log(`  Genre activations: ${TRACK.genreActivations.toLocaleString()}`);
+// (Genre system was removed — the counter always read 0. Line deleted Aug 6 2026 so the
+// sim output stops implying a live mechanic exists. _genreCounts/_activeGenre left in
+// newGame as harmless inert fields in case a future genre feature reuses them.)
 console.log(`  WTH entered: ${TRACK.wthEntered} | WTH won: ${TRACK.wthWins}`);
 console.log(`  Contracts signed: ${TRACK.contractsSigned}`)
 console.log(`  Riff Chains triggered: ${(TRACK.combosTriggered||0).toLocaleString()}`)
@@ -1888,6 +1993,27 @@ console.log(`  Shrooms bought: ${TRACK.shroomsBought.toLocaleString()} | Acid bo
 console.log(`  Used: ${TRACK.shroomsUsed.toLocaleString()} shrooms, ${TRACK.acidUsed.toLocaleString()} acid`);
 console.log(`  Good: ${TRACK.goodTrips.toLocaleString()} | Bad: ${TRACK.badTrips.toLocaleString()} | Bunk: ${TRACK.bunkTrips.toLocaleString()}`);
 console.log(`\n😈 LUCIFER: Reached ${TRACK.luciferReached} | P1 kills: ${TRACK.luciferP1Kills} | Wins: ${TRACK.luciferWins}`);
+
+// 🎸 MEMBER LEADERBOARD — per-member contribution (Aug 6 2026 instrument)
+{
+  const rows=Object.keys(MEMBER_STATS).map(id=>{
+    const s=MEMBER_STATS[id];const meta=ALL_MUSICIANS.find(x=>x.id===id)||{name:id,role:'?',keyword:'?'};
+    return {name:meta.name,role:meta.role,kw:meta.keyword,dmg:s.dmg,fights:s.fights,games:s.games,won:s.won,
+      dpf:s.fights?s.dmg/s.fights:0,winPct:s.games?s.won/s.games*100:0,pick:s.games};
+  });
+  console.log('\n🎸 MEMBER LEADERBOARD (per-member, this deck):');
+  console.log('  DAMAGE DEALERS — sorted by dmg/fight (raw ATK contribution, pre-multiplier):');
+  rows.filter(r=>r.role!=='Drummer').sort((a,b)=>b.dpf-a.dpf).forEach(r=>{
+    console.log(`    ${(r.name||'?').padEnd(18)} ${(r.role+'/'+r.kw).padEnd(20)} ${r.dpf.toFixed(1).padStart(7)} dmg/fight | pick ${(r.pick/NUM_GAMES*100).toFixed(0).padStart(3)}% | win-when-used ${r.winPct.toFixed(1)}%`);
+  });
+  const drums=rows.filter(r=>r.role==='Drummer');
+  if(drums.length){
+    console.log('  BUFFERS — Drummers deal 0 direct dmg; value is the buffs they apply (rank by win-when-used):');
+    drums.sort((a,b)=>b.winPct-a.winPct).forEach(r=>{
+      console.log(`    ${(r.name||'?').padEnd(18)} ${r.kw.padEnd(12)} pick ${(r.pick/NUM_GAMES*100).toFixed(0).padStart(3)}% | win-when-used ${r.winPct.toFixed(1)}%`);
+    });
+  }
+}
 
 // Card usage
 const cardNames={amp:'Amp It Up',dialtoeleven:'Dial to Eleven',soundcheck:'Sound Check',sigdecay:'Signal Decay',battlecry:'Battle Cry',roadie:'Roadie',setlist:'Setlist',groupie:'Groupie',demotape:'Demo Tape',distortion:'Distortion',staticcharge:'Static Charge',powertap:'Power Tap',setbreak:'Smoke Break',crowdsurf:'Crowd Surf',newstrings:'New Strings',encore:'Encore',wakeup:'Wake Up Call',feedbackloop:'Feedback Loop',tappedout:'Tapped Out',controlfeedback:'Controlled Feedback',burnset:'Burn the Set',soundwall:'Sound Wall',doubledown:'Double Down',deathriff:'Death Riff',ampoverload:'Amp Overload',ampstatic:'Amp the Static',seance:'Seance',soundboard:'Soundboard',heavyriff:'Heavy Riff',resonancecard:'Resonance',herbmoney:'Herb Money',darktuning:'Dark Tuning',stagedive:'Stage Dive',overdrive:'Overdrive',infencore:'Infernal Encore',remaster:'The Remaster',sabbathsigil:'Sabbath Sigil',possessedperf:'Possessed Perf',goingbroke:'Going Broke',moshpit:'Mosh Pit',bloodritual:'Blood Ritual',contract:'Record Deal'};

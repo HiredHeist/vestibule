@@ -915,15 +915,16 @@ IMPL.resonancecard = (S, C, out) => {
 
 IMPL.herbmoney = (S, C, out) => {
   if (!C.m) return false
-  if (num(S.stash) < 10) { log(out, '🌿 Need 10 Stash! (have ' + num(S.stash) + ')'); return false }
-  S.stash = num(S.stash) - 10
-  // TEXT-MISMATCH: CARD_UPGRADES.herbmoney says "Full stash as damage. Keep half
-  // stash." — a completely different card. Live's upgrade is just +1 ATK.
+  // REVIVED (Aug 6 2026): the old design charged 10 Stash for +3 flat ATK — a
+  // terrible rate in a multiplicative-damage game, so it sat DEAD in every deck.
+  // Now the herb profits already paid for the gear: no Stash spent, just a
+  // reliable permanent ATK buff worth a card slot. Pure upside (no economy drain
+  // → cannot lower deck winrate). Upgrade path unchanged (+4).
   const buff = C.upgraded ? 4 : 3
   permAtk(C.m, buff)
   bumpBuff(C.m)
   float(out, '+' + buff + ' ATK', C.t)
-  log(out, '🌿 Herb Money! Spent 10🌿 — ' + C.m.name + ' +' + buff + ' ATK permanently!')
+  log(out, '🌿 Herb Money! ' + C.m.name + ' +' + buff + ' ATK permanently!')
 }
 
 IMPL.goingbroke = (S, C, out) => {
