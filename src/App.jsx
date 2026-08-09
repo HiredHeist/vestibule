@@ -456,57 +456,302 @@ function getEffectiveAtk(m,ctx){
   // DIRGE — Dark Minstrel (Orm). +1 ATK per 4 cards in the discard pile: the longer the
   // set runs, the heavier he plays. Deck-agnostic (no corruption). Mirrors sim.
   if(m.keyword==='DIRGE')atk+=Math.floor((ctx.discardCount||0)/4)
-  // v0.8 Band Auras — adjacency bonus computed once per strike into ctx.auraAtk
-  if(ctx.auraAtk)atk+=ctx.auraAtk[m.uid]||0
+  // Neighbor-adjacency ATK auras REMOVED (v0.8.1 declutter). Mentor Link is the only
+  // adjacency mechanic now — it lives in computeStrikeDamage, not here.
   return atk
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// computeStrikeDamage(P) — THE SINGLE SOURCE OF TRUTH for strike damage.
+//
+// Extracted verbatim from handleStrikeBody so the "DEALS X DMG" preview and the
+// real strike can never disagree again. This is a PURE function: inputs → numbers
+// + display arrays. It performs NO React setState, NO addLog, NO DOM reads. Every
+// side effect that used to be interleaved (addLog, setTriggeredArtifactId, mentor
+// addFloat/tryAchieve, the HEXED setCorruption) stays in handleStrikeBody, driven
+// off the auxiliary arrays this function returns (syncLogs / mentorFloats /
+// cascadeLogs / triggeredArtifactIds).
+//
+// The ACTUAL strike is the source of truth; this is its math, moved. The preview
+// was made to match — notably it now includes the trip multiplier and treats
+// Tongue of the Devourer as flat additive damage (both of which the old preview
+// mishandled). Paranoia is random, so the preview passes paranoiaVictim:null; the
+// actual passes the real victim.
+//
+// Damage stages (in the actual's exact order):
+//   base sum (non-Drummer, non-paranoia, getEffectiveAtk + p10Bonus)
+//   → ×dblMult (BLASTBEAT 1.35^drummerCount)
+//   → +encDmg (encore) → +dtBonus (DOUBLE TIME tier≥4)
+//   → ×bandBonus → +mentor-link (_mlb) → ×2 Wailing Guitar (first strike)
+//   → ×trip ×strike(currentMult) ×corruption ×artifactMult (one combined round)
+//   → +flat artifact (Tongue) → +shredder echo → blind-armor cap (40% boss maxHp)
+// ═══════════════════════════════════════════════════════════════════════════
+function computeStrikeDamage(P){
+  const {
+    stage,actives,atkCtx,paranoiaVictim,kwStacks,
+    activePassives,activeArtifacts,activeStake,
+    strikesLeft,fightMaxStrikes,fightTripBuff,corruption,currentMult,
+    cardIdsThisStrike,combosThisStrike,discardsThisStrike,discardsThisFight,
+    hand,embers,stash,fightIndex,collectedLoot,
+    shredderEchoesPending,activeBlind,scaledMaxHp,
+  }=P
+  const bLines=[]
+  const syncLogs=[]
+  const mentorFloats=[]
+  // ── BASE SUM (non-Drummer, non-paranoia) + p10 opening-strike bonus ──
+  const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===fightMaxStrikes?10:0
+  let dmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
+    const effectiveAtk=getEffectiveAtk(m,atkCtx)
+    const cleanLivingBonus=0 /* clean_living now applies at fight start */
+    return s+effectiveAtk+cleanLivingBonus
+  },0)+p10Bonus
+  // ── BLASTBEAT: each drummer makes the whole band hit ×1.35 harder, STACKS ──
+  let dblMult=1
+  const hasDbl=actives.some(m=>m.role==='Drummer')
+  if(hasDbl){
+    const _bbCount=actives.filter(m=>m.role==='Drummer').length
+    dblMult=Math.round(Math.pow(1.35,_bbCount)*100)/100
+    dmg=Math.round(dmg*dblMult)
+    bLines.push({type:'multiply',label:'BLASTBEAT ×'+dblMult,label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff8800'})
+  }
+  // ── ENCORE (excludes paranoia victim) ──
+  const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
+    const ea=getEffectiveAtk(m,atkCtx)
+    return s+ea
+  },0)
+  dmg+=encDmg
+  if(encDmg>0){bLines.push({type:'add',label:'Encore',emoji:'🔁',value:encDmg,runningAfter:dmg,color:'#44cc44'})}
+  // ── DOUBLE TIME tier-3 (4d) — at 3+ Drummer stacks, all members attack twice ──
+  const _dtTier=kwStacks.tier('DOUBLE TIME')
+  if(_dtTier>=4){
+    const _dtBonusDmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>s+getEffectiveAtk(m,atkCtx),0)
+    if(_dtBonusDmg>0){
+      dmg+=_dtBonusDmg
+      bLines.push({type:'add',label:'DOUBLE TIME ×3!',emoji:'🥁',value:_dtBonusDmg,runningAfter:dmg,color:'#ff8800'})
+      syncLogs.push('🥁 DOUBLE TIME ×3! All members attack twice!')
+    }
+  }
+  // ── BAND SYNERGY ──
+  const buffed=actives.filter(m=>(m.buffCount||0)>0)
+  const bandBonus=buffed.length>=5?1.35:buffed.length>=4?1.20:buffed.length>=3?1.10:1.0
+  dmg=Math.round(dmg*bandBonus)
+  if(bandBonus>1){bLines.push({type:'multiply',label:'Band Synergy ×'+bandBonus.toFixed(2),label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ffd700'})}
+  // ── MENTOR LINK strike multiplier ──
+  let _mlb=0
+  for(let _i=0;_i<stage.length-1;_i++){
+    const _mn=stage[_i],_bs=stage[_i+1]
+    if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue
+    if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){
+      const _ma=getEffectiveAtk(_mn,atkCtx)
+      const _ba=getEffectiveAtk(_bs,atkCtx)
+      const _effectiveMult=_bs.mentorMult+(activeStake.mentorBonus||0)
+      const _b=Math.round((_ma+_ba)*(_effectiveMult-1))
+      _mlb+=_b
+      syncLogs.push('⛓ Mentor Link! '+_mn.name+'+'+_bs.name+' ×'+_effectiveMult.toFixed(2)+' (+'+_b+'!)')
+      mentorFloats.push({slotIdx:_i,mult:_effectiveMult})
+    }
+  }
+  if(_mlb>0){dmg+=_mlb;bLines.push({type:'add',label:'Mentor Link',emoji:'⛓',value:_mlb,runningAfter:dmg,color:'#ffd700'})}
+  // ── CA4: Wailing Guitar — first Strike deals double damage ──
+  if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===fightMaxStrikes){
+    dmg*=2
+    bLines.push({type:'multiply',label:'Wailing Guitar ×2',label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff4488'})
+    syncLogs.push('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')
+  }
+  const baseDmg=dmg
+  // ── PER-MEMBER DAMAGE (for cascade impact display) + breakdown lines + subtotal ──
+  const memberDmgs=[]
+  actives.forEach(function(m){
+    if(m.role==='Drummer')return
+    if(paranoiaVictim&&m.uid===paranoiaVictim.uid)return
+    let mAtk=getEffectiveAtk(m,atkCtx)
+    if(m.encoreReady)mAtk*=2
+    memberDmgs.push({m,atk:mAtk})
+  })
+  memberDmgs.forEach(d=>{bLines.push({type:'member',label:d.m.name,emoji:d.m.emoji,value:d.atk,color:'#c8a060'})})
+  bLines.push({type:'subtotal',label:'BASE ATK',value:dmg,color:'#e8a820'})
+  // ── CASCADE: trip / corruption / strike / artifact / loot multipliers ──
+  const tripMult=fightTripBuff==='SACRED CHORD'?3:(fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION')?2:1
+  const corruptionMult=corrDamageMult(corruption)
+  const cMults=[]
+  const cascadeLogs=[]
+  const triggeredArtifactIds=[]
+  if(currentMult>1.0)cMults.push({mult:currentMult,label:'Strike (cards + chains)',emoji:'⛧',color:'#ff4400'})
+  if(tripMult>1)cMults.push({mult:tripMult,label:fightTripBuff||'Trip',emoji:'🍄',color:'#ff44ff'})
+  if(corruptionMult>1)cMults.push({mult:corruptionMult,label:'Corruption '+Math.floor(corruption)+'%',emoji:'🌀',color:'#cc44ff'})
+  let artifactMult=1.0
+  let _flatArtifactDmg=0
+  let _flatArtifactLabel='',_flatArtifactEmoji=''
+  const cardsPlayedCount=(cardIdsThisStrike||[]).length||0
+  const chainsFired=(combosThisStrike||[]).length
+  const stonedCount=stage.filter(m=>m&&m.tooStoned).length
+  const handDupes=hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
+  const cardsThisStrike=(cardIdsThisStrike||[]).map(id=>{
+    const isEcho=typeof id==='string'&&id.startsWith('_echo:')
+    const realId=isEcho?id.slice(6):id
+    const card=ALL_CARDS.find(c=>c.id===realId)
+    return card?{...card,_isEchoplexRetrigger:isEcho}:null
+  }).filter(Boolean)
+  const cardsRealPlays=cardsThisStrike.filter(c=>!c._isEchoplexRetrigger)
+  const corruptCardsCount=cardsThisStrike.filter(c=>c.type==='CORRUPT').length
+  const riffCardsCount=cardsThisStrike.filter(c=>c.type==='RIFF').length
+  const playedAnyRiff=riffCardsCount>0
+  const realCardsForPurity=cardsRealPlays
+  const allSameType=realCardsForPurity.length>=3&&realCardsForPurity.every(c=>c.type===realCardsForPurity[0].type)
+  const roleCounts={}
+  stage.forEach(m=>{if(m&&m.role){roleCounts[m.role]=(roleCounts[m.role]||0)+1}})
+  const maxSameRole=Math.max(0,...Object.values(roleCounts))
+  const aliveNonStoned=stage.filter(m=>m&&!m.tooStoned&&m.hp>0).length
+  const luciferOnStage=stage.some(m=>m&&(m.id==='lucifer'||m.name==='Lucifer'))
+  const drummerDT=stage.some(m=>m&&!m.tooStoned&&m.role==='Drummer')
+  const firstCardType=cardsThisStrike.length>0?cardsThisStrike[0].type:null
+  const allMembersHealthy=stage.filter(m=>m).every(m=>m.hp>=Math.ceil(m.maxHp/2))
+  const aliveCount=stage.filter(m=>m&&m.hp>0).length
+  const earlyCircleCheck=Math.floor((fightIndex||0)/3)<3
+  const highestStageAtk=Math.max(0,...stage.filter(m=>m).map(m=>getEffectiveAtk(m,atkCtx)))
+  for(const art of activeArtifacts){
+    if(!art.multTrigger)continue
+    let fires=0
+    if(art.multTrigger==='cards3'&&cardsPlayedCount>=4)fires=1
+    if(art.multTrigger==='cards5'&&cardsPlayedCount>=6)fires=1
+    if(art.multTrigger==='corrupt50'&&corruption>=60)fires=1
+    if(art.multTrigger==='corrupt80'&&corruption>=80)fires=1
+    if(art.multTrigger==='perChain')fires=chainsFired
+    if(art.multTrigger==='perStoned')fires=stonedCount
+    if(art.multTrigger==='perDupe')fires=handDupes
+    if(art.multTrigger==='alwaysOn')fires=1
+    if(art.multTrigger==='playedRiff'&&playedAnyRiff)fires=1
+    if(art.multTrigger==='anyStoned'&&stonedCount>0)fires=1
+    if(art.multTrigger==='perAliveMember')fires=aliveNonStoned
+    if(art.multTrigger==='noRiff'&&!playedAnyRiff&&cardsPlayedCount>0)fires=1
+    if(art.multTrigger==='firstCardEmber'&&firstCardType==='EMBER')fires=1
+    if(art.multTrigger==='allHealthy'&&allMembersHealthy)fires=1
+    if(art.multTrigger==='embers5'&&embers>=5)fires=1
+    if(art.multTrigger==='discardedFight'&&discardsThisFight>=1)fires=1
+    if(art.multTrigger==='discardedStrike'&&discardsThisStrike>=1)fires=1
+    if(art.multTrigger==='perDupePlayed'){const _s={};let _d=0;(cardsRealPlays||[]).forEach(c=>{_s[c.id]=(_s[c.id]||0)+1;if(_s[c.id]>1)_d++});fires=_d}
+    if(art.multTrigger==='earlyCircle'&&earlyCircleCheck)fires=1
+    if(art.multTrigger==='perCorruptCard')fires=corruptCardsCount
+    if(art.multTrigger==='perSameRole')fires=Math.max(0,maxSameRole)
+    if(art.multTrigger==='cards2exact'&&cardsRealPlays.length===2)fires=1
+    if(art.multTrigger==='chains3'&&chainsFired>=3)fires=1
+    if(art.multTrigger==='perDiscardStrike')fires=discardsThisStrike
+    if(art.multTrigger==='doubleTimeRolled'&&drummerDT)fires=1
+    if(art.multTrigger==='lastMemberStanding'&&aliveCount===1)fires=1
+    if(art.multTrigger==='allSameType'&&allSameType)fires=1
+    if(art.multTrigger==='perOtherArtifact')fires=Math.max(0,activeArtifacts.length-1)
+    if(art.multTrigger==='luciferOnStage'&&luciferOnStage)fires=1
+    if(art.multTrigger==='corrupt100exact'&&corruption===100)fires=1
+    if(art.multTrigger==='goatStackOther'){
+      const others=Math.max(0,activeArtifacts.length-1)
+      const baseAmount=art.mult||2.0
+      const perOtherMult=Math.pow(1.3,others)
+      const totalMult=baseAmount*perOtherMult
+      artifactMult*=totalMult
+      cMults.push({mult:baseAmount,label:art.name+' (base)',emoji:art.emoji,color:'#aa44cc'})
+      if(others>0){cMults.push({mult:perOtherMult,label:art.name+' (×1.3 per other ×'+others+')',emoji:art.emoji,color:'#aa44cc'})}
+      cascadeLogs.push('⛧ '+art.emoji+' '+art.name+' TRIGGERS! ×'+totalMult.toFixed(2));triggeredArtifactIds.push(art.id)
+      continue
+    }
+    if(art.multTrigger==='corruptedClean'&&corruption===100&&stonedCount===0)fires=1
+    if(art.multTrigger==='tongueDamage'){
+      const tongueDmg=highestStageAtk*cardsPlayedCount
+      if(tongueDmg>0){
+        _flatArtifactDmg+=tongueDmg
+        _flatArtifactLabel=art.name;_flatArtifactEmoji=art.emoji||'👅'
+        cascadeLogs.push('👅 '+art.name+' DEVOURS! +'+tongueDmg+' flat damage!');triggeredArtifactIds.push(art.id)
+      }
+      continue
+    }
+    if(art.multTrigger==='sigilOpener'){
+      const isFirstStrikeOfFight=(strikesLeft===fightMaxStrikes)
+      if(isFirstStrikeOfFight){
+        const peakMult=4.31
+        artifactMult*=peakMult
+        cMults.push({mult:peakMult,label:art.name+' (auto-peaked)',emoji:art.emoji,color:'#ffaa00'})
+        if(tripMult<=1){
+          artifactMult*=2
+          cMults.push({mult:2.0,label:art.name+' (auto-trip)',emoji:art.emoji,color:'#ff44ff'})
+        }
+        cascadeLogs.push('𓂀 '+art.name+' awakens! Peak roll on opening strike!');triggeredArtifactIds.push(art.id)
+      }
+      continue
+    }
+    if(fires>0){
+      const m=Math.pow(art.mult,fires)
+      artifactMult*=m
+      cMults.push({mult:m,label:art.name+(fires>1?' ×'+fires:''),emoji:art.emoji,color:'#e8a820'})
+      cascadeLogs.push('⛧ '+art.emoji+' '+art.name+' TRIGGERS! ×'+m.toFixed(2));triggeredArtifactIds.push(art.id)
+    }
+  }
+  // BOSS LOOT MULTIPLIER TRIGGERS
+  for(const lootId of collectedLoot){
+    const loot=BOSS_LOOT.find(l=>l&&l.id===lootId)
+    if(!loot||!loot.multTrigger||!loot.mult)continue
+    let fires=0
+    if(loot.multTrigger==='perStrikesLeft')fires=Math.max(0,strikesLeft-1)
+    if(loot.multTrigger==='firstCardFree'&&cardsPlayedCount>=1)fires=1
+    if(loot.multTrigger==='alive4'&&actives.length>=4)fires=1
+    if(loot.multTrigger==='perStash20')fires=Math.floor(stash/20)
+    if(loot.multTrigger==='memberAtk20'&&actives.some(m=>m.atk>=20))fires=1
+    if(loot.multTrigger==='perCorrThreshold')fires=[25,50,75,100].filter(t=>corruption>=t).length
+    if(loot.multTrigger==='cards1'&&cardsPlayedCount===1)fires=1
+    if(loot.multTrigger==='perUniqueKeyword')fires=new Set(actives.map(m=>m.keyword)).size
+    if(fires>0){const m=Math.pow(loot.mult,fires);artifactMult*=m;cMults.push({mult:m,label:loot.name+(fires>1?' ×'+fires:''),emoji:loot.emoji,color:'#44ddff'});cascadeLogs.push('💎 '+loot.emoji+' '+loot.name+' ×'+m.toFixed(2)+'!')}
+  }
+  const finalDmg=Math.round(dmg*tripMult*currentMult*corruptionMult*artifactMult)+_flatArtifactDmg
+  const _totalMult=cMults.reduce((p,e)=>p*e.mult,1.0)
+  let _runningDmg=dmg
+  for(const ev of cMults){
+    _runningDmg=Math.round(_runningDmg*ev.mult)
+    bLines.push({type:'multiply',label:ev.emoji+' '+ev.label+' ×'+ev.mult.toFixed(2),label2:'= '+_runningDmg.toLocaleString(),runningAfter:_runningDmg,color:ev.color,mult:ev.mult})
+  }
+  if(_flatArtifactDmg>0){
+    _runningDmg=_runningDmg+_flatArtifactDmg
+    bLines.push({type:'add',label:_flatArtifactLabel||'Flat relic damage',emoji:_flatArtifactEmoji||'👅',value:_flatArtifactDmg,runningAfter:_runningDmg,color:'#ff0000'})
+  }
+  let _shredderEchoDmg=0
+  if(shredderEchoesPending>0){
+    _shredderEchoDmg=Math.round(finalDmg*0.33*shredderEchoesPending)
+    bLines.push({type:'multiply',label:'⚡ Shredder Echo ×'+shredderEchoesPending+' (33%)',label2:'+ '+_shredderEchoDmg.toLocaleString(),runningAfter:finalDmg+_shredderEchoDmg,color:'#ff8800'})
+    cascadeLogs.push('⚡ Shredder Echo: '+shredderEchoesPending+' chain(s) replay for '+_shredderEchoDmg+' bonus damage!')
+  }
+  let _totalStrikeDmg=finalDmg+_shredderEchoDmg
+  // BOSS BLIND: armor — cap any single strike above 40% of boss max HP.
+  if(activeBlind&&activeBlind.id==='armor'){
+    const _armorCap=Math.ceil((scaledMaxHp||0)*0.40)
+    if(_totalStrikeDmg>_armorCap){cascadeLogs.push('🧱 Feedback Wall! Strike capped at '+_armorCap.toLocaleString()+' (40% of boss HP).');_totalStrikeDmg=_armorCap}
+  }
+  return {
+    total:_totalStrikeDmg,totalMult:_totalMult,baseDmg,memberDmgs,
+    breakdownLines:bLines,cascadeMults:cMults,dblMult,hasDbl,
+    syncLogs,mentorFloats,cascadeLogs,triggeredArtifactIds,
+    shredderEchoConsumed:shredderEchoesPending>0,
+  }
+}
 
-// ═══ BAND AURAS (v0.8) — every member radiates a small bonus to ADJACENT stage slots.
-// Stoned members neither emit nor receive. Edge slots have 1 neighbor, center 2.
-// Mirrors vestibule-sim-kwstacks.js aura engine (sim-validated at 10K games/deck).
-function _keywordAuraVal(kw,ctx){
-  switch(kw){
-    case 'FRENZIED':case 'DEBUFF':case 'BLASTBEAT':case 'DISSONANCE':case 'DIRGE':return 1
-    case 'CORRUPT':return (ctx.corruption||0)>=50?1:0
-    case 'HEXED':return (ctx.corruption||0)>=25?1:0
-    case 'SHREDDER':return (ctx.shredderHits||0)>0?1:0
-    default:return 0
-  }}
-function _auraAtkMap(stage,ctx){const map={}
-  for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue;let a=0
-    for(const j of[i-1,i+1]){const n=stage[j];if(!n||n.tooStoned)continue
-      if(n.keyword==='TRICKSTER'){
-        // TRICKSTER copies both neighbors' auras: relay this TRICKSTER's OTHER neighbor's
-        // ATK-aura to m, plus a base +1 of its own. (v1: copies ATK auras only.)
-        const other=stage[2*j-i];if(other&&!other.tooStoned)a+=_keywordAuraVal(other.keyword,ctx)
-        a+=1
-      }else{
-        a+=_keywordAuraVal(n.keyword,ctx)
-      }}
-    if(a>0)map[m.uid]=a}
-  return map}
-function _anchorAuraRed(stage,uid){
-  const i=stage.findIndex(m=>m&&m.uid===uid);if(i<0)return 0;let r=0
-  for(const j of[i-1,i+1]){const n=stage[j];if(n&&!n.tooStoned&&n.keyword==='ANCHOR')r+=1}
-  return r}
-function _folkAuraHealMap(stage){let any=false;const map={}
-  for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue;let h=0
-    for(const j of[i-1,i+1]){const n=stage[j];if(n&&!n.tooStoned&&n.keyword==='FOLK MAGIC')h+=2}
-    if(h>0){map[i]=h;any=true}}
-  return any?map:null}
+
+// ═══ BAND AURAS REMOVED (v0.8.1 declutter) ═══════════════════════════════════
+// The "every member buffs their neighbors" adjacency-aura system was cut — it was
+// clutter that made board reads noisy. Each keyword keeps only its PRIMARY effect.
+// Mentor Link is a SEPARATE adjacency mechanic and STAYS (see computeStrikeDamage).
+// These stubs are kept (returning empty/zero) so the few remaining call sites stay
+// harmless no-ops without a wider edit; they can be deleted in a later cleanup.
+function _auraAtkMap(){return {}}
+function _anchorAuraRed(){return 0}
+function _folkAuraHealMap(){return null}
 const KEYWORD_DESC={
-  'FRENZIED':'+ATK per RIFF played each Strike. Stack more for bigger bonus (1/2/4×). ⟡AURA: neighbors +1 ATK.',
-  'BLASTBEAT':'Every drummer makes the whole band hit ×1.35 harder — flat, reliable, and it STACKS (2 drummers = ×1.82). Drummers don\'t swing, so it\'s a real trade: fewer attackers for a band-wide multiplier. ⟡AURA: neighbors +1 ATK.',
-  'ANCHOR':'Saves an ANCHOR member from a lethal hit. 1 stack = save 1 ANCHOR/fight. 2 stacks = save 2 ANCHORs/fight. 3+ stacks = ANY member can be saved (4 saves/fight). Stack 3+ ANCHORs to protect the whole band. ⟡AURA: neighbors take −1 boss damage.',
-  'CORRUPT':'+ATK from Corruption (×1/×2/×4 by stack tier). Thrives in chaos. ⟡AURA: neighbors +1 ATK at ≥50% Corruption.',
-  'DEBUFF':'Reduces boss damage by 2 each Strike, stacking permanently this fight. ⟡AURA: neighbors +1 ATK.',
-  'FOLK MAGIC':'25% chance each Strike to refill all Embers. ⟡AURA: neighbors heal 2 each Strike.',
-  'SHREDDER':'+ATK per consecutive same-type card chain played each Strike (1/2/4×). ⟡AURA: neighbors +1 ATK when a chain fires.',
-  'DISSONANCE':'+1 ATK for every DIFFERENT keyword elsewhere in your band — the more varied your lineup, the harder these synths scream. Build wide. ⟡AURA: neighbors +1 ATK.',
-  'DIRGE':'+1 ATK for every 4 cards in your DISCARD pile — the deeper into the set, the heavier he plays. Keep him alive to ramp. ⟡AURA: neighbors +1 ATK.',
-  'HEXED':'Gains +5% Corruption each Strike, +1 ATK per 8% Corruption. ⟡AURA: neighbors +1 ATK at ≥25% Corruption.',
-  'TRICKSTER':'Mythical shapeshifter. Copies the aura of BOTH neighbors and passes each to the other, plus +1 ATK of its own. Place him between your two strongest. ⟡AURA: relays both neighbors.',
+  'FRENZIED':'+ATK per RIFF played each Strike. Stack more for bigger bonus (1/2/4×).',
+  'BLASTBEAT':'Every drummer makes the whole band hit ×1.35 harder — flat, reliable, and it STACKS (2 drummers = ×1.82). Drummers don\'t swing, so it\'s a real trade: fewer attackers for a band-wide multiplier.',
+  'ANCHOR':'Saves an ANCHOR member from a lethal hit. 1 stack = save 1 ANCHOR/fight. 2 stacks = save 2 ANCHORs/fight. 3+ stacks = ANY member can be saved (4 saves/fight). Stack 3+ ANCHORs to protect the whole band.',
+  'CORRUPT':'+ATK from Corruption (×1/×2/×4 by stack tier). Thrives in chaos.',
+  'DEBUFF':'Reduces boss damage by 2 each Strike, stacking permanently this fight.',
+  'FOLK MAGIC':'25% chance each Strike to refill all Embers.',
+  'SHREDDER':'+ATK per consecutive same-type card chain played each Strike (1/2/4×).',
+  'DISSONANCE':'+1 ATK for every DIFFERENT keyword elsewhere in your band — the more varied your lineup, the harder these synths scream. Build wide.',
+  'DIRGE':'+1 ATK for every 4 cards in your DISCARD pile — the deeper into the set, the heavier he plays. Keep him alive to ramp.',
+  'HEXED':'Gains +5% Corruption each Strike, +1 ATK per 8% Corruption.',
+  'TRICKSTER':'Mythical shapeshifter. Place him between your two strongest for a +1 ATK of his own.',
   'FALLEN':'Cannot be healed. Loses 1 HP per Strike. If Lucifer dies, game over. Max 3 band members.',
 }
 
@@ -884,8 +1129,8 @@ const STARTER_DECKS=[
   {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced, corruption-free — the honest fight for any playstyle.',requirement:null,color:'#c8a060',hpScale:1.00,luciferScale:0.26,scoreMult:1.0},
   {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. All-RIFF, corruption-free. +1 hand size. SIGNATURE: Riff Chain Echo — every chain fires a second time at 33% damage on the next strike.',requirement:'beat_standard',color:'#ff4400',hpScale:1.00,luciferScale:0.21,memberHpPct:1.0,handSize:6,signature:'riff_chain_echo',scoreMult:1.4},
   {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power — the ONLY deck that gambles with it. 30+ CORRUPT cards, corruption synths. Start each fight at 15% corruption. 4 starting embers. SIGNATURE: Corruption Feeds — every 10% corruption gained refunds 1 ember (max 5/strike).',requirement:'beat_shredder',color:'#cc44ff',hpScale:1.50,luciferScale:0.58,startEmbers:4,startCorruption:15,signature:'corruption_feeds',scoreMult:1.6},
-  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Combo nerd. Utility-dense, corruption-free. SIGNATURE: Copier — every UTILITY card has a 25% chance to add a copy of itself to your hand. Copies can\'t re-copy. Stack the engine.',requirement:'beat_ritualist',color:'#44aaff',hpScale:0.90,luciferScale:0.20,signature:'copier',scoreMult:1.2},
-  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything, corruption-free. SIGNATURE: Second Wind — each member gets ONE per-fight save: when they would go Too Stoned, they instead revive at 15% HP. Stacks across the band.',requirement:'beat_engineer',color:'#44cc44',hpScale:1.00,luciferScale:0.35,memberHpMod:0,maxStrikesMod:0,signature:'second_wind',scoreMult:1.3},
+  {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Combo nerd. Utility-dense, corruption-free. SIGNATURE: Copier — every UTILITY card has a 25% chance to add a copy of itself to your hand. Copies can\'t re-copy. Stack the engine.',requirement:'beat_ritualist',color:'#44aaff',hpScale:0.83,luciferScale:0.20,signature:'copier',scoreMult:1.2},
+  {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything, corruption-free. SIGNATURE: Second Wind — each member gets ONE per-fight save: when they would go Too Stoned, they instead revive at 15% HP. Stacks across the band.',requirement:'beat_engineer',color:'#44cc44',hpScale:0.90,luciferScale:0.35,memberHpMod:0,maxStrikesMod:0,signature:'second_wind',scoreMult:1.3},
 ]
 function getUnlockedDecks(){
   const achs=getAchievements()
@@ -1391,10 +1636,10 @@ function BoosterScreen({onComplete,seed}){
             ['ANCHOR','#33dd33','⚓','Saves a member from a lethal hit. 1 stack = save 1 lethal/fight on an ANCHOR. 2 stacks = 2 saves. 3+ stacks = ANY member can be saved (4 saves/fight).'],
             ['DISSONANCE','#22ccee','🎹','+1 ATK for every DIFFERENT keyword elsewhere in your band. The more varied your lineup, the harder these synths scream — build wide.'],
             ['DEBUFF','#4488ff','🎤','Each Strike permanently reduces boss damage by 2 this fight. Stacks up.'],
-            ['FOLK MAGIC','#44ddaa','🪈','Each Strike has a 25% chance to refund ALL the Embers you spent. AURA: neighbours heal 2 each Strike.'],
+            ['FOLK MAGIC','#44ddaa','🪈','Each Strike has a 25% chance to refund ALL the Embers you spent.'],
             ['SHREDDER','#ff4488','🎸','+ATK per consecutive same-type card pair played each Strike. Chain RIFF→RIFF→RIFF for max stacks (1/2/4× per chain hit).'],
             ['DIRGE','#aa88cc','🪈','+1 ATK for every 4 cards in your DISCARD pile. The longer the set runs, the heavier he plays — keep him alive to ramp.'],
-            ['TRICKSTER','#e8b84a','🦝','Mythical shapeshifter. Copies the aura of BOTH neighbours and passes each to the other, plus +1 ATK of its own. Place between your two strongest.'],
+            ['TRICKSTER','#e8b84a','🦝','Mythical shapeshifter. Gains +1 ATK of its own — place him between your two strongest.'],
           ].map(([kw,color,icon,desc])=>(
             <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:10,background:'rgba(0,0,0,0.4)',borderRadius:6,padding:'8px 12px',border:`1px solid ${color}44`}}>
               <div style={{fontSize:20,flexShrink:0,marginTop:1}}>{icon}</div>
@@ -2414,7 +2659,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
 
           {/* GEAR PANELS — Artifact above, Effect Pedal below. Both fixed-height, sit at bottom of column. */}
           {stage&&stage.filter(Boolean).length>1&&onSwapMembers&&<div style={{flexShrink:0,border:'1px solid rgba(68,221,170,0.3)',borderRadius:8,padding:'6px 8px',background:'rgba(4,10,6,0.4)',marginBottom:6}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#44ddaa',letterSpacing:2,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>⟡ Stage Order — auras reach adjacent slots</div>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#44ddaa',letterSpacing:2,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>⛓ Stage Order — Mentor Links form left → right</div>
             <div style={{display:'flex',gap:4,justifyContent:'center',flexWrap:'wrap'}}>
               {stage.map((m,i)=>m&&<div key={m.uid} style={{display:'flex',alignItems:'center',gap:3,border:'1px solid rgba(68,221,170,0.25)',borderRadius:4,padding:'2px 5px',background:'rgba(10,20,14,0.5)'}}>
                 <span onClick={()=>{if(i>0&&stage[i-1])onSwapMembers(i,i-1)}} style={{cursor:i>0&&stage[i-1]?'pointer':'default',opacity:i>0&&stage[i-1]?1:0.25,fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#44ddaa',padding:'0 2px'}}>⟨</span>
@@ -8702,7 +8947,7 @@ function App(){
     for(let _si=1;_si<_realIdsThisStrike.length;_si++){
       if(CARD_TYPE_BY_ID[_realIdsThisStrike[_si]]===CARD_TYPE_BY_ID[_realIdsThisStrike[_si-1]])_shredderHits++
     }
-    const _atkCtx={corruption,tier:_kwStacks.tier,riffsThisStrike:_riffsThisStrike,shredderHits:_shredderHits,distinctKeywords:Object.keys(_kwStacks.counts).filter(k=>k!=='DISSONANCE').length,discardCount:discRef.current.length,auraAtk:_auraAtkMap(stage,{corruption,shredderHits:_shredderHits})}
+    const _atkCtx={corruption,tier:_kwStacks.tier,riffsThisStrike:_riffsThisStrike,shredderHits:_shredderHits,distinctKeywords:Object.keys(_kwStacks.counts).filter(k=>k!=='DISSONANCE').length,discardCount:discRef.current.length}
     // BOSS BLIND: silence — pick the single highest-ATK alive attacker and mark it in
     // _atkCtx so getEffectiveAtk zeroes it everywhere. Picked BEFORE silencedUid is set
     // (so this loop reads true ATK) and among non-drummers (drummers deal no direct
@@ -8770,71 +9015,34 @@ function App(){
     // so with the War Drums pact or a deck maxStrikesMod it never fired on strike 1 and
     // fired on strike 2 instead. The damage preview already uses fightMaxStrikes.
     // (strikesLeft here is the PRE-decrement value: strike 1 == fightMaxStrikes.)
-    const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===fightMaxStrikes?10:0
-    const _breakdownLines=[]
-    let dmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
-      const effectiveAtk=getEffectiveAtk(m,_atkCtx)
-      const cleanLivingBonus=0 /* clean_living now applies at fight start */
-      return s+effectiveAtk+cleanLivingBonus
-    },0)+p10Bonus
-    let _bkRunning=dmg
-    // BLASTBEAT: each drummer makes the whole band hit ×1.35 harder — flat, no dice, STACKS.
-    let dblMult=1
-    if(hasDbl){
-      const _bbCount=actives.filter(m=>m.role==='Drummer').length
-      dblMult=Math.round(Math.pow(1.35,_bbCount)*100)/100 // Aug 6 2026: 1.5→1.35. At 1.5 a drummer was a raw auto-include (4 attackers×1.5=6× a 5-attacker band + a free tank); 1.35 makes it a real ~33% choice. MIRROR in sim BB_MULT.
-      dmg=Math.round(dmg*dblMult);_bkRunning=dmg
-      _breakdownLines.push({type:'multiply',label:'BLASTBEAT ×'+dblMult,label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff8800'})
-    }
-    // Aug 4 2026 (phase 3): the Encore bonus did NOT exclude the paranoia victim, unlike
-    // the base sum, the DOUBLE TIME tier-3 bonus and memberDmgs. Against The Traitor a
-    // member who "refuses to attack" still contributed full ATK here, so the per-member
-    // breakdown lines summed to LESS than the BASE ATK subtotal printed under them.
-    const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>{
-      const ea=getEffectiveAtk(m,_atkCtx)
-      return s+ea
-    },0)
-    dmg+=encDmg
-    if(encDmg>0){_bkRunning=dmg;_breakdownLines.push({type:'add',label:'Encore',emoji:'🔁',value:encDmg,runningAfter:dmg,color:'#44cc44'})}
-    // ── DOUBLE TIME tier-3 (4d) — at 3+ stacks of Drummers, ALL members attack twice ──
-    // NOTE (May 2): currently unreachable in normal play. The recruit screen at line 4433
-    // blocks adding a 2nd DOUBLE TIME drummer (canAdd = ... && !(isDblTime&&hasDblTime)).
-    // 2 basic drummers via Opening Night = 2 stacks (tier 2), not tier 3+. Code kept
-    // intact in case JV ever lifts the recruit restriction. Tooltip text and rules-help
-    // updated to NOT promise this tier so players aren't misled.
-    const _dtTier=_kwStacks.tier('DOUBLE TIME')
-    if(_dtTier>=4){
-      const _dtBonusDmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>s+getEffectiveAtk(m,_atkCtx),0)
-      if(_dtBonusDmg>0){
-        dmg+=_dtBonusDmg;_bkRunning=dmg
-        _breakdownLines.push({type:'add',label:'DOUBLE TIME ×3!',emoji:'🥁',value:_dtBonusDmg,runningAfter:dmg,color:'#ff8800'})
-        addLog('🥁 DOUBLE TIME ×3! All members attack twice!')
-      }
-    }
-    dmg=Math.round(dmg*bandBonus)
-    if(bandBonus>1){_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Band Synergy ×'+bandBonus.toFixed(2),label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ffd700'})}
-    // ── MENTOR LINK strike multiplier ──────────────────────────────
-    let _mlb=0
-    for(let _i=0;_i<stage.length-1;_i++){
-      const _mn=stage[_i],_bs=stage[_i+1]
-      if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue
-      if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){
-        const _ma=getEffectiveAtk(_mn,_atkCtx)
-        const _ba=getEffectiveAtk(_bs,_atkCtx)
-        const _effectiveMult=_bs.mentorMult+(activeStake.mentorBonus||0)
-        const _b=Math.round((_ma+_ba)*(_effectiveMult-1))
-        _mlb+=_b
-        addLog('⛓ Mentor Link! '+_mn.name+'+'+_bs.name+' ×'+_effectiveMult.toFixed(2)+' (+'+_b+'!)');tryAchieve('mentor_link')
-        addFloat('⛓ ×'+_effectiveMult.toFixed(2),getCenter(stageRefs.current[_i]).x,getCenter(stageRefs.current[_i]).y-80,'#ffd700',true)
-      }
-    }
-    if(_mlb>0){dmg+=_mlb;_bkRunning=dmg;_breakdownLines.push({type:'add',label:'Mentor Link',emoji:'⛓',value:_mlb,runningAfter:dmg,color:'#ffd700'})}
-    // CA4: Wailing Guitar — first Strike deals double damage.
-    // Aug 4 2026 (phase 3): the old comment was wrong. setStrikesLeft(p=>p-1) is a
-    // FUNCTIONAL update — it does not touch the `strikesLeft` const in this closure, so
-    // strikesLeft here is still the PRE-decrement value and strike 1 == fightMaxStrikes.
-    // The `-1` made this fire on strike TWO. The preview mirror (fightMaxStrikes) had it right.
-    if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===fightMaxStrikes){dmg*=2;_bkRunning=dmg;_breakdownLines.push({type:'multiply',label:'Wailing Guitar ×2',label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff4488'});addLog('🎸 Wailing Guitar! First Strike deals DOUBLE damage!')}
+    // ── SINGLE SOURCE OF TRUTH: computeStrikeDamage (pure, shared with the preview) ──
+    // All the strike MATH lives in the module-level computeStrikeDamage() now, so this
+    // real strike and the "DEALS X DMG" preview can never drift again. SIDE EFFECTS stay
+    // HERE: the sync-time logs + mentor floats fire just below, the HEXED setCorruption
+    // fires right after, and the cascade-time logs/glow fire in the cascade block. NOTE:
+    // corruption is passed PRE-raise (setCorruption is async), so corrDamageMult uses this
+    // strike's value. paranoiaVictim is the real victim (the preview passes null).
+    const _strikeResult=computeStrikeDamage({
+      stage,actives,atkCtx:_atkCtx,paranoiaVictim,kwStacks:_kwStacks,
+      activePassives,activeArtifacts,activeStake,
+      strikesLeft,fightMaxStrikes,fightTripBuff,corruption,currentMult,
+      cardIdsThisStrike:_cardIdsThisStrike,combosThisStrike:_combosThisStrike,
+      discardsThisStrike:_discardsThisStrike,
+      discardsThisFight:(discardsThisFightRef&&discardsThisFightRef.current)||0,
+      hand,embers,stash,fightIndex,collectedLoot,
+      shredderEchoesPending:shredderEchoesPendingRef.current,
+      activeBlind:activeBlindRef.current,scaledMaxHp,
+    })
+    const _breakdownLines=_strikeResult.breakdownLines
+    const dmg=_strikeResult.baseDmg
+    const dblMult=_strikeResult.dblMult
+    const memberDmgs=_strikeResult.memberDmgs
+    // Sync-time side effects: DOUBLE TIME / Mentor Link / Wailing Guitar logs + mentor floats.
+    _strikeResult.syncLogs.forEach(msg=>addLog(msg))
+    _strikeResult.mentorFloats.forEach(mf=>{
+      const _c=getCenter(stageRefs.current[mf.slotIdx])
+      addFloat('⛓ ×'+mf.mult.toFixed(2),_c.x,_c.y-80,'#ffd700',true);tryAchieve('mentor_link')
+    })
     // HEXED: auto-raise corruption +5%, member gains +1 ATK per 10% corruption
     const hexedMembers=actives.filter(m=>m.keyword==='HEXED')
     if(hexedMembers.length>0){
@@ -8867,20 +9075,9 @@ function App(){
     // while the band was only dealing ~2-4k per strike. Every fight it faked is
     // balance data we have to throw away. Read the live ref instead.
     const startHp=(enemyHpRef.current!==undefined&&enemyHpRef.current!==null)?enemyHpRef.current:enemyHp
-    // Compute per-member damage for cascade display
-    const memberDmgs=[]
-    actives.forEach(function(m){
-      if(m.role==='Drummer')return
-      if(paranoiaVictim&&m.uid===paranoiaVictim.uid)return
-      let mAtk=getEffectiveAtk(m,_atkCtx)
-      /* clean_living now applies at fight start */
-      if(m.encoreReady)mAtk*=2
-      memberDmgs.push({m,atk:mAtk})
-    })
-    // Build per-member breakdown lines (after memberDmgs is populated)
-    memberDmgs.forEach(d=>{_breakdownLines.push({type:'member',label:d.m.name,emoji:d.m.emoji,value:d.atk,color:'#c8a060'})})
-    _breakdownLines.push({type:'subtotal',label:'BASE ATK',value:dmg,color:'#e8a820'})
-    _bkRunning=dmg
+    // Per-member damage (memberDmgs) + the per-member breakdown lines + BASE ATK subtotal
+    // are all built by computeStrikeDamage now — memberDmgs came back on _strikeResult and
+    // was destructured above. The impact loop below reads it for the cascade animation.
     // ── BASE MULTIPLIER for per-member impact damage (v0.7.11) ──
     // JV feedback: "the band members attacking do such little damage to the
     // boss hp bar then all at once the combos trigger and the multiplier kills
@@ -8903,10 +9100,22 @@ function App(){
     const _baseTripMult=fightTripBuff==='SACRED CHORD'?3:(fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION')?2:1
     const _baseCorrMult=corrDamageMult(corruption)
     const _baseImpactMult=currentMult*_baseTripMult*_baseCorrMult
-    // Aug 4 2026 (phase 3): the cascade's HP drop is now a DELTA, so it has to know
-    // exactly how much the per-member impacts already took off. Same membership rule as
-    // the impact loop below (non-Drummer, non-paranoia, atk>0).
-    const _impactApplied=memberDmgs.filter(d=>d.atk>0).reduce((s,d)=>s+Math.max(1,Math.round(d.atk*_baseImpactMult)),0)
+    // ── DEALS-EXACT INVARIANT (v0.8.1) ──────────────────────────────────────
+    // The boss's TOTAL HP loss for the strike MUST equal _strikeResult.total — the exact
+    // number the "DEALS X DMG" preview shows (both call computeStrikeDamage). Damage lands
+    // in two visual phases: (1) per-member IMPACTS during the attack animation, (2) the
+    // CASCADE slam for the multiplier reveal. Historically these were computed with
+    // different rounding — impacts summed round(md.atk*baseMult) per member (pre-blastbeat/
+    // band/mentor/artifact), and the cascade delta was max(0,total-impacts). That drifted:
+    // if the impacts over-shot total the delta clamped to 0 and the boss lost MORE than
+    // DEALS; if a member floored to a min-1 hit the boss could lose the wrong number.
+    //
+    // Fix: the impacts collectively remove a fixed BUDGET = min(rawImpactSum, total), each
+    // impact capped so the running sum never exceeds it, and the cascade removes the EXACT
+    // remainder (total - budget). Sum of impact drops + cascade drop === total, always.
+    const _rawImpactSum=memberDmgs.filter(d=>d.atk>0).reduce((s,d)=>s+Math.max(1,Math.round(d.atk*_baseImpactMult)),0)
+    const _impactBudget=Math.min(_rawImpactSum,_strikeResult.total)
+    const _impactState={applied:0} // running total actually removed by impacts (for the cap + dev check)
     // Mark the strike pipeline live: the 600ms victory safety net must not fire between
     // the first impact landing and the cascade block resolving the kill.
     strikeInFlightRef.current++
@@ -8948,17 +9157,21 @@ function App(){
         playHit()
         triggerShake(8,250)
         if(md){
-          // v0.7.11: deal MULTIPLIED damage at impact instead of raw md.atk.
-          // Float text and HP deduction both use the multiplied value so the
-          // boss HP bar moves dramatically with each hit. Artifact multiplier
-          // still adds a slam bonus on top via the cascade.
-          const _imp=Math.max(1,Math.round(md.atk*_baseImpactMult))
-          addFloat(_imp.toLocaleString(),bc.x,bc.y-60,'#cc8800',_imp>=15)
-          // Deliberately does NOT trigger victory: the cascade block a beat later owns
-          // the kill (Lucifer phase handoff, overkill stat, breakdown slam). The 600ms
-          // safety net is held off by strikeInFlightRef until then — see the effect.
-          enemyHpRef.current=Math.max(0,enemyHpRef.current-_imp)
-          setEnemyHp(p=>Math.max(0,p-_imp))
+          // v0.7.11: deal MULTIPLIED damage at impact so the boss HP bar moves dramatically
+          // with each hit. v0.8.1 DEALS-EXACT: cap each impact so the impacts collectively
+          // remove at most _impactBudget (the cascade removes the exact remainder). This
+          // guarantees the boss's total HP loss equals _strikeResult.total (== DEALS preview).
+          const _rawImp=Math.max(1,Math.round(md.atk*_baseImpactMult))
+          const _imp=Math.max(0,Math.min(_rawImp,_impactBudget-_impactState.applied))
+          _impactState.applied+=_imp
+          if(_imp>0){
+            addFloat(_imp.toLocaleString(),bc.x,bc.y-60,'#cc8800',_imp>=15)
+            // Deliberately does NOT trigger victory: the cascade block a beat later owns
+            // the kill (Lucifer phase handoff, overkill stat, breakdown slam). The 600ms
+            // safety net is held off by strikeInFlightRef until then — see the effect.
+            enemyHpRef.current=Math.max(0,enemyHpRef.current-_imp)
+            setEnemyHp(p=>Math.max(0,p-_imp))
+          }
         }
       },curDelay+(speedFast?550:1200)))
       // Phase 5: RETURN (1500ms) — card floats back
@@ -8977,232 +9190,18 @@ function App(){
       if(_stale('strike cascade / damage resolution')){_endPipeline();return}
       setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
       setProjectiles([])
-      const tripMult=fightTripBuff==='SACRED CHORD'?3:(fightTripBuff==='DIMENSIONAL RIFT'||fightTripBuff==='FRACTAL VISION')?2:1
-      const corruptionMult=corrDamageMult(corruption) // gamble ramp (halved vs old); downside is +boss damage taken, see CORR_DMG_TAKEN
-      // ── BIG-NUMBERS ENGINE: collect every multiplier as a discrete cascade event ──
-      // Each entry = {mult, label, color}. During the cascade, the visible strikeMult
-      // counter climbs through each entry one by one, building suspense as it grows
-      // from ~1.85 (card-play) into the hundreds or thousands with stacked artifacts.
-      // Final damage is identical to before — this is purely visualization.
-      const _cascadeMults=[]
-      // 1. Strike (cards + chains) — the visible mult already shows this, but we
-      //    re-emit it in the cascade so the animation has a starting beat.
-      if(currentMult>1.0)_cascadeMults.push({mult:currentMult,label:'Strike (cards + chains)',emoji:'⛧',color:'#ff4400'})
-      // 2. Trip buff
-      if(tripMult>1)_cascadeMults.push({mult:tripMult,label:fightTripBuff||'Trip',emoji:'🍄',color:'#ff44ff'})
-      // 3. Corruption tier
-      if(corruptionMult>1)_cascadeMults.push({mult:corruptionMult,label:'Corruption '+Math.floor(corruption)+'%',emoji:'🌀',color:'#cc44ff'})
-      // ARTIFACT MULTIPLIER TRIGGERS — Balatro-style Jokers
-      let artifactMult=1.0
-      // Aug 4 2026 (phase 3): flat (additive) relic damage. Tongue of the Devourer used
-      // to fake this as a multiplier — 1+(tongueDmg/dmg) against the PRE-multiplier base,
-      // pushed into the cascade display and into _totalMult but NEVER into artifactMult.
-      // It was shown and never dealt: the breakdown's running total ended higher than the
-      // boss's actual HP loss. Real additive term now, applied after the multipliers.
-      let _flatArtifactDmg=0
-      let _flatArtifactLabel='',_flatArtifactEmoji=''
-      // ── Aug 1 2026 CRITICAL: EVERY CARD/CHAIN-COUNT RELIC WAS DEAD ────────
-      // These used to read cardsPlayedRef / combosFiredRef, but both are emptied
-      // synchronously earlier in handleStrikeBody while this block runs inside a
-      // setTimeout — so both were ALWAYS 0 and every count-based multiplier
-      // silently never fired: Vintage Guitar (cards3), Burning Stage x3.0
-      // (cards5), Solo Sermon x6.0 (cards2exact), Doom Crown x8.0 (allSameType),
-      // Black Mass Bell x2.5 (chains3), Haunted Radio (perChain), Pentagram
-      // Shrine (perCorruptCard), Cracked Pickup (playedRiff), Tape Hiss (noRiff),
-      // Set List Art (firstCardEmber), Resonance Coil (perDupePlayed).
-      // Relics were a dead system in the live game. Use the pre-reset snapshots.
-      const cardsPlayedCount=_cardIdsThisStrike.length||0
-      const chainsFired=_combosThisStrike.length
-      const stonedCount=stage.filter(m=>m&&m.tooStoned).length
-      const handDupes=hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
-      // ── EXTENDED CONTEXT for new multTrigger types ──
-      // _cardsThisStrike list filtered to count types/CORRUPTs/RIFFs played this strike.
-      // Echoplex retriggers prefix with '_echo:' on the card ID — excluded from purity checks.
-      const cardIdsThisStrike=_cardIdsThisStrike||[]
-      const cardsThisStrike=cardIdsThisStrike.map(id=>{
-        const isEcho=typeof id==='string'&&id.startsWith('_echo:')
-        const realId=isEcho?id.slice(6):id
-        const card=ALL_CARDS.find(c=>c.id===realId)
-        return card?{...card,_isEchoplexRetrigger:isEcho}:null
-      }).filter(Boolean)
-      const cardsRealPlays=cardsThisStrike.filter(c=>!c._isEchoplexRetrigger)
-      const corruptCardsCount=cardsThisStrike.filter(c=>c.type==='CORRUPT').length
-      const riffCardsCount=cardsThisStrike.filter(c=>c.type==='RIFF').length
-      const playedAnyRiff=riffCardsCount>0
-      // Same-type purity check: every REAL play (excl Echoplex retriggers) is the same type.
-      const realCardsForPurity=cardsRealPlays
-      const allSameType=realCardsForPurity.length>=3&&realCardsForPurity.every(c=>c.type===realCardsForPurity[0].type)
-      // Same-role count: max number of band members sharing the same role.
-      const roleCounts={}
-      stage.forEach(m=>{if(m&&m.role){roleCounts[m.role]=(roleCounts[m.role]||0)+1}})
-      const maxSameRole=Math.max(0,...Object.values(roleCounts))
-      // Alive non-stoned members
-      const aliveNonStoned=stage.filter(m=>m&&!m.tooStoned&&m.hp>0).length
-      // Discard tracking — discardsThisFightRef counts discards this fight.
-      const discardsThisFight=(discardsThisFightRef&&discardsThisFightRef.current)||0
-      const discardsThisStrike=_discardsThisStrike // snapshot taken before the per-strike reset
-      // Lucifer on stage check
-      const luciferOnStage=stage.some(m=>m&&(m.id==='lucifer'||m.name==='Lucifer'))
-      // Drummer DOUBLE TIME rolled this fight (uses existing dblRoll state)
-      const drummerDT=stage.some(m=>m&&!m.tooStoned&&m.role==='Drummer')
-      // First card played type (for setlist artifact)
-      const firstCardType=cardsThisStrike.length>0?cardsThisStrike[0].type:null
-      // All members healthy (≥50% HP) for Gaffer Tape
-      const allMembersHealthy=stage.filter(m=>m).every(m=>m.hp>=Math.ceil(m.maxHp/2))
-      // Last member standing
-      const aliveCount=stage.filter(m=>m&&m.hp>0).length
-      // Early circle check (1-3 = early, indices 0-2)
-      const earlyCircleCheck=Math.floor((fightIndex||0)/3)<3
-      // Highest member ATK on stage (for Tongue of the Devourer mythic)
-      const highestStageAtk=Math.max(0,...stage.filter(m=>m).map(m=>getEffectiveAtk(m,_atkCtx)))
-
-      for(const art of activeArtifacts){
-        if(!art.multTrigger)continue
-        let fires=0
-        // EXISTING TRIGGERS (kept)
-        if(art.multTrigger==='cards3'&&cardsPlayedCount>=4)fires=1
-        if(art.multTrigger==='cards5'&&cardsPlayedCount>=6)fires=1
-        if(art.multTrigger==='corrupt50'&&corruption>=60)fires=1
-        if(art.multTrigger==='corrupt80'&&corruption>=80)fires=1
-        if(art.multTrigger==='perChain')fires=chainsFired
-        if(art.multTrigger==='perStoned')fires=stonedCount
-        if(art.multTrigger==='perDupe')fires=handDupes
-        // ── NEW COMMON TRIGGERS ──
-        if(art.multTrigger==='alwaysOn')fires=1
-        if(art.multTrigger==='playedRiff'&&playedAnyRiff)fires=1
-        if(art.multTrigger==='anyStoned'&&stonedCount>0)fires=1
-        if(art.multTrigger==='perAliveMember')fires=aliveNonStoned
-        if(art.multTrigger==='noRiff'&&!playedAnyRiff&&cardsPlayedCount>0)fires=1
-        if(art.multTrigger==='firstCardEmber'&&firstCardType==='EMBER')fires=1
-        if(art.multTrigger==='allHealthy'&&allMembersHealthy)fires=1
-        if(art.multTrigger==='embers5'&&embers>=5)fires=1
-        if(art.multTrigger==='discardedFight'&&discardsThisFight>=1)fires=1
-        if(art.multTrigger==='discardedStrike'&&discardsThisStrike>=1)fires=1
-        if(art.multTrigger==='perDupePlayed'){const _s={};let _d=0;(cardsRealPlays||[]).forEach(c=>{_s[c.id]=(_s[c.id]||0)+1;if(_s[c.id]>1)_d++});fires=_d}
-        if(art.multTrigger==='earlyCircle'&&earlyCircleCheck)fires=1
-        // ── NEW UNCOMMON TRIGGERS ──
-        if(art.multTrigger==='perCorruptCard')fires=corruptCardsCount
-        if(art.multTrigger==='perSameRole')fires=Math.max(0,maxSameRole)
-        if(art.multTrigger==='cards2exact'&&cardsRealPlays.length===2)fires=1
-        if(art.multTrigger==='chains3'&&chainsFired>=3)fires=1
-        if(art.multTrigger==='perDiscardStrike')fires=discardsThisStrike
-        if(art.multTrigger==='doubleTimeRolled'&&drummerDT)fires=1
-        if(art.multTrigger==='lastMemberStanding'&&aliveCount===1)fires=1
-        // ── NEW RARE TRIGGERS ──
-        if(art.multTrigger==='allSameType'&&allSameType)fires=1
-        if(art.multTrigger==='perOtherArtifact')fires=Math.max(0,activeArtifacts.length-1)
-        if(art.multTrigger==='luciferOnStage'&&luciferOnStage)fires=1
-        if(art.multTrigger==='corrupt100exact'&&corruption===100)fires=1
-        if(art.multTrigger==='goatStackOther'){
-          // Black Goat: ×2.0 always × ×1.3 per OTHER artifact
-          // Implemented as: base ×2.0 fires once + ×1.3 per other artifact
-          const others=Math.max(0,activeArtifacts.length-1)
-          // We'll handle this as TWO mult events for clarity in cascade
-          const baseAmount=art.mult||2.0
-          const perOtherMult=Math.pow(1.3,others)
-          const totalMult=baseAmount*perOtherMult
-          artifactMult*=totalMult
-          _cascadeMults.push({mult:baseAmount,label:art.name+' (base)',emoji:art.emoji,color:'#aa44cc'})
-          if(others>0){_cascadeMults.push({mult:perOtherMult,label:art.name+' (×1.3 per other ×'+others+')',emoji:art.emoji,color:'#aa44cc'})}
-          addLog('⛧ '+art.emoji+' '+art.name+' TRIGGERS! ×'+totalMult.toFixed(2));setTriggeredArtifactId(art.id);setTimeout(()=>setTriggeredArtifactId(null),600)
-          continue
-        }
-        // ── NEW MYTHIC TRIGGERS ──
-        if(art.multTrigger==='corruptedClean'&&corruption===100&&stonedCount===0)fires=1
-        if(art.multTrigger==='tongueDamage'){
-          // Each card you play deals damage = highest member ATK. Flat addition —
-          // accumulated here and ADDED to finalDmg after the multiplier chain, with its
-          // own additive breakdown line. Never enters artifactMult or _totalMult.
-          const tongueDmg=highestStageAtk*cardsPlayedCount
-          if(tongueDmg>0){
-            _flatArtifactDmg+=tongueDmg
-            _flatArtifactLabel=art.name;_flatArtifactEmoji=art.emoji||'👅'
-            addLog('👅 '+art.name+' DEVOURS! +'+tongueDmg+' flat damage!');setTriggeredArtifactId(art.id);setTimeout(()=>setTriggeredArtifactId(null),600)
-          }
-          continue
-        }
-        if(art.multTrigger==='sigilOpener'){
-          // First Strike of every fight: card+chain mults auto-peaked + auto-trip if no other trip.
-          // Aug 4 2026 (phase 3): same off-by-one as Wailing Guitar — strikesLeft is the
-          // PRE-decrement closure value, so strike 1 == fightMaxStrikes (preview agrees).
-          const isFirstStrikeOfFight=(strikesLeft===fightMaxStrikes)
-          if(isFirstStrikeOfFight){
-            const peakMult=4.31  // 1.05^6 * 1.78^2 simulated peak
-            artifactMult*=peakMult
-            _cascadeMults.push({mult:peakMult,label:art.name+' (auto-peaked)',emoji:art.emoji,color:'#ffaa00'})
-            // Auto-trip if no other trip active
-            if(tripMult<=1){
-              artifactMult*=2
-              _cascadeMults.push({mult:2.0,label:art.name+' (auto-trip)',emoji:art.emoji,color:'#ff44ff'})
-            }
-            addLog('𓂀 '+art.name+' awakens! Peak roll on opening strike!');setTriggeredArtifactId(art.id);setTimeout(()=>setTriggeredArtifactId(null),600)
-          }
-          continue
-        }
-        // GENERAL FIRES HANDLER (after all custom multi-event triggers handled above)
-        if(fires>0){
-          const m=Math.pow(art.mult,fires)
-          artifactMult*=m
-          _cascadeMults.push({mult:m,label:art.name+(fires>1?' ×'+fires:''),emoji:art.emoji,color:'#e8a820'})
-          addLog('⛧ '+art.emoji+' '+art.name+' TRIGGERS! ×'+m.toFixed(2));setTriggeredArtifactId(art.id);setTimeout(()=>setTriggeredArtifactId(null),600)
-        }
-      }
-      // BOSS LOOT MULTIPLIER TRIGGERS
-      for(const lootId of collectedLoot){
-        const loot=BOSS_LOOT.find(l=>l&&l.id===lootId)
-        if(!loot||!loot.multTrigger||!loot.mult)continue
-        let fires=0
-        // Aug 4 2026 (phase 3): strikesLeft is the PRE-decrement closure value, so this
-        // counted the strike currently being SPENT — one extra Math.pow(mult,1) on every
-        // strike of every fight, and it still fired on the last strike (0 remaining).
-        if(loot.multTrigger==='perStrikesLeft')fires=Math.max(0,strikesLeft-1)
-        if(loot.multTrigger==='firstCardFree'&&cardsPlayedCount>=1)fires=1
-        if(loot.multTrigger==='alive4'&&actives.length>=4)fires=1
-        if(loot.multTrigger==='perStash20')fires=Math.floor(stash/20)
-        if(loot.multTrigger==='memberAtk20'&&actives.some(m=>m.atk>=20))fires=1
-        if(loot.multTrigger==='perCorrThreshold')fires=[25,50,75,100].filter(t=>corruption>=t).length
-        if(loot.multTrigger==='cards1'&&cardsPlayedCount===1)fires=1
-        if(loot.multTrigger==='perUniqueKeyword')fires=new Set(actives.map(m=>m.keyword)).size
-        if(fires>0){const m=Math.pow(loot.mult,fires);artifactMult*=m;_cascadeMults.push({mult:m,label:loot.name+(fires>1?' ×'+fires:''),emoji:loot.emoji,color:'#44ddff'});addLog('💎 '+loot.emoji+' '+loot.name+' ×'+m.toFixed(2)+'!')}
-      }
-      const finalDmg=Math.round(dmg*tripMult*currentMult*corruptionMult*artifactMult)+_flatArtifactDmg
-      // Compute the TRUE total multiplier = product of every cascade mult.
-      // This is what climbs in the visible counter during the cascade.
-      const _totalMult=_cascadeMults.reduce((p,e)=>p*e.mult,1.0)
-      // Push every cascade mult into the breakdown panel as a line. Each line
-      // carries the mult value so the cascade can climb the visible mult counter.
-      let _runningDmg=dmg
-      for(const ev of _cascadeMults){
-        _runningDmg=Math.round(_runningDmg*ev.mult)
-        _breakdownLines.push({type:'multiply',label:ev.emoji+' '+ev.label+' ×'+ev.mult.toFixed(2),label2:'= '+_runningDmg.toLocaleString(),runningAfter:_runningDmg,color:ev.color,mult:ev.mult})
-      }
-      // Flat relic damage lands AFTER the multiplier chain, as a real additive line.
-      if(_flatArtifactDmg>0){
-        _runningDmg=_runningDmg+_flatArtifactDmg
-        _breakdownLines.push({type:'add',label:_flatArtifactLabel||'Flat relic damage',emoji:_flatArtifactEmoji||'👅',value:_flatArtifactDmg,runningAfter:_runningDmg,color:'#ff0000'})
-      }
-      // ── SHREDDER SIGNATURE: apply echo damage from chains queued PREVIOUS strike ──
-      // Echo = 50% of this strike's final damage × pending chain count.
-      // Chains queued THIS strike (combosFiredRef populated in playCard) won't echo
-      // until the strike AFTER next, because shredderEchoesPendingRef is read here
-      // BEFORE we add this strike's chains to it (additions happen at end of strike).
-      let _shredderEchoDmg=0
-      if(shredderEchoesPendingRef.current>0){
-        _shredderEchoDmg=Math.round(finalDmg*0.33*shredderEchoesPendingRef.current)
-        _breakdownLines.push({type:'multiply',label:'⚡ Shredder Echo ×'+shredderEchoesPendingRef.current+' (33%)',label2:'+ '+_shredderEchoDmg.toLocaleString(),runningAfter:finalDmg+_shredderEchoDmg,color:'#ff8800'})
-        addLog('⚡ Shredder Echo: '+shredderEchoesPendingRef.current+' chain(s) replay for '+_shredderEchoDmg+' bonus damage!')
-        shredderEchoesPendingRef.current=0
-      }
-      let _totalStrikeDmg=finalDmg+_shredderEchoDmg
-      // BOSS BLIND: armor — the boss shrugs off any single strike above 40% of its max
-      // HP, forcing multiple strikes to down it (mirrors the sim's `_blindArmor` clamp
-      // at ceil(maxHp*0.40)). scaledMaxHp is the current per-phase boss max HP.
-      if(activeBlindRef.current&&activeBlindRef.current.id==='armor'){
-        const _armorCap=Math.ceil(scaledMaxHp*0.40)
-        if(_totalStrikeDmg>_armorCap){addLog('🧱 Feedback Wall! Strike capped at '+_armorCap.toLocaleString()+' (40% of boss HP).');_totalStrikeDmg=_armorCap}
-      }
-      // v0.8 FOLK MAGIC aura — adjacent members heal 1 per folk neighbor after each strike
-      setStage(p=>{const hm=_folkAuraHealMap(p);return hm?p.map((m,i)=>m&&hm[i]&&!m.cursed?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+hm[i])}):m):p})
+      // ── Numbers + display arrays all come from computeStrikeDamage (built at strike
+      //    start as _strikeResult). This block only fires the CASCADE-time SIDE EFFECTS:
+      //    the artifact / loot / shredder-echo / armor-cap logs and the relic glow. ──
+      const _cascadeMults=_strikeResult.cascadeMults
+      const _totalMult=_strikeResult.totalMult
+      let _totalStrikeDmg=_strikeResult.total
+      _strikeResult.cascadeLogs.forEach(msg=>addLog(msg))
+      _strikeResult.triggeredArtifactIds.forEach(id=>{setTriggeredArtifactId(id);setTimeout(()=>setTriggeredArtifactId(null),600)})
+      // Consume the pending shredder echoes exactly as the old inline code did.
+      if(_strikeResult.shredderEchoConsumed)shredderEchoesPendingRef.current=0
+      // FOLK MAGIC neighbor-heal aura REMOVED (v0.8.1 declutter). The keyword keeps its
+      // primary effect only (25% chance to refill all Embers, handled via folkMagicFired).
       // Aug 4 2026 (phase 3): overkill was ALWAYS 0 — newEHp is clamped at 0 by
       // Math.max BEFORE Math.abs() reads it, so _ok was |0|. Keep the unclamped value.
       const _rawEHp=startHp-_totalStrikeDmg
@@ -9222,13 +9221,20 @@ function App(){
       // straight back to 0. It now applies a DELTA: the total strike damage minus what
       // the per-member impacts already took off. A delta is not idempotent, so the slam
       // and the safety net share an explicit once-only guard.
-      const _dropDelta=Math.max(0,_totalStrikeDmg-_impactApplied)
+      // v0.8.1 DEALS-EXACT: the cascade removes exactly total - budget. Since the impacts
+      // removed exactly _impactBudget (capped, floor 0), impacts + this delta === total.
+      const _dropDelta=Math.max(0,_totalStrikeDmg-_impactBudget)
+      // Dev-only arithmetic invariant: impacts + cascade must reconcile to the DEALS number.
+      try{if(import.meta.env&&import.meta.env.DEV&&(_impactBudget+_dropDelta)!==_totalStrikeDmg){console.warn('[DEALS-CHECK] partition mismatch: budget '+_impactBudget+' + delta '+_dropDelta+' = '+(_impactBudget+_dropDelta)+' != total '+_totalStrikeDmg)}}catch(e){}
       let _dropDone=false
       const _applyHpDrop=()=>{
         if(_dropDone)return
         if(_stale('cascade HP drop'))return
         _dropDone=true
         const _after=Math.max(0,enemyHpRef.current-_dropDelta)
+        // Dev-only ACTUAL-drop check: the boss's real HP loss this strike must equal the
+        // DEALS preview. Skip lethal (clamps at 0) — the boss is dead either way.
+        try{if(import.meta.env&&import.meta.env.DEV&&_after>0){const _actualDrop=startHp-_after;if(_actualDrop!==_totalStrikeDmg){console.warn('[DEALS-CHECK] boss lost '+_actualDrop+' but DEALS said '+_totalStrikeDmg+' (impacts '+_impactState.applied+' / budget '+_impactBudget+' + delta '+_dropDelta+')')}}}catch(e){}
         enemyHpRef.current=_after // keep the ref exact; useEffect sync lags a render
         setEnemyHp(prev=>Math.max(0,prev-_dropDelta))
         if(enemy.passiveId==='luciferBoss'){
@@ -10935,7 +10941,7 @@ function App(){
             ['🌿 Stash','Your currency. Earned after victories (scales with circle depth). Spent in the shop on recruit packs, cards, artifacts, passives, and drugs. Capped at 420.'],
             ['💨 Too Stoned','When a member reaches 0 HP, they go Too Stoned and can\'t attack or be targeted for the rest of this fight. They recover at full HP next fight. If ALL members go Too Stoned at once, the run ends.'],
             ['👥 Band Members','Your band has up to 5 slots (6 with the Sixth Slot pact). Each member has ATK, HP, and a keyword ability. Recruit new members from packs in the shop.'],
-            ['🏷 Member Keywords','FRENZIED: +ATK per RIFF played each Strike (×1/2/4 by stack tier). BLASTBEAT: each drummer makes the whole band hit ×1.35 harder — flat, no dice, and it STACKS (multiple drummers allowed). ANCHOR: Saves from lethal damage 1/2/any-member by stack tier (per fight). CORRUPT: +ATK from Corruption (×1/2/4 by stack tier). DEBUFF: Reduces boss damage. FOLK MAGIC: 25% chance to refill all Embers (aura heals neighbours 2). SHREDDER: +ATK per consecutive same-type card chain (×1/2/4 by stack tier). DISSONANCE: +1 ATK per DIFFERENT keyword elsewhere in your band — build wide. DIRGE: +1 ATK per 4 cards in your discard pile — ramps as the fight runs long. TRICKSTER: mythical — copies both neighbours\' auras. ⟡ AURAS: every member radiates a small bonus to ADJACENT slots — reorder your stage in the shop to stack them.'],
+            ['🏷 Member Keywords','FRENZIED: +ATK per RIFF played each Strike (×1/2/4 by stack tier). BLASTBEAT: each drummer makes the whole band hit ×1.35 harder — flat, no dice, and it STACKS (multiple drummers allowed). ANCHOR: Saves from lethal damage 1/2/any-member by stack tier (per fight). CORRUPT: +ATK from Corruption (×1/2/4 by stack tier). DEBUFF: Reduces boss damage. FOLK MAGIC: 25% chance to refill all Embers. SHREDDER: +ATK per consecutive same-type card chain (×1/2/4 by stack tier). DISSONANCE: +1 ATK per DIFFERENT keyword elsewhere in your band — build wide. DIRGE: +1 ATK per 4 cards in your discard pile — ramps as the fight runs long. TRICKSTER: mythical — gains +1 ATK of its own.'],
             ['⛓ Mentor Links','Place a Foil/Mythic/Demonic member directly LEFT of a basic member with the same role. They form a Mentor Link — a permanent damage multiplier that fires every Strike while both are alive.'],
             ['✨ Member Tiers','Members come in tiers: Basic (standard), Foil (+1 ATK/HP, -1 Ember on cards), Mythic (+3 ATK/HP), Demonic (+5 ATK/HP, golden glow). Higher tiers appear in better packs.'],
             ['🃏 Card Types','RIFF (purple): Direct damage and ATK buffs. CORRUPT (red): Corruption-scaling power. UTILITY (green): Healing, draw, and economy. EMBER (orange): Ember management and recovery.'],
@@ -11029,8 +11035,8 @@ function App(){
       <>
       {ColdOpenOverlay}
       <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(2,1,0,0.99)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:0,overflow:'hidden'}}>
-        {/* Background logo — large, subtle */}
-        <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',opacity:0.08}}>
+        {/* Background logo — large, FAINT (Aug 6 2026: 0.08 → 0.05 per JV, should be barely-there) */}
+        <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',opacity:0.05}}>
           <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:972,height:972,objectFit:'contain'}}/>
         </div>
         {/* Scanlines */}
@@ -11184,22 +11190,33 @@ function App(){
                   </div>
                 </div>})}
             </div>
-            {/* HEAT — earned permanent difficulty/score modifier. +1 per Lucifer kill, +15% boss HP per level. */}
-            {(()=>{const heat=parseInt(localStorage.getItem('vst_heat')||'1');const hpBonus=Math.round((heat-1)*15);const maxHeat=10;return(
-              <div title={"Beat Lucifer to raise Heat. Each level: +15% boss HP. Higher Heat = harder fights, bigger bragging rights."} style={{marginTop:8,display:'flex',flexDirection:'column',alignItems:'center',gap:4,padding:'8px 16px',background:'rgba(40,15,5,0.6)',border:'1px solid rgba(255,100,30,0.3)',borderRadius:6,cursor:'help'}}>
-                <div style={{display:'flex',alignItems:'center',gap:6}}>
-                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'rgba(255,140,40,0.9)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>🔥 Heat</span>
-                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:heat>=10?'var(--text-blood)':heat>=5?'rgba(255,140,40,1)':'var(--text-gold)',letterSpacing:1,fontWeight:900,textShadow:heat>=5?'0 0 8px rgba(255,140,40,0.6)':'none'}}>{heat} / {maxHeat}</span>
-                  {hpBonus>0&&<span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-blood)',letterSpacing:1,fontWeight:700}}>· +{hpBonus}% Boss HP</span>}
+            {/* DAILY DESCENT — fixed daily-seed challenge. Replaced the Heat meter (Aug 6 2026):
+                Heat duplicated Difficulty Stake and read as clutter. The Heat mechanic itself
+                is left dormant in code (vst_heat still read by getScaledMaxHp) for a possible
+                post-early-access NG+ mode; only its menu UI is swapped for this. Same seed for
+                everyone each day → a shared score to compete on. Reuses the proven daily launch
+                path (setRunSeed(getDailySeed)+setIsDailyRun+handleReset). */}
+            {(()=>{
+              const seedHex=getDailySeed().toString(16).toUpperCase()
+              const today=new Date().toISOString().slice(0,10)
+              const db=JSON.parse(localStorage.getItem('vst_daily_best')||'{}')
+              const todayBest=(db&&db.date===today)?(db.score||0):0
+              const streak=parseInt(localStorage.getItem('vst_streak')||'0')
+              return(
+              <div style={{marginTop:8,display:'flex',flexDirection:'column',alignItems:'center',gap:6,padding:'10px 24px',background:'rgba(20,14,4,0.6)',border:'1px solid rgba(200,140,40,0.35)',borderRadius:6}}>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-gold)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>🌍 Daily Descent</span>
+                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:1}}>Seed {seedHex}</span>
                 </div>
-                {/* Pip row — filled = earned, dim = locked */}
-                <div style={{display:'flex',gap:3}}>
-                  {Array.from({length:maxHeat}).map((_,i)=>(
-                    <div key={i} style={{width:14,height:14,borderRadius:2,background:i<heat?(i>=4?'rgba(255,80,30,0.95)':'rgba(255,160,40,0.85)'):'rgba(40,25,15,0.6)',border:'1px solid '+(i<heat?'rgba(255,140,40,0.7)':'rgba(80,55,25,0.4)'),boxShadow:i<heat?'0 0 6px rgba(255,120,40,0.4)':'none'}}/>
-                  ))}
+                <div style={{display:'flex',gap:18,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)'}}>
+                  <span>Today's Best: <b style={{color:'var(--text-gold)'}}>{todayBest>0?todayBest.toLocaleString():'—'}</b></span>
+                  {streak>0&&<span style={{color:'var(--text-gold)'}}>🔥 {streak}-day streak</span>}
                 </div>
-                {heat<maxHeat&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',fontStyle:'italic',letterSpacing:0.5,opacity:0.75}}>Beat Lucifer to raise Heat</div>}
-                {heat>=maxHeat&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-blood)',letterSpacing:2,fontWeight:900,textShadow:'0 0 8px rgba(196,30,58,0.6)'}}>⛧ MAX HEAT ⛧</div>}
+                <button onClick={()=>{setRunSeed(getDailySeed());setIsDailyRun(true);handleReset()}}
+                  onMouseEnter={e=>e.currentTarget.style.background='rgba(200,140,40,0.28)'}
+                  onMouseLeave={e=>e.currentTarget.style.background='rgba(200,140,40,0.15)'}
+                  style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,letterSpacing:2,textTransform:'uppercase',color:'var(--text-gold)',background:'rgba(200,140,40,0.15)',border:'2px solid rgba(200,140,40,0.7)',borderRadius:4,padding:'8px 28px',cursor:'pointer',transition:'all 0.15s'}}>⛧ Play Today's Seed ⛧</button>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',fontStyle:'italic',opacity:0.75}}>Same seed for everyone — compare your score.</div>
               </div>
             )})()}
           </div>
@@ -12417,7 +12434,7 @@ function App(){
             // Build ad-hoc atk context for preview damage calc — mirrors handleStrikeBody
             const _vmKwStacks=getKeywordStacks(stage)
             const _vmRiffsThis=_vmCardsThisStrike.filter(c=>c.type==='RIFF').length
-            const _vmAtkCtx={corruption,tier:_vmKwStacks.tier,riffsThisStrike:_vmRiffsThis,shredderHits:0,distinctKeywords:Object.keys(_vmKwStacks.counts).filter(k=>k!=='DISSONANCE').length,discardCount:discRef.current.length,auraAtk:_auraAtkMap(stage,{corruption,shredderHits:0})}
+            const _vmAtkCtx={corruption,tier:_vmKwStacks.tier,riffsThisStrike:_vmRiffsThis,shredderHits:0,distinctKeywords:Object.keys(_vmKwStacks.counts).filter(k=>k!=='DISSONANCE').length,discardCount:discRef.current.length}
             const _vmHighestAtk = Math.max(0, ...stage.filter(m=>m).map(m=>getEffectiveAtk(m,_vmAtkCtx)))
             // Base (pre-multiplier) damage — mirrors step 1 of the damage preview
             // IIFE below and `dmg` at the top of handleStrikeBody's artifact loop.
@@ -12549,148 +12566,38 @@ function App(){
             </div>
           })()}
           {(()=>{
-            // ═══ MIRRORS handleStrike formula EXACTLY (line 5147+) ═══
+            // ═══ SINGLE SOURCE OF TRUTH — calls the same module-level computeStrikeDamage()
+            //     the real strike uses, so the "DEALS X DMG" number can never drift from the
+            //     actual damage dealt. Preview passes paranoiaVictim:null (random victim can't
+            //     be predicted) and currentMult:strikeMult (the visible state multiplier). All
+            //     the OTHER stages — trip, corruption, artifacts, loot, Tongue-as-flat, shredder
+            //     echo, armor cap — now match the actual exactly. ═══
             const actives=stage.filter(m=>m&&!m.tooStoned)
-            // Keyword stack ctx — must match handleStrike's _atkCtx to keep preview accurate.
-            // riffsThisStrike + shredderHits read from cardsPlayedRef (always fresh on render).
             const _previewKw=getKeywordStacks(stage)
             const _previewCardIds=cardsPlayedRef.current||[]
             const _previewRiffs=_previewCardIds.filter(id=>CARD_TYPE_BY_ID[id]==='RIFF').length
+            // DEALS-PARITY: shredderHits must be computed EXACTLY as handleStrikeBody does
+            // (filter '_echo:' retriggers and unknown-type ids, then count consecutive
+            // same-type pairs). Counting echoes here would inflate the preview above the
+            // real strike whenever an Echoplex retrigger was in the played list.
+            const _previewRealIds=_previewCardIds.filter(id=>!String(id).startsWith('_echo:')&&CARD_TYPE_BY_ID[id]!==undefined)
             let _previewShredHits=0
-            for(let _psi=1;_psi<_previewCardIds.length;_psi++){
-              if(CARD_TYPE_BY_ID[_previewCardIds[_psi]]===CARD_TYPE_BY_ID[_previewCardIds[_psi-1]])_previewShredHits++
+            for(let _psi=1;_psi<_previewRealIds.length;_psi++){
+              if(CARD_TYPE_BY_ID[_previewRealIds[_psi]]===CARD_TYPE_BY_ID[_previewRealIds[_psi-1]])_previewShredHits++
             }
-            const _previewCtx={corruption,tier:_previewKw.tier,riffsThisStrike:_previewRiffs,shredderHits:_previewShredHits,distinctKeywords:Object.keys(_previewKw.counts).filter(k=>k!=='DISSONANCE').length,discardCount:discRef.current.length,auraAtk:_auraAtkMap(stage,{corruption,shredderHits:_previewShredHits})}
-            // 1) base sum (non-Drummer; paranoia is random so excluded from preview)
-            const p10Bonus=activePassives.some(p=>p.id==='p10')&&strikesLeft===fightMaxStrikes?10:0
-            let dmg=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>{
-              const effAtk=getEffectiveAtk(m,_previewCtx)
-              const cleanLivingBonus=0 /* clean_living now applies at fight start */
-              return s+effAtk+cleanLivingBonus
-            },0)+p10Bonus
-            // 2) Drummer × dblMult (NOT always ×2 — depends on dblRoll: ≤2=1×, 3-4=1.5×, 5-6=2×)
-            const hasDbl=actives.some(m=>m.role==='Drummer')
-            if(hasDbl){
-              const dblMult=Math.round(Math.pow(1.5,actives.filter(m=>m.role==='Drummer').length)*100)/100
-              dmg=Math.round(dmg*dblMult)
-            }
-            // 3) Encore: members with encoreReady get a SECOND attack (added separately)
-            const encDmg=actives.filter(m=>m.encoreReady&&m.role!=='Drummer').reduce((s,m)=>{
-              const ea=getEffectiveAtk(m,_previewCtx)
-              return s+ea
-            },0)
-            dmg+=encDmg
-            // 3.5) DOUBLE TIME tier-3 (4e): at 3+ Drummer stacks, all members attack twice
-            //   NOTE: dormant — recruit screen blocks 2nd drummer. Mirrors handleStrike line ~6868.
-            const _previewDtTier=_previewKw.tier('DOUBLE TIME')
-            if(_previewDtTier>=4){
-              const _dtBonus=actives.filter(m=>m.role!=='Drummer').reduce((s,m)=>s+getEffectiveAtk(m,_previewCtx),0)
-              dmg+=_dtBonus
-            }
-            // 4) Band synergy
-            const buf=actives.filter(m=>(m.buffCount||0)>0).length
-            const bon=buf>=5?1.35:buf>=4?1.20:buf>=3?1.10:1
-            dmg=Math.round(dmg*bon)
-            // 5) Mentor link bonus
-            for(let _mi=0;_mi<stage.length-1;_mi++){
-              const _mn=stage[_mi],_bs=stage[_mi+1]
-              if(!_mn||!_bs||_mn.tooStoned||_bs.tooStoned)continue
-              if(_mn.isMentor&&_bs.mentorLinkedToUid===_mn.uid&&_bs.mentorAlive){
-                const _em=_bs.mentorMult+(activeStake.mentorBonus||0)
-                const _ma=getEffectiveAtk(_mn,_previewCtx)
-                const _ba=getEffectiveAtk(_bs,_previewCtx)
-                dmg+=Math.round((_ma+_ba)*(_em-1))
-              }
-            }
-            // 6) Wailing Guitar artifact: ×2 on first strike
-            if(activeArtifacts.some(a=>a.id==='ca4')&&strikesLeft===fightMaxStrikes)dmg*=2
-            // 7) Corruption multiplier
-            const corrMult=corrDamageMult(corruption)
-            dmg=Math.round(dmg*corrMult)
-            // 8) Artifact multiplier triggers — full set including new modifiers
-            let artMult=1.0
-            const _cpc=(cardsPlayedRef.current||[]).length
-            const _cf=(combosFiredRef.current||[]).length
-            const _sc=stage.filter(m=>m&&m.tooStoned).length
-            const _hd=hand.filter((c,i)=>hand.findIndex(h=>h.id===c.id)!==i).length
-            // Extended preview context for new triggers
-            const _cardIds = cardsPlayedRef.current||[]
-            const _cardsThis = _cardIds.map(id=>{
-              const isEcho=typeof id==='string'&&id.startsWith('_echo:')
-              const realId=isEcho?id.slice(6):id
-              const card=ALL_CARDS.find(c=>c.id===realId)
-              return card?{...card,_isEchoplexRetrigger:isEcho}:null
-            }).filter(Boolean)
-            const _realPlays = _cardsThis.filter(c=>!c._isEchoplexRetrigger)
-            const _corrCards = _cardsThis.filter(c=>c.type==='CORRUPT').length
-            const _riffCards = _cardsThis.filter(c=>c.type==='RIFF').length
-            const _allSame = _realPlays.length>=3 && _realPlays.every(c=>c.type===_realPlays[0].type)
-            const _roleCnts = {}
-            stage.forEach(m=>{if(m&&m.role)_roleCnts[m.role]=(_roleCnts[m.role]||0)+1})
-            const _maxRole = Math.max(0, ...Object.values(_roleCnts))
-            const _aliveNS = stage.filter(m=>m&&!m.tooStoned&&m.hp>0).length
-            const _discFight = (discardsThisFightRef && discardsThisFightRef.current) || 0
-            const _discStrike = (discardsThisStrikeRef && discardsThisStrikeRef.current) || 0
-            const _lucStg = stage.some(m=>m&&(m.id==='lucifer'||m.name==='Lucifer'))
-            const _drumDT = stage.some(m=>m&&!m.tooStoned&&m.role==='Drummer')
-            const _firstT = _cardsThis.length>0 ? _cardsThis[0].type : null
-            const _allHlth = stage.filter(m=>m).every(m=>m.hp>=Math.ceil(m.maxHp/2))
-            const _aliveAll = stage.filter(m=>m&&m.hp>0).length
-            const _earlyC = Math.floor((fightIndex||0)/3)<3
-            const _highAtk = Math.max(0, ...stage.filter(m=>m).map(m=>getEffectiveAtk(m,_previewCtx)))
-            for(const art of activeArtifacts){
-              if(!art.multTrigger)continue
-              let fires=0
-              if(art.multTrigger==='cards3'&&_cpc>=4)fires=1
-              if(art.multTrigger==='cards5'&&_cpc>=6)fires=1
-              if(art.multTrigger==='corrupt50'&&corruption>=60)fires=1
-              if(art.multTrigger==='corrupt80'&&corruption>=80)fires=1
-              if(art.multTrigger==='perChain')fires=_cf
-              if(art.multTrigger==='perStoned')fires=_sc
-              if(art.multTrigger==='perDupe')fires=_hd
-              if(art.multTrigger==='alwaysOn')fires=1
-              if(art.multTrigger==='playedRiff'&&_riffCards>0)fires=1
-              if(art.multTrigger==='anyStoned'&&_sc>0)fires=1
-              if(art.multTrigger==='perAliveMember')fires=_aliveNS
-              if(art.multTrigger==='noRiff'&&_riffCards===0&&_cpc>0)fires=1
-              if(art.multTrigger==='firstCardEmber'&&_firstT==='EMBER')fires=1
-              if(art.multTrigger==='allHealthy'&&_allHlth)fires=1
-              if(art.multTrigger==='embers5'&&embers>=5)fires=1
-              if(art.multTrigger==='discardedFight'&&_discFight>=1)fires=1
-              if(art.multTrigger==='earlyCircle'&&_earlyC)fires=1
-              if(art.multTrigger==='perCorruptCard')fires=_corrCards
-              if(art.multTrigger==='perSameRole')fires=Math.max(0,_maxRole)
-              if(art.multTrigger==='cards2exact'&&_realPlays.length===2)fires=1
-              if(art.multTrigger==='chains3'&&_cf>=3)fires=1
-              if(art.multTrigger==='perDiscardStrike')fires=_discStrike
-              if(art.multTrigger==='doubleTimeRolled'&&_drumDT)fires=1
-              if(art.multTrigger==='lastMemberStanding'&&_aliveAll===1)fires=1
-              if(art.multTrigger==='allSameType'&&_allSame)fires=1
-              if(art.multTrigger==='perOtherArtifact')fires=Math.max(0,activeArtifacts.length-1)
-              if(art.multTrigger==='luciferOnStage'&&_lucStg)fires=1
-              if(art.multTrigger==='corrupt100exact'&&corruption===100)fires=1
-              if(art.multTrigger==='goatStackOther'){
-                const others=Math.max(0,activeArtifacts.length-1)
-                artMult*=(art.mult||2.0)*Math.pow(1.3,others)
-                continue
-              }
-              if(art.multTrigger==='corruptedClean'&&corruption===100&&_sc===0)fires=1
-              if(art.multTrigger==='tongueDamage'){
-                const tDmg=_highAtk*_cpc
-                if(tDmg>0&&dmg>0)artMult*=(1+tDmg/dmg)
-                continue
-              }
-              if(art.multTrigger==='sigilOpener'){
-                const isFS=(strikesLeft===fightMaxStrikes)
-                if(isFS){artMult*=4.31;if(strikeMult<=1)artMult*=2}
-                continue
-              }
-              if(fires>0)artMult*=Math.pow(art.mult,fires)
-            }
-            // ca1 'always' legacy now handled by alwaysOn trigger
-            dmg=Math.round(dmg*artMult)
-            // 9) Strike multiplier
-            const fin=strikeMult>1.0?Math.round(dmg*strikeMult):dmg
+            const _previewCtx={corruption,tier:_previewKw.tier,riffsThisStrike:_previewRiffs,shredderHits:_previewShredHits,distinctKeywords:Object.keys(_previewKw.counts).filter(k=>k!=='DISSONANCE').length,discardCount:discRef.current.length}
+            const _preview=computeStrikeDamage({
+              stage,actives,atkCtx:_previewCtx,paranoiaVictim:null,kwStacks:_previewKw,
+              activePassives,activeArtifacts,activeStake,
+              strikesLeft,fightMaxStrikes,fightTripBuff,corruption,currentMult:strikeMult,
+              cardIdsThisStrike:_previewCardIds,combosThisStrike:(combosFiredRef.current||[]),
+              discardsThisStrike:(discardsThisStrikeRef&&discardsThisStrikeRef.current)||0,
+              discardsThisFight:(discardsThisFightRef&&discardsThisFightRef.current)||0,
+              hand,embers,stash,fightIndex,collectedLoot,
+              shredderEchoesPending:shredderEchoesPendingRef.current,
+              activeBlind:activeBlindRef.current,scaledMaxHp,
+            })
+            const fin=_preview.total
             if(fin<=0||!canStrike)return null
             return (
               <div style={{fontFamily:"'MBScribblesFont',serif",textAlign:'center',marginTop:6}}>

@@ -267,7 +267,7 @@ const ACTIVE_DECK=DECK_MANIFESTS[DECK_ID]||DECK_MANIFESTS.standard
 // corruption damage (bosses used to corrupt you → free x1.2–3.0). Regular-boss HP
 // scaling drops to 1.0 for them so the descent stays a fair fight; Ritualist keeps
 // 1.85 because its corruption gamble supplies the burst.
-const DECK_HP_SCALE={standard:1.00,shredder:1.00,ritualist:1.50,engineer:0.90,survivor:1.00}
+const DECK_HP_SCALE={standard:1.00,shredder:1.00,ritualist:1.50,engineer:0.83,survivor:0.90}
 const HP_SCALE=parseFloat(process.env.HP_SCALE)||DECK_HP_SCALE[DECK_ID]||1.0
 // CORRUPTION REWORK: Lucifer's 55x HP cliff was designed around the old corruption
 // x3 burst. Honest (corruption-free) decks need a shallower final wall. LUCIFER_SCALE
@@ -405,32 +405,15 @@ function rollHellquake(gs,enemy){
 const MAX_STRIKES=4,MAX_DISCARDS=4,HAND_SIZE=6,MAX_STASH=420,MAX_EMBERS_CAP=8;
 const circleBaseMin=[8,6,7,8,9,9,11,11,14],circleBaseRange=[3,4,4,3,4,4,5,5,7]; // v12 stash tightening
 const MENTOR_LINK_BONUS={foil:{atk:1,hp:2,mult:1.25},mythic:{atk:2,hp:4,mult:1.5},demonic:{atk:4,hp:8,mult:2.0}};
-// ═══ BAND AURAS (v0.8) — adjacency bonuses radiating to neighboring stage slots ═══
-function _kwAuraVal(kw,ctx){switch(kw){
-  case 'FRENZIED':case 'DEBUFF':case 'BLASTBEAT':case 'DISSONANCE':case 'DIRGE':return 1
-  case 'CORRUPT':return ctx.corruption>=50?1:0
-  case 'HEXED':return ctx.corruption>=25?1:0
-  case 'SHREDDER':return ctx.shredderHits>0?1:0
-  default:return 0}}
-function auraAtkMap(stage,ctx){const map={}
-  for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue;let a=0
-    for(const j of[i-1,i+1]){const n=stage[j];if(!n||n.tooStoned)continue
-      if(n.keyword==='TRICKSTER'){const other=stage[2*j-i];if(other&&!other.tooStoned)a+=_kwAuraVal(other.keyword,ctx);a+=1}
-      else a+=_kwAuraVal(n.keyword,ctx)}
-    if(a>0)map[m.uid]=a}
-  return map}
-function anchorAuraReduction(stage,uid){for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.uid!==uid)continue;let r=0
-  for(const j of[i-1,i+1]){const n=stage[j];if(n&&!n.tooStoned&&n.keyword==='ANCHOR')r+=1}return r}return 0}
-function folkAuraHeal(stage){for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue;let h=0
-  for(const j of[i-1,i+1]){const n=stage[j];if(n&&!n.tooStoned&&n.keyword==='FOLK MAGIC')h+=2}
-  if(h>0)m.hp=Math.min(m.maxHp,m.hp+h)}}
-function auraStaticScore(stage){let s=0
-  for(let i=0;i<stage.length;i++){const m=stage[i];if(!m||m.tooStoned)continue
-    for(const j of[i-1,i+1]){const n=stage[j];if(!n||n.tooStoned)continue
-      switch(n.keyword){case 'FRENZIED':case 'DEBUFF':case 'BLASTBEAT':case 'TRICKSTER':case 'DISSONANCE':case 'DIRGE':s+=3;break
-        case 'ANCHOR':case 'FOLK MAGIC':s+=2;break
-        case 'CORRUPT':case 'HEXED':case 'SHREDDER':s+=1.5;break}}}
-  return s}
+// ═══ BAND AURAS REMOVED (v0.8.1 declutter) — mirrors live App.jsx ═════════════
+// The neighbor-adjacency aura system (every member buffs its neighbors) was cut.
+// Each keyword keeps only its PRIMARY effect; Mentor Link is separate and stays.
+// Stubs return empty/zero so remaining call sites are harmless no-ops. auraStaticScore
+// returning 0 makes improveOrdering a no-op for reordering, preserving mentor links.
+function auraAtkMap(){return {}}
+function anchorAuraReduction(){return 0}
+function folkAuraHeal(){}
+function auraStaticScore(){return 0}
 function improveOrdering(gs){const stage=gs.stage
   const linkPairs=(gs.mentorLinks||[]).map(l=>({m:stage[l.mentorIdx]&&stage[l.mentorIdx].uid,p:stage[l.protegeIdx]&&stage[l.protegeIdx].uid}))
   let improved=true,guard=0
@@ -1311,7 +1294,6 @@ function simFight(gs,phaseHp,luciferPhase){
     // DIRGE (Orm): +1 ATK per 4 cards in the discard pile (ramps as the fight runs long).
     const _dissoDistinct=Object.keys(_kwStacks).filter(k=>k!=='DISSONANCE').length
     const _dirgeBonus=Math.floor(gs.discard.length/4)
-    const _auraAtk=auraAtkMap(gs.stage,{corruption:gs.corruption,shredderHits:_shredderHits,drumRollOk:Object.values(dtMult).some(v=>v>=1.5)})
     // DOUBLE TIME stack-3: all members attack twice this strike
     if(_doubleTimeTier>=4){for(const _m of aliveNow)_m._kwDoubleStrike=true}
     // Tracking: which keyword stack tiers fired this strike
@@ -1338,7 +1320,7 @@ function simFight(gs,phaseHp,luciferPhase){
       if(m.keyword==='SHREDDER'&&_shredderTier>0)atk+=_shredderHits*_shredderTier
       if(m.keyword==='DISSONANCE')atk+=_dissoDistinct
       if(m.keyword==='DIRGE')atk+=_dirgeBonus
-      atk+=_auraAtk[m.uid]||0
+      // neighbor-adjacency ATK aura REMOVED (v0.8.1 declutter)
       if(m.ampedThisStrike)atk*=Math.pow(2,m.ampedThisStrike);if(gs._possessedActive)atk*=3;if(gs._overdriveActive)atk*=2;
       if(dtMult[m.uid]!==undefined)atk=Math.floor(atk*dtMult[m.uid]);
       gs._membersUsed.add(m.id); // (leaderboard) member acted this run
@@ -1358,7 +1340,7 @@ function simFight(gs,phaseHp,luciferPhase){
     // chain strikeMult (line ~1250), so a chain-firing deck recovers via its large
     // strikeMult while unconnected raw card-ATK stays weak. Default 1.0 → no-op.
     if(SKILL_PASS&&SP_RAW_DMG_MULT!==1.0)strikeDmg=Math.round(strikeDmg*SP_RAW_DMG_MULT);
-    folkAuraHeal(gs.stage)
+    // FOLK MAGIC neighbor-heal aura REMOVED (v0.8.1) — keyword keeps only its ember-refill primary
     let _mentorAdd=0
     let mentorMult=1.0;for(const link of links){const mn=gs.stage[link.mentorIdx],pr=gs.stage[link.protegeIdx];
       if(mn&&!mn.tooStoned&&pr&&!pr.tooStoned){
