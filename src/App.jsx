@@ -2642,8 +2642,8 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
               border:'2px solid '+(leftBought.rec||recruitBought?'rgba(100,65,15,0.3)':hovId==='rec'?'rgba(255,220,120,1)':'rgba(232,168,32,0.6)'),borderRadius:10,
               background:'linear-gradient(180deg,#1a1408,#0a0604)',overflow:'hidden',
               opacity:leftBought.rec||recruitBought?0.4:1,
-              transform:hovId==='rec'&&!leftBought.rec&&!recruitBought?'scale(1.02)':'none',
-              transition:'transform 0.15s,border-color 0.15s',
+              transform:'none',
+              transition:'border-color 0.15s,box-shadow 0.15s',
               display:'flex',flexDirection:'column',
               ...(hovId==='rec'&&!leftBought.rec&&!recruitBought?{boxShadow:'0 0 30px rgba(232,168,32,0.45),0 0 8px rgba(255,230,150,0.5) inset'}:{boxShadow:'0 0 18px rgba(232,168,32,0.15)'})}}
             onMouseEnter={()=>setHovId('rec')} onMouseLeave={()=>setHovId(null)}>
