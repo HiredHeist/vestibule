@@ -2288,7 +2288,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
         <div onClick={()=>canBuy&&!bought&&buyCard(card)}
           style={{flex:1,minHeight:315,display:'flex',flexDirection:'column',position:'relative',
             background:'linear-gradient(180deg,#201408,#100804)',
-            border:hov&&canBuy&&!bought?'2px solid '+bc:'1px solid '+bc+'55',
+            border:'2px solid '+(hov&&canBuy&&!bought?bc:bc+'33'),
             borderRadius:8,overflow:'hidden',
             cursor:canBuy&&!bought?'pointer':'default',
             transform:hov&&canBuy&&!bought?'translateY(-6px) scale(1.02)':'none',
@@ -2371,7 +2371,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
         <div onClick={()=>canBuy&&onBuy()}
           style={{flex:1,position:'relative',display:'flex',flexDirection:'column',
             background:'linear-gradient(180deg,#1c1408,#0e0a04)',
-            border:hov&&canBuy?'2px solid '+ac:'1px solid '+ac+(canBuy?'88':'44'),
+            border:'2px solid '+(hov&&canBuy?ac:ac+(canBuy?'55':'2e')),
             borderTop:'4px solid '+ac,borderRadius:8,overflow:'hidden',
             cursor:canBuy?'pointer':'default',opacity:canBuy?1:0.4,
             transform:hov&&canBuy?'translateY(-3px)':'none',
@@ -2424,7 +2424,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
         <div onClick={()=>canBuy&&handleOpenPack(pack)}
           style={{flex:1,height:280,minHeight:280,maxHeight:280,display:'flex',flexDirection:'column',alignItems:'center',
             background:'linear-gradient(160deg,#12100a 0%,#1e1a0e 40%,#120e08 100%)',
-            border:hov&&canBuy?'2px solid '+ac:'1px solid '+ac+'66',
+            border:'2px solid '+(hov&&canBuy?ac:ac+'40'),
             borderRadius:10,overflow:'hidden',
             cursor:canBuy?'pointer':'default',
             transform:hov&&canBuy?'translateY(-6px) scale(1.02)':'none',
@@ -2699,7 +2699,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
           {/* CARDS ROW */}
           <div style={{display:'block',border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>🎸 Cards For Sale</div>
-          <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start',paddingTop:4}}>
+          <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'stretch',paddingTop:4}}>
             {shopCards.filter(Boolean).map((card,i)=><SaleCard key={i} card={card} idx={i}/>)}
           </div>
           </div>
