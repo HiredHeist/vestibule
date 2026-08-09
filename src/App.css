@@ -836,3 +836,6 @@ body {
   70%  { transform: translate(3px, -16px) scale(1.0); opacity: 0.65; }
   100% { transform: translate(-2px, -24px) scale(0.9); opacity: 0.3; }
 }
+
+/* Background sigil slow clockwise rotation (menu bg logo) */
+@keyframes bgSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
