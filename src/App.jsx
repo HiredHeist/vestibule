@@ -1844,7 +1844,9 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
   // remount, which unmounts this component entirely. The pawn cap additionally
   // has to be visible to the Recruit screen's fire panel, which sells members
   // through the same handler (see item 15).
-  const packsBoughtThisVisit=((boughtPackIds||[]).length+(recruitBought?1:0))>=1?1:0
+  // CARD booster packs (Cassette/CD-R) only — the band recruitment pack is tracked
+  // separately via `recruitBought`, so buying one no longer locks the other.
+  const packsBoughtThisVisit=((boughtPackIds||[]).length)>=1?1:0
   const [shopTab,setShopTab]=useState('all') // all, cards, packs, gear
   const [tearingPack,setTearingPack]=useState(null) // pack object while tear animation plays
   const [tearPhase,setTearPhase]=useState(0) // 0=anticipate, 1=rip, 2=fan, 3=sparks
@@ -1865,7 +1867,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
     // Hover-on-artifact takes top priority — Sly whispers about whatever you're eyeing
     if(hoveringArtifact)return 'hoverArtifact'
     // CLEANED OUT — nothing left to buy. Higher priority than multiBuy because it's a terminal state.
-    const recruitGone=leftBought.rec||packsBoughtThisVisit>=1
+    const recruitGone=leftBought.rec||recruitBought
     const allCardsGone=(shopCards||[]).every(c=>!c||boughtIds.includes(c.uid||c.id)||(soldIds||[]).includes(c.uid||c.id))
     const allPacksGone=(boosterPacks||[]).slice(0,2).every(p=>boughtPackIds.includes(p.id))||packsBoughtThisVisit>=1
     const cartGone=leftBought.cart||!!circleCartBought||(soldIds||[]).includes(circleArtifact?.id)
@@ -2629,7 +2631,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
         <div style={{width:280,flexShrink:0,display:'flex',flexDirection:'column',gap:8,minHeight:0,overflowY:'auto'}}>
           {/* RECRUITMENT PACK — the star. Flex:1 so it dominates the column. Most important purchase in the game. */}
           <div onClick={()=>{
-              if(leftBought.rec||recruitBought||packsBoughtThisVisit>=1)return
+              if(leftBought.rec||recruitBought)return
               if(!can(recruitPack.cost))return
               // Only mark the pack consumed if the parent actually took the money
               // (it refuses when Lucifer caps the band at 3).
@@ -2637,7 +2639,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
               setLeftBought(p=>({...p,rec:true}))
               if(onMarkRecruitBought)onMarkRecruitBought()
             }}
-            style={{position:'relative',cursor:can(recruitPack.cost)&&!leftBought.rec&&!recruitBought&&packsBoughtThisVisit<1?'pointer':'default',
+            style={{position:'relative',cursor:can(recruitPack.cost)&&!leftBought.rec&&!recruitBought?'pointer':'default',
               flex:1,minHeight:0,
               border:'2px solid '+(leftBought.rec||recruitBought?'rgba(100,65,15,0.3)':hovId==='rec'?'rgba(255,220,120,1)':'rgba(232,168,32,0.6)'),borderRadius:10,
               background:'linear-gradient(180deg,#1a1408,#0a0604)',overflow:'hidden',
@@ -2648,7 +2650,6 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
               ...(hovId==='rec'&&!leftBought.rec&&!recruitBought?{boxShadow:'0 0 30px rgba(232,168,32,0.45),0 0 8px rgba(255,230,150,0.5) inset'}:{boxShadow:'0 0 18px rgba(232,168,32,0.15)'})}}
             onMouseEnter={()=>setHovId('rec')} onMouseLeave={()=>setHovId(null)}>
             {(leftBought.rec||recruitBought)&&<SoldOverlay/>}
-            {packsBoughtThisVisit>=1&&!leftBought.rec&&!recruitBought&&<SoldOverlay label="SOLD OUT THIS VISIT"/>}
             <div style={{flex:'1 1 0',minHeight:0,display:'flex',justifyContent:'center',alignItems:'center',padding:'12px 0 6px'}}>
               <PackArtImg packId={['touring','underground','festival','headliner','demonic'][Math.min(4,Math.floor(circleNum/2))]} emoji="🎸" size={288}/>
             </div>
