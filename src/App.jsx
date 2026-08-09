@@ -1133,9 +1133,9 @@ function markTutorialDone(){localStorage.setItem('vst_tutorial','done')}
 // Ritualist keeps a tall wall (its corruption gamble supplies the burst).
 // Sim mirror: DECK_HP_SCALE / DECK_LUCIFER_SCALE in vestibule-sim-kwstacks.js.
 const STARTER_DECKS=[
-  {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced, corruption-free — the honest fight for any playstyle.',requirement:null,color:'#c8a060',hpScale:1.00,luciferScale:0.26,scoreMult:1.0},
-  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. All-RIFF, corruption-free. +1 hand size. SIGNATURE: Riff Chain Echo — every chain fires a second time at 33% damage on the next strike.',requirement:'beat_standard',color:'#ff4400',hpScale:1.00,luciferScale:0.21,memberHpPct:1.0,handSize:6,signature:'riff_chain_echo',scoreMult:1.4},
-  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power — the ONLY deck that gambles with it. 30+ CORRUPT cards, corruption synths. Start each fight at 15% corruption. 4 starting embers. SIGNATURE: Corruption Feeds — every 10% corruption gained refunds 1 ember (max 5/strike).',requirement:'beat_shredder',color:'#cc44ff',hpScale:1.50,luciferScale:0.58,startEmbers:4,startCorruption:15,signature:'corruption_feeds',scoreMult:1.6},
+  {id:'standard',name:'⛧ Standard',emoji:'🎸',desc:'The default 69-card deck. Balanced, corruption-free — the honest fight for any playstyle.',requirement:null,color:'#c8a060',hpScale:1.05,luciferScale:0.26,scoreMult:1.0},
+  {id:'shredder',name:'🎸 The Shredder',emoji:'⚡',desc:'Pure aggro. All-RIFF, corruption-free. +1 hand size. SIGNATURE: Riff Chain Echo — every chain fires a second time at 33% damage on the next strike.',requirement:'beat_standard',color:'#ff4400',hpScale:1.14,luciferScale:0.21,memberHpPct:1.0,handSize:6,signature:'riff_chain_echo',scoreMult:1.4},
+  {id:'ritualist',name:'💀 The Ritualist',emoji:'🌀',desc:'Corruption IS power — the ONLY deck that gambles with it. 30+ CORRUPT cards, corruption synths. Start each fight at 15% corruption. 4 starting embers. SIGNATURE: Corruption Feeds — every 10% corruption gained refunds 1 ember (max 5/strike).',requirement:'beat_shredder',color:'#cc44ff',hpScale:1.57,luciferScale:0.58,startEmbers:4,startCorruption:15,signature:'corruption_feeds',scoreMult:1.6},
   {id:'engineer',name:'🔧 The Engineer',emoji:'🔧',desc:'Combo nerd. Utility-dense, corruption-free. SIGNATURE: Copier — every UTILITY card has a 25% chance to add a copy of itself to your hand. Copies can\'t re-copy. Stack the engine.',requirement:'beat_ritualist',color:'#44aaff',hpScale:0.83,luciferScale:0.20,signature:'copier',scoreMult:1.2},
   {id:'survivor',name:'🛡️ The Survivor',emoji:'🛡️',desc:'Outlast everything, corruption-free. SIGNATURE: Second Wind — each member gets ONE per-fight save: when they would go Too Stoned, they instead revive at 15% HP. Stacks across the band.',requirement:'beat_engineer',color:'#44cc44',hpScale:0.90,luciferScale:0.35,memberHpMod:0,maxStrikesMod:0,signature:'second_wind',scoreMult:1.3},
 ]
@@ -6446,7 +6446,7 @@ function App(){
     const sfxMap={RIFF:'riff_play',CORRUPT:'corrupt_play',UTILITY:'utility_play',EMBER:'ember_play'};playSfx(sfxMap[card.type]||'card_play')
     const synesthesiaDiscount=(fightTripBuff==='SYNESTHESIA')?1:0
     const darkBargainDiscount=(chosenPacts.includes('dark_bargain')&&card.type==='CORRUPT'&&card.embers>=1)?1:0
-    const ampFbDiscount=(ampFeedbackDiscount>0&&card.type==='RIFF')?1:0
+    const ampFbDiscount=(ampFeedbackDiscount>0&&card.type==='RIFF')?ampFeedbackDiscount:0 // 1 = "−1 ember"; 99 = upgraded "next RIFF free"
     // ── NEW PEDAL DISCOUNTS ──
     // Reverb Tank: first card each strike costs 1 less ember
     const reverbTankDiscount=(activePassives.some(p=>p.id==='reverbtank')&&(cardsPlayedRef.current||[]).length===0)?1:0
@@ -6465,7 +6465,9 @@ function App(){
     // BOSS BLIND: embertax — every card costs +1 ember this fight (mirrors the sim's
     // `_spEmberTax` +1, applied on top of ALL discounts/free-card charges, matching sim).
     const emberTax=(activeBlindRef.current&&activeBlindRef.current.id==='embertax')?1:0
-    const effectiveEmbers=((nextCardFreeRef.current&&card.id!=='doubledown')||allCardsFreeRef.current||(freeCardsLeftRef.current>0&&card.id!=='doubledown')?0:Math.max(0,card.embers-foilDiscount-synesthesiaDiscount-darkBargainDiscount-ampFbDiscount-reverbTankDiscount-fuzzBoxDiscount-phaserDiscount-ghostWeedFree-wahFreeFirst-cableTesterDiscount-conduitDiscount))+emberTax
+    // ── DOOM FORGE cost-reduction upgrades (−1 ember each; gearcheck 1→0) ──
+    const forgeDiscount=(card.upgraded&&(card.id==='infencore'||card.id==='possessedperf'||card.id==='doublebooking'||card.id==='overdriveped'||card.id==='gearcheck'))?1:0
+    const effectiveEmbers=((nextCardFreeRef.current&&card.id!=='doubledown')||allCardsFreeRef.current||(freeCardsLeftRef.current>0&&card.id!=='doubledown')?0:Math.max(0,card.embers-foilDiscount-synesthesiaDiscount-darkBargainDiscount-ampFbDiscount-reverbTankDiscount-fuzzBoxDiscount-phaserDiscount-ghostWeedFree-wahFreeFirst-cableTesterDiscount-conduitDiscount-forgeDiscount))+emberTax
   if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers, have '+embers+'.');return false}
   if(nextCardFreeRef.current&&card.id!=='doubledown'){setNextCardFree(false)}
   // ── BLOTTER REVELATION counter consumption ──
@@ -6494,14 +6496,14 @@ function App(){
       addFloat('📝 SIGNED!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ffd700',true)
       addFloat(strongest.name+' GONE',getCenter(stageRefs.current[sIdx]).x,getCenter(stageRefs.current[sIdx]).y-70,'#cc0000',true)
     }
-    else if(card.id==='amp'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk*2,_origAtk:m._origAtk||m.atk,tempBuff:true,buffCount:(m.buffCount||0)+1});msg='⚡ '+m.name+' doubled ATK!';addBuff(m.uid,'×2 ATK','#cc44ff');addFloat('×2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#9933cc')}
-    else if(card.id==='battlecry'){if(!m)return false;const bcBonus=(activePassives.some(p=>p.id==='p7')?2:1)+(card.upgraded?1:0);ns[slotIdx]=Object.assign({},m,{atk:m.atk+bcBonus,buffCount:(m.buffCount||0)+1});msg='🤘 '+m.name+' Battle Cry! +'+bcBonus+' ATK forever!';addBuff(m.uid,'+'+bcBonus+' ATK','#ee2222');addFloat('+'+bcBonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4400')}
-    else if(card.id==='newstrings'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,buffCount:(m.buffCount||0)+1});msg='🎸 '+m.name+' +2 ATK permanently!';addBuff(m.uid,'+2 ATK','#ee2222');addFloat('+2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#e8a820')}
-    else if(card.id==='encore'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{encoreReady:true,buffCount:(m.buffCount||0)+1});msg='🔁 '+m.name+' encores!';addBuff(m.uid,'ENCORE','#dd2222');addFloat('ENCORE!',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#dd2222')}
-    else if(card.id==='roadie'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{stoneShield:2,hp:(m.keyword==='FALLEN'||m.cursed)?m.hp:Math.min(m.maxHp,m.hp+2),buffCount:(m.buffCount||0)+1});msg='🛡 '+m.name+' shielded for 2 Strikes and healed 2 HP!'}
+    else if(card.id==='amp'){if(!m)return false;const _ab=card.upgraded?2:0;const _base=m.atk+_ab;ns[slotIdx]=Object.assign({},m,{atk:_base*2,permAtkBonus:(m.permAtkBonus||0)+_ab,_origAtk:m._origAtk!==undefined?m._origAtk:_base,tempBuff:true,buffCount:(m.buffCount||0)+1});msg='⚡ '+m.name+' doubled ATK!'+(card.upgraded?' (+2 ATK perm)':'');addBuff(m.uid,'×2 ATK','#cc44ff');addFloat('×2 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#9933cc')}
+    else if(card.id==='battlecry'){if(!m)return false;const bcBonus=(activePassives.some(p=>p.id==='p7')?2:1)+(card.upgraded?2:0);ns[slotIdx]=Object.assign({},m,{atk:m.atk+bcBonus,buffCount:(m.buffCount||0)+1});msg='🤘 '+m.name+' Battle Cry! +'+bcBonus+' ATK forever!';addBuff(m.uid,'+'+bcBonus+' ATK','#ee2222');addFloat('+'+bcBonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4400')}
+    else if(card.id==='newstrings'){if(!m)return false;const _ns=card.upgraded?3:2;ns[slotIdx]=Object.assign({},m,{atk:m.atk+_ns,buffCount:(m.buffCount||0)+1});msg='🎸 '+m.name+' +'+_ns+' ATK permanently!';addBuff(m.uid,'+'+_ns+' ATK','#ee2222');addFloat('+'+_ns+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#e8a820')}
+    else if(card.id==='encore'){if(!m)return false;ns[slotIdx]=Object.assign({},m,{encoreReady:true,atk:m.atk+(card.upgraded?1:0),buffCount:(m.buffCount||0)+1});msg='🔁 '+m.name+' encores!'+(card.upgraded?' (+1 ATK perm)':'');addBuff(m.uid,'ENCORE','#dd2222');addFloat('ENCORE!',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#dd2222')}
+    else if(card.id==='roadie'){if(!m)return false;const _rsh=card.upgraded?3:2;const _rhl=card.upgraded?4:2;ns[slotIdx]=Object.assign({},m,{stoneShield:_rsh,hp:(m.keyword==='FALLEN'||m.cursed)?m.hp:Math.min(m.maxHp,m.hp+_rhl),buffCount:(m.buffCount||0)+1});msg='🛡 '+m.name+' shielded for '+_rsh+' Strikes and healed '+_rhl+' HP!'}
     else if(card.id==='stagedive'){
       if(!m)return false
-      const dmg=m.hp
+      const dmg=Math.floor(m.hp*(card.upgraded?1.5:1))
       const bc=getCenter(bossRef)
       const sdHp=Math.max(0,enemyHp-dmg);setEnemyHp(sdHp);if(sdHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);addFloat(dmg,bc.x,bc.y-60,'#ff6600',true)
       setIsWiggling(true);setTimeout(function(){setIsWiggling(false)},500)
@@ -6510,8 +6512,9 @@ function App(){
       msg='🤘 '+m.name+' Stage Dives for '+dmg+' damage!'
     }
     else if(card.id==='wakeup'){
-      // Heal all active members 2 HP
-      ns=ns.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'&&!m.cursed?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+2)}):m)
+      // Heal all active members (UPGRADE: +4 HP, was +2)
+      const _whl=card.upgraded?4:2
+      ns=ns.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'&&!m.cursed?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+_whl)}):m)
       // Revive first Too Stoned member with 50% permanent ATK loss
       const stonedIdx=ns.findIndex(m=>m&&m.tooStoned)
       if(stonedIdx>=0){
@@ -6519,29 +6522,30 @@ function App(){
         const startAtk=ALL_MUSICIANS.find(mu=>mu.id===sm.id)?.atk||1
         const curBase=sm._origAtk!==undefined?sm._origAtk:sm.atk
         ns[stonedIdx]=Object.assign({},sm,{tooStoned:false,hp:sm.maxHp,atk:curBase,_origAtk:undefined,tempBuff:false,buffCount:sm.buffCount||0})
-        msg='☕ '+sm.name+' revived! All members +2 HP.'
+        msg='☕ '+sm.name+' revived! All members +'+_whl+' HP.'
         if(sm.isMentor){const _rs=scanMentorLinks(ns);_rs.forEach((rm,ri)=>{if(rm)ns[ri]=rm})}
         addFloat('REVIVED',getCenter(stageRefs.current[stonedIdx]).x,getCenter(stageRefs.current[stonedIdx]).y-70,'#22aa44')
       } else {
-        msg='☕ Wake Up Call! All members +2 HP.'
-        addFloat('+2 HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')
+        msg='☕ Wake Up Call! All members +'+_whl+' HP.'
+        addFloat('+'+_whl+' HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')
       }
     }
     else if(card.id==='soundcheck'){
       const injuredCount=ns.filter(m=>m&&!m.tooStoned&&m.hp<m.maxHp).length
-      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:(m.keyword==='FALLEN'||m.cursed)?m.hp:Math.min(m.maxHp,m.hp+4),atk:m.hp<m.maxHp&&m.keyword!=='FALLEN'?m.atk+1:m.atk,tempBuff:m.hp<m.maxHp&&m.keyword!=='FALLEN'?true:m.tempBuff,_origAtk:m.hp<m.maxHp&&!m._origAtk&&m.keyword!=='FALLEN'?m.atk:m._origAtk}):m)
-      msg='🔊 Sound Check! All +4 HP'+(injuredCount>0?' + '+injuredCount+' injured member(s) +1 ATK!':'!');stage.filter(x=>x&&!x.tooStoned).forEach(x=>addBuff(x.uid,'+HP','#33dd33'))
-      addFloat('+4 HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')
+      const _sch=card.upgraded?6:4,_sca=card.upgraded?2:1 // UPGRADE: +6 HP, hurt +2 ATK
+      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{hp:(m.keyword==='FALLEN'||m.cursed)?m.hp:Math.min(m.maxHp,m.hp+_sch),atk:m.hp<m.maxHp&&m.keyword!=='FALLEN'?m.atk+_sca:m.atk,tempBuff:m.hp<m.maxHp&&m.keyword!=='FALLEN'?true:m.tempBuff,_origAtk:m.hp<m.maxHp&&!m._origAtk&&m.keyword!=='FALLEN'?m.atk:m._origAtk}):m)
+      msg='🔊 Sound Check! All +'+_sch+' HP'+(injuredCount>0?' + '+injuredCount+' injured member(s) +'+_sca+' ATK!':'!');stage.filter(x=>x&&!x.tooStoned).forEach(x=>addBuff(x.uid,'+HP','#33dd33'))
+      addFloat('+'+_sch+' HP',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44')
     }
     else if(card.id==='whispercard'){
       // Targeted card — dropping it on an EMPTY stage slot used to throw
       // (`m.atk` on null). Reject the play cleanly, matching cardEngine.js
       // IMPL.whispercard which returns false on a null target.
       if(!m){addLog('⚠ Dark Whisper needs a band member.');return false}
-      ns=ns.map((mm,mi)=>mi===slotIdx&&mm?Object.assign({},mm,{atk:mm.atk+2,permAtkBonus:(mm.permAtkBonus||0)+2,buffCount:(mm.buffCount||0)+1}):mm);msg='\u{1F300} Dark Whisper! +2 ATK permanently.'
+      {const _wb=card.upgraded?3:2;ns=ns.map((mm,mi)=>mi===slotIdx&&mm?Object.assign({},mm,{atk:mm.atk+_wb,permAtkBonus:(mm.permAtkBonus||0)+_wb,buffCount:(mm.buffCount||0)+1}):mm);msg='\u{1F300} Dark Whisper! +'+_wb+' ATK permanently.'}
     }
-    else if(card.id==='hungercard'){ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,tempAtkBonus:(m.tempAtkBonus||0)+1,buffCount:(m.buffCount||0)+1}):m);drawUpTo(hand.filter(c=>c.uid!==card.uid),deckRef.current,[...discRef.current,card],2);msg='\u{1F525} Hungering Flame! All +1 ATK, drew 2 cards.'}
-    else if(card.id==='madnesscard'){const maxHp=scaledMaxHp||(enemy?enemy.maxHp:100);const dmg=Math.floor(maxHp*0.15);const bc2=getCenter(bossRef);const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp);if(newHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);addFloat(dmg,bc2.x,bc2.y-60,'#cc1144',dmg>=20);playHit();updStat('totalDamage',dmg);msg='\u{1F480} Madness Unleashed! '+dmg+' damage (15% of max HP)!'}
+    else if(card.id==='hungercard'){const _hb=card.upgraded?2:1;ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+_hb,tempAtkBonus:(m.tempAtkBonus||0)+_hb,buffCount:(m.buffCount||0)+1}):m);drawUpTo(hand.filter(c=>c.uid!==card.uid),deckRef.current,[...discRef.current,card],2);msg='\u{1F525} Hungering Flame! All +'+_hb+' ATK.'}
+    else if(card.id==='madnesscard'){const maxHp=scaledMaxHp||(enemy?enemy.maxHp:100);const _mpct=card.upgraded?0.20:0.15;const dmg=Math.floor(maxHp*_mpct);const bc2=getCenter(bossRef);const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp);if(newHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500);addFloat(dmg,bc2.x,bc2.y-60,'#cc1144',dmg>=20);playHit();updStat('totalDamage',dmg);msg='\u{1F480} Madness Unleashed! '+dmg+' damage ('+Math.round(_mpct*100)+'% of max HP)!'}
     else if(card.id==='dark_whisper'){
       const nc=Math.min(100,corruption+5);setCorruption(nc);updStat('maxCorruption',nc,true)
       ns=ns.map((m,mi)=>mi===slotIdx&&m?Object.assign({},m,{atk:m.atk+2,tempAtkBonus:(m.tempAtkBonus||0)+2,buffCount:(m.buffCount||0)+1}):m)
@@ -6571,6 +6575,12 @@ function App(){
     }
     else if(card.id==='controlfeedback'){
       setCorruption(50)
+      if(card.upgraded){
+        // UPGRADE: fully heal the WHOLE band.
+        ns=ns.map(x=>x&&!x.tooStoned&&x.keyword!=='FALLEN'&&!x.cursed?Object.assign({},x,{hp:x.maxHp}):x)
+        msg='🎚 Controlled Feedback! Corruption → 50%. WHOLE band fully healed!'
+        addFloat('FULL HEAL',getCenter(bossRef).x,getCenter(bossRef).y-80,'#44dd44',true)
+      } else {
       const cfTarget=ns[slotIdx]
       if(cfTarget&&!cfTarget.tooStoned){
         const healAmt=cfTarget.maxHp-cfTarget.hp
@@ -6580,9 +6590,10 @@ function App(){
       } else {
         msg='🎚 Corruption set to 50%.'
       }
+      }
     }
     else if(card.id==='feedbackloop'){
-      if(!m)return false;const bonus=corruption>=50?4:2
+      if(!m)return false;const bonus=corruption>=50?(card.upgraded?5:4):(card.upgraded?3:2)
       ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus})
       addFloat('+'+bonus+' ATK perm',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#aa1111',bonus>=4)
       msg='🎛 Feedback Loop! '+m.name+' +'+bonus+' ATK permanently!'+(corruption>=50?' (≥50% corruption bonus!)':'')
@@ -6592,7 +6603,7 @@ function App(){
       // Handled entirely in handleDropOnStage to avoid double setHand
       return false
     }
-    else if(card.id==='tappedout'){setPendingEmbers(function(p){return p+5});spent=0;playEmber();msg='🪙 Tapped Out! +5 Embers next Strike.'}
+    else if(card.id==='tappedout'){if(card.upgraded){setEmbers(p=>Math.min(maxEmbers,p+5));msg='🪙 Tapped Out! +5 Embers now!'}else{setPendingEmbers(function(p){return p+5});msg='🪙 Tapped Out! +5 Embers next Strike.'}spent=0;playEmber()}
     else if(card.id==='demotape'){
       if(!lastRiffPlayedRef.current){addLog('📼 No riff recorded yet.');return false}
       spent=0
@@ -6689,7 +6700,8 @@ function App(){
         if(lrTarget&&!lrTarget.tooStoned)ns[slotIdx]=Object.assign({},lrTarget,{atk:lrTarget.atk+2,buffCount:(lrTarget.buffCount||0)+1})
         addLog('📼 Demo Tape replays '+lr.name+' (generic)')
       }
-      msg='📼 Demo Tape! Replays: '+lr.name
+      if(card.upgraded){const _dtd=[...deckRef.current];const _dtdr=_dtd.length>0?[_dtd.pop()]:[];setDeck(_dtd);setTimeout(()=>setHand(h=>[...h,..._dtdr]),0)} // UPGRADE: draw 1 after replay
+      msg='📼 Demo Tape! Replays: '+lr.name+(card.upgraded?' (+draw 1)':'')
       addFloat('📼 '+lr.name,getCenter(bossRef).x,getCenter(bossRef).y-100,'#e8a820',true)
     }
     else if(card.id==='burnset'){
@@ -6697,7 +6709,7 @@ function App(){
       // applyCard returns false here so handleDropOnStage runs the burnset logic directly
       return false
     }
-    else if(card.id==='overdrive'){const req=card.corrReq||60;if(corruption>=(card.upgraded?50:req)){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{const showReq=card.upgraded?50:req;addLog('⚠ Need ≥'+showReq+'% Corruption (you have '+Math.floor(corruption)+'%)');addFloat('💥 Need '+showReq+'% Corruption',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true);return false}}
+    else if(card.id==='overdrive'){const req=card.corrReq||60;if(corruption>=(card.upgraded?40:req)){ns=ns.map(function(s){return s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true,_origAtk:s._origAtk||s.atk}):s});msg='💥 OVERDRIVE! All ATK doubled!';addFloat('OVERDRIVE!',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true)}else{const showReq=card.upgraded?40:req;addLog('⚠ Need ≥'+showReq+'% Corruption (you have '+Math.floor(corruption)+'%)');addFloat('💥 Need '+showReq+'% Corruption',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff3300',true);return false}}
     else if(card.id==='crowdsurf'){
       if(!m)return false
       const buff=Math.max(1,hand.length-1)+(card.upgraded?1:0) // -1 because crowdsurf itself is leaving hand
@@ -6707,43 +6719,53 @@ function App(){
     }
     else if(card.id==='doubledown'){
       setNextCardFree(true)
-      msg='🎰 Double Down! Next card costs 0 Embers.'
+      if(card.upgraded){const _d=[...deckRef.current];const _drawn=_d.length>0?[_d.pop()]:[];setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._drawn]),0)} // UPGRADE: draw 1
+      msg='🎰 Double Down! Next card costs 0 Embers.'+(card.upgraded?' Draw 1!':'')
       addFloat('FREE!',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='deathriff'){
-      ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+2,permAtkBonus:(s.permAtkBonus||0)+2}):s)
+      const _drb=card.upgraded?3:2
+      ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+_drb,permAtkBonus:(s.permAtkBonus||0)+_drb}):s)
       const nc=Math.min(100,corruption+10);setCorruption(nc);updStat('maxCorruption',nc,true)
-      msg='💀 Death Riff! ALL members +2 ATK permanently! Corruption +10%'
+      msg='💀 Death Riff! ALL members +'+_drb+' ATK permanently! Corruption +10%'
     }
     else if(card.id==='ampoverload'){
-      if(discardsLeft<=0){addLog('⚠ No discards left to sacrifice!');return false}
+      // UPGRADE: no discard cost. Base requires and consumes 1 discard.
+      if(!card.upgraded){
+        if(discardsLeft<=0){addLog('⚠ No discards left to sacrifice!');return false}
+        setDiscardsLeft(p=>Math.max(0,p-1))
+      }
       setEmbers(p=>Math.min(maxEmbers,p+3))
-      setDiscardsLeft(p=>Math.max(0,p-1))
       playEmber()
-      msg='🔋 Amp Overload! +3 Embers. -1 Discard.'
-      addFloat('+3 🔥 -1 DISCARD',getCenter(bossRef).x,getCenter(bossRef).y-70,'#ff6600')
+      msg='🔋 Amp Overload! +3 Embers.'+(card.upgraded?'':' -1 Discard.')
+      addFloat(card.upgraded?'+3 🔥':'+3 🔥 -1 DISCARD',getCenter(bossRef).x,getCenter(bossRef).y-70,'#ff6600')
     }
     else if(card.id==='ampstatic'){
       if(!m)return false
-      const bonus=corruption>=50?4:2
+      const bonus=corruption>=50?(card.upgraded?6:4):(card.upgraded?3:2)
       ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,tempBuff:true,_origAtk:m._origAtk||m.atk,buffCount:(m.buffCount||0)+1})
       msg='📶 Amp the Static! '+m.name+' +'+bonus+' ATK this Strike!'+(corruption>=50?' (≥50% corruption bonus!)':'')
       addFloat('+'+bonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#cc4400',bonus>=4)
     }
     else if(card.id==='distortion'){
       const nc=Math.min(100,corruption+15);setCorruption(nc);updStat('maxCorruption',nc,true)
-      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,tempBuff:true,_origAtk:m._origAtk||m.atk,buffCount:(m.buffCount||0)+1}):m)
-      msg='🎸 Distortion! Corruption +15%. All members +1 ATK.'
-      addFloat('+1 ATK',getCenter(bossRef).x,getCenter(bossRef).y-70,'#cc4400')
+      const _dib=card.upgraded?2:1
+      ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+_dib,tempBuff:true,_origAtk:m._origAtk||m.atk,buffCount:(m.buffCount||0)+1}):m)
+      msg='🎸 Distortion! Corruption +15%. All members +'+_dib+' ATK.'
+      addFloat('+'+_dib+' ATK',getCenter(bossRef).x,getCenter(bossRef).y-70,'#cc4400')
     }
     else if(card.id==='seance'){
       const healAmt=corruption>=50?6:3
       ns=ns.map(m=>m&&!m.tooStoned&&m.keyword!=='FALLEN'&&!m.cursed?Object.assign({},m,{hp:Math.min(m.maxHp,m.hp+healAmt)}):m)
-      msg='🔮 Séance! All members +'+healAmt+' HP'+(corruption>=50?' (≥50% corruption: bonus heal!)':'')
+      if(card.upgraded){ // UPGRADE: also revive a Too Stoned member
+        const _sri=ns.findIndex(x=>x&&x.tooStoned)
+        if(_sri>=0){const _sm=ns[_sri];const _sb=_sm._origAtk!==undefined?_sm._origAtk:_sm.atk;ns[_sri]=Object.assign({},_sm,{tooStoned:false,hp:_sm.maxHp,atk:_sb,_origAtk:undefined,tempBuff:false});addFloat('REVIVED',getCenter(stageRefs.current[_sri]).x,getCenter(stageRefs.current[_sri]).y-70,'#22aa44')}
+      }
+      msg='🔮 Séance! All members +'+healAmt+' HP'+(corruption>=50?' (≥50% corruption: bonus heal!)':'')+(card.upgraded?' + revive!':'')
       addFloat('+'+healAmt+' HP',getCenter(bossRef).x,getCenter(bossRef).y-70,'#22aa44')
     }
     else if(card.id==='staticcharge'){
-      const scBonus=corruption===0?4:2
+      const scBonus=corruption===0?(card.upgraded?6:4):2
       setEmbers(p=>Math.min(maxEmbers,p+scBonus));playEmber();spent=0
       msg='⚡ Static Charge! +'+scBonus+' Embers'+(corruption===0?' (pure signal bonus)':'')+'.'
       addFloat('+'+scBonus+' 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
@@ -6751,6 +6773,11 @@ function App(){
     else if(card.id==='darktuning'){
       const req=card.corrReq||40
       if(corruption<req){addLog('🌑 Need ≥'+req+'% Corruption for Dark Tuning! (you have '+Math.floor(corruption)+'%)');addFloat('🌑 Need '+req+'% Corruption',getCenter(bossRef).x,getCenter(bossRef).y-80,'#cc44ff',true);return false}
+      if(card.upgraded){ // UPGRADE: buff the WHOLE band +1 ATK perm
+        ns=ns.map(x=>x&&!x.tooStoned?Object.assign({},x,{atk:x.atk+1,permAtkBonus:(x.permAtkBonus||0)+1}):x)
+        msg='🌑 Dark Tuning! WHOLE band +1 ATK permanently!'
+        addFloat('+1 ATK all',getCenter(bossRef).x,getCenter(bossRef).y-80,'#6600aa',true)
+      } else {
       const memberCount=corruption>=70?3:2
       const activeSlots=ns.map((m,i)=>m&&!m.tooStoned?i:-1).filter(i=>i>=0)
       for(let i=0;i<Math.min(memberCount,activeSlots.length);i++){
@@ -6760,9 +6787,10 @@ function App(){
       }
       msg='🌑 Dark Tuning! '+memberCount+' random members +1 ATK permanently!'+(corruption>=70?' (≥70% = 3 members!)':'')
       addFloat('+1 ATK ×'+memberCount,getCenter(bossRef).x,getCenter(bossRef).y-80,'#6600aa',corruption>=70)
+      }
     }
     else if(card.id==='powertap'){
-      const ptBonus=activeArtifacts.some(a=>a.id==='a5')?3:2
+      const ptBonus=(activeArtifacts.some(a=>a.id==='a5')||card.upgraded)?3:2
       const p4Bonus=activePassives.some(p=>p.id==='p4')?1:0
       setEmbers(p=>Math.min(maxEmbers,p+ptBonus+p4Bonus));playEmber();spent=0
       msg='🔌 Power Tap! +'+(ptBonus+p4Bonus)+' Ember'+(ptBonus+p4Bonus>1?'s!':'!')
@@ -6770,7 +6798,8 @@ function App(){
     else if(card.id==='soundboard'){
       setEmbers(p=>Math.min(maxEmbers,p+2));playEmber();spent=0
       setPendingDraw(p=>p+1) // draw 1 extra card at start of next strike
-      msg='🎛 Soundboard! +2 Embers. Draw 1 extra card next Strike.'
+      if(card.upgraded){const _d=[...deckRef.current];const _drawn=_d.length>0?[_d.pop()]:[];setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._drawn]),0)} // UPGRADE: draw 1 now
+      msg='🎛 Soundboard! +2 Embers.'+(card.upgraded?' Draw 1 now +':' Draw')+' 1 extra card next Strike.'
       addFloat('+2 🔥 +1 DRAW',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
     }
     else if(card.id==='setbreak'){
@@ -6782,7 +6811,7 @@ function App(){
       // BALANCE (Jul 31 2026, JV): once per member per fight — self-compounding
       // +half-current-ATK stacking was the one-carry snowball that trivialized C3+.
       if(m._hrUsed){addLog('⚠ '+m.name+' already rode the Heavy Riff this fight!');return false}
-      const bonus=Math.min(20,Math.ceil((m.atk+(m.permAtkBonus||0))/2))+(card.upgraded?2:0)
+      const bonus=Math.min(20,Math.ceil((m.atk+(m.permAtkBonus||0))/2))+(card.upgraded?4:0)
       ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus,buffCount:(m.buffCount||0)+1,_hrUsed:true})
       addBuff(m.uid,'+'+bonus+' ATK','#9933cc');addFloat('+'+bonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#9933cc')
       msg='🥊 Heavy Riff! '+m.name+' +'+bonus+' ATK permanently! (half ATK, max +20)'
@@ -6791,14 +6820,14 @@ function App(){
       // REVIVED (Aug 6 2026): no longer spends 10 Stash (dead rate). Reliable
       // permanent ATK buff for 1 ember — the herb money already bought the gear.
       if(!m)return false
-      const buff=card.upgraded?4:3
+      const buff=card.upgraded?5:3
       ns[slotIdx]=Object.assign({},m,{atk:m.atk+buff,permAtkBonus:(m.permAtkBonus||0)+buff,buffCount:(m.buffCount||0)+1})
       addBuff(m.uid,'+'+buff+' ATK','#22aa44');addFloat('+'+buff+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#22aa44')
       msg='🌿 Herb Money! '+m.name+' +'+buff+' ATK permanently!'
     }
     else if(card.id==='goingbroke'){
       if(stash<=0){addLog('💸 You are already broke!');return false}
-      const brokeDmg=stash
+      const brokeDmg=stash*(card.upgraded?10:1)
       setStash(0)
       const bc=getCenter(bossRef)
       const gbHp=Math.max(0,enemyHp-brokeDmg);setEnemyHp(gbHp);if(gbHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
@@ -6810,7 +6839,7 @@ function App(){
     // ── UNLOCKABLE CARDS ─────────────────────────────────────────
     else if(card.id==='moshpit'){
       const alive=ns.filter(m=>m&&!m.tooStoned).length
-      const buff=alive>=4?2:1
+      const buff=(alive>=4?2:1)+(card.upgraded?1:0)
       ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+buff,permAtkBonus:(m.permAtkBonus||0)+buff,buffCount:(m.buffCount||0)+1}):m)
       msg='🤘 Mosh Pit! '+alive+' members — all gain +'+buff+' ATK permanently!'+(alive>=4?' (Full pit bonus!)':'')
     }
@@ -6829,7 +6858,7 @@ function App(){
     }
     else if(card.id==='resonancecard'){
       if(!m)return false
-      const maxAtk=Math.max(...ns.filter(mb=>mb&&!mb.tooStoned).map(mb=>mb.atk))
+      const maxAtk=Math.max(...ns.filter(mb=>mb&&!mb.tooStoned).map(mb=>mb.atk))+(card.upgraded?2:0)
       if(maxAtk<=m.atk){addLog('🌀 Already at max ATK!');return false}
       ns[slotIdx]=Object.assign({},m,{atk:maxAtk,tempBuff:true,_origAtk:m._origAtk||m.atk,buffCount:(m.buffCount||0)+1})
       msg='🌀 Resonance! '+m.name+' ATK → '+maxAtk+'!'
@@ -6908,7 +6937,7 @@ function App(){
       const lastCards=cardsPlayedRef.current;const lastId=lastCards.length>0?lastCards[lastCards.length-1]:null
       if(lastId&&!['echopedal','riffthief'].includes(lastId)){
         const lc=ALL_CARDS.find(c=>c.id===lastId)
-        if(lc){setHand(h=>[...h,Object.assign({},lc,{uid:uid()})]);nextCardFreeRef.current=true;setNextCardFree(true);msg='🔁 Echo Pedal! '+lc.name+' added to hand — play it FREE!'}
+        if(lc){setHand(h=>[...h,Object.assign({},lc,{uid:uid()})]);nextCardFreeRef.current=true;setNextCardFree(true);if(card.upgraded){const _d=[...deckRef.current];const _dr=_d.length>0?[_d.pop()]:[];setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._dr]),0)}msg='🔁 Echo Pedal! '+lc.name+' added to hand — play it FREE!'+(card.upgraded?' Draw 1!':'')}
         else msg='🔁 Echo Pedal — no valid card to echo'
       } else msg='🔁 Echo Pedal — nothing to replay yet'
     }
@@ -6916,19 +6945,19 @@ function App(){
       const lastCards=cardsPlayedRef.current;const lastId=lastCards.length>0?lastCards[lastCards.length-1]:null
       if(lastId&&!['echopedal','riffthief'].includes(lastId)){
         const lc=ALL_CARDS.find(c=>c.id===lastId)
-        if(lc){setHand(h=>[...h,Object.assign({},lc,{uid:uid()})]);nextCardFreeRef.current=true;setNextCardFree(true);msg='🎭 Riff Thief! Stole '+lc.name+' — play it FREE!'}
+        if(lc){setHand(h=>[...h,Object.assign({},lc,{uid:uid()})]);nextCardFreeRef.current=true;setNextCardFree(true);if(card.upgraded){const _d=[...deckRef.current];const _dr=_d.length>0?[_d.pop()]:[];setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._dr]),0)}msg='🎭 Riff Thief! Stole '+lc.name+' — play it FREE!'+(card.upgraded?' Draw 1!':'')}
         else msg='🎭 Riff Thief — nothing to steal'
       } else msg='🎭 Riff Thief — no card to copy'
     }
     else if(card.id==='feedbackscream'){
       if(!m)return false
-      ns[slotIdx]=Object.assign({},m,{atk:m.atk+4,permAtkBonus:(m.permAtkBonus||0)+4,hp:Math.max(1,m.hp-2)})
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+4,permAtkBonus:(m.permAtkBonus||0)+4,hp:card.upgraded?m.hp:Math.max(1,m.hp-2)}) // UPGRADE: no HP cost
       addFloat('+4 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#ff4444',true)
-      addFloat('-2 HP',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-40,'#ff0000',false)
-      msg='📢 Feedback Scream! '+m.name+' +4 ATK permanently! -2 HP.'
+      if(!card.upgraded)addFloat('-2 HP',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-40,'#ff0000',false)
+      msg='📢 Feedback Scream! '+m.name+' +4 ATK permanently!'+(card.upgraded?'':' -2 HP.')
     }
     else if(card.id==='skullsplitter'){
-      if(!m)return false;const bonus=(m.atk+(m.permAtkBonus||0))>=10?5:3
+      if(!m)return false;const bonus=card.upgraded?5:((m.atk+(m.permAtkBonus||0))>=10?5:3)
       ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus})
       addFloat('+'+bonus+' ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#cc2222',bonus>=5)
       msg='💀 Skull Splitter! '+m.name+' +'+bonus+' ATK permanently!'+(bonus>=5?' (10+ ATK bonus!)':'')
@@ -6936,25 +6965,32 @@ function App(){
     else if(card.id==='doomchord'){
       if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+4,tempBuff:true,buffCount:(m.buffCount||0)+1})
       addFloat('+4 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#6622aa',false)
-      if(corruption>=50){ns=ns.map((s,i)=>{if(s&&!s.tooStoned&&Math.abs(i-slotIdx)===1)return Object.assign({},s,{atk:s.atk+4,tempBuff:true,buffCount:(s.buffCount||0)+1});return s});msg='🎵 Doom Chord! +4 ATK to '+m.name+' AND adjacent! (≥50% corruption)'}
+      if(corruption>=(card.upgraded?30:50)){ns=ns.map((s,i)=>{if(s&&!s.tooStoned&&Math.abs(i-slotIdx)===1)return Object.assign({},s,{atk:s.atk+4,tempBuff:true,buffCount:(s.buffCount||0)+1});return s});msg='🎵 Doom Chord! +4 ATK to '+m.name+' AND adjacent! (≥'+(card.upgraded?30:50)+'% corruption)'}
       else msg='🎵 Doom Chord! '+m.name+' +4 ATK!'
     }
     else if(card.id==='bloodharmony'){
       // Batch C: now PERMANENT +2 to target + both neighbours (positional board-builder).
-      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2,buffCount:(m.buffCount||0)+1})
-      ns=ns.map((s,i)=>{if(s&&!s.tooStoned&&Math.abs(i-slotIdx)===1)return Object.assign({},s,{atk:s.atk+2,permAtkBonus:(s.permAtkBonus||0)+2,buffCount:(s.buffCount||0)+1});return s})
-      msg='🩸 Blood Harmony! '+m.name+' + adjacent +2 ATK permanently!'
+      if(!m)return false
+      if(card.upgraded){ // UPGRADE: +2 ATK perm to the WHOLE band
+        ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+2,permAtkBonus:(s.permAtkBonus||0)+2,buffCount:(s.buffCount||0)+1}):s)
+        msg='🩸 Blood Harmony! WHOLE band +2 ATK permanently!'
+      } else {
+        ns[slotIdx]=Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2,buffCount:(m.buffCount||0)+1})
+        ns=ns.map((s,i)=>{if(s&&!s.tooStoned&&Math.abs(i-slotIdx)===1)return Object.assign({},s,{atk:s.atk+2,permAtkBonus:(s.permAtkBonus||0)+2,buffCount:(s.buffCount||0)+1});return s})
+        msg='🩸 Blood Harmony! '+m.name+' + adjacent +2 ATK permanently!'
+      }
     }
     else if(card.id==='sonicboom'){
-      ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+2,tempBuff:true,buffCount:(s.buffCount||0)+1}):s)
+      const _sbb=card.upgraded?3:2
+      ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+_sbb,tempBuff:true,_origAtk:s._origAtk!==undefined?s._origAtk:s.atk,buffCount:(s.buffCount||0)+1}):s)
       // RULE 1 fix (was setHand inside setDeck).
       const _d=[...deckRef.current];const _drawn=_d.length>0?[_d.pop()]:[]
       setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._drawn]),0)
-      msg='💥 Sonic Boom! ALL members +2 ATK! Draw 1!'
+      msg='💥 Sonic Boom! ALL members +'+_sbb+' ATK! Draw 1!'
     }
     else if(card.id==='tremolopick'){
       // Riff Barrage (synergy): +2 ATK to ALL members per RIFF already played this Strike (max +12).
-      const _rbRiffs=cardsPlayedRef.current.filter(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c&&c.type==='RIFF'}).length
+      const _rbRiffs=cardsPlayedRef.current.filter(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c&&c.type==='RIFF'}).length+(card.upgraded?1:0) // UPGRADE: counts itself
       const _rbB=Math.min(12,_rbRiffs*2)
       ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+_rbB,tempAtkBonus:(m.tempAtkBonus||0)+_rbB,buffCount:(m.buffCount||0)+1}):m)
       msg='⚡ Riff Barrage! All members +'+_rbB+' ATK! ('+_rbRiffs+' RIFFs played)'
@@ -6962,11 +6998,12 @@ function App(){
     else if(card.id==='harmonicfb'){
       if(!m)return false;const riffCount=cardsPlayedRef.current.filter(id=>{const c=ALL_CARDS.find(x=>x.id===id);return c&&c.type==='RIFF'}).length
       const bonus=Math.max(1,riffCount);ns[slotIdx]=Object.assign({},m,{atk:m.atk+bonus,permAtkBonus:(m.permAtkBonus||0)+bonus})
+      if(card.upgraded){const _d=[...deckRef.current];const _dr=_d.length>0?[_d.pop()]:[];setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._dr]),0)} // UPGRADE: draw 1
       msg='🎶 Harmonic Feedback! '+m.name+' +'+bonus+' ATK perm! ('+riffCount+' RIFFs played)'
     }
     else if(card.id==='shredsolo'){
-      if(!m)return false;ns[slotIdx]=Object.assign({},m,{encoreReady:true})
-      addBuff(m.uid,'SHRED','#ff4400');msg='🎸 Shred Solo! '+m.name+' attacks TWICE this strike!'
+      if(!m)return false;ns[slotIdx]=card.upgraded?Object.assign({},m,{encoreReady:true,atk:m.atk+2,tempBuff:true,_origAtk:m._origAtk!==undefined?m._origAtk:m.atk,buffCount:(m.buffCount||0)+1}):Object.assign({},m,{encoreReady:true})
+      addBuff(m.uid,'SHRED','#ff4400');msg='🎸 Shred Solo! '+m.name+' attacks TWICE this strike!'+(card.upgraded?' (+2 ATK)':'')
     }
     else if(card.id==='overdriveped'){
       setStrikeMult(p=>Math.min(10000,Math.round(p*1.5*100)/100));strikeMultRef.current=Math.min(10000,Math.round(strikeMultRef.current*1.5*100)/100)
@@ -6974,90 +7011,98 @@ function App(){
     }
     else if(card.id==='devilsdice'){
       const roll=Math.floor(Math.random()*6)+1
-      if(roll<=2){msg='🎲 Devil\'s Dice: rolled '+roll+'. Nothing happens!'}
-      else if(roll<=4){ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+3,tempBuff:true}):s);msg='🎲 Devil\'s Dice: rolled '+roll+'! ALL +3 ATK!'}
+      if(roll<=(card.upgraded?1:2)){msg='🎲 Devil\'s Dice: rolled '+roll+'. Nothing happens!'}
+      else if(roll<=(card.upgraded?3:4)){ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+3,tempBuff:true}):s);msg='🎲 Devil\'s Dice: rolled '+roll+'! ALL +3 ATK!'}
       else{ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+5,tempBuff:true}):s);const _dd=[...deckRef.current];const _ddr=_dd.splice(Math.max(0,_dd.length-2));setDeck(_dd);setTimeout(()=>setHand(h=>[...h,..._ddr]),0);msg='🎲 Devil\'s Dice: rolled '+roll+'! ALL +5 ATK + draw 2! JACKPOT!'}
     }
     else if(card.id==='necroticamp'){
-      const bonus=Math.floor(corruption/20);ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+bonus,tempBuff:true}):s)
-      msg='☠️ Necrotic Amp! ALL +'+bonus+' ATK! ('+Math.floor(corruption)+'% corruption ÷ 20)'
+      const bonus=Math.floor(corruption/20)*(card.upgraded?2:1);ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+bonus,tempBuff:true}):s)
+      msg='☠️ Necrotic Amp! ALL +'+bonus+' ATK! ('+Math.floor(corruption)+'% corruption)'
     }
     else if(card.id==='soulbargain'){
-      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+5,tempBuff:true,hp:Math.max(1,m.hp-3),buffCount:(m.buffCount||0)+1})
+      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+5,tempBuff:true,_origAtk:m._origAtk!==undefined?m._origAtk:m.atk,hp:card.upgraded?m.hp:Math.max(1,m.hp-3),buffCount:(m.buffCount||0)+1}) // UPGRADE: no HP cost
       setCorruption(p=>Math.min(100,p+5))
       addFloat('+5 ATK',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#8800cc',true)
-      addFloat('-3 HP',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-40,'#ff0000',false)
-      msg='👿 Soul Bargain! '+m.name+' +5 ATK, -3 HP! Corruption +5%'
+      if(!card.upgraded)addFloat('-3 HP',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-40,'#ff0000',false)
+      msg='👿 Soul Bargain! '+m.name+' +5 ATK'+(card.upgraded?'':', -3 HP')+'! Corruption +5%'
     }
     else if(card.id==='venomriff'){
       if(!m)return false
-      ns[slotIdx]=Object.assign({},m,{atk:m.atk+3,permAtkBonus:(m.permAtkBonus||0)+3})
+      {const _vb=card.upgraded?4:3;ns[slotIdx]=Object.assign({},m,{atk:m.atk+_vb,permAtkBonus:(m.permAtkBonus||0)+_vb})
       setCorruption(p=>Math.min(100,p+5))
-      addFloat('+3 ATK permanently',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#44aa44',false)
-      msg='🐍 Venom Riff! '+m.name+' +3 ATK permanently! Corruption +5%'
+      addFloat('+'+_vb+' ATK permanently',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#44aa44',false)
+      msg='🐍 Venom Riff! '+m.name+' +'+_vb+' ATK permanently! Corruption +5%'}
     }
     else if(card.id==='offeringpit'){
-      if(!m)return false;const alive=ns.filter(s=>s&&!s.tooStoned&&s.uid!==m.uid)
-      if(alive.length===0){msg='🕳️ No other member to receive the offering!';return false}
-      const target=alive[Math.floor(Math.random()*alive.length)];const tidx=ns.indexOf(target)
+      if(!m)return false
+      let target,tidx
+      if(card.upgraded){ // UPGRADE: choose the member (the drop target) instead of random OTHER
+        target=m;tidx=slotIdx
+      } else {
+        const alive=ns.filter(s=>s&&!s.tooStoned&&s.uid!==m.uid)
+        if(alive.length===0){msg='🕳️ No other member to receive the offering!';return false}
+        target=alive[Math.floor(Math.random()*alive.length)];tidx=ns.indexOf(target)
+      }
       ns[tidx]=Object.assign({},target,{atk:target.atk+8,tempBuff:true,buffCount:(target.buffCount||0)+1})
       setCorruption(p=>Math.min(100,p+10))
-      msg='🕳️ Offering! '+m.name+' skips attack, '+target.name+' +8 ATK! Corruption +10%'
+      msg='🕳️ Offering! '+target.name+' +8 ATK! Corruption +10%'
     }
     else if(card.id==='cursedstrings'){
       // 3B: +6 ATK this strike (fixed the never-expire bug: tempBuff now carries _origAtk),
       // and the `cursed` flag is now actually read by every heal site this fight.
-      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+6,tempBuff:true,_origAtk:m._origAtk!==undefined?m._origAtk:m.atk,buffCount:(m.buffCount||0)+1,cursed:true})
-      msg='🪡 Cursed Strings! '+m.name+" +6 ATK — but can't be healed this fight!"
+      if(!m)return false;ns[slotIdx]=Object.assign({},m,{atk:m.atk+6,tempBuff:true,_origAtk:m._origAtk!==undefined?m._origAtk:m.atk,buffCount:(m.buffCount||0)+1,cursed:card.upgraded?m.cursed:true}) // UPGRADE: no heal-lock
+      msg='🪡 Cursed Strings! '+m.name+(card.upgraded?' +6 ATK!':" +6 ATK — but can't be healed this fight!")
     }
     else if(card.id==='hexdecay'){
-      const dmg=Math.floor(enemyHp*0.15);const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp)
+      const _hxp=card.upgraded?0.20:0.15;const dmg=Math.floor(enemyHp*_hxp);const newHp=Math.max(0,enemyHp-dmg);setEnemyHp(newHp)
       setCorruption(p=>Math.min(100,p+15));const bc=getCenter(bossRef)
       addFloat(dmg,bc.x,bc.y-60,'#448844',true);playHit();updStat('totalDamage',dmg)
       if(newHp<=0)setTimeout(()=>{if(triggerVictoryRef.current)triggerVictoryRef.current()},500)
-      msg='🦠 Hex of Decay! Boss loses 15% HP ('+dmg+' damage)! Corruption +15%'
+      msg='🦠 Hex of Decay! Boss loses '+Math.round(_hxp*100)+'% HP ('+dmg+' damage)! Corruption +15%'
     }
     else if(card.id==='infernalpact'){
       setCorruption(66);updStat('maxCorruption',66,true)
-      ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+2,permAtkBonus:(s.permAtkBonus||0)+2}):s)
-      msg='📜 Infernal Pact! Corruption → 66%! ALL members +2 ATK permanently!'
+      {const _ipb=card.upgraded?3:2;ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+_ipb,permAtkBonus:(s.permAtkBonus||0)+_ipb}):s)
+      msg='📜 Infernal Pact! Corruption → 66%! ALL members +'+_ipb+' ATK permanently!'}
     }
     else if(card.id==='carrioncall'){
       const stoned=ns.findIndex(s=>s&&s.tooStoned)
       if(stoned===-1){msg='🦅 No stoned members to revive!';return false}
-      ns[stoned]=Object.assign({},ns[stoned],{tooStoned:false,hp:1,atk:ns[stoned].atk+5,permAtkBonus:(ns[stoned].permAtkBonus||0)+5})
+      const _ccHp=card.upgraded?Math.max(1,Math.floor(ns[stoned].maxHp/2)):1 // UPGRADE: revive at HALF max HP
+      ns[stoned]=Object.assign({},ns[stoned],{tooStoned:false,hp:_ccHp,atk:ns[stoned].atk+5,permAtkBonus:(ns[stoned].permAtkBonus||0)+5})
       setCorruption(p=>Math.min(100,p+20))
-      msg='🦅 Carrion Call! '+ns[stoned].name+' rises from the dead at 1 HP +5 ATK! Corruption +20%'
+      msg='🦅 Carrion Call! '+ns[stoned].name+' rises from the dead at '+_ccHp+' HP +5 ATK! Corruption +20%'
     }
     else if(card.id==='possessionriff'){
       if(!m)return false
-      ns[slotIdx]=Object.assign({},m,{atk:m.atk+20,tempBuff:true,buffCount:(m.buffCount||0)+1})
-      setCorruption(p=>Math.min(100,p+10))
+      ns[slotIdx]=Object.assign({},m,{atk:m.atk+20,tempBuff:true,_origAtk:m._origAtk!==undefined?m._origAtk:m.atk,buffCount:(m.buffCount||0)+1})
+      if(!card.upgraded)setCorruption(p=>Math.min(100,p+10)) // UPGRADE: no Corruption cost
       addFloat('+20 ATK!',getCenter(stageRefs.current[slotIdx]).x,getCenter(stageRefs.current[slotIdx]).y-70,'#aa44cc',true)
-      msg='👁️ POSSESSION! '+m.name+' +20 ATK this strike! Corruption +10%'
+      msg='👁️ POSSESSION! '+m.name+' +20 ATK this strike!'+(card.upgraded?'':' Corruption +10%')
     }
     else if(card.id==='darkcrescendo'){
-      if(corruption>=80){setStrikeMult(p=>Math.min(10000,Math.round(p*3*100)/100));strikeMultRef.current=Math.min(10000,Math.round(strikeMultRef.current*3*100)/100);msg='🌑 DARK CRESCENDO! TRIPLE STRIKE MULTIPLIER! ('+corruption+'% corruption)'}
-      else msg='🌑 Dark Crescendo... corruption too low ('+Math.floor(corruption)+'%, need 80%)'
+      if(corruption>=(card.upgraded?60:80)){setStrikeMult(p=>Math.min(10000,Math.round(p*3*100)/100));strikeMultRef.current=Math.min(10000,Math.round(strikeMultRef.current*3*100)/100);msg='🌑 DARK CRESCENDO! TRIPLE STRIKE MULTIPLIER! ('+corruption+'% corruption)'}
+      else msg='🌑 Dark Crescendo... corruption too low ('+Math.floor(corruption)+'%, need '+(card.upgraded?60:80)+'%)'
     }
     // ═══ CORRUPTION GAMBIT CARDS — insane power, insane corruption cost ═══
     else if(card.id==='hellfirerift'){
-      ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*2,tempBuff:true}):s);setCorruption(p=>Math.min(100,p+20))
-      msg='🌋 HELLFIRE RIFT! ALL MEMBERS ×2 ATK! +20% CORRUPTION!';addFloat('×2 ALL ATK!',getCenter(bossRef).x,getCenter(bossRef).y-120,'#ff2200',true)
+      {const _hfm=card.upgraded?2.5:2;ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk*_hfm,tempBuff:true,_origAtk:s._origAtk!==undefined?s._origAtk:s.atk}):s);setCorruption(p=>Math.min(100,p+20))
+      msg='🌋 HELLFIRE RIFT! ALL MEMBERS ×'+_hfm+' ATK! +20% CORRUPTION!';addFloat('×'+_hfm+' ALL ATK!',getCenter(bossRef).x,getCenter(bossRef).y-120,'#ff2200',true)}
     }
     else if(card.id==='soulsacrifice'){
-      ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+5,permAtkBonus:(s.permAtkBonus||0)+5,buffCount:(s.buffCount||0)+1}):s);setCorruption(p=>Math.min(100,p+15))
-      msg='⚰️ SOUL SACRIFICE! ALL +5 ATK PERMANENT! +15% CORRUPTION!';addFloat('+5 ALL PERM!',getCenter(bossRef).x,getCenter(bossRef).y-120,'#cc0044',true)
+      {const _ssc=card.upgraded?10:15;ns=ns.map(s=>s&&!s.tooStoned?Object.assign({},s,{atk:s.atk+5,permAtkBonus:(s.permAtkBonus||0)+5,buffCount:(s.buffCount||0)+1}):s);setCorruption(p=>Math.min(100,p+_ssc))
+      msg='⚰️ SOUL SACRIFICE! ALL +5 ATK PERMANENT! +'+_ssc+'% CORRUPTION!';addFloat('+5 ALL PERM!',getCenter(bossRef).x,getCenter(bossRef).y-120,'#cc0044',true)}
     }
     else if(card.id==='voidpact'){
       setStrikeMult(p=>Math.min(10000,Math.round(p*2.5*100)/100));strikeMultRef.current=Math.min(10000,Math.round(strikeMultRef.current*2.5*100)/100);setCorruption(p=>Math.min(100,p+25))
-      msg='🕳 VOID PACT! STRIKE MULTIPLIER ×2.5! +25% CORRUPTION!';addFloat('×2.5 MULT!',getCenter(bossRef).x,getCenter(bossRef).y-120,'#8800ff',true)
+      if(card.upgraded){const _d=[...deckRef.current];const _dr=_d.splice(Math.max(0,_d.length-2));setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._dr]),0)} // UPGRADE: draw 2
+      msg='🕳 VOID PACT! STRIKE MULTIPLIER ×2.5! +25% CORRUPTION!'+(card.upgraded?' Draw 2!':'');addFloat('×2.5 MULT!',getCenter(bossRef).x,getCenter(bossRef).y-120,'#8800ff',true)
     }
     else if(card.id==='russianroulette'){
       if(!m)return false;const roll=Math.floor(Math.random()*6)+1
       if(roll===1){ns[slotIdx]=Object.assign({},m,{tooStoned:true,hp:0});msg='🔫 Russian Roulette: '+m.name+' rolled 1... TOO STONED! 💨'}
-      else if(roll<=5){ns[slotIdx]=Object.assign({},m,{atk:m.atk+4,tempBuff:true});msg='🔫 Russian Roulette: '+m.name+' rolled '+roll+'! +4 ATK!'}
-      else{ns[slotIdx]=Object.assign({},m,{atk:m.atk+8,tempBuff:true,stoneShield:2});msg='🔫 Russian Roulette: '+m.name+' rolled 6! +8 ATK + Shield! 🛡️'}
+      else if(roll<=5){const _rrb=card.upgraded?6:4;ns[slotIdx]=Object.assign({},m,{atk:m.atk+_rrb,tempBuff:true,_origAtk:m._origAtk!==undefined?m._origAtk:m.atk});msg='🔫 Russian Roulette: '+m.name+' rolled '+roll+'! +'+_rrb+' ATK!'}
+      else{const _rrb=card.upgraded?10:8;ns[slotIdx]=Object.assign({},m,{atk:m.atk+_rrb,tempBuff:true,_origAtk:m._origAtk!==undefined?m._origAtk:m.atk,stoneShield:2});msg='🔫 Russian Roulette: '+m.name+' rolled 6! +'+_rrb+' ATK + Shield! 🛡️'}
     }
     else if(card.id==='gearcheck'){
       // Feedback Engine (synergy): ×strikeMult scaling with DISTINCT cards played this Strike — the combo engine.
@@ -7074,17 +7119,22 @@ function App(){
       if(_top.length>0){
         let _wi=0;for(let i=1;i<_top.length;i++){if((_top[i].embers||0)>(_top[_wi].embers||0))_wi=i}
         const _tossed=_top.splice(_wi,1)[0]
-        _d.push(..._top);setDeck(_d);setDiscardPile(p=>[...p,_tossed])
+        _d.push(..._top)
+        let _slrDrawn=[]
+        if(card.upgraded&&_d.length>0){_slrDrawn=[_d.pop()]} // UPGRADE: also draw 1
+        setDeck(_d);setDiscardPile(p=>[...p,_tossed])
+        if(_slrDrawn.length>0)setTimeout(()=>setHand(h=>[...h,..._slrDrawn]),0)
         setSetlistRewriteUsed(true)
-        msg='📝 Setlist Rewrite! Tossed '+_tossed.name+', kept '+_top.length+' on top.'
+        msg='📝 Setlist Rewrite! Tossed '+_tossed.name+', kept '+_top.length+' on top.'+(card.upgraded?' Draw 1.':'')
       }else{msg='📝 Setlist Rewrite! Deck is empty.'}
     }
     else if(card.id==='backstagepass'){
-      nextCardFreeRef.current=true;setNextCardFree(true)
+      if(card.upgraded){freeCardsLeftRef.current=(freeCardsLeftRef.current||0)+2;setFreeCardsLeft(p=>(p||0)+2)} // UPGRADE: next TWO cards free
+      else{nextCardFreeRef.current=true;setNextCardFree(true)}
       // RULE 1 fix (was setHand inside setDeck).
       const _d=[...deckRef.current];const _drawn=_d.length>0?[_d.pop()]:[]
       setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._drawn]),0)
-      msg='🎫 Backstage Pass! Next card is FREE! Draw 1!'
+      msg='🎫 Backstage Pass! Next '+(card.upgraded?'TWO cards are':'card is')+' FREE! Draw 1!'
     }
     else if(card.id==='venueswap'){
       // ── Aug 4 2026 PARITY FIX (measured by e2e/test-card-parity.cjs) ──────
@@ -7107,7 +7157,8 @@ function App(){
       // after applyCard returns, which REPLACES any hand update queued here. Land
       // the fresh hand after it, the same way the Copier signature does (~6845).
       setTimeout(()=>setHand(_res.h),0)
-      msg='🏟️ Venue Swap! Hand shuffled away — drew 6 fresh cards!'
+      if(card.upgraded)setEmbers(p=>Math.min(maxEmbers,p+2)) // UPGRADE: also gain 2 Embers
+      msg='🏟️ Venue Swap! Hand shuffled away — drew 6 fresh cards!'+(card.upgraded?' +2 Embers!':'')
     }
     else if(card.id==='doublebooking'){
       setStrikesLeft(p=>p+1);setFightMaxStrikes(p=>p+1)
@@ -7121,39 +7172,42 @@ function App(){
       // was a 1-ember no-op. Measured live: hand 6 -> 5, no copy anywhere.
       // Land the copy after the caller's setHand, like the Copier signature (~6845).
       const _src=hand.length>1?hand.filter(c=>c.id!=='bootlegcopy')[0]:null
-      if(_src){const _copy=Object.assign({},_src,{uid:uid()});setTimeout(()=>setHand(h=>[...h,_copy]),0)}
-      msg=_src?'📀 Bootleg Copy! Copied best card in hand!':'📀 Bootleg Copy! Nothing to copy.'
+      // UPGRADE: the copy goes to HAND now; base sends it to the DECK (per card text).
+      if(_src){const _copy=Object.assign({},_src,{uid:uid()});if(card.upgraded)setTimeout(()=>setHand(h=>[...h,_copy]),0);else setDeck(d=>[...d,_copy])}
+      msg=_src?(card.upgraded?'📀 Bootleg Copy! Copied to HAND — play it now!':'📀 Bootleg Copy! Copied into your deck!'):'📀 Bootleg Copy! Nothing to copy.'
     }
     else if(card.id==='secondwind'){
       const gain=maxEmbers-embers;setEmbers(maxEmbers)
-      const _d=[...deckRef.current];const _drawn=_d.length>0?[_d.pop()]:[]
+      const _swn=card.upgraded?2:1 // UPGRADE: draw 2 (was 1)
+      const _d=[...deckRef.current];const _drawn=_d.splice(Math.max(0,_d.length-_swn))
       setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._drawn]),0)
-      msg='💨 Second Wind! +'+gain+' embers (max) + drew 1!'
+      msg='💨 Second Wind! +'+gain+' embers (max) + drew '+_swn+'!'
     }
     else if(card.id==='pyromaniac'){
-      setEmbers(p=>Math.min(maxEmbers,p+2));setPyromaniacActive(true)
-      msg='🧨 Pyromaniac! +2 embers! Spend ALL before Strike → +3 ATK to all!'
+      {const _pyb=card.upgraded?3:2;setEmbers(p=>Math.min(maxEmbers,p+_pyb));setPyromaniacActive(true)
+      msg='🧨 Pyromaniac! +'+_pyb+' embers! Spend ALL before Strike → +3 ATK to all!'}
     }
     else if(card.id==='slowburn'){
       setEmbers(p=>Math.min(maxEmbers,p+2));setSlowBurnStrikes(p=>p+2)
-      msg='🕯️ Slow Burn! +2 embers now, +2 per strike for next 2 strikes.'
+      if(card.upgraded){const _d=[...deckRef.current];const _dr=_d.length>0?[_d.pop()]:[];setDeck(_d);setTimeout(()=>setHand(h=>[...h,..._dr]),0)} // UPGRADE: draw 1 now
+      msg='🕯️ Slow Burn! +2 embers now, +2 per strike for next 2 strikes.'+(card.upgraded?' Draw 1.':'')
     }
     else if(card.id==='ampfeedback'){
-      setEmbers(p=>Math.min(maxEmbers,p+2));setAmpFeedbackDiscount(1)
-      msg='🔌 Amp Feedback! +2 embers. Next RIFF costs 1 less.'
+      setEmbers(p=>Math.min(maxEmbers,p+2));setAmpFeedbackDiscount(card.upgraded?99:1) // UPGRADE: next RIFF FREE (99=full discount)
+      msg='🔌 Amp Feedback! +2 embers. Next RIFF '+(card.upgraded?'is FREE.':'costs 1 less.')
     }
     else if(card.id==='drainthecrowd'){
       // Death's Bargain (synergy): +1 ATK to all per 10% of the band's total HP that is MISSING (comeback).
       const _dbAlive=ns.filter(s=>s&&!s.tooStoned)
       let _dbCur=0,_dbMax=0;for(const s of _dbAlive){_dbCur+=s.hp;_dbMax+=(s.maxHp||s.hp)}
       const _dbMissing=_dbMax>0?(_dbMax-_dbCur)/_dbMax:0
-      const _dbB=Math.floor(_dbMissing*10)
+      const _dbB=Math.floor(_dbMissing*(card.upgraded?12.5:10)) // UPGRADE: +1 per 8% missing (was 10%)
       ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+_dbB,tempAtkBonus:(m.tempAtkBonus||0)+_dbB,buffCount:(m.buffCount||0)+1}):m)
       msg='🧛 Death\'s Bargain! All members +'+_dbB+' ATK! ('+Math.round(_dbMissing*100)+'% band HP missing)'
     }
     else if(card.id==='corrsiphon'){
       // Corruption Nexus (synergy): +1 ATK to all per 10% Corruption — scales with a corruption build.
-      const _cnB=Math.floor(corruption/10)
+      const _cnB=Math.floor(corruption/10)*(card.upgraded?2:1) // UPGRADE: +2 per 10% (was +1)
       ns=ns.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+_cnB,tempAtkBonus:(m.tempAtkBonus||0)+_cnB,buffCount:(m.buffCount||0)+1}):m)
       msg='🌀 Corruption Nexus! All members +'+_cnB+' ATK (from '+corruption+'% Corruption)!'
     }
@@ -7279,7 +7333,7 @@ function App(){
           tabletFiredRef.current=true
           // Find an upgradeable card from current deck/hand/discard that isn't already upgraded
           const allDeckCards=[...deckRef.current,...hand,...discRef.current]
-          const upgradeable=allDeckCards.filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i).filter(c=>!c.consumable&&CARD_UPGRADES[c.id]&&!upgradedCards.includes(c.id))
+          const upgradeable=allDeckCards.filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i).filter(c=>CARD_UPGRADES[c.id]&&!upgradedCards.includes(c.id))
           if(upgradeable.length>0){
             const target=upgradeable[Math.floor(Math.random()*upgradeable.length)]
             setUpgradedCards(p=>[...p,target.id])
@@ -7378,8 +7432,9 @@ function App(){
       setDiscardPile(p=>[...p,card,victim])
       setSelected([])
       setEmbers(p=>Math.min(maxEmbers,p+3-effectiveEmbers))
-      setCorruption(p=>Math.max(0,p-15))
-      addLog('🎼 Smoke Break! '+victim.name+' discarded. +3 Embers. -15% Corruption. Drew 1 card.'+(preSelected.length===0?' (tip: select a card first)':''))
+      const _sbPurge=card.upgraded?25:15 // UPGRADE: -25% Corruption (was -15%)
+      setCorruption(p=>Math.max(0,p-_sbPurge))
+      addLog('🎼 Smoke Break! '+victim.name+' discarded. +3 Embers. -'+_sbPurge+'% Corruption.'+(preSelected.length===0?' (tip: select a card first)':''))
       addFloat('+3 🔥',getCenter(bossRef).x,getCenter(bossRef).y-70,'#e8a820')
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
@@ -7404,9 +7459,10 @@ function App(){
       const handWithout=hand.filter(c=>c.uid!==card.uid)
       const res=drawUpTo(handWithout,deckRef.current,[...discRef.current,card],handWithout.length+1)
       setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
-      setEmbers(p=>Math.min(maxEmbers,p+2+p4Bonus-effectiveEmbers))
-      addLog('🍯 Groupie! +2 Embers, drew 1 card.')
-      addFloat('+2 🔥 +1 card',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')
+      const _grEb=card.upgraded?3:2 // UPGRADE: +3 Embers (was +2)
+      setEmbers(p=>Math.min(maxEmbers,p+_grEb+p4Bonus-effectiveEmbers))
+      addLog('🍯 Groupie! +'+_grEb+' Embers, drew 1 card.')
+      addFloat('+'+_grEb+' 🔥 +1 card',getCenter(bossRef).x,getCenter(bossRef).y-80,'#ff6600')
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
     const _mp=getMasteryPlays(card.id);const _milestones=[10,25,50,100,250,500]
@@ -7450,7 +7506,7 @@ function App(){
       if(nextCardFreeRef.current)setNextCardFree(false)
       const toDiscard=selected.filter(uid=>uid!==card.uid).slice(0,3)
       const discardCount=toDiscard.length
-      const drawCount=discardCount+1
+      const drawCount=discardCount+(card.upgraded?2:1) // UPGRADE: discarded +2 (was +1)
       const remainingHand=hand.filter(c=>c.uid!==card.uid&&!toDiscard.includes(c.uid))
       const discarded=hand.filter(c=>toDiscard.includes(c.uid))
       const res=drawUpTo(remainingHand,deckRef.current,[...discRef.current,card,...discarded],remainingHand.length+drawCount)
@@ -7479,11 +7535,12 @@ function App(){
       if(nextCardFreeRef.current)setNextCardFree(false)
       const toDelete=hand.find(c=>c.uid===toDeleteUid)
       const handAfterDelete=hand.filter(c=>c.uid!==toDeleteUid&&c.uid!==card.uid)
-      const res=drawUpTo(handAfterDelete,deckRef.current,[...discRef.current,card,toDelete],handAfterDelete.length+3)
+      const _rmN=card.upgraded?4:3 // UPGRADE: draw 4 (was 3)
+      const res=drawUpTo(handAfterDelete,deckRef.current,[...discRef.current,card,toDelete],handAfterDelete.length+_rmN)
       setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
       setSelected([])
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
-      addLog('🎙 Remastered! Deleted '+toDelete.name+', drew 3.')
+      addLog('🎙 Remastered! Deleted '+toDelete.name+', drew '+_rmN+'.')
       addFloat('🎙 -1 +3 CARDS',getCenter(bossRef).x,getCenter(bossRef).y-80,'#22aa44',true)
       updStat('cardsPlayed',1);addMasteryPlays(card.id,1)
     // #4: MASTERY MILESTONE POPS
@@ -7510,19 +7567,20 @@ function App(){
       if(effectiveEmbers>0&&embers<effectiveEmbers){addLog('⚠ Need '+effectiveEmbers+' Embers.');setDragCardUid(null);setDragHandIdx(null);setDragOverHandIdx(null);return}
       if(nextCardFreeRef.current)setNextCardFree(false)
       const handWithout=hand.filter(c=>c.uid!==card.uid)
+      const _sdN=card.upgraded?3:2 // UPGRADE: draw 3 (was 2)
       if(handWithout.length===0){
-        // No cards to discard, just draw 2
-        const res=drawUpTo(handWithout,deckRef.current,[...discRef.current,card],handWithout.length+2)
+        // No cards to discard, just draw
+        const res=drawUpTo(handWithout,deckRef.current,[...discRef.current,card],handWithout.length+_sdN)
         setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
-        addLog('📡 Signal Decay! Drew 2 cards.')
+        addLog('📡 Signal Decay! Drew '+_sdN+' cards.')
       } else {
-        // Discard 1 random, draw 2
+        // Discard 1 random, draw
         const victimIdx=Math.floor(Math.random()*handWithout.length)
         const victim=handWithout[victimIdx]
         const remaining=handWithout.filter((_,i)=>i!==victimIdx)
-        const res=drawUpTo(remaining,deckRef.current,[...discRef.current,card,victim],remaining.length+2)
+        const res=drawUpTo(remaining,deckRef.current,[...discRef.current,card,victim],remaining.length+_sdN)
         setHand(res.h);setDeck(res.d);setDiscardPile(res.disc)
-        addLog('📡 Signal Decay! Discarded '+victim.name+', drew 2 cards.')
+        addLog('📡 Signal Decay! Discarded '+victim.name+', drew '+_sdN+' cards.')
       }
       setSelected([])
       if(effectiveEmbers>0){setEmbers(p=>p-effectiveEmbers);embersSpentThisFightRef.current+=effectiveEmbers}
@@ -7573,7 +7631,7 @@ function App(){
       // Fix: removed the on-play branch entirely. Card flows through the
       // normal "to discard" path. perDupe still fires at strike time.
       setHand(remaining)
-      if(card.consumable){
+      if(card.consumable&&!card.upgraded){ // UPGRADE (sabbathsigil): NOT destroyed — reusable
         addLog('⛧ '+card.name+' shatters and vanishes from your deck!')
         addFloat('CONSUMED!',getCenter(bossRef).x,getCenter(bossRef).y-110,'#ff4400',true)
       } else {
@@ -11708,7 +11766,7 @@ function App(){
   )
   if(gameState==='campfire'){
     const allDeckCards=[...deck,...hand,...discardPile]
-    const uniqueUpgradeable=allDeckCards.filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i).filter(c=>!c.consumable&&CARD_UPGRADES[c.id]&&!upgradedCards.includes(c.id))
+    const uniqueUpgradeable=allDeckCards.filter((c,i,a)=>a.findIndex(x=>x.id===c.id)===i).filter(c=>CARD_UPGRADES[c.id]&&!upgradedCards.includes(c.id))
     return(
     <div style={{position:'absolute',top:-2,left:-2,right:-2,bottom:-2,zIndex:9800,background:'#040201',display:'flex',flexDirection:'column',alignItems:'center',gap:12,padding:'24px 40px',overflow:'hidden'}}>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:50,color:'var(--text-gold)',textShadow:'0 0 40px rgba(255,120,0,0.6),0 0 80px rgba(200,80,0,0.3),3px 3px 0 #000',letterSpacing:6}}>The Doom Forge</div>

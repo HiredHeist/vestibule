@@ -188,13 +188,22 @@ supplies the burst. Sim mirror: `DECK_HP_SCALE` / `DECK_LUCIFER_SCALE` +
 `LUCIFER_SCALE` in `vestibule-sim-kwstacks.js`; live mirror: `STARTER_DECKS` +
 `getScaledMaxHp`. **Keep the two files' values identical.**
 
-| Deck | hpScale | luciferScale | Identity | Veteran win% (Bronze, ~1200 games) |
+| Deck | hpScale | luciferScale | Identity | Veteran win% (Bronze, 2000g, PLANNER+BLINDS) |
 |---|---|---|---|---|
-| Standard | 1.00 | 0.26 | Balanced, corruption-free | ~9.1% |
-| Shredder | 1.00 | 0.21 | Pure aggro, corruption-free | ~10.9% |
-| Ritualist | 1.50 | 0.58 | Corruption gamble (ONLY corrupt deck) | ~8.6% |
-| Engineer | 1.00 | 0.24 | Combo/copy, corruption-free | ~9.6% |
-| Survivor | 1.00 | 0.35 | Outlast, corruption-free | ~10.3% |
+| Standard | 1.05 | 0.26 | Balanced, corruption-free | ~10.6% |
+| Shredder | 1.14 | 0.21 | Pure aggro, corruption-free | ~9.7% |
+| Ritualist | 1.57 | 0.58 | Corruption gamble (ONLY corrupt deck) | ~10.7% |
+| Engineer | 0.83 | 0.24 | Combo/copy, corruption-free | ~8.9% |
+| Survivor | 0.90 | 0.35 | Outlast, corruption-free | ~10.2% |
+
+**Aug 9 2026 — FORGE UPGRADE PASS:** all 82 cards now have a real, per-card `upgraded` effect
+(was 9 real + 32 "gold foil / no rules change" placebos + 41 un-forgeable). Effects live in
+App.jsx handlers (`card.upgraded`) + `cardEngine.js` IMPL (`C.upgraded`); descriptions in
+`cards.js CARD_UPGRADES`; full per-card spec in `FORGE_UPGRADES.md`. Every card is now forgeable
+(incl. sabbathsigil — the `!c.consumable` forge filter was dropped). Making every card upgradeable
+lifted the 3 strongest decks over 11%, so their `hpScale` was nudged up (Standard 1.00→1.05,
+Shredder 1.00→1.14, Ritualist 1.50→1.57) to hold the 8–11% band. Keep `STARTER_DECKS` (live)
+and `DECK_HP_SCALE` (sim) identical.
 
 Combat formula (use `getScaledMaxHp` helper):
 `Math.ceil(enemy.maxHp × deck.hpScale × heatMult × encoreMult)` for regular bosses;

@@ -290,15 +290,18 @@ IMPL.amp = (S, C, out) => {
   // upgraded; live applyCard applies no maxHp change for ANY upgraded card.
   // SIM-MISMATCH: sim models amp as `ampedThisStrike++` (a separate multiplier
   // applied at strike time) instead of doubling `atk` here.
+  // UPGRADE: also grant +2 PERMANENT ATK (applied before doubling so the perm
+  // buff survives strike-end when the ×2 temp buff reverts to _origAtk).
+  if (C.upgraded) permAtk(C.m, 2)
   tempAtkSet(C.m, num(C.m.atk) * 2)
   bumpBuff(C.m)
-  log(out, '⚡ ' + C.m.name + ' doubled ATK!')
+  log(out, '⚡ ' + C.m.name + ' doubled ATK!' + (C.upgraded ? ' (+2 ATK perm)' : ''))
   float(out, '×2 ATK', C.t)
 }
 
 IMPL.battlecry = (S, C, out) => {
   if (!C.m) return false
-  const bonus = (C.pas.has('p7') ? 2 : 1) + (C.upgraded ? 1 : 0)
+  const bonus = (C.pas.has('p7') ? 2 : 1) + (C.upgraded ? 2 : 0)   // UPGRADE: +3 total (was +1)
   rawAtk(C.m, bonus)   // live does NOT mirror into permAtkBonus here
   bumpBuff(C.m)
   log(out, '🤘 ' + C.m.name + ' Battle Cry! +' + bonus + ' ATK forever!')
@@ -307,12 +310,11 @@ IMPL.battlecry = (S, C, out) => {
 
 IMPL.newstrings = (S, C, out) => {
   if (!C.m) return false
-  // TEXT-MISMATCH: CARD_UPGRADES.newstrings says "+3 ATK (was +2)"; live ignores
-  // `upgraded` entirely here and always grants +2.
-  rawAtk(C.m, 2)
+  const b = C.upgraded ? 3 : 2   // UPGRADE: +3 (was +2)
+  rawAtk(C.m, b)
   bumpBuff(C.m)
-  log(out, '🎸 ' + C.m.name + ' +2 ATK permanently!')
-  float(out, '+2 ATK', C.t)
+  log(out, '🎸 ' + C.m.name + ' +' + b + ' ATK permanently!')
+  float(out, '+' + b + ' ATK', C.t)
 }
 
 IMPL.encore = (S, C, out) => {
@@ -320,8 +322,9 @@ IMPL.encore = (S, C, out) => {
   // TEXT-MISMATCH: CARD_UPGRADES.encore promises "+1 perm ATK. +2 max HP"; live
   // only sets encoreReady.
   C.m.encoreReady = true
+  if (C.upgraded) rawAtk(C.m, 1)   // UPGRADE: +1 ATK permanently on top of the extra attack
   bumpBuff(C.m)
-  log(out, '🔁 ' + C.m.name + ' encores!')
+  log(out, '🔁 ' + C.m.name + ' encores!' + (C.upgraded ? ' (+1 ATK perm)' : ''))
   float(out, 'ENCORE!', C.t)
 }
 
@@ -329,17 +332,19 @@ IMPL.roadie = (S, C, out) => {
   if (!C.m) return false
   // TEXT-MISMATCH: CARD_UPGRADES.roadie promises "Shield 3 strikes, heal 4 HP,
   // +2 max HP"; live always shields 2 and heals 2.
-  C.m.stoneShield = 2
-  heal(C.m, 2)
+  const shieldN = C.upgraded ? 3 : 2   // UPGRADE: shield 3 strikes, heal 4
+  const healN = C.upgraded ? 4 : 2
+  C.m.stoneShield = shieldN
+  heal(C.m, healN)
   bumpBuff(C.m)
-  log(out, '🛡 ' + C.m.name + ' shielded for 2 Strikes and healed 2 HP!')
+  log(out, '🛡 ' + C.m.name + ' shielded for ' + shieldN + ' Strikes and healed ' + healN + ' HP!')
 }
 
 IMPL.stagedive = (S, C, out) => {
   // Once per strike. Live checks this BEFORE resolving the target.
   if (S.flags.stageDiveUsed) { log(out, '⚠ Stage Dive once per round only.'); return false }
   if (!C.m) return false
-  const dmg = num(C.m.hp)
+  const dmg = Math.floor(num(C.m.hp) * (C.upgraded ? 1.5 : 1))
   dmgBoss(S, out, dmg)
   S.flags.stageDiveUsed = true
   if (dmg >= 500) sfx(out, 'big_hit')
@@ -349,7 +354,8 @@ IMPL.stagedive = (S, C, out) => {
 }
 
 IMPL.wakeup = (S, C, out) => {
-  for (const m of alive(S)) heal(m, 2)
+  const healN = C.upgraded ? 4 : 2   // UPGRADE: ALL +4 HP (was +2)
+  for (const m of alive(S)) heal(m, healN)
   const stoned = S.stage.find(m => m && m.tooStoned)
   if (stoned) {
     // Revive at full HP with ATK reset to the pre-temp-buff base.
@@ -363,10 +369,10 @@ IMPL.wakeup = (S, C, out) => {
     // to ALL"; live heals a flat 2 and revives to FULL regardless of upgrade.
     // DEMOTAPE-MISMATCH: the echoplex/looper replay path revives at 50% maxHp
     // (App.jsx ~7588) instead of full.
-    log(out, '☕ ' + stoned.name + ' revived! All members +2 HP.')
+    log(out, '☕ ' + stoned.name + ' revived! All members +' + healN + ' HP.')
     float(out, 'REVIVED', S.stage.indexOf(stoned))
   } else {
-    log(out, '☕ Wake Up Call! All members +2 HP.')
+    log(out, '☕ Wake Up Call! All members +' + healN + ' HP.')
     float(out, '+2 HP', 'boss')
   }
 }
@@ -374,21 +380,21 @@ IMPL.wakeup = (S, C, out) => {
 IMPL.soundcheck = (S, C, out) => {
   const av = alive(S)
   const injured = av.filter(m => num(m.hp) < num(m.maxHp)).length
+  const healN = C.upgraded ? 6 : 4      // UPGRADE: ALL +6 HP, hurt members +2 ATK
+  const atkN = C.upgraded ? 2 : 1
   for (const m of av) {
     const wasInjured = num(m.hp) < num(m.maxHp) && m.keyword !== 'FALLEN'
-    heal(m, 4)
-    // TEXT-MISMATCH: CARD_UPGRADES.soundcheck says "Heal 6 HP (was 4)"; live
-    // always heals 4.
+    heal(m, healN)
     // NOTE: live's injured-check reads the PRE-heal hp (all `m.hp` references
     // live inside one Object.assign literal), so a member healed to full by
-    // this same card still gets the +1 ATK. Preserved.
+    // this same card still gets the ATK buff. Preserved.
     if (wasInjured) {
-      // Live sets tempBuff + _origAtk here, so this +1 DOES expire at strike end.
-      tempAtk(m, 1)
+      // Live sets tempBuff + _origAtk here, so this DOES expire at strike end.
+      tempAtk(m, atkN)
     }
   }
-  log(out, '🔊 Sound Check! All +4 HP' + (injured > 0 ? ' + ' + injured + ' injured member(s) +1 ATK!' : '!'))
-  float(out, '+4 HP', 'boss')
+  log(out, '🔊 Sound Check! All +' + healN + ' HP' + (injured > 0 ? ' + ' + injured + ' injured member(s) +' + atkN + ' ATK!' : '!'))
+  float(out, '+' + healN + ' HP', 'boss')
 }
 
 // ── CORRUPTION-GIFT CARDS ──────────────────────────────────────────────────
@@ -396,19 +402,21 @@ IMPL.whispercard = (S, C, out) => {
   // Live maps `mi===slotIdx ? Object.assign({},m,{atk:m.atk+2,...})` with NO
   // null guard — playing this on an empty slot throws in live. Rejected here.
   if (!C.m) return false
-  permAtk(C.m, 2)
+  const b = C.upgraded ? 3 : 2   // UPGRADE: +3 (was +2)
+  permAtk(C.m, b)
   bumpBuff(C.m)
-  log(out, '🌀 Dark Whisper! +2 ATK permanently.')
+  log(out, '🌀 Dark Whisper! +' + b + ' ATK permanently.')
 }
 
 IMPL.hungercard = (S, C, out) => {
+  const b = C.upgraded ? 2 : 1   // UPGRADE: ALL +2 ATK perm (was +1)
   for (const m of alive(S)) {
     // TEXT-MISMATCH: card text said "+1 ATK this Strike", but live sets only
     // `tempAtkBonus` — NOT `tempBuff`/`_origAtk` — so the buff NEVER expires and
     // is effectively permanent. Faithful to live: raw atk bump + tempAtkBonus
     // bookkeeping, no tempBuff.
-    rawAtk(m, 1)
-    m.tempAtkBonus = num(m.tempAtkBonus) + 1
+    rawAtk(m, b)
+    m.tempAtkBonus = num(m.tempAtkBonus) + b
     bumpBuff(m)
   }
   // NO DRAW. The engine drew 2. Live (App.jsx ~5596) calls
@@ -418,13 +426,14 @@ IMPL.hungercard = (S, C, out) => {
   // without ever reaching setHand/setDeck. Two independent reasons the cards can
   // never arrive, exactly like setbreak. Matching live, not the card text.
   // (Reported as a live bug: the intended draw needs the setbreak-style fix.)
-  log(out, '🔥 Hungering Flame! All +1 ATK.')
+  log(out, '🔥 Hungering Flame! All +' + b + ' ATK.')
 }
 
 IMPL.madnesscard = (S, C, out) => {
-  const dmg = Math.floor(num(S.bossMaxHp, 100) * 0.15)
+  const pct = C.upgraded ? 0.20 : 0.15   // UPGRADE: 20% of boss max HP (was 15%)
+  const dmg = Math.floor(num(S.bossMaxHp, 100) * pct)
   dmgBoss(S, out, dmg)
-  log(out, '💀 Madness Unleashed! ' + dmg + ' damage (15% of max HP)!')
+  log(out, '💀 Madness Unleashed! ' + dmg + ' damage (' + Math.round(pct * 100) + '% of max HP)!')
 }
 
 IMPL.dark_whisper = (S, C, out) => {
@@ -476,23 +485,28 @@ IMPL.dialtoeleven = (S, C, out) => {
 IMPL.sigdecay = (S, C, out) => {
   // Live's applyCard returns false for this id; the real implementation lives in
   // handleDropOnStage (App.jsx ~6470). Reproduced here.
-  // TEXT-MISMATCH: CARD_UPGRADES.sigdecay says "Draw 3 (was 2)"; live always 2.
+  const n = C.upgraded ? 3 : 2   // UPGRADE: draw 3 (was 2)
   const others = S.hand.filter(c => c && c.uid !== C.selfUid)
   if (others.length === 0) {
-    draw(S, 2, C.rng)
-    log(out, '📡 Signal Decay! Drew 2 cards.')
+    draw(S, n, C.rng)
+    log(out, '📡 Signal Decay! Drew ' + n + ' cards.')
   } else {
     const victim = others[Math.floor(C.rng() * others.length)]
     discardFromHand(S, victim)
-    draw(S, 2, C.rng)
-    log(out, '📡 Signal Decay! Discarded ' + victim.name + ', drew 2 cards.')
+    draw(S, n, C.rng)
+    log(out, '📡 Signal Decay! Discarded ' + victim.name + ', drew ' + n + ' cards.')
   }
 }
 
 IMPL.controlfeedback = (S, C, out) => {
   setCorruption(S, 50)
-  // TEXT-MISMATCH: CARD_UPGRADES.controlfeedback says "Heal ALL to full"; live
-  // only heals the drop target.
+  // UPGRADE: fully heal the WHOLE band (base heals only the drop target).
+  if (C.upgraded) {
+    for (const m of alive(S)) { if (canHeal(m)) m.hp = num(m.maxHp) }
+    log(out, '🎚 Controlled Feedback! Corruption → 50%. WHOLE band fully healed!')
+    float(out, 'FULL HEAL', 'boss')
+    return
+  }
   if (C.m && !C.m.tooStoned) {
     const healed = num(C.m.maxHp) - num(C.m.hp)
     if (canHeal(C.m)) C.m.hp = num(C.m.maxHp)
@@ -511,7 +525,8 @@ IMPL.feedbackloop = (S, C, out) => {
   // DEMOTAPE-MISMATCH: the Demo Tape replay of feedbackloop DOES deal
   // floor(corruption/2) direct damage — i.e. replaying it does something the
   // card itself never does.
-  const bonus = num(S.corruption) >= 50 ? 4 : 2
+  // UPGRADE: +3 perm (+5 at 50%+ corruption); base is +2 (+4 at 50%+).
+  const bonus = num(S.corruption) >= 50 ? (C.upgraded ? 5 : 4) : (C.upgraded ? 3 : 2)
   permAtk(C.m, bonus)
   float(out, '+' + bonus + ' ATK perm', C.t)
   log(out, '🎛 Feedback Loop! ' + C.m.name + ' +' + bonus + ' ATK permanently!' +
@@ -533,16 +548,18 @@ IMPL.deathriff = (S, C, out) => {
   // Live deals NO damage — every alive member gets +2 permanent ATK.
   // CARD_UPGRADES.deathriff ("80 base damage (was 60)") describes the same
   // phantom damage card.
-  for (const m of alive(S)) permAtk(m, 2)
+  const b = C.upgraded ? 3 : 2   // UPGRADE: ALL +3 perm (was +2)
+  for (const m of alive(S)) permAtk(m, b)
   addCorruption(S, 10)
-  log(out, '💀 Death Riff! ALL members +2 ATK permanently! Corruption +10%')
+  log(out, '💀 Death Riff! ALL members +' + b + ' ATK permanently! Corruption +10%')
 }
 
 IMPL.ampstatic = (S, C, out) => {
   if (!C.m) return false
   // TEXT-MISMATCH: text says "ATK equal to Corruption ÷ 10" (and the upgrade
   // says ÷ 8). Live uses a flat threshold: +2, or +4 at ≥50% corruption.
-  const bonus = num(S.corruption) >= 50 ? 4 : 2
+  // UPGRADE: +3 this Strike (+6 at 50%+); base is +2 (+4 at 50%+).
+  const bonus = num(S.corruption) >= 50 ? (C.upgraded ? 6 : 4) : (C.upgraded ? 3 : 2)
   tempAtk(C.m, bonus)
   bumpBuff(C.m)
   log(out, '📶 Amp the Static! ' + C.m.name + ' +' + bonus + ' ATK this Strike!' +
@@ -552,11 +569,10 @@ IMPL.ampstatic = (S, C, out) => {
 
 IMPL.distortion = (S, C, out) => {
   const nc = addCorruption(S, 15)
-  // TEXT-MISMATCH: CARD_UPGRADES.distortion says "+2 temp ATK/member (was +1)";
-  // live always +1.
-  for (const m of alive(S)) { tempAtk(m, 1); bumpBuff(m) }
-  log(out, '🎸 Distortion! Corruption +15% → ' + nc + '%. All members +1 ATK.')
-  float(out, '+1 ATK', 'boss')
+  const b = C.upgraded ? 2 : 1   // UPGRADE: ALL +2 this Strike (was +1)
+  for (const m of alive(S)) { tempAtk(m, b); bumpBuff(m) }
+  log(out, '🎸 Distortion! Corruption +15% → ' + nc + '%. All members +' + b + ' ATK.')
+  float(out, '+' + b + ' ATK', 'boss')
 }
 
 IMPL.seance = (S, C, out) => {
@@ -564,6 +580,17 @@ IMPL.seance = (S, C, out) => {
   // uses a flat threshold: 3 HP, or 6 HP at ≥50% corruption.
   const amt = num(S.corruption) >= 50 ? 6 : 3
   for (const m of alive(S)) heal(m, amt)
+  // UPGRADE: also revive a Too Stoned member (at full HP, ATK reset to base).
+  if (C.upgraded) {
+    const stoned = S.stage.find(m => m && m.tooStoned)
+    if (stoned) {
+      const base = stoned._origAtk !== undefined ? stoned._origAtk : num(stoned.atk)
+      stoned.tooStoned = false; stoned.hp = num(stoned.maxHp); stoned.atk = base
+      delete stoned._origAtk; stoned.tempBuff = false
+      log(out, '🔮 Séance revives ' + stoned.name + '!')
+      float(out, 'REVIVED', S.stage.indexOf(stoned))
+    }
+  }
   log(out, '🔮 Séance! All members +' + amt + ' HP' + (num(S.corruption) >= 50 ? ' (≥50% corruption: bonus heal!)' : ''))
   float(out, '+' + amt + ' HP', 'boss')
 }
@@ -571,7 +598,7 @@ IMPL.seance = (S, C, out) => {
 IMPL.staticcharge = (S, C, out) => {
   // TEXT-MISMATCH: CARD_UPGRADES.staticcharge says "Gain 5 Embers at 0%
   // corruption (was 4)"; live always 4.
-  const bonus = num(S.corruption) === 0 ? 4 : 2
+  const bonus = num(S.corruption) === 0 ? (C.upgraded ? 6 : 4) : 2   // UPGRADE: 6 at 0% corr (was 4)
   addEmbers(S, bonus)
   C.freeCost = true      // live sets spent=0 — this card funds itself
   log(out, '⚡ Static Charge! +' + bonus + ' Embers' + (num(S.corruption) === 0 ? ' (pure signal bonus)' : '') + '.')
@@ -585,9 +612,14 @@ IMPL.darktuning = (S, C, out) => {
     float(out, '🌑 Need ' + req + '% Corruption', 'boss')
     return false
   }
-  // TEXT-MISMATCH: CARD_UPGRADES.darktuning says "Corruption / 8 buffs (was /
-  // 10)"; live uses a 70% threshold for 3 members instead of 2, ignoring
-  // `upgraded`.
+  // UPGRADE: buff the WHOLE band +1 ATK perm (base is 2 random, or 3 at 70%+).
+  if (C.upgraded) {
+    const av = alive(S)
+    for (const m of av) permAtk(m, 1)
+    log(out, '🌑 Dark Tuning! WHOLE band +1 ATK permanently! (' + av.length + ' members)')
+    float(out, '+1 ATK all', 'boss')
+    return
+  }
   const count = num(S.corruption) >= 70 ? 3 : 2
   const slots = S.stage.map((m, i) => (m && !m.tooStoned) ? i : -1).filter(i => i >= 0)
   for (let i = 0; i < Math.min(count, slots.length); i++) {
@@ -600,17 +632,22 @@ IMPL.darktuning = (S, C, out) => {
 
 // ── EMBER ──────────────────────────────────────────────────────────────────
 IMPL.tappedout = (S, C, out) => {
-  // TEXT-MISMATCH: CARD_UPGRADES.tappedout says 6 Embers; live always 5.
-  S.pendingEmbers = num(S.pendingEmbers) + 5
+  // UPGRADE: gain 5 Embers IMMEDIATELY (no delay); base delays to next Strike.
+  if (C.upgraded) {
+    addEmbers(S, 5)
+    log(out, '🪙 Tapped Out! +5 Embers now!')
+  } else {
+    S.pendingEmbers = num(S.pendingEmbers) + 5
+    log(out, '🪙 Tapped Out! +5 Embers next Strike.')
+  }
   C.freeCost = true
   sfx(out, 'ember')
-  log(out, '🪙 Tapped Out! +5 Embers next Strike.')
 }
 
 IMPL.powertap = (S, C, out) => {
   // TEXT-MISMATCH: CARD_UPGRADES.powertap says 3 Embers when upgraded; live
   // ignores `upgraded` (the 3 comes from artifact a5 instead).
-  const bonus = (C.art.has('a5') ? 3 : 2) + (C.pas.has('p4') ? 1 : 0)
+  const bonus = ((C.art.has('a5') || C.upgraded) ? 3 : 2) + (C.pas.has('p4') ? 1 : 0)   // UPGRADE: base 3 (was 2)
   addEmbers(S, bonus)
   C.freeCost = true
   sfx(out, 'ember')
@@ -622,20 +659,23 @@ IMPL.soundboard = (S, C, out) => {
   // strike, +1 max HP to random"; live always +2 embers / +1 draw.
   addEmbers(S, 2)
   S.pendingDraw = num(S.pendingDraw) + 1
+  if (C.upgraded) draw(S, 1, C.rng)   // UPGRADE: also draw 1 NOW
   C.freeCost = true
   sfx(out, 'ember')
-  log(out, '🎛 Soundboard! +2 Embers. Draw 1 extra card next Strike.')
+  log(out, '🎛 Soundboard! +2 Embers.' + (C.upgraded ? ' Draw 1 now +' : ' Draw') + ' 1 extra card next Strike.')
   float(out, '+2 🔥 +1 DRAW', 'boss')
 }
 
 IMPL.ampoverload = (S, C, out) => {
-  if (num(S.discardsLeft) <= 0) { log(out, '⚠ No discards left to sacrifice!'); return false }
-  // TEXT-MISMATCH: CARD_UPGRADES.ampoverload says 4 Embers; live always 3.
+  // UPGRADE: no discard cost. Base requires and consumes 1 discard.
+  if (!C.upgraded) {
+    if (num(S.discardsLeft) <= 0) { log(out, '⚠ No discards left to sacrifice!'); return false }
+    S.discardsLeft = Math.max(0, num(S.discardsLeft) - 1)
+  }
   addEmbers(S, 3)
-  S.discardsLeft = Math.max(0, num(S.discardsLeft) - 1)
   sfx(out, 'ember')
-  log(out, '🔋 Amp Overload! +3 Embers. -1 Discard.')
-  float(out, '+3 🔥 -1 DISCARD', 'boss')
+  log(out, '🔋 Amp Overload! +3 Embers.' + (C.upgraded ? '' : ' -1 Discard.'))
+  float(out, C.upgraded ? '+3 🔥' : '+3 🔥 -1 DISCARD', 'boss')
 }
 
 IMPL.groupie = (S, C, out) => {
@@ -643,10 +683,11 @@ IMPL.groupie = (S, C, out) => {
   // handleDropOnStage (App.jsx ~6362).
   // TEXT-MISMATCH: CARD_UPGRADES.groupie says "+3 Embers, draw 2"; live always
   // +2 (+1 with passive p4) and draws 1.
-  addEmbers(S, 2 + (C.pas.has('p4') ? 1 : 0))
+  const eb = (C.upgraded ? 3 : 2) + (C.pas.has('p4') ? 1 : 0)   // UPGRADE: +3 Embers (was +2)
+  addEmbers(S, eb)
   draw(S, 1, C.rng)
-  log(out, '🍯 Groupie! +2 Embers, drew 1 card.')
-  float(out, '+2 🔥 +1 card', 'boss')
+  log(out, '🍯 Groupie! +' + eb + ' Embers, drew 1 card.')
+  float(out, '+' + eb + ' 🔥 +1 card', 'boss')
 }
 
 // ── UTILITY (hand-manipulation cards live handles in handleDropOnStage) ────
@@ -670,7 +711,7 @@ IMPL.burnset = (S, C, out) => {
   const sel = (C.selectedUids || []).filter(u => u !== C.selfUid).slice(0, 3)
   const victims = S.hand.filter(c => c && sel.includes(c.uid))
   for (const v of victims) discardFromHand(S, v)
-  const drawCount = victims.length + 1
+  const drawCount = victims.length + (C.upgraded ? 2 : 1)   // UPGRADE: discarded +2 (was +1)
   draw(S, drawCount, C.rng)
   log(out, '🔥 Burned ' + victims.length + ' card' + (victims.length !== 1 ? 's' : '') +
     ', drew ' + drawCount + '.' + (victims.length === 0 ? ' (Tip: select cards before playing)' : ''))
@@ -686,8 +727,9 @@ IMPL.remaster = (S, C, out) => {
   const i = S.hand.indexOf(victim)
   if (i >= 0) S.hand.splice(i, 1)
   S.discard.push(victim)
-  draw(S, 3, C.rng)
-  log(out, '🎙 Remastered! Deleted ' + victim.name + ', drew 3.')
+  const n = C.upgraded ? 4 : 3   // UPGRADE: draw 4 (was 3)
+  draw(S, n, C.rng)
+  log(out, '🎙 Remastered! Deleted ' + victim.name + ', drew ' + n + '.')
   float(out, '🎙 -1 +3 CARDS', 'boss')
 }
 
@@ -703,14 +745,15 @@ IMPL.setbreak = (S, C, out) => {
     || others[Math.floor(C.rng() * others.length)]
   discardFromHand(S, victim)
   addEmbers(S, 3)
-  S.corruption = Math.max(0, num(S.corruption) - 15)
+  const purge = C.upgraded ? 25 : 15   // UPGRADE: -25% Corruption (was -15%)
+  S.corruption = Math.max(0, num(S.corruption) - purge)
   // NO DRAW. Aug 1 2026: verified empirically against the running game by
   // e2e/test-card-parity.cjs — live hand 6->4, deck 12->12, i.e. nothing drawn.
   // Live (App.jsx ~6355) calls drawUpTo(remaining, deck, discard, 1) with a
   // refill TARGET of 1 (not remaining.length+1) AND throws the return value away
   // without ever calling setHand/setDeck — two independent reasons no card can
   // arrive. The engine mirrors live, not the card text.
-  log(out, '🎼 Smoke Break! ' + victim.name + ' discarded. +3 Embers. -15% Corruption.' +
+  log(out, '🎼 Smoke Break! ' + victim.name + ' discarded. +3 Embers. -' + purge + '% Corruption.' +
     (pre.length === 0 ? ' (tip: select a card first)' : ''))
   float(out, '+3 🔥', 'boss')
 }
@@ -844,14 +887,15 @@ IMPL.demotape = (S, C, out) => {
     if (usable) { rawAtk(t, 2); bumpBuff(t) }
     log(out, '📼 Demo Tape replays ' + lrName + ' (generic)')
   }
-  log(out, '📼 Demo Tape! Replays: ' + lrName)
+  if (C.upgraded) draw(S, 1, C.rng)   // UPGRADE: replay free, then draw 1
+  log(out, '📼 Demo Tape! Replays: ' + lrName + (C.upgraded ? ' (+draw 1)' : ''))
   float(out, '📼 ' + lrName, 'boss')
 }
 
 // ── BIG RIFFS ──────────────────────────────────────────────────────────────
 IMPL.overdrive = (S, C, out) => {
   const req = num(C.card.corrReq, 60)
-  const need = C.upgraded ? 50 : req
+  const need = C.upgraded ? 40 : req   // UPGRADE: only needs 40% Corruption (was 60%)
   if (num(S.corruption) < need) {
     log(out, '⚠ Need ≥' + need + '% Corruption (you have ' + Math.floor(num(S.corruption)) + '%)')
     float(out, '💥 Need ' + need + '% Corruption', 'boss')
@@ -879,7 +923,8 @@ IMPL.doubledown = (S, C, out) => {
   // TEXT-MISMATCH: CARD_UPGRADES.doubledown says "Next TWO cards cost 0 (was
   // 1)"; live sets a single-shot nextCardFree regardless of upgrade.
   S.flags.nextCardFree = true
-  log(out, '🎰 Double Down! Next card costs 0 Embers.')
+  if (C.upgraded) draw(S, 1, C.rng)   // UPGRADE: also draw 1
+  log(out, '🎰 Double Down! Next card costs 0 Embers.' + (C.upgraded ? ' Draw 1!' : ''))
   float(out, 'FREE!', 'boss')
 }
 
@@ -893,7 +938,7 @@ IMPL.heavyriff = (S, C, out) => {
   // permanent buff already applied — a live quirk, preserved verbatim.
   // TEXT-MISMATCH: CARD_UPGRADES.heavyriff says "60% of total ATK (was 50%)";
   // live keeps 50% and adds a flat +2 when upgraded.
-  const bonus = Math.min(20, Math.ceil((num(C.m.atk) + num(C.m.permAtkBonus)) / 2)) + (C.upgraded ? 2 : 0)
+  const bonus = Math.min(20, Math.ceil((num(C.m.atk) + num(C.m.permAtkBonus)) / 2)) + (C.upgraded ? 4 : 0)   // UPGRADE: +4 extra (was +2)
   permAtk(C.m, bonus)
   bumpBuff(C.m)
   C.m._hrUsed = true
@@ -905,12 +950,12 @@ IMPL.resonancecard = (S, C, out) => {
   if (!C.m) return false
   const av = alive(S)
   if (av.length === 0) return false
-  const maxAtk = Math.max(...av.map(m => num(m.atk)))
-  if (maxAtk <= num(C.m.atk)) { log(out, '🌀 Already at max ATK!'); return false }
-  tempAtkSet(C.m, maxAtk)
+  const target = Math.max(...av.map(m => num(m.atk))) + (C.upgraded ? 2 : 0)   // UPGRADE: highest ATK +2
+  if (target <= num(C.m.atk)) { log(out, '🌀 Already at max ATK!'); return false }
+  tempAtkSet(C.m, target)
   bumpBuff(C.m)
-  log(out, '🌀 Resonance! ' + C.m.name + ' ATK → ' + maxAtk + '!')
-  float(out, 'ATK → ' + maxAtk, C.t)
+  log(out, '🌀 Resonance! ' + C.m.name + ' ATK → ' + target + '!')
+  float(out, 'ATK → ' + target, C.t)
 }
 
 IMPL.herbmoney = (S, C, out) => {
@@ -920,7 +965,7 @@ IMPL.herbmoney = (S, C, out) => {
   // Now the herb profits already paid for the gear: no Stash spent, just a
   // reliable permanent ATK buff worth a card slot. Pure upside (no economy drain
   // → cannot lower deck winrate). Upgrade path unchanged (+4).
-  const buff = C.upgraded ? 4 : 3
+  const buff = C.upgraded ? 5 : 3   // UPGRADE: +5 (was +3)
   permAtk(C.m, buff)
   bumpBuff(C.m)
   float(out, '+' + buff + ' ATK', C.t)
@@ -931,7 +976,7 @@ IMPL.goingbroke = (S, C, out) => {
   if (num(S.stash) <= 0) { log(out, '💸 You are already broke!'); return false }
   // TEXT-MISMATCH: CARD_UPGRADES.goingbroke says "Stash x1.5 as damage"; live
   // ignores `upgraded`.
-  const dmg = num(S.stash)
+  const dmg = num(S.stash) * (C.upgraded ? 10 : 1)   // UPGRADE: 10× Stash as damage
   S.stash = 0
   dmgBoss(S, out, dmg)
   float(out, 'BROKE!', 'boss')
@@ -942,7 +987,7 @@ IMPL.moshpit = (S, C, out) => {
   const av = alive(S)
   // TEXT-MISMATCH: CARD_UPGRADES.moshpit says "5 damage per member (was 3)" —
   // this card deals no damage.
-  const buff = av.length >= 4 ? 2 : 1
+  const buff = (av.length >= 4 ? 2 : 1) + (C.upgraded ? 1 : 0)   // UPGRADE: +2 all (+3 if 4+ alive)
   for (const m of av) { permAtk(m, buff); bumpBuff(m) }
   log(out, '🤘 Mosh Pit! ' + av.length + ' members — all gain +' + buff + ' ATK permanently!' +
     (av.length >= 4 ? ' (Full pit bonus!)' : ''))
@@ -1050,25 +1095,25 @@ function copyLastPlayed(S, C, out, emoji, verb) {
   S.flags.nextCardFree = true
   log(out, emoji + ' ' + verb + ' ' + def.name + ' — play it FREE!')
 }
-IMPL.echopedal = (S, C, out) => copyLastPlayed(S, C, out, '🔁 Echo Pedal!', 'Copied')
+IMPL.echopedal = (S, C, out) => { copyLastPlayed(S, C, out, '🔁 Echo Pedal!', 'Copied'); if (C.upgraded) draw(S, 1, C.rng) }   // UPGRADE: also draw 1
 // TEXT-MISMATCH: Riff Thief's text says "Copy last card played this strike. Cast
 // the copy free" — live is byte-identical to Echo Pedal (same handler body), so
 // the two cards are functionally the same card at two different rarities.
-IMPL.riffthief = (S, C, out) => copyLastPlayed(S, C, out, '🎭 Riff Thief!', 'Stole')
+IMPL.riffthief = (S, C, out) => { copyLastPlayed(S, C, out, '🎭 Riff Thief!', 'Stole'); if (C.upgraded) draw(S, 1, C.rng) }   // UPGRADE: also draw 1
 
 // ── ALT-DECK RIFFS ─────────────────────────────────────────────────────────
 IMPL.feedbackscream = (S, C, out) => {
   if (!C.m) return false
   permAtk(C.m, 4)
-  C.m.hp = Math.max(1, num(C.m.hp) - 2)
-  float(out, '+4 ATK', C.t); float(out, '-2 HP', C.t)
-  log(out, '📢 Feedback Scream! ' + C.m.name + ' +4 ATK permanently! -2 HP.')
+  if (!C.upgraded) C.m.hp = Math.max(1, num(C.m.hp) - 2)   // UPGRADE: no HP cost
+  float(out, '+4 ATK', C.t); if (!C.upgraded) float(out, '-2 HP', C.t)
+  log(out, '📢 Feedback Scream! ' + C.m.name + ' +4 ATK permanently!' + (C.upgraded ? '' : ' -2 HP.'))
 }
 
 IMPL.skullsplitter = (S, C, out) => {
   if (!C.m) return false
   // NOTE: like heavyriff, live's threshold reads atk+permAtkBonus (double-count).
-  const bonus = (num(C.m.atk) + num(C.m.permAtkBonus)) >= 10 ? 5 : 3
+  const bonus = C.upgraded ? 5 : ((num(C.m.atk) + num(C.m.permAtkBonus)) >= 10 ? 5 : 3)   // UPGRADE: always +5 (no requirement)
   permAtk(C.m, bonus)
   float(out, '+' + bonus + ' ATK', C.t)
   log(out, '💀 Skull Splitter! ' + C.m.name + ' +' + bonus + ' ATK permanently!' + (bonus >= 5 ? ' (10+ ATK bonus!)' : ''))
@@ -1078,11 +1123,12 @@ IMPL.doomchord = (S, C, out) => {
   if (!C.m) return false
   tempAtk(C.m, 4); bumpBuff(C.m)
   float(out, '+4 ATK', C.t)
-  if (num(S.corruption) >= 50) {
+  const thresh = C.upgraded ? 30 : 50   // UPGRADE: adjacent bonus at just 30% corruption (was 50%)
+  if (num(S.corruption) >= thresh) {
     S.stage.forEach((s, i) => {
       if (s && !s.tooStoned && Math.abs(i - C.t) === 1) { tempAtk(s, 4); bumpBuff(s) }
     })
-    log(out, '🎵 Doom Chord! +4 ATK to ' + C.m.name + ' AND adjacent! (≥50% corruption)')
+    log(out, '🎵 Doom Chord! +4 ATK to ' + C.m.name + ' AND adjacent! (≥' + thresh + '% corruption)')
   } else {
     log(out, '🎵 Doom Chord! ' + C.m.name + ' +4 ATK!')
   }
@@ -1091,25 +1137,32 @@ IMPL.doomchord = (S, C, out) => {
 IMPL.bloodharmony = (S, C, out) => {
   if (!C.m) return false
   // Batch C: now PERMANENT +2 to target + both neighbours (positional board-builder).
-  permAtk(C.m, 2); bumpBuff(C.m)
-  S.stage.forEach((s, i) => {
-    if (s && !s.tooStoned && Math.abs(i - C.t) === 1) { permAtk(s, 2); bumpBuff(s) }
-  })
-  log(out, '🩸 Blood Harmony! ' + C.m.name + ' + adjacent +2 ATK permanently!')
+  // UPGRADE: +2 ATK perm to the WHOLE band (base is target + both neighbours).
+  if (C.upgraded) {
+    for (const s of alive(S)) { permAtk(s, 2); bumpBuff(s) }
+    log(out, '🩸 Blood Harmony! WHOLE band +2 ATK permanently!')
+  } else {
+    permAtk(C.m, 2); bumpBuff(C.m)
+    S.stage.forEach((s, i) => {
+      if (s && !s.tooStoned && Math.abs(i - C.t) === 1) { permAtk(s, 2); bumpBuff(s) }
+    })
+    log(out, '🩸 Blood Harmony! ' + C.m.name + ' + adjacent +2 ATK permanently!')
+  }
 }
 
 IMPL.sonicboom = (S, C, out) => {
   // TEXT-MISMATCH: text says "+2 ATK permanently"; live grants a THIS-STRIKE
   // buff (tempBuff), so it expires.
-  for (const m of alive(S)) { tempAtk(m, 2); bumpBuff(m) }
+  const b = C.upgraded ? 3 : 2   // UPGRADE: ALL +3 this Strike (was +2)
+  for (const m of alive(S)) { tempAtk(m, b); bumpBuff(m) }
   draw(S, 1, C.rng)
-  log(out, '💥 Sonic Boom! ALL members +2 ATK! Draw 1!')
+  log(out, '💥 Sonic Boom! ALL members +' + b + ' ATK! Draw 1!')
 }
 
 IMPL.tremolopick = (S, C, out) => {
   // Riff Barrage (synergy): +2 ATK to ALL members per RIFF card already played
   // this Strike (max +12). All-target now — no single-target guard.
-  const riffs = (S.cardsPlayedIds || []).filter(id => cardTypeOf(id) === 'RIFF').length
+  const riffs = (S.cardsPlayedIds || []).filter(id => cardTypeOf(id) === 'RIFF').length + (C.upgraded ? 1 : 0)   // UPGRADE: counts itself
   const b = Math.min(12, riffs * 2)
   for (const m of alive(S)) { rawAtk(m, b); m.tempAtkBonus = num(m.tempAtkBonus) + b; bumpBuff(m) }
   log(out, '⚡ Riff Barrage! All members +' + b + ' ATK! (' + riffs + ' RIFFs played)')
@@ -1120,6 +1173,7 @@ IMPL.harmonicfb = (S, C, out) => {
   const riffs = (S.cardsPlayedIds || []).filter(id => cardTypeOf(id) === 'RIFF').length
   const bonus = Math.max(1, riffs)
   permAtk(C.m, bonus)
+  if (C.upgraded) draw(S, 1, C.rng)   // UPGRADE: also draw 1
   log(out, '🎶 Harmonic Feedback! ' + C.m.name + ' +' + bonus + ' ATK perm! (' + riffs + ' RIFFs played)')
 }
 
@@ -1128,7 +1182,8 @@ IMPL.shredsolo = (S, C, out) => {
   // TEXT-MISMATCH: text says "second hit at HALF ATK"; live grants a full second
   // attack via encoreReady — identical to Encore, at 2 embers vs Encore's 2.
   C.m.encoreReady = true
-  log(out, '🎸 Shred Solo! ' + C.m.name + ' attacks TWICE this strike!')
+  if (C.upgraded) { tempAtk(C.m, 2); bumpBuff(C.m) }   // UPGRADE: also +2 ATK this Strike
+  log(out, '🎸 Shred Solo! ' + C.m.name + ' attacks TWICE this strike!' + (C.upgraded ? ' (+2 ATK)' : ''))
 }
 
 IMPL.overdriveped = (S, C, out) => {
@@ -1138,9 +1193,12 @@ IMPL.overdriveped = (S, C, out) => {
 
 IMPL.devilsdice = (S, C, out) => {
   const roll = Math.floor(C.rng() * 6) + 1
-  if (roll <= 2) {
+  // UPGRADE: only a 1 whiffs; 2-3 all +3; 4-6 all +5 + draw 2. Base: 1-2 whiff, 3-4 +3, 5-6 +5.
+  const whiffMax = C.upgraded ? 1 : 2
+  const midMax = C.upgraded ? 3 : 4
+  if (roll <= whiffMax) {
     log(out, "🎲 Devil's Dice: rolled " + roll + '. Nothing happens!')
-  } else if (roll <= 4) {
+  } else if (roll <= midMax) {
     for (const m of alive(S)) tempAtk(m, 3)
     log(out, "🎲 Devil's Dice: rolled " + roll + '! ALL +3 ATK!')
   } else {
@@ -1151,7 +1209,7 @@ IMPL.devilsdice = (S, C, out) => {
 }
 
 IMPL.necroticamp = (S, C, out) => {
-  const bonus = Math.floor(num(S.corruption) / 20)
+  const bonus = Math.floor(num(S.corruption) / 20) * (C.upgraded ? 2 : 1)   // UPGRADE: +2 per 20% (was +1)
   // At 0-19% corruption the bonus is 0 but live still flags tempBuff. The engine
   // still captures _origAtk so the (no-op) buff expires cleanly.
   for (const m of alive(S)) tempAtk(m, bonus)
@@ -1161,28 +1219,35 @@ IMPL.necroticamp = (S, C, out) => {
 IMPL.soulbargain = (S, C, out) => {
   if (!C.m) return false
   tempAtk(C.m, 5)
-  C.m.hp = Math.max(1, num(C.m.hp) - 3)
+  if (!C.upgraded) C.m.hp = Math.max(1, num(C.m.hp) - 3)   // UPGRADE: no HP cost
   bumpBuff(C.m)
   addCorruption(S, 5)
-  float(out, '+5 ATK', C.t); float(out, '-3 HP', C.t)
-  log(out, '👿 Soul Bargain! ' + C.m.name + ' +5 ATK, -3 HP! Corruption +5%')
+  float(out, '+5 ATK', C.t); if (!C.upgraded) float(out, '-3 HP', C.t)
+  log(out, '👿 Soul Bargain! ' + C.m.name + ' +5 ATK' + (C.upgraded ? '' : ', -3 HP') + '! Corruption +5%')
 }
 
 IMPL.venomriff = (S, C, out) => {
   if (!C.m) return false
-  permAtk(C.m, 3)
+  const b = C.upgraded ? 4 : 3   // UPGRADE: +4 (was +3)
+  permAtk(C.m, b)
   addCorruption(S, 5)
   // NOTE: S.flags.venomDotStacks exists in live state but NO card ever sets it —
   // the boss DOT tick at App.jsx ~7796 is unreachable. Left untouched.
-  float(out, '+3 ATK permanently', C.t)
-  log(out, '🐍 Venom Riff! ' + C.m.name + ' +3 ATK permanently! Corruption +5%')
+  float(out, '+' + b + ' ATK permanently', C.t)
+  log(out, '🐍 Venom Riff! ' + C.m.name + ' +' + b + ' ATK permanently! Corruption +5%')
 }
 
 IMPL.offeringpit = (S, C, out) => {
   if (!C.m) return false
-  const others = alive(S).filter(s => s.uid !== C.m.uid)
-  if (others.length === 0) { log(out, '🕳️ No other member to receive the offering!'); return false }
-  const target = pick(others, C.rng)
+  // UPGRADE: choose the member (the drop target itself) instead of a random OTHER.
+  let target
+  if (C.upgraded) {
+    target = C.m
+  } else {
+    const others = alive(S).filter(s => s.uid !== C.m.uid)
+    if (others.length === 0) { log(out, '🕳️ No other member to receive the offering!'); return false }
+    target = pick(others, C.rng)
+  }
   tempAtk(target, 8)
   bumpBuff(target)
   addCorruption(S, 10)
@@ -1198,22 +1263,24 @@ IMPL.cursedstrings = (S, C, out) => {
   // cannot be healed for the rest of the fight (cleared at the fight boundary).
   tempAtk(C.m, 6)
   bumpBuff(C.m)
-  C.m.cursed = true
-  log(out, '🪡 Cursed Strings! ' + C.m.name + " +6 ATK — but can't be healed this fight!")
+  if (!C.upgraded) C.m.cursed = true   // UPGRADE: no heal-lock
+  log(out, '🪡 Cursed Strings! ' + C.m.name + ' +6 ATK' + (C.upgraded ? '!' : " — but can't be healed this fight!"))
 }
 
 IMPL.hexdecay = (S, C, out) => {
-  const dmg = Math.floor(num(S.bossHp) * 0.15)
+  const pct = C.upgraded ? 0.20 : 0.15   // UPGRADE: 20% of current HP (was 15%)
+  const dmg = Math.floor(num(S.bossHp) * pct)
   dmgBoss(S, out, dmg)
   addCorruption(S, 15)
-  log(out, '🦠 Hex of Decay! Boss loses 15% HP (' + dmg + ' damage)! Corruption +15%')
+  log(out, '🦠 Hex of Decay! Boss loses ' + Math.round(pct * 100) + '% HP (' + dmg + ' damage)! Corruption +15%')
 }
 
 IMPL.infernalpact = (S, C, out) => {
   // Live SETS corruption to 66 — it can LOWER corruption above 66%.
   setCorruption(S, 66)
-  for (const m of alive(S)) permAtk(m, 2)
-  log(out, '📜 Infernal Pact! Corruption → 66%! ALL members +2 ATK permanently!')
+  const b = C.upgraded ? 3 : 2   // UPGRADE: ALL +3 perm (was +2)
+  for (const m of alive(S)) permAtk(m, b)
+  log(out, '📜 Infernal Pact! Corruption → 66%! ALL members +' + b + ' ATK permanently!')
 }
 
 IMPL.carrioncall = (S, C, out) => {
@@ -1221,50 +1288,54 @@ IMPL.carrioncall = (S, C, out) => {
   if (i === -1) { log(out, '🦅 No stoned members to revive!'); return false }
   const m = S.stage[i]
   m.tooStoned = false
-  m.hp = 1
+  m.hp = C.upgraded ? Math.max(1, Math.floor(num(m.maxHp) / 2)) : 1   // UPGRADE: revive at HALF max HP
   permAtk(m, 5)
   addCorruption(S, 20)
-  log(out, '🦅 Carrion Call! ' + m.name + ' rises from the dead at 1 HP +5 ATK! Corruption +20%')
+  log(out, '🦅 Carrion Call! ' + m.name + ' rises from the dead at ' + m.hp + ' HP +5 ATK! Corruption +20%')
 }
 
 IMPL.possessionriff = (S, C, out) => {
   if (!C.m) return false
   tempAtk(C.m, 20)
   bumpBuff(C.m)
-  addCorruption(S, 10)
+  if (!C.upgraded) addCorruption(S, 10)   // UPGRADE: no Corruption cost
   float(out, '+20 ATK!', C.t)
-  log(out, '👁️ POSSESSION! ' + C.m.name + ' +20 ATK this strike! Corruption +10%')
+  log(out, '👁️ POSSESSION! ' + C.m.name + ' +20 ATK this strike!' + (C.upgraded ? '' : ' Corruption +10%'))
 }
 
 IMPL.darkcrescendo = (S, C, out) => {
-  if (num(S.corruption) >= 80) {
+  const thresh = C.upgraded ? 60 : 80   // UPGRADE: triples at 60%+ (was 80%+)
+  if (num(S.corruption) >= thresh) {
     mulStrikeMult(S, 3)
     log(out, '🌑 DARK CRESCENDO! TRIPLE STRIKE MULTIPLIER! (' + num(S.corruption) + '% corruption)')
   } else {
     // Live returns TRUE here — the card is consumed and does nothing.
-    log(out, '🌑 Dark Crescendo... corruption too low (' + Math.floor(num(S.corruption)) + '%, need 80%)')
+    log(out, '🌑 Dark Crescendo... corruption too low (' + Math.floor(num(S.corruption)) + '%, need ' + thresh + '%)')
   }
 }
 
 // ── CORRUPTION GAMBIT ──────────────────────────────────────────────────────
 IMPL.hellfirerift = (S, C, out) => {
-  for (const m of alive(S)) tempAtkSet(m, num(m.atk) * 2)
+  const mult = C.upgraded ? 2.5 : 2   // UPGRADE: ALL ×2.5 (was ×2)
+  for (const m of alive(S)) tempAtkSet(m, num(m.atk) * mult)
   addCorruption(S, 20)
-  log(out, '🌋 HELLFIRE RIFT! ALL MEMBERS ×2 ATK! +20% CORRUPTION!')
-  float(out, '×2 ALL ATK!', 'boss')
+  log(out, '🌋 HELLFIRE RIFT! ALL MEMBERS ×' + mult + ' ATK! +20% CORRUPTION!')
+  float(out, '×' + mult + ' ALL ATK!', 'boss')
 }
 
 IMPL.soulsacrifice = (S, C, out) => {
   for (const m of alive(S)) { permAtk(m, 5); bumpBuff(m) }
-  addCorruption(S, 15)
-  log(out, '⚰️ SOUL SACRIFICE! ALL +5 ATK PERMANENT! +15% CORRUPTION!')
+  const cor = C.upgraded ? 10 : 15   // UPGRADE: +10% Corruption (was +15%)
+  addCorruption(S, cor)
+  log(out, '⚰️ SOUL SACRIFICE! ALL +5 ATK PERMANENT! +' + cor + '% CORRUPTION!')
   float(out, '+5 ALL PERM!', 'boss')
 }
 
 IMPL.voidpact = (S, C, out) => {
   mulStrikeMult(S, 2.5)
   addCorruption(S, 25)
-  log(out, '🕳 VOID PACT! STRIKE MULTIPLIER ×2.5! +25% CORRUPTION!')
+  if (C.upgraded) draw(S, 2, C.rng)   // UPGRADE: also draw 2
+  log(out, '🕳 VOID PACT! STRIKE MULTIPLIER ×2.5! +25% CORRUPTION!' + (C.upgraded ? ' Draw 2!' : ''))
   float(out, '×2.5 MULT!', 'boss')
 }
 
@@ -1275,12 +1346,14 @@ IMPL.russianroulette = (S, C, out) => {
     C.m.tooStoned = true; C.m.hp = 0
     log(out, '🔫 Russian Roulette: ' + C.m.name + ' rolled 1... TOO STONED! 💨')
   } else if (roll <= 5) {
-    tempAtk(C.m, 4)
-    log(out, '🔫 Russian Roulette: ' + C.m.name + ' rolled ' + roll + '! +4 ATK!')
+    const b = C.upgraded ? 6 : 4   // UPGRADE: 2-5 give +6 (was +4)
+    tempAtk(C.m, b)
+    log(out, '🔫 Russian Roulette: ' + C.m.name + ' rolled ' + roll + '! +' + b + ' ATK!')
   } else {
-    tempAtk(C.m, 8)
+    const b = C.upgraded ? 10 : 8   // UPGRADE: 6 gives +10 (was +8)
+    tempAtk(C.m, b)
     C.m.stoneShield = 2
-    log(out, '🔫 Russian Roulette: ' + C.m.name + ' rolled 6! +8 ATK + Shield! 🛡️')
+    log(out, '🔫 Russian Roulette: ' + C.m.name + ' rolled 6! +' + b + ' ATK + Shield! 🛡️')
   }
 }
 
@@ -1291,6 +1364,7 @@ IMPL.gearcheck = (S, C, out) => {
   const distinct = new Set(S.cardsPlayedIds || []).size
   const factor = 1 + 0.08 * distinct
   mulStrikeMult(S, factor)
+  if (C.upgraded) C.freeCost = true   // UPGRADE: costs 0 Embers (was 1)
   log(out, '🔧 Feedback Engine! Strike multiplier ×' + factor.toFixed(2) + ' (' + distinct + ' distinct cards)')
 }
 
@@ -1308,14 +1382,16 @@ IMPL.setlistrewrite = (S, C, out) => {
   S.deck.push(...top)
   S.discard.push(tossed)
   if (S.flags) S.flags.setlistRewriteUsed = true
+  if (C.upgraded) draw(S, 1, C.rng)   // UPGRADE: also draw 1
   const tn = CARD_DEFS[tossed.id] ? CARD_DEFS[tossed.id].name : tossed.id
-  log(out, '📝 Setlist Rewrite! Tossed ' + tn + ', kept ' + top.length + ' on top.')
+  log(out, '📝 Setlist Rewrite! Tossed ' + tn + ', kept ' + top.length + ' on top.' + (C.upgraded ? ' Draw 1.' : ''))
 }
 
 IMPL.backstagepass = (S, C, out) => {
-  S.flags.nextCardFree = true
+  if (C.upgraded) S.flags.freeCardsLeft = num(S.flags.freeCardsLeft) + 2   // UPGRADE: next TWO cards free
+  else S.flags.nextCardFree = true
   draw(S, 1, C.rng)
-  log(out, '🎫 Backstage Pass! Next card is FREE! Draw 1!')
+  log(out, '🎫 Backstage Pass! Next ' + (C.upgraded ? 'TWO cards are' : 'card is') + ' FREE! Draw 1!')
 }
 
 IMPL.venueswap = (S, C, out) => {
@@ -1333,7 +1409,8 @@ IMPL.venueswap = (S, C, out) => {
   S.hand.length = 0
   S.hand.push(...self)
   draw(S, 6, C.rng)
-  log(out, '🏟️ Venue Swap! Hand shuffled away — drew 6 fresh cards!')
+  if (C.upgraded) addEmbers(S, 2)   // UPGRADE: also gain 2 Embers
+  log(out, '🏟️ Venue Swap! Hand shuffled away — drew 6 fresh cards!' + (C.upgraded ? ' +2 Embers!' : ''))
 }
 
 IMPL.doublebooking = (S, C, out) => {
@@ -1354,35 +1431,45 @@ IMPL.bootlegcopy = (S, C, out) => {
   // copy was destroyed and the card did nothing at all. App.jsx ~6660.
   const best = S.hand.filter(c => c && c.id !== 'bootlegcopy')[0]
   if (!best) { log(out, '📀 Bootleg Copy! Nothing to copy.'); return }
-  if (S.hand.length >= MAX_HAND) { log(out, '📀 Bootleg Copy! Hand is full.'); return }
-  S.hand.push(Object.assign({}, best, { uid: engineUid(S, C.rng) }))
-  log(out, '📀 Bootleg Copy! Copied best card in hand!')
+  const copy = Object.assign({}, best, { uid: engineUid(S, C.rng) })
+  // UPGRADE: the copy goes to HAND now; base sends it to the DECK (per card text).
+  if (C.upgraded) {
+    if (S.hand.length >= MAX_HAND) { log(out, '📀 Bootleg Copy! Hand is full.'); return }
+    S.hand.push(copy)
+    log(out, '📀 Bootleg Copy! Copied to HAND — play it now!')
+  } else {
+    S.deck.push(copy)
+    log(out, '📀 Bootleg Copy! Copied into your deck!')
+  }
 }
 
 // ── EMBER (alt decks) ──────────────────────────────────────────────────────
 IMPL.secondwind = (S, C, out) => {
   const gain = num(S.maxEmbers) - num(S.embers)
   S.embers = num(S.maxEmbers)
-  draw(S, 1, C.rng)
-  log(out, '💨 Second Wind! +' + gain + ' embers (max) + drew 1!')
+  const n = C.upgraded ? 2 : 1   // UPGRADE: draw 2 (was 1)
+  draw(S, n, C.rng)
+  log(out, '💨 Second Wind! +' + gain + ' embers (max) + drew ' + n + '!')
 }
 
 IMPL.pyromaniac = (S, C, out) => {
-  addEmbers(S, 2)
+  const eb = C.upgraded ? 3 : 2   // UPGRADE: +3 embers (was +2)
+  addEmbers(S, eb)
   S.flags.pyromaniacActive = true
-  log(out, '🧨 Pyromaniac! +2 embers! Spend ALL before Strike → +3 ATK to all!')
+  log(out, '🧨 Pyromaniac! +' + eb + ' embers! Spend ALL before Strike → +3 ATK to all!')
 }
 
 IMPL.slowburn = (S, C, out) => {
   addEmbers(S, 2)
   S.flags.slowBurnStrikes = num(S.flags.slowBurnStrikes) + 2
-  log(out, '🕯️ Slow Burn! +2 embers now, +2 per strike for next 2 strikes.')
+  if (C.upgraded) draw(S, 1, C.rng)   // UPGRADE: also draw 1 now
+  log(out, '🕯️ Slow Burn! +2 embers now, +2 per strike for next 2 strikes.' + (C.upgraded ? ' Draw 1.' : ''))
 }
 
 IMPL.ampfeedback = (S, C, out) => {
   addEmbers(S, 2)
-  S.flags.ampFeedbackDiscount = 1
-  log(out, '🔌 Amp Feedback! +2 embers. Next RIFF costs 1 less.')
+  S.flags.ampFeedbackDiscount = C.upgraded ? 99 : 1   // UPGRADE: next RIFF is FREE (was 1 less)
+  log(out, '🔌 Amp Feedback! +2 embers. Next RIFF ' + (C.upgraded ? 'is FREE.' : 'costs 1 less.'))
 }
 
 IMPL.drainthecrowd = (S, C, out) => {
@@ -1392,14 +1479,14 @@ IMPL.drainthecrowd = (S, C, out) => {
   let cur = 0, mx = 0
   for (const m of av) { cur += num(m.hp); mx += num(m.maxHp, num(m.hp)) }
   const missing = mx > 0 ? (mx - cur) / mx : 0
-  const b = Math.floor(missing * 10)
+  const b = Math.floor(missing * (C.upgraded ? 12.5 : 10))   // UPGRADE: +1 per 8% missing (was 10%)
   for (const m of av) { rawAtk(m, b); m.tempAtkBonus = num(m.tempAtkBonus) + b; bumpBuff(m) }
   log(out, "🧛 Death's Bargain! All members +" + b + ' ATK! (' + Math.round(missing * 100) + '% band HP missing)')
 }
 
 IMPL.corrsiphon = (S, C, out) => {
   // Corruption Nexus (synergy): +1 ATK to all per 10% Corruption, this strike.
-  const b = Math.floor(num(S.corruption) / 10)
+  const b = Math.floor(num(S.corruption) / 10) * (C.upgraded ? 2 : 1)   // UPGRADE: +2 per 10% (was +1)
   for (const m of alive(S)) { rawAtk(m, b); m.tempAtkBonus = num(m.tempAtkBonus) + b; bumpBuff(m) }
   log(out, '🌀 Corruption Nexus! All members +' + b + ' ATK (from ' + num(S.corruption) + '% Corruption)!')
 }

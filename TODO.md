@@ -1,7 +1,24 @@
 # VESTIBULE — TODO
 
-*Last updated: Aug 6, 2026 — CORRUPTION REWORK (uncommitted, pending build-verify + push)*
+*Last updated: Aug 9, 2026 — FORGE UPGRADE PASS + shop UI polish*
 *Branch state: main = audited stable · playtest/session2 = bot rig WIP + Aug 5 card fixes (see HANDOFF.md)*
+
+## ⛧ FORGE UPGRADE PASS (Aug 9 2026 — DONE, sim-validated, live+sim mirrored)
+
+- [x] **All 82 cards now have a real, per-card upgrade** (was 9 real + 32 "gold foil/no
+  rules change" placebos + 41 un-forgeable). Per-card spec: `FORGE_UPGRADES.md`.
+- [x] Implemented in **live** (App.jsx `card.upgraded` handlers) + **sim** (cardEngine.js
+  `C.upgraded` IMPLs); descriptions in `cards.js CARD_UPGRADES`. Self-test 86/86.
+- [x] **Every card forgeable** (dropped `!c.consumable` forge filter so sabbathsigil qualifies).
+- [x] **bootlegcopy** base copy → deck (matches card text), upgrade → hand. ⚠ re-check `e2e/test-card-parity.cjs`.
+- [x] **Rebalanced:** universal upgrades lifted top decks; nudged hpScale Standard 1.05 /
+  Shredder 1.14 / Ritualist 1.57. Final 2000g Bronze: 8.9–10.7%, all in 8–11% band.
+- [ ] FOLLOW-UP: run `e2e/up.sh` + card-parity rig to reconfirm live↔sim after this pass.
+
+## ⛧ SHOP UI POLISH (Aug 9 2026 — DONE)
+- [x] Bottom-row windows exact-equal height, bottom border aligned to Effect Pedal box.
+- [x] Cards-for-sale static equal height (alignItems stretch). Killed hover-reflow (constant 2px borders).
+- [x] Recruitment pack no longer swells on hover (removed scale transform).
 
 ## ⛧ CORRUPTION REWORK (Aug 6 2026 — sim-validated, live mirrored, NEEDS BUILD-VERIFY)
 

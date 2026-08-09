@@ -267,7 +267,7 @@ const ACTIVE_DECK=DECK_MANIFESTS[DECK_ID]||DECK_MANIFESTS.standard
 // corruption damage (bosses used to corrupt you → free x1.2–3.0). Regular-boss HP
 // scaling drops to 1.0 for them so the descent stays a fair fight; Ritualist keeps
 // 1.85 because its corruption gamble supplies the burst.
-const DECK_HP_SCALE={standard:1.00,shredder:1.00,ritualist:1.50,engineer:0.83,survivor:0.90}
+const DECK_HP_SCALE={standard:1.05,shredder:1.14,ritualist:1.57,engineer:0.83,survivor:0.90}
 const HP_SCALE=parseFloat(process.env.HP_SCALE)||DECK_HP_SCALE[DECK_ID]||1.0
 // CORRUPTION REWORK: Lucifer's 55x HP cliff was designed around the old corruption
 // x3 burst. Honest (corruption-free) decks need a shallower final wall. LUCIFER_SCALE
@@ -448,7 +448,7 @@ function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rand(i+1);[a[i],a[j]]=
 // ~14%, drummers dead at 1-6%). Flattened to reflect the post-BLASTBEAT-fix reality:
 // non-drummer keywords equal (a genuine choice), BLASTBEAT high because drummers carry
 // a smaller body budget (~20-21) yet now provide the ×1.5^count band multiplier.
-const BB_MULT=parseFloat(process.env.BB_MULT)||1.35; // BLASTBEAT per-drummer band mult. 1.5 was auto-include; 1.35 makes a drummer a real ~33% choice. MIRROR in App.jsx ~8753.
+const BB_MULT=parseFloat(process.env.BB_MULT)||1.5; // BLASTBEAT per-drummer band mult. Re-testing 1.5 now that drummers are fragile (hp 14/11); MIRROR in App.jsx computeStrikeDamage.
 const BB_WEIGHT=parseInt(process.env.BB_WEIGHT)||8;   // (legacy) unused now that drummers are special-cased in memberScore via DRUM_SCORE
 const KW_DRAFT_WEIGHT={FRENZIED:4,CORRUPT:4,'FOLK MAGIC':4,HEXED:4,SHREDDER:4,BLASTBEAT:BB_WEIGHT,TRICKSTER:5,DEBUFF:4,ANCHOR:4,DISSONANCE:4,DIRGE:4};
 // Drummers deal 0 ATK, so the atk*3+hp budget formula can't value them (it would either
@@ -486,7 +486,7 @@ function buildDeck(){const d=[];for(const[id,copies]of Object.entries(ACTIVE_DEC
 // CORRUPTION REWORK (Aug 6 2026): corruption members (CORRUPT synth players + the
 // HEXED corruption-generator) are ONLY offered on the Ritualist deck. The 4 clean
 // decks never see them, so a beginner never encounters corruption via the roster.
-function rosterPool(){return ALL_MUSICIANS.filter(m=>!m.locked&&(DECK_ID==='ritualist'||(m.keyword!=='CORRUPT'&&m.keyword!=='HEXED')))}
+function rosterPool(){return ALL_MUSICIANS.filter(m=>((!m.locked)||(process.env.TEST_TANUKI==='1'&&m.id==='tanuki'))&&(DECK_ID==='ritualist'||(m.keyword!=='CORRUPT'&&m.keyword!=='HEXED')))}
 function pickStartingPair(){const pool=rosterPool();let best=null,bs=-1;for(let i=0;i<40;i++){const a=pick(pool),b=pick(pool);if(a.id===b.id)continue;if(a.keyword==='ANCHOR'&&b.keyword==='ANCHOR')continue;const s=memberScore(a)+memberScore(b);if(s>bs){bs=s;best=[a,b]}}return best.map(b=>makeMember(b,false,false,false,true))}
 function arrangeStage(stage){
   const alive=stage.filter(m=>!m.tooStoned),stoned=stage.filter(m=>m.tooStoned);if(alive.length<=1)return stage;
@@ -731,7 +731,7 @@ function cardCost(c,gs,st,commit){
   if(c.foil&&base>=2)d+=1                                                            // 1  foil card
   if(gs._tripBuff==='SYNESTHESIA')d+=1                                               // 2  SYNESTHESIA trip
   if((gs._pacts||[]).includes('dark_bargain')&&c.type==='CORRUPT'&&base>=1)d+=1      // 3  dark_bargain pact
-  if((gs._ampFbDiscount||0)>0&&c.type==='RIFF'){d+=1;if(commit)gs._ampFbDiscount=0}  // 4  Amp Feedback
+  if((gs._ampFbDiscount||0)>0&&c.type==='RIFF'){d+=gs._ampFbDiscount;if(commit)gs._ampFbDiscount=0}  // 4  Amp Feedback (1 less; upgraded=99=free)
   if(_hasPas(gs,'reverbtank')&&st.firstOfStrike)d+=1                                 // 5  Reverb Tank
   if(_hasPas(gs,'fuzzbox')&&c.type==='RIFF')d+=1                                     // 6  Fuzz Box
   if(_hasPas(gs,'phaserpedal')&&c.type==='CORRUPT')d+=1                              // 7  Phaser
@@ -739,6 +739,8 @@ function cardCost(c,gs,st,commit){
   if(_hasPas(gs,'wahpedal')&&c.type==='CORRUPT'&&!gs._wahUsed){d+=base;if(commit)gs._wahUsed=true} // 9 Wah Pedal
   if(_hasPas(gs,'cabletester')&&gs.hand.filter(h=>h&&h.id===c.id).length>=2)d+=1     // 10 Cable Tester
   if(_hasPas(gs,'theconduit'))d+=Math.floor(base/2)                                  // 11 The Conduit
+  // ── DOOM FORGE cost-reduction upgrades (−1 ember each; gearcheck 1→0) ──
+  if(c.upgraded&&(c.id==='infencore'||c.id==='possessedperf'||c.id==='doublebooking'||c.id==='overdriveped'||c.id==='gearcheck'))d+=1
   return Math.max(0,base-d)                                                          // 12 = the three overrides above
 }
 // ══════════════════════════════════════════════════════════════════════
@@ -782,6 +784,7 @@ function _buildEngineState(card,gs,enemy,emberCost){
       stageDiveUsed:!!gs._stageDiveUsed,setlistRewriteUsed:!!gs._setlistRewriteUsed,possessedActive:!!gs._possessedActive,overdriveActive:!!gs._overdriveActive,
       infencoreActive:!!gs._infencoreActive,bossSkipStrikes:gs._bossSkipStrikes||0,slowBurnStrikes:gs._slowBurn||0,
       pyromaniacActive:!!gs._pyro,venomDotStacks:gs._venomDot||0,tripBuff:gs._tripBuff,cursedNoHeal:!!gs._cursed,
+      ampFeedbackDiscount:gs._ampFbDiscount||0,
       lastRiffId:gs._lastRiffPlayed}
   }
   // Aug 4 2026 — bossPassiveId was NEVER passed, so the Circle III "heals X per card
@@ -940,6 +943,9 @@ function applyCardSim(card,gs,enemy,emberCost){
   // Performance x9 instead of x3 and pushed the measured winrate to 95%.
   gs._possessedActive=false;gs._overdriveActive=false;gs._infencoreActive=false
   gs._nextCardFree=S.flags.nextCardFree;gs._allCardsFree=S.flags.allCardsFree;gs._freeCardsLeft=S.flags.freeCardsLeft
+  // Amp Feedback discount (1 = "next RIFF −1 ember", 99 = upgraded "next RIFF free").
+  // The engine sets S.flags.ampFeedbackDiscount; wire it back so cardCost sees it.
+  gs._ampFbDiscount=S.flags.ampFeedbackDiscount||0
   gs._bossSkipStrikes=S.flags.bossSkipStrikes;gs._venomDot=S.flags.venomDotStacks
   gs._cursed=S.flags.cursedNoHeal
   // Aug 4 2026 — DOUBLE BOOKING WAS A NO-OP. The engine grants +1 strike
@@ -1294,6 +1300,16 @@ function simFight(gs,phaseHp,luciferPhase){
     // DIRGE (Orm): +1 ATK per 4 cards in the discard pile (ramps as the fight runs long).
     const _dissoDistinct=Object.keys(_kwStacks).filter(k=>k!=='DISSONANCE').length
     const _dirgeBonus=Math.floor(gs.discard.length/4)
+    // MIMIC (TRICKSTER/Tanuki): ATK matches the highest STANDING atk (base+perm) among other
+    // non-drummer members — copies permanent buffs, NOT per-strike scaling. Mirrors live getEffectiveAtk.
+    const _mimicStrength=Math.max(0,...aliveNow.filter(x=>x.keyword!=='TRICKSTER'&&x.role!=='Drummer').map(x=>{
+      let a=x.atk+(x.permAtkBonus||0)+(x.tempAtkBonus||0)
+      if(x.keyword==='FRENZIED'&&_frenziedTier>0)a+=_riffsThisStrike*_frenziedTier
+      if(x.keyword==='CORRUPT')a+=Math.floor(gs.corruption/12)*Math.max(1,_corruptTier)
+      if(x.keyword==='SHREDDER'&&_shredderTier>0)a+=_shredderHits*_shredderTier
+      if(x.keyword==='DISSONANCE')a+=_dissoDistinct
+      if(x.keyword==='DIRGE')a+=_dirgeBonus
+      return a}))
     // DOUBLE TIME stack-3: all members attack twice this strike
     if(_doubleTimeTier>=4){for(const _m of aliveNow)_m._kwDoubleStrike=true}
     // Tracking: which keyword stack tiers fired this strike
@@ -1320,6 +1336,7 @@ function simFight(gs,phaseHp,luciferPhase){
       if(m.keyword==='SHREDDER'&&_shredderTier>0)atk+=_shredderHits*_shredderTier
       if(m.keyword==='DISSONANCE')atk+=_dissoDistinct
       if(m.keyword==='DIRGE')atk+=_dirgeBonus
+      if(m.keyword==='TRICKSTER'&&_mimicStrength>atk)atk=_mimicStrength
       // neighbor-adjacency ATK aura REMOVED (v0.8.1 declutter)
       if(m.ampedThisStrike)atk*=Math.pow(2,m.ampedThisStrike);if(gs._possessedActive)atk*=3;if(gs._overdriveActive)atk*=2;
       if(dtMult[m.uid]!==undefined)atk=Math.floor(atk*dtMult[m.uid]);
