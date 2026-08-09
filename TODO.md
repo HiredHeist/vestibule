@@ -1,25 +1,58 @@
 # VESTIBULE — TODO
 
-*Last updated: Aug 9, 2026 — FORGE UPGRADE PASS + shop UI polish*
-*Branch state: main = audited stable · playtest/session2 = bot rig WIP + Aug 5 card fixes (see HANDOFF.md)*
+*Last updated: Aug 9, 2026 (evening) — Forge upgrade pass + shop UI shipped. Next: release-ready push.*
+*Branch state: main = audited stable · playtest/session2 = active (all Aug 9 work pushed, build-verified via push-fixes.bat)*
 
-## ⛧ FORGE UPGRADE PASS (Aug 9 2026 — DONE, sim-validated, live+sim mirrored)
+---
 
-- [x] **All 82 cards now have a real, per-card upgrade** (was 9 real + 32 "gold foil/no
-  rules change" placebos + 41 un-forgeable). Per-card spec: `FORGE_UPGRADES.md`.
-- [x] Implemented in **live** (App.jsx `card.upgraded` handlers) + **sim** (cardEngine.js
-  `C.upgraded` IMPLs); descriptions in `cards.js CARD_UPGRADES`. Self-test 86/86.
-- [x] **Every card forgeable** (dropped `!c.consumable` forge filter so sabbathsigil qualifies).
-- [x] **bootlegcopy** base copy → deck (matches card text), upgrade → hand. ⚠ re-check `e2e/test-card-parity.cjs`.
-- [x] **Rebalanced:** universal upgrades lifted top decks; nudged hpScale Standard 1.05 /
-  Shredder 1.14 / Ritualist 1.57. Final 2000g Bronze: 8.9–10.7%, all in 8–11% band.
-- [x] Forge cards: hover shows ORIGINAL text + Ember cost (CSS overlay, no state).
-- [ ] FOLLOW-UP: run `e2e/up.sh` + card-parity rig to reconfirm live↔sim after this pass.
+## 🚀 RELEASE CHECKLIST — PICK UP HERE TOMORROW
 
-## ⛧ SHOP UI POLISH (Aug 9 2026 — DONE)
-- [x] Bottom-row windows exact-equal height, bottom border aligned to Effect Pedal box.
-- [x] Cards-for-sale static equal height (alignItems stretch). Killed hover-reflow (constant 2px borders).
-- [x] Recruitment pack no longer swells on hover (removed scale transform).
+Ordered roughly by priority. Goal: get the release ready.
+
+### A. Content / player-facing (the release blockers)
+1. [ ] **Unlock progression audit.** Intro screen shows `UNLOCKS 0/77` but there are only ~8 real
+   milestones — the `77` denominator (App.jsx ~11101) is hardcoded/wrong. Audit EVERY unlockable
+   (members, stakes, achievements, Lucky Draw, cards) so the count is real and things actually unlock.
+2. [ ] **RULES page cleanup** (UI). Tidy the layout, and **add DMT** to the drugs section alongside
+   Shrooms & Acid (DMT currently only appears in the shop, never explained in the rules).
+3. [ ] **Full emoji-placeholder art inventory.** Produce a complete list of EVERYTHING still using an
+   emoji placeholder — artifacts, effect pedals, any cards with generic/placeholder art, plus the
+   cassette 📼 / CD-R 💿 shop packs — so JV can finish the artwork in one pass.
+4. [ ] **Cassette + CD-R pack art** — draw/drop in `cassette.png` + `cdr.png` to replace the emoji
+   in `public/vestibule/packs/` (part of #3; called out separately since it's a known gap).
+
+### B. Verify / stability
+5. [ ] **Re-run the E2E parity rig** (`bash e2e/up.sh` → card-parity) to reconfirm live↔sim after the
+   82-card Forge pass — **especially `bootlegcopy`** (base copy→deck / upgrade→hand changed) and the
+   `sabbathsigil` forge-filter change.
+6. [ ] Keep build-verifying with `push-fixes.bat` before any Steam build (full `vite build` only runs
+   on JV's Windows machine — the sandbox can't load the rolldown native binary).
+
+### C. Finish the screen tour (shop ✅ + forge ✅ already done)
+7. [ ] Walk the remaining in-game screens for polish/bugs: **event, boss intro, victory & death** screens.
+8. [ ] Sweep leftover **DOUBLE TIME** help strings → BLASTBEAT/TRICKSTER (functional done; a few
+   cosmetic strings in KEYWORD_DESC / tutorial / FAQ may linger).
+
+### D. Docs
+9. [ ] `GDD.md` (and any other docs) still describe the OLD corruption model — do a doc pass.
+
+### E. Post-launch / R&D (NOT release blockers)
+- [ ] Skill-based rebalance: validate the ember leak-plug + chains-dominant damage on the **live bot**
+  (sim's greedy bot can't build combos). See "SKILL-BASED REBALANCE" section below.
+- [ ] Expert-brain bot wiring (`cardEval.js`) + the value-table root-cause fix (bot card values are
+  hand-maintained in 3 places and rot on every balance change).
+- [ ] Phantom-victory forensic still open from Aug 1 (see bottom section).
+
+### ✅ Shipped this session (Aug 9) — details in CLAUDE.md + FORGE_UPGRADES.md
+- **Doom Forge:** all 82 cards now have a real, JV-picked upgrade (live + sim mirrored, self-test 86/86,
+  every card forgeable, hover shows original text + Ember cost). Rebalanced to hold 8–11% (hpScale
+  Standard 1.05 / Shredder 1.14 / Ritualist 1.57).
+- **Shop UI:** equal-height aligned windows, static equal-height sale cards, killed all hover-reflow,
+  recruitment pack no longer swells on hover.
+- **Earlier:** Tanuki MIMIC, BLASTBEAT ×1.5, Daily Descent tile, spinning faint bg, dealer gamble,
+  DEALS==actual damage unify, neighbour-aura removal.
+
+---
 
 ## ⛧ CORRUPTION REWORK (Aug 6 2026 — sim-validated, live mirrored, NEEDS BUILD-VERIFY)
 
