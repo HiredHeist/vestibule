@@ -623,8 +623,10 @@ function burnWeakCards(gs){
 
 function rollTrip(type){
   const roll=Math.random()
-  if(roll<0.05){TRACK.badTrips++;return type==='shrooms'?'BAD_SHROOMS':'BAD_ACID'}
-  if(roll<0.10){TRACK.bunkTrips++;return 'BUNK'}
+  // Aug 6 2026: dealer is a REAL gamble now — 20% ACTIVE bad trip (was 5% bad + 5% bunk).
+  // Bunk (wasted money) removed to match live (feels-bad, was cut). Mirrors live's
+  // stake.badTripChance (0.20 base / 0.25 Demonic); sim runs Bronze so 0.20.
+  if(roll<0.20){TRACK.badTrips++;return type==='shrooms'?'BAD_SHROOMS':'BAD_ACID'}
   TRACK.goodTrips++
   const d4=rand(4)
   if(type==='shrooms')return['EGO_DEATH','TIME_DILATION','SYNESTHESIA','COSMIC_UNITY'][d4]

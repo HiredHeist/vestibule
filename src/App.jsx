@@ -311,12 +311,12 @@ const STREAK_BONUSES=[
 // happens in combat — do not re-add HP-mult promises unless wiring hpMult into
 // the fight formula at line ~7387 + getScaledMaxHp at line ~4959.
 const STAKES=[
-  {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.30,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Baseline difficulty. Full heal between fights. ×1.0 score.',mentorBonus:0},
-  {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.30,dmgAdd:2,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Enemies +2 damage. ×1.5 score.',mentorBonus:0.03},
-  {id:'gold',name:'Gold',color:'#ffd700',border:'#ffd700',hpMult:1.43,dmgAdd:3,priceMult:1.25,scoreMult:2.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.05,desc:'Enemies +3 damage, +10% HP. Shop prices +25%. ×2.0 score.',mentorBonus:0.03},
-  {id:'obsidian',name:'Obsidian',color:'#7a7a9a',border:'#6a6a8a',hpMult:1.73,dmgAdd:2,priceMult:1.25,scoreMult:2.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Enemies +2 damage, +33% HP. No free heal between fights. Shop +25%. Drugs +50%. ×2.5 score.',mentorBonus:0.06},
-  {id:'blood',name:'Blood',color:'#8b0000',border:'#cc0000',hpMult:2.05,dmgAdd:2,priceMult:1.25,scoreMult:3.0,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.05,desc:'Enemies +2 damage, +58% HP. Start each fight at 4 Embers, 10% Corruption. No heal. Shop +25%. Drugs +50%. ×3.0 score.',mentorBonus:0.15},
-  {id:'demonic',name:'Demonic ⛧',color:'#ff0000',border:'#ff0000',hpMult:1.80,dmgAdd:4,priceMult:1.5,scoreMult:4.0,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,drugPriceMult:2.0,badTripChance:0.15,desc:'Enemies +4 damage, +38% HP. ONLY 3 Strikes per fight. Start at 4 Embers, 15% Corruption. No heal. Shop +50%. Drugs +100%. Bad trips 15%. ×4.0 score. Pure hell.',mentorBonus:0.75},
+  {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.30,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.20,desc:'Baseline difficulty. Full heal between fights. ×1.0 score.',mentorBonus:0},
+  {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.30,dmgAdd:2,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.20,desc:'Enemies +2 damage. ×1.5 score.',mentorBonus:0.03},
+  {id:'gold',name:'Gold',color:'#ffd700',border:'#ffd700',hpMult:1.43,dmgAdd:3,priceMult:1.25,scoreMult:2.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.20,desc:'Enemies +3 damage, +10% HP. Shop prices +25%. ×2.0 score.',mentorBonus:0.03},
+  {id:'obsidian',name:'Obsidian',color:'#7a7a9a',border:'#6a6a8a',hpMult:1.73,dmgAdd:2,priceMult:1.25,scoreMult:2.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.20,desc:'Enemies +2 damage, +33% HP. No free heal between fights. Shop +25%. Drugs +50%. ×2.5 score.',mentorBonus:0.06},
+  {id:'blood',name:'Blood',color:'#8b0000',border:'#cc0000',hpMult:2.05,dmgAdd:2,priceMult:1.25,scoreMult:3.0,maxStrikes:4,startEmbers:4,startCorruption:10,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.20,desc:'Enemies +2 damage, +58% HP. Start each fight at 4 Embers, 10% Corruption. No heal. Shop +25%. Drugs +50%. ×3.0 score.',mentorBonus:0.15},
+  {id:'demonic',name:'Demonic ⛧',color:'#ff0000',border:'#ff0000',hpMult:1.80,dmgAdd:4,priceMult:1.5,scoreMult:4.0,maxStrikes:3,startEmbers:4,startCorruption:15,healAfterFight:false,drugPriceMult:2.0,badTripChance:0.25,desc:'Enemies +4 damage, +38% HP. ONLY 3 Strikes per fight. Start at 4 Embers, 15% Corruption. No heal. Shop +50%. Drugs +100%. Bad trips 25%. ×4.0 score. Pure hell.',mentorBonus:0.75},
 ]
 // v0.8: stake HP factor relative to bronze (1.30). Resurrects formerly-dead hpMult — sim-tuned ladder:
 // bronze 38% / silver 26% / gold 18% / obsidian 11% / blood 7% / demonic 1.5% (expert full-relic play, 10K sims).
@@ -8204,12 +8204,15 @@ function App(){
       setDrugsUsedThisRun(p=>{const n={...p,dmt:(p.dmt||0)+1};return n})
       tryAchieve('dmt_traveler')
     }
-    // Roll: 3% bad, 97% good for shrooms/acid. DMT has no bad pool — premium tier.
+    // Roll (Aug 6 2026): bad-trip chance is now the stake's badTripChance (0.20 base,
+    // 0.25 Demonic) so the dealer is a REAL gamble — ~1-in-5 buys backfires with an
+    // ACTIVE bad-trip effect (not "bunk"/wasted money, which stays removed). DMT has no
+    // bad pool — premium tier. Mirrors the sim's flat 0.20 bad rate.
     const pool=TRIP_EFFECTS[type]
     let chosen
     if(type==='dmt'){
       chosen=pool.good[Math.floor(Math.random()*pool.good.length)]
-    } else if(Math.random()<0.03){
+    } else if(Math.random()<((activeStake&&activeStake.badTripChance)||0.20)){
       chosen=pool.bad
     } else {
       chosen=pool.good[Math.floor(Math.random()*pool.good.length)]
