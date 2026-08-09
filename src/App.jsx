@@ -311,7 +311,7 @@ const STREAK_BONUSES=[
 // happens in combat — do not re-add HP-mult promises unless wiring hpMult into
 // the fight formula at line ~7387 + getScaledMaxHp at line ~4959.
 const STAKES=[
-  {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.30,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.20,desc:'Baseline difficulty. Full heal between fights. ×1.0 score.',mentorBonus:0},
+  {id:'bronze',name:'Bronze',color:'#cd7f32',border:'#cd7f32',hpMult:1.30,dmgAdd:0,priceMult:1.0,scoreMult:1.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.20,desc:'Baseline difficulty. Full heal between fights.',mentorBonus:0},
   {id:'silver',name:'Silver',color:'#c0c0c0',border:'#c0c0c0',hpMult:1.30,dmgAdd:2,priceMult:1.0,scoreMult:1.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.20,desc:'Enemies +2 damage. ×1.5 score.',mentorBonus:0.03},
   {id:'gold',name:'Gold',color:'#ffd700',border:'#ffd700',hpMult:1.43,dmgAdd:3,priceMult:1.25,scoreMult:2.0,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:true,drugPriceMult:1.0,badTripChance:0.20,desc:'Enemies +3 damage, +10% HP. Shop prices +25%. ×2.0 score.',mentorBonus:0.03},
   {id:'obsidian',name:'Obsidian',color:'#7a7a9a',border:'#6a6a8a',hpMult:1.73,dmgAdd:2,priceMult:1.25,scoreMult:2.5,maxStrikes:4,startEmbers:5,startCorruption:0,healAfterFight:false,drugPriceMult:1.5,badTripChance:0.20,desc:'Enemies +2 damage, +33% HP. No free heal between fights. Shop +25%. Drugs +50%. ×2.5 score.',mentorBonus:0.06},
@@ -456,6 +456,13 @@ function getEffectiveAtk(m,ctx){
   // DIRGE — Dark Minstrel (Orm). +1 ATK per 4 cards in the discard pile: the longer the
   // set runs, the heavier he plays. Deck-agnostic (no corruption). Mirrors sim.
   if(m.keyword==='DIRGE')atk+=Math.floor((ctx.discardCount||0)/4)
+  // MIMIC (TRICKSTER — Tanuki): shapeshifts into your strongest member. His ATK becomes the
+  // highest STANDING atk (base+permanent buffs) among your OTHER members — so permanent card
+  // investment on your carry (New Strings/Battle Cry/etc.) pumps Tanuki too, but he does NOT
+  // copy per-strike keyword scaling (FRENZIED riffs) or temp doublers (Amp It Up) — that
+  // would be too strong. ctx.mimicStrength is precomputed = max memberStrength of non-TRICKSTER,
+  // non-Drummer members. Glass cannon is his balance cost.
+  if(m.keyword==='TRICKSTER'&&ctx&&ctx.mimicStrength)return Math.max(atk,ctx.mimicStrength)
   // Neighbor-adjacency ATK auras REMOVED (v0.8.1 declutter). Mentor Link is the only
   // adjacency mechanic now — it lives in computeStrikeDamage, not here.
   return atk
@@ -505,12 +512,12 @@ function computeStrikeDamage(P){
     const cleanLivingBonus=0 /* clean_living now applies at fight start */
     return s+effectiveAtk+cleanLivingBonus
   },0)+p10Bonus
-  // ── BLASTBEAT: each drummer makes the whole band hit ×1.35 harder, STACKS ──
+  // ── BLASTBEAT: each drummer makes the whole band hit ×1.5 harder, STACKS ──
   let dblMult=1
   const hasDbl=actives.some(m=>m.role==='Drummer')
   if(hasDbl){
     const _bbCount=actives.filter(m=>m.role==='Drummer').length
-    dblMult=Math.round(Math.pow(1.35,_bbCount)*100)/100
+    dblMult=Math.round(Math.pow(1.5,_bbCount)*100)/100
     dmg=Math.round(dmg*dblMult)
     bLines.push({type:'multiply',label:'BLASTBEAT ×'+dblMult,label2:'= '+dmg.toLocaleString(),runningAfter:dmg,color:'#ff8800'})
   }
@@ -742,7 +749,7 @@ function _anchorAuraRed(){return 0}
 function _folkAuraHealMap(){return null}
 const KEYWORD_DESC={
   'FRENZIED':'+ATK per RIFF played each Strike. Stack more for bigger bonus (1/2/4×).',
-  'BLASTBEAT':'Every drummer makes the whole band hit ×1.35 harder — flat, reliable, and it STACKS (2 drummers = ×1.82). Drummers don\'t swing, so it\'s a real trade: fewer attackers for a band-wide multiplier.',
+  'BLASTBEAT':'Every drummer makes the whole band hit ×1.5 harder, and it STACKS (2 drummers = ×2.25). Drummers don\'t swing themselves — that\'s the trade: an attacker slot for a band-wide multiplier.',
   'ANCHOR':'Saves an ANCHOR member from a lethal hit. 1 stack = save 1 ANCHOR/fight. 2 stacks = save 2 ANCHORs/fight. 3+ stacks = ANY member can be saved (4 saves/fight). Stack 3+ ANCHORs to protect the whole band.',
   'CORRUPT':'+ATK from Corruption (×1/×2/×4 by stack tier). Thrives in chaos.',
   'DEBUFF':'Reduces boss damage by 2 each Strike, stacking permanently this fight.',
@@ -751,7 +758,7 @@ const KEYWORD_DESC={
   'DISSONANCE':'+1 ATK for every DIFFERENT keyword elsewhere in your band — the more varied your lineup, the harder these synths scream. Build wide.',
   'DIRGE':'+1 ATK for every 4 cards in your DISCARD pile — the deeper into the set, the heavier he plays. Keep him alive to ramp.',
   'HEXED':'Gains +5% Corruption each Strike, +1 ATK per 8% Corruption.',
-  'TRICKSTER':'Mythical shapeshifter. Place him between your two strongest for a +1 ATK of his own.',
+  'TRICKSTER':'MIMIC — each strike Tanuki\'s ATK matches your strongest member, buffs and all (their FULL boosted ATK). A glass cannon — protect him and he mirrors your carry.',
   'FALLEN':'Cannot be healed. Loses 1 HP per Strike. If Lucifer dies, game over. Max 3 band members.',
 }
 
@@ -1632,14 +1639,14 @@ function BoosterScreen({onComplete,seed}){
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
           {[
             ['FRENZIED','#ee2222','⚡','+ATK per RIFF card played each Strike. 1 stack = +1/RIFF, 2 stacks = +2/RIFF, 3+ stacks = +4/RIFF. Foil counts as 2 stacks.'],
-            ['BLASTBEAT','#ff8800','🥁','Every drummer makes the whole band hit ×1.35 harder — flat, no dice. Multiple drummers allowed and it STACKS (2 = ×1.82). Drummers don\'t swing; this is their whole job — a real trade of an attacker slot for a band-wide multiplier.'],
+            ['BLASTBEAT','#ff8800','🥁','Every drummer makes the whole band hit ×1.5 harder, and it STACKS (2 drummers = ×2.25). Drummers don\'t swing themselves — that\'s the trade: an attacker slot for a band-wide multiplier.'],
             ['ANCHOR','#33dd33','⚓','Saves a member from a lethal hit. 1 stack = save 1 lethal/fight on an ANCHOR. 2 stacks = 2 saves. 3+ stacks = ANY member can be saved (4 saves/fight).'],
             ['DISSONANCE','#22ccee','🎹','+1 ATK for every DIFFERENT keyword elsewhere in your band. The more varied your lineup, the harder these synths scream — build wide.'],
             ['DEBUFF','#4488ff','🎤','Each Strike permanently reduces boss damage by 2 this fight. Stacks up.'],
             ['FOLK MAGIC','#44ddaa','🪈','Each Strike has a 25% chance to refund ALL the Embers you spent.'],
             ['SHREDDER','#ff4488','🎸','+ATK per consecutive same-type card pair played each Strike. Chain RIFF→RIFF→RIFF for max stacks (1/2/4× per chain hit).'],
             ['DIRGE','#aa88cc','🪈','+1 ATK for every 4 cards in your DISCARD pile. The longer the set runs, the heavier he plays — keep him alive to ramp.'],
-            ['TRICKSTER','#e8b84a','🦝','Mythical shapeshifter. Gains +1 ATK of its own — place him between your two strongest.'],
+            ['TRICKSTER','#e8b84a','🦝','MIMIC — each strike Tanuki\'s ATK matches your strongest member, buffs and all (their FULL boosted ATK). A glass cannon — protect him and he mirrors your carry.'],
           ].map(([kw,color,icon,desc])=>(
             <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:10,background:'rgba(0,0,0,0.4)',borderRadius:6,padding:'8px 12px',border:`1px solid ${color}44`}}>
               <div style={{fontSize:20,flexShrink:0,marginTop:1}}>{icon}</div>
@@ -2415,7 +2422,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
           </div>
         </div>
         <div onClick={()=>canBuy&&handleOpenPack(pack)}
-          style={{flex:1,minHeight:520,display:'flex',flexDirection:'column',alignItems:'center',
+          style={{flex:1,height:280,minHeight:280,maxHeight:280,display:'flex',flexDirection:'column',alignItems:'center',
             background:'linear-gradient(160deg,#12100a 0%,#1e1a0e 40%,#120e08 100%)',
             border:hov&&canBuy?'2px solid '+ac:'1px solid '+ac+'66',
             borderRadius:10,overflow:'hidden',
@@ -2430,8 +2437,6 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
           <div style={{width:'100%',height:8,flexShrink:0,
             background:'linear-gradient(90deg,'+ac+'44,'+ac+'ee,'+ac+'44)',
             boxShadow:'0 0 16px '+ac+'99'}}/>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,letterSpacing:3,
-            color:ac,textTransform:'uppercase',opacity:1,marginTop:8,flexShrink:0}}>VESTIBULE</div>
           <div style={{flex:'0 0 38%',display:'flex',alignItems:'center',justifyContent:'center',
             filter:'drop-shadow(0 0 '+(hov?'20px':'8px')+' '+ac+(hov?'cc':'66')+')',
             transition:'filter 0.15s'}}><PackArtImg packId={pack.id} emoji={pack.emoji} size={140}/></div>
@@ -2524,7 +2529,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
     <TearingPackOverlay/>
     <div style={{position:'absolute',inset:0,zIndex:9500,
       background:'radial-gradient(ellipse at 50% 0%,rgba(28,18,4,1) 0%,rgba(6,4,1,1) 100%)',
-      overflow:'hidden',boxSizing:'border-box',height:1080}}>
+      overflowY:'auto',overflowX:'hidden',boxSizing:'border-box',height:1080}}>
       {/* BACKGROUND ATMOSPHERE — dirty brick stripes, streetlight corners, drifting dust */}
       <div style={{position:'absolute',inset:0,pointerEvents:'none',zIndex:0,
         backgroundImage:'repeating-linear-gradient(0deg, rgba(80,40,20,0.06) 0 22px, transparent 22px 24px, rgba(60,30,15,0.05) 24px 46px, transparent 46px 48px),'+
@@ -2645,7 +2650,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
             {(leftBought.rec||recruitBought)&&<SoldOverlay/>}
             {packsBoughtThisVisit>=1&&!leftBought.rec&&!recruitBought&&<SoldOverlay label="SOLD OUT THIS VISIT"/>}
             <div style={{flex:'1 1 0',minHeight:0,display:'flex',justifyContent:'center',alignItems:'center',padding:'12px 0 6px'}}>
-              <PackArtImg packId={['cassette','cdr','vinyl','rarevinyl','cursed'][Math.min(4,Math.floor(circleNum/2))]} emoji="📦" size={288}/>
+              <PackArtImg packId={['touring','underground','festival','headliner','demonic'][Math.min(4,Math.floor(circleNum/2))]} emoji="🎸" size={288}/>
             </div>
             <div style={{padding:'4px 12px 12px',textAlign:'center',flexShrink:0}}>
               <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:'var(--text-gold)',letterSpacing:3,textShadow:'0 0 14px rgba(232,168,32,0.6)'}}>Band Recruitment</div>
@@ -2689,7 +2694,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
         </div>
 
         {/* CENTER */}
-        <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',minHeight:0}}>
+        <div style={{flex:1,display:'flex',flexDirection:'column',overflowY:'auto',overflowX:'hidden',minHeight:0,gap:2}}>
 
           {/* CARDS ROW */}
           <div style={{display:'block',border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
@@ -2751,8 +2756,9 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
             </div>}
           </div>
 
-          {/* GAP */}
-          <div style={{flex:1,minHeight:8,maxHeight:30}}/>
+          {/* GAP — grows to push the Boosters box to the column bottom so its
+              outer border lines up with the left column's Effect Pedal box. */}
+          <div style={{flex:1,minHeight:2}}/>
 
           {/* PACKS + PAWN ROW */}
           <div style={{display:'block',border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
@@ -2760,32 +2766,28 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
           <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start'}}>
             {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
             <div style={{paddingTop:24,flexShrink:0}}>
-            <div style={{width:340,height:520,
+            <div style={{width:320,height:280,
               background:'linear-gradient(160deg,#0e0a16,#080510)',
               border:'2px solid rgba(150,70,220,0.65)',borderRadius:10,
-              padding:'14px 16px',
+              padding:'14px 16px 16px',overflow:'hidden',
               display:'flex',flexDirection:'column',
               justifyContent:'space-between',
               boxShadow:'0 0 30px rgba(130,50,200,0.2)'}}>
               <div>
-                <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:30,
+                <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,
                   color:'#9944dd',textAlign:'center',marginBottom:4,
                   textShadow:'0 0 18px rgba(160,80,240,0.8)'}}>💸 Sly's Buyback</div>
-                <div style={{fontSize:36,textAlign:'center',margin:'4px 0 8px'}}>🏧</div>
                 {/* 2-column rate sheet */}
-                <div style={{padding:'8px 22px',fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--tier-mythic)',letterSpacing:1}}>
+                <div style={{padding:'2px 22px',fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'var(--tier-mythic)',letterSpacing:1}}>
                   {[['Common','1',true],['Uncommon','2',true],['Rare','4',true],['Foil','+3',true],['Mythic','+8',true],['Member','5',true],['Artifact','50% buyback',false]].map(([k,v,leaf])=>(
-                    <div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'3px 0',borderBottom:'1px dashed rgba(200,140,255,0.18)'}}>
+                    <div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'1.5px 0',borderBottom:'1px dashed rgba(200,140,255,0.18)'}}>
                       <span style={{fontWeight:700}}>{k}</span>
                       <span style={{fontWeight:900,color:'var(--tier-mythic)',fontVariantNumeric:'tabular-nums',display:'inline-flex',alignItems:'center',gap:3}}>{v}{leaf&&<WeedLeaf size={14}/>}</span>
                     </div>
                   ))}
                 </div>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',marginTop:10,letterSpacing:0.5,padding:'0 12px'}}>
-                  —No questions asked. Sly takes a cut.
-                </div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',marginTop:4,letterSpacing:0.5,padding:'0 12px',opacity:0.8}}>
-                  Max 2 sales per visit · Cannot sell last 2 members
+                  Max 2 sales/visit · Can't sell last 2
                 </div>
               </div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--ink-dim)',fontStyle:'italic',textAlign:'center',letterSpacing:0.5,opacity:0.85}}>
@@ -2811,7 +2813,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
               <div onClick={()=>{if(pawnSalesLeft>0)setPawnOpen(true)}}
                 onMouseEnter={e=>{if(pawnSalesLeft>0){e.currentTarget.style.transform='translateY(-4px) scale(1.02)';e.currentTarget.style.boxShadow='0 16px 40px rgba(0,0,0,0.95),0 0 32px rgba(160,80,240,0.55)'}}}
                 onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='0 0 30px rgba(130,50,200,0.2)'}}
-                style={{width:300,height:520,
+                style={{width:186,height:280,
                   background:'linear-gradient(160deg,#16081e,#0a0410)',
                   border:'2px solid rgba(150,70,220,0.65)',borderRadius:10,
                   cursor:pawnSalesLeft>0?'pointer':'not-allowed',
@@ -2824,7 +2826,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
                   color:'#cc88ff',textAlign:'center',
                   textShadow:'0 0 14px rgba(180,80,240,0.8)',letterSpacing:2,flexShrink:0}}>SLY</div>
                 {/* Sly portrait — 172×256 source, scales to fill 280×420 slot via object-fit. Pixelated rendering preserves the pixel art. */}
-                <div data-sly-portrait="" style={{width:280,height:420,flexShrink:0,
+                <div data-sly-portrait="" style={{width:120,height:168,flexShrink:0,
                   background:'radial-gradient(ellipse at 50% 40%, rgba(80,40,140,0.35), rgba(30,10,50,0.85) 70%)',
                   border:'1px solid rgba(200,140,255,0.35)',borderRadius:8,
                   display:'flex',alignItems:'center',justifyContent:'center',
@@ -2936,12 +2938,29 @@ function showFirstTimeTip(key, msg, addLog, addFloat) {
 
 
 // ═══ PACK ART — maps pack IDs to art files ═══
-const PACK_ART_MAP={cassette:'touring',cdr:'underground',vinyl:'festival',rarevinyl:'headliner',cursed:'demonic'}
+// Aug 6 2026 — cassette/cdr were mapped to touring.png/underground.png, which are generic
+// tour-pack BAG art (read as the recruit "tour pack", not a cassette/CD). No cassette.png /
+// cdr.png art exists, so they now fall through to their emoji (📼 / 💿) which read correctly.
+// (Drop-in cassette.png/cdr.png into public/vestibule/packs/ later to upgrade from emoji.)
+const PACK_ART_MAP={vinyl:'festival',rarevinyl:'headliner',cursed:'demonic'}
+// Module-level cache of "does this pack's art PNG exist" (packId → boolean). Mirrors
+// _ARTIFACT_ART_CACHE. Aug 6 2026 FIX: without it, PackArtImg started every render at
+// hasArt=false (emoji), then async-loaded the PNG and flipped to the image — so any shop
+// re-render (hover, reroll, buy) re-ran the load and flickered the icon emoji<->art. The
+// cache makes the result stick, so a pack renders its correct icon immediately after the
+// first load (no more Cassette/CD-R "switching icons").
+const _PACK_ART_CACHE={}
 function PackArtImg({packId,emoji,size=120,style={}}){
-  const [hasArt,setHasArt]=React.useState(false)
   const artFile=PACK_ART_MAP[packId]||packId
   const src=import.meta.env.BASE_URL+'vestibule/packs/'+artFile+'.png'
-  React.useEffect(()=>{const img=new window.Image();img.onload=()=>setHasArt(true);img.onerror=()=>setHasArt(false);img.src=src},[packId])
+  const [hasArt,setHasArt]=React.useState(_PACK_ART_CACHE[packId]===true)
+  React.useEffect(()=>{
+    if(_PACK_ART_CACHE[packId]!==undefined){setHasArt(_PACK_ART_CACHE[packId]);return}
+    const img=new window.Image()
+    img.onload=()=>{_PACK_ART_CACHE[packId]=true;setHasArt(true)}
+    img.onerror=()=>{_PACK_ART_CACHE[packId]=false;setHasArt(false)}
+    img.src=src
+  },[packId,src])
   if(hasArt)return <img src={src} alt={packId} style={{width:'auto',height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
   return <span style={{fontSize:size*0.6,...style}}>{emoji}</span>
 }
@@ -8947,7 +8966,8 @@ function App(){
     for(let _si=1;_si<_realIdsThisStrike.length;_si++){
       if(CARD_TYPE_BY_ID[_realIdsThisStrike[_si]]===CARD_TYPE_BY_ID[_realIdsThisStrike[_si-1]])_shredderHits++
     }
-    const _atkCtx={corruption,tier:_kwStacks.tier,riffsThisStrike:_riffsThisStrike,shredderHits:_shredderHits,distinctKeywords:Object.keys(_kwStacks.counts).filter(k=>k!=='DISSONANCE').length,discardCount:discRef.current.length}
+    const _atkBase={corruption,tier:_kwStacks.tier,riffsThisStrike:_riffsThisStrike,shredderHits:_shredderHits,distinctKeywords:Object.keys(_kwStacks.counts).filter(k=>k!=='DISSONANCE').length,discardCount:discRef.current.length}
+    const _atkCtx={..._atkBase,mimicStrength:Math.max(0,...stage.filter(x=>x&&!x.tooStoned&&x.keyword!=='TRICKSTER'&&x.role!=='Drummer').map(x=>getEffectiveAtk(x,_atkBase)))}
     // BOSS BLIND: silence — pick the single highest-ATK alive attacker and mark it in
     // _atkCtx so getEffectiveAtk zeroes it everywhere. Picked BEFORE silencedUid is set
     // (so this loop reads true ATK) and among non-drummers (drummers deal no direct
@@ -10941,7 +10961,7 @@ function App(){
             ['🌿 Stash','Your currency. Earned after victories (scales with circle depth). Spent in the shop on recruit packs, cards, artifacts, passives, and drugs. Capped at 420.'],
             ['💨 Too Stoned','When a member reaches 0 HP, they go Too Stoned and can\'t attack or be targeted for the rest of this fight. They recover at full HP next fight. If ALL members go Too Stoned at once, the run ends.'],
             ['👥 Band Members','Your band has up to 5 slots (6 with the Sixth Slot pact). Each member has ATK, HP, and a keyword ability. Recruit new members from packs in the shop.'],
-            ['🏷 Member Keywords','FRENZIED: +ATK per RIFF played each Strike (×1/2/4 by stack tier). BLASTBEAT: each drummer makes the whole band hit ×1.35 harder — flat, no dice, and it STACKS (multiple drummers allowed). ANCHOR: Saves from lethal damage 1/2/any-member by stack tier (per fight). CORRUPT: +ATK from Corruption (×1/2/4 by stack tier). DEBUFF: Reduces boss damage. FOLK MAGIC: 25% chance to refill all Embers. SHREDDER: +ATK per consecutive same-type card chain (×1/2/4 by stack tier). DISSONANCE: +1 ATK per DIFFERENT keyword elsewhere in your band — build wide. DIRGE: +1 ATK per 4 cards in your discard pile — ramps as the fight runs long. TRICKSTER: mythical — gains +1 ATK of its own.'],
+            ['🏷 Member Keywords','FRENZIED: +ATK per RIFF played each Strike (×1/2/4 by stack tier). BLASTBEAT: each drummer makes the whole band hit ×1.5 harder, and it STACKS (multiple drummers allowed). ANCHOR: Saves from lethal damage 1/2/any-member by stack tier (per fight). CORRUPT: +ATK from Corruption (×1/2/4 by stack tier). DEBUFF: Reduces boss damage. FOLK MAGIC: 25% chance to refill all Embers. SHREDDER: +ATK per consecutive same-type card chain (×1/2/4 by stack tier). DISSONANCE: +1 ATK per DIFFERENT keyword elsewhere in your band — build wide. DIRGE: +1 ATK per 4 cards in your discard pile — ramps as the fight runs long. TRICKSTER: mythical MIMIC — each strike Tanuki\'s ATK matches your strongest member, buffs and all (their FULL boosted ATK).'],
             ['⛓ Mentor Links','Place a Foil/Mythic/Demonic member directly LEFT of a basic member with the same role. They form a Mentor Link — a permanent damage multiplier that fires every Strike while both are alive.'],
             ['✨ Member Tiers','Members come in tiers: Basic (standard), Foil (+1 ATK/HP, -1 Ember on cards), Mythic (+3 ATK/HP), Demonic (+5 ATK/HP, golden glow). Higher tiers appear in better packs.'],
             ['🃏 Card Types','RIFF (purple): Direct damage and ATK buffs. CORRUPT (red): Corruption-scaling power. UTILITY (green): Healing, draw, and economy. EMBER (orange): Ember management and recovery.'],
@@ -11035,9 +11055,9 @@ function App(){
       <>
       {ColdOpenOverlay}
       <div style={{position:'absolute',inset:0,zIndex:9900,background:'rgba(2,1,0,0.99)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:0,overflow:'hidden'}}>
-        {/* Background logo — large, FAINT (Aug 6 2026: 0.08 → 0.05 per JV, should be barely-there) */}
-        <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',opacity:0.05}}>
-          <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:972,height:972,objectFit:'contain'}}/>
+        {/* Background logo — large, VERY FAINT + slow clockwise spin (Aug 6 2026: 0.08→0.05→0.03 per JV; bgSpin adds subtle motion). */}
+        <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none',opacity:0.03}}>
+          <img src={import.meta.env.BASE_URL+"vestibule_logo.png"} alt="" style={{width:972,height:972,objectFit:'contain',animation:'bgSpin 140s linear infinite'}}/>
         </div>
         {/* Scanlines */}
         
@@ -12434,7 +12454,8 @@ function App(){
             // Build ad-hoc atk context for preview damage calc — mirrors handleStrikeBody
             const _vmKwStacks=getKeywordStacks(stage)
             const _vmRiffsThis=_vmCardsThisStrike.filter(c=>c.type==='RIFF').length
-            const _vmAtkCtx={corruption,tier:_vmKwStacks.tier,riffsThisStrike:_vmRiffsThis,shredderHits:0,distinctKeywords:Object.keys(_vmKwStacks.counts).filter(k=>k!=='DISSONANCE').length,discardCount:discRef.current.length}
+            const _vmAtkBase={corruption,tier:_vmKwStacks.tier,riffsThisStrike:_vmRiffsThis,shredderHits:0,distinctKeywords:Object.keys(_vmKwStacks.counts).filter(k=>k!=='DISSONANCE').length,discardCount:discRef.current.length}
+            const _vmAtkCtx={..._vmAtkBase,mimicStrength:Math.max(0,...stage.filter(x=>x&&!x.tooStoned&&x.keyword!=='TRICKSTER'&&x.role!=='Drummer').map(x=>getEffectiveAtk(x,_vmAtkBase)))}
             const _vmHighestAtk = Math.max(0, ...stage.filter(m=>m).map(m=>getEffectiveAtk(m,_vmAtkCtx)))
             // Base (pre-multiplier) damage — mirrors step 1 of the damage preview
             // IIFE below and `dmg` at the top of handleStrikeBody's artifact loop.
@@ -12585,7 +12606,8 @@ function App(){
             for(let _psi=1;_psi<_previewRealIds.length;_psi++){
               if(CARD_TYPE_BY_ID[_previewRealIds[_psi]]===CARD_TYPE_BY_ID[_previewRealIds[_psi-1]])_previewShredHits++
             }
-            const _previewCtx={corruption,tier:_previewKw.tier,riffsThisStrike:_previewRiffs,shredderHits:_previewShredHits,distinctKeywords:Object.keys(_previewKw.counts).filter(k=>k!=='DISSONANCE').length,discardCount:discRef.current.length}
+            const _previewBase={corruption,tier:_previewKw.tier,riffsThisStrike:_previewRiffs,shredderHits:_previewShredHits,distinctKeywords:Object.keys(_previewKw.counts).filter(k=>k!=='DISSONANCE').length,discardCount:discRef.current.length}
+            const _previewCtx={..._previewBase,mimicStrength:Math.max(0,...stage.filter(x=>x&&!x.tooStoned&&x.keyword!=='TRICKSTER'&&x.role!=='Drummer').map(x=>getEffectiveAtk(x,_previewBase)))}
             const _preview=computeStrikeDamage({
               stage,actives,atkCtx:_previewCtx,paranoiaVictim:null,kwStacks:_previewKw,
               activePassives,activeArtifacts,activeStake,
