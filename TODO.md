@@ -13,6 +13,7 @@
 - [x] **bootlegcopy** base copy → deck (matches card text), upgrade → hand. ⚠ re-check `e2e/test-card-parity.cjs`.
 - [x] **Rebalanced:** universal upgrades lifted top decks; nudged hpScale Standard 1.05 /
   Shredder 1.14 / Ritualist 1.57. Final 2000g Bronze: 8.9–10.7%, all in 8–11% band.
+- [x] Forge cards: hover shows ORIGINAL text + Ember cost (CSS overlay, no state).
 - [ ] FOLLOW-UP: run `e2e/up.sh` + card-parity rig to reconfirm live↔sim after this pass.
 
 ## ⛧ SHOP UI POLISH (Aug 9 2026 — DONE)

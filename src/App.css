@@ -839,3 +839,6 @@ body {
 
 /* Background sigil slow clockwise rotation (menu bg logo) */
 @keyframes bgSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+/* Doom Forge: reveal a card's ORIGINAL text + Ember cost on hover (what you're upgrading). */
+.forge-orig{opacity:0;transition:opacity 0.12s ease}
+.forge-fcard:hover .forge-orig{opacity:1}

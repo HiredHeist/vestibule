@@ -11777,7 +11777,7 @@ function App(){
           const up=CARD_UPGRADES[c.id]
           const bc=c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc'
           const hasHp=up.hp&&up.hpAmt
-          return <div key={c.id} onClick={()=>{
+          return <div key={c.id} className="forge-fcard" onClick={()=>{
             setUpgradedCards(p=>[...p,c.id])
             setDeck(p=>p.map(dc=>dc.id===c.id?Object.assign({},dc,{upgraded:true,name:(dc.name||'').replace(/\+$/,'')+'+'}):dc))
             setHand(p=>p.map(dc=>dc.id===c.id?Object.assign({},dc,{upgraded:true,name:(dc.name||'').replace(/\+$/,'')+'+'}):dc))
@@ -11795,6 +11795,15 @@ function App(){
           }} style={{width:240,background:'linear-gradient(180deg,#1a1008,#0a0604)',border:'2px solid '+bc+'88',borderRadius:10,padding:'0 0 14px',cursor:'pointer',transition:'all 0.2s',position:'relative'}}
             onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-6px)';e.currentTarget.style.borderColor='#ffd700';e.currentTarget.style.boxShadow='0 6px 25px rgba(200,150,0,0.3)'}}
             onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor=bc+'88';e.currentTarget.style.boxShadow='none'}}>
+            {/* HOVER: original card text + Ember cost (what you're upgrading, and its price) */}
+            <div className="forge-orig" style={{position:'absolute',inset:0,borderRadius:10,background:'rgba(6,3,1,0.97)',border:'2px solid '+bc,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,padding:'14px 14px',textAlign:'center',pointerEvents:'none',zIndex:20}}>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:18,color:'#c8a878',letterSpacing:1}}>{c.name}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:bc,textTransform:'uppercase'}}>{c.type} {c.rarity||''}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#ff8800',display:'flex',alignItems:'center',gap:5}}>{c.embers>0?<><span>Cost:</span> <span>{c.embers}</span> 🔥</>:<span>Cost: FREE</span>}</div>
+              <div style={{width:'70%',height:1,background:'rgba(255,255,255,0.12)'}}/>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#c8a878',letterSpacing:1,textTransform:'uppercase',opacity:0.8}}>Current effect</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-secondary)',lineHeight:1.45}}>{c.effect||c.desc||''}</div>
+            </div>
             <div style={{height:5,background:bc,borderRadius:'10px 10px 0 0'}}/>
             <div style={{textAlign:'center',padding:'14px 0',display:'flex',justifyContent:'center'}}><CardArtImg id={c.id} emoji={c.emoji} size={56}/></div>
             <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:20,color:'var(--text-gold)',textAlign:'center',letterSpacing:1}}>{c.name}+</div>
