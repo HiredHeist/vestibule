@@ -15,8 +15,11 @@ Ordered roughly by priority. Goal: get the release ready.
    16 riff chains = **33**, earned from vst_lifetime/vst_stake_unlocks/vst_combos_discovered (verified
    live: 3/33). Fixed War Drums (reclassified artifact→pedal) showing as always-unlocked in the pedals
    gallery. Confirmed all unlock write-paths fire. Kept "COMING SOON" slots as future-content placeholders.
-2. [ ] **RULES page cleanup** (UI). Tidy the layout, and **add DMT** to the drugs section alongside
-   Shrooms & Acid (DMT currently only appears in the shop, never explained in the rules).
+2. [x] **RULES page cleanup — DONE (Aug 10).** Multi-part entries (Member Keywords, Card Types,
+   Member Tiers, Stakes, Dealer, Synergy, Reducing Corruption) now render as clean bulleted lists
+   with bolded labels. Added DMT to the Dealer. Removed stale/contradictory corruption entries;
+   fixed Reducing-Corruption card list. Menus also reorganized: Unlocks = earn-only (3/30),
+   Collection = full compendium (Cards/Members/Artifacts/Pedals) with real art + fixed 82-card count.
 3. [ ] **Full emoji-placeholder art inventory.** Produce a complete list of EVERYTHING still using an
    emoji placeholder — artifacts, effect pedals, any cards with generic/placeholder art, plus the
    cassette 📼 / CD-R 💿 shop packs — so JV can finish the artwork in one pass.
