@@ -10,9 +10,11 @@
 Ordered roughly by priority. Goal: get the release ready.
 
 ### A. Content / player-facing (the release blockers)
-1. [ ] **Unlock progression audit.** Intro screen shows `UNLOCKS 0/77` but there are only ~8 real
-   milestones — the `77` denominator (App.jsx ~11101) is hardcoded/wrong. Audit EVERY unlockable
-   (members, stakes, achievements, Lucky Draw, cards) so the count is real and things actually unlock.
+1. [x] **Unlock progression audit — DONE (Aug 10).** Replaced the hardcoded `/77` with a real
+   aggregate: 8 milestones + 6 stake rewards + 2 lockable members + 1 lockable gear (War Drums) +
+   16 riff chains = **33**, earned from vst_lifetime/vst_stake_unlocks/vst_combos_discovered (verified
+   live: 3/33). Fixed War Drums (reclassified artifact→pedal) showing as always-unlocked in the pedals
+   gallery. Confirmed all unlock write-paths fire. Kept "COMING SOON" slots as future-content placeholders.
 2. [ ] **RULES page cleanup** (UI). Tidy the layout, and **add DMT** to the drugs section alongside
    Shrooms & Acid (DMT currently only appears in the shop, never explained in the rules).
 3. [ ] **Full emoji-placeholder art inventory.** Produce a complete list of EVERYTHING still using an
