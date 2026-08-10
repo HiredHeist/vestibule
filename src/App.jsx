@@ -2923,6 +2923,25 @@ function PassiveArtImg({id,emoji,size=40,style={}}){
   return <span style={{fontSize:size*0.7,...style}}>{emoji}</span>
 }
 
+// Generic UI icon loader: vestibule/{folder}/{id}.png with emoji fallback (menu nav,
+// deck emblems, stake rewards, daily tile). Aug 10 2026 art pass.
+const _UI_ART_CACHE={}
+function UiArtImg({folder,id,emoji,size=24,style={}}){
+  const src=import.meta.env.BASE_URL+'vestibule/'+folder+'/'+id+'.png'
+  const key=folder+'/'+id
+  const cached=_UI_ART_CACHE[key]
+  const [hasArt,setHasArt]=React.useState(cached===true)
+  React.useEffect(()=>{
+    if(_UI_ART_CACHE[key]!==undefined){setHasArt(_UI_ART_CACHE[key]);return}
+    const img=new window.Image()
+    img.onload=()=>{_UI_ART_CACHE[key]=true;setHasArt(true)}
+    img.onerror=()=>{_UI_ART_CACHE[key]=false;setHasArt(false)}
+    img.src=src
+  },[key,src])
+  if(hasArt||cached===true)return <img src={src} alt={id} style={{width:size,height:size,imageRendering:'pixelated',objectFit:'contain',verticalAlign:'middle',...style}}/>
+  return <span style={{fontSize:Math.round(size*0.85),...style}}>{emoji}</span>
+}
+
 
 
 // ═══ SAVE/RESUME SYSTEM ═══
@@ -11354,37 +11373,37 @@ function App(){
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'var(--text-gold)',
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(200,140,30,0.5)',borderRadius:6,
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
-              🔓 Unlocks ({unlockEarned}/{unlockTotal})
+              <UiArtImg folder="menu" id="unlocks" emoji="🔓" size={24} style={{marginRight:8}}/>Unlocks ({unlockEarned}/{unlockTotal})
             </button>
             <button onClick={()=>setMenuView('rules')}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'var(--text-secondary)',
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(160,120,40,0.4)',borderRadius:6,
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
-              📜 Rules
+              <UiArtImg folder="menu" id="rules" emoji="📜" size={24} style={{marginRight:8}}/>Rules
             </button>
             <button onClick={()=>setMenuView('options')}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'var(--text-secondary)',
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(120,100,50,0.3)',borderRadius:6,
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
-              ⚙ Options
+              <UiArtImg folder="menu" id="options" emoji="⚙" size={24} style={{marginRight:8}}/>Options
             </button>
             <button onClick={()=>setShowTrophies(true)}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'var(--text-blood)',
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(180,50,50,0.4)',borderRadius:6,
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
-              💀 Trophies ({Object.keys(getTrophyData()).length}/28)
+              <UiArtImg folder="menu" id="trophies" emoji="💀" size={24} style={{marginRight:8}}/>Trophies ({Object.keys(getTrophyData()).length}/28)
             </button>
             <button onClick={()=>setShowCollection(true)}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'var(--text-secondary)',
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(200,160,40,0.4)',borderRadius:6,
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
-              📀 Collection
+              <UiArtImg folder="menu" id="collection" emoji="📀" size={24} style={{marginRight:8}}/>Collection
             </button>
             <button onClick={()=>setShowStats(true)}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'var(--text-secondary)',
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(120,160,200,0.4)',borderRadius:6,
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
-              📊 Stats
+              <UiArtImg folder="menu" id="stats" emoji="📊" size={24} style={{marginRight:8}}/>Stats
             </button>
           </div>
 
@@ -11427,7 +11446,7 @@ function App(){
                     borderRadius:6,padding:'7px 10px',cursor:dkUnlocked?'pointer':'default',
                     opacity:dkUnlocked?1:0.4,letterSpacing:1,transition:'all 0.15s',
                     boxShadow:dkActive?'0 0 16px '+(dk.color||'#c8a040')+'66':'none'}}>
-                  <div>{dkUnlocked?(dk.emoji+' '+dk.name.replace(/^[^ ]+ /,'')):'🔒 ???'}</div>
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:6}}>{dkUnlocked?<><UiArtImg folder="decks" id={dk.id} emoji={dk.emoji} size={22}/>{dk.name.replace(/^[^ ]+ /,'')}</>:'🔒 ???'}</div>
                   <div style={{display:'flex',gap:2,justifyContent:'center',marginTop:3,minHeight:12}}>
                     {STAKES.map(sk=>seals.includes(sk.id)&&<span key={sk.id} title={sk.name+' conquered'} style={{fontSize:13,color:dkActive?'#000':sk.color,textShadow:dkActive?'none':'0 0 4px '+sk.color}}>⛧</span>)}
                   </div>
@@ -11448,7 +11467,7 @@ function App(){
               return(
               <div style={{marginTop:8,display:'flex',flexDirection:'column',alignItems:'center',gap:6,padding:'10px 24px',background:'rgba(20,14,4,0.6)',border:'1px solid rgba(200,140,40,0.35)',borderRadius:6}}>
                 <div style={{display:'flex',alignItems:'center',gap:10}}>
-                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-gold)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>🌍 Daily Descent</span>
+                  <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-gold)',letterSpacing:3,textTransform:'uppercase',fontWeight:900,display:'inline-flex',alignItems:'center'}}><UiArtImg folder="menu" id="daily" emoji="🌍" size={20} style={{marginRight:6}}/>Daily Descent</span>
                   <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:1}}>Seed {seedHex}</span>
                 </div>
                 <div style={{display:'flex',gap:18,fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)'}}>
@@ -11532,7 +11551,7 @@ function App(){
         <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,fontWeight:900,color:'var(--text-gold)',letterSpacing:4,textShadow:'0 0 20px rgba(200,140,0,0.6)'}}>⛧ {victoryCinematic.stakeName.toUpperCase()} CONQUERED ⛧</div>
         {STAKE_UNLOCKS[victoryCinematic.stakeId]&&<div style={{marginTop:16,animation:'fadeIn 0.8s ease 0.3s both'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-secondary)',letterSpacing:2}}>REWARD UNLOCKED</div>
-          <div style={{fontSize:56,marginTop:8,filter:'drop-shadow(0 0 20px '+STAKE_UNLOCKS[victoryCinematic.stakeId].color+')'}}>{STAKE_UNLOCKS[victoryCinematic.stakeId].emoji}</div>
+          <div style={{marginTop:8,display:'flex',justifyContent:'center',filter:'drop-shadow(0 0 20px '+STAKE_UNLOCKS[victoryCinematic.stakeId].color+')'}}><UiArtImg folder="rewards" id={'su_'+victoryCinematic.stakeId} emoji={STAKE_UNLOCKS[victoryCinematic.stakeId].emoji} size={72}/></div>
           <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:32,color:STAKE_UNLOCKS[victoryCinematic.stakeId].color,marginTop:4,textShadow:'0 0 20px '+STAKE_UNLOCKS[victoryCinematic.stakeId].color+'66'}}>{STAKE_UNLOCKS[victoryCinematic.stakeId].name}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-secondary)',marginTop:6,fontStyle:'italic'}}>{STAKE_UNLOCKS[victoryCinematic.stakeId].desc}</div>
         </div>}
