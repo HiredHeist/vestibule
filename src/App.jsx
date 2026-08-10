@@ -2571,7 +2571,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
             boxShadow:'0 0 16px rgba(200,160,40,0.28), inset 0 0 12px rgba(60,40,0,0.4), 2px 3px 8px rgba(0,0,0,0.6)'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--gold)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Stash</div>
           <div style={{display:'flex',alignItems:'center',gap:6}}>
-            <span style={{fontSize:20}}>💵</span>
+            <UiArtImg folder="shop" id="stash" emoji="💵" size={22}/>
             <WeedLeaf size={28} style={{marginLeft:-2}}/>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,color:stashColor,lineHeight:1,display:'inline-block',
               textShadow:stashPulse==='gain'?'0 0 22px rgba(80,220,100,1),0 0 40px rgba(80,220,100,0.5)':stashPulse==='loss'?'0 0 14px rgba(220,60,60,0.85)':'0 0 10px '+stashColor+'55',
@@ -2587,7 +2587,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
               <path d="M 60 22 Q 240 19, 480 22 T 900 22" stroke="var(--blood)" strokeWidth="0.7" fill="none" opacity="0.55"/>
               <path d="M 60 56 Q 240 59, 480 56 T 900 56" stroke="var(--blood)" strokeWidth="0.7" fill="none" opacity="0.55"/>
             </svg>
-            <span style={{position:'relative',zIndex:1,fontFamily:"'BogartsMetalFont',cursive",fontSize:30,color:'var(--blood)',letterSpacing:3,textTransform:'uppercase',whiteSpace:'nowrap',animation:'neonFlicker 4.5s ease-in-out infinite',padding:'0 90px',lineHeight:1}}>🚬 SLY'S MERCH 🚬</span>
+            <span style={{position:'relative',zIndex:1,fontFamily:"'BogartsMetalFont',cursive",fontSize:30,color:'var(--blood)',letterSpacing:3,textTransform:'uppercase',whiteSpace:'nowrap',animation:'neonFlicker 4.5s ease-in-out infinite',padding:'0 90px',lineHeight:1,display:'inline-flex',alignItems:'center',gap:12}}><UiArtImg folder="shop" id="slymerch" emoji="🚬" size={28}/>SLY'S MERCH<UiArtImg folder="shop" id="slymerch" emoji="🚬" size={28}/></span>
           </div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'var(--ink-bone)',letterSpacing:0.5,marginTop:4,fontWeight:700,opacity:0.85}}>Hey kid... wanna see what fell off the truck?</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:slyFlash?'#ffe69a':'var(--ink-rust)',letterSpacing:0.3,marginTop:2,fontWeight:700,fontStyle:'italic',textShadow:slyFlash?'0 0 14px rgba(255,210,90,0.85), 0 0 4px rgba(255,210,90,0.5)':'none',transition:'color 320ms ease-out, text-shadow 320ms ease-out'}}>"{slyLine}" —Sly</div>
@@ -2605,7 +2605,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
             background:'rgba(25,18,4,0.92)',border:'2px solid '+(canReroll?'rgba(200,150,30,0.85)':'rgba(110,85,20,0.4)'),borderRadius:8,cursor:canReroll?'pointer':'not-allowed',
             opacity:canReroll?1:0.4,
             boxShadow:canReroll?'0 0 16px rgba(180,130,20,0.3)':'none',animation:canReroll?'rerollWiggle 3s ease-in-out infinite':'none'}}>
-          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-gold)',letterSpacing:3,textTransform:'uppercase'}}>🎲 Reroll</span>
+          <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--text-gold)',letterSpacing:3,textTransform:'uppercase',display:'inline-flex',alignItems:'center'}}><UiArtImg folder="shop" id="reroll" emoji="🎲" size={18} style={{marginRight:6}}/>Reroll</span>
           <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--text-gold)',lineHeight:1}}>{priceMoved(rerollCost,'reroll')?<><span style={{textDecoration:'line-through',opacity:0.4,fontSize:13}}>{rerollCost}</span> <WeedLeaf size={14}/> {rerollReal}</>:<><WeedLeaf size={14}/> {rerollCost}</>}</span>
         </div>
 
@@ -2621,7 +2621,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
             display:'flex',alignItems:'center',justifyContent:'center',gap:8,whiteSpace:'nowrap',
             animation:'throbPulseRed 2.4s ease-in-out infinite'}}>
           <span style={{fontSize:18,color:'var(--blood)',textShadow:'0 0 10px rgba(196,30,58,0.9)'}}>⛧</span>
-          <span>🚪 Back to the Pit</span>
+          <span style={{display:'inline-flex',alignItems:'center'}}><UiArtImg folder="shop" id="backtopit" emoji="🚪" size={18} style={{marginRight:6}}/>Back to the Pit</span>
           <span style={{fontSize:18,color:'var(--blood)',textShadow:'0 0 10px rgba(196,30,58,0.9)'}}>⛧</span>
         </button>
       </div>
@@ -2721,7 +2721,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
                 border:'1px solid '+(shroomsInStock&&heldShrooms<drugMax?'rgba(200,150,50,0.5)':'rgba(60,40,20,0.3)'),
                 borderRadius:6,cursor:shroomsInStock&&heldShrooms<drugMax&&can(6,'drug')?'pointer':'default',
                 opacity:shroomsInStock?1:0.4,transition:'all 0.15s'}}>
-              <span style={{fontSize:48,filter:'drop-shadow(0 0 6px rgba(232,168,32,0.4))'}}>🍄</span>
+              <UiArtImg folder="drugs" id="shrooms" emoji="🍄" size={48} style={{filter:'drop-shadow(0 0 6px rgba(232,168,32,0.4))'}}/>
               <div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:shroomsInStock?'#e8a820':'#554428'}}>
                   {heldShrooms>=drugMax?'HOLDING':shroomsInStock?'Shrooms':'DRY'}</div>
@@ -2735,7 +2735,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
                 border:'1px solid '+(acidInStock&&heldAcid<drugMax?'rgba(150,50,220,0.5)':'rgba(40,20,60,0.3)'),
                 borderRadius:6,cursor:acidInStock&&heldAcid<drugMax&&can(12,'drug')?'pointer':'default',
                 opacity:acidInStock?1:0.4,transition:'all 0.15s'}}>
-              <span style={{fontSize:48,filter:'drop-shadow(0 0 6px rgba(204,68,255,0.4))'}}>🧪</span>
+              <UiArtImg folder="drugs" id="acid" emoji="🧪" size={48} style={{filter:'drop-shadow(0 0 6px rgba(204,68,255,0.4))'}}/>
               <div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:acidInStock?'#cc44ff':'#4a2a6a'}}>
                   {heldAcid>=drugMax?'HOLDING':acidInStock?'Acid':'DRY'}</div>
@@ -2751,7 +2751,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
                 borderRadius:6,cursor:heldDMT<drugMax&&can(25,'drug')?'pointer':'default',
                 opacity:1,transition:'all 0.15s',
                 boxShadow:heldDMT<drugMax?'0 0 14px rgba(180,200,255,0.4)':'none'}}>
-              <span style={{fontSize:48,filter:'drop-shadow(0 0 8px rgba(220,200,255,0.6))'}}>💠</span>
+              <UiArtImg folder="drugs" id="dmt" emoji="💠" size={48} style={{filter:'drop-shadow(0 0 8px rgba(220,200,255,0.6))'}}/>
               <div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'#e8ddff',letterSpacing:1}}>
                   {heldDMT>=drugMax?'HOLDING':'DMT'}</div>
@@ -2767,7 +2767,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
 
           {/* PACKS + PAWN ROW */}
           <div style={{display:'block',border:'1px solid rgba(160,110,35,0.3)',borderRadius:8,padding:'8px 12px 12px',background:'rgba(10,6,2,0.3)'}}>
-          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:4}}>📦 Boosters + Pawn Shop</div>
+          <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',letterSpacing:3,textTransform:'uppercase',textAlign:'center',marginBottom:4,display:'flex',alignItems:'center',justifyContent:'center',gap:6}}><UiArtImg folder="shop" id="boosters" emoji="📦" size={18}/>Boosters + Pawn Shop</div>
           <div style={{flexShrink:0,display:'flex',gap:20,justifyContent:'center',alignItems:'flex-start'}}>
             {(boosterPacks||[]).slice(0,2).map((pack,i)=><BoosterPack key={i} pack={pack} idx={i}/>)}
             <div style={{paddingTop:24,flexShrink:0}}>
@@ -2781,7 +2781,7 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
               <div>
                 <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:24,
                   color:'#9944dd',textAlign:'center',marginBottom:4,
-                  textShadow:'0 0 18px rgba(160,80,240,0.8)'}}>💸 Sly's Buyback</div>
+                  textShadow:'0 0 18px rgba(160,80,240,0.8)',display:'flex',alignItems:'center',justifyContent:'center',gap:6}}><UiArtImg folder="shop" id="buyback" emoji="💸" size={22}/>Sly's Buyback</div>
                 {/* 2-column rate sheet */}
                 <div style={{padding:'2px 22px',fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'var(--tier-mythic)',letterSpacing:1}}>
                   {[['Common','1',true],['Uncommon','2',true],['Rare','4',true],['Foil','+3',true],['Mythic','+8',true],['Member','5',true],['Artifact','50% buyback',false]].map(([k,v,leaf])=>(
@@ -2987,7 +2987,11 @@ function showFirstTimeTip(key, msg, addLog, addFloat) {
 // tour-pack BAG art (read as the recruit "tour pack", not a cassette/CD). No cassette.png /
 // cdr.png art exists, so they now fall through to their emoji (📼 / 💿) which read correctly.
 // (Drop-in cassette.png/cdr.png into public/vestibule/packs/ later to upgrade from emoji.)
-const PACK_ART_MAP={vinyl:'festival',rarevinyl:'headliner',cursed:'demonic'}
+// Aug 10 2026: card packs (cassette/cdr/vinyl/rarevinyl/cursed) now have their OWN
+// doom art in packs/{id}.png, so the map is empty and each pack loads its own file.
+// The holographic-bag art (festival/headliner/demonic) stays for the RECRUIT packs,
+// which reference those ids directly.
+const PACK_ART_MAP={}
 // Module-level cache of "does this pack's art PNG exist" (packId → boolean). Mirrors
 // _ARTIFACT_ART_CACHE. Aug 6 2026 FIX: without it, PackArtImg started every render at
 // hasArt=false (emoji), then async-loaded the PNG and flipped to the image — so any shop
