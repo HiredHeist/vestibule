@@ -10931,6 +10931,22 @@ function App(){
   if(gameState==='menu'||menuView){
     const lt=lifetimeScore||0
     const earned=UNLOCK_MILESTONES.filter(u=>lt>=u.score)
+    // REAL unlock progress (Aug 10 2026 — replaces the hardcoded /77). Counts every
+    // genuinely-earnable thing: score milestones + stakes (beyond default Bronze) +
+    // lockable members + lockable artifacts + discoverable riff chains.
+    const _stakeU=getStakeUnlocks()
+    const _combosU=JSON.parse(localStorage.getItem('vst_combos_discovered')||'[]')
+    const _lockMembers=ALL_MUSICIANS.filter(m=>m.locked)
+    // Locked GEAR spans both pools — War Drums was reclassified artifact→pedal, so it
+    // lives in STARTER_PASSIVES now. Search both so the count can't miss it.
+    const _lockGear=[...STARTER_ARTIFACTS,...STARTER_PASSIVES].filter(x=>x.locked)
+    const _unlockableStakes=['bronze','silver','gold','obsidian','blood','demonic']
+    const unlockTotal=UNLOCK_MILESTONES.length+_unlockableStakes.length+_lockMembers.length+_lockGear.length+RIFF_CHAINS.length
+    const unlockEarned=earned.length
+      +_unlockableStakes.filter(s=>_stakeU.includes(s)).length
+      +_lockMembers.filter(m=>!m.unlockAt||lt>=m.unlockAt).length
+      +_lockGear.filter(x=>!x.unlockAt||lt>=x.unlockAt).length
+      +RIFF_CHAINS.filter(ch=>_combosU.includes(ch.id)).length
     const achs=getAchievements()
     const streak=dailyStreak||0
     const scanlines=localStorage.getItem('vst_scanlines')!=='off'
@@ -10950,10 +10966,10 @@ function App(){
     const PAGE=8
     let items=[]
     if(unlockTab==='milestones')items=UNLOCK_MILESTONES.map(u=>({id:u.id,emoji:lt>=u.score?u.emoji:'🔒',name:lt>=u.score?u.label:'???',sub:u.score.toLocaleString()+' pts',done:lt>=u.score,pct:Math.min(100,Math.round(lt/u.score*100))}))
-    else if(unlockTab==='members')items=[...ALL_MUSICIANS.filter(m=>!m.locked).map(m=>({id:m.id,emoji:m.emoji,name:m.name,sub:m.keyword,done:true})),...ALL_MUSICIANS.filter(m=>m.locked).map(m=>{const done=!m.unlockAt||lt>=m.unlockAt;return{id:m.id,emoji:done?m.emoji:'🔒',name:done?m.name:'???',sub:done?m.keyword:'LOCKED',done}}),...Array(7).fill(null).map((_,i)=>({id:'fm'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
+    else if(unlockTab==='members')items=[...ALL_MUSICIANS.filter(m=>!m.locked).map(m=>({id:m.id,emoji:m.emoji,name:m.name,sub:m.keyword,done:true})),...ALL_MUSICIANS.filter(m=>m.locked).map(m=>{const done=!m.unlockAt||lt>=m.unlockAt;return{id:m.id,emoji:done?m.emoji:'🔒',name:done?m.name:'???',sub:done?m.keyword:(m.unlockAt?m.unlockAt.toLocaleString()+' lifetime pts':'LOCKED'),done}}),...Array(7).fill(null).map((_,i)=>({id:'fm'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
     else if(unlockTab==='cards')items=ALL_CARDS.map(c=>({id:c.id+(c.uid||''),emoji:c.emoji,name:c.name,sub:c.type+' · '+c.rarity+(c.shopOnly?' · SHOP':''),done:true,color:c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc',card:c}))
-    else if(unlockTab==='artifacts')items=[...STARTER_ARTIFACTS.map(a=>{const done=!a.locked||(a.unlockAt&&lt>=a.unlockAt);return{id:a.id,emoji:done?a.emoji:'🔒',name:done?a.name:'???',sub:done?(a.effect||'').substring(0,50):'LOCKED',done}}),...Array(9).fill(null).map((_,i)=>({id:'fa'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
-    else if(unlockTab==='pedals')items=[...STARTER_PASSIVES.map(p=>({id:p.id,emoji:p.emoji,name:p.name,sub:(p.effect||'').substring(0,50),done:true})),...Array(10).fill(null).map((_,i)=>({id:'fp'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
+    else if(unlockTab==='artifacts')items=[...STARTER_ARTIFACTS.map(a=>{const done=!a.locked||(a.unlockAt&&lt>=a.unlockAt);return{id:a.id,emoji:done?a.emoji:'🔒',name:done?a.name:'???',sub:done?(a.effect||'').substring(0,50):(a.unlockAt?a.unlockAt.toLocaleString()+' lifetime pts':'LOCKED'),done}}),...Array(9).fill(null).map((_,i)=>({id:'fa'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
+    else if(unlockTab==='pedals')items=[...STARTER_PASSIVES.map(p=>{const done=!p.locked||(p.unlockAt&&lt>=p.unlockAt);return{id:p.id,emoji:done?p.emoji:'🔒',name:done?p.name:'???',sub:done?(p.effect||'').substring(0,50):(p.unlockAt?p.unlockAt.toLocaleString()+' lifetime pts':'LOCKED'),done}}),...Array(10).fill(null).map((_,i)=>({id:'fp'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
     else if(unlockTab==='combos')items=RIFF_CHAINS.map(ch=>{const found=discoveredCombos.includes(ch.id);const c1=ALL_CARDS.find(c=>c.id===ch.cards[0]);const c2=ALL_CARDS.find(c=>c.id===ch.cards[1]);return{id:ch.id,emoji:found?ch.emoji:'🔒',name:found?ch.name:'??? HIDDEN COMBO',sub:found?(c1?c1.name:'?')+' + '+(c2?c2.name:'?'):'Play two synergy cards in the same strike to discover',done:found,color:found?ch.color:'#444'}})
     else if(unlockTab==='victories'){const stakeUnlocks=getStakeUnlocks();items=['bronze','silver','gold','obsidian','blood','demonic'].map(sid=>{const su=STAKE_UNLOCKS[sid];const done=stakeUnlocks.includes(sid);return{id:su.id,emoji:done?su.emoji:'🔒',name:done?su.name:'???',sub:done?su.desc:'Beat '+sid.charAt(0).toUpperCase()+sid.slice(1)+' stake to unlock',done,color:done?su.color:'#444'}})}
     const totalPages=Math.ceil(items.length/PAGE)
@@ -11194,7 +11210,7 @@ function App(){
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'var(--text-gold)',
                 background:'rgba(40,25,5,0.5)',border:'1px solid rgba(200,140,30,0.5)',borderRadius:6,
                 padding:'14px 36px',cursor:'pointer',textTransform:'uppercase'}}>
-              🔓 Unlocks ({earned.length}/77)
+              🔓 Unlocks ({unlockEarned}/{unlockTotal})
             </button>
             <button onClick={()=>setMenuView('rules')}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:21,letterSpacing:4,color:'var(--text-secondary)',
@@ -11802,11 +11818,11 @@ function App(){
             onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor=bc+'88';e.currentTarget.style.boxShadow='none'}}>
             {/* HOVER: original card text + Ember cost (what you're upgrading, and its price) */}
             <div className="forge-orig" style={{position:'absolute',inset:0,borderRadius:10,background:'rgba(6,3,1,0.97)',border:'2px solid '+bc,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,padding:'14px 14px',textAlign:'center',pointerEvents:'none',zIndex:20}}>
-              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:18,color:'#c8a878',letterSpacing:1}}>{c.name}</div>
+              <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:18,color:'var(--ink-bone)',letterSpacing:1}}>{c.name}</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,letterSpacing:2,color:bc,textTransform:'uppercase'}}>{c.type} {c.rarity||''}</div>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'#ff8800',display:'flex',alignItems:'center',gap:5}}>{c.embers>0?<><span>Cost:</span> <span>{c.embers}</span> 🔥</>:<span>Cost: FREE</span>}</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:'var(--type-ember)',display:'flex',alignItems:'center',gap:5}}>{c.embers>0?<><span>Cost:</span> <span>{c.embers}</span> 🔥</>:<span>Cost: FREE</span>}</div>
               <div style={{width:'70%',height:1,background:'rgba(255,255,255,0.12)'}}/>
-              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'#c8a878',letterSpacing:1,textTransform:'uppercase',opacity:0.8}}>Current effect</div>
+              <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-bone)',letterSpacing:1,textTransform:'uppercase',opacity:0.8}}>Current effect</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-secondary)',lineHeight:1.45}}>{c.effect||c.desc||''}</div>
             </div>
             <div style={{height:5,background:bc,borderRadius:'10px 10px 0 0'}}/>
