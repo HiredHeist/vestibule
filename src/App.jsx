@@ -11181,7 +11181,7 @@ function App(){
             ['🎲 Random Events','30% chance of a Hell-themed event between non-boss fights. Choose between two options with risk/reward tradeoffs. 6 events: Mosh Pit, Cursed Amp, Blood Oath, Hellfire Baptism, Sabbath Offering, Devil\'s Wager.'],
             ['🏪 The Shop','After each fight: buy recruit packs (add members), card packs (add cards), artifacts, passives, and drugs. Circle artifacts and passives change each circle.'],
             ['🍄 The Dealer',[
-              'Buy a drug in the shop and use it BEFORE your first Strike for a fight-long buff.',
+              'Buy a drug in the shop, then use it at ANY point during a fight (once per fight) for a lasting buff.',
               'Shrooms (6🌿) — 90% good trip, 5% bad, 5% bunk. Entry-level.',
               'Acid (12🌿) — stronger effects, but riskier than Shrooms.',
               'DMT (25🌿) — boss shops only. No bad trips: 8 huge "I am god this fight" effects.',
