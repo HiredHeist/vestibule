@@ -2571,7 +2571,6 @@ function ShopScreen({stash,onSpend,onSwapMembers,onLeave,stake,pawnSalesLeft=2,o
             boxShadow:'0 0 16px rgba(200,160,40,0.28), inset 0 0 12px rgba(60,40,0,0.4), 2px 3px 8px rgba(0,0,0,0.6)'}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--gold)',letterSpacing:3,textTransform:'uppercase',fontWeight:900}}>Stash</div>
           <div style={{display:'flex',alignItems:'center',gap:6}}>
-            <UiArtImg folder="shop" id="stash" emoji="💵" size={22}/>
             <WeedLeaf size={28} style={{marginLeft:-2}}/>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:32,fontWeight:900,color:stashColor,lineHeight:1,display:'inline-block',
               textShadow:stashPulse==='gain'?'0 0 22px rgba(80,220,100,1),0 0 40px rgba(80,220,100,0.5)':stashPulse==='loss'?'0 0 14px rgba(220,60,60,0.85)':'0 0 10px '+stashColor+'55',
