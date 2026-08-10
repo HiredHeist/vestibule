@@ -1653,7 +1653,7 @@ function BoosterScreen({onComplete,seed}){
             ['TRICKSTER','#e8b84a','🦝','MIMIC — each strike Tanuki\'s ATK matches your strongest member, buffs and all (their FULL boosted ATK). A glass cannon — protect him and he mirrors your carry.'],
           ].map(([kw,color,icon,desc])=>(
             <div key={kw} style={{display:'flex',alignItems:'flex-start',gap:10,background:'rgba(0,0,0,0.4)',borderRadius:6,padding:'8px 12px',border:`1px solid ${color}44`}}>
-              <div style={{fontSize:20,flexShrink:0,marginTop:1}}>{icon}</div>
+              <div style={{flexShrink:0,marginTop:1}}><UiArtImg folder="keywords" id={kw.toLowerCase().replace(/ /g,'')} emoji={icon} size={24}/></div>
               <div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:color,letterSpacing:1,marginBottom:5}}>{kw}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'var(--text-secondary)',lineHeight:1.4,fontStyle:'italic'}}>{desc}</div>
@@ -12374,7 +12374,7 @@ function App(){
           {circleClearedData.isBoss&&<div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:48,color:'var(--text-gold)',textShadow:'0 0 30px rgba(200,150,0,0.6),0 0 60px rgba(150,100,0,0.3),3px 3px 0 #000',animation:'fadeIn 0.8s ease'}}>⛧ Circle {circleClearedData.circleName} Cleared ⛧</div>}
           {circleClearedData.isBoss&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--text-blood)',letterSpacing:3,marginTop:8,animation:'fadeIn 1.2s ease'}}>+1 MAX EMBERS</div>}
           {circleClearedData.loot&&<div style={{marginTop:12,padding:'12px 24px',background:'rgba(200,150,0,0.12)',border:'1px solid rgba(200,150,0,0.4)',borderRadius:8,animation:'fadeIn 1.6s ease',display:'flex',alignItems:'center',gap:12}}>
-            <div style={{fontSize:40}}>{circleClearedData.loot.emoji}</div>
+            <div style={{fontSize:40,display:'flex',justifyContent:'center'}}><UiArtImg folder="loot" id={circleClearedData.loot.id} emoji={circleClearedData.loot.emoji} size={52}/></div>
             <div>
               <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:22,color:'var(--text-gold)',letterSpacing:2}}>{circleClearedData.loot.name}</div>
               <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-secondary)'}}>{circleClearedData.loot.desc}</div>

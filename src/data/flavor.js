@@ -225,6 +225,9 @@ export const TUTORIAL_TIPS={
   ],
 }
 export const BOSS_PORTRAITS={
+  tut_shade:import.meta.env.BASE_URL+'bosses/tut_shade.png',
+  tut_wraith:import.meta.env.BASE_URL+'bosses/tut_wraith.png',
+  tut_revenant:import.meta.env.BASE_URL+'bosses/tut_revenant.png',
   wanderer:import.meta.env.BASE_URL+'bosses/wanderer.png',
   lostsoul:import.meta.env.BASE_URL+'bosses/lostsoul.png',
   drifter:import.meta.env.BASE_URL+'bosses/drifter.png',
