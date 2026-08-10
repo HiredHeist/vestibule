@@ -2901,6 +2901,27 @@ function ArtifactArtImg({id,emoji,size=40,style={}}){
   if(cached===true)return <img src={src} alt={id} style={{width:size,height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
   return <span style={{fontSize:size*0.7,...style}}>{emoji}</span>
 }
+// PEDAL (effect pedal / passive) art. Loads from a DIFFERENT folder than artifacts:
+// public/vestibule/passives/. Only p1-p10 have art today; every other pedal (the
+// reclassified a3/a8/ca2/ca3, war drums, and all the new pedals) falls through to its
+// emoji — which is fine. Mirrors ArtifactArtImg's synchronous-cache pattern to avoid the
+// emoji→PNG flash on remount.
+const _PASSIVE_ART_CACHE={}
+function PassiveArtImg({id,emoji,size=40,style={}}){
+  const src=import.meta.env.BASE_URL+'vestibule/passives/'+id+'.png'
+  const cached=_PASSIVE_ART_CACHE[id]
+  const [hasArt,setHasArt]=React.useState(cached===true)
+  React.useEffect(()=>{
+    if(_PASSIVE_ART_CACHE[id]!==undefined){setHasArt(_PASSIVE_ART_CACHE[id]);return}
+    const img=new window.Image()
+    img.onload=()=>{_PASSIVE_ART_CACHE[id]=true;setHasArt(true)}
+    img.onerror=()=>{_PASSIVE_ART_CACHE[id]=false;setHasArt(false)}
+    img.src=src
+  },[id,src])
+  if(hasArt)return <img src={src} alt={id} style={{width:size,height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
+  if(cached===true)return <img src={src} alt={id} style={{width:size,height:size,imageRendering:'pixelated',objectFit:'contain',...style}}/>
+  return <span style={{fontSize:size*0.7,...style}}>{emoji}</span>
+}
 
 
 
@@ -3926,44 +3947,129 @@ function StatsScreen({onClose}){
 
 function MasteryGallery({onClose}){
   const data=getMasteryData()
-  const allCards=ALL_CARDS.filter(c=>!c.shopOnly&&c.id!=='contract')
+  // Aug 9 2026 — Collection rebuilt into a full compendium with top-level category tabs
+  // (Cards / Members / Artifacts / Pedals). The old card-type filters (All/Riff/…) became
+  // SUB-filters shown only under Cards. Cards now shows ALL 82 (the `!c.shopOnly` exclusion
+  // that hid 8 shop-only cards was dropped — those are tagged "· SHOP" in-tile instead).
+  const [category,setCategory]=useState('cards')
   const [filter,setFilter]=useState('ALL')
   const [selectedCard,setSelectedCard]=useState(null)
+  const lifetime=parseInt(localStorage.getItem('vst_lifetime')||'0')
+  // 'vst_lifetime_score' is never written — the game writes 'vst_lifetime'.
+  const allCards=ALL_CARDS.filter(c=>c.id!=='contract')
   const discovered=new Set(Object.keys(data).filter(k=>data[k]>0))
   const totalPlays=Object.values(data).reduce((s,v)=>s+v,0)
-  
   const filtered=filter==='ALL'?allCards:allCards.filter(c=>c.type===filter)
-  const discCount=allCards.filter(c=>discovered.has(c.id)).length
-  const pct=Math.round(discCount/allCards.length*100)
-  
+  const cardDiscCount=allCards.filter(c=>discovered.has(c.id)).length
+
   const typeColors={RIFF:'#9933cc',CORRUPT:'#aa1111',UTILITY:'#22aa44',EMBER:'#c87820'}
-  
+  const ACC_MEMBER='#e8a820',ACC_ARTIFACT='#c87820',ACC_PEDAL='#9933cc'
+
+  // Members / artifacts / pedals catalogues
+  const members=ALL_MUSICIANS
+  const artifacts=STARTER_ARTIFACTS
+  const pedals=STARTER_PASSIVES
+  const memLocked=m=>m.locked&&m.unlockAt&&lifetime<m.unlockAt
+  const itemLocked=x=>x.locked&&x.unlockAt&&lifetime<x.unlockAt
+  const memUnlocked=members.filter(m=>!memLocked(m)).length
+  const pedalUnlocked=pedals.filter(p=>!itemLocked(p)).length
+
+  // Completion header + progress bar % reflect the ACTIVE category.
+  let headerLine,pct
+  if(category==='cards'){
+    pct=Math.round(cardDiscCount/allCards.length*100)
+    headerLine=cardDiscCount+'/'+allCards.length+' discovered · '+totalPlays.toLocaleString()+' total plays · '+pct+'% complete'
+  }else if(category==='members'){
+    pct=Math.round(memUnlocked/members.length*100)
+    headerLine=memUnlocked+'/'+members.length+' band members unlocked · '+pct+'% complete'
+  }else if(category==='artifacts'){
+    pct=100
+    headerLine=artifacts.length+' vintage amps catalogued'
+  }else{
+    pct=Math.round(pedalUnlocked/pedals.length*100)
+    headerLine=pedalUnlocked+'/'+pedals.length+' effect pedals unlocked · '+pct+'% complete'
+  }
+  const truncEffect=t=>{const s=t||'';return s.length>72?s.slice(0,70)+'…':s}
+
+  // Generic compendium tile (members / artifacts / pedals). `artNode` is pre-rendered art.
+  const CompTile=({keyId,artNode,name,sub,locked,accent})=>(
+    <div key={keyId} style={{background:locked?'rgba(10,6,2,0.8)':'linear-gradient(180deg,#1a1008,#0c0604)',
+      border:'2px solid '+(locked?'#333':accent+'66'),borderRadius:7,overflow:'hidden',position:'relative',
+      filter:locked?'brightness(0.4) saturate(0.35)':'none',boxShadow:locked?'none':'0 0 10px rgba(0,0,0,0.5)'}}>
+      <div style={{height:3,background:locked?'#333':accent}}/>
+      <div style={{height:92,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.3)',overflow:'hidden',position:'relative'}}>
+        {locked?<span style={{fontSize:48}}>🔒</span>:artNode}
+      </div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,color:locked?'var(--text-muted)':'var(--ink-bone)',textAlign:'center',padding:'4px 4px 2px',lineHeight:1.1}}>{locked?'???':name}</div>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',textAlign:'center',padding:'0 6px 8px',lineHeight:1.2,minHeight:32}}>{sub}</div>
+    </div>
+  )
+  // "Future content" placeholder slots JV wants kept visible.
+  const comingSoon=(keyId)=>(
+    <div key={keyId} style={{background:'rgba(10,6,2,0.5)',border:'2px dashed rgba(100,65,15,0.3)',borderRadius:7,overflow:'hidden',opacity:0.5,minHeight:170,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8}}>
+      <span style={{fontSize:44}}>❓</span>
+      <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-muted)',letterSpacing:2,textAlign:'center'}}>COMING SOON</div>
+    </div>
+  )
+  const memberArt=m=>IDLE_PORTRAITS[m.id]?<img src={IDLE_PORTRAITS[m.id]} alt={m.name} style={{width:80,height:80,objectFit:'contain',imageRendering:'pixelated'}}/>:MEMBER_PORTRAITS[m.id]?<MemberPortrait id={m.id} size={56} noSquiggle/>:<span style={{fontSize:48}}>{m.emoji}</span>
+
   return(<div style={{position:'absolute',inset:0,zIndex:9900,background:'linear-gradient(180deg,#080404,#0a0604)',display:'flex',flexDirection:'column',alignItems:'center',padding:'10px 20px',overflowY:'auto'}}>
     {/* HEADER */}
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',width:'100%',maxWidth:1400,marginBottom:4}}>
       <div>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:42,color:'var(--text-secondary)',textShadow:'0 0 30px rgba(200,160,40,0.4),2px 2px 0 #000',letterSpacing:6}}>Collection</div>
-        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-secondary)'}}>{discCount}/{allCards.length} discovered · {totalPlays.toLocaleString()} total plays · {pct}% complete</div>
+        <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-secondary)'}}>{headerLine}</div>
       </div>
       <button onClick={onClose} style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:'var(--text-blood)',background:'rgba(80,0,0,0.4)',border:'2px solid #aa2222',borderRadius:6,padding:'8px 24px',cursor:'pointer',letterSpacing:3}}>✕ CLOSE</button>
     </div>
-    
+
     {/* COMPLETION BAR */}
     <div style={{width:'100%',maxWidth:1400,height:8,background:'rgba(0,0,0,0.5)',borderRadius:4,overflow:'hidden',marginBottom:8}}>
       <div style={{height:'100%',width:pct+'%',background:'linear-gradient(90deg,#c87820,#e8a820,#ffd700)',borderRadius:4,transition:'width 0.5s',boxShadow:'0 0 10px rgba(232,168,32,0.5)'}}/>
     </div>
-    
-    {/* FILTER TABS */}
-    <div style={{display:'flex',gap:4,marginBottom:8,flexWrap:'wrap',justifyContent:'center'}}>
+
+    {/* CATEGORY TABS */}
+    <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap',justifyContent:'center'}}>
+      {[['cards','Cards','#c8a040'],['members','Members','#e8a820'],['artifacts','Artifacts','#c87820'],['pedals','Pedals','#9933cc']].map(([id,label,color])=>(
+        <button key={id} onClick={()=>{setCategory(id);setSelectedCard(null)}} style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:20,letterSpacing:3,padding:'8px 26px',cursor:'pointer',border:category===id?'2px solid '+color:'1px solid rgba(100,65,15,0.3)',borderRadius:6,background:category===id?color+'22':'transparent',color:category===id?'var(--text-gold)':'var(--text-muted)',textTransform:'uppercase',transition:'all 0.15s'}}>{label}</button>
+      ))}
+    </div>
+
+    {/* CARD TYPE SUB-FILTERS — only under the Cards category */}
+    {category==='cards'&&<div style={{display:'flex',gap:4,marginBottom:8,flexWrap:'wrap',justifyContent:'center'}}>
       {[['ALL','All Cards','#c8a040'],['RIFF','Riff','#9933cc'],['CORRUPT','Corrupt','#aa1111'],['UTILITY','Utility','#22aa44'],['EMBER','Ember','#c87820']].map(([id,label,color])=>{
         const count=id==='ALL'?allCards.length:allCards.filter(c=>c.type===id).length
-        const disc=id==='ALL'?discCount:allCards.filter(c=>c.type===id&&discovered.has(c.id)).length
+        const disc=id==='ALL'?cardDiscCount:allCards.filter(c=>c.type===id&&discovered.has(c.id)).length
         return <button key={id} onClick={()=>setFilter(id)} style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,letterSpacing:2,padding:'8px 20px',cursor:'pointer',border:filter===id?'2px solid '+color:'1px solid rgba(100,65,15,0.3)',borderRadius:6,background:filter===id?color+'22':'transparent',color:filter===id?color:'var(--text-muted)',textTransform:'uppercase',transition:'all 0.15s'}}>{label} ({disc}/{count})</button>
       })}
-    </div>
-    
+    </div>}
+
+    {/* MEMBERS GRID */}
+    {category==='members'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,180px)',gap:8,justifyContent:'center',width:'100%',maxWidth:1400,paddingBottom:30}}>
+      {members.map(m=>{const locked=memLocked(m)
+        return CompTile({keyId:m.id,artNode:memberArt(m),name:m.name,accent:ACC_MEMBER,locked,
+          sub:locked?'Reach '+m.unlockAt.toLocaleString()+' lifetime score':m.keyword})})}
+      {Array.from({length:7}).map((_,i)=>comingSoon('csm'+i))}
+    </div>}
+
+    {/* ARTIFACTS GRID */}
+    {category==='artifacts'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,180px)',gap:8,justifyContent:'center',width:'100%',maxWidth:1400,paddingBottom:30}}>
+      {artifacts.map(a=>{const locked=itemLocked(a)
+        return CompTile({keyId:a.id,artNode:<ArtifactArtImg id={a.id} emoji={a.emoji} size={56}/>,name:a.name,accent:ACC_ARTIFACT,locked,
+          sub:locked?'Reach '+a.unlockAt.toLocaleString()+' lifetime score':truncEffect(a.effect)})})}
+      {Array.from({length:9}).map((_,i)=>comingSoon('csa'+i))}
+    </div>}
+
+    {/* PEDALS GRID */}
+    {category==='pedals'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,180px)',gap:8,justifyContent:'center',width:'100%',maxWidth:1400,paddingBottom:30}}>
+      {pedals.map(p=>{const locked=itemLocked(p)
+        return CompTile({keyId:p.id,artNode:<PassiveArtImg id={p.id} emoji={p.emoji} size={56}/>,name:p.name,accent:ACC_PEDAL,locked,
+          sub:locked?'Reach '+p.unlockAt.toLocaleString()+' lifetime score':truncEffect(p.effect)})})}
+      {Array.from({length:10}).map((_,i)=>comingSoon('csp'+i))}
+    </div>}
+
     {/* CARD GRID */}
-    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,180px)',gap:8,justifyContent:'center',width:'100%',maxWidth:1400,paddingBottom:30}}>
+    {category==='cards'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,180px)',gap:8,justifyContent:'center',width:'100%',maxWidth:1400,paddingBottom:30}}>
       {filtered.map(c=>{
         const plays=data[c.id]||0
         const isDiscovered=plays>0
@@ -3986,6 +4092,7 @@ function MasteryGallery({onClose}){
              <CardArtImg id={c.id} emoji={isDiscovered?c.emoji:'❓'} size={72}/>}
           </div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:700,color:isDiscovered?'#eedfc0':'#555',textAlign:'center',padding:'2px 4px',lineHeight:1.1}}>{isLocked?'???':c.name}</div>
+          {c.shopOnly&&!isLocked&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-secondary)',textAlign:'center',letterSpacing:2,opacity:0.85}}>· SHOP ·</div>}
           {isDiscovered&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'2px 6px 4px'}}>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:tier.color,letterSpacing:1}}>{tier.name==='Unplayed'?'':tier.name}</span>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'var(--text-secondary)'}}>{plays}×</span>
@@ -3994,10 +4101,10 @@ function MasteryGallery({onClose}){
           {isLocked&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-muted)',textAlign:'center',padding:'2px 0 4px',letterSpacing:1}}>LOCKED</div>}
         </div>)
       })}
-    </div>
-    
-    {/* DETAIL PANEL — shows when card clicked */}
-    {selectedCard&&<div style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:800,background:'linear-gradient(180deg,rgba(20,12,4,0.98),rgba(10,6,2,0.99))',border:'2px solid '+(typeColors[selectedCard.type]||'#c8a040'),borderRadius:'12px 12px 0 0',padding:'16px 24px',zIndex:9999,boxShadow:'0 -10px 40px rgba(0,0,0,0.8)'}}>
+    </div>}
+
+    {/* DETAIL PANEL — shows when a card is clicked (Cards category only) */}
+    {category==='cards'&&selectedCard&&<div style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:800,background:'linear-gradient(180deg,rgba(20,12,4,0.98),rgba(10,6,2,0.99))',border:'2px solid '+(typeColors[selectedCard.type]||'#c8a040'),borderRadius:'12px 12px 0 0',padding:'16px 24px',zIndex:9999,boxShadow:'0 -10px 40px rgba(0,0,0,0.8)'}}>
       <div style={{display:'flex',gap:16,alignItems:'center'}}>
         <CardArtImg id={selectedCard.id} emoji={selectedCard.emoji} size={80}/>
         <div style={{flex:1}}>
@@ -10931,22 +11038,17 @@ function App(){
   if(gameState==='menu'||menuView){
     const lt=lifetimeScore||0
     const earned=UNLOCK_MILESTONES.filter(u=>lt>=u.score)
-    // REAL unlock progress (Aug 10 2026 — replaces the hardcoded /77). Counts every
-    // genuinely-earnable thing: score milestones + stakes (beyond default Bronze) +
-    // lockable members + lockable artifacts + discoverable riff chains.
+    // REAL unlock progress (Aug 10 2026). Counts ONLY the earn-through-play items that
+    // live on the Unlocks screen — milestones + riff chains + stake victories — so the
+    // menu button number exactly matches what's shown. Browsable content (cards, the
+    // member roster, artifacts, pedals) lives on the COLLECTION screen instead.
     const _stakeU=getStakeUnlocks()
     const _combosU=JSON.parse(localStorage.getItem('vst_combos_discovered')||'[]')
-    const _lockMembers=ALL_MUSICIANS.filter(m=>m.locked)
-    // Locked GEAR spans both pools — War Drums was reclassified artifact→pedal, so it
-    // lives in STARTER_PASSIVES now. Search both so the count can't miss it.
-    const _lockGear=[...STARTER_ARTIFACTS,...STARTER_PASSIVES].filter(x=>x.locked)
     const _unlockableStakes=['bronze','silver','gold','obsidian','blood','demonic']
-    const unlockTotal=UNLOCK_MILESTONES.length+_unlockableStakes.length+_lockMembers.length+_lockGear.length+RIFF_CHAINS.length
+    const unlockTotal=UNLOCK_MILESTONES.length+RIFF_CHAINS.length+_unlockableStakes.length
     const unlockEarned=earned.length
-      +_unlockableStakes.filter(s=>_stakeU.includes(s)).length
-      +_lockMembers.filter(m=>!m.unlockAt||lt>=m.unlockAt).length
-      +_lockGear.filter(x=>!x.unlockAt||lt>=x.unlockAt).length
       +RIFF_CHAINS.filter(ch=>_combosU.includes(ch.id)).length
+      +_unlockableStakes.filter(s=>_stakeU.includes(s)).length
     const achs=getAchievements()
     const streak=dailyStreak||0
     const scanlines=localStorage.getItem('vst_scanlines')!=='off'
@@ -10954,12 +11056,10 @@ function App(){
 // Unlocks gallery
     if(menuView==='unlocks'){
     const discoveredCombos=JSON.parse(localStorage.getItem('vst_combos_discovered')||'[]')
+    // Unlocks screen = EARN-THROUGH-PLAY only. Browsable content (cards, member roster,
+    // artifacts, pedals) lives on the Collection screen.
     const tabs=[
       {id:'milestones',name:'Milestones',emoji:'🏆',color:'#e8a820'},
-      {id:'members',name:'Members',emoji:'🎸',color:'#cc44ff'},
-      {id:'cards',name:'Cards',emoji:'🃏',color:'#9933cc'},
-      {id:'artifacts',name:'Artifacts',emoji:'⚙',color:'#c87820'},
-      {id:'pedals',name:'Pedals',emoji:'🎛',color:'#9933cc'},
       {id:'combos',name:'Riff Chains',emoji:'⛧',color:'#ffdd00'},
       {id:'victories',name:'Victories',emoji:'🏆',color:'#ffd700'},
     ]
