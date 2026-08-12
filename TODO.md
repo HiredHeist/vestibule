@@ -3,6 +3,15 @@
 *Last updated: Aug 12, 2026 — Full art pass complete (107 icons generated + wired). Next: release-ready push.*
 *Branch state: main = audited stable · playtest/session2 = active (all Aug 9 work pushed, build-verified via push-fixes.bat)*
 
+## ✅ Aug 12 — EMOJI→ART PASS (functional icons)
+- Generated + wired 116 icons: hud/ (11, incl. ember pips), events/ (10), achievements/ (17), icons/ (78 shared combat-log glyphs). Folders under public/vestibule/.
+- New infra in App.jsx: `ICON_BY_EMOJI` map + `LogText` inline renderer (swaps mapped emoji→art in combat log + floating text), `achArtId()` + `ACH_ART_OVERRIDE`, `EventChoiceIcon`/`EVENT_CHOICE_ART`.
+- Wired: ember/spent pips, phase banner (⚔/👿), tip, cost, member-slot glyphs (encore/dice/mentor-link/broken/stoned), combat-HUD drug shelf (reuses drugs/ art), achievement badges, event + event-choice icons.
+- Left as text by design: banner ornaments ⛧ ✠ ☥ ☠, all button-label glyphs. One event choice (🃏 "Keep Your Cards") has no art → stays emoji.
+- Note: achievement `mentor_link` art is `mentor_link_achievement.png` (avoids clash with hud/mentor_link). circle_3/5/7/9 achievements → ach_circle_*.
+- Char rotation sheets (17 members, 8-dir, 256px transparent) live in character_sheets/ (gitignored — external deliverable). bjorn pending hand-fix.
+- Gates: esbuild clean, npm run check clean.
+
 ## ✅ Aug 12 — ART PASS COMPLETE (this commit)
 - 46 placeholder-fix icons (cards/artifacts/pedals/loot/pacts) — replaced the shipped 64px geometric placeholders.
 - 61 new icons: 16 riff chains (chains/), 10 trophy circles (circles/), 3 unlock tabs (unlocktabs/), 32 rules-page rows (rules/).

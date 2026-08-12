@@ -1024,6 +1024,66 @@ function LogLine({text}){
   return <>{parts.map((p,i)=>(<React.Fragment key={i}>{p}{i<parts.length-1?<WeedLeaf size={12} style={{margin:'0 1px'}}/>:null}</React.Fragment>))}</>
 }
 
+// \u2550\u2550\u2550 INLINE ICON RENDERER \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+// Maps every functional log/float emoji glyph \u2192 its pixel-art id in
+// public/vestibule/icons/. Built from artgen/icon_manifest.json (icons group).
+// The four banner ornaments \u26E7 \u2720 \u2625 \u2620 are deliberately ABSENT \u2014 they stay as text.
+const ICON_BY_EMOJI={
+  '\uD83D\uDD25':'icon_fire','\uD83D\uDC80':'icon_skull','\u26A0':'icon_warning','\u26A1':'icon_lightning','\u2B50':'icon_star',
+  '\u2728':'icon_sparkle','\u2726':'icon_star4','\uD83C\uDF40':'icon_clover','\uD83D\uDD2B':'icon_gun','\uD83D\uDEE1':'icon_shield',
+  '\uD83D\uDCA5':'icon_burst','\u2693':'icon_anchor','\uD83E\uDE99':'icon_coin','\uD83D\uDCB0':'icon_money','\uD83D\uDCB8':'icon_money_wings',
+  '\uD83D\uDE08':'icon_devil','\uD83E\uDE78':'icon_blood','\uD83C\uDF44':'icon_mushroom','\uD83E\uDDEA':'icon_potion','\uD83D\uDCA0':'icon_crystal',
+  '\uD83D\uDCDD':'icon_note','\uD83D\uDCDC':'icon_scroll','\uD83D\uDCCB':'icon_clipboard','\uD83D\uDCCA':'icon_chart','\uD83C\uDFC6':'icon_trophy',
+  '\uD83D\uDC51':'icon_crown','\u2713':'icon_check','\u2715':'icon_x','\uD83D\uDEAB':'icon_ban','\uD83D\uDD04':'icon_refresh',
+  '\u21A9':'icon_return','\uD83D\uDDD1':'icon_trash','\uD83D\uDD12':'icon_lock','\uD83D\uDD13':'icon_unlock','\u2753':'icon_question',
+  '\uD83C\uDF0D':'icon_globe','\uD83C\uDFB2':'icon_dice','\uD83E\uDD18':'icon_horns','\uD83C\uDF00':'icon_swirl','\uD83D\uDD6F':'icon_candle',
+  '\uD83D\uDD2E':'icon_crystalball','\uD83D\uDD27':'icon_wrench','\u2699':'icon_gear','\u2697':'icon_alembic','\uD83D\uDD17':'icon_link',
+  '\uD83E\uDDF1':'icon_bricks','\uD83E\uDDCA':'icon_ice','\u2744':'icon_snowflake','\uD83E\uDDE8':'icon_bomb','\uD83D\uDED2':'icon_cart',
+  '\uD83D\uDEB6':'icon_walk','\uD83D\uDCE6':'icon_box','\uD83D\uDCD6':'icon_book','\uD83D\uDC41':'icon_eye','\uD83D\uDC45':'icon_tongue',
+  '\uD83D\uDC0D':'icon_snake','\uD83D\uDCA4':'icon_zzz','\uD83D\uDCA2':'icon_dizzy','\uD83D\uDC94':'icon_broken_heart','\u2764':'icon_heart',
+  '\uD83D\uDD4A':'icon_dove','\uD83D\uDD31':'icon_trident','\uD83D\uDC4B':'icon_wave_hand','\uD83C\uDF7B':'icon_beers','\uD83C\uDF6F':'icon_honey',
+  '\uD83C\uDF56':'icon_meat','\uD83D\uDFE0':'icon_orange','\uD83D\uDED1':'icon_stop','\uD83C\uDFE6':'icon_bank','\uD83D\uDD74':'icon_suit',
+  '\uD83C\uDFAD':'icon_mask','\uD83C\uDF99':'icon_mic','\uD83C\uDFA4':'icon_mic_hand','\uD83C\uDF9A':'icon_sliders','\uD83C\uDF9B':'icon_knobs',
+  '\uD83C\uDFBC':'icon_score','\uD83C\uDFB8':'icon_guitar','\uD83E\uDE88':'icon_flute','\uD83E\uDD41':'icon_drum','\uD83D\uDCBF':'icon_cd',
+  '\uD83D\uDCC0':'icon_dvd','\uD83D\uDCFC':'icon_cassette','\uD83D\uDCE1':'icon_satellite'
+}
+// Walks a string and swaps any mapped emoji for its inline pixel-art icon,
+// preserving the weed-leaf glyph. Used for combat LOG lines and rising FLOAT text.
+// Banner ornaments (not in ICON_BY_EMOJI) fall through untouched as text.
+function LogText({text,size=14}){
+  if(typeof text!=='string')return <>{text}</>
+  const chars=Array.from(text)
+  const out=[];let buf=''
+  const flush=()=>{if(buf){out.push(buf);buf=''}}
+  for(let i=0;i<chars.length;i++){
+    const ch=chars[i]
+    const hasVS=chars[i+1]==='\uFE0F'
+    if(ch==='\uD83C\uDF3F'){flush();out.push(<WeedLeaf key={out.length} size={size<12?12:size} style={{margin:'0 1px',verticalAlign:'middle'}}/>);if(hasVS)i++;continue}
+    const art=ICON_BY_EMOJI[ch]
+    if(art){flush();out.push(<UiArtImg key={out.length} folder="icons" id={art} emoji={ch+(hasVS?'\uFE0F':'')} size={size} style={{display:'inline-block',verticalAlign:'middle'}}/>);if(hasVS)i++;continue}
+    buf+=ch+(hasVS?'\uFE0F':'');if(hasVS)i++
+  }
+  flush()
+  return <>{out}</>
+}
+// Event choice glyphs \u2192 art. The four bespoke ones live in events/; the rest reuse icons/.
+const EVENT_CHOICE_ART={
+  '\uD83C\uDF0A':['events','event_choice_wave'],'\uD83D\uDD28':['events','event_choice_hammer'],
+  '\uD83E\uDEA6':['events','event_choice_grave'],'\u270D':['events','event_choice_sign'],
+  '\uD83D\uDCA5':['icons','icon_burst'],'\uD83D\uDEB6':['icons','icon_walk'],'\u26A1':['icons','icon_lightning'],
+  '\uD83D\uDEAB':['icons','icon_ban'],'\u21A9':['icons','icon_return'],'\uD83E\uDE99':['icons','icon_coin']
+}
+function EventChoiceIcon({emoji,size=22}){
+  const key=typeof emoji==='string'?emoji.replace(/\uFE0F/g,''):emoji
+  const hit=EVENT_CHOICE_ART[key]
+  if(!hit)return <span style={{fontSize:size}}>{emoji}</span>
+  return <UiArtImg folder={hit[0]} id={hit[1]} emoji={emoji} size={size} style={{display:'inline-block',verticalAlign:'middle'}}/>
+}
+// Achievement badge art id: four circle achievements + the mentor-link one have
+// prefixed art files to avoid colliding with trophy-circle / hud art.
+const ACH_ART_OVERRIDE={circle_3:'ach_circle_3',circle_5:'ach_circle_5',circle_7:'ach_circle_7',circle_9:'ach_circle_9',mentor_link:'mentor_link_achievement'}
+const achArtId=a=>(a&&ACH_ART_OVERRIDE[a.id])||(a&&a.id)
+
 
 // ═══ TOUR QUOTES — pre-fight loading screen flavor ═══════════════════════
 // → TOUR_QUOTES moved to src/data/flavor.js
@@ -1490,7 +1550,7 @@ function Float({v,x,y,color,big,onDone}){
     else if(v>=50)sz='4.5rem'
     else if(v>=20)sz='3.5rem'
   }
-  return <div style={{position:'absolute',left:x,top:y,transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:sz,fontWeight:900,color:color,textShadow:`0 0 24px ${color}, 0 0 48px ${color}44`,pointerEvents:'none',zIndex:9000,animation:'popFloat 1.6s ease-out forwards'}}>{typeof v==='number'&&v>0?'-'+v:v}</div>
+  return <div style={{position:'absolute',left:x,top:y,transform:'translateX(-50%)',fontFamily:"'MBScribblesFont',serif",fontSize:sz,fontWeight:900,color:color,textShadow:`0 0 24px ${color}, 0 0 48px ${color}44`,pointerEvents:'none',zIndex:9000,animation:'popFloat 1.6s ease-out forwards'}}>{typeof v==='number'?(v>0?'-'+v:v):<LogText text={v} size={Math.round(parseFloat(sz)*11)}/>}</div>
 }
 
 // Boss kill quote — types out letter by letter
@@ -1547,7 +1607,7 @@ function EmberDisplayLarge({current,max,forecast}){
         {Array.from({length:max}).map((_,i)=>{
           const filled=i>=(max-current)
           const wouldSpend=forecast&&filled&&i<(max-afterCast)
-          return <div key={i} style={{fontSize:filled?20:15,opacity:wouldSpend?0.4:filled?1:0.2,filter:wouldSpend?'grayscale(0.5) brightness(1.5)':filled?'drop-shadow(0 0 6px rgba(200,152,56,0.7))':'grayscale(1)',transition:'all 0.25s'}}>{wouldSpend?'💨':'🔥'}</div>
+          return <div key={i} style={{fontSize:filled?20:15,opacity:wouldSpend?0.4:filled?1:0.2,filter:wouldSpend?'grayscale(0.5) brightness(1.5)':filled?'drop-shadow(0 0 6px rgba(200,152,56,0.7))':'grayscale(1)',transition:'all 0.25s',display:'inline-flex'}}>{wouldSpend?<UiArtImg folder="hud" id="ember_spent" emoji="💨" size={20}/>:<UiArtImg folder="hud" id="ember" emoji="🔥" size={filled?20:15}/>}</div>
         })}
       </div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,fontWeight:900,color:current>0?'var(--gold)':'var(--rot)',lineHeight:1}}><span key={'e-'+current} style={{animation:'inkStamp 0.4s ease-out',display:'inline-block'}}>{forecast&&forecast>0?afterCast+'/'+max:current+'/'+max}</span></div>
@@ -1560,7 +1620,7 @@ function EmberDisplay({current,max}){
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',letterSpacing:3,textTransform:'uppercase'}}>Embers</div>
       <div style={{display:'flex',gap:3}}>
         {Array.from({length:max}).map((_,i)=>(
-          <div key={i} style={{fontSize:i>=(max-current)?15:13,opacity:i>=(max-current)?1:0.22,filter:i>=(max-current)?'drop-shadow(0 0 6px rgba(255,100,0,0.8))':'grayscale(1)',transition:'all 0.25s'}}>🔥</div>
+          <div key={i} style={{fontSize:i>=(max-current)?15:13,opacity:i>=(max-current)?1:0.22,filter:i>=(max-current)?'drop-shadow(0 0 6px rgba(255,100,0,0.8))':'grayscale(1)',transition:'all 0.25s',display:'inline-flex'}}><UiArtImg folder="hud" id="ember" emoji="🔥" size={i>=(max-current)?15:13}/></div>
         ))}
       </div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:current>0?'#ff6600':'#444',lineHeight:1}}>{current}/{max}</div>
@@ -3048,17 +3108,17 @@ function StageSlot({member,isAttacking,isStriking,isHit,strikeAnim,isDiceTarget,
       {/* Keyword tooltip — positioned ABOVE the card to avoid the hand-fan z-index/overflow trap below */}
       {showTip&&member&&KEYWORD_DESC[member.keyword]&&<div style={{position:'absolute',bottom:'calc(100% + 6px)',left:'50%',transform:'translateX(-50%)',background:'rgba(8,4,2,0.97)',border:'1px solid rgba(196,30,58,0.5)',borderRadius:3,padding:'8px 12px',zIndex:99999,pointerEvents:'none',minWidth:180,maxWidth:260,boxShadow:'0 8px 32px rgba(0,0,0,0.9)'}}><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--gold)',letterSpacing:2,textTransform:'uppercase',marginBottom:4}}>{member.keyword}</div><div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-bone)',lineHeight:1.4}}>{KEYWORD_DESC[member.keyword]}</div>{member.bio&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',lineHeight:1.4,fontStyle:'italic',marginTop:6,paddingTop:6,borderTop:'1px solid rgba(100,60,20,0.3)'}}>{member.bio}</div>}</div>}
       {buffCount>0&&<div style={{position:'absolute',top:6,left:6,background:buffCount>=3?'#aa1111':'#9933cc',borderRadius:10,padding:'1px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-primary)',zIndex:10,boxShadow:'0 0 8px rgba(0,0,0,0.6)'}}>+{buffCount}</div>}
-      {member.encoreReady&&<div style={{position:'absolute',top:6,right:6,background:'#dd2222',borderRadius:10,padding:'1px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-primary)',zIndex:10,boxShadow:'0 0 8px rgba(220,0,0,0.6)',animation:'pulse 0.8s ease infinite alternate'}}>🔁×2</div>}
-      {isDiceTarget&&<div style={{position:'absolute',top:-16,left:'50%',transform:'translateX(-50%)',fontSize:20}}>🎯</div>}
-      {mentorState==='active'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:18,textShadow:'0 0 12px #ffd700',zIndex:12,animation:'mentorPulse 1.5s ease-in-out infinite'}}>⛓</div>}
-      {mentorState==='broken'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:16,opacity:0.45,zIndex:12}}>💔</div>}
-      {mentorState==='mentor'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:18,textShadow:'0 0 8px rgba(255,215,0,0.6)',zIndex:12}}>⛓</div>}
+      {member.encoreReady&&<div style={{position:'absolute',top:6,right:6,background:'#dd2222',borderRadius:10,padding:'1px 6px',fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:'var(--text-primary)',zIndex:10,boxShadow:'0 0 8px rgba(220,0,0,0.6)',animation:'pulse 0.8s ease infinite alternate',display:'inline-flex',alignItems:'center'}}><UiArtImg folder="hud" id="encore" emoji="🔁" size={14} style={{display:'inline-block',verticalAlign:'middle'}}/>×2</div>}
+      {isDiceTarget&&<div style={{position:'absolute',top:-16,left:'50%',transform:'translateX(-50%)',fontSize:20}}><UiArtImg folder="hud" id="dice" emoji="🎯" size={20}/></div>}
+      {mentorState==='active'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:18,textShadow:'0 0 12px #ffd700',zIndex:12,animation:'mentorPulse 1.5s ease-in-out infinite'}}><UiArtImg folder="hud" id="mentor_link" emoji="⛓" size={18}/></div>}
+      {mentorState==='broken'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:16,opacity:0.45,zIndex:12}}><UiArtImg folder="hud" id="mentor_broken" emoji="💔" size={16}/></div>}
+      {mentorState==='mentor'&&<div style={{position:'absolute',bottom:55,left:'50%',transform:'translateX(-50%)',fontSize:18,textShadow:'0 0 8px rgba(255,215,0,0.6)',zIndex:12}}><UiArtImg folder="hud" id="mentor_link" emoji="⛓" size={18}/></div>}
       {st&&<div style={{position:'absolute',inset:0,zIndex:15,pointerEvents:'none',overflow:'hidden'}}>
         {/* Drifting smoke clouds at varying positions/timings — reads as "passed out" not "dead" */}
-        <div style={{position:'absolute',bottom:'18%',left:'12%',fontSize:42,opacity:0.85,animation:'stonedSmoke 3.2s ease-in-out infinite',filter:'drop-shadow(0 0 8px rgba(180,160,200,0.5))'}}>💨</div>
-        <div style={{position:'absolute',bottom:'42%',left:'58%',fontSize:36,opacity:0.75,animation:'stonedSmoke 3.6s ease-in-out infinite 0.5s',filter:'drop-shadow(0 0 8px rgba(180,160,200,0.5))'}}>💨</div>
-        <div style={{position:'absolute',bottom:'24%',right:'15%',fontSize:46,opacity:0.8,animation:'stonedSmoke 2.9s ease-in-out infinite 1.1s',filter:'drop-shadow(0 0 8px rgba(180,160,200,0.5))'}}>💨</div>
-        <div style={{position:'absolute',top:'22%',left:'30%',fontSize:32,opacity:0.7,animation:'stonedSmoke 3.4s ease-in-out infinite 1.7s',filter:'drop-shadow(0 0 8px rgba(180,160,200,0.5))'}}>💨</div>
+        <div style={{position:'absolute',bottom:'18%',left:'12%',fontSize:42,opacity:0.85,animation:'stonedSmoke 3.2s ease-in-out infinite',filter:'drop-shadow(0 0 8px rgba(180,160,200,0.5))'}}><UiArtImg folder="hud" id="stoned" emoji="💨" size={42}/></div>
+        <div style={{position:'absolute',bottom:'42%',left:'58%',fontSize:36,opacity:0.75,animation:'stonedSmoke 3.6s ease-in-out infinite 0.5s',filter:'drop-shadow(0 0 8px rgba(180,160,200,0.5))'}}><UiArtImg folder="hud" id="stoned" emoji="💨" size={36}/></div>
+        <div style={{position:'absolute',bottom:'24%',right:'15%',fontSize:46,opacity:0.8,animation:'stonedSmoke 2.9s ease-in-out infinite 1.1s',filter:'drop-shadow(0 0 8px rgba(180,160,200,0.5))'}}><UiArtImg folder="hud" id="stoned" emoji="💨" size={46}/></div>
+        <div style={{position:'absolute',top:'22%',left:'30%',fontSize:32,opacity:0.7,animation:'stonedSmoke 3.4s ease-in-out infinite 1.7s',filter:'drop-shadow(0 0 8px rgba(180,160,200,0.5))'}}><UiArtImg folder="hud" id="stoned" emoji="💨" size={32}/></div>
         {/* Status pill — "back next fight" subtitle removes the "run is over" feeling */}
         <div style={{position:'absolute',bottom:'38%',left:'50%',transform:'translateX(-50%)',
           fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,letterSpacing:3,
@@ -4304,7 +4364,7 @@ function EventScreen({event,onChoose}){
 
       {/* Emoji + title */}
       <div style={{textAlign:'center',marginBottom:20}}>
-        <div style={{fontSize:64,filter:'drop-shadow(0 0 20px rgba(200,100,0,0.4))',marginBottom:8}}>{event.emoji}</div>
+        <div style={{fontSize:64,filter:'drop-shadow(0 0 20px rgba(200,100,0,0.4))',marginBottom:8,display:'flex',justifyContent:'center'}}><UiArtImg folder="events" id={'event_'+event.id} emoji={event.emoji} size={64}/></div>
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:36,color:'var(--text-secondary)',textShadow:'0 0 20px rgba(200,160,40,0.3),2px 2px 0 #000',letterSpacing:3}}>{event.name}</div>
       </div>
 
@@ -4318,7 +4378,7 @@ function EventScreen({event,onChoose}){
       <div style={{display:'flex',flexDirection:'column',gap:14,alignItems:'center'}}>
         <div onClick={()=>handleChoice('A')} style={{...btnBase,background:chosen==='A'?'rgba(200,80,0,0.25)':chosen?'rgba(20,10,4,0.5)':'rgba(30,15,5,0.8)',borderColor:chosen==='A'?'#cc6600':chosen?'rgba(60,30,10,0.3)':'rgba(200,100,20,0.35)',color:chosen&&chosen!=='A'?'#554433':'#ddc090',opacity:chosen&&chosen!=='A'?0.4:1,pointerEvents:chosen?'none':'auto'}}>
           <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4}}>
-            <span style={{fontSize:22}}>{event.choiceA.emoji}</span>
+            <span style={{fontSize:22,display:'inline-flex',alignItems:'center'}}><EventChoiceIcon emoji={event.choiceA.emoji} size={22}/></span>
             <span style={{fontSize:20,fontWeight:900,color:chosen==='A'?'#ff8800':'#e8c080'}}>{event.choiceA.label}</span>
           </div>
           <div style={{fontSize:14,color:chosen==='A'?'#cc8844':'#887755',paddingLeft:32}}>{event.choiceA.desc}</div>
@@ -4328,7 +4388,7 @@ function EventScreen({event,onChoose}){
 
         <div onClick={()=>handleChoice('B')} style={{...btnBase,background:chosen==='B'?'rgba(40,60,80,0.25)':chosen?'rgba(20,10,4,0.5)':'rgba(30,15,5,0.8)',borderColor:chosen==='B'?'#4488aa':chosen?'rgba(60,30,10,0.3)':'rgba(100,120,140,0.35)',color:chosen&&chosen!=='B'?'#554433':'#b0c0d0',opacity:chosen&&chosen!=='B'?0.4:1,pointerEvents:chosen?'none':'auto'}}>
           <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4}}>
-            <span style={{fontSize:22}}>{event.choiceB.emoji}</span>
+            <span style={{fontSize:22,display:'inline-flex',alignItems:'center'}}><EventChoiceIcon emoji={event.choiceB.emoji} size={22}/></span>
             <span style={{fontSize:20,fontWeight:900,color:chosen==='B'?'#66aacc':'#a0b0c0'}}>{event.choiceB.label}</span>
           </div>
           <div style={{fontSize:14,color:chosen==='B'?'#6699aa':'#667788',paddingLeft:32}}>{event.choiceB.desc}</div>
@@ -4497,7 +4557,7 @@ function CombatLogViewer({log,onClose}){
             letterSpacing:isFightHeader?2:0,
             lineHeight:1.5,
             opacity:isFightHeader?1:0.9
-          }}><LogLine text={entry}/></div>
+          }}><LogText text={entry} size={isFightHeader?24:20}/></div>
         })}
       </div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',marginTop:8}}>{log.length} entries this run</div>
@@ -4607,7 +4667,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,onEncore,streakWins,strea
     if(newAchIds.length===0&&allAchievements.length===0)return null
     return(<div style={{width:'100%',maxWidth:600,margin:'6px 0'}}>
       {newAchIds.length>0&&<div style={{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'center',marginBottom:6}}>
-        {newAchIds.map(id=>{const a=ACHIEVEMENTS.find(x=>x.id===id);if(!a)return null;return <div key={id} style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-gold)',background:'rgba(60,40,0,0.8)',border:'2px solid #ffd700',borderRadius:6,padding:'4px 12px',letterSpacing:1,animation:'throb 1.5s ease-in-out infinite'}}>{a.emoji} NEW: {a.label}</div>})}
+        {newAchIds.map(id=>{const a=ACHIEVEMENTS.find(x=>x.id===id);if(!a)return null;return <div key={id} style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-gold)',background:'rgba(60,40,0,0.8)',border:'2px solid #ffd700',borderRadius:6,padding:'4px 12px',letterSpacing:1,animation:'throb 1.5s ease-in-out infinite',display:'inline-flex',alignItems:'center',gap:4}}><UiArtImg folder="achievements" id={achArtId(a)} emoji={a.emoji} size={16} style={{display:'inline-block',verticalAlign:'middle'}}/>NEW: {a.label}</div>})}
       </div>}
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',textAlign:'center'}}>{allAchievements.length} / {ACHIEVEMENTS.length} achievements</div>
     </div>)
@@ -5095,7 +5155,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,onEncore,streakWins,strea
 
                 {/* ROW 6: Achievements + Discoveries + Streak — all inline */}
         <div style={{display:'flex',gap:12,alignItems:'center',justifyContent:'center',flexWrap:'wrap'}}>
-          {newAchIds.length>0&&newAchIds.slice(0,4).map(id=>{const a=ACHIEVEMENTS.find(x=>x.id===id);if(!a)return null;return <div key={id} style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-gold)',background:'rgba(60,40,0,0.7)',border:'1px solid #ffd700',borderRadius:4,padding:'3px 10px',animation:'throb 1.5s ease-in-out infinite'}}>{a.emoji} {a.label}</div>})}
+          {newAchIds.length>0&&newAchIds.slice(0,4).map(id=>{const a=ACHIEVEMENTS.find(x=>x.id===id);if(!a)return null;return <div key={id} style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:'var(--text-gold)',background:'rgba(60,40,0,0.7)',border:'1px solid #ffd700',borderRadius:4,padding:'3px 10px',animation:'throb 1.5s ease-in-out infinite',display:'inline-flex',alignItems:'center',gap:4}}><UiArtImg folder="achievements" id={achArtId(a)} emoji={a.emoji} size={16} style={{display:'inline-block',verticalAlign:'middle'}}/>{a.label}</div>})}
           {discoveryList.slice(0,4).map((d,i)=><div key={i} style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-gold)',background:'rgba(40,25,5,0.7)',border:'1px solid rgba(200,140,30,0.3)',borderRadius:3,padding:'2px 8px'}}>NEW: {d}</div>)}
           {dailyStreak>1&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:'var(--text-blood)',padding:'4px 16px',background:'rgba(0,0,0,0.5)',border:'1px solid #ff6600',borderRadius:3}}>🔥 {dailyStreak} DAY STREAK</div>}
           {streakMsg&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,fontWeight:900,color:streakWins>1?'#ff6600':'#aa4444',padding:'3px 12px',background:'rgba(0,0,0,0.5)',border:'1px solid '+(streakWins>1?'#ff6600':'#aa4444'),borderRadius:3}}>{streakMsg}</div>}
@@ -5779,7 +5839,7 @@ function App(){
       a.play().catch(()=>{})
     }catch(e){}
   },[sfxVol])
-  const tryAchieve=useCallback((id)=>{if(unlockAchievement(id)){setNewAchievements(p=>[...p,id]);const a=ACHIEVEMENTS.find(x=>x.id===id);if(a){setPolaroidNotif({emoji:a.emoji,label:a.label});setTimeout(()=>setPolaroidNotif(null),3500)}}},[])
+  const tryAchieve=useCallback((id)=>{if(unlockAchievement(id)){setNewAchievements(p=>[...p,id]);const a=ACHIEVEMENTS.find(x=>x.id===id);if(a){setPolaroidNotif({emoji:a.emoji,label:a.label,artId:achArtId(a)});setTimeout(()=>setPolaroidNotif(null),3500)}}},[])
   // ── MUSIC SYSTEM ─────────────────────────────────────────────
   const audioRef=useRef({})
   const currentTrackRef=useRef(null)
@@ -12261,7 +12321,7 @@ function App(){
       {polaroidNotif&&<div style={{position:'absolute',top:120,right:40,zIndex:9800,animation:'polaroidSlide 3.5s ease-in-out forwards',pointerEvents:'none'}}>
         <div style={{width:220,background:'#f5f0e8',padding:'12px 12px 40px',borderRadius:2,boxShadow:'0 8px 40px rgba(0,0,0,0.8),0 0 20px rgba(200,152,56,0.3)',transform:'rotate(-3deg)'}}>
           <div style={{background:'linear-gradient(180deg,#1a1008,#0a0604)',width:'100%',height:140,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:1}}>
-            <span style={{fontSize:64}}>{polaroidNotif.emoji}</span>
+            <span style={{fontSize:64,display:'inline-flex'}}><UiArtImg folder="achievements" id={polaroidNotif.artId||''} emoji={polaroidNotif.emoji} size={64}/></span>
           </div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-inverse)',textAlign:'center',marginTop:12,fontStyle:'italic',lineHeight:1.3,fontWeight:700}}>{polaroidNotif.label}</div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',textAlign:'center',marginTop:4,letterSpacing:3,textTransform:'uppercase'}}>Achievement Unlocked</div>
@@ -12580,10 +12640,10 @@ function App(){
             color:'var(--blood)',
             textShadow:'0 0 12px rgba(196,30,58,0.6)',
             transition:'color 0.2s',opacity:0.95}}>
-            {phaseBanner==='strike'?'⚔ Striking!':'👿 Boss Attacks'}
+            {phaseBanner==='strike'?<><UiArtImg folder="hud" id="phase_strike" emoji="⚔" size={14} style={{display:'inline-block',verticalAlign:'middle',marginRight:4}}/>Striking!</>:<><UiArtImg folder="hud" id="phase_boss" emoji="👿" size={14} style={{display:'inline-block',verticalAlign:'middle',marginRight:4}}/>Boss Attacks</>}
           </div>}
           {/* TIP HINT — separately rendered, only on idle 'play' phase, low-key bottom-left */}
-          {currentTip&&phaseBanner==='play'&&<div style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',fontSize:13,color:'var(--ink-dim)',letterSpacing:1,fontWeight:400,textTransform:'none',opacity:0.55,maxWidth:240,fontFamily:"'MBScribblesFont',serif",pointerEvents:'none'}}>💡 {currentTip}</div>}
+          {currentTip&&phaseBanner==='play'&&<div style={{position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',fontSize:13,color:'var(--ink-dim)',letterSpacing:1,fontWeight:400,textTransform:'none',opacity:0.55,maxWidth:240,fontFamily:"'MBScribblesFont',serif",pointerEvents:'none'}}><UiArtImg folder="hud" id="tip" emoji="💡" size={16} style={{display:'inline-block',verticalAlign:'middle',marginRight:4}}/>{currentTip}</div>}
           {/* PACT ICONS — keep the hover tooltips, remove redundant Combined Attack readout (DEALS X DMG',animation:'dmgPreviewPulse 0.3s ease-out covers that now) */}
           {chosenPacts.length>0&&<div style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)',display:'flex',gap:4}}>
             {chosenPacts.filter(Boolean).map(pid=>{const p=PACT_REWARDS.find(r=>r.id===pid);return p?<div key={pid} style={{position:'relative',cursor:'help'}}
@@ -12628,7 +12688,7 @@ function App(){
                 borderRadius:2,color:heldShrooms&&!tripUsedThisFight?'var(--gold)':'var(--rot)',
                 cursor:heldShrooms&&!tripUsedThisFight?'pointer':'not-allowed',
                 opacity:heldShrooms?1:0.5,textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
-              <span style={{fontSize:22,lineHeight:1,opacity:heldShrooms?1:0.35,filter:heldShrooms?'none':'grayscale(1)'}}>🍄</span>
+              <span style={{fontSize:22,lineHeight:1,opacity:heldShrooms?1:0.35,filter:heldShrooms?'none':'grayscale(1)',display:'inline-flex'}}><UiArtImg folder="drugs" id="shrooms" emoji="🍄" size={40}/></span>
               <span style={{fontSize:13,letterSpacing:2}}>{heldShrooms?'USE':'⛧'}</span>
               {/* Tape marks — zine aesthetic */}
               <div style={{position:'absolute',top:-3,left:8,width:24,height:7,background:'rgba(200,180,140,0.25)',transform:'rotate(-15deg)',borderRadius:1,pointerEvents:'none'}}/>
@@ -12650,7 +12710,7 @@ function App(){
                 borderRadius:2,color:heldAcid&&!tripUsedThisFight?'#cc88ff':'var(--rot)',
                 cursor:heldAcid&&!tripUsedThisFight?'pointer':'not-allowed',
                 opacity:heldAcid?1:0.5,textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
-              <span style={{fontSize:22,lineHeight:1,opacity:heldAcid?1:0.35,filter:heldAcid?'none':'grayscale(1)'}}>🧪</span>
+              <span style={{fontSize:22,lineHeight:1,opacity:heldAcid?1:0.35,filter:heldAcid?'none':'grayscale(1)',display:'inline-flex'}}><UiArtImg folder="drugs" id="acid" emoji="🧪" size={40}/></span>
               <span style={{fontSize:13,letterSpacing:2}}>{heldAcid?'USE':'⛧'}</span>
               {/* Tape marks — zine aesthetic */}
               <div style={{position:'absolute',top:-3,right:8,width:24,height:7,background:'rgba(180,160,220,0.25)',transform:'rotate(15deg)',borderRadius:1,pointerEvents:'none'}}/>
@@ -12673,7 +12733,7 @@ function App(){
                 cursor:!tripUsedThisFight?'pointer':'not-allowed',
                 opacity:1,textAlign:'center',display:'flex',flexDirection:'column',alignItems:'center',gap:3,
                 boxShadow:!tripUsedThisFight?'0 0 12px rgba(220,200,255,0.5)':'none'}}>
-              <span style={{fontSize:22,lineHeight:1,filter:!tripUsedThisFight?'drop-shadow(0 0 6px rgba(220,200,255,0.8))':'grayscale(1)'}}>💠</span>
+              <span style={{fontSize:22,lineHeight:1,filter:!tripUsedThisFight?'drop-shadow(0 0 6px rgba(220,200,255,0.8))':'grayscale(1)',display:'inline-flex'}}><UiArtImg folder="drugs" id="dmt" emoji="💠" size={40}/></span>
               <span style={{fontSize:13,letterSpacing:2}}>{!tripUsedThisFight?'USE':'⛧'}</span>
               <div style={{position:'absolute',top:-3,left:8,width:24,height:7,background:'rgba(220,200,255,0.3)',transform:'rotate(-15deg)',borderRadius:1,pointerEvents:'none'}}/>
               <div style={{position:'absolute',bottom:-3,right:8,width:24,height:7,background:'rgba(220,200,255,0.3)',transform:'rotate(-15deg)',borderRadius:1,pointerEvents:'none'}}/>
@@ -12686,7 +12746,7 @@ function App(){
           {/* Sort buttons — tight labels with clear hit targets */}
           <div style={{display:'flex',flexDirection:'column',gap:5,marginTop:8,width:'100%'}}>
             <button onClick={()=>setHandSort(p=>{const n=p==='embers'?'none':'embers';localStorage.setItem('vst_handsort',n);return n})}
-              style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:2.5,textTransform:'uppercase',padding:'6px 8px',background:handSort==='embers'?'linear-gradient(180deg, rgba(200,152,56,0.22), rgba(200,152,56,0.06))':'rgba(15,10,6,0.4)',border:handSort==='embers'?'1px solid var(--gold)':'1px solid rgba(138,117,96,0.25)',borderRadius:2,color:handSort==='embers'?'var(--gold)':'var(--ink-dim)',cursor:'pointer',textAlign:'center',transition:'all 0.15s'}}>⚡ Cost</button>
+              style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:2.5,textTransform:'uppercase',padding:'6px 8px',background:handSort==='embers'?'linear-gradient(180deg, rgba(200,152,56,0.22), rgba(200,152,56,0.06))':'rgba(15,10,6,0.4)',border:handSort==='embers'?'1px solid var(--gold)':'1px solid rgba(138,117,96,0.25)',borderRadius:2,color:handSort==='embers'?'var(--gold)':'var(--ink-dim)',cursor:'pointer',textAlign:'center',transition:'all 0.15s'}}><UiArtImg folder="hud" id="cost" emoji="⚡" size={16} style={{display:'inline-block',verticalAlign:'middle',marginRight:4}}/>Cost</button>
             <button onClick={()=>setHandSort(p=>{const n=p==='rarity'?'none':'rarity';localStorage.setItem('vst_handsort',n);return n})}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:2.5,textTransform:'uppercase',padding:'6px 8px',background:handSort==='rarity'?'linear-gradient(180deg, rgba(200,152,56,0.22), rgba(200,152,56,0.06))':'rgba(15,10,6,0.4)',border:handSort==='rarity'?'1px solid var(--gold)':'1px solid rgba(138,117,96,0.25)',borderRadius:2,color:handSort==='rarity'?'var(--gold)':'var(--ink-dim)',cursor:'pointer',textAlign:'center',transition:'all 0.15s'}}>✦ Rarity</button>
           </div>
