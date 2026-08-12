@@ -4577,7 +4577,7 @@ function EndScreen({won,cause,enemy,stats,seed,onReset,onEncore,streakWins,strea
   const isStoned=cause==='stoned'
   const isBeaten=cause==='beaten'
   const isVictory=cause==='victory'
-  const circleReached=Math.floor((stats.fightsSurvived)/3)+1
+  const circleReached=Math.min(9,Math.floor((stats.fightsSurvived)/3)+1)
   const streakMsg=streakWins>1?'🔥 '+streakWins+' WIN STREAK!'+(streakWins>=5?' ⛧ LEGENDARY!':streakWins>=3?' 🎁 BONUS STASH!':''):streakLosses>2?'💀 '+streakLosses+' losses in a row...':''
   const finalScore=calcRunScore(stats,isVictory)
   const grade=getScoreGrade(finalScore,isVictory)
@@ -7965,6 +7965,13 @@ function App(){
     // Every caller is supposed to have verified the kill; this logs who called and
     // with what state so a bad caller can't hide. Cheap, stays in prod builds.
     try{console.log('[VICTORY]','fi='+fightIndex,'hp='+enemyHp,'liveHp='+enemyHpRef.current,'phase='+luciferPhase,'stack:',new Error().stack.split('\n').slice(2,6).join(' <- '))}catch(e){}
+    // ── PHANTOM-VICTORY GUARD (Aug 12 2026) — the single choke-point HP check ──
+    // Every legitimate kill leaves enemyHpRef.current<=0 by the time this fires: the strike
+    // path sets the ref exact, and the ~15 direct-damage card paths sync via the [enemyHp]
+    // effect (line ~5470) well within their 500ms victory delay. If HP is still >0 here, this
+    // is a stale/phantom caller — abort. Placed BEFORE the Lucifer intercept so a phantom
+    // phase-1 call can't prematurely open phase 2. (Dev Shift+W bypasses triggerVictory.)
+    if(enemyHpRef.current>0){try{console.log('[VICTORY-BLOCKED] live HP still '+enemyHpRef.current+' — phantom call aborted')}catch(e){}return}
     // ── LUCIFER PHASE-1 INTERCEPT (Aug 1 2026) ────────────────────────────
     // Killing phase 1 must open phase 2, never end the run. handleStrikeBody had
     // its own transition, but ~15 OTHER kill paths call triggerVictory directly
@@ -10393,7 +10400,7 @@ function App(){
       if(choice==='A'){
         setCorruption(69)
         setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2}):m))
-        addLog('🔥 Hellfire Baptism! Corruption → 69%. All members +3 ATK!')
+        addLog('🔥 Hellfire Baptism! Corruption → 69%. All members +2 ATK!')
       } else {
         addLog('↩ You find another way around. Nothing happens.')
       }
@@ -10412,7 +10419,7 @@ function App(){
           removed.forEach(c=>addLog('🪦 Offered: '+c.name+' ('+c.rarity+')'))
           return sorted.slice(Math.min(3,sorted.length))
         })
-        setStage(p=>p.map(m=>m?Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1}):m))
+        setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1}):m))
         addLog('⛧ Sabbath Offering accepted! 3 weakest cards removed. All members +1 ATK permanently.')
       } else {
         addLog('🃏 You keep your cards. The altar crumbles.')
@@ -12512,7 +12519,9 @@ function App(){
                 const base=enemy.baseDmg+(activeStake.dmgAdd||0)
                 let dmg=base,target='random',special=null
                 const pid=enemy.passiveId||''
-                if(pid.startsWith('targetHighestHp'))target='strongest'
+                if(pid==='targetHighestHp2'){target='strongest';dmg=Math.max(1,Math.round(dmg*1.5));special='×1.5 vs strongest'}
+                else if(pid==='targetHighestHp3'){target='strongest';dmg=Math.max(1,dmg*2);special='×2 vs strongest'}
+                else if(pid.startsWith('targetHighestHp'))target='strongest'
                 if(pid==='luciferBoss'&&luciferPhase===2)target='ALL'
                 if(pid==='selfbuff')dmg=base+(strikesLeft||0)
                 else if(pid==='selfbuff2')dmg=base+((activeStake.maxStrikes||4)-(strikesLeft||0))*2
@@ -12529,7 +12538,9 @@ function App(){
                 else if(pid==='stashSteal3')special='steals 3🌿'
                 if(chosenPacts.includes('stone_wall'))dmg=Math.max(1,dmg-1)
                 dmg=Math.max(1,dmg-(bossDebuff||0))
-                if(corruption>=100)dmg+=3
+                // Corruption damage-taken multiplier — mirrors the engine (CORR_DMG_TAKEN 0.60,
+                // +60% incoming at 100%). No-op off Ritualist since corruption stays 0 there.
+                if(corruption>0)dmg=Math.max(1,Math.round(dmg*(1+0.60*corruption/100)))
                 if(fightTripBuff==='ASTRAL PROJECTION'){dmg=0;special='BLOCKED'}
                 telegraph={dmg,target,special}
               }
