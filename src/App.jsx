@@ -264,7 +264,7 @@ const CIRCLE_EMOJIS=['','🌑','🌹','🍖','💰','⚔','⛪','🗡','🎭','�
 const DESCENT_REWARDS_1=[ // Fight 1 skip rewards (small) — 9 options
   {id:'s_stash',name:'+15 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>Math.min(420,p+15));gs.addLog('🌿 Skipped fight: +15 Stash')}},
   {id:'s_ember',name:'+1 Max Ember',emoji:'🔥',apply:(gs)=>{gs.setMaxEmbers(p=>Math.min(8,p+1));gs.addLog('🔥 Skipped fight: +1 Max Ember')}},
-  {id:'s_corrupt',name:'-15% Corruption',emoji:'✨',apply:(gs)=>{gs.setCorruption(p=>Math.max(0,p-15));gs.addLog('✨ Skipped fight: -15% Corruption')}},
+  {id:'s_corrupt',name:'-15% Corruption',emoji:'✨',corrupt:true,apply:(gs)=>{gs.setCorruption(p=>Math.max(0,p-15));gs.addLog('✨ Skipped fight: -15% Corruption')}},
   {id:'s_atk',name:'Random Member +1 ATK',emoji:'🎸',apply:(gs)=>{gs.setStage(p=>{const alive=p.map((m,i)=>m&&!m.tooStoned?i:null).filter(i=>i!==null);if(alive.length===0)return p;const idx=alive[Math.floor(Math.random()*alive.length)];const ns=[...p];ns[idx]=Object.assign({},ns[idx],{atk:ns[idx].atk+1,permAtkBonus:(ns[idx].permAtkBonus||0)+1});gs.addLog('🎸 Skipped fight: '+ns[idx].name+' +1 ATK');return ns})}},
   {id:'s_draw1',name:'Draw +1 Next Fight',emoji:'📋',apply:(gs)=>{gs.setPendingDraw(p=>p+1);gs.addLog('📋 Skipped fight: +1 Card next fight')}},
   {id:'s_discard',name:'+1 Discard Next Fight',emoji:'🗑',apply:(gs)=>{gs.setBonusDiscards(p=>p+1);gs.addLog('🗑 Skipped fight: +1 Discard next fight')}},
@@ -274,7 +274,7 @@ const DESCENT_REWARDS_1=[ // Fight 1 skip rewards (small) — 9 options
 ]
 const DESCENT_REWARDS_2=[ // Fight 2 skip rewards (medium) — 9 options
   {id:'m_stash',name:'+25 Stash',emoji:'🌿',apply:(gs)=>{gs.setStash(p=>Math.min(420,p+25));gs.addLog('🌿 Skipped fight: +25 Stash')}},
-  {id:'m_corrupt',name:'Corruption → 0%',emoji:'✨',apply:(gs)=>{gs.setCorruption(0);gs.addLog('✨ Skipped fight: Corruption reset to 0%')}},
+  {id:'m_corrupt',name:'Corruption → 0%',emoji:'✨',corrupt:true,apply:(gs)=>{gs.setCorruption(0);gs.addLog('✨ Skipped fight: Corruption reset to 0%')}},
   {id:'m_draw2',name:'Draw +2 Next Fight',emoji:'📋',apply:(gs)=>{gs.setPendingDraw(p=>p+2);gs.addLog('📋 Skipped fight: +2 Cards next fight')}},
   {id:'m_card',name:'Random Uncommon Card',emoji:'🃏',apply:(gs)=>{const uncommons=ALL_CARDS.filter(c=>c.rarity==='Uncommon');const pick=uncommons[Math.floor(Math.random()*uncommons.length)];gs.addToDeck({...pick,uid:uid()});gs.addLog('🃏 Skipped fight: Added '+pick.name+' to deck')}},
   {id:'m_allatk',name:'All Members +1 ATK',emoji:'🎸',apply:(gs)=>{gs.setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1}):m));gs.addLog('🎸 Skipped fight: All members +1 ATK')}},
@@ -1271,8 +1271,10 @@ function rollShopArtifact(excludeIds){
   let unlockedMythics=[]
   try{unlockedMythics=JSON.parse(localStorage.getItem('vst_mythic_unlocks')||'[]')}catch(e){}
   const pool=[...STARTER_ARTIFACTS,...CIRCLE_ARTIFACTS,...MYTHIC_ARTIFACTS.filter(m=>unlockedMythics.includes(m.unlockId))]
-  // Skip artifacts that were reclassified to pedals
-  let artifactPool=pool.filter(a=>!a.reclassifiedToPedal)
+  // Skip artifacts that were reclassified to pedals; and skip corruption artifacts
+  // on the 4 corruption-free decks (corruption is a Ritualist-only mechanic).
+  const _corrOk=_corruptionOnDeck()
+  let artifactPool=pool.filter(a=>!a.reclassifiedToPedal&&(_corrOk||!a.corrupt))
   // v0.7.4: Exclude already-owned artifacts so the rerolled circle artifact doesn't
   // appear as "sold" because activeArtifacts.some(...) matches the rolled id.
   if(excludeIds&&excludeIds.length){
@@ -1286,6 +1288,7 @@ function rollShopPedal(excludeIds){
   let unlockedMythics=[]
   try{unlockedMythics=JSON.parse(localStorage.getItem('vst_mythic_unlocks')||'[]')}catch(e){}
   let pool=[...STARTER_PASSIVES,...MYTHIC_PEDALS.filter(m=>unlockedMythics.includes(m.unlockId))]
+    .filter(p=>_corruptionOnDeck()||!p.corrupt) // corruption pedals: Ritualist-only
   // v0.7.4: Same exclusion logic as rollShopArtifact — prevent reroll collision
   // with active pedals causing the tile to display as sold.
   if(excludeIds&&excludeIds.length){
@@ -3697,15 +3700,15 @@ function TrophyWall({onClose}){
   const stakeNames={bronze:'Bronze',silver:'Silver',gold:'Gold',obsidian:'Obsidian',blood:'Blood',demonic:'Demonic'}
 
   const CIRCLES=[
-    {name:'I — Limbo',emoji:'👤',enemies:['wanderer','lostsoul','drifter']},
-    {name:'II — Lust',emoji:'💋',enemies:['siren','tempter','lust_boss']},
-    {name:'III — Gluttony',emoji:'🍖',enemies:['glutton','feaster','gluttony_boss']},
-    {name:'IV — Greed',emoji:'💰',enemies:['miser','hoarder','greed_boss']},
-    {name:'V — Anger',emoji:'🔥',enemies:['wrathful','berserker','anger_boss']},
-    {name:'VI — Heresy',emoji:'🔱',enemies:['heretic','apostate','heresy_boss']},
-    {name:'VII — Violence',emoji:'🗡️',enemies:['brute','hunter','violence_boss']},
-    {name:'VIII — Fraud',emoji:'🃏',enemies:['trickster','deceiver','fraud_boss']},
-    {name:'IX — Treachery',emoji:'🔒',enemies:['traitor','betrayer','lucifer']},
+    {name:'I — Limbo',emoji:'👤',artId:'circle_1',enemies:['wanderer','lostsoul','drifter']},
+    {name:'II — Lust',emoji:'💋',artId:'circle_2',enemies:['siren','tempter','lust_boss']},
+    {name:'III — Gluttony',emoji:'🍖',artId:'circle_3',enemies:['glutton','feaster','gluttony_boss']},
+    {name:'IV — Greed',emoji:'💰',artId:'circle_4',enemies:['miser','hoarder','greed_boss']},
+    {name:'V — Anger',emoji:'🔥',artId:'circle_5',enemies:['wrathful','berserker','anger_boss']},
+    {name:'VI — Heresy',emoji:'🔱',artId:'circle_6',enemies:['heretic','apostate','heresy_boss']},
+    {name:'VII — Violence',emoji:'🗡️',artId:'circle_7',enemies:['brute','hunter','violence_boss']},
+    {name:'VIII — Fraud',emoji:'🃏',artId:'circle_8',enemies:['trickster','deceiver','fraud_boss']},
+    {name:'IX — Treachery',emoji:'🔒',artId:'circle_9',enemies:['traitor','betrayer','lucifer']},
   ]
   const SPECIAL=[{id:'ar_exec',name:'The Executive',emoji:'🕴',circle:'Welcome to Hell'}]
 
@@ -3783,7 +3786,7 @@ function TrophyWall({onClose}){
           {/* Circle label */}
           <div style={{width:140,flexShrink:0,textAlign:'right',paddingRight:10}}>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:allDefeated?'#e8a820':'#665533',letterSpacing:2,textTransform:'uppercase'}}>
-              {circle.emoji} Circle {circle.name.split(' — ')[0]}
+              <UiArtImg folder="circles" id={circle.artId} emoji={circle.emoji} size={18} style={{verticalAlign:'middle',marginRight:4}}/>Circle {circle.name.split(' — ')[0]}
             </div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:allDefeated?'#aa8844':'#443322',fontStyle:'italic'}}>
               {circle.name.split(' — ')[1]}
@@ -3801,7 +3804,7 @@ function TrophyWall({onClose}){
       <div style={{display:'flex',alignItems:'center',gap:10,marginTop:4,paddingTop:6,borderTop:'1px solid rgba(100,65,15,0.2)',width:'100%'}}>
         <div style={{width:140,flexShrink:0,textAlign:'right',paddingRight:10}}>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:trophies['ar_exec']?'#ffd700':'#665533',letterSpacing:2}}>
-            🕴 BONUS
+            <UiArtImg folder="circles" id="circle_bonus" emoji="🕴" size={18} style={{verticalAlign:'middle',marginRight:4}}/>BONUS
           </div>
           <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',fontStyle:'italic'}}>
             Welcome to Hell
@@ -3913,7 +3916,7 @@ function StatsScreen({onClose}){
   return(<div style={{width:1920,height:1080,position:'relative',display:'flex',flexDirection:'column',alignItems:'center',padding:'40px 80px 30px',background:'radial-gradient(ellipse at center,rgba(15,9,3,1) 0%,rgba(5,3,1,1) 100%)'}}>
     {/* Header */}
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',marginBottom:24,flexShrink:0}}>
-      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:'var(--text-gold)',letterSpacing:6,textShadow:'0 0 24px rgba(200,160,40,0.6)',lineHeight:1}}>📊 Tour Stats</div>
+      <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:64,color:'var(--text-gold)',letterSpacing:6,textShadow:'0 0 24px rgba(200,160,40,0.6)',lineHeight:1,display:'inline-flex',alignItems:'center',gap:16}}><UiArtImg folder="menu" id="stats" emoji="📊" size={56}/>Tour Stats</div>
       <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,color:'var(--text-secondary)',letterSpacing:3,textTransform:'uppercase',marginTop:6,fontStyle:'italic'}}>Every run, every kill, every card played</div>
     </div>
 
@@ -3985,12 +3988,13 @@ function MasteryGallery({onClose}){
   const cardDiscCount=allCards.filter(c=>discovered.has(c.id)).length
 
   const typeColors={RIFF:'#9933cc',CORRUPT:'#aa1111',UTILITY:'#22aa44',EMBER:'#c87820'}
-  const ACC_MEMBER='#e8a820',ACC_ARTIFACT='#c87820',ACC_PEDAL='#9933cc'
+  const ACC_MEMBER='#e8a820',ACC_ARTIFACT='#c87820',ACC_PEDAL='#9933cc',ACC_PACT='#cc44ff'
 
-  // Members / artifacts / pedals catalogues
+  // Members / artifacts / pedals / pacts catalogues
   const members=ALL_MUSICIANS
   const artifacts=STARTER_ARTIFACTS
   const pedals=STARTER_PASSIVES
+  const pacts=PACT_REWARDS
   const memLocked=m=>m.locked&&m.unlockAt&&lifetime<m.unlockAt
   const itemLocked=x=>x.locked&&x.unlockAt&&lifetime<x.unlockAt
   const memUnlocked=members.filter(m=>!memLocked(m)).length
@@ -4007,6 +4011,9 @@ function MasteryGallery({onClose}){
   }else if(category==='artifacts'){
     pct=100
     headerLine=artifacts.length+' vintage amps catalogued'
+  }else if(category==='pacts'){
+    pct=100
+    headerLine=pacts.length+' blood pacts catalogued'
   }else{
     pct=Math.round(pedalUnlocked/pedals.length*100)
     headerLine=pedalUnlocked+'/'+pedals.length+' effect pedals unlocked · '+pct+'% complete'
@@ -4052,7 +4059,7 @@ function MasteryGallery({onClose}){
 
     {/* CATEGORY TABS */}
     <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap',justifyContent:'center'}}>
-      {[['cards','Cards','#c8a040'],['members','Members','#e8a820'],['artifacts','Artifacts','#c87820'],['pedals','Pedals','#9933cc']].map(([id,label,color])=>(
+      {[['cards','Cards','#c8a040'],['members','Members','#e8a820'],['artifacts','Artifacts','#c87820'],['pedals','Pedals','#9933cc'],['pacts','Pacts','#cc44ff']].map(([id,label,color])=>(
         <button key={id} onClick={()=>{setCategory(id);setSelectedCard(null)}} style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:20,letterSpacing:3,padding:'8px 26px',cursor:'pointer',border:category===id?'2px solid '+color:'1px solid rgba(100,65,15,0.3)',borderRadius:6,background:category===id?color+'22':'transparent',color:category===id?'var(--text-gold)':'var(--text-muted)',textTransform:'uppercase',transition:'all 0.15s'}}>{label}</button>
       ))}
     </div>
@@ -4088,6 +4095,13 @@ function MasteryGallery({onClose}){
         return CompTile({keyId:p.id,artNode:<PassiveArtImg id={p.id} emoji={p.emoji} size={56}/>,name:p.name,accent:ACC_PEDAL,locked,
           sub:locked?'Reach '+p.unlockAt.toLocaleString()+' lifetime score':truncEffect(p.effect)})})}
       {Array.from({length:10}).map((_,i)=>comingSoon('csp'+i))}
+    </div>}
+
+    {/* PACTS GRID — permanent 1-of-2 buffs chosen after each circle boss */}
+    {category==='pacts'&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,180px)',gap:8,justifyContent:'center',width:'100%',maxWidth:1400,paddingBottom:30}}>
+      {pacts.map(p=>CompTile({keyId:p.id,artNode:<UiArtImg folder="pacts" id={p.id} emoji={p.emoji} size={56}/>,name:p.name,accent:ACC_PACT,locked:false,
+        sub:truncEffect(p.desc)}))}
+      {Array.from({length:5}).map((_,i)=>comingSoon('cspa'+i))}
     </div>}
 
     {/* CARD GRID */}
@@ -5738,6 +5752,25 @@ function App(){
   const [musicVol,setMusicVol]=useState(()=>parseFloat(localStorage.getItem('vst_music_vol')||'0.3'))
   const [sfxVol,setSfxVol]=useState(()=>parseFloat(localStorage.getItem('vst_sfx_vol')||'0.5'))
   const [shakeEnabled,setShakeEnabled]=useState(()=>localStorage.getItem('vst_shake')!=='off')
+  // Options-screen toggles: backed by React state so the ON/OFF button re-renders
+  // immediately on click (localStorage alone doesn't trigger a render — the old bug).
+  // localStorage stays the persisted source of truth the effects read; every toggle
+  // writes both. Mirrors how Combat Speed (speedMode) already works.
+  const [scanlinesOn,setScanlinesOn]=useState(()=>localStorage.getItem('vst_scanlines')!=='off')
+  const [hoverZoomOnS,setHoverZoomOnS]=useState(()=>localStorage.getItem('vst_hoverzoom')!=='off')
+  const [dmgNumsOn,setDmgNumsOn]=useState(()=>localStorage.getItem('vst_dmgnums')!=='off')
+  const [chainHintsRaw,setChainHintsRaw]=useState(()=>localStorage.getItem('vst_chainhints')!=='off')
+  const [vhsOnS,setVhsOnS]=useState(()=>localStorage.getItem('vst_vhs')!=='off')
+  // key -> [current bool, setter]; drives both options screens (menu + pause overlay)
+  const OPTION_TOGGLES={
+    vst_scanlines:[scanlinesOn,setScanlinesOn],
+    vst_shake:[shakeEnabled,setShakeEnabled],
+    vst_hoverzoom:[hoverZoomOnS,setHoverZoomOnS],
+    vst_dmgnums:[dmgNumsOn,setDmgNumsOn],
+    vst_chainhints:[chainHintsRaw,setChainHintsRaw],
+    vst_vhs:[vhsOnS,setVhsOnS],
+  }
+  const toggleOption=(key)=>{const [cur,setter]=OPTION_TOGGLES[key];const nv=!cur;localStorage.setItem(key,nv?'on':'off');setter(nv)}
   const playSfx=useCallback((name,vol)=>{
     if(sfxVol<=0)return
     try{
@@ -6345,6 +6378,9 @@ function App(){
     // player settings / persisted profile — surviving a run is the point
     handSort:'user setting (vst_handsort)',speedMode:'user setting (vst_speed)',
     musicVol:'user setting',sfxVol:'user setting',shakeEnabled:'user setting',
+    scanlinesOn:'user setting (vst_scanlines)',hoverZoomOnS:'user setting (vst_hoverzoom)',
+    dmgNumsOn:'user setting (vst_dmgnums)',chainHintsRaw:'user setting (vst_chainhints)',
+    vhsOnS:'user setting (vst_vhs)',
     selectedDeck:'run configuration, chosen on the booster screen',
     activeStakeId:'run configuration, chosen on the menu',
     streakWins:'lifetime profile',streakLosses:'lifetime profile',
@@ -6566,9 +6602,12 @@ function App(){
     }
     setGameState('playing')
     addLog('⛧ '+musicians[0].name+' and '+musicians[1].name+' take the stage!')
-    // Show Descent map for Circle 1
-    const r1=DESCENT_REWARDS_1[Math.floor(Math.random()*DESCENT_REWARDS_1.length)]
-    const r2=DESCENT_REWARDS_2[Math.floor(Math.random()*DESCENT_REWARDS_2.length)]
+    // Show Descent map for Circle 1. Corruption skip-rewards are inert on the 4
+    // corruption-free decks — filter them out so a clean deck is never offered one.
+    const _dr1=DESCENT_REWARDS_1.filter(r=>selectedDeck==='ritualist'||!r.corrupt)
+    const _dr2=DESCENT_REWARDS_2.filter(r=>selectedDeck==='ritualist'||!r.corrupt)
+    const r1=_dr1[Math.floor(Math.random()*_dr1.length)]
+    const r2=_dr2[Math.floor(Math.random()*_dr2.length)]
     setDescentData({circleNum:1,circleName:CIRCLE_NAMES[1],circleEmoji:CIRCLE_EMOJIS[1],fights:[ENEMIES[0],ENEMIES[1],ENEMIES[2]],fightIndices:[0,1,2],reward1:r1,reward2:r2,skips:[]})
     setGameState('descent')
   },[runSeed])
@@ -8077,9 +8116,13 @@ function App(){
         setCircleClearedData({circle:cn,circleName:circleNames[cn]||cn,bossName:enemy.name,bossEmoji:enemy.emoji,bossId:enemy.id,isBoss:isBossKill})
         if(isBossKill){
           // BOSS LOOT
-          const loot=BOSS_LOOT[fightIndex]
+          let loot=BOSS_LOOT[fightIndex]
+          // Corruption loot (Heretic's Brand, circle VI) is inert on the corruption-free
+          // decks — hand the clean-deck player a working permanent buff instead.
+          if(loot&&loot.corrupt&&selectedDeck!=='ritualist')loot={id:'brand_of_the_pit',name:'Brand of the Pit',emoji:'🔥',desc:'All members +2 ATK permanently.',effect:'atk2all'}
           if(loot){
             if(loot.effect==='atk1all')setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+1,permAtkBonus:(m.permAtkBonus||0)+1}):m))
+            else if(loot.effect==='atk2all')setStage(p=>p.map(m=>m&&!m.tooStoned?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2}):m))
             else if(loot.effect==='hp3all')setStage(p=>p.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+3,hp:m.hp+3}):m))
             else if(loot.effect==='hp4all')setStage(p=>p.map(m=>m?Object.assign({},m,{maxHp:m.maxHp+4,hp:m.hp+4}):m))
             else if(loot.effect==='atk2strong'){const al=stage.filter(m=>m&&!m.tooStoned);if(al.length){const s=al.reduce((a,b)=>memberStrength(a)>memberStrength(b)?a:b);setStage(p=>p.map(m=>m&&m.uid===s.uid?Object.assign({},m,{atk:m.atk+2,permAtkBonus:(m.permAtkBonus||0)+2}):m))}}
@@ -8089,7 +8132,9 @@ function App(){
             setCircleClearedData(p=>p?{...p,loot}:p)
           }
           // Generate 2 pact choices (never repeat already chosen)
-          const available=PACT_REWARDS.filter(p=>!chosenPacts.includes(p.id))
+          // Corruption pacts (Dark Bargain, Corruption Engine, Blood Price, Atonement)
+          // are inert/harmful on the 4 corruption-free decks — never offer them there.
+          const available=PACT_REWARDS.filter(p=>!chosenPacts.includes(p.id)&&(selectedDeck==='ritualist'||!p.corrupt))
           const shuffled=[...available].sort(()=>Math.random()-0.5)
           const picks=shuffled.slice(0,2)
           setTimeout(()=>{setCircleClearedData(null);setPactChoices(picks);setGameState('pact')},2800)
@@ -8097,7 +8142,9 @@ function App(){
           setTimeout(()=>{
             setCircleClearedData(null)
             // Decide next screen now so the summary can dispatch to it on continue
-            const availEvents=HELL_EVENTS.filter(e=>!eventsSeenThisRun.includes(e.id))
+            // Corruption is a Ritualist-only mechanic — never offer corruption events
+            // (Cursed Amp, Hellfire Baptism) on the 4 corruption-free decks.
+            const availEvents=HELL_EVENTS.filter(e=>!eventsSeenThisRun.includes(e.id)&&(selectedDeck==='ritualist'||!e.corrupt))
             let nextScreen={type:'shop'}
             if(availEvents.length>0&&Math.random()<0.30){
               const evt=availEvents[Math.floor(Math.random()*availEvents.length)]
@@ -10041,8 +10088,11 @@ function App(){
       setGameState('circleSplash')
       setTimeout(()=>{
         setCircleSplash(null)
-        const r1=DESCENT_REWARDS_1[Math.floor(Math.random()*DESCENT_REWARDS_1.length)]
-        const r2=DESCENT_REWARDS_2[Math.floor(Math.random()*DESCENT_REWARDS_2.length)]
+        // Corruption skip-rewards are inert on corruption-free decks — filter them out.
+        const _dr1=DESCENT_REWARDS_1.filter(r=>selectedDeck==='ritualist'||!r.corrupt)
+        const _dr2=DESCENT_REWARDS_2.filter(r=>selectedDeck==='ritualist'||!r.corrupt)
+        const r1=_dr1[Math.floor(Math.random()*_dr1.length)]
+        const r2=_dr2[Math.floor(Math.random()*_dr2.length)]
         setDescentData({
           circleNum,
           circleName:CIRCLE_NAMES[circleNum],
@@ -10984,16 +11034,16 @@ function App(){
         style={{fontFamily:"'MBScribblesFont',serif",fontSize:15,letterSpacing:3,color:'var(--text-gold)',background:'rgba(40,25,5,0.5)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:7,padding:'10px 28px',cursor:'pointer',width:'100%'}}>📜 RULES</button>
       <div style={{display:'flex',flexDirection:'column',gap:10,width:'100%'}}>
         {[
-          ['Scanlines','vst_scanlines',localStorage.getItem('vst_scanlines')!=='off'],
-          ['Screen Shake','vst_shake',localStorage.getItem('vst_shake')!=='off'],
-          ['Card Hover Zoom','vst_hoverzoom',localStorage.getItem('vst_hoverzoom')!=='off'],
-          ['Damage Numbers','vst_dmgnums',localStorage.getItem('vst_dmgnums')!=='off'],
-          ['Chain Hints','vst_chainhints',localStorage.getItem('vst_chainhints')!=='off'],
-          ['VHS Effect','vst_vhs',localStorage.getItem('vst_vhs')!=='off'],
+          ['Scanlines','vst_scanlines',scanlinesOn],
+          ['Screen Shake','vst_shake',shakeEnabled],
+          ['Card Hover Zoom','vst_hoverzoom',hoverZoomOnS],
+          ['Damage Numbers','vst_dmgnums',dmgNumsOn],
+          ['Chain Hints','vst_chainhints',chainHintsRaw],
+          ['VHS Effect','vst_vhs',vhsOnS],
         ].map(([label,key,on])=>(
           <div key={key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 16px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
             <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-gold)'}}>{label}</span>
-            <button onClick={()=>{localStorage.setItem(key,on?'off':'on');setShowPauseOptions(false);setTimeout(()=>setShowPauseOptions(true),10)}}
+            <button onClick={()=>toggleOption(key)}
               style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,fontWeight:900,color:on?'#44cc44':'#cc4444',background:'rgba(0,0,0,0.4)',border:'1px solid '+(on?'#44cc44':'#cc4444'),borderRadius:4,padding:'6px 20px',cursor:'pointer',minWidth:60,textAlign:'center'}}>{on?'ON':'OFF'}</button>
           </div>
         ))}
@@ -11073,7 +11123,6 @@ function App(){
       +_unlockableStakes.filter(s=>_stakeU.includes(s)).length
     const achs=getAchievements()
     const streak=dailyStreak||0
-    const scanlines=localStorage.getItem('vst_scanlines')!=='off'
 
 // Unlocks gallery
     if(menuView==='unlocks'){
@@ -11081,9 +11130,9 @@ function App(){
     // Unlocks screen = EARN-THROUGH-PLAY only. Browsable content (cards, member roster,
     // artifacts, pedals) lives on the Collection screen.
     const tabs=[
-      {id:'milestones',name:'Milestones',emoji:'🏆',color:'#e8a820'},
-      {id:'combos',name:'Riff Chains',emoji:'⛧',color:'#ffdd00'},
-      {id:'victories',name:'Victories',emoji:'🏆',color:'#ffd700'},
+      {id:'milestones',name:'Milestones',emoji:'🏆',color:'#e8a820',artId:'tab_milestones'},
+      {id:'combos',name:'Riff Chains',emoji:'⛧',color:'#ffdd00',artId:'tab_chains'},
+      {id:'victories',name:'Victories',emoji:'🏆',color:'#ffd700',artId:'tab_victories'},
     ]
     const PAGE=8
     let items=[]
@@ -11092,7 +11141,7 @@ function App(){
     else if(unlockTab==='cards')items=ALL_CARDS.map(c=>({id:c.id+(c.uid||''),emoji:c.emoji,name:c.name,sub:c.type+' · '+c.rarity+(c.shopOnly?' · SHOP':''),done:true,color:c.type==='CORRUPT'?'#aa1111':c.type==='UTILITY'?'#22aa44':c.type==='EMBER'?'#c87820':'#9933cc',card:c}))
     else if(unlockTab==='artifacts')items=[...STARTER_ARTIFACTS.map(a=>{const done=!a.locked||(a.unlockAt&&lt>=a.unlockAt);return{id:a.id,emoji:done?a.emoji:'🔒',name:done?a.name:'???',sub:done?(a.effect||'').substring(0,50):(a.unlockAt?a.unlockAt.toLocaleString()+' lifetime pts':'LOCKED'),done}}),...Array(9).fill(null).map((_,i)=>({id:'fa'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
     else if(unlockTab==='pedals')items=[...STARTER_PASSIVES.map(p=>{const done=!p.locked||(p.unlockAt&&lt>=p.unlockAt);return{id:p.id,emoji:done?p.emoji:'🔒',name:done?p.name:'???',sub:done?(p.effect||'').substring(0,50):(p.unlockAt?p.unlockAt.toLocaleString()+' lifetime pts':'LOCKED'),done}}),...Array(10).fill(null).map((_,i)=>({id:'fp'+i,emoji:'🔒',name:'???',sub:'COMING SOON',done:false}))]
-    else if(unlockTab==='combos')items=RIFF_CHAINS.map(ch=>{const found=discoveredCombos.includes(ch.id);const c1=ALL_CARDS.find(c=>c.id===ch.cards[0]);const c2=ALL_CARDS.find(c=>c.id===ch.cards[1]);return{id:ch.id,emoji:found?ch.emoji:'🔒',name:found?ch.name:'??? HIDDEN COMBO',sub:found?(c1?c1.name:'?')+' + '+(c2?c2.name:'?'):'Play two synergy cards in the same strike to discover',done:found,color:found?ch.color:'#444'}})
+    else if(unlockTab==='combos')items=RIFF_CHAINS.map(ch=>{const found=discoveredCombos.includes(ch.id);const c1=ALL_CARDS.find(c=>c.id===ch.cards[0]);const c2=ALL_CARDS.find(c=>c.id===ch.cards[1]);return{id:ch.id,emoji:found?ch.emoji:'🔒',name:found?ch.name:'??? HIDDEN COMBO',sub:found?(c1?c1.name:'?')+' + '+(c2?c2.name:'?'):'Play two synergy cards in the same strike to discover',done:found,color:found?ch.color:'#444',artFolder:found?'chains':undefined}})
     else if(unlockTab==='victories'){const stakeUnlocks=getStakeUnlocks();items=['bronze','silver','gold','obsidian','blood','demonic'].map(sid=>{const su=STAKE_UNLOCKS[sid];const done=stakeUnlocks.includes(sid);return{id:su.id,emoji:done?su.emoji:'🔒',name:done?su.name:'???',sub:done?su.desc:'Beat '+sid.charAt(0).toUpperCase()+sid.slice(1)+' stake to unlock',done,color:done?su.color:'#444'}})}
     const totalPages=Math.ceil(items.length/PAGE)
     const pageItems=items.slice(unlockPage*PAGE,(unlockPage+1)*PAGE)
@@ -11103,8 +11152,8 @@ function App(){
         {/* TABS */}
         <div style={{display:'flex',gap:6,flexWrap:'wrap',justifyContent:'center'}}>
           {tabs.map(t=><button key={t.id} onClick={()=>setUnlockTab(t.id)}
-            style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:2,padding:'8px 18px',cursor:'pointer',border:unlockTab===t.id?'2px solid '+t.color:'1px solid rgba(100,65,15,0.4)',borderRadius:6,background:unlockTab===t.id?t.color+'22':'transparent',color:unlockTab===t.id?t.color:'#8a6a30',textTransform:'uppercase',transition:'all 0.15s'}}>
-            {t.emoji} {t.name}
+            style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,letterSpacing:2,padding:'8px 18px',cursor:'pointer',border:unlockTab===t.id?'2px solid '+t.color:'1px solid rgba(100,65,15,0.4)',borderRadius:6,background:unlockTab===t.id?t.color+'22':'transparent',color:unlockTab===t.id?t.color:'#8a6a30',textTransform:'uppercase',transition:'all 0.15s',display:'inline-flex',alignItems:'center',gap:6}}>
+            <UiArtImg folder="unlocktabs" id={t.artId} emoji={t.emoji} size={18}/>{t.name}
           </button>)}
         </div>
         {/* GRID 5x5 with arrows */}
@@ -11116,7 +11165,7 @@ function App(){
               <div key={item.id} style={{background:item.done?'rgba(20,12,4,0.7)':'rgba(10,6,2,0.5)',border:item.done?'1px solid '+(item.color||'rgba(160,100,25,0.5)'):'1px solid rgba(160,120,40,0.3)',borderRadius:10,padding:'20px 14px',textAlign:'center',opacity:item.done?1:0.7,transition:'all 0.2s',position:'relative'}}
                 onMouseEnter={()=>{if(item.card)setUnlockHover({card:item.card,idx})}}
                 onMouseLeave={()=>setUnlockHover(null)}>
-                <div style={{filter:item.done?'none':'brightness(0.6)',marginBottom:6,display:'flex',justifyContent:'center',height:80,alignItems:'center'}}>{item.isMember&&item.done?(IDLE_PORTRAITS[item.id]?<img src={IDLE_PORTRAITS[item.id]} alt={item.name} style={{height:80,objectFit:'contain',imageRendering:'pixelated'}}/>:MEMBER_PORTRAITS[item.id]?<MemberPortrait id={item.id} size={54} noSquiggle/>:<CardArtImg id={item.id||''} emoji={item.emoji} size={64}/>):<CardArtImg id={item.id||''} emoji={item.emoji} size={64}/>}</div>
+                <div style={{filter:item.done?'none':'brightness(0.6)',marginBottom:6,display:'flex',justifyContent:'center',height:80,alignItems:'center'}}>{item.isMember&&item.done?(IDLE_PORTRAITS[item.id]?<img src={IDLE_PORTRAITS[item.id]} alt={item.name} style={{height:80,objectFit:'contain',imageRendering:'pixelated'}}/>:MEMBER_PORTRAITS[item.id]?<MemberPortrait id={item.id} size={54} noSquiggle/>:<CardArtImg id={item.id||''} emoji={item.emoji} size={64}/>):item.artFolder?<UiArtImg folder={item.artFolder} id={item.id||''} emoji={item.emoji} size={64}/>:<CardArtImg id={item.id||''} emoji={item.emoji} size={64}/>}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:20,fontWeight:900,color:item.done?(item.color||'#e8a820'):'#c8a040',lineHeight:1.2,marginBottom:4}}>{item.name}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:14,color:item.done?'#c0a060':'#aa8a50',lineHeight:1.3}}>{item.sub}</div>
                 {item.pct!==undefined&&!item.done&&<div style={{height:6,background:'rgba(20,12,4,0.8)',borderRadius:3,marginTop:6,overflow:'hidden'}}><div style={{height:'100%',width:item.pct+'%',background:'linear-gradient(90deg,#8a2200,#e8a820)',borderRadius:3}}/></div>}
@@ -11155,14 +11204,14 @@ function App(){
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'var(--text-blood)',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Rules</div>
         <div style={{maxWidth:1500,width:'100%',display:'flex',flexDirection:'column',gap:12}}>
           {[
-            ['🎸 The Goal','Build a doom metal band and fight through 9 Circles of Hell. Defeat all 27 enemies and Lucifer to win. Each circle has 2 regular fights and 1 boss fight.'],
-            ['⚔ Strikes','You get 4 Strikes per fight (some stakes change this). Play cards to buff your band, then press Strike. All living members deal their ATK as damage to the boss.'],
-            ['↓ Discards','You get 4 Discards per fight. Select unwanted cards and discard them to draw fresh ones. Strategic discarding is key to finding your best cards.'],
-            ['🔥 Embers','Cards cost Embers to play. You refill to your max Embers at the start of each Strike. Max Embers increases by +1 after each boss kill.'],
-            ['🌿 Stash','Your currency. Earned after victories (scales with circle depth). Spent in the shop on recruit packs, cards, artifacts, passives, and drugs. Capped at 420.'],
-            ['💨 Too Stoned','When a member reaches 0 HP, they go Too Stoned and can\'t attack or be targeted for the rest of this fight. They recover at full HP next fight. If ALL members go Too Stoned at once, the run ends.'],
-            ['👥 Band Members','Your band has up to 5 slots (6 with the Sixth Slot pact). Each member has ATK, HP, and a keyword ability. Recruit new members from packs in the shop.'],
-            ['🏷 Member Keywords',[
+            ['🎸','The Goal','Build a doom metal band and fight through 9 Circles of Hell. Defeat all 27 enemies and Lucifer to win. Each circle has 2 regular fights and 1 boss fight.','rule_goal'],
+            ['⚔','Strikes','You get 4 Strikes per fight (some stakes change this). Play cards to buff your band, then press Strike. All living members deal their ATK as damage to the boss.','rule_strikes'],
+            ['↓','Discards','You get 4 Discards per fight. Select unwanted cards and discard them to draw fresh ones. Strategic discarding is key to finding your best cards.','rule_discards'],
+            ['🔥','Embers','Cards cost Embers to play. You refill to your max Embers at the start of each Strike. Max Embers increases by +1 after each boss kill.','rule_embers'],
+            ['🌿','Stash','Your currency. Earned after victories (scales with circle depth). Spent in the shop on recruit packs, cards, artifacts, passives, and drugs. Capped at 420.','rule_stash'],
+            ['💨','Too Stoned','When a member reaches 0 HP, they go Too Stoned and can\'t attack or be targeted for the rest of this fight. They recover at full HP next fight. If ALL members go Too Stoned at once, the run ends.','rule_too_stoned'],
+            ['👥','Band Members','Your band has up to 5 slots (6 with the Sixth Slot pact). Each member has ATK, HP, and a keyword ability. Recruit new members from packs in the shop.','rule_band_members'],
+            ['🏷','Member Keywords',[
               'FRENZIED — +ATK per RIFF played each Strike (×1/2/4 by stack tier).',
               'BLASTBEAT — each drummer makes the whole band hit ×1.5 harder, and it STACKS (multiple drummers allowed).',
               'ANCHOR — saves from lethal damage (1 / 2 / any-member by stack tier, per fight).',
@@ -11173,66 +11222,66 @@ function App(){
               'DISSONANCE — +1 ATK per DIFFERENT keyword elsewhere in your band. Build wide.',
               'DIRGE — +1 ATK per 4 cards in your discard pile. Ramps as the fight runs long.',
               'TRICKSTER — MIMIC: each Strike, Tanuki\'s ATK matches your strongest member, buffs and all.',
-            ]],
-            ['⛓ Mentor Links','Place a Foil/Mythic/Demonic member directly LEFT of a basic member with the same role. They form a Mentor Link — a permanent damage multiplier that fires every Strike while both are alive.'],
-            ['✨ Member Tiers',[
+            ],'rule_member_keywords'],
+            ['⛓','Mentor Links','Place a Foil/Mythic/Demonic member directly LEFT of a basic member with the same role. They form a Mentor Link — a permanent damage multiplier that fires every Strike while both are alive.','rule_mentor_links'],
+            ['✨','Member Tiers',[
               'Basic — standard stats.',
               'Foil — +1 ATK / +1 HP, and its cards cost 1 less Ember.',
               'Mythic — +3 ATK / +3 HP.',
               'Demonic — +5 ATK / +5 HP, golden glow.',
               'Higher tiers appear in better packs.',
-            ]],
-            ['🃏 Card Types',[
+            ],'rule_member_tiers'],
+            ['🃏','Card Types',[
               'RIFF (purple) — direct damage and ATK buffs.',
               'CORRUPT (red) — Corruption-scaling power.',
               'UTILITY (green) — healing, draw, and economy.',
               'EMBER (orange) — Ember management and recovery.',
-            ]],
-            ['⛧ Riff Chains','Play a specific card pair BACK-TO-BACK — one immediately after the other — to trigger a Riff Chain for a massive combo bonus! Sequence matters: dumping the cards in random order won\'t fire it. Chains multiply your Strike damage (e.g., Battle Cry → Stage Dive = DEATH WISH). A partner card glows the moment you play its pair-mate. 16 chains to discover.'],
-            ['×️ Strike Multiplier','Every card played MULTIPLIES your Strike by ×1.08. Riff Chains — played BACK-TO-BACK — each do something UNIQUE and multiply your Strike (×1.4 for cheap combos, up to ×3+ for the hardest). Mults stack multiplicatively. Stack artifacts for the god run. The multiplier resets each Strike.'],
-            ['🌀 Corruption','A risk/reward GAMBLE, and only THE RITUALIST deck plays with it — the other four decks are completely corruption-free. Corruption boosts your Strike damage (×1.10 at 40% up to ×1.60 at 100%), but the DOWNSIDE is the boss hits harder the higher it climbs (up to +60% incoming damage at 100%). Push it for a timed burst, then purge it back down — parking at 100% gets you killed. HANGOVER: end a fight at 50%+ corruption and the next shop costs +20%. That is the only carry-over cost — corruption can never end your run outright.'],
-            ['🧹 Reducing Corruption',[
+            ],'rule_card_types'],
+            ['⛧','Riff Chains','Play a specific card pair BACK-TO-BACK — one immediately after the other — to trigger a Riff Chain for a massive combo bonus! Sequence matters: dumping the cards in random order won\'t fire it. Chains multiply your Strike damage (e.g., Battle Cry → Stage Dive = DEATH WISH). A partner card glows the moment you play its pair-mate. 16 chains to discover.','rule_riff_chains'],
+            ['×️','Strike Multiplier','Every card played MULTIPLIES your Strike by ×1.08. Riff Chains — played BACK-TO-BACK — each do something UNIQUE and multiply your Strike (×1.4 for cheap combos, up to ×3+ for the hardest). Mults stack multiplicatively. Stack artifacts for the god run. The multiplier resets each Strike.','rule_strike_multiplier'],
+            ['🌀','Corruption','A risk/reward GAMBLE, and only THE RITUALIST deck plays with it — the other four decks are completely corruption-free. Corruption boosts your Strike damage (×1.10 at 40% up to ×1.60 at 100%), but the DOWNSIDE is the boss hits harder the higher it climbs (up to +60% incoming damage at 100%). Push it for a timed burst, then purge it back down — parking at 100% gets you killed. HANGOVER: end a fight at 50%+ corruption and the next shop costs +20%. That is the only carry-over cost — corruption can never end your run outright.','rule_corruption'],
+            ['🧹','Reducing Corruption',[
               'Smoke Break — lowers Corruption 15% (25% when forged).',
               'Controlled Feedback — resets Corruption to 50%.',
               'Atonement pact — reduces Corruption after each boss kill.',
               'Some descent-map rewards also lower it.',
-            ]],
-            ['⛧ Pacts','After each boss kill, choose 1 of 2 pact offers. Pacts are permanent buffs for the rest of the run. 13 pacts total including Ember Surge, Iron Strings, Thick Skin, Clean Living, Corruption Engine, Atonement, and more.'],
-            ['🔨 Doom Forge','After choosing a pact, the Doom Forge appears. Upgrade one card in your deck permanently. Upgraded cards have stronger effects and some grant permanent HP buffs.'],
-            ['🗺 Descent Map','At the start of each new circle (C2-C9), choose which of the 3 fights to face. You can skip up to 2 fights for rewards (Stash, ATK, Embers, corruption reduction, HP, cards).'],
-            ['🎲 Random Events','30% chance of a Hell-themed event between non-boss fights. Choose between two options with risk/reward tradeoffs. 6 events: Mosh Pit, Cursed Amp, Blood Oath, Hellfire Baptism, Sabbath Offering, Devil\'s Wager.'],
-            ['🏪 The Shop','After each fight: buy recruit packs (add members), card packs (add cards), artifacts, passives, and drugs. Circle artifacts and passives change each circle.'],
-            ['🍄 The Dealer',[
+            ],'rule_reducing_corruption'],
+            ['⛧','Pacts','After each boss kill, choose 1 of 2 pact offers. Pacts are permanent buffs for the rest of the run. 13 pacts total including Ember Surge, Iron Strings, Thick Skin, Clean Living, Corruption Engine, Atonement, and more.','rule_pacts'],
+            ['🔨','Doom Forge','After choosing a pact, the Doom Forge appears. Upgrade one card in your deck permanently. Upgraded cards have stronger effects and some grant permanent HP buffs.','rule_doom_forge'],
+            ['🗺','Descent Map','At the start of each new circle (C2-C9), choose which of the 3 fights to face. You can skip up to 2 fights for rewards (Stash, ATK, Embers, corruption reduction, HP, cards).','rule_descent_map'],
+            ['🎲','Random Events','30% chance of a Hell-themed event between non-boss fights. Choose between two options with risk/reward tradeoffs. 6 events: Mosh Pit, Cursed Amp, Blood Oath, Hellfire Baptism, Sabbath Offering, Devil\'s Wager.','rule_random_events'],
+            ['🏪','The Shop','After each fight: buy recruit packs (add members), card packs (add cards), artifacts, passives, and drugs. Circle artifacts and passives change each circle.','rule_shop'],
+            ['🍄','The Dealer',[
               'Buy a drug in the shop, then use it at ANY point during a fight (once per fight) for a lasting buff.',
               'Shrooms (6🌿) — 90% good trip, 5% bad, 5% bunk. Entry-level.',
               'Acid (12🌿) — stronger effects, but riskier than Shrooms.',
               'DMT (25🌿) — boss shops only. No bad trips: 8 huge "I am god this fight" effects.',
-            ]],
-            ['⚙ Artifacts & Passives','Vintage Amps (artifacts) give powerful active effects. Effect Pedals (passives) provide ongoing bonuses. Max 3 artifacts, 5 passives. Buy in the shop.'],
-            ['♻ Pawn Shop','Sell unwanted members or cards for Stash. Burn cards to permanently remove them from your deck (deck thinning). Access via the shop.'],
-            ['🏆 Mastery','Every card play earns mastery XP. 4 tiers: Novice (10 plays), Adept (50), Master (200), Legendary (666). View progress in the Collection from the main menu.'],
-            ['💀 Trophy Wall','The Hall of Damnation tracks every boss you\'ve killed. Kills, best damage, best stake — all recorded. 28 trophies to collect.'],
-            ['🎯 Stakes',[
+            ],'rule_dealer'],
+            ['⚙','Artifacts & Passives','Vintage Amps (artifacts) give powerful active effects. Effect Pedals (passives) provide ongoing bonuses. Max 3 artifacts, 5 passives. Buy in the shop.','rule_artifacts_passives'],
+            ['♻','Pawn Shop','Sell unwanted members or cards for Stash. Burn cards to permanently remove them from your deck (deck thinning). Access via the shop.','rule_pawn_shop'],
+            ['🏆','Mastery','Every card play earns mastery XP. 4 tiers: Novice (10 plays), Adept (50), Master (200), Legendary (666). View progress in the Collection from the main menu.','rule_mastery'],
+            ['💀','Trophy Wall','The Hall of Damnation tracks every boss you\'ve killed. Kills, best damage, best stake — all recorded. 28 trophies to collect.','rule_trophy_wall'],
+            ['🎯','Stakes',[
               'Bronze — standard difficulty.',
               'Silver — +2 boss damage.',
               'Gold — +3 boss damage, +25% shop prices.',
               'Obsidian — +38% boss HP, no post-fight heal.',
               'Blood — +48% boss HP, start at 10% Corruption.',
               'Demonic — max 3 Strikes, +66% boss HP.',
-            ]],
-            ['🌍 Daily Challenge','A shared daily seed. Everyone faces the same RNG. Your best daily score is tracked. Play from the main menu or end screen.'],
-            ['📜 Combat Log','Press ESC during combat to open the pause menu, then click Combat Log to review every event in the current run. Also available on the end screen as Run Log.'],
-            ['💪 Synergy Bonus',[
+            ],'rule_stakes'],
+            ['🌍','Daily Challenge','A shared daily seed. Everyone faces the same RNG. Your best daily score is tracked. Play from the main menu or end screen.','rule_daily_challenge'],
+            ['📜','Combat Log','Press ESC during combat to open the pause menu, then click Combat Log to review every event in the current run. Also available on the end screen as Run Log.','rule_combat_log'],
+            ['💪','Synergy Bonus',[
               'Buff 3+ members (raise their ATK with cards) for a Strike damage bonus:',
               '3 buffed — +10% Strike damage.',
               '4 buffed — +20% Strike damage.',
               '5 buffed — +35% Strike damage.',
-            ]],
-            ['🎁 Boss Loot','Each circle boss drops a unique permanent reward when defeated. These include +1 ATK to all members, +1 max Ember, member HP boosts, and more. Boss loot stacks across the entire run.'],
-            ['🛡 Stone Shield','Roadie and some events grant Stone Shield — when a member would die, they survive at 1 HP instead. The shield absorbs the lethal hit and is consumed. Essential for surviving boss fights.'],
-            ['🔄 Encore Mode','After defeating Lucifer and clearing all 9 Circles, you can choose to enter Encore Mode — all enemies return with ×2.0 HP. How far can you push your band?'],
-          ].map(([title,desc],i)=><div key={i} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:8,padding:'14px 20px'}}>
-            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,color:'var(--text-gold)',marginBottom:4}}>{title}</div>
+            ],'rule_synergy_bonus'],
+            ['🎁','Boss Loot','Each circle boss drops a unique permanent reward when defeated. These include +1 ATK to all members, +1 max Ember, member HP boosts, and more. Boss loot stacks across the entire run.','rule_boss_loot'],
+            ['🛡','Stone Shield','Roadie and some events grant Stone Shield — when a member would die, they survive at 1 HP instead. The shield absorbs the lethal hit and is consumed. Essential for surviving boss fights.','rule_stone_shield'],
+            ['🔄','Encore Mode','After defeating Lucifer and clearing all 9 Circles, you can choose to enter Encore Mode — all enemies return with ×2.0 HP. How far can you push your band?','rule_encore_mode'],
+          ].map(([emoji,title,desc,artId],i)=><div key={i} style={{background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:8,padding:'14px 20px'}}>
+            <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:42,fontWeight:900,color:'var(--text-gold)',marginBottom:4,display:'flex',alignItems:'center',gap:12}}><UiArtImg folder="rules" id={artId} emoji={emoji} size={42}/>{title}</div>
             {Array.isArray(desc)
               ? <ul style={{margin:'6px 0 0',padding:0,listStyle:'none',display:'flex',flexDirection:'column',gap:7}}>{desc.map((line,j)=>{const mm=line.match(/^(.+?)( — |: )(.*)$/);return <li key={j} style={{fontFamily:"'MBScribblesFont',serif",fontSize:24,color:'var(--text-secondary)',lineHeight:1.4,display:'flex',gap:10,alignItems:'baseline'}}><span style={{color:'var(--text-gold)',flexShrink:0,fontWeight:900}}>▸</span><span>{mm?<><span style={{color:'var(--ink-bone)',fontWeight:900}}>{mm[1]}</span>{mm[2]}{mm[3]}</>:line}</span></li>})}</ul>
               : <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:28,color:'var(--text-secondary)',lineHeight:1.5}}>{desc}</div>}
@@ -11248,16 +11297,16 @@ function App(){
         <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:52,color:'var(--text-blood)',textShadow:'0 0 30px rgba(180,0,0,0.6),3px 3px 0 #000',letterSpacing:8}}>Options</div>
         <div style={{display:'flex',flexDirection:'column',gap:12,maxWidth:500,width:'100%'}}>
           {[
-            ['Scanlines','vst_scanlines',scanlines],
-            ['Screen Shake','vst_shake',localStorage.getItem('vst_shake')!=='off'],
-            ['Card Hover Zoom','vst_hoverzoom',localStorage.getItem('vst_hoverzoom')!=='off'],
-            ['Damage Numbers','vst_dmgnums',localStorage.getItem('vst_dmgnums')!=='off'],
-            ['Chain Hints','vst_chainhints',localStorage.getItem('vst_chainhints')!=='off'],
-            ['VHS Effect','vst_vhs',localStorage.getItem('vst_vhs')!=='off'],
+            ['Scanlines','vst_scanlines',scanlinesOn],
+            ['Screen Shake','vst_shake',shakeEnabled],
+            ['Card Hover Zoom','vst_hoverzoom',hoverZoomOnS],
+            ['Damage Numbers','vst_dmgnums',dmgNumsOn],
+            ['Chain Hints','vst_chainhints',chainHintsRaw],
+            ['VHS Effect','vst_vhs',vhsOnS],
           ].map(([label,key,on])=>(
             <div key={key} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 20px',background:'rgba(20,12,4,0.6)',border:'1px solid rgba(100,65,15,0.3)',borderRadius:6}}>
               <span style={{fontFamily:"'MBScribblesFont',serif",fontSize:18,color:'var(--text-gold)'}}>{label}</span>
-              <button onClick={()=>{localStorage.setItem(key,on?'off':'on');setMenuView('options')}}
+              <button onClick={()=>toggleOption(key)}
                 style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,fontWeight:900,color:on?'#44cc44':'#cc4444',background:'rgba(0,0,0,0.4)',border:'1px solid '+(on?'#44cc44':'#cc4444'),borderRadius:4,padding:'8px 24px',cursor:'pointer',minWidth:70,textAlign:'center'}}>{on?'ON':'OFF'}</button>
             </div>
           ))}
@@ -11920,10 +11969,10 @@ function App(){
       <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 70% 40%, rgba(200,140,20,0.04) 0%, transparent 50%)',animation:'pactSmoke2 6s ease-in-out infinite',pointerEvents:'none'}}/>
       <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:56,color:'var(--text-gold)',textShadow:'0 0 40px rgba(200,140,0,0.6),0 0 80px rgba(150,100,0,0.3),3px 3px 0 #000',letterSpacing:8,animation:'fadeSlideUp 0.6s ease-out'}}>⛧ The Pact ⛧</div>
       <div style={{fontFamily:"'ScratchFont',serif",fontSize:20,color:'var(--text-secondary)',fontStyle:'italic',animation:'fadeSlideUp 0.6s ease-out 0.2s both'}}>Choose your reward. The other is lost to the Void.</div>
-      {chosenPacts.length>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:2}}>Current: {chosenPacts.map(p=>{const pr=PACT_REWARDS.find(r=>r.id===p);return pr?pr.emoji:'⛧'}).join(' ')}</div>}
+      {chosenPacts.length>0&&<div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--ink-dim)',letterSpacing:2,display:'inline-flex',alignItems:'center',gap:6}}>Current: {chosenPacts.map(p=>{const pr=PACT_REWARDS.find(r=>r.id===p);return pr?<UiArtImg key={p} folder="pacts" id={pr.id} emoji={pr.emoji} size={20}/>:<span key={p}>⛧</span>})}</div>}
       <div style={{display:'flex',gap:40,marginTop:16}}>
         {pactChoices.filter(Boolean).map((pact,pi)=>(
-          <div key={pact.id} style={{animation:'fadeSlideUp 0.5s ease-out '+(0.3+pi*0.15)+'s both'}} onClick={()=>{
+          <div key={pact.id} onClick={()=>{
             setChosenPacts(p=>[...p,pact.id])
             // Apply immediate pact effects
             if(pact.id==='ember_surge')setMaxEmbers(p=>{const n=Math.min(MAX_EMBERS_CAP,p+1);setEmbers(n);return n})
@@ -11935,10 +11984,11 @@ function App(){
             setGameState('campfire')
           }}
             style={{width:280,background:'linear-gradient(180deg,#1a1008,#0a0604)',border:'2px solid rgba(200,140,20,0.5)',borderRadius:10,padding:'30px 24px',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:12,
+              animation:'fadeSlideUp 0.5s ease-out '+(0.3+pi*0.15)+'s both',
               transition:'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}
             onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-8px) scale(1.05)';e.currentTarget.style.borderColor=pact.color;e.currentTarget.style.boxShadow='0 8px 40px '+pact.color+'44'}}
             onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.borderColor='rgba(200,140,20,0.5)';e.currentTarget.style.boxShadow='0 4px 20px rgba(0,0,0,0.8)'}}>
-            <div style={{fontSize:64,filter:`drop-shadow(0 0 20px ${pact.color})`}}>{pact.emoji}</div>
+            <div style={{filter:`drop-shadow(0 0 20px ${pact.color})`,display:'flex',alignItems:'center',justifyContent:'center'}}><UiArtImg folder="pacts" id={pact.id} emoji={pact.emoji} size={64}/></div>
             <div style={{fontFamily:"'BogartsMetalFont',cursive",fontSize:28,color:pact.color,textShadow:`0 0 20px ${pact.color}66`,textAlign:'center',letterSpacing:2}}>{pact.name}</div>
             <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:16,color:'var(--text-secondary)',textAlign:'center',lineHeight:1.5}}>{pact.desc}</div>
           </div>
@@ -12539,9 +12589,9 @@ function App(){
             {chosenPacts.filter(Boolean).map(pid=>{const p=PACT_REWARDS.find(r=>r.id===pid);return p?<div key={pid} style={{position:'relative',cursor:'help'}}
               onMouseEnter={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='block'}}
               onMouseLeave={e=>{const t=e.currentTarget.querySelector('[data-pacttip]');if(t)t.style.display='none'}}>
-              <div style={{width:24,height:24,borderRadius:4,background:p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')?'rgba(60,30,30,0.8)':'rgba(0,0,0,0.6)',border:`1px solid ${p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')?'#ff000066':p.color+'66'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,position:'relative'}}>{p.emoji}{p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')&&<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.6)',borderRadius:4,fontSize:13,color:'var(--text-blood)',fontWeight:900,letterSpacing:1}}>🔒</div>}</div>
+              <div style={{width:24,height:24,borderRadius:4,background:p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')?'rgba(60,30,30,0.8)':'rgba(0,0,0,0.6)',border:`1px solid ${p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')?'#ff000066':p.color+'66'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,position:'relative'}}><UiArtImg folder="pacts" id={p.id} emoji={p.emoji} size={18}/>{p.id==='corruption_engine'&&chosenPacts.includes('corruption_locked')&&<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.6)',borderRadius:4,fontSize:13,color:'var(--text-blood)',fontWeight:900,letterSpacing:1}}>🔒</div>}</div>
               <div data-pacttip="" style={{display:'none',position:'absolute',bottom:'120%',right:0,background:'rgba(8,4,2,0.97)',border:'1px solid rgba(200,140,30,0.6)',borderRadius:6,padding:'8px 12px',zIndex:99999,pointerEvents:'none',minWidth:180,boxShadow:'0 4px 20px rgba(0,0,0,0.8)'}}>
-                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:p.color,marginBottom:3}}>{p.emoji} {p.name}</div>
+                <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,fontWeight:900,color:p.color,marginBottom:3,display:'inline-flex',alignItems:'center',gap:5}}><UiArtImg folder="pacts" id={p.id} emoji={p.emoji} size={16}/> {p.name}</div>
                 <div style={{fontFamily:"'MBScribblesFont',serif",fontSize:13,color:'var(--text-secondary)',lineHeight:1.4}}>{p.desc}</div>
               </div>
             </div>:null})}

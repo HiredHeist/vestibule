@@ -1,7 +1,16 @@
 # VESTIBULE — TODO
 
-*Last updated: Aug 9, 2026 (evening) — Forge upgrade pass + shop UI shipped. Next: release-ready push.*
+*Last updated: Aug 12, 2026 — Full art pass complete (107 icons generated + wired). Next: release-ready push.*
 *Branch state: main = audited stable · playtest/session2 = active (all Aug 9 work pushed, build-verified via push-fixes.bat)*
+
+## ✅ Aug 12 — ART PASS COMPLETE (this commit)
+- 46 placeholder-fix icons (cards/artifacts/pedals/loot/pacts) — replaced the shipped 64px geometric placeholders.
+- 61 new icons: 16 riff chains (chains/), 10 trophy circles (circles/), 3 unlock tabs (unlocktabs/), 32 rules-page rows (rules/).
+- Wired via UiArtImg: Unlocks riff-chain items + tabs, Hall of Damnation circle icons, all 32 Rules rows, Stats header (menu/stats.png), Pacts (choice screen, current-list, combat HUD).
+- NEW **Pacts tab** in the Collection compendium (13 pacts + art + effect).
+- Bug fixes: Options toggles now re-render live (were only updating on screen re-entry); corruption content (events/pacts/shop artifacts+pedals/boss loot/descent rewards) now gated to Ritualist only; fixed duplicate-`style` on pact modal (was killing fade-in).
+- Folder corrections: a3/a8/ca2/ca3/wardrums art moved artifacts/→passives/ (reclassified artifact→pedal); deleted 10 orphan pact files (5 loot-named, 5 deck-named). pacts/ = exactly 13.
+- Gates: esbuild clean (0 warnings), npm run check clean, cardEngine 86/86.
 
 ---
 

@@ -1,0 +1,3 @@
+trials=10  bestFit=3.85  elapsed=2.8min
+BEST: {"PLAN_W_ember":0.4,"PLAN_W_draw":0.2,"PLAN_W_corr":0.3,"PLAN_DEPTH":3,"PLAN_BEAM":4,"SP_CHAIN_ORDER":1,"SP_CHAIN_MULT":2.5,"SP_EMBER_GEN_CAP":11}
+last: vWin=6.29 lWin=4 fit=3.23
