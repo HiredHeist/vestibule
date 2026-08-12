@@ -65,31 +65,53 @@ Chain firing also adds a "DISCOVERY!" beat the first time per save. Chain pairs 
 
 ---
 
-## CORRUPTION (0-100%)
+## CORRUPTION (Ritualist deck only — a gamble)
 
-Visible thermometer (hidden when 0). Crossing thresholds adds a card to your hand.
+**Reworked Aug 6 2026.** Corruption is isolated to the **Ritualist** deck. The other four
+decks are 100% corruption-free — no CORRUPT cards, no corruption-referencing riffs, no
+CORRUPT/HEXED members, and enemy "corrupt the player" passives are inert on them. The
+draft/shop/booster/recruit pools filter corruption content by the active deck (`vst_active_deck`).
 
-| Threshold | Name | Effect |
-|---|---|---|
-| 25% | Whispers | Weakest member takes 1 damage per fight |
-| 50% | Hunger | All shop prices +25% |
-| 75% | Madness | 15% chance to lose a random card per Strike |
-| 100% | Possession | Boss +3 dmg permanently. CORRUPT members +3 ATK once. |
+On Ritualist, corruption is a **push-your-luck gamble**: build it up for a burst, then purge
+before the downside catches up. The thermometer is hidden at 0%.
 
-CORRUPT keyword members scale ATK with corruption — high corruption is *power* if you build for it.
+**Upside — damage ramp** (`corrDamageMult`):
+
+| Corruption | Damage × |
+|---|---|
+| 40% | ×1.10 |
+| 60% | ×1.22 |
+| 80% | ×1.40 |
+| 100% | ×1.60 |
+
+**Downside — incoming damage:** boss damage taken scales ×(1 + 0.60 × corruption/100) —
+up to **+60% damage taken at 100%** (`CORR_DMG_TAKEN = 0.60`). The higher you push, the
+harder hits land.
+
+**Hangover (one cost):** end a fight at **50%+ corruption** → the next shop's prices are
+**+20%** (`shopHungerMult`). That is the entire hangover — the old per-member max-HP debuff
+and stash cut are gone.
+
+**Removed in the rework:** the old threshold "gifts" (auto-injecting free CORRUPT cards at
+25/50/75%) are gone, as are the old Whispers/Hunger/Madness/Possession threshold effects. A
+subtle red screen tint appears only at **80%+**.
+
+CORRUPT keyword members still scale ATK with corruption — on Ritualist, high corruption is
+*power* if you build for it and purge in time.
 
 ---
 
-## MEMBER KEYWORDS (9)
+## MEMBER KEYWORDS
 
-Members have one keyword each. Keywords scale with **stack tier** (1 / 2 / 3+ same-keyword members):
+Members have one keyword each. Keywords scale with **stack tier** (1 / 2 / 3+ same-keyword members). The core set is below; the live game also carries DISSONANCE and DIRGE — the in-game Abilities legend (`KEYWORD_DESC` in App.jsx) is the authoritative list:
 
 | Keyword | Effect |
 |---|---|
 | **FRENZIED** | +ATK per RIFF played each Strike. Tier 1/2/3+ = 1×/2×/4× scaling. |
 | **SHREDDER** | +ATK per consecutive same-type card chain played each Strike. Tier 1/2/3+ = 1×/2×/4×. |
 | **ANCHOR** | Saves a member from a lethal hit. 1 save/fight (tier 1), 2 saves (tier 2), 4 saves *any member* (tier 3+). |
-| **DOUBLE TIME** (Drummers) | Drummer roll: 5-6=×2, 3-4=×1.5, 1-2=×1. Tier 3+: ALL members attack twice (currently unreachable due to "ONLY ONE DRUMMER" rule, see TODO 1.2). |
+| **BLASTBEAT** (Drummers) | Each drummer makes the whole band hit ×1.5 harder, and it STACKS (2 drummers = ×2.25); multiple drummers are allowed. Drummers don't swing themselves — an attacker slot traded for a band-wide multiplier. *(Separate mechanic: the drummer's DOUBLE TIME d6 roll — 5-6 = members attack twice this fight; Drummer's Stick keys off it.)* |
+| **TRICKSTER** (Tanuki) | MIMIC — each Strike, Tanuki's ATK matches your strongest member (their full buffed ATK). A glass cannon: protect him and he mirrors your carry. |
 | **CORRUPT** | +ATK from Corruption (tier 1/2/3+ = ×1/×2/×4 the per-corruption bonus). |
 | **DEBUFF** | Reduces boss damage by 2 each Strike, stacking permanently this fight. |
 | **FOLK MAGIC** | 20% chance each Strike to refill all Embers. |

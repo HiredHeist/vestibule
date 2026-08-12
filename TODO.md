@@ -38,11 +38,12 @@ Ordered roughly by priority. Goal: get the release ready.
    with bolded labels. Added DMT to the Dealer. Removed stale/contradictory corruption entries;
    fixed Reducing-Corruption card list. Menus also reorganized: Unlocks = earn-only (3/30),
    Collection = full compendium (Cards/Members/Artifacts/Pedals) with real art + fixed 82-card count.
-3. [ ] **Full emoji-placeholder art inventory.** Produce a complete list of EVERYTHING still using an
-   emoji placeholder — artifacts, effect pedals, any cards with generic/placeholder art, plus the
-   cassette 📼 / CD-R 💿 shop packs — so JV can finish the artwork in one pass.
-4. [ ] **Cassette + CD-R pack art** — draw/drop in `cassette.png` + `cdr.png` to replace the emoji
-   in `public/vestibule/packs/` (part of #3; called out separately since it's a known gap).
+3. [x] **Full emoji→art pass — DONE (Aug 12).** Audited every emoji, then generated + wired real
+   pixel art for all functional icons: 46 placeholder-fix icons, 61 nav/chain/circle/tab/rules icons,
+   and 116 HUD/achievement/event/combat-log icons (incl. an inline `LogText` emoji→art renderer for the
+   combat log + floating text). Banner ornaments ⛧✠☥☠ and button-label glyphs kept as text by design.
+   Also: 17 band-member 8-direction rotation sheets (256px transparent) in `character_sheets/`.
+4. [x] **Cassette + CD-R + all shop pack art — DONE.** Real art in `public/vestibule/packs/`.
 
 ### B. Verify / stability
 5. [ ] **Re-run the E2E parity rig** (`bash e2e/up.sh` → card-parity) to reconfirm live↔sim after the
@@ -53,11 +54,19 @@ Ordered roughly by priority. Goal: get the release ready.
 
 ### C. Finish the screen tour (shop ✅ + forge ✅ already done)
 7. [ ] Walk the remaining in-game screens for polish/bugs: **event, boss intro, victory & death** screens.
-8. [ ] Sweep leftover **DOUBLE TIME** help strings → BLASTBEAT/TRICKSTER (functional done; a few
-   cosmetic strings in KEYWORD_DESC / tutorial / FAQ may linger).
+8. [x] **DOUBLE TIME help-string sweep — DONE (Aug 12).** Verified all player-facing help/tutorial/FAQ/
+   KEYWORD_DESC text already reads BLASTBEAT/TRICKSTER; remaining "DOUBLE TIME" refs are the legit
+   drummer d6-roll mechanic (Drummer's Stick) + comments. Fixed the stale GDD keyword row too.
+   ⚠ Flagged: a vestigial `kwStacks.tier('DOUBLE TIME')` block in App.jsx (~line 531-540) + dead
+   `keyword==='DOUBLE TIME'` checks (~5265) never fire (no member carries that keyword) — safe to
+   delete but it's combat code, so do it with a build-verify, not in a docs pass.
 
 ### D. Docs
-9. [ ] `GDD.md` (and any other docs) still describe the OLD corruption model — do a doc pass.
+9. [x] **GDD.md corruption doc pass — DONE (Aug 12).** Rewrote the CORRUPTION section to the Aug 6
+   Ritualist-only gamble model (damage ramp, +damage-taken downside, 50%+ shop hangover, gifts removed).
+   Fixed the drummer keyword row (BLASTBEAT + DOUBLE-TIME-roll note) and added TRICKSTER.
+   ⚠ Still drifting in GDD (separate, bigger doc pass): deck-table `hpScale` numbers (shows Ritualist 1.65,
+   live is 1.57), stake-table `startCorruption`, and the keyword table is missing DISSONANCE/DIRGE.
 
 ### E. Post-launch / R&D (NOT release blockers)
 - [ ] Skill-based rebalance: validate the ember leak-plug + chains-dominant damage on the **live bot**
