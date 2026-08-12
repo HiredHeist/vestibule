@@ -528,16 +528,9 @@ function computeStrikeDamage(P){
   },0)
   dmg+=encDmg
   if(encDmg>0){bLines.push({type:'add',label:'Encore',emoji:'🔁',value:encDmg,runningAfter:dmg,color:'#44cc44'})}
-  // ── DOUBLE TIME tier-3 (4d) — at 3+ Drummer stacks, all members attack twice ──
-  const _dtTier=kwStacks.tier('DOUBLE TIME')
-  if(_dtTier>=4){
-    const _dtBonusDmg=actives.filter(m=>m.role!=='Drummer'&&(!paranoiaVictim||m.uid!==paranoiaVictim.uid)).reduce((s,m)=>s+getEffectiveAtk(m,atkCtx),0)
-    if(_dtBonusDmg>0){
-      dmg+=_dtBonusDmg
-      bLines.push({type:'add',label:'DOUBLE TIME ×3!',emoji:'🥁',value:_dtBonusDmg,runningAfter:dmg,color:'#ff8800'})
-      syncLogs.push('🥁 DOUBLE TIME ×3! All members attack twice!')
-    }
-  }
+  // (removed vestigial DOUBLE TIME kwStack tier block — no member carries the 'DOUBLE TIME'
+  //  keyword since the drummer keyword became BLASTBEAT, so kwStacks.tier('DOUBLE TIME') was
+  //  always 0 and this never fired. DOUBLE TIME survives only as the drummer's d6 roll.)
   // ── BAND SYNERGY ──
   const buffed=actives.filter(m=>(m.buffCount||0)>0)
   const bandBonus=buffed.length>=5?1.35:buffed.length>=4?1.20:buffed.length>=3?1.10:1.0
@@ -5262,11 +5255,9 @@ function RecruitScreen({candidates,stage,onPick,onPass,onFireMember,stash,salesL
           </div>
         </div>}
         {candidates.map(m=>{
-          const hasDblTime=stage.some(s=>s&&s.keyword==='DOUBLE TIME')
-          const isDblTime=m.keyword==='DOUBLE TIME'
           const emptySlot=stage.findIndex(s=>!s)
-          // Allow ALL duplicates — only block second DOUBLE TIME drummer
-          const canAdd=emptySlot!==-1&&!(isDblTime&&hasDblTime)
+          // Allow ALL duplicates (BLASTBEAT drummers stack; the old single-DOUBLE-TIME-drummer block was vestigial)
+          const canAdd=emptySlot!==-1
           const tier=m.demonic?'DEMONIC':m.mythic?'MYTHIC':m.foil?'FOIL':null
           const bondTarget=stage.find(s=>s&&s.role===m.role&&!s.tooStoned)
           const bondBonus=m.demonic?3:m.mythic?2:m.foil?1:0

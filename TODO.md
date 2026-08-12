@@ -12,6 +12,25 @@
 - Char rotation sheets (17 members, 8-dir, 256px transparent) live in character_sheets/ (gitignored — external deliverable). bjorn pending hand-fix.
 - Gates: esbuild clean, npm run check clean.
 
+## 🔎 Aug 12 (late) — DOCS, DEAD-CODE, AUDITS + UPSCALE
+- [x] DOUBLE TIME help-string sweep — verified already clean; fixed the stale GDD keyword row.
+- [x] GDD corruption doc pass — rewrote to the Aug 6 Ritualist-only gamble model.
+- [x] GDD number sync — deck table hpScale/luciferScale (was 1.85/2.00/1.65 → **1.05/1.14/1.57** etc.), added DISSONANCE/DIRGE keyword rows, fixed boss-HP-table multiplier note. (Stake table was already correct.)
+- [x] Removed vestigial DOUBLE TIME dead code (kwStack tier block ~531 + `keyword==='DOUBLE TIME'` checks ~5265). esbuild + npm run check clean. ⚠ **NEEDS BUILD-VERIFY** (combat file).
+- [x] 512px character-sheet upscale → `upscaled_member_sheets/` (17 members, 512px frames + 4096×512 sheets). Gitignored.
+- [x] Bjorn rotation sheet — **DROPPED** (source art too rough to rotate cleanly; not needed for the animations).
+- [ ] **3b — JV PLAY-THROUGH TOMORROW:** live-verify the **event, boss-intro, victory & death** screens (pairs with the static audit below).
+
+## 🐞 AUDIT FINDINGS (Aug 12 static pass) — fixes NOT applied yet (need a live build)
+Screen audit + phantom-victory forensic. Ranked; each is safe to fix but wants build-verify:
+- [ ] **HIGH — Daily Challenge launches a random, untracked run.** EndScreen `onDailyChallenge` (~12125) + menu button (~11589) call `handleReset()` with no arg, so the PER_RUN reset overwrites the daily seed and `setIsDailyRun(false)` clobbers the daily flag → non-deterministic, untracked daily. Fix: thread daily ctx through `handleReset({seed:getDailySeed(),daily:true})`, honor in `_opts.seed`, `isDailyRun:o=>setIsDailyRun(!!o?.daily)`.
+- [ ] **HIGH — ANCHOR band aura is a dead stub.** `_anchorAuraRed()` returns 0 always (~748) but is called in the damage code (~9772/9905/9914) — the "−1 dmg per adjacent ANCHOR" aura does nothing. Confirm if it's meant to be live; if so it's a regression.
+- [ ] **MED — phantom victory (Aug 1 forensic): `triggerVictory` has no live-HP abort.** Add one guard at the top: `if(enemyHpRef.current>0)return`. Neutralizes ~15 direct-damage card kill paths that still compute the kill off the stale `enemyHp` closure (~6741/6858/6863/6868/7066/7085/7111/7126/7137/7290/7557) + de-dupe the Stage Dive double-schedule. This finally closes the forensic (strike path + timers already guarded).
+- [ ] **MED — boss telegraph under-reports:** Hunter/Executioner ×1.5/×2 (`targetHighestHp2/3`) not applied (~12524); Ritualist corruption damage-taken multiplier ignored — telegraph does a flat +3 at 100% instead of ×(1+0.6·corr/100) (~12541), misleading the core Ritualist push decision.
+- [ ] **MED — cursed_amp "corruption locks forever" barely functions** — the `corruption_locked` flag is only honored by the corruption_engine pact (~10219); card plays / boss passives / events all ignore it (~6783/9826/10403). Enforce on the main `setCorruption` paths or drop the promise from the text.
+- [ ] **LOW — cosmetic/edge:** hellfire_baptism log says "+3 ATK" but grants +2 (~10405); sabbath_offering buffs downed members (missing `!m.tooStoned`, ~10424); EndScreen `saveDailyBest` runs during render (~4595 → move to useEffect); `circleReached` unclamped can print "Circle 10/9" (~4587).
+- [x] VictorySummaryScreen — audited, clean (no NaN/undefined).
+
 ## ✅ Aug 12 — ART PASS COMPLETE (this commit)
 - 46 placeholder-fix icons (cards/artifacts/pedals/loot/pacts) — replaced the shipped 64px geometric placeholders.
 - 61 new icons: 16 riff chains (chains/), 10 trophy circles (circles/), 3 unlock tabs (unlocktabs/), 32 rules-page rows (rules/).

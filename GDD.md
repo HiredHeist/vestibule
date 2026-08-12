@@ -116,6 +116,8 @@ Members have one keyword each. Keywords scale with **stack tier** (1 / 2 / 3+ sa
 | **DEBUFF** | Reduces boss damage by 2 each Strike, stacking permanently this fight. |
 | **FOLK MAGIC** | 20% chance each Strike to refill all Embers. |
 | **HEXED** | Gains corruption each Strike, ATK scales with corruption. |
+| **DISSONANCE** | +1 ATK for every DIFFERENT keyword elsewhere in your band — reward a wide, varied lineup. |
+| **DIRGE** | +1 ATK for every 4 cards in your DISCARD pile — ramps the deeper into the set you go. |
 | **FALLEN** | Cannot be healed. Loses 1 HP/Strike. If Lucifer dies, game over. Max 3 band members. |
 
 Foil members count as 2 stacks for keyword tier purposes.
@@ -176,15 +178,15 @@ Stakes layer over decks. Unlock by beating game on the previous stake.
 
 Unlock progression: each deck unlocks the next on full-game victory.
 
-| Deck | RIFF | CORRUPT | UTILITY | EMBER | hpScale | Identity |
-|---|---|---|---|---|---|---|
-| ⛧ Standard | 32 | 18 | 10 | 9 | 1.85 | Balanced, all playstyles |
-| 🎸 Shredder | 38 | 10 | 8 | 13 | 2.00 | Pure aggro, max RIFF |
-| 💀 Ritualist | 21 | 26 | 11 | 11 | 1.65 | Corruption = power |
-| 🔧 Engineer | 24 | 13 | 18 | 14 | 1.85 | Combo, copy, multiply |
-| 🛡️ Survivor | 25 | 15 | 15 | 14 | 1.75 | Outlast, extra strikes |
+| Deck | hpScale | luciferScale | Identity | Veteran win% (Bronze) |
+|---|---|---|---|---|
+| ⛧ Standard | 1.05 | 0.26 | Balanced, corruption-free | ~10.6% |
+| 🎸 Shredder | 1.14 | 0.21 | Pure aggro, corruption-free | ~9.7% |
+| 💀 Ritualist | 1.57 | 0.58 | Corruption gamble (**only** corrupt deck) | ~10.7% |
+| 🔧 Engineer | 0.83 | 0.24 | Combo / copy, corruption-free | ~8.9% |
+| 🛡️ Survivor | 0.90 | 0.35 | Outlast, corruption-free | ~10.2% |
 
-`hpScale` is the **only** boss HP multiplier in live combat. All scaling math goes through `getScaledMaxHp` (App.jsx ~line 4904).
+*Values synced to CLAUDE.md (Aug 12). `hpScale` multiplies regular-boss HP; `luciferScale` the final boss (per phase) — both go through `getScaledMaxHp` (App.jsx), mirrored by `DECK_HP_SCALE`/`DECK_LUCIFER_SCALE` in the sim. Post the Aug 6 corruption rework, only Ritualist carries CORRUPT cards; the other four are corruption-free and refilled to 69. For current per-type card composition see `DECK_CARD_MANIFESTS` (App.jsx) — the old fixed RIFF/CORRUPT/UTILITY/EMBER counts here were pre-rework and are removed rather than re-guessed.*
 
 ---
 
@@ -330,7 +332,7 @@ Skip Tutorial option for experienced players. `localStorage.setItem('vst_tutoria
 
 Per design vision: "r1 = training wheels match, then in the shop you get a 3rd member and start to pop off."
 
-| Fight | Boss | Base HP | Base Dmg | Display HP (Standard 1.85×) | Notes |
+| Fight | Boss | Base HP | Base Dmg | Display HP (illustrative; Standard is now 1.05×) | Notes |
 |---|---|---|---|---|---|
 | C1 F1 | The Wanderer | **45** | **2** | **83** | Training-wheels fight. ~100% survive in 50k sim. |
 | C1 F2 | The Lost Soul | 150 | 5 | 278 | The "real game starts here" wall (~22% death) |
